@@ -88,6 +88,7 @@ function getSessionSecret() {
   return (
     process.env.CMS_ADMIN_SESSION_SECRET ??
     process.env.CMS_ADMIN_API_KEY ??
+    process.env.CMS_ADMIN_PASSWORD ??
     (process.env.NODE_ENV !== 'production' ? 'deaho-local-admin-session' : '')
   );
 }

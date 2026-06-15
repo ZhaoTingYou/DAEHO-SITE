@@ -529,60 +529,65 @@ export function SiteHeader({locale}: SiteHeaderProps) {
                     variants={itemVariants}
                     className="border-b border-hairline pb-4"
                   >
-                    <div className="flex items-center justify-between gap-4">
-                      {hasChildren ? (
-                        <button
-                          type="button"
-                          aria-expanded={isExpanded}
-                          onClick={toggleExpanded}
-                          className={`border-0 bg-transparent p-0 text-left font-heading text-[clamp(26px,8vw,40px)] font-semibold leading-tight ${
-                            isActivePath(relativePath, item.href) ? 'text-accent' : ''
-                          }`}
-                        >
+                    {hasChildren ? (
+                      <button
+                        type="button"
+                        aria-expanded={isExpanded}
+                        aria-label={navText(isExpanded ? 'collapse' : 'expand', {label: itemLabel})}
+                        onClick={toggleExpanded}
+                        className={`group flex min-h-14 w-full items-center justify-between gap-5 border-0 bg-transparent p-0 text-left ${
+                          isActivePath(relativePath, item.href) ? 'text-accent' : ''
+                        } focus-visible:text-accent focus-visible:outline-none`}
+                      >
+                        <span className="font-body text-[15px] font-semibold uppercase leading-none tracking-[0.22em]">
                           {itemLabel}
-                        </button>
-                      ) : (
-                        <Link
-                          href={withLocale(locale, item.href)}
-                          onClick={() => setIsMenuOpen(false)}
-                          className={`font-heading text-[clamp(26px,8vw,40px)] font-semibold leading-tight ${
-                            isActivePath(relativePath, item.href) ? 'text-accent' : ''
-                          }`}
+                        </span>
+                        <span
+                          className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-current/18 bg-white/55 transition duration-300 ease-brand group-hover:border-current/34 group-focus-visible:border-current/45"
+                          aria-hidden="true"
                         >
-                          {itemLabel}
-                        </Link>
-                      )}
-                      {hasChildren ? (
-                        <button
-                          type="button"
-                          aria-expanded={isExpanded}
-                          aria-label={navText(isExpanded ? 'collapse' : 'expand', {label: itemLabel})}
-                          className="flex h-11 w-11 items-center justify-center border border-hairline bg-white text-xl text-primary"
-                          onClick={toggleExpanded}
-                        >
-                          <span aria-hidden="true">{isExpanded ? '-' : '+'}</span>
-                        </button>
-                      ) : null}
-                    </div>
+                          <span
+                            className={`h-[7px] w-[7px] border-b border-r border-current transition duration-300 ease-brand ${
+                              isExpanded ? '-translate-y-[1px] rotate-[225deg]' : '-translate-y-[2px] rotate-45'
+                            }`}
+                          />
+                        </span>
+                      </button>
+                    ) : (
+                      <Link
+                        href={withLocale(locale, item.href)}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`flex min-h-14 items-center font-body text-[15px] font-semibold uppercase leading-none tracking-[0.22em] ${
+                          isActivePath(relativePath, item.href) ? 'text-accent' : ''
+                        } focus-visible:text-accent focus-visible:outline-none`}
+                      >
+                        {itemLabel}
+                      </Link>
+                    )}
 
                     {hasChildren && isExpanded ? (
-                      <div className="mt-4 grid gap-3 pl-1">
+                      <motion.div
+                        initial={prefersReducedMotion ? {opacity: 1} : {opacity: 0, y: -6}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{duration: prefersReducedMotion ? 0 : 0.28, ease: [0.22, 0.61, 0.36, 1]}}
+                        className="mt-1 grid gap-1 border-l border-accent/35 pl-5"
+                      >
                         {item.children?.map((child) => (
                           <Link
                             key={child.href}
                             href={withLocale(locale, child.href)}
                             onClick={() => setIsMenuOpen(false)}
-                            className="grid min-h-11 gap-1 font-body text-sm font-semibold uppercase tracking-[0.14em] text-subtext"
+                            className="grid min-h-[52px] gap-1 py-2 font-body text-[12px] font-semibold uppercase tracking-[0.16em] text-subtext transition duration-300 ease-brand hover:text-primary focus-visible:text-accent focus-visible:outline-none"
                           >
                             <span>{navText(`items.${child.id}`)}</span>
                             {details ? (
-                              <span className="normal-case tracking-normal text-subtext/80">
+                              <span className="text-[12px] font-normal normal-case leading-5 tracking-normal text-subtext/80">
                                 {details.descriptions[child.id]}
                               </span>
                             ) : null}
                           </Link>
                         ))}
-                      </div>
+                      </motion.div>
                     ) : null}
                   </motion.div>
                 );

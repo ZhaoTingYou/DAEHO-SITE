@@ -1,6 +1,3 @@
-import {existsSync} from 'node:fs';
-import path from 'node:path';
-
 import type {HomeNewsPopupCard} from '@/components/home/home-news-popups';
 import type {NewsCard} from '@/components/news/news-journal-grid';
 import type {SpecialtyCollectionItem} from '@/components/specialty/specialty-collection-gallery';
@@ -51,7 +48,7 @@ export function getNewsCardsForSite(locale: Locale): NewsCard[] {
 export function getHomeNewsCardsForSite(locale: Locale): HomeNewsPopupCard[] {
   return getNewsCardsForSite(locale).slice(0, 4).map((card) => ({
     ...card,
-    hasImage: existsSync(path.join(process.cwd(), 'public', 'images', card.image))
+    hasImage: imageExists(card.image)
   }));
 }
 

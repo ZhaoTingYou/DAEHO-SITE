@@ -8,6 +8,7 @@ import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 
 import {
+  assertAdminSession,
   clearAdminSession,
   createAdminSession,
   validateAdminPassword
@@ -36,6 +37,16 @@ import {
 } from '@/lib/cms/validation';
 import type {Locale} from '@/lib/locales';
 
+const maxImageUploadBytes = 10 * 1024 * 1024;
+const allowedImageMimeTypes = new Set([
+  'image/gif',
+  'image/jpeg',
+  'image/png',
+  'image/svg+xml',
+  'image/webp'
+]);
+const allowedImageExtensions = new Set(['.gif', '.jpeg', '.jpg', '.png', '.svg', '.webp']);
+
 export async function loginAction(formData: FormData) {
   const password = stringFromForm(formData, 'password');
 
@@ -53,6 +64,8 @@ export async function logoutAction() {
 }
 
 export async function updateInquiryStatusAction(formData: FormData) {
+  await assertAdminSession();
+
   const id = stringFromForm(formData, 'id');
   const parsed = inquiryStatusSchema.safeParse({
     status: stringFromForm(formData, 'status')
@@ -69,6 +82,8 @@ export async function updateInquiryStatusAction(formData: FormData) {
 }
 
 export async function resendInquiryNotificationAction(formData: FormData) {
+  await assertAdminSession();
+
   const id = stringFromForm(formData, 'id');
   const inquiry = id ? getInquiry(id) : null;
 
@@ -80,6 +95,8 @@ export async function resendInquiryNotificationAction(formData: FormData) {
 }
 
 export async function saveNewsAction(formData: FormData) {
+  await assertAdminSession();
+
   const id = stringFromForm(formData, 'id');
   const payload = newsPayloadSchema.parse({
     slug: stringFromForm(formData, 'slug'),
@@ -106,6 +123,8 @@ export async function saveNewsAction(formData: FormData) {
 }
 
 export async function deleteNewsAction(formData: FormData) {
+  await assertAdminSession();
+
   const id = stringFromForm(formData, 'id');
 
   if (id) {
@@ -116,6 +135,8 @@ export async function deleteNewsAction(formData: FormData) {
 }
 
 export async function saveCollectionAction(formData: FormData) {
+  await assertAdminSession();
+
   const id = stringFromForm(formData, 'id');
   const payload = collectionPayloadSchema.parse({
     slug: stringFromForm(formData, 'slug'),
@@ -143,6 +164,8 @@ export async function saveCollectionAction(formData: FormData) {
 }
 
 export async function deleteCollectionAction(formData: FormData) {
+  await assertAdminSession();
+
   const id = stringFromForm(formData, 'id');
 
   if (id) {
@@ -153,6 +176,8 @@ export async function deleteCollectionAction(formData: FormData) {
 }
 
 export async function savePageAction(formData: FormData) {
+  await assertAdminSession();
+
   const pageKey = stringFromForm(formData, 'pageKey');
   const payload = pagePayloadSchema.parse({
     section: stringFromForm(formData, 'section'),
@@ -176,9 +201,15 @@ export async function savePageAction(formData: FormData) {
 }
 
 export async function uploadMediaAction(formData: FormData) {
+  await assertAdminSession();
+
   const file = formData.get('file');
 
   if (!(file instanceof File) || file.size === 0) {
+    redirect('/admin/media?error=file');
+  }
+
+  if (!isAllowedImageUpload(file)) {
     redirect('/admin/media?error=file');
   }
 
@@ -204,6 +235,8 @@ export async function uploadMediaAction(formData: FormData) {
 }
 
 export async function updateMediaAction(formData: FormData) {
+  await assertAdminSession();
+
   const id = stringFromForm(formData, 'id');
   const parsed = mediaUpdateSchema.safeParse({
     altKo: stringFromForm(formData, 'altKo'),
@@ -218,6 +251,8 @@ export async function updateMediaAction(formData: FormData) {
 }
 
 export async function deleteMediaAction(formData: FormData) {
+  await assertAdminSession();
+
   const id = stringFromForm(formData, 'id');
 
   if (id) {
@@ -285,4 +320,12 @@ function createPublicFilename(originalName: string) {
     .slice(0, 60);
 
   return `${baseName || 'asset'}-${randomUUID().slice(0, 8)}${extension}`;
+}
+
+function isAllowedImageUpload(file: File) {
+  return (
+    file.size <= maxImageUploadBytes &&
+    allowedImageMimeTypes.has(file.type) &&
+    allowedImageExtensions.has(path.extname(file.name).toLowerCase())
+  );
 }

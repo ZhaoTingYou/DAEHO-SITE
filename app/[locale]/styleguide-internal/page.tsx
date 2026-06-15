@@ -1,3 +1,4 @@
+import type {Metadata} from 'next';
 import {setRequestLocale} from 'next-intl/server';
 
 import {ColorSwatchRow} from '@/components/color-swatch-row';
@@ -13,6 +14,14 @@ import {TimelineEntry} from '@/components/timeline-entry';
 
 type Props = {
   params: Promise<{locale: string}>;
+};
+
+export const metadata: Metadata = {
+  title: 'DEAHO Styleguide',
+  robots: {
+    index: false,
+    follow: false
+  }
 };
 
 const productItems: ProductGridItem[] = [
