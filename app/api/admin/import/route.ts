@@ -2,6 +2,7 @@ import {revalidatePath} from 'next/cache';
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
+import {hasAdminSession} from '@/lib/cms/admin-session';
 import {requireAdmin} from '@/lib/cms/auth';
 import {getCmsDb} from '@/lib/cms/db';
 import {
@@ -15,7 +16,7 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   const unauthorized = requireAdmin(request);
 
-  if (unauthorized) {
+  if (unauthorized && !(await hasAdminSession())) {
     return unauthorized;
   }
 

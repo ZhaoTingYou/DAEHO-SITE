@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import {getCmsExportCounts, getCmsExportSnapshot} from '@/lib/cms/export';
 
+import {CmsImportPanel} from '../../_components/cms-import-panel';
 import {PageHeader, Panel} from '../../_components/admin-shell';
 
 export default function AdminExportPage() {
@@ -20,7 +21,7 @@ export default function AdminExportPage() {
             prefetch={false}
             className="inline-flex min-h-10 items-center rounded-md bg-[#101827] px-4 text-sm font-semibold text-white transition hover:bg-[#263247]"
           >
-          Download JSON
+            Download JSON
           </Link>
         }
       />
@@ -59,7 +60,16 @@ export default function AdminExportPage() {
 
       <Panel className="mt-6 overflow-hidden">
         <div className="border-b border-[#e4e7ec] px-5 py-4">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Import API</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Import backup</h2>
+        </div>
+        <div className="p-5">
+          <CmsImportPanel />
+        </div>
+      </Panel>
+
+      <Panel className="mt-6 overflow-hidden">
+        <div className="border-b border-[#e4e7ec] px-5 py-4">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">API examples</h2>
         </div>
         <div className="grid gap-4 p-5 text-sm leading-6 text-[#647084]">
           <p>
