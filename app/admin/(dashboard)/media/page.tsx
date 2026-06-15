@@ -77,7 +77,7 @@ export default async function AdminMediaPage({searchParams}: Props) {
                       className="min-h-9 rounded-md border border-[#cbd3df] px-2 text-sm text-[#101827]"
                     />
                   </label>
-                  <button className="min-h-9 rounded-md bg-[#101827] px-3 text-sm font-semibold text-white transition hover:bg-[#7a2230]">
+                  <button className="admin-on-dark min-h-9 rounded-md bg-[#101827] px-3 text-sm font-semibold text-[#ffffff] transition hover:bg-[#7a2230]">
                     Save alt text
                   </button>
                 </form>

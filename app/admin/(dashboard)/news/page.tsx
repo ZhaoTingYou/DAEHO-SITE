@@ -20,7 +20,7 @@ export default function AdminNewsPage() {
         title="News"
         description="Manage journal cards, bilingual content, visibility, and SEO data for News pages."
         action={
-          <Link href="/admin/news/new" className="inline-flex min-h-10 items-center rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-white transition hover:bg-[#101827]">
+          <Link href="/admin/news/new" className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827]">
             New article
           </Link>
         }

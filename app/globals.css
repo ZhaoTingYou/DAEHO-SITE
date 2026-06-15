@@ -110,6 +110,18 @@ select {
   font: inherit;
 }
 
+.admin-on-dark {
+  color: #fff !important;
+}
+
+.admin-on-dark:disabled {
+  color: #fff !important;
+}
+
+.admin-file-control::file-selector-button {
+  color: #fff;
+}
+
 ::selection {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--primary);

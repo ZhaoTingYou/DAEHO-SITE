@@ -94,7 +94,7 @@ export function CmsImportPanel() {
               setResult(null);
               setError('');
             }}
-            className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm text-[#344054] file:mr-4 file:rounded-md file:border-0 file:bg-[#101827] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
+            className="admin-file-control min-h-11 rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm text-[#344054] file:mr-4 file:rounded-md file:border-0 file:bg-[#101827] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-[#ffffff]"
           />
         </label>
         <p className="font-mono text-xs text-[#647084]">{fileLabel}</p>
@@ -103,7 +103,7 @@ export function CmsImportPanel() {
             type="button"
             onClick={previewImport}
             disabled={!canPreview}
-            className="inline-flex min-h-10 items-center rounded-md bg-[#101827] px-4 text-sm font-semibold text-white transition hover:bg-[#263247] disabled:cursor-not-allowed disabled:bg-[#98a2b3]"
+            className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#101827] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#263247] disabled:cursor-not-allowed disabled:bg-[#667085] disabled:text-[#ffffff]"
           >
             {busy === 'preview' ? 'Previewing...' : 'Preview import'}
           </button>
@@ -111,7 +111,7 @@ export function CmsImportPanel() {
             type="button"
             onClick={replaceImport}
             disabled={!canReplace}
-            className="inline-flex min-h-10 items-center rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-white transition hover:bg-[#101827] disabled:cursor-not-allowed disabled:bg-[#98a2b3]"
+            className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827] disabled:cursor-not-allowed disabled:bg-[#667085] disabled:text-[#ffffff]"
           >
             {busy === 'replace' ? 'Replacing...' : 'Replace CMS data'}
           </button>

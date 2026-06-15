@@ -19,7 +19,7 @@ export default function AdminExportPage() {
           <Link
             href="/admin/export/download"
             prefetch={false}
-            className="inline-flex min-h-10 items-center rounded-md bg-[#101827] px-4 text-sm font-semibold text-white transition hover:bg-[#263247]"
+            className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#101827] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#263247]"
           >
             Download JSON
           </Link>
@@ -95,7 +95,7 @@ export default function AdminExportPage() {
 
 function CodeBlock({children}: {children: string}) {
   return (
-    <pre className="overflow-x-auto rounded-md bg-[#101827] p-4 font-mono text-xs leading-6 text-white">
+    <pre className="admin-on-dark overflow-x-auto rounded-md bg-[#101827] p-4 font-mono text-xs leading-6 text-[#ffffff]">
       {children}
     </pre>
   );

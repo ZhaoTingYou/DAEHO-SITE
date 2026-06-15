@@ -21,7 +21,7 @@ export default function AdminCollectionsPage() {
         title="Collections"
         description="Manage championship, appointment, and bespoke ring records with bilingual detail content."
         action={
-          <Link href="/admin/collections/new" className="inline-flex min-h-10 items-center rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-white transition hover:bg-[#101827]">
+          <Link href="/admin/collections/new" className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827]">
             New collection
           </Link>
         }

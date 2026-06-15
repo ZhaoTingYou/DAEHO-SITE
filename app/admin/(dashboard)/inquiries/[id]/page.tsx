@@ -114,7 +114,7 @@ export default async function AdminInquiryDetailPage({params}: Props) {
                   ))}
                 </select>
               </label>
-              <button className="min-h-10 rounded-md bg-[#101827] px-4 text-sm font-semibold text-white transition hover:bg-[#7a2230]">
+              <button className="admin-on-dark min-h-10 rounded-md bg-[#101827] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#7a2230]">
                 Update status
               </button>
             </form>

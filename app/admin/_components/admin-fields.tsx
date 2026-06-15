@@ -111,7 +111,7 @@ export function CheckboxField({
 
 export function SubmitButton({children = 'Save'}: {children?: React.ReactNode}) {
   return (
-    <button className="min-h-10 rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-white transition hover:bg-[#101827] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]">
+    <button className="admin-on-dark min-h-10 rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]">
       {children}
     </button>
   );

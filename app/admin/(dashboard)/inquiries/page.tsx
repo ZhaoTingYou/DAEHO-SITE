@@ -93,7 +93,7 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                             </option>
                           ))}
                         </select>
-                        <button className="min-h-9 rounded-md bg-[#101827] px-3 text-sm font-semibold text-white">
+                        <button className="admin-on-dark min-h-9 rounded-md bg-[#101827] px-3 text-sm font-semibold text-[#ffffff]">
                           Update
                         </button>
                         <Link href={`/admin/inquiries/${item.id}`} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">
@@ -118,7 +118,7 @@ function FilterLink({href, label, active}: {href: string; label: string; active:
       href={href}
       className={`inline-flex min-h-10 items-center rounded-md border px-3 text-sm font-semibold ${
         active
-          ? 'border-[#101827] bg-[#101827] text-white'
+          ? 'admin-on-dark border-[#101827] bg-[#101827] text-[#ffffff]'
           : 'border-[#cbd3df] bg-white text-[#344054] hover:bg-[#f8fafc]'
       }`}
     >
