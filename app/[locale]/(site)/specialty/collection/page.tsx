@@ -4,6 +4,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {ScrollText} from '@/components/motion/scroll-text';
 import {SpecialtyCollectionGallery} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
+import {getCollectionItemsForSite} from '@/lib/cms/public-content';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
@@ -11,6 +12,8 @@ import {getPageMetadata} from '@/lib/seo';
 type Props = {
   params: Promise<{locale: Locale}>;
 };
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -23,10 +26,7 @@ export default async function CollectionPage({params}: Props) {
   const messages = getLocaleMessages(locale);
   const content = messages.specialtyPages.collection;
   const text = messages.collectionUi;
-  const items = content.gallery.items.map((item) => ({
-    ...item,
-    hasImage: imageExists(item.image)
-  }));
+  const items = getCollectionItemsForSite(locale);
   const filters = content.gallery.filters.map((filter) => ({
     ...filter,
     hasImage: Boolean(filter.image && imageExists(filter.image))

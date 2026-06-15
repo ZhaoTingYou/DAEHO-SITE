@@ -4,6 +4,7 @@ import {notFound} from 'next/navigation';
 
 import {SpecialtyCollectionCategory} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
+import {getCollectionItemsForSite} from '@/lib/cms/public-content';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
@@ -14,6 +15,8 @@ type CategoryPageProps = {
   params: Promise<{locale: Locale}>;
   categoryId: CollectionCategoryId;
 };
+
+export const dynamic = 'force-dynamic';
 
 export async function getCollectionCategoryMetadata({
   params,
@@ -45,10 +48,7 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
     ...filter,
     hasImage: Boolean(filter.image && imageExists(filter.image))
   }));
-  const items = content.gallery.items.map((item) => ({
-    ...item,
-    hasImage: imageExists(item.image)
-  }));
+  const items = getCollectionItemsForSite(locale);
 
   if (!filters.some((filter) => filter.id === categoryId)) {
     notFound();

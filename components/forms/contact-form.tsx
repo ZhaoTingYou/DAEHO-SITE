@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {type FormEvent, useState} from 'react';
 
 type ContactFormProps = {
   copy: ContactFormCopy;
@@ -22,14 +22,16 @@ type ContactFormCopy = {
 };
 
 export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFormProps) {
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const isSubmitted = status === 'success';
 
   return (
     <form
       className="space-y-6"
-      onSubmit={(event) => {
-        event.preventDefault();
-        setIsSubmitted(true);
+      onSubmit={async (event) => {
+        if (await submitContactForm(event)) {
+          setStatus('success');
+        }
       }}
     >
       <TextField id="contact-name" label={text.name} name="name" autoComplete="name" />
@@ -60,6 +62,7 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
       </label>
       <button
         type="submit"
+        disabled={status === 'submitting'}
         className="min-h-12 border border-accent bg-accent px-7 py-3 font-body text-sm font-semibold uppercase tracking-[0.14em] text-white transition duration-hover ease-brand hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
       >
         {text.submit}
@@ -70,8 +73,42 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
           <p className="mt-2 text-subtext">{text.fallback}</p>
         </div>
       ) : null}
+      {status === 'error' ? (
+        <div className="border-l-2 border-primary bg-bg px-4 py-3 font-body text-sm leading-6 text-primary" role="alert">
+          {text.fallback}
+        </div>
+      ) : null}
     </form>
   );
+
+  async function submitContactForm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    setStatus('submitting');
+
+    const response = await fetch('/api/inquiries/contact', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({
+        name: String(formData.get('name') ?? ''),
+        organization: String(formData.get('organization') ?? ''),
+        contact: String(formData.get('contact') ?? ''),
+        type: String(formData.get('type') ?? ''),
+        message: String(formData.get('message') ?? ''),
+        locale: getCurrentLocale(),
+        pagePath: `${window.location.pathname}${window.location.search}`
+      })
+    }).catch(() => null);
+
+    if (!response?.ok) {
+      setStatus('error');
+      return false;
+    }
+
+    form.reset();
+    return true;
+  }
 }
 
 function TextField({
@@ -102,4 +139,9 @@ function TextField({
       />
     </label>
   );
+}
+
+function getCurrentLocale() {
+  const locale = window.location.pathname.split('/').filter(Boolean)[0];
+  return locale === 'en' ? 'en' : 'ko';
 }

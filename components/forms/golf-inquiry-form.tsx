@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {type FormEvent, useState} from 'react';
 
 type GolfInquiryFormProps = {
   copy: GolfInquiryFormCopy;
@@ -25,14 +25,16 @@ type GolfInquiryFormCopy = {
 };
 
 export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProps) {
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const isSubmitted = status === 'success';
 
   return (
     <form
       className="grid gap-6 md:grid-cols-2"
-      onSubmit={(event) => {
-        event.preventDefault();
-        setIsSubmitted(true);
+      onSubmit={async (event) => {
+        if (await submitGolfInquiryForm(event)) {
+          setStatus('success');
+        }
       }}
     >
       {configuration ? (
@@ -60,6 +62,7 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
       <div className="space-y-4 md:col-span-2">
         <button
           type="submit"
+          disabled={status === 'submitting'}
           className="min-h-12 border border-accent bg-accent px-7 py-3 font-body text-sm font-semibold uppercase tracking-[0.14em] text-white transition duration-hover ease-brand hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         >
           {text.submit}
@@ -70,9 +73,48 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
             <p className="mt-2 text-subtext">{text.fallback}</p>
           </div>
         ) : null}
+        {status === 'error' ? (
+          <div className="border-l-2 border-primary bg-white px-4 py-3 font-body text-sm leading-6 text-primary" role="alert">
+            {text.fallback}
+          </div>
+        ) : null}
       </div>
     </form>
   );
+
+  async function submitGolfInquiryForm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    setStatus('submitting');
+
+    const response = await fetch('/api/inquiries/golf', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({
+        name: String(formData.get('name') ?? ''),
+        contact: String(formData.get('contact') ?? ''),
+        quantity: String(formData.get('quantity') ?? ''),
+        due: String(formData.get('due') ?? ''),
+        team: String(formData.get('team') ?? ''),
+        use: String(formData.get('use') ?? ''),
+        message: String(formData.get('message') ?? ''),
+        selectedHead: String(formData.get('selectedHead') ?? ''),
+        selectedShaft: String(formData.get('selectedShaft') ?? ''),
+        engravingSample: String(formData.get('engravingSample') ?? ''),
+        locale: getCurrentLocale(),
+        pagePath: `${window.location.pathname}${window.location.search}`
+      })
+    }).catch(() => null);
+
+    if (!response?.ok) {
+      setStatus('error');
+      return false;
+    }
+
+    form.reset();
+    return true;
+  }
 }
 
 function TextField({
@@ -106,4 +148,9 @@ function TextField({
       />
     </label>
   );
+}
+
+function getCurrentLocale() {
+  const locale = window.location.pathname.split('/').filter(Boolean)[0];
+  return locale === 'en' ? 'en' : 'ko';
 }

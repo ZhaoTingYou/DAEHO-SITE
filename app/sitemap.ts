@@ -1,8 +1,11 @@
 import type {MetadataRoute} from 'next';
 
 import {routing} from '@/i18n/routing';
+import {listPublicCollections, listPublicNews} from '@/lib/cms/repositories';
 import {metadataBase} from '@/lib/seo';
 import koMessages from '@/messages/ko.json';
+
+export const dynamic = 'force-dynamic';
 
 const staticPaths = [
   '/',
@@ -19,9 +22,15 @@ const staticPaths = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const cmsNews = listPublicNews('ko');
+  const cmsCollections = listPublicCollections('ko');
   const detailPaths = [
-    ...koMessages.news.grid.cards.map((card) => `/news/${card.id}`),
-    ...koMessages.specialtyPages.collection.gallery.items.map((item) => `/specialty/collection/${item.id}`)
+    ...(cmsNews.length > 0
+      ? cmsNews.map((card) => `/news/${card.slug}`)
+      : koMessages.news.grid.cards.map((card) => `/news/${card.id}`)),
+    ...(cmsCollections.length > 0
+      ? cmsCollections.map((item) => `/specialty/collection/${item.slug}`)
+      : koMessages.specialtyPages.collection.gallery.items.map((item) => `/specialty/collection/${item.id}`))
   ];
   const lastModified = new Date();
 

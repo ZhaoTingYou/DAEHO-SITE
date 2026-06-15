@@ -6,6 +6,10 @@ import {routing} from '@/i18n/routing';
 const intlMiddleware = createMiddleware(routing);
 
 export default function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    return NextResponse.next();
+  }
+
   if (request.nextUrl.pathname === '/__styleguide') {
     return NextResponse.rewrite(new URL('/ko/styleguide-internal', request.url));
   }

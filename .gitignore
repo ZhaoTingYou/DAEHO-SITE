@@ -20,12 +20,15 @@ pnpm-debug.log*
 
 # env
 .env*
+!.env.example
 
 # vercel
 .vercel
 
 # local verification artifacts
 /artifacts
+/data/*.sqlite
+/data/*.sqlite-*
 
 # local Claude permissions/config
 .claude/

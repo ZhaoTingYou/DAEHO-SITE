@@ -9,6 +9,7 @@ import {ShareLinkButton} from '@/components/news/share-link-button';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
 import {routing} from '@/i18n/routing';
+import {getNewsCardsForSite, getNewsDetailForSite} from '@/lib/cms/public-content';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
@@ -18,6 +19,8 @@ type Props = {
   params: Promise<{locale: Locale; slug: string}>;
 };
 
+export const dynamic = 'force-dynamic';
+
 export function generateStaticParams() {
   const slugs = koMessages.news.grid.cards.map((card) => card.id);
   return routing.locales.flatMap((locale) => slugs.map((slug) => ({locale, slug})));
@@ -25,27 +28,34 @@ export function generateStaticParams() {
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const card = getNewsCard(locale, slug);
+  const detail = getNewsDetailForSite(locale, slug);
 
-  if (!card) {
+  if (!detail) {
     return getDetailMetadata(locale, '/news', 'NEWS', '');
   }
 
-  return getDetailMetadata(locale, `/news/${slug}`, card.title, card.title, '/images/news_detail_hero.png');
+  return getDetailMetadata(
+    locale,
+    `/news/${slug}`,
+    detail.seoTitle || detail.card.title,
+    detail.seoDescription,
+    `/images/${detail.ogImagePath}`
+  );
 }
 
 export default async function NewsDetailPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
   const messages = getLocaleMessages(locale);
-  const card = getNewsCard(locale, slug);
+  const detail = getNewsDetailForSite(locale, slug);
 
-  if (!card) {
+  if (!detail) {
     notFound();
   }
 
   const text = messages.newsUi.detail;
-  const related = getNewsCards(locale).filter((item) => item.id !== slug).slice(0, 3);
+  const card = detail.card;
+  const related = getNewsCardsForSite(locale).filter((item) => item.id !== slug).slice(0, 3);
 
   return (
     <main className="bg-bg text-text">
@@ -65,11 +75,11 @@ export default async function NewsDetailPage({params}: Props) {
             <h1 className="font-heading text-[clamp(34px,5.8vw,68px)] font-semibold leading-none text-primary">
               {card.title}
             </h1>
-            <p className="max-w-3xl font-body text-[15px] leading-7 text-subtext">{text.lead}</p>
+            <p className="max-w-3xl font-body text-[15px] leading-7 text-subtext">{detail.lead}</p>
           </Reveal>
           <Reveal className="mt-12">
             <SafeImage
-              filename="news_detail_hero.png"
+              filename={detail.ogImagePath || card.image}
               alt={card.title}
               aspect="aspect-[16/9]"
               priority
@@ -81,18 +91,18 @@ export default async function NewsDetailPage({params}: Props) {
 
       <section className="bg-bg py-section">
         <div className="mx-auto max-w-[720px] space-y-8 px-container">
-          {text.paragraphs.map((paragraph) => (
+          {detail.paragraphs.map((paragraph) => (
             <Reveal key={paragraph}>
               <p className="font-body text-[15px] leading-8 text-text">{paragraph}</p>
             </Reveal>
           ))}
           <Reveal>
             <blockquote className="border-l-2 border-accent bg-white px-6 py-5 font-heading text-[22px] font-semibold leading-tight text-primary">
-              {text.quote}
+              {detail.quote}
             </blockquote>
           </Reveal>
           <Reveal className="flex flex-wrap items-center gap-3">
-            {text.tags.map((tag) => (
+            {detail.tags.map((tag) => (
               <span key={tag} className="border border-hairline bg-white px-4 py-2 font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-subtext">
                 {tag}
               </span>
@@ -100,7 +110,7 @@ export default async function NewsDetailPage({params}: Props) {
             <ShareLinkButton copy={messages.newsUi.share} />
           </Reveal>
           <Reveal className="bg-white p-6 shadow-[0_20px_70px_rgba(16,29,48,0.06)]">
-            <p className="font-heading text-[28px] font-semibold leading-tight text-primary">{text.ctaTitle}</p>
+            <p className="font-heading text-[28px] font-semibold leading-tight text-primary">{detail.ctaTitle}</p>
             <Link href={withLocale(locale, `/contact?type=other&source=news&item=${slug}`)} className="link-sweep mt-5 inline-flex font-body text-sm font-semibold uppercase tracking-[0.12em]">
               {text.cta}
             </Link>
@@ -138,12 +148,4 @@ export default async function NewsDetailPage({params}: Props) {
       </section>
     </main>
   );
-}
-
-function getNewsCards(locale: Locale) {
-  return getLocaleMessages(locale).news.grid.cards;
-}
-
-function getNewsCard(locale: Locale, slug: string) {
-  return getNewsCards(locale).find((card) => card.id === slug);
 }

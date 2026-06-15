@@ -6,13 +6,15 @@ import {Reveal} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import {SectionIntro} from '@/components/section-intro';
 import type {Locale} from '@/i18n/routing';
-import {imageExists} from '@/lib/image-exists';
+import {getNewsCardsForSite} from '@/lib/cms/public-content';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 
 type Props = {
   params: Promise<{locale: Locale}>;
 };
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -25,10 +27,7 @@ export default async function NewsPage({params}: Props) {
   const messages = getLocaleMessages(locale);
   const content = messages.news;
   const text = messages.newsUi;
-  const cards: NewsCard[] = content.grid.cards.map((card) => ({
-    ...card,
-    hasImage: imageExists(card.image)
-  }));
+  const cards: NewsCard[] = getNewsCardsForSite(locale);
   const tickerItems = [...content.masthead.ticker, ...content.masthead.ticker];
 
   return (

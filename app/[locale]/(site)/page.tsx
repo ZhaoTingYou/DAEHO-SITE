@@ -10,6 +10,7 @@ import {HomeNewsPopups, type HomeNewsPopupCard} from '@/components/home/home-new
 import {Reveal, RevealItem} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
+import {getHomeNewsCardsForSite} from '@/lib/cms/public-content';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
@@ -18,6 +19,8 @@ import koMessages from '@/messages/ko.json';
 type Props = {
   params: Promise<{locale: Locale}>;
 };
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -32,10 +35,7 @@ export default async function HomePage({params}: Props) {
   const content = messages.home;
   const homeUi = messages.homeUi;
   const heroVideo = getHomeHeroVideo();
-  const latestNews: HomeNewsPopupCard[] = messages.news.grid.cards.slice(0, 4).map((card) => ({
-    ...card,
-    hasImage: existsSync(path.join(process.cwd(), 'public', 'images', card.image))
-  }));
+  const latestNews: HomeNewsPopupCard[] = getHomeNewsCardsForSite(locale);
 
   return <HomeContent content={content} heroVideo={heroVideo} homeUi={homeUi} latestNews={latestNews} locale={locale} />;
 }

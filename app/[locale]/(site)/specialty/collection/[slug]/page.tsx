@@ -8,6 +8,10 @@ import {SafeImage} from '@/components/safe-image';
 import {CollectionDetailGallery} from '@/components/specialty/collection-detail-gallery';
 import type {Locale} from '@/i18n/routing';
 import {routing} from '@/i18n/routing';
+import {
+  getCollectionItemForSite,
+  getCollectionItemsForSite
+} from '@/lib/cms/public-content';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
@@ -17,6 +21,8 @@ import koMessages from '@/messages/ko.json';
 type Props = {
   params: Promise<{locale: Locale; slug: string}>;
 };
+
+export const dynamic = 'force-dynamic';
 
 const detailImages = [
   'collection_detail_01.png',
@@ -33,36 +39,43 @@ export function generateStaticParams() {
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const item = getCollectionItem(locale, slug);
+  const item = getCollectionItemForSite(locale, slug);
 
   if (!item) {
     return getDetailMetadata(locale, '/specialty/collection', 'COLLECTION', '');
   }
 
-  return getDetailMetadata(locale, `/specialty/collection/${slug}`, item.title, item.caption, `/images/${item.image}`);
+  return getDetailMetadata(
+    locale,
+    `/specialty/collection/${slug}`,
+    item.seoTitle,
+    item.seoDescription,
+    `/images/${item.ogImagePath}`
+  );
 }
 
 export default async function CollectionDetailPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
   const messages = getLocaleMessages(locale);
-  const item = getCollectionItem(locale, slug);
+  const item = getCollectionItemForSite(locale, slug);
 
   if (!item) {
     notFound();
   }
 
   const text = messages.collectionUi.detail;
-  const images = [item.image, ...detailImages].map((filename) => ({
+  const galleryImages = item.gallery.length > 0 ? item.gallery : [item.image, ...detailImages];
+  const images = galleryImages.map((filename) => ({
     filename,
     alt: `${item.title} ${item.caption}`,
     hasImage: imageExists(filename)
   }));
-  const related = getCollectionItems(locale).filter((entry) => entry.id !== slug).slice(0, 4);
+  const related = getCollectionItemsForSite(locale).filter((entry) => entry.id !== slug).slice(0, 4);
   const specs = [
     [text.material, text.placeholder],
     [text.stones, text.placeholder],
-    [text.year, '20XX'],
+    [text.year, item.year || '20XX'],
     [text.madeFor, text.placeholder],
     [text.specs, item.categoryLabel]
   ];
@@ -101,7 +114,7 @@ export default async function CollectionDetailPage({params}: Props) {
                   <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.2em] text-accent">
                     {text.story}
                   </p>
-                  <p className="font-body text-[14px] leading-7 text-text">{item.caption}</p>
+                  <p className="font-body text-[14px] leading-7 text-text">{item.story || item.caption}</p>
                 </div>
               </aside>
             </Reveal>
@@ -117,7 +130,7 @@ export default async function CollectionDetailPage({params}: Props) {
             </h2>
           </Reveal>
           <div className="grid gap-6 md:grid-cols-3 md:gap-8">
-            {detailImages.slice(0, 3).map((filename) => (
+            {galleryImages.slice(1, 4).map((filename) => (
               <Reveal key={filename}>
                 <div className="hover-zoom">
                   <div className="hover-zoom-media">
@@ -191,12 +204,4 @@ export default async function CollectionDetailPage({params}: Props) {
       </section>
     </main>
   );
-}
-
-function getCollectionItems(locale: Locale) {
-  return getLocaleMessages(locale).specialtyPages.collection.gallery.items;
-}
-
-function getCollectionItem(locale: Locale, slug: string) {
-  return getCollectionItems(locale).find((item) => item.id === slug);
 }

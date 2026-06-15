@@ -10,6 +10,8 @@ type Props = {
   params: Promise<{locale: Locale}>;
 };
 
+export const dynamic = 'force-dynamic';
+
 export function generateMetadata({params}: Props): Promise<Metadata> {
   return getCollectionCategoryMetadata({params, categoryId: 'appointment'});
 }
