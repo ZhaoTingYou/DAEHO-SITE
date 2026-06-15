@@ -12,15 +12,15 @@ export default function AdminExportPage() {
   return (
     <>
       <PageHeader
-        title="Export"
-        description="Download a JSON backup of CMS content, media records, inquiries, and email events."
+        title="Backup"
+        description="Download, inspect, and restore JSON backups of CMS content, media records, inquiries, and email events."
         action={
           <Link
             href="/admin/export/download"
             prefetch={false}
             className="inline-flex min-h-10 items-center rounded-md bg-[#101827] px-4 text-sm font-semibold text-white transition hover:bg-[#263247]"
           >
-            Download JSON
+          Download JSON
           </Link>
         }
       />
@@ -56,6 +56,37 @@ export default function AdminExportPage() {
           </div>
         </Panel>
       </div>
+
+      <Panel className="mt-6 overflow-hidden">
+        <div className="border-b border-[#e4e7ec] px-5 py-4">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Import API</h2>
+        </div>
+        <div className="grid gap-4 p-5 text-sm leading-6 text-[#647084]">
+          <p>
+            The import endpoint validates a backup first. It only replaces CMS tables when
+            <span className="font-mono text-[#344054]"> ?replace=1 </span>
+            is present.
+          </p>
+          <CodeBlock>{`curl -X POST \\
+  -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  --data-binary @deaho-cms-export.json \\
+  http://localhost:3000/api/admin/import`}</CodeBlock>
+          <CodeBlock>{`curl -X POST \\
+  -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  --data-binary @deaho-cms-export.json \\
+  "http://localhost:3000/api/admin/import?replace=1"`}</CodeBlock>
+        </div>
+      </Panel>
     </>
+  );
+}
+
+function CodeBlock({children}: {children: string}) {
+  return (
+    <pre className="overflow-x-auto rounded-md bg-[#101827] p-4 font-mono text-xs leading-6 text-white">
+      {children}
+    </pre>
   );
 }

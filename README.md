@@ -93,6 +93,27 @@ Import a JSON backup:
 
 ```bash
 npm run cms:import -- path/to/deaho-cms-export.json
+npm run cms:import -- path/to/deaho-cms-export.json --replace
+```
+
+Protected admin import API:
+
+```bash
+curl -X POST \
+  -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  --data-binary @deaho-cms-export.json \
+  http://localhost:3000/api/admin/import
+```
+
+The import API validates and previews by default. To replace CMS tables, call:
+
+```bash
+curl -X POST \
+  -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  --data-binary @deaho-cms-export.json \
+  "http://localhost:3000/api/admin/import?replace=1"
 ```
 
 Admin API health/status:
