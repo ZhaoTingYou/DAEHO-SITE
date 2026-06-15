@@ -915,6 +915,53 @@
         "daeho": "DAEHO",
         "oh": "OH",
         "vulcan": "VULCAN"
+      },
+      "business": {
+        "heading": "Business information",
+        "items": [
+          {
+            "label": "Company",
+            "value": "DAEHO"
+          },
+          {
+            "label": "Representative",
+            "value": "Pending"
+          },
+          {
+            "label": "Business registration no.",
+            "value": "000-00-00000"
+          },
+          {
+            "label": "Mail-order license no.",
+            "value": "Pending"
+          },
+          {
+            "label": "Address",
+            "value": "Pending"
+          },
+          {
+            "label": "Customer center",
+            "value": "Pending"
+          },
+          {
+            "label": "Email",
+            "value": "Pending"
+          },
+          {
+            "label": "Privacy officer",
+            "value": "Pending"
+          },
+          {
+            "label": "Hosting provider",
+            "value": "Pending"
+          }
+        ]
+      },
+      "legal": {
+        "heading": "Terms & policies",
+        "terms": "Terms of Use",
+        "privacy": "Privacy Policy",
+        "rights": "All rights reserved."
       }
     }
   },
@@ -1144,5 +1191,17 @@
   "notFound": {
     "title": "Page not found",
     "body": "The requested route is not ready yet or has moved."
+  },
+  "legalPages": {
+    "terms": {
+      "eyebrow": "LEGAL",
+      "title": "Terms of Use",
+      "notice": "These Terms of Use will be published in their finalized form after legal review. The complete terms will appear on this page once confirmed."
+    },
+    "privacy": {
+      "eyebrow": "LEGAL",
+      "title": "Privacy Policy",
+      "notice": "The full Privacy Policy will be published on this page after legal review. It will cover the personal data collected, purposes of use, retention periods, third-party provision, destruction procedures, user rights, and the privacy officer, as required by Korean law."
+    }
   }
 }

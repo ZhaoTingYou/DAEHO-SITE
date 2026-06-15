@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {
   listCollections,
   listInquiries,
@@ -11,7 +12,8 @@ import {getCmsStatus} from '@/lib/cms/status';
 
 import {PageHeader, Panel} from '../_components/admin-shell';
 
-export default function AdminOverviewPage() {
+export default async function AdminOverviewPage() {
+  const {t} = await getAdminI18n();
   const inquiries = listInquiries({});
   const news = listNews();
   const collections = listCollections();
@@ -24,21 +26,21 @@ export default function AdminOverviewPage() {
   return (
     <>
       <PageHeader
-        title="Overview"
-        description="Company-only CMS workspace for content, media, and inquiry operations."
+        title={t('overview.title')}
+        description={t('overview.description')}
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <Metric label="New inquiries" value={newInquiries} href="/admin/inquiries?status=new" />
-        <Metric label="Total inquiries" value={inquiries.length} href="/admin/inquiries" />
-        <Metric label="News" value={news.length} href="/admin/news" />
-        <Metric label="Collections" value={collections.length} href="/admin/collections" />
-        <Metric label="Media assets" value={media.length} href="/admin/media" />
+        <Metric label={t('overview.metricNewInquiries')} value={newInquiries} href="/admin/inquiries?status=new" />
+        <Metric label={t('overview.metricTotalInquiries')} value={inquiries.length} href="/admin/inquiries" />
+        <Metric label={t('overview.metricNews')} value={news.length} href="/admin/news" />
+        <Metric label={t('overview.metricCollections')} value={collections.length} href="/admin/collections" />
+        <Metric label={t('overview.metricMedia')} value={media.length} href="/admin/media" />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <Panel>
           <div className="border-b border-[#e4e7ec] px-5 py-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Latest inquiries</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('overview.latestInquiries')}</h2>
           </div>
           <div className="divide-y divide-[#e4e7ec]">
             {inquiries.slice(0, 6).map((item) => (
@@ -46,40 +48,40 @@ export default function AdminOverviewPage() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="font-semibold text-[#101827]">{item.name}</p>
                   <span className="rounded-full bg-[#eef2f6] px-2 py-1 text-xs font-semibold text-[#475467]">
-                    {item.source} / {item.status}
+                    {t(`source.${item.source}`)} / {t(`status.${item.status}`)}
                   </span>
                 </div>
                 <p className="text-sm text-[#647084]">{item.contact}</p>
               </Link>
             ))}
-            {inquiries.length === 0 ? <p className="px-5 py-8 text-sm text-[#647084]">No inquiries yet.</p> : null}
+            {inquiries.length === 0 ? <p className="px-5 py-8 text-sm text-[#647084]">{t('overview.noInquiries')}</p> : null}
           </div>
         </Panel>
 
         <div className="grid gap-6">
           <Panel>
             <div className="border-b border-[#e4e7ec] px-5 py-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Content inventory</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('overview.contentInventory')}</h2>
             </div>
             <div className="grid gap-3 p-5">
-              <InventoryRow label="Editable page groups" value={pages.length} href="/admin/pages" />
-              <InventoryRow label="Visible news items" value={news.filter((item) => item.isVisible).length} href="/admin/news" />
-              <InventoryRow label="Visible collections" value={collections.filter((item) => item.isVisible).length} href="/admin/collections" />
-              <InventoryRow label="Public image records" value={media.filter((item) => item.storageProvider === 'public').length} href="/admin/media" />
+              <InventoryRow label={t('overview.editablePageGroups')} value={pages.length} href="/admin/pages" />
+              <InventoryRow label={t('overview.visibleNewsItems')} value={news.filter((item) => item.isVisible).length} href="/admin/news" />
+              <InventoryRow label={t('overview.visibleCollections')} value={collections.filter((item) => item.isVisible).length} href="/admin/collections" />
+              <InventoryRow label={t('overview.publicImageRecords')} value={media.filter((item) => item.storageProvider === 'public').length} href="/admin/media" />
             </div>
           </Panel>
 
           <Panel>
             <div className="border-b border-[#e4e7ec] px-5 py-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">CMS health</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('overview.cmsHealth')}</h2>
             </div>
             <div className="grid gap-3 p-5">
-              <StatusRow label="Database" value={formatPersistence(cmsStatus.environment.persistence)} tone={cmsStatus.environment.persistence === 'ephemeral' ? 'warning' : 'ok'} />
-              <StatusRow label="DB path" value={cmsStatus.database.path} mono />
-              <StatusRow label="Rows tracked" value={tableTotal.toString()} />
-              <StatusRow label="Email notify" value={cmsStatus.email.configured ? 'Configured' : 'Not configured'} tone={cmsStatus.email.configured ? 'ok' : 'warning'} />
-              <StatusRow label="Latest inquiry" value={cmsStatus.latest.inquiryCreatedAt || 'None'} mono />
-              <StatusRow label="Latest email event" value={cmsStatus.latest.emailEventCreatedAt || 'None'} mono />
+              <StatusRow label={t('overview.database')} value={formatPersistence(cmsStatus.environment.persistence, t)} tone={cmsStatus.environment.persistence === 'ephemeral' ? 'warning' : 'ok'} />
+              <StatusRow label={t('overview.dbPath')} value={cmsStatus.database.path} mono />
+              <StatusRow label={t('overview.rowsTracked')} value={tableTotal.toString()} />
+              <StatusRow label={t('overview.emailNotify')} value={cmsStatus.email.configured ? t('overview.configured') : t('overview.notConfigured')} tone={cmsStatus.email.configured ? 'ok' : 'warning'} />
+              <StatusRow label={t('overview.latestInquiry')} value={cmsStatus.latest.inquiryCreatedAt || t('common.none')} mono />
+              <StatusRow label={t('overview.latestEmailEvent')} value={cmsStatus.latest.emailEventCreatedAt || t('common.none')} mono />
             </div>
           </Panel>
         </div>
@@ -134,18 +136,18 @@ function StatusRow({
   );
 }
 
-function formatPersistence(value: string) {
+function formatPersistence(value: string, t: (key: string) => string) {
   if (value === 'configured') {
-    return 'Persistent path configured';
+    return t('overview.persistenceConfigured');
   }
 
   if (value === 'ephemeral') {
-    return 'Ephemeral Vercel filesystem';
+    return t('overview.persistenceEphemeral');
   }
 
   if (value === 'local') {
-    return 'Local data directory';
+    return t('overview.persistenceLocal');
   }
 
-  return value || 'Unknown';
+  return value || t('common.none');
 }

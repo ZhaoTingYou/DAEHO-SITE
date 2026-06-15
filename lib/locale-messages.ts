@@ -4,6 +4,11 @@ import koMessages from '@/messages/ko.json';
 
 export type LocaleMessages = typeof koMessages;
 
+const messagesByLocale: Record<Locale, LocaleMessages> = {
+  ko: koMessages,
+  en: enMessages
+};
+
 export function getLocaleMessages(locale: Locale): LocaleMessages {
-  return locale === 'en' ? enMessages : koMessages;
+  return messagesByLocale[locale] ?? koMessages;
 }

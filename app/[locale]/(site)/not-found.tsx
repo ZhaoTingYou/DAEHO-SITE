@@ -5,10 +5,11 @@ import {useTranslations} from 'next-intl';
 import {useParams} from 'next/navigation';
 
 import type {Locale} from '@/i18n/routing';
+import {isLocale} from '@/lib/locales';
 
 export default function NotFound() {
   const params = useParams<{locale?: Locale}>();
-  const locale = params.locale === 'en' ? 'en' : 'ko';
+  const locale = isLocale(params.locale) ? params.locale : 'ko';
   const text = useTranslations('notFound');
   const nav = useTranslations('common.navigation');
 

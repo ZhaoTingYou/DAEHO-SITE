@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {listNews} from '@/lib/cms/repositories';
 
 import {deleteNewsAction} from '../../actions';
@@ -11,35 +12,36 @@ type NewsTranslation = {
   categoryLabel?: string;
 };
 
-export default function AdminNewsPage() {
+export default async function AdminNewsPage() {
+  const {t} = await getAdminI18n();
   const items = listNews();
 
   return (
     <>
       <PageHeader
-        title="News"
-        description="Manage journal cards, bilingual content, visibility, and SEO data for News pages."
+        title={t('news.title')}
+        description={t('news.description')}
         action={
           <Link href="/admin/news/new" className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827]">
-            New article
+            {t('news.newArticle')}
           </Link>
         }
       />
 
       {items.length === 0 ? (
-        <EmptyState title="No news items" body="Create the first article to start filling the News section." />
+        <EmptyState title={t('news.noItemsTitle')} body={t('news.noItemsBody')} />
       ) : (
         <Panel className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] border-collapse text-left text-sm">
               <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
                 <tr>
-                  <th className="px-4 py-3">Article</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Image</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">{t('news.article')}</th>
+                  <th className="px-4 py-3">{t('common.category')}</th>
+                  <th className="px-4 py-3">{t('common.image')}</th>
+                  <th className="px-4 py-3">{t('news.date')}</th>
+                  <th className="px-4 py-3">{t('common.status')}</th>
+                  <th className="px-4 py-3 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e4e7ec]">
@@ -59,18 +61,18 @@ export default function AdminNewsPage() {
                       <td className="px-4 py-4 font-numeric text-xs text-[#647084]">{item.publishedAt}</td>
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-2">
-                          <Badge tone={item.isVisible ? 'green' : 'gray'}>{item.isVisible ? 'visible' : 'hidden'}</Badge>
-                          {item.isFeatured ? <Badge tone="red">featured</Badge> : null}
+                          <Badge tone={item.isVisible ? 'green' : 'gray'}>{item.isVisible ? t('common.visible') : t('common.hidden')}</Badge>
+                          {item.isFeatured ? <Badge tone="red">{t('status.featured')}</Badge> : null}
                         </div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex justify-end gap-2">
                           <Link href={`/admin/news/${item.id}`} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">
-                            Edit
+                            {t('common.edit')}
                           </Link>
                           <form action={deleteNewsAction}>
                             <input type="hidden" name="id" value={item.id} />
-                            <DangerButton>Delete</DangerButton>
+                            <DangerButton>{t('common.delete')}</DangerButton>
                           </form>
                         </div>
                       </td>

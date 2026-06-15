@@ -1,5 +1,7 @@
 import {randomUUID} from 'node:crypto';
 
+import {locales, type Locale} from '@/lib/locales';
+
 import {getCmsDb, jsonParse, jsonStringify, nowIso} from './db';
 import type {
   collectionPayloadSchema,
@@ -13,7 +15,6 @@ import type {
 } from './validation';
 import type {z} from 'zod';
 
-type Locale = 'ko' | 'en';
 type PagePayload = z.infer<typeof pagePayloadSchema>;
 type NewsPayload = z.infer<typeof newsPayloadSchema>;
 type CollectionPayload = z.infer<typeof collectionPayloadSchema>;
@@ -160,7 +161,8 @@ export function upsertPage(pageKey: string, payload: PagePayload) {
   getCmsDb()
     .prepare(
       `INSERT INTO cms_pages (
-        page_key, section, sort_order, content_ko, content_en, seo_ko, seo_en, created_at, updated_at
+        page_key, section, sort_order, content_ko, content_en,
+        seo_ko, seo_en, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(page_key) DO UPDATE SET
         section = excluded.section,
@@ -680,7 +682,7 @@ function getNewsTranslations(newsId: string) {
 function upsertNewsTranslations(newsId: string, payload: NewsPayload) {
   const now = nowIso();
 
-  for (const locale of ['ko', 'en'] as const) {
+  for (const locale of locales) {
     const translation = payload.translations[locale];
 
     if (!translation) {
@@ -732,7 +734,7 @@ function getCollectionTranslations(collectionId: string) {
 function upsertCollectionTranslations(collectionId: string, payload: CollectionPayload) {
   const now = nowIso();
 
-  for (const locale of ['ko', 'en'] as const) {
+  for (const locale of locales) {
     const translation = payload.translations[locale];
 
     if (!translation) {

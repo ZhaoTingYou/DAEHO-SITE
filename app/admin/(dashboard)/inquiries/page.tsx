@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {listInquiries} from '@/lib/cms/repositories';
 
 import {updateInquiryStatusAction} from '../../actions';
@@ -12,6 +13,7 @@ type Props = {
 const statuses = ['new', 'contacted', 'in_progress', 'done', 'spam'];
 
 export default async function AdminInquiriesPage({searchParams}: Props) {
+  const {t} = await getAdminI18n();
   const query = await searchParams;
   const inquiries = listInquiries({
     status: query?.status,
@@ -21,32 +23,32 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
   return (
     <>
       <PageHeader
-        title="Inquiries"
-        description="Contact and Golf form submissions are stored here. Email notification results are recorded separately in the database."
+        title={t('inquiry.title')}
+        description={t('inquiry.description')}
         action={
           <div className="flex flex-wrap gap-2">
-            <FilterLink href="/admin/inquiries" label="All" active={!query?.status && !query?.source} />
-            <FilterLink href="/admin/inquiries?status=new" label="New" active={query?.status === 'new'} />
-            <FilterLink href="/admin/inquiries?source=contact" label="Contact" active={query?.source === 'contact'} />
-            <FilterLink href="/admin/inquiries?source=golf" label="Golf" active={query?.source === 'golf'} />
+            <FilterLink href="/admin/inquiries" label={t('common.all')} active={!query?.status && !query?.source} />
+            <FilterLink href="/admin/inquiries?status=new" label={t('status.new')} active={query?.status === 'new'} />
+            <FilterLink href="/admin/inquiries?source=contact" label={t('source.contact')} active={query?.source === 'contact'} />
+            <FilterLink href="/admin/inquiries?source=golf" label={t('source.golf')} active={query?.source === 'golf'} />
           </div>
         }
       />
 
       {inquiries.length === 0 ? (
-        <EmptyState title="No inquiries" body="New Contact and Golf form submissions will appear here as soon as users submit them." />
+        <EmptyState title={t('inquiry.noItemsTitle')} body={t('inquiry.noItemsBody')} />
       ) : (
         <Panel className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] border-collapse text-left text-sm">
               <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
                 <tr>
-                  <th className="px-4 py-3">Received</th>
-                  <th className="px-4 py-3">Source</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Contact</th>
-                  <th className="px-4 py-3">Details</th>
-                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">{t('inquiry.received')}</th>
+                  <th className="px-4 py-3">{t('inquiry.source')}</th>
+                  <th className="px-4 py-3">{t('inquiry.name')}</th>
+                  <th className="px-4 py-3">{t('inquiry.contact')}</th>
+                  <th className="px-4 py-3">{t('common.details')}</th>
+                  <th className="px-4 py-3">{t('common.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e4e7ec]">
@@ -55,7 +57,7 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                     <td className="px-4 py-4 font-numeric text-xs text-[#647084]">{formatDate(item.createdAt)}</td>
                     <td className="px-4 py-4">
                       <span className="rounded-full bg-[#eef2f6] px-2 py-1 text-xs font-semibold text-[#475467]">
-                        {item.source}
+                        {t(`source.${item.source}`)}
                       </span>
                     </td>
                     <td className="px-4 py-4">
@@ -70,11 +72,11 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                     </td>
                     <td className="px-4 py-4">
                       <div className="max-w-[360px] space-y-1 text-[#344054]">
-                        {item.inquiryType ? <p>Type: {item.inquiryType}</p> : null}
-                        {item.team ? <p>Team: {item.team}</p> : null}
-                        {item.quantity ? <p>Qty: {item.quantity}</p> : null}
-                        {item.dueDate ? <p>Due: {item.dueDate}</p> : null}
-                        {item.useCase ? <p>Use: {item.useCase}</p> : null}
+                        {item.inquiryType ? <p>{t('inquiry.type')}: {item.inquiryType}</p> : null}
+                        {item.team ? <p>{t('inquiry.team')}: {item.team}</p> : null}
+                        {item.quantity ? <p>{t('inquiry.quantity')}: {item.quantity}</p> : null}
+                        {item.dueDate ? <p>{t('inquiry.due')}: {item.dueDate}</p> : null}
+                        {item.useCase ? <p>{t('inquiry.use')}: {item.useCase}</p> : null}
                         {item.message ? <p className="line-clamp-3 text-[#647084]">{item.message}</p> : null}
                         {item.pagePath ? <p className="font-numeric text-xs text-[#98a2b3]">{item.pagePath}</p> : null}
                       </div>
@@ -89,15 +91,15 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                         >
                           {statuses.map((status) => (
                             <option key={status} value={status}>
-                              {status}
+                              {t(`status.${status}`)}
                             </option>
                           ))}
                         </select>
                         <button className="admin-on-dark min-h-9 rounded-md bg-[#101827] px-3 text-sm font-semibold text-[#ffffff]">
-                          Update
+                          {t('inquiry.update')}
                         </button>
                         <Link href={`/admin/inquiries/${item.id}`} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">
-                          Open
+                          {t('common.open')}
                         </Link>
                       </form>
                     </td>

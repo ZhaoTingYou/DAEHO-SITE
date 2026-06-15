@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 
 import '@/app/globals.css';
+import {getAdminLocale} from '@/lib/admin-i18n';
 
 export const metadata: Metadata = {
   title: 'DEAHO Admin',
@@ -10,9 +11,11 @@ export const metadata: Metadata = {
   }
 };
 
-export default function AdminRootLayout({children}: {children: React.ReactNode}) {
+export default async function AdminRootLayout({children}: {children: React.ReactNode}) {
+  const locale = await getAdminLocale();
+
   return (
-    <html lang="ko" className="locale-ko">
+    <html lang={locale} className={`locale-${locale}`}>
       <body className="bg-[#f4f5f7] font-body text-[#182033]">
         {children}
       </body>

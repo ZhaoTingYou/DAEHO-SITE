@@ -10,6 +10,7 @@ import {
   importCmsSnapshot,
   readCmsImportSnapshotFromText
 } from '@/lib/cms/import-core.mjs';
+import {locales} from '@/lib/locales';
 
 export const runtime = 'nodejs';
 
@@ -58,6 +59,12 @@ export async function POST(request: NextRequest) {
 }
 
 function revalidateCmsPaths() {
+  const localizedPaths = locales.flatMap((locale) => [
+    `/${locale}`,
+    `/${locale}/news`,
+    `/${locale}/specialty/collection`
+  ]);
+
   for (const path of [
     '/admin',
     '/admin/collections',
@@ -66,12 +73,7 @@ function revalidateCmsPaths() {
     '/admin/media',
     '/admin/news',
     '/admin/pages',
-    '/ko',
-    '/en',
-    '/ko/news',
-    '/en/news',
-    '/ko/specialty/collection',
-    '/en/specialty/collection',
+    ...localizedPaths,
     '/sitemap.xml'
   ]) {
     revalidatePath(path);

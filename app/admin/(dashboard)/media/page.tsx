@@ -1,5 +1,6 @@
 import Image from 'next/image';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {listMedia} from '@/lib/cms/repositories';
 
 import {
@@ -15,20 +16,21 @@ type Props = {
 };
 
 export default async function AdminMediaPage({searchParams}: Props) {
+  const {t} = await getAdminI18n();
   const query = await searchParams;
   const items = listMedia();
 
   return (
     <>
       <PageHeader
-        title="Media"
-        description="Current uploads are written to public/images and registered in cms_media. The storage provider fields are ready for object storage later."
+        title={t('media.title')}
+        description={t('media.description')}
       />
 
       <Panel className="mb-6 p-5">
         <form action={uploadMediaAction} className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
           <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-            <span>File</span>
+            <span>{t('media.file')}</span>
             <input
               name="file"
               type="file"
@@ -37,22 +39,22 @@ export default async function AdminMediaPage({searchParams}: Props) {
               className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm"
             />
           </label>
-          <TextField label="Alt Korean" name="altKo" />
-          <TextField label="Alt English" name="altEn" />
-          <SubmitButton>Upload</SubmitButton>
+          <TextField label={t('media.altKo')} name="altKo" />
+          <TextField label={t('media.altEn')} name="altEn" />
+          <SubmitButton>{t('common.upload')}</SubmitButton>
         </form>
-        {query?.error === 'file' ? <p className="mt-3 text-sm font-semibold text-[#b42318]">Please choose a file.</p> : null}
+        {query?.error === 'file' ? <p className="mt-3 text-sm font-semibold text-[#b42318]">{t('media.chooseFile')}</p> : null}
       </Panel>
 
       {items.length === 0 ? (
-        <EmptyState title="No media" body="Uploaded image records and imported public/images assets will appear here." />
+        <EmptyState title={t('media.noItemsTitle')} body={t('media.noItemsBody')} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((item) => (
             <Panel key={item.id} className="overflow-hidden">
               <div className="relative aspect-[4/3] bg-[#eef2f6]">
                 {item.url.startsWith('/images/') ? (
-                  <Image src={item.url} alt={item.altKo || item.filename} fill sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw" className="object-cover" />
+                  <Image src={item.url} alt={item.altKo || item.altEn || item.filename} fill sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw" className="object-cover" />
                 ) : null}
               </div>
               <div className="space-y-2 p-4">
@@ -62,7 +64,7 @@ export default async function AdminMediaPage({searchParams}: Props) {
                 <form action={updateMediaAction} className="grid gap-2 border-t border-[#e4e7ec] pt-3">
                   <input type="hidden" name="id" value={item.id} />
                   <label className="grid gap-1 text-xs font-semibold text-[#647084]">
-                    <span>Alt Korean</span>
+                    <span>{t('media.altKo')}</span>
                     <input
                       name="altKo"
                       defaultValue={item.altKo}
@@ -70,7 +72,7 @@ export default async function AdminMediaPage({searchParams}: Props) {
                     />
                   </label>
                   <label className="grid gap-1 text-xs font-semibold text-[#647084]">
-                    <span>Alt English</span>
+                    <span>{t('media.altEn')}</span>
                     <input
                       name="altEn"
                       defaultValue={item.altEn}
@@ -78,13 +80,13 @@ export default async function AdminMediaPage({searchParams}: Props) {
                     />
                   </label>
                   <button className="admin-on-dark min-h-9 rounded-md bg-[#101827] px-3 text-sm font-semibold text-[#ffffff] transition hover:bg-[#7a2230]">
-                    Save alt text
+                    {t('common.saveAltText')}
                   </button>
                 </form>
                 <form action={deleteMediaAction} className="pt-1">
                   <input type="hidden" name="id" value={item.id} />
                   <button className="min-h-9 w-full rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-sm font-semibold text-[#b42318] transition hover:bg-[#fee4e2]">
-                    Remove record
+                    {t('media.removeRecord')}
                   </button>
                 </form>
               </div>

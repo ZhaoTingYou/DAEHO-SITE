@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type {Locale} from '@/i18n/routing';
 import {externalLinks} from '@/lib/config';
 import {getLocaleMessages} from '@/lib/locale-messages';
+import {localeShortLabels, locales} from '@/lib/locales';
 import {navItems, withLocale} from '@/lib/site-map';
 
 import {ExternalSiteLink} from './external-site-link';
@@ -15,7 +16,9 @@ export function SiteFooter({locale}: SiteFooterProps) {
   const text = getLocaleMessages(locale).common;
   const navLabels = text.navigation.items;
   const externalLabels = text.footer.externalSites;
+  const {business, legal} = text.footer;
   const footerNavItems = navItems.flatMap((item) => item.children ?? [item]);
+  const year = new Date().getFullYear();
 
   return (
     <footer className="border-t border-hairline bg-bg px-container py-14 text-primary">
@@ -53,14 +56,42 @@ export function SiteFooter({locale}: SiteFooterProps) {
           <div>
             <p className="footer-label">{text.footer.locale}</p>
             <div className="mt-4 flex gap-4">
-              <Link href={withLocale('ko', '/')} className="footer-link">
-                KO
-              </Link>
-              <Link href={withLocale('en', '/')} className="footer-link">
-                EN
-              </Link>
+              {locales.map((targetLocale) => (
+                <Link key={targetLocale} href={withLocale(targetLocale, '/')} className="footer-link">
+                  {localeShortLabels[targetLocale]}
+                </Link>
+              ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="mx-auto mt-12 max-w-[1440px] border-t border-hairline pt-8">
+        <p className="footer-label">{business.heading}</p>
+        <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-body text-[12px] leading-6 text-subtext">
+          {business.items.map((item) => (
+            <div key={item.label} className="flex gap-2">
+              <dt className="font-semibold text-primary/70">{item.label}</dt>
+              <dd>{item.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="mt-8 flex flex-col gap-4 border-t border-hairline pt-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <Link href={withLocale(locale, '/terms')} className="footer-link">
+              {legal.terms}
+            </Link>
+            <Link
+              href={withLocale(locale, '/privacy')}
+              className="footer-link font-semibold text-primary"
+            >
+              {legal.privacy}
+            </Link>
+          </div>
+          <p className="font-body text-[12px] text-subtext">
+            © {year} DAEHO. {legal.rights}
+          </p>
         </div>
       </div>
     </footer>

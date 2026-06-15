@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import {setRequestLocale} from 'next-intl/server';
 
-import {LegacyDetailPage} from '@/components/legacy/legacy-detail-page';
+import {CredibilityCompliancePage} from '@/components/legacy/credibility-compliance-page';
 import type {Locale} from '@/i18n/routing';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
@@ -20,5 +20,5 @@ export default async function CredibilityPage({params}: Props) {
   setRequestLocale(locale);
   const content = getLocaleMessages(locale).legacyPages.credibility;
 
-  return <LegacyDetailPage locale={locale} content={content} />;
+  return <CredibilityCompliancePage locale={locale} content={content} />;
 }

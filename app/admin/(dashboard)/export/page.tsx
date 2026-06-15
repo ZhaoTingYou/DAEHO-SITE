@@ -1,11 +1,13 @@
 import Link from 'next/link';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {getCmsExportCounts, getCmsExportSnapshot} from '@/lib/cms/export';
 
 import {CmsImportPanel} from '../../_components/cms-import-panel';
 import {PageHeader, Panel} from '../../_components/admin-shell';
 
-export default function AdminExportPage() {
+export default async function AdminExportPage() {
+  const {messages, t} = await getAdminI18n();
   const snapshot = getCmsExportSnapshot();
   const counts = getCmsExportCounts(snapshot);
   const totalRows = counts.reduce((total, item) => total + item.count, 0);
@@ -13,31 +15,31 @@ export default function AdminExportPage() {
   return (
     <>
       <PageHeader
-        title="Backup"
-        description="Download, inspect, and restore JSON backups of CMS content, media records, inquiries, and email events."
+        title={t('export.title')}
+        description={t('export.description')}
         action={
           <Link
             href="/admin/export/download"
             prefetch={false}
             className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#101827] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#263247]"
           >
-            Download JSON
+            {t('export.downloadJson')}
           </Link>
         }
       />
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <Panel className="p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#647084]">Current snapshot</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#647084]">{t('export.currentSnapshot')}</p>
           <p className="mt-4 font-numeric text-4xl font-semibold text-[#101827]">{totalRows}</p>
-          <p className="mt-2 text-sm leading-6 text-[#647084]">rows across {counts.length} CMS tables</p>
+          <p className="mt-2 text-sm leading-6 text-[#647084]">{t('export.rowsAcrossTables', {count: counts.length})}</p>
           <dl className="mt-6 grid gap-3 text-sm">
             <div className="flex justify-between gap-4 border-t border-[#e4e7ec] pt-4">
-              <dt className="font-semibold text-[#344054]">Exported at preview</dt>
+              <dt className="font-semibold text-[#344054]">{t('export.exportedAtPreview')}</dt>
               <dd className="font-numeric text-[#647084]">{snapshot.exportedAt}</dd>
             </div>
             <div className="flex justify-between gap-4 border-t border-[#e4e7ec] pt-4">
-              <dt className="font-semibold text-[#344054]">Schema version</dt>
+              <dt className="font-semibold text-[#344054]">{t('export.schemaVersion')}</dt>
               <dd className="font-numeric text-[#647084]">{snapshot.schemaVersion}</dd>
             </div>
           </dl>
@@ -45,7 +47,7 @@ export default function AdminExportPage() {
 
         <Panel>
           <div className="border-b border-[#e4e7ec] px-5 py-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Included tables</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('export.includedTables')}</h2>
           </div>
           <div className="divide-y divide-[#e4e7ec]">
             {counts.map((item) => (
@@ -60,22 +62,22 @@ export default function AdminExportPage() {
 
       <Panel className="mt-6 overflow-hidden">
         <div className="border-b border-[#e4e7ec] px-5 py-4">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Import backup</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('export.importBackup')}</h2>
         </div>
         <div className="p-5">
-          <CmsImportPanel />
+          <CmsImportPanel messages={messages} />
         </div>
       </Panel>
 
       <Panel className="mt-6 overflow-hidden">
         <div className="border-b border-[#e4e7ec] px-5 py-4">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">API examples</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('export.apiExamples')}</h2>
         </div>
         <div className="grid gap-4 p-5 text-sm leading-6 text-[#647084]">
           <p>
-            The import endpoint validates a backup first. It only replaces CMS tables when
+            {t('export.apiDescription')}
             <span className="font-mono text-[#344054]"> ?replace=1 </span>
-            is present.
+            {t('export.apiDescriptionSuffix')}
           </p>
           <CodeBlock>{`curl -X POST \\
   -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \\

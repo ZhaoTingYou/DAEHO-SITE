@@ -2,6 +2,8 @@
 
 import {type FormEvent, useState} from 'react';
 
+import {isLocale} from '@/lib/locales';
+
 type GolfInquiryFormProps = {
   copy: GolfInquiryFormCopy;
   configuration?: {
@@ -152,5 +154,5 @@ function TextField({
 
 function getCurrentLocale() {
   const locale = window.location.pathname.split('/').filter(Boolean)[0];
-  return locale === 'en' ? 'en' : 'ko';
+  return isLocale(locale) ? locale : 'ko';
 }

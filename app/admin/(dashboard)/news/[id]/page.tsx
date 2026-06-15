@@ -1,5 +1,6 @@
 import {notFound} from 'next/navigation';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {getNews} from '@/lib/cms/repositories';
 
 import {PageHeader} from '../../../_components/admin-shell';
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default async function AdminNewsEditPage({params}: Props) {
+  const {messages, t} = await getAdminI18n();
   const {id} = await params;
   const item = id === 'new' ? undefined : getNews(id);
 
@@ -20,10 +22,10 @@ export default async function AdminNewsEditPage({params}: Props) {
   return (
     <>
       <PageHeader
-        title={item ? 'Edit news' : 'New news'}
-        description="Both Korean and English fields are required before the item is useful on the public site."
+        title={item ? t('news.editTitle') : t('news.newTitle')}
+        description={t('news.editDescription')}
       />
-      <NewsForm item={item ?? undefined} />
+      <NewsForm item={item ?? undefined} messages={messages} />
     </>
   );
 }

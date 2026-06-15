@@ -1,6 +1,8 @@
 import {z} from 'zod';
 
-export const localeSchema = z.enum(['ko', 'en']);
+import {locales} from '@/lib/locales';
+
+export const localeSchema = z.enum(locales);
 
 const optionalText = z.string().trim().optional().default('');
 const optionalJson = z.unknown().optional().default({});

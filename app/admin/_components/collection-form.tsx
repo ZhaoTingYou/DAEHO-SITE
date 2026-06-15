@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
 import {saveCollectionAction} from '../actions';
+import {createAdminTranslator, getContentLocaleLabel} from '@/lib/admin-i18n';
+import {locales, type Locale} from '@/lib/locales';
 import {
   CheckboxField,
   SecondaryLink,
@@ -34,9 +36,8 @@ type CollectionTranslation = {
   ogImagePath?: string;
 };
 
-export function CollectionForm({item}: {item?: CollectionItem}) {
-  const ko = getTranslation(item, 'ko');
-  const en = getTranslation(item, 'en');
+export function CollectionForm({item, messages}: {item?: CollectionItem; messages: Record<string, string>}) {
+  const t = createAdminTranslator(messages);
 
   return (
     <form action={saveCollectionAction} className="grid gap-6">
@@ -44,29 +45,35 @@ export function CollectionForm({item}: {item?: CollectionItem}) {
 
       <Panel className="p-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <TextField label="Slug" name="slug" defaultValue={item?.slug} required placeholder="ring-01" />
-          <TextField label="Category" name="category" defaultValue={item?.category} required placeholder="champion" />
-          <TextField label="Sport category" name="sportCategory" defaultValue={item?.sportCategory} placeholder="baseball" />
-          <TextField label="Image filename" name="imagePath" defaultValue={item?.imagePath} placeholder="collection_ring_01.png" />
-          <TextField label="Sort order" name="sortOrder" type="number" defaultValue={item?.sortOrder ?? 0} />
-          <CheckboxField label="Visible" name="isVisible" defaultChecked={item?.isVisible ?? true} />
+          <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="ring-01" />
+          <TextField label={t('form.category')} name="category" defaultValue={item?.category} required placeholder="champion" />
+          <TextField label={t('form.sportCategory')} name="sportCategory" defaultValue={item?.sportCategory} placeholder="baseball" />
+          <TextField label={t('form.imageFilename')} name="imagePath" defaultValue={item?.imagePath} placeholder="collection_ring_01.png" />
+          <TextField label={t('common.sortOrder')} name="sortOrder" type="number" defaultValue={item?.sortOrder ?? 0} />
+          <CheckboxField label={t('form.visible')} name="isVisible" defaultChecked={item?.isVisible ?? true} />
         </div>
         <div className="mt-4 grid gap-4 xl:grid-cols-2">
-          <TextAreaField label="Gallery JSON" name="gallery" defaultValue={formatJson(item?.gallery ?? [])} rows={7} />
-          <TextAreaField label="Specs JSON" name="specs" defaultValue={formatJson(item?.specs ?? {})} rows={7} />
+          <TextAreaField label={t('form.galleryJson')} name="gallery" defaultValue={formatJson(item?.gallery ?? [])} rows={7} />
+          <TextAreaField label={t('form.specsJson')} name="specs" defaultValue={formatJson(item?.specs ?? {})} rows={7} />
         </div>
       </Panel>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <TranslationPanel locale="ko" title="Korean" translation={ko} />
-        <TranslationPanel locale="en" title="English" translation={en} />
+        {locales.map((locale) => (
+          <TranslationPanel
+            key={locale}
+            locale={locale}
+            messages={messages}
+            translation={getTranslation(item, locale)}
+          />
+        ))}
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-3">
         <Link href="/admin/collections" className="inline-flex min-h-10 items-center rounded-md border border-[#cbd3df] bg-white px-4 text-sm font-semibold text-[#344054] transition hover:bg-[#f4f5f7]">
-          Cancel
+          {t('common.cancel')}
         </Link>
-        <SubmitButton>{item ? 'Save collection' : 'Create collection'}</SubmitButton>
+        <SubmitButton>{item ? t('form.saveCollection') : t('form.createCollection')}</SubmitButton>
       </div>
     </form>
   );
@@ -74,34 +81,36 @@ export function CollectionForm({item}: {item?: CollectionItem}) {
 
 function TranslationPanel({
   locale,
-  title,
+  messages,
   translation
 }: {
-  locale: 'ko' | 'en';
-  title: string;
+  locale: Locale;
+  messages: Record<string, string>;
   translation: CollectionTranslation;
 }) {
+  const t = createAdminTranslator(messages);
+
   return (
     <Panel className="p-5">
       <div className="mb-4 flex items-center justify-between border-b border-[#e4e7ec] pb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{title}</h2>
-        <SecondaryLink href="/admin/media">Media</SecondaryLink>
+        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{getContentLocaleLabel(messages, locale)}</h2>
+        <SecondaryLink href="/admin/media">{t('common.media')}</SecondaryLink>
       </div>
       <div className="grid gap-4">
-        <TextField label="Title" name={`${locale}.title`} defaultValue={translation.title} required />
-        <TextAreaField label="Caption" name={`${locale}.caption`} defaultValue={translation.caption} rows={3} />
-        <TextAreaField label="Story" name={`${locale}.story`} defaultValue={translation.story} rows={5} />
-        <TextField label="Category label" name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
-        <TextField label="Sport category label" name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} />
-        <TextField label="SEO title" name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
-        <TextAreaField label="SEO description" name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
-        <TextField label="OG image" name={`${locale}.ogImagePath`} defaultValue={translation.ogImagePath} />
+        <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required />
+        <TextAreaField label={t('form.caption')} name={`${locale}.caption`} defaultValue={translation.caption} rows={3} />
+        <TextAreaField label={t('form.story')} name={`${locale}.story`} defaultValue={translation.story} rows={5} />
+        <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
+        <TextField label={t('form.sportCategoryLabel')} name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} />
+        <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
+        <TextAreaField label={t('form.seoDescription')} name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
+        <TextField label={t('form.ogImage')} name={`${locale}.ogImagePath`} defaultValue={translation.ogImagePath} />
       </div>
     </Panel>
   );
 }
 
-function getTranslation(item: CollectionItem | undefined, locale: 'ko' | 'en') {
+function getTranslation(item: CollectionItem | undefined, locale: Locale) {
   return (item?.translations[locale] ?? {}) as CollectionTranslation;
 }
 

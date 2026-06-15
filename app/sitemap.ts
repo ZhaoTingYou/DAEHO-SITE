@@ -18,7 +18,9 @@ const staticPaths = [
   '/news',
   '/golf',
   '/golf/inquiry',
-  '/contact'
+  '/contact',
+  '/terms',
+  '/privacy'
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

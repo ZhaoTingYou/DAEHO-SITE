@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {
   getInquiry,
   listEmailEventsForInquiry
@@ -19,6 +20,7 @@ type Props = {
 const statuses = ['new', 'contacted', 'in_progress', 'done', 'spam'];
 
 export default async function AdminInquiryDetailPage({params}: Props) {
+  const {t} = await getAdminI18n();
   const {id} = await params;
   const inquiry = getInquiry(id);
 
@@ -31,11 +33,11 @@ export default async function AdminInquiryDetailPage({params}: Props) {
   return (
     <>
       <PageHeader
-        title="Inquiry detail"
-        description="Review the submitted request, update its internal status, and audit email notification attempts."
+        title={t('inquiry.detailTitle')}
+        description={t('inquiry.detailDescription')}
         action={
           <Link href="/admin/inquiries" className="inline-flex min-h-10 items-center rounded-md border border-[#cbd3df] bg-white px-4 text-sm font-semibold text-[#344054] transition hover:bg-[#f4f5f7]">
-            Back to inquiries
+            {t('inquiry.back')}
           </Link>
         }
       />
@@ -46,35 +48,35 @@ export default async function AdminInquiryDetailPage({params}: Props) {
             <div className="mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-[#e4e7ec] pb-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#647084]">
-                  {inquiry.source} inquiry
+                  {t(`source.${inquiry.source}`)}
                 </p>
                 <h2 className="mt-2 font-heading text-[28px] font-semibold text-[#101827]">{inquiry.name}</h2>
               </div>
-              <StatusBadge status={inquiry.status} />
+              <StatusBadge status={inquiry.status} label={t(`status.${inquiry.status}`)} />
             </div>
             <dl className="grid gap-4 md:grid-cols-2">
-              <DetailItem label="Contact" value={inquiry.contact} />
-              <DetailItem label="Locale" value={inquiry.locale.toUpperCase()} />
-              <DetailItem label="Organization" value={inquiry.organization || '-'} />
-              <DetailItem label="Inquiry type" value={inquiry.inquiryType || '-'} />
-              <DetailItem label="Team" value={inquiry.team || '-'} />
-              <DetailItem label="Quantity" value={inquiry.quantity?.toString() ?? '-'} />
-              <DetailItem label="Due date" value={inquiry.dueDate || '-'} />
-              <DetailItem label="Use" value={inquiry.useCase || '-'} />
-              <DetailItem label="Page path" value={inquiry.pagePath || '-'} />
-              <DetailItem label="Created" value={formatDate(inquiry.createdAt)} />
+              <DetailItem label={t('inquiry.contact')} value={inquiry.contact} />
+              <DetailItem label={t('inquiry.locale')} value={inquiry.locale.toUpperCase()} />
+              <DetailItem label={t('inquiry.organization')} value={inquiry.organization || '-'} />
+              <DetailItem label={t('inquiry.type')} value={inquiry.inquiryType || '-'} />
+              <DetailItem label={t('inquiry.team')} value={inquiry.team || '-'} />
+              <DetailItem label={t('inquiry.quantity')} value={inquiry.quantity?.toString() ?? '-'} />
+              <DetailItem label={t('inquiry.due')} value={inquiry.dueDate || '-'} />
+              <DetailItem label={t('inquiry.use')} value={inquiry.useCase || '-'} />
+              <DetailItem label={t('inquiry.pagePath')} value={inquiry.pagePath || '-'} />
+              <DetailItem label={t('common.created')} value={formatDate(inquiry.createdAt)} />
             </dl>
             <div className="mt-5 border-t border-[#e4e7ec] pt-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#647084]">Message</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#647084]">{t('inquiry.message')}</p>
               <p className="mt-2 whitespace-pre-wrap rounded-md bg-[#f8fafc] p-4 text-sm leading-7 text-[#344054]">
-                {inquiry.message || 'No message provided.'}
+                {inquiry.message || t('inquiry.noMessage')}
               </p>
             </div>
           </Panel>
 
           <Panel className="p-5">
             <h2 className="mb-4 border-b border-[#e4e7ec] pb-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">
-              Configuration
+              {t('inquiry.configuration')}
             </h2>
             <pre className="overflow-x-auto rounded-md bg-[#101827] p-4 text-xs leading-6 text-white">
               {JSON.stringify(inquiry.configuration, null, 2)}
@@ -83,12 +85,12 @@ export default async function AdminInquiryDetailPage({params}: Props) {
 
           <Panel className="p-5">
             <h2 className="mb-4 border-b border-[#e4e7ec] pb-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">
-              Request metadata
+              {t('inquiry.metadata')}
             </h2>
             <dl className="grid gap-4">
-              <DetailItem label="IP address" value={inquiry.ipAddress || '-'} />
-              <DetailItem label="User agent" value={inquiry.userAgent || '-'} />
-              <DetailItem label="Inquiry ID" value={inquiry.id} />
+              <DetailItem label={t('inquiry.ipAddress')} value={inquiry.ipAddress || '-'} />
+              <DetailItem label={t('inquiry.userAgent')} value={inquiry.userAgent || '-'} />
+              <DetailItem label={t('inquiry.id')} value={inquiry.id} />
             </dl>
           </Panel>
         </div>
@@ -96,12 +98,12 @@ export default async function AdminInquiryDetailPage({params}: Props) {
         <aside className="grid h-fit gap-6">
           <Panel className="p-5">
             <h2 className="mb-4 border-b border-[#e4e7ec] pb-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">
-              Workflow
+              {t('inquiry.workflow')}
             </h2>
             <form action={updateInquiryStatusAction} className="grid gap-3">
               <input type="hidden" name="id" value={inquiry.id} />
               <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-                <span>Status</span>
+                <span>{t('common.status')}</span>
                 <select
                   name="status"
                   defaultValue={inquiry.status}
@@ -109,38 +111,38 @@ export default async function AdminInquiryDetailPage({params}: Props) {
                 >
                   {statuses.map((status) => (
                     <option key={status} value={status}>
-                      {status}
+                      {t(`status.${status}`)}
                     </option>
                   ))}
                 </select>
               </label>
               <button className="admin-on-dark min-h-10 rounded-md bg-[#101827] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#7a2230]">
-                Update status
+                {t('inquiry.updateStatus')}
               </button>
             </form>
             <form action={resendInquiryNotificationAction} className="mt-3">
               <input type="hidden" name="id" value={inquiry.id} />
               <button className="min-h-10 w-full rounded-md border border-[#cbd3df] bg-white px-4 text-sm font-semibold text-[#344054] transition hover:bg-[#f4f5f7]">
-                Send notification again
+                {t('inquiry.resendNotification')}
               </button>
             </form>
           </Panel>
 
           <Panel className="overflow-hidden">
             <div className="border-b border-[#e4e7ec] px-5 py-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Email events</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('inquiry.emailEvents')}</h2>
             </div>
             {emailEvents.length === 0 ? (
-              <p className="px-5 py-8 text-sm text-[#647084]">No email event recorded.</p>
+              <p className="px-5 py-8 text-sm text-[#647084]">{t('inquiry.noEmailEvent')}</p>
             ) : (
               <div className="divide-y divide-[#e4e7ec]">
                 {emailEvents.map((event) => (
                   <div key={event.id} className="space-y-2 px-5 py-4">
                     <div className="flex items-center justify-between gap-3">
-                      <StatusBadge status={event.status} />
+                      <StatusBadge status={event.status} label={t(`status.${event.status}`)} />
                       <span className="font-numeric text-xs text-[#98a2b3]">{formatDate(event.createdAt)}</span>
                     </div>
-                    <p className="break-words text-sm font-semibold text-[#101827]">{event.subject || 'No subject'}</p>
+                    <p className="break-words text-sm font-semibold text-[#101827]">{event.subject || t('inquiry.noSubject')}</p>
                     {event.recipient ? <p className="break-words text-xs text-[#647084]">{event.recipient}</p> : null}
                     {event.providerMessageId ? (
                       <p className="break-words font-numeric text-xs text-[#647084]">{event.providerMessageId}</p>
@@ -170,7 +172,7 @@ function DetailItem({label, value}: {label: string; value: string}) {
   );
 }
 
-function StatusBadge({status}: {status: string}) {
+function StatusBadge({status, label}: {status: string; label: string}) {
   const className =
     status === 'sent' || status === 'done'
       ? 'bg-[#ecfdf3] text-[#027a48]'
@@ -180,7 +182,7 @@ function StatusBadge({status}: {status: string}) {
           ? 'bg-[#fffaeb] text-[#b54708]'
           : 'bg-[#eef2f6] text-[#475467]';
 
-  return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>{status}</span>;
+  return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>{label}</span>;
 }
 
 function formatDate(value: string) {

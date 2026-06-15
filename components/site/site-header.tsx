@@ -9,6 +9,7 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import type {Locale} from '@/i18n/routing';
 import {externalLinks} from '@/lib/config';
+import {localeShortLabels, locales} from '@/lib/locales';
 import {isActivePath, navItems, withLocale} from '@/lib/site-map';
 
 import {ExternalSiteLink} from './external-site-link';
@@ -69,15 +70,18 @@ export function SiteHeader({locale}: SiteHeaderProps) {
   const relativePath = useMemo(() => {
     const parts = pathname.split('/').filter(Boolean);
 
-    if (parts[0] === 'ko' || parts[0] === 'en') {
+    if (locales.includes(parts[0] as Locale)) {
       return `/${parts.slice(1).join('/')}`;
     }
 
     return pathname || '/';
   }, [pathname]);
 
-  const koLocalePath = withLocale('ko', relativePath === '/' ? '/' : relativePath);
-  const enLocalePath = withLocale('en', relativePath === '/' ? '/' : relativePath);
+  const languageLinks = locales.map((targetLocale) => ({
+    locale: targetLocale,
+    label: localeShortLabels[targetLocale],
+    href: withLocale(targetLocale, relativePath === '/' ? '/' : relativePath)
+  }));
   const isHome = relativePath === '/';
   const contactLabel = navText('contactCta');
   const megaMenuDetails: Record<
@@ -320,23 +324,22 @@ export function SiteHeader({locale}: SiteHeaderProps) {
 
           <div className="flex items-center justify-end gap-5 font-body text-[12px] font-semibold uppercase tracking-[0.12em]">
             <div className="flex items-center gap-3" aria-label={navText('languageSwitcherLabel')}>
-              <Link
-                href={koLocalePath}
-                className={`site-nav-link no-underline ${locale === 'ko' ? 'opacity-100' : 'opacity-60'}`}
-                aria-current={locale === 'ko' ? 'page' : undefined}
-              >
-                KO
-              </Link>
-              <span className="opacity-40" aria-hidden="true">
-                /
-              </span>
-              <Link
-                href={enLocalePath}
-                className={`site-nav-link no-underline ${locale === 'en' ? 'opacity-100' : 'opacity-60'}`}
-                aria-current={locale === 'en' ? 'page' : undefined}
-              >
-                EN
-              </Link>
+              {languageLinks.map((item, index) => (
+                <span key={item.locale} className="contents">
+                  {index > 0 ? (
+                    <span className="opacity-40" aria-hidden="true">
+                      /
+                    </span>
+                  ) : null}
+                  <Link
+                    href={item.href}
+                    className={`site-nav-link no-underline ${locale === item.locale ? 'opacity-100' : 'opacity-60'}`}
+                    aria-current={locale === item.locale ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                </span>
+              ))}
             </div>
 
             <span className="h-3 w-px bg-current opacity-25" aria-hidden="true" />
@@ -399,15 +402,18 @@ export function SiteHeader({locale}: SiteHeaderProps) {
         </Link>
 
         <div className="flex min-h-11 items-center gap-2 font-body text-[12px] font-semibold uppercase tracking-[0.12em]">
-          <Link href={koLocalePath} className={locale === 'ko' ? 'opacity-100' : 'opacity-55'}>
-            KO
-          </Link>
-          <span className="opacity-35" aria-hidden="true">
-            /
-          </span>
-          <Link href={enLocalePath} className={locale === 'en' ? 'opacity-100' : 'opacity-55'}>
-            EN
-          </Link>
+          {languageLinks.map((item, index) => (
+            <span key={item.locale} className="contents">
+              {index > 0 ? (
+                <span className="opacity-35" aria-hidden="true">
+                  /
+                </span>
+              ) : null}
+              <Link href={item.href} className={locale === item.locale ? 'opacity-100' : 'opacity-55'}>
+                {item.label}
+              </Link>
+            </span>
+          ))}
         </div>
       </div>
 

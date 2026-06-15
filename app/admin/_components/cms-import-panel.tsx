@@ -1,6 +1,6 @@
 'use client';
 
-import {useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
 type ImportCount = {
   table: string;
@@ -17,7 +17,8 @@ type ImportResult = {
   error?: string;
 };
 
-export function CmsImportPanel() {
+export function CmsImportPanel({messages}: {messages: Record<string, string>}) {
+  const t = useCallback((key: string) => messages[key] ?? key, [messages]);
   const [file, setFile] = useState<File | null>(null);
   const [backupText, setBackupText] = useState('');
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -28,11 +29,11 @@ export function CmsImportPanel() {
   const canReplace = Boolean(result && !result.replaced && backupText && !busy);
   const fileLabel = useMemo(() => {
     if (!file) {
-      return 'No file selected';
+      return t('import.noFile');
     }
 
     return `${file.name} / ${formatBytes(file.size)}`;
-  }, [file]);
+  }, [file, t]);
 
   const previewImport = async () => {
     if (!file) {
@@ -61,7 +62,7 @@ export function CmsImportPanel() {
       return;
     }
 
-    const confirmed = window.confirm('Replace all CMS tables with this backup? This cannot be undone from the browser.');
+    const confirmed = window.confirm(t('import.confirmReplace'));
 
     if (!confirmed) {
       return;
@@ -84,7 +85,7 @@ export function CmsImportPanel() {
     <div className="grid gap-5">
       <div className="grid gap-3 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4">
         <label className="grid gap-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">Backup JSON</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('import.backupJson')}</span>
           <input
             type="file"
             accept="application/json,.json"
@@ -105,7 +106,7 @@ export function CmsImportPanel() {
             disabled={!canPreview}
             className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#101827] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#263247] disabled:cursor-not-allowed disabled:bg-[#667085] disabled:text-[#ffffff]"
           >
-            {busy === 'preview' ? 'Previewing...' : 'Preview import'}
+            {busy === 'preview' ? t('import.previewing') : t('import.preview')}
           </button>
           <button
             type="button"
@@ -113,7 +114,7 @@ export function CmsImportPanel() {
             disabled={!canReplace}
             className="admin-on-dark inline-flex min-h-10 items-center rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827] disabled:cursor-not-allowed disabled:bg-[#667085] disabled:text-[#ffffff]"
           >
-            {busy === 'replace' ? 'Replacing...' : 'Replace CMS data'}
+            {busy === 'replace' ? t('import.replacing') : t('import.replace')}
           </button>
         </div>
       </div>
@@ -129,10 +130,10 @@ export function CmsImportPanel() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e4e7ec] bg-white px-4 py-3">
             <div>
               <p className="text-sm font-semibold text-[#101827]">
-                {result.replaced ? 'Import completed' : 'Import preview'}
+                {result.replaced ? t('import.completedTitle') : t('import.previewTitle')}
               </p>
               <p className="mt-1 font-mono text-xs text-[#647084]">
-                schema v{result.schemaVersion} / {result.exportedAt || 'unknown export time'}
+                schema v{result.schemaVersion} / {result.exportedAt || t('import.unknownExportTime')}
               </p>
             </div>
             <span className="rounded-full bg-[#eef2f6] px-3 py-1 font-numeric text-xs font-semibold text-[#344054]">

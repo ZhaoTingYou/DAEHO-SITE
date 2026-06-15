@@ -1,5 +1,6 @@
 import {notFound} from 'next/navigation';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {getCollection} from '@/lib/cms/repositories';
 
 import {CollectionForm} from '../../../_components/collection-form';
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default async function AdminCollectionEditPage({params}: Props) {
+  const {messages, t} = await getAdminI18n();
   const {id} = await params;
   const item = id === 'new' ? undefined : getCollection(id);
 
@@ -20,10 +22,10 @@ export default async function AdminCollectionEditPage({params}: Props) {
   return (
     <>
       <PageHeader
-        title={item ? 'Edit collection' : 'New collection'}
-        description="Use gallery and specs JSON for now; these can become richer controls when the final content model settles."
+        title={item ? t('collection.editTitle') : t('collection.newTitle')}
+        description={t('collection.editDescription')}
       />
-      <CollectionForm item={item ?? undefined} />
+      <CollectionForm item={item ?? undefined} messages={messages} />
     </>
   );
 }

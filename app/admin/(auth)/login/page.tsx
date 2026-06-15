@@ -1,8 +1,10 @@
 import {redirect} from 'next/navigation';
 
+import {getAdminI18n} from '@/lib/admin-i18n';
 import {getAdminPasswordHint, hasAdminSession} from '@/lib/cms/admin-session';
 
 import {loginAction} from '../../actions';
+import {AdminLanguageSwitcher} from '../../_components/admin-language-switcher';
 
 type Props = {
   searchParams?: Promise<{error?: string}>;
@@ -13,6 +15,7 @@ export default async function AdminLoginPage({searchParams}: Props) {
     redirect('/admin');
   }
 
+  const {locale, t} = await getAdminI18n();
   const query = await searchParams;
   const hint = getAdminPasswordHint();
 
@@ -21,11 +24,11 @@ export default async function AdminLoginPage({searchParams}: Props) {
       <section className="w-full max-w-[420px] rounded-lg border border-white/10 bg-white p-6 text-[#182033] shadow-2xl">
         <div className="border-b border-[#e4e7ec] pb-5">
           <p className="font-heading text-[28px] font-semibold tracking-[0.14em] text-[#101827]">DEAHO</p>
-          <h1 className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-[#647084]">CMS Admin</h1>
+          <h1 className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-[#647084]">{t('login.title')}</h1>
         </div>
         <form action={loginAction} className="mt-6 grid gap-4">
           <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-            <span>Password</span>
+            <span>{t('login.password')}</span>
             <input
               name="password"
               type="password"
@@ -36,14 +39,17 @@ export default async function AdminLoginPage({searchParams}: Props) {
           </label>
           {query?.error ? (
             <p className="rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 py-2 text-sm font-semibold text-[#b42318]">
-              Password is incorrect.
+              {t('login.error')}
             </p>
           ) : null}
           {hint ? <p className="text-xs font-semibold text-[#647084]">{hint}</p> : null}
           <button className="admin-on-dark min-h-11 rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827]">
-            Sign in
+            {t('login.signIn')}
           </button>
         </form>
+        <div className="admin-on-dark mt-5 rounded-md bg-[#101827] p-3">
+          <AdminLanguageSwitcher activeLocale={locale} label={t('shell.interfaceLanguage')} />
+        </div>
       </section>
     </main>
   );

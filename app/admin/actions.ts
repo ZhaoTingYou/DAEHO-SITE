@@ -34,6 +34,7 @@ import {
   newsPayloadSchema,
   pagePayloadSchema
 } from '@/lib/cms/validation';
+import type {Locale} from '@/lib/locales';
 
 export async function loginAction(formData: FormData) {
   const password = stringFromForm(formData, 'password');
@@ -226,7 +227,7 @@ export async function deleteMediaAction(formData: FormData) {
   revalidatePath('/admin/media');
 }
 
-function readNewsTranslation(formData: FormData, locale: 'ko' | 'en') {
+function readNewsTranslation(formData: FormData, locale: Locale) {
   return {
     title: stringFromForm(formData, `${locale}.title`),
     categoryLabel: stringFromForm(formData, `${locale}.categoryLabel`),
@@ -239,7 +240,7 @@ function readNewsTranslation(formData: FormData, locale: 'ko' | 'en') {
   };
 }
 
-function readCollectionTranslation(formData: FormData, locale: 'ko' | 'en') {
+function readCollectionTranslation(formData: FormData, locale: Locale) {
   return {
     title: stringFromForm(formData, `${locale}.title`),
     caption: stringFromForm(formData, `${locale}.caption`),

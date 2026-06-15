@@ -39,7 +39,8 @@ function seedPages() {
   ];
   const statement = db.prepare(`
     INSERT INTO cms_pages (
-      page_key, section, sort_order, content_ko, content_en, seo_ko, seo_en, created_at, updated_at
+      page_key, section, sort_order, content_ko, content_en,
+      seo_ko, seo_en, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     ON CONFLICT(page_key) DO UPDATE SET
       section = excluded.section,

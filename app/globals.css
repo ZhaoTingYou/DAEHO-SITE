@@ -94,7 +94,11 @@ body.is-chronicle-intro-locked {
 .locale-ko h1,
 .locale-ko h2,
 .locale-ko h3,
-.locale-ko p {
+.locale-ko p,
+.locale-zh h1,
+.locale-zh h2,
+.locale-zh h3,
+.locale-zh p {
   word-break: keep-all;
 }
 
