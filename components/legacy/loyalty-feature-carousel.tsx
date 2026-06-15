@@ -151,8 +151,6 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
           <span className="block h-3 w-3 -rotate-45 border-b border-r border-primary" />
         </button>
       </div>
-
-      <div className="absolute inset-x-0 bottom-0 h-7 bg-primary" />
     </div>
   );
 }
