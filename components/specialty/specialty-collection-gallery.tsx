@@ -139,7 +139,7 @@ export function SpecialtyCollectionGallery({
             href={`/${locale}/specialty/collection/${category.id}`}
             item={category.item}
             reducedMotion={prefersReducedMotion}
-            reversed={index % 2 === 1}
+            textSide={index === 1 ? 'left' : 'right'}
           />
         ))}
       </div>
@@ -173,24 +173,42 @@ export function SpecialtyCollectionCategory({
     return null;
   }
 
-  return categoryId === 'champion' ? (
-    <CollectionFinderView
-      items={visibleItems}
-      empty={empty}
-      filterLabel={filterLabel}
-      activeLabel={activeFilter.label}
-      allLabel={allLabel}
-      labels={finder}
-      selectedSports={selectedSports}
-      selectedYears={selectedYears}
-      setSelectedSports={setSelectedSports}
-      setSelectedYears={setSelectedYears}
-      finderOpen={finderOpen}
-      setFinderOpen={setFinderOpen}
-      backHref={backHref}
-      locale={locale}
-    />
-  ) : (
+  if (categoryId === 'champion') {
+    return (
+      <CollectionFinderView
+        items={visibleItems}
+        empty={empty}
+        filterLabel={filterLabel}
+        activeLabel={activeFilter.label}
+        allLabel={allLabel}
+        labels={finder}
+        selectedSports={selectedSports}
+        selectedYears={selectedYears}
+        setSelectedSports={setSelectedSports}
+        setSelectedYears={setSelectedYears}
+        finderOpen={finderOpen}
+        setFinderOpen={setFinderOpen}
+        backHref={backHref}
+        locale={locale}
+      />
+    );
+  }
+
+  if (categoryId === 'appointment') {
+    return (
+      <AppointmentCollectionView
+        items={visibleItems}
+        empty={empty}
+        filterLabel={filterLabel}
+        activeLabel={activeFilter.label}
+        allLabel={allLabel}
+        backHref={backHref}
+        locale={locale}
+      />
+    );
+  }
+
+  return (
     <CollectionGridView
       items={visibleItems}
       empty={empty}
@@ -256,6 +274,95 @@ function CollectionGridView({
           locale={locale}
           columns="md:grid-cols-3"
         />
+      )}
+    </div>
+  );
+}
+
+function AppointmentCollectionView({
+  items,
+  empty,
+  filterLabel,
+  activeLabel,
+  allLabel,
+  backHref,
+  locale
+}: {
+  items: SpecialtyCollectionItem[];
+  empty: {
+    title: string;
+    body: string;
+  };
+  filterLabel: string;
+  activeLabel: string;
+  allLabel: string;
+  backHref: string;
+  locale: Locale;
+}) {
+  const featuredItems = items.slice(0, 3);
+
+  return (
+    <div className="mx-auto max-w-[1180px] px-container">
+      <div className="border-b border-hairline pb-[clamp(24px,4vw,44px)] pt-[clamp(8px,2vw,20px)] text-center">
+        <Link
+          href={backHref}
+          className="link-sweep font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary"
+        >
+          {allLabel}
+        </Link>
+        <h2 className="mt-[clamp(24px,4vw,52px)] font-heading text-[clamp(32px,4.2vw,54px)] font-semibold leading-none text-primary">
+          {activeLabel}
+        </h2>
+      </div>
+
+      {featuredItems.length === 0 ? (
+        <div className="pt-10">
+          <EmptyState title={empty.title} body={empty.body} />
+        </div>
+      ) : (
+        <div
+          aria-label={filterLabel}
+          className="space-y-[clamp(72px,9vw,128px)] pt-[clamp(56px,7vw,96px)]"
+        >
+          {featuredItems.map((item, index) => (
+            <motion.article
+              key={item.id}
+              className="mx-auto max-w-[760px]"
+              initial={{opacity: 0, y: 34}}
+              whileInView={{opacity: 1, y: 0}}
+              viewport={{once: true, margin: '-12% 0px'}}
+              transition={{
+                duration: 0.48,
+                delay: Math.min(index * 0.05, 0.12),
+                ease: [0.16, 1, 0.3, 1]
+              }}
+            >
+              <Link
+                href={`/${locale}/specialty/collection/${item.id}`}
+                className="group block min-h-11 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                aria-label={`${item.title}: ${item.caption}`}
+              >
+                <div className="mx-auto w-full max-w-[min(620px,88vw)]">
+                  <CollectionImage
+                    item={item}
+                    aspect="aspect-square"
+                    sizes="(min-width: 1024px) 620px, 88vw"
+                    priority={index === 0}
+                  />
+                </div>
+                <div className="mx-auto mt-[clamp(20px,3vw,34px)] max-w-[520px] space-y-2 text-center">
+                  <p className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+                    {item.categoryLabel}
+                  </p>
+                  <h3 className="font-heading text-[clamp(24px,3vw,34px)] font-semibold leading-tight text-primary">
+                    {item.title}
+                  </h3>
+                  <p className="font-body text-[13px] leading-7 text-subtext">{item.caption}</p>
+                </div>
+              </Link>
+            </motion.article>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -725,7 +832,7 @@ function CollectionStagePanel({
   href,
   item,
   reducedMotion,
-  reversed
+  textSide
 }: {
   index: number;
   label: string;
@@ -735,15 +842,20 @@ function CollectionStagePanel({
   href: string;
   item?: CollectionImageSource;
   reducedMotion: boolean;
-  reversed: boolean;
+  textSide: 'left' | 'right';
 }) {
   const ref = useRef<HTMLElement | null>(null);
   const {scrollYProgress} = useScroll({
     target: ref,
     offset: ['start end', 'end start']
   });
-  const imageY = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [54, -54]);
-  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], reducedMotion ? [1, 1, 1] : [1.08, 1, 1.08]);
+  const imageY = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [24, -24]);
+  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], reducedMotion ? [1, 1, 1] : [1.025, 1, 1.025]);
+  const textX = useTransform(
+    scrollYProgress,
+    [0.16, 0.48],
+    reducedMotion ? [0, 0] : textSide === 'left' ? [-28, 0] : [28, 0]
+  );
   const textY = useTransform(scrollYProgress, [0.16, 0.48], reducedMotion ? [0, 0] : [34, 0]);
   const textOpacity = useTransform(scrollYProgress, [0.16, 0.42], reducedMotion ? [1, 1] : [0.35, 1]);
 
@@ -758,12 +870,11 @@ function CollectionStagePanel({
         whileInView={{opacity: 1}}
         viewport={{once: true, amount: 0.2}}
         transition={{duration: 1, delay: Math.min(index * 0.06, 0.16), ease: [0.16, 1, 0.3, 1]}}
-        className={`absolute inset-y-0 w-full md:w-[66%] ${reversed ? 'right-0' : 'left-0'}`}
+        className="absolute inset-0 w-full"
       >
         <StageImage
           item={item}
           priority={index === 0}
-          reversed={reversed}
           y={imageY}
           scale={imageScale}
         />
@@ -771,17 +882,21 @@ function CollectionStagePanel({
 
       <div
         className={`pointer-events-none absolute inset-0 ${
-          reversed
-            ? 'bg-gradient-to-r from-black via-black/80 to-black/10'
-            : 'bg-gradient-to-l from-black via-black/78 to-black/10'
+          textSide === 'left'
+            ? 'bg-gradient-to-r from-black via-black/68 to-black/5'
+            : 'bg-gradient-to-l from-black via-black/68 to-black/5'
         }`}
         aria-hidden="true"
       />
 
       <div className="relative z-10 mx-auto grid min-h-[78svh] max-w-[1440px] items-center px-container py-[clamp(84px,9vw,150px)] md:min-h-[92svh] md:grid-cols-2">
         <motion.div
-          style={{opacity: textOpacity, y: textY}}
-          className={`max-w-sm space-y-5 ${reversed ? 'md:col-start-1' : 'md:col-start-2 md:justify-self-end'}`}
+          style={{opacity: textOpacity, x: textX, y: textY}}
+          className={`max-w-[340px] space-y-5 ${
+            textSide === 'left'
+              ? 'md:col-start-1 md:ml-[clamp(28px,5vw,96px)] md:justify-self-start'
+              : 'md:col-start-2 md:mr-[clamp(28px,5vw,96px)] md:justify-self-end'
+          }`}
         >
           <div className="space-y-3">
             <p className="font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-on-navy/70">
@@ -809,13 +924,11 @@ function CollectionStagePanel({
 function StageImage({
   item,
   priority,
-  reversed,
   y,
   scale
 }: {
   item?: CollectionImageSource;
   priority: boolean;
-  reversed: boolean;
   y: MotionValue<number>;
   scale: MotionValue<number>;
 }) {
@@ -837,9 +950,9 @@ function StageImage({
         src={`/images/${item.image}`}
         alt={`${item.title} ${item.caption}`}
         fill
-        sizes="(min-width: 1024px) 66vw, 100vw"
+        sizes="100vw"
         priority={priority}
-        className={`object-cover ${reversed ? 'object-right' : 'object-left'}`}
+        className="object-cover object-center"
       />
     </motion.div>
   );
