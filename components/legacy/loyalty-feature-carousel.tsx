@@ -38,10 +38,13 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
 
   const trackTransition: Transition = prefersReducedMotion
     ? {duration: 0.01}
-    : {duration: 0.82, ease: [0.16, 1, 0.3, 1]};
+    : {duration: 1.18, ease: [0.16, 1, 0.3, 1]};
   const contentTransition: Transition = prefersReducedMotion
     ? {duration: 0.01}
-    : {duration: 0.32, ease: [0.16, 1, 0.3, 1]};
+    : {duration: 0.52, ease: [0.16, 1, 0.3, 1]};
+  const previewTransition: Transition = prefersReducedMotion
+    ? {duration: 0.01}
+    : {duration: 0.9, ease: [0.16, 1, 0.3, 1]};
 
   if (!activeSlide) {
     return null;
@@ -55,7 +58,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
         animate={{x: `${visualTrackOffset}%`}}
         transition={trackTransition}
       >
-        {slides.map((slide) => (
+        {slides.map((slide, index) => (
           <div
             key={slide.backgroundImage}
             className="relative h-full overflow-hidden"
@@ -68,6 +71,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
               src={`/images/${slide.backgroundImage}`}
               alt={imageAlt}
               fill
+              loading={index === current.index ? 'eager' : 'lazy'}
               sizes="100vw"
               className="object-cover opacity-62 mix-blend-luminosity"
             />
@@ -81,13 +85,13 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
         keyName={`left-${previousSlide.previewImage}`}
         slide={previousSlide}
         side="left"
-        transition={trackTransition}
+        transition={previewTransition}
       />
       <SidePreview
         keyName={`right-${nextSlide.previewImage}`}
         slide={nextSlide}
         side="right"
-        transition={trackTransition}
+        transition={previewTransition}
       />
 
       <button
@@ -115,15 +119,15 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
           animate={{opacity: 1, x: 0}}
           exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0, x: current.direction * -28}}
           transition={contentTransition}
-          className="absolute left-1/2 top-1/2 z-10 w-[min(78vw,690px)] -translate-x-1/2 -translate-y-1/2 bg-white px-[clamp(30px,5vw,78px)] py-[clamp(50px,6vw,80px)] text-center shadow-[0_24px_80px_rgba(56,33,28,0.16)]"
+          className="absolute left-1/2 top-1/2 z-10 w-[min(78vw,690px)] -translate-x-1/2 -translate-y-1/2 bg-white px-8 py-14 text-center shadow-[0_24px_80px_rgba(56,33,28,0.16)] md:px-20 md:py-20"
         >
-          <p className="font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-subtext">
+          <p className="omega-kicker text-subtext">
             {activeSlide.kicker}
           </p>
-          <h2 className="mt-6 font-heading text-[clamp(28px,3.3vw,48px)] font-semibold italic leading-tight text-primary">
+          <h2 className="omega-display mt-7 text-primary">
             {activeSlide.title}
           </h2>
-          <p className="mx-auto mt-8 max-w-[520px] font-body text-[13px] leading-[2.05] text-text">
+          <p className="omega-copy mx-auto mt-8 max-w-[520px] text-text">
             {activeSlide.body}
           </p>
         </motion.article>
@@ -148,7 +152,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
         </button>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 h-7 bg-[#07162d]" />
+      <div className="absolute inset-x-0 bottom-0 h-7 bg-primary" />
     </div>
   );
 }
@@ -179,7 +183,7 @@ function SidePreview({
             alt={slide.title}
             width={520}
             height={680}
-            className="aspect-[3/4] w-full object-cover mix-blend-screen saturate-[0.86]"
+            className="aspect-[3/4] w-full object-cover opacity-[0.88] saturate-[0.92] contrast-[0.98]"
           />
         </motion.div>
       </AnimatePresence>

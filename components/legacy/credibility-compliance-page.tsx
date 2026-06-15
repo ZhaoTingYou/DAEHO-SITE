@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
-import {getLocaleMessages} from '@/lib/locale-messages';
 import {withLocale} from '@/lib/site-map';
 
 type CredibilityContent = {
@@ -39,7 +38,7 @@ const pageCopy = {
     standardTitle: 'STANDARD',
     standardLead: 'Credibility. Proven Through Standards.',
     standardSubline: '신뢰는 기준에서 시작됩니다.',
-    cta: '연혁으로 돌아가기',
+    cta: 'DISCOVER MORE',
     rows: [
       {
         number: '01.',
@@ -93,7 +92,7 @@ const pageCopy = {
     standardTitle: 'STANDARD',
     standardLead: 'Credibility. Proven Through Standards.',
     standardSubline: 'Trust begins with standards.',
-    cta: 'Back to chronicle',
+    cta: 'DISCOVER MORE',
     rows: [
       {
         number: '01.',
@@ -148,13 +147,12 @@ const pageCopy = {
 }>;
 
 export function CredibilityCompliancePage({locale, content}: CredibilityCompliancePageProps) {
-  const messages = getLocaleMessages(locale);
   const copy = pageCopy[locale];
 
   return (
-    <main className="bg-[#f5efe3] text-primary">
-      <section className="bg-[#f4f1eb] px-[clamp(20px,2.4vw,36px)] pb-16 pt-24 md:pb-20 md:pt-32">
-        <div className="relative mx-auto h-[360px] max-w-[1500px] overflow-hidden bg-[#8990c7] md:h-[480px] xl:h-[560px]">
+    <main className="bg-bg text-primary">
+      <section className="bg-bg px-[clamp(20px,2.4vw,36px)] pb-16 pt-24 md:pb-20 md:pt-32">
+        <div className="relative mx-auto h-[360px] max-w-[1500px] overflow-hidden bg-primary md:h-[480px] xl:h-[560px]">
           <Image
             src={`/images/${content.hero.image}`}
             alt={content.hero.subtitle}
@@ -163,10 +161,10 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
             sizes="100vw"
             className="scale-110 object-cover opacity-35 mix-blend-multiply blur-[1px] saturate-50"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(235,236,255,0.18),rgba(105,111,178,0.58)),radial-gradient(circle_at_44%_18%,rgba(255,255,255,0.54),transparent_34%),radial-gradient(circle_at_72%_82%,rgba(63,71,142,0.48),transparent_42%)]" />
-          <div className="absolute inset-0 opacity-55 [background-image:linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(180deg,rgba(25,32,94,0.16)_1px,transparent_1px)] [background-size:38px_38px]" />
-          <Reveal className="absolute left-1/2 top-1/2 w-[min(74vw,680px)] -translate-x-1/2 -translate-y-1/2 bg-white px-8 py-12 text-center shadow-[0_18px_60px_rgba(30,34,70,0.08)] md:px-16 md:py-16">
-            <h1 className="font-heading text-lg font-medium uppercase text-primary md:text-xl">
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,246,242,0.16),rgba(16,29,48,0.62)),radial-gradient(circle_at_44%_18%,rgba(255,255,255,0.48),transparent_34%),radial-gradient(circle_at_72%_82%,rgba(8,15,26,0.48),transparent_42%)]" />
+          <div className="absolute inset-0 opacity-55 [background-image:linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(180deg,rgba(16,29,48,0.18)_1px,transparent_1px)] [background-size:38px_38px]" />
+          <Reveal className="absolute left-1/2 top-1/2 w-[min(74vw,680px)] -translate-x-1/2 -translate-y-1/2 bg-white px-8 py-12 text-center shadow-[0_18px_60px_rgba(16,29,48,0.08)] md:px-16 md:py-16">
+            <h1 className="omega-title text-primary">
               {copy.heroLabel}
             </h1>
             <span className="mx-auto mt-7 block h-2.5 w-2.5 rotate-45 border-b border-r border-primary/70" />
@@ -174,47 +172,47 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
         </div>
       </section>
 
-      <section className="bg-[#f4f1eb] pb-20 md:pb-28">
+      <section className="bg-bg pb-20 md:pb-28">
         <div className="mx-auto max-w-3xl px-container text-center">
-          <Reveal className="space-y-4 font-body text-[13px] leading-[2.05] text-[#252525]">
+          <Reveal className="space-y-3 text-[#252525]">
             {copy.introLines.map((line) => (
-              <p key={line}>{line}</p>
+              <p key={line} className="omega-intro-copy">{line}</p>
             ))}
           </Reveal>
         </div>
       </section>
 
-      <section className="bg-[#f5efe3] px-container pb-24 pt-24 md:pb-32 md:pt-32">
+      <section className="omega-section-y bg-bg px-container">
         <Reveal className="mx-auto max-w-3xl text-center">
-          <h2 className="font-heading text-3xl font-semibold uppercase leading-tight text-primary md:text-4xl">
+          <h2 className="omega-display text-primary">
             {copy.standardTitle}
           </h2>
-          <p className="mt-5 font-body text-sm leading-7 text-[#111827]">
+          <p className="omega-intro-copy mt-5 text-[#111827]">
             {copy.standardLead}
           </p>
-          <p className="mt-2 font-body text-sm leading-7 text-[#111827]">
+          <p className="omega-intro-copy mt-2 text-[#111827]">
             {copy.standardSubline}
           </p>
         </Reveal>
 
-        <div className="mx-auto mt-20 max-w-[1180px] bg-white px-7 py-8 shadow-[0_18px_70px_rgba(43,34,22,0.04)] md:px-16 md:py-12 lg:px-20">
+        <div className="mx-auto mt-16 max-w-[1180px] bg-white px-7 py-8 shadow-[0_18px_70px_rgba(43,34,22,0.04)] md:px-16 md:py-12 lg:px-20">
           {copy.rows.map((row, index) => (
             <Reveal
               key={row.title}
-              className={`grid gap-10 py-12 md:grid-cols-[1fr_0.82fr] md:items-center md:gap-16 lg:gap-24 ${
+              className={`grid gap-10 py-14 md:grid-cols-[1fr_0.82fr] md:items-center md:gap-16 lg:gap-24 ${
                 index === 0 ? 'pt-4' : ''
               } ${index < copy.rows.length - 1 ? 'border-b border-[#b65c55]/70' : 'pb-4'}`}
             >
               <div className="max-w-[500px]">
-                <h3 className="font-heading text-2xl font-medium leading-tight text-primary md:text-3xl">
+                <h3 className="omega-title text-primary">
                   <span>{row.number}</span>
                   {' '}
                   <span className="ml-3">{row.title}</span>
                 </h3>
-                <p className="mt-3 font-body text-sm font-medium leading-6 text-[#b0443c]">
+                <p className="omega-small-title mt-3 text-[#b0443c]">
                   {row.accent}
                 </p>
-                <p className="mt-5 font-body text-[13px] leading-[1.85] text-[#111827]">
+                <p className="omega-copy mt-5 text-[#111827]">
                   {row.body}
                 </p>
               </div>
@@ -234,13 +232,13 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
         </div>
       </section>
 
-      <section className="bg-[#f5efe3] pb-20">
+      <section className="bg-bg pb-20">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <Link
-            href={withLocale(locale, '/chronicle')}
-            className="link-sweep font-body text-xs font-semibold uppercase"
+            href={withLocale(locale, '/specialty/collection')}
+            className="link-sweep omega-kicker"
           >
-            {copy.cta || messages.legacyUi.backToLegacy}
+            {copy.cta}
           </Link>
         </Reveal>
       </section>

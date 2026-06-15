@@ -126,6 +126,98 @@ select {
   color: #fff;
 }
 
+.omega-kicker {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.omega-display {
+  font-family: var(--font-body);
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 45.6px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.omega-title {
+  font-family: var(--font-body);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 30px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.omega-small-title {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.omega-copy {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0;
+}
+
+.omega-intro-copy {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 30px;
+  letter-spacing: .02em;
+}
+
+.omega-small-copy {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: 0;
+}
+
+.omega-section-y {
+  padding-top: 96px;
+  padding-bottom: 96px;
+}
+
+@media (min-width: 768px) {
+  .omega-section-y {
+    padding-top: 112px;
+    padding-bottom: 112px;
+  }
+}
+
+@media (max-width: 767px) {
+  .omega-display {
+    font-size: 30px;
+    line-height: 36px;
+    letter-spacing: .14em;
+  }
+
+  .omega-title {
+    font-size: 21px;
+    line-height: 27px;
+    letter-spacing: .14em;
+  }
+
+  .omega-intro-copy {
+    font-size: 15px;
+    line-height: 28px;
+    letter-spacing: .01em;
+  }
+}
+
 ::selection {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--primary);
