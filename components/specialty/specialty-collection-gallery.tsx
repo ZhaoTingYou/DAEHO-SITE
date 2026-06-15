@@ -128,20 +128,25 @@ export function SpecialtyCollectionGallery({
         aria-label={chooseLabel}
         className="grid"
       >
-        {categoryCards.map((category, index) => (
-          <CollectionStagePanel
-            key={category.id}
-            index={index}
-            label={category.label}
-            description={category.description}
-            countText={formatCount(category.count)}
-            viewLabel={viewLabel}
-            href={`/${locale}/specialty/collection/${category.id}`}
-            item={category.item}
-            reducedMotion={prefersReducedMotion}
-            textSide={index === 1 ? 'left' : 'right'}
-          />
-        ))}
+        {categoryCards.map((category, index) => {
+          const imageSide = index === 1 ? 'right' : 'left';
+
+          return (
+            <CollectionStagePanel
+              key={category.id}
+              index={index}
+              label={category.label}
+              description={category.description}
+              countText={formatCount(category.count)}
+              viewLabel={viewLabel}
+              href={`/${locale}/specialty/collection/${category.id}`}
+              item={category.item}
+              reducedMotion={prefersReducedMotion}
+              mirrorImage={index < 2}
+              textSide={imageSide === 'left' ? 'right' : 'left'}
+            />
+          );
+        })}
       </div>
     </motion.div>
   );
@@ -832,6 +837,7 @@ function CollectionStagePanel({
   href,
   item,
   reducedMotion,
+  mirrorImage,
   textSide
 }: {
   index: number;
@@ -842,6 +848,7 @@ function CollectionStagePanel({
   href: string;
   item?: CollectionImageSource;
   reducedMotion: boolean;
+  mirrorImage: boolean;
   textSide: 'left' | 'right';
 }) {
   const ref = useRef<HTMLElement | null>(null);
@@ -875,6 +882,7 @@ function CollectionStagePanel({
         <StageImage
           item={item}
           priority={index === 0}
+          mirrorImage={mirrorImage}
           y={imageY}
           scale={imageScale}
         />
@@ -894,8 +902,8 @@ function CollectionStagePanel({
           style={{opacity: textOpacity, x: textX, y: textY}}
           className={`max-w-[340px] space-y-5 ${
             textSide === 'left'
-              ? 'md:col-start-1 md:ml-[clamp(28px,5vw,96px)] md:justify-self-start'
-              : 'md:col-start-2 md:mr-[clamp(28px,5vw,96px)] md:justify-self-end'
+              ? 'ml-[clamp(20px,6vw,96px)] justify-self-start text-left md:col-start-1'
+              : 'mr-[clamp(20px,6vw,96px)] justify-self-end text-right md:col-start-2'
           }`}
         >
           <div className="space-y-3">
@@ -924,11 +932,13 @@ function CollectionStagePanel({
 function StageImage({
   item,
   priority,
+  mirrorImage,
   y,
   scale
 }: {
   item?: CollectionImageSource;
   priority: boolean;
+  mirrorImage: boolean;
   y: MotionValue<number>;
   scale: MotionValue<number>;
 }) {
@@ -946,14 +956,16 @@ function StageImage({
 
   return (
     <motion.div className="absolute inset-0 will-change-transform" style={{y, scale}}>
-      <Image
-        src={`/images/${item.image}`}
-        alt={`${item.title} ${item.caption}`}
-        fill
-        sizes="100vw"
-        priority={priority}
-        className="object-cover object-center"
-      />
+      <div className={`absolute inset-0 ${mirrorImage ? '-scale-x-100' : ''}`}>
+        <Image
+          src={`/images/${item.image}`}
+          alt={`${item.title} ${item.caption}`}
+          fill
+          sizes="100vw"
+          priority={priority}
+          className="object-cover object-center"
+        />
+      </div>
     </motion.div>
   );
 }
