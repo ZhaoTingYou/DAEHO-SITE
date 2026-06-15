@@ -1,4 +1,5 @@
 import {mkdirSync, readFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
 import path from 'node:path';
 
 import Database from 'better-sqlite3';
@@ -21,7 +22,15 @@ export function getCmsDb() {
 }
 
 export function getCmsDbPath() {
-  return process.env.CMS_DB_PATH ?? path.join(process.cwd(), 'data', 'cms.sqlite');
+  if (process.env.CMS_DB_PATH) {
+    return process.env.CMS_DB_PATH;
+  }
+
+  if (process.env.VERCEL) {
+    return path.join(tmpdir(), 'deaho-cms.sqlite');
+  }
+
+  return path.join(process.cwd(), 'data', 'cms.sqlite');
 }
 
 export function nowIso() {

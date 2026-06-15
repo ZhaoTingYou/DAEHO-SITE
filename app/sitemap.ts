@@ -22,8 +22,8 @@ const staticPaths = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const cmsNews = listPublicNews('ko');
-  const cmsCollections = listPublicCollections('ko');
+  const cmsNews = readCmsValue(() => listPublicNews('ko'), []);
+  const cmsCollections = readCmsValue(() => listPublicCollections('ko'), []);
   const detailPaths = [
     ...(cmsNews.length > 0
       ? cmsNews.map((card) => `/news/${card.slug}`)
@@ -46,4 +46,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
 function absoluteUrl(path: string) {
   return new URL(path, metadataBase).toString();
+}
+
+function readCmsValue<T>(reader: () => T, fallback: T): T {
+  try {
+    return reader();
+  } catch (error) {
+    console.error('[cms] Falling back to static sitemap entries because CMS read failed.', error);
+    return fallback;
+  }
 }

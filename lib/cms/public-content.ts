@@ -28,7 +28,7 @@ export type PublicNewsDetail = {
 };
 
 export function getNewsCardsForSite(locale: Locale): NewsCard[] {
-  const cmsItems = listPublicNews(locale);
+  const cmsItems = readCmsValue(() => listPublicNews(locale), []);
 
   if (cmsItems.length > 0) {
     return cmsItems.map((item) => ({
@@ -57,7 +57,7 @@ export function getHomeNewsCardsForSite(locale: Locale): HomeNewsPopupCard[] {
 
 export function getNewsDetailForSite(locale: Locale, slug: string): PublicNewsDetail | null {
   const text = getLocaleMessages(locale).newsUi.detail;
-  const cmsItem = getPublicNews(slug, locale);
+  const cmsItem = readCmsValue(() => getPublicNews(slug, locale), null);
 
   if (cmsItem) {
     const body = normalizeNewsBody(cmsItem.body);
@@ -105,7 +105,7 @@ export function getNewsDetailForSite(locale: Locale, slug: string): PublicNewsDe
 }
 
 export function getCollectionItemsForSite(locale: Locale): SpecialtyCollectionItem[] {
-  const cmsItems = listPublicCollections(locale);
+  const cmsItems = readCmsValue(() => listPublicCollections(locale), []);
 
   if (cmsItems.length > 0) {
     return cmsItems.map((item) => {
@@ -132,7 +132,7 @@ export function getCollectionItemsForSite(locale: Locale): SpecialtyCollectionIt
 }
 
 export function getCollectionItemForSite(locale: Locale, slug: string) {
-  const cmsItem = getPublicCollection(slug, locale);
+  const cmsItem = readCmsValue(() => getPublicCollection(slug, locale), null);
 
   if (cmsItem) {
     const specs = normalizeCollectionSpecs(cmsItem.specs);
@@ -226,4 +226,13 @@ function normalizeGallery(value: unknown, fallbackImage: string) {
     : [];
 
   return images.length > 0 ? images : [fallbackImage].filter(Boolean);
+}
+
+function readCmsValue<T>(reader: () => T, fallback: T): T {
+  try {
+    return reader();
+  } catch (error) {
+    console.error('[cms] Falling back to static content because CMS read failed.', error);
+    return fallback;
+  }
 }
