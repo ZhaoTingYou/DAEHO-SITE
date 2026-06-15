@@ -142,7 +142,6 @@ export function SpecialtyCollectionGallery({
               href={`/${locale}/specialty/collection/${category.id}`}
               item={category.item}
               reducedMotion={prefersReducedMotion}
-              mirrorImage={index < 2}
               textSide={imageSide === 'left' ? 'right' : 'left'}
             />
           );
@@ -837,7 +836,6 @@ function CollectionStagePanel({
   href,
   item,
   reducedMotion,
-  mirrorImage,
   textSide
 }: {
   index: number;
@@ -848,7 +846,6 @@ function CollectionStagePanel({
   href: string;
   item?: CollectionImageSource;
   reducedMotion: boolean;
-  mirrorImage: boolean;
   textSide: 'left' | 'right';
 }) {
   const ref = useRef<HTMLElement | null>(null);
@@ -882,7 +879,6 @@ function CollectionStagePanel({
         <StageImage
           item={item}
           priority={index === 0}
-          mirrorImage={mirrorImage}
           y={imageY}
           scale={imageScale}
         />
@@ -932,13 +928,11 @@ function CollectionStagePanel({
 function StageImage({
   item,
   priority,
-  mirrorImage,
   y,
   scale
 }: {
   item?: CollectionImageSource;
   priority: boolean;
-  mirrorImage: boolean;
   y: MotionValue<number>;
   scale: MotionValue<number>;
 }) {
@@ -956,16 +950,14 @@ function StageImage({
 
   return (
     <motion.div className="absolute inset-0 will-change-transform" style={{y, scale}}>
-      <div className={`absolute inset-0 ${mirrorImage ? '-scale-x-100' : ''}`}>
-        <Image
-          src={`/images/${item.image}`}
-          alt={`${item.title} ${item.caption}`}
-          fill
-          sizes="100vw"
-          priority={priority}
-          className="object-cover object-center"
-        />
-      </div>
+      <Image
+        src={`/images/${item.image}`}
+        alt={`${item.title} ${item.caption}`}
+        fill
+        sizes="100vw"
+        priority={priority}
+        className="object-cover object-center"
+      />
     </motion.div>
   );
 }
