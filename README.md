@@ -71,6 +71,52 @@ npm run build
 git diff --check
 ```
 
+## CMS Operations
+
+The project includes a company-only CMS backend under `/admin` plus protected
+JSON APIs under `/api/admin/*`.
+
+Initialize or refresh the local SQLite database from `messages/*.json` and
+`public/images`:
+
+```bash
+npm run cms:init
+```
+
+Export a full JSON backup:
+
+```bash
+npm run cms:export
+```
+
+Import a JSON backup:
+
+```bash
+npm run cms:import -- path/to/deaho-cms-export.json
+```
+
+Admin API health/status:
+
+```bash
+curl -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \
+  http://localhost:3000/api/admin/status
+```
+
+The admin overview page also shows CMS health, including database path,
+persistence mode, total tracked rows, latest inquiry, latest email event, and
+email notification configuration.
+
+Production note: SQLite must use persistent storage through `CMS_DB_PATH`.
+Without that variable on Vercel, the app falls back to `/tmp`, which keeps the
+public site online but does not persist CMS edits between serverless instances.
+
+Inquiry flow:
+
+- Contact and Golf forms write to `cms_inquiries`.
+- Email notification attempts are recorded in `cms_email_events`.
+- Missing SMTP configuration does not block form submission; the email event is
+  recorded as `skipped`.
+
 Latest verification before this README update:
 
 - `npm run lint` passed

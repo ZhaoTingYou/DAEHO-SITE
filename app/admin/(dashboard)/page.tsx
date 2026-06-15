@@ -7,6 +7,7 @@ import {
   listNews,
   listPages
 } from '@/lib/cms/repositories';
+import {getCmsStatus} from '@/lib/cms/status';
 
 import {PageHeader, Panel} from '../_components/admin-shell';
 
@@ -16,7 +17,9 @@ export default function AdminOverviewPage() {
   const collections = listCollections();
   const media = listMedia();
   const pages = listPages();
+  const cmsStatus = getCmsStatus();
   const newInquiries = inquiries.filter((item) => item.status === 'new').length;
+  const tableTotal = cmsStatus.tables.reduce((total, table) => total + table.count, 0);
 
   return (
     <>
@@ -53,17 +56,33 @@ export default function AdminOverviewPage() {
           </div>
         </Panel>
 
-        <Panel>
-          <div className="border-b border-[#e4e7ec] px-5 py-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Content inventory</h2>
-          </div>
-          <div className="grid gap-3 p-5">
-            <InventoryRow label="Editable page groups" value={pages.length} href="/admin/pages" />
-            <InventoryRow label="Visible news items" value={news.filter((item) => item.isVisible).length} href="/admin/news" />
-            <InventoryRow label="Visible collections" value={collections.filter((item) => item.isVisible).length} href="/admin/collections" />
-            <InventoryRow label="Public image records" value={media.filter((item) => item.storageProvider === 'public').length} href="/admin/media" />
-          </div>
-        </Panel>
+        <div className="grid gap-6">
+          <Panel>
+            <div className="border-b border-[#e4e7ec] px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">Content inventory</h2>
+            </div>
+            <div className="grid gap-3 p-5">
+              <InventoryRow label="Editable page groups" value={pages.length} href="/admin/pages" />
+              <InventoryRow label="Visible news items" value={news.filter((item) => item.isVisible).length} href="/admin/news" />
+              <InventoryRow label="Visible collections" value={collections.filter((item) => item.isVisible).length} href="/admin/collections" />
+              <InventoryRow label="Public image records" value={media.filter((item) => item.storageProvider === 'public').length} href="/admin/media" />
+            </div>
+          </Panel>
+
+          <Panel>
+            <div className="border-b border-[#e4e7ec] px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">CMS health</h2>
+            </div>
+            <div className="grid gap-3 p-5">
+              <StatusRow label="Database" value={formatPersistence(cmsStatus.environment.persistence)} tone={cmsStatus.environment.persistence === 'ephemeral' ? 'warning' : 'ok'} />
+              <StatusRow label="DB path" value={cmsStatus.database.path} mono />
+              <StatusRow label="Rows tracked" value={tableTotal.toString()} />
+              <StatusRow label="Email notify" value={cmsStatus.email.configured ? 'Configured' : 'Not configured'} tone={cmsStatus.email.configured ? 'ok' : 'warning'} />
+              <StatusRow label="Latest inquiry" value={cmsStatus.latest.inquiryCreatedAt || 'None'} mono />
+              <StatusRow label="Latest email event" value={cmsStatus.latest.emailEventCreatedAt || 'None'} mono />
+            </div>
+          </Panel>
+        </div>
       </div>
     </>
   );
@@ -85,4 +104,48 @@ function InventoryRow({label, value, href}: {label: string; value: number; href:
       <span className="font-numeric text-sm font-semibold text-[#101827]">{value}</span>
     </Link>
   );
+}
+
+function StatusRow({
+  label,
+  value,
+  mono = false,
+  tone = 'neutral'
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  tone?: 'neutral' | 'ok' | 'warning';
+}) {
+  const toneClass =
+    tone === 'ok'
+      ? 'bg-[#ecfdf3] text-[#027a48]'
+      : tone === 'warning'
+        ? 'bg-[#fffaeb] text-[#b54708]'
+        : 'bg-[#f2f4f7] text-[#344054]';
+
+  return (
+    <div className="grid gap-2 rounded-md border border-[#e4e7ec] px-3 py-2">
+      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">{label}</span>
+      <span className={`break-words rounded px-2 py-1 text-sm font-semibold ${toneClass} ${mono ? 'font-mono' : ''}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function formatPersistence(value: string) {
+  if (value === 'configured') {
+    return 'Persistent path configured';
+  }
+
+  if (value === 'ephemeral') {
+    return 'Ephemeral Vercel filesystem';
+  }
+
+  if (value === 'local') {
+    return 'Local data directory';
+  }
+
+  return value || 'Unknown';
 }
