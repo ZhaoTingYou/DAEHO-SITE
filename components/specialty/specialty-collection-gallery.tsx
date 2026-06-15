@@ -578,10 +578,12 @@ function CollectionFilterDrawer({
     const previousOverflow = document.body.style.overflow;
 
     document.body.style.overflow = 'hidden';
+    window.dispatchEvent(new Event('deaho:lenis-stop'));
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      window.dispatchEvent(new Event('deaho:lenis-start'));
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [close]);
@@ -638,7 +640,10 @@ function CollectionFilterDrawer({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-[clamp(24px,4vw,48px)] py-8">
+        <div
+          className="flex-1 touch-pan-y overflow-y-auto overscroll-contain px-[clamp(24px,4vw,48px)] py-8 [-webkit-overflow-scrolling:touch]"
+          data-lenis-prevent
+        >
           <FilterSection
             title={labels.sportCategory}
             options={sportOptions}

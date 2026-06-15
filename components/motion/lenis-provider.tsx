@@ -18,10 +18,13 @@ export function LenisProvider({children}: {children: ReactNode}) {
     const lenis = new Lenis({
       lerp: 0.09,
       smoothWheel: true,
-      touchMultiplier: 1
+      touchMultiplier: 1,
+      prevent: (node) => node instanceof Element && Boolean(node.closest('[data-lenis-prevent]'))
     });
 
     let frame = 0;
+    const stopLenis = () => lenis.stop();
+    const startLenis = () => lenis.start();
 
     const raf = (time: number) => {
       lenis.raf(time);
@@ -29,8 +32,12 @@ export function LenisProvider({children}: {children: ReactNode}) {
     };
 
     frame = requestAnimationFrame(raf);
+    window.addEventListener('deaho:lenis-stop', stopLenis);
+    window.addEventListener('deaho:lenis-start', startLenis);
 
     return () => {
+      window.removeEventListener('deaho:lenis-stop', stopLenis);
+      window.removeEventListener('deaho:lenis-start', startLenis);
       cancelAnimationFrame(frame);
       lenis.destroy();
     };
