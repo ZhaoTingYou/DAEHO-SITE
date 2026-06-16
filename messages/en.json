@@ -4,15 +4,32 @@
     "description": "The moment of victory, shaped for eternity."
   },
   "home": {
-    "eyebrow": "KOREA'S CHAMPIONSHIP RING AUTHORITY",
-    "title": "38 YEARS OF CHAMPIONS",
-    "subtitle": "The moment of victory, shaped for eternity.",
+    "eyebrow": "CUSTOM JEWELRY · SYMBOLIC OBJECTS · DESIGN CONSULTING",
+    "title": "WE DESIGN SYMBOLS THAT LAST",
+    "subtitle": "We design brand stories\ninto lasting symbols.",
     "image": "home_hero.png",
     "signature": {
-      "eyebrow": "SIGNATURE WORKS",
-      "title": "Victory, refined into form.",
-      "body": "In bright gallery light, DEAHO distills each team's symbols and records into a single ring.",
-      "cta": "View collection"
+      "eyebrow": "SIGNATURE PROJECTS",
+      "title": "Designing moments meant to be remembered",
+      "body": "We complete records of victory, symbols of commission,\nand brand stories as a single product.",
+      "cta": "View collection",
+      "projects": [
+        {
+          "title": "Championship Rings",
+          "caption": "CHAMPIONSHIP\nRINGS",
+          "image": "home_ring_03.png"
+        },
+        {
+          "title": "Commission Rings",
+          "caption": "COMMISSION\nRINGS",
+          "image": "home_ring_04.png"
+        },
+        {
+          "title": "Custom Products",
+          "caption": "CUSTOM\nPRODUCTS",
+          "image": "home_ring_05.png"
+        }
+      ]
     },
     "rings": [
       {
@@ -60,6 +77,33 @@
         }
       ]
     },
+    "statBand": [
+      {
+        "value": "38",
+        "label": "YEARS",
+        "body": "A heritage company\nwith enduring craft"
+      },
+      {
+        "value": "95%",
+        "label": "CHAMPIONSHIP\nRING SHARE",
+        "body": "The most selected maker\nin Korea's championship ring market"
+      },
+      {
+        "value": "90%",
+        "label": "COMMISSION\nRING SHARE",
+        "body": "Specialized records built\nin Korea's commission ring field"
+      },
+      {
+        "value": "0%",
+        "label": "DELIVERY\nFAILURE",
+        "body": "An unmatched record\nwith no delivery failures"
+      },
+      {
+        "value": "100%",
+        "label": "END-TO\n-END",
+        "body": "Full-process responsibility\nfrom start to finish"
+      }
+    ],
     "pillars": {
       "eyebrow": "FOUR CHAPTERS",
       "title": "Four stories that prove DEAHO",
@@ -696,7 +740,7 @@
           "category": "making",
           "categoryLabel": "Recent work",
           "date": "2026.00.00",
-          "title": "A production record for a new winning moment",
+          "title": "LG Twins opening ceremony large ring model production",
           "image": "news_card_01.png"
         },
         {
@@ -704,7 +748,7 @@
           "category": "story",
           "categoryLabel": "Project stories",
           "date": "2026.00.00",
-          "title": "When team symbols become the structure of a ring",
+          "title": "Jeonbuk Hyundai football ring delivery completed",
           "image": "news_card_02.png"
         },
         {
@@ -712,7 +756,7 @@
           "category": "press",
           "categoryLabel": "Press / Features",
           "date": "2026.00.00",
-          "title": "A feature field reserved for DEAHO",
+          "title": "Red Force Valorant championship ring design",
           "image": "news_card_03.png"
         },
         {
@@ -720,7 +764,7 @@
           "category": "partner",
           "categoryLabel": "Collaborations",
           "date": "2026.00.00",
-          "title": "A quiet preview for the next collaboration",
+          "title": "LG Twins championship ring from design to delivery",
           "image": "news_card_04.png"
         },
         {
@@ -976,7 +1020,11 @@
       "eyebrow": "THE CURRENT PULSE",
       "title": "DEAHO, Now",
       "body": "And we are still creating now.",
-      "question": "A piece or project worth remembering?"
+      "question": "A piece or project worth remembering?",
+      "primaryTitle": "NEW LEGACY RELEASED",
+      "primaryCta": "Explore More",
+      "secondaryTitle": "RECENT HIGHLIGHT",
+      "secondaryCta": "Explore More"
     },
     "latestNews": {
       "eyebrow": "LATEST NEWS",
@@ -991,40 +1039,26 @@
       "ariaLabel": "Collaboration and sponsorship brands",
       "rows": [
         [
-          "pcn",
-          "KB Kookmin Bank",
-          "NH NongHyup Bank",
-          "DOYAK",
-          "BHL",
-          "SHIFT UP",
-          "Shinhan Bank",
-          "IPARTNERS",
-          "Woori Bank",
-          "INNORED"
+          "대한항공 점보스",
+          "KCC",
+          "인삼공사",
+          "두산베어스",
+          "삼성 라이온즈",
+          "KT위즈"
         ],
         [
-          "NC Entertainment",
-          "YeonSung Apparel",
-          "Jeonbuk Bank",
-          "SC First Bank",
-          "JK Friends",
-          "Charm Technology",
-          "kakaobank",
-          "KREITs",
-          "Kbank",
-          "KRAFTON"
+          "NC다이노스",
+          "핑크스파이더스",
+          "GS칼텍스",
+          "SSG랜더스",
+          "전북현대"
         ],
         [
-          "toss bank",
-          "KEB Hana Bank",
-          "A Partners",
-          "Woori Bank",
-          "INNORED",
-          "SHIFT UP",
-          "Shinhan Bank",
-          "KRAFTON",
-          "Kbank",
-          "KB Kookmin Bank"
+          "울산현대",
+          "KB스타즈",
+          "현대모비스",
+          "KGC",
+          "스카이워커스"
         ]
       ]
     }

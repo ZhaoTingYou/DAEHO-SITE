@@ -98,7 +98,7 @@ export function HomeHero({
           </motion.h1>
           <motion.p
             variants={copyVariants}
-            className="max-w-2xl font-body text-body leading-[1.7]"
+            className="max-w-2xl whitespace-pre-line font-body text-body leading-[1.7]"
           >
             {subtitle}
           </motion.p>

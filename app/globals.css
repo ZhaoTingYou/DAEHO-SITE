@@ -445,6 +445,46 @@ select {
   font-feature-settings: "lnum" 1, "pnum" 1;
 }
 
+.home-feature-link {
+  position: relative;
+  padding-bottom: 9px;
+  color: var(--accent);
+}
+
+.home-feature-link::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-hover) var(--ease);
+}
+
+.home-feature-link:hover,
+.home-feature-link:focus-visible {
+  color: var(--primary);
+}
+
+.home-feature-link:hover::after,
+.home-feature-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.home-stat-band__value,
+.home-stat-band__label {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+}
+
+.home-stat-band__body {
+  font-family: "MaruBuri", serif;
+  font-weight: 600;
+}
+
 .home-brand-marquee {
   display: grid;
   gap: clamp(16px, 2vw, 26px);
@@ -1493,6 +1533,23 @@ select {
   letter-spacing: .18em;
 }
 
+.footer-group-title {
+  display: inline-flex;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  transition: color .3s ease;
+}
+
+a.footer-group-title:hover,
+a.footer-group-title:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
 .footer-link {
   font-family: var(--font-body);
   font-size: 14px;
@@ -1500,6 +1557,25 @@ select {
   color: inherit;
   text-transform: uppercase;
   letter-spacing: .12em;
+  transition: color .3s ease, opacity .3s ease;
+}
+
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.footer-link--muted {
+  color: var(--subtext);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .06em;
+}
+
+.footer-link--legal {
+  font-size: 12px;
+  letter-spacing: .06em;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,15 +4,32 @@
     "description": "승리의 순간을, 영원의 형태로."
   },
   "home": {
-    "eyebrow": "KOREA'S CHAMPIONSHIP RING AUTHORITY",
-    "title": "38 YEARS OF CHAMPIONS",
-    "subtitle": "승리의 순간을, 영원의 형태로.",
+    "eyebrow": "CUSTOM JEWELRY · SYMBOLIC OBJECTS · DESIGN CONSULTING",
+    "title": "WE DESIGN SYMBOLS THAT LAST",
+    "subtitle": "브랜드의 이야기를,\n오래 남는 상징으로 설계합니다",
     "image": "home_hero.png",
     "signature": {
-      "eyebrow": "SIGNATURE WORKS / 대표작",
-      "title": "승리의 형태를 가장 대호답게.",
-      "body": "밝은 전시장 빛 속에서 각 팀의 상징과 기록을 하나의 반지로 정제합니다.",
-      "cta": "Collection 보기"
+      "eyebrow": "SIGNATURE PROJECTS / 대표 프로젝트",
+      "title": "기억되어야 할 순간을 설계합니다",
+      "body": "우승의 기록, 임관의 상징, 브랜드의 이야기를\n하나의 제품으로 완성합니다.",
+      "cta": "Collection 보기",
+      "projects": [
+        {
+          "title": "우승반지",
+          "caption": "CHAMPIONSHIP\nRINGS",
+          "image": "home_ring_03.png"
+        },
+        {
+          "title": "임관반지",
+          "caption": "COMMISSION\nRINGS",
+          "image": "home_ring_04.png"
+        },
+        {
+          "title": "주문제작",
+          "caption": "CUSTOM\nPRODUCTS",
+          "image": "home_ring_05.png"
+        }
+      ]
     },
     "rings": [
       {
@@ -60,6 +77,33 @@
         }
       ]
     },
+    "statBand": [
+      {
+        "value": "38",
+        "label": "YEARS",
+        "body": "역사가 유구한\n장인기업"
+      },
+      {
+        "value": "95%",
+        "label": "CHAMPIONSHIP\nRING SHARE",
+        "body": "국내 우승반지 시장에서\n가장 많이 선택받은 제작 경험"
+      },
+      {
+        "value": "90%",
+        "label": "COMMISSION\nRING SHARE",
+        "body": "국내 임관반지 분야에서\n축적한 전문 제작 기록"
+      },
+      {
+        "value": "0%",
+        "label": "DELIVERY\nFAILURE",
+        "body": "한번의 납품사고도 없는\n전무후무한 기록"
+      },
+      {
+        "value": "100%",
+        "label": "END-TO\n-END",
+        "body": "처음부터 끝까지\n전 공정 책임제"
+      }
+    ],
     "pillars": {
       "eyebrow": "FOUR CHAPTERS",
       "title": "대호를 증명하는 네 가지 이야기",
@@ -696,7 +740,7 @@
           "category": "making",
           "categoryLabel": "최근 제작 사례",
           "date": "2026.00.00",
-          "title": "새로운 우승의 순간을 위한 제작 기록",
+          "title": "LG 트윈스 개막식 대형반지 모형 제작",
           "image": "news_card_01.png"
         },
         {
@@ -704,7 +748,7 @@
           "category": "story",
           "categoryLabel": "프로젝트 스토리",
           "date": "2026.00.00",
-          "title": "팀의 상징이 반지의 구조가 되는 과정",
+          "title": "전북현대 축구 반지 납품 완료!",
           "image": "news_card_02.png"
         },
         {
@@ -712,7 +756,7 @@
           "category": "press",
           "categoryLabel": "언론/피처",
           "date": "2026.00.00",
-          "title": "밝은 지면에 남길 대호의 피처",
+          "title": "레드포스 발로란트 우승반지 디자인",
           "image": "news_card_03.png"
         },
         {
@@ -720,7 +764,7 @@
           "category": "partner",
           "categoryLabel": "협업",
           "date": "2026.00.00",
-          "title": "다음 협업을 위한 조용한 예고",
+          "title": "LG 트윈스 우승반지 디자인부터 납품까지",
           "image": "news_card_04.png"
         },
         {
@@ -976,7 +1020,11 @@
       "eyebrow": "현재의 흐름",
       "title": "지금, 대호",
       "body": "그리고 지금도 만들고 있다.",
-      "question": "가장 자랑하고 싶은 아이템? 프로젝트?"
+      "question": "가장 자랑하고 싶은 아이템? 프로젝트?",
+      "primaryTitle": "NEW LEGACY RELEASED",
+      "primaryCta": "Explore More",
+      "secondaryTitle": "RECENT HIGHLIGHT",
+      "secondaryCta": "Explore More"
     },
     "latestNews": {
       "eyebrow": "최근 소식",
@@ -991,40 +1039,26 @@
       "ariaLabel": "협업 및 후원 브랜드",
       "rows": [
         [
-          "pcn",
-          "KB 국민은행",
-          "NH농협은행",
-          "DOYAK",
-          "BHL",
-          "SHIFT UP",
-          "신한은행",
-          "IPARTNERS",
-          "우리은행",
-          "INNORED"
+          "대한항공 점보스",
+          "KCC",
+          "인삼공사",
+          "두산베어스",
+          "삼성 라이온즈",
+          "KT위즈"
         ],
         [
-          "NC Entertainment",
-          "YeonSung Apparel",
-          "전북은행",
-          "SC 제일은행",
-          "JK 프렌즈",
-          "Charm Technology",
-          "kakaobank",
-          "KREITs",
-          "Kbank",
-          "KRAFTON"
+          "NC다이노스",
+          "핑크스파이더스",
+          "GS칼텍스",
+          "SSG랜더스",
+          "전북현대"
         ],
         [
-          "toss bank",
-          "KEB 하나은행",
-          "A Partners",
-          "우리은행",
-          "INNORED",
-          "SHIFT UP",
-          "신한은행",
-          "KRAFTON",
-          "Kbank",
-          "KB 국민은행"
+          "울산현대",
+          "KB스타즈",
+          "현대모비스",
+          "KGC",
+          "스카이워커스"
         ]
       ]
     }

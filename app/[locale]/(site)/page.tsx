@@ -87,33 +87,30 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
       <section className="bg-white py-[clamp(96px,10vw,156px)]">
         <div className="mx-auto max-w-[1180px] space-y-20 px-container">
           <Reveal className="grid gap-10 lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)] lg:items-center xl:gap-[72px]">
-            <div className="max-w-[260px] space-y-3">
-              <p className="font-body text-[10px] font-semibold uppercase tracking-[0.28em] text-subtext">
-                {currentPulse.eyebrow}
-              </p>
-              <h2 className="font-heading text-[clamp(30px,3.6vw,48px)] font-semibold leading-tight text-primary">
-                {currentPulse.title}
+            <div className="max-w-[260px] space-y-7 lg:text-center">
+              <h2 className="font-heading text-[clamp(20px,1.7vw,30px)] font-medium uppercase leading-tight text-primary">
+                {currentPulse.primaryTitle}
               </h2>
-              <p className="font-body text-[14px] leading-6 text-text">
-                {currentPulse.body}
-              </p>
+              <Link
+                href={withLocale(locale, '/legacy')}
+                className="home-feature-link inline-flex font-body text-[16px] leading-none transition duration-hover ease-brand"
+              >
+                {currentPulse.primaryCta}
+              </Link>
             </div>
 
-            <Link href={withLocale(locale, '/news')} className="group block">
+            <Link href={withLocale(locale, '/legacy')} className="group block">
               <div className="relative overflow-hidden bg-bg">
                 <div className="hover-zoom">
                   <div className="hover-zoom-media">
                     <SafeImage
                       filename="news_featured.png.png"
-                      alt={currentPulse.question}
+                      alt={currentPulse.primaryTitle}
                       aspect="aspect-[16/7]"
                       variant="plain"
                     />
                   </div>
                 </div>
-                <p className="absolute left-5 top-5 max-w-[88%] font-heading text-[clamp(15px,1.25vw,20px)] font-semibold leading-tight text-primary md:left-8 md:top-6">
-                  {currentPulse.question}
-                </p>
               </div>
             </Link>
           </Reveal>
@@ -124,7 +121,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
                 <div className="hover-zoom-media">
                   <SafeImage
                     filename="home_ring_01.png"
-                    alt={currentPulse.title}
+                    alt={currentPulse.secondaryTitle}
                     aspect="aspect-[16/7]"
                     variant="plain"
                   />
@@ -132,16 +129,16 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
               </div>
             </Link>
 
-            <div className="space-y-3 lg:max-w-[260px] lg:justify-self-end lg:text-right">
-              <p className="font-body text-[10px] font-semibold uppercase tracking-[0.28em] text-subtext">
-                {currentPulse.eyebrow}
+            <div className="space-y-7 lg:max-w-[260px] lg:justify-self-end lg:text-center">
+              <p className="font-heading text-[clamp(20px,1.7vw,30px)] font-medium uppercase leading-tight text-primary">
+                {currentPulse.secondaryTitle}
               </p>
-              <p className="font-heading text-[clamp(30px,3.4vw,46px)] font-semibold leading-tight text-primary">
-                {currentPulse.title}
-              </p>
-              <p className="font-body text-[14px] leading-6 text-text">
-                {currentPulse.body}
-              </p>
+              <Link
+                href={withLocale(locale, '/news')}
+                className="home-feature-link inline-flex font-body text-[16px] leading-none transition duration-hover ease-brand"
+              >
+                {currentPulse.secondaryCta}
+              </Link>
             </div>
           </Reveal>
         </div>
@@ -151,20 +148,20 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         <div className="mx-auto grid max-w-[1180px] gap-10 px-container lg:grid-cols-[minmax(240px,0.34fr)_minmax(0,0.66fr)] lg:items-center xl:gap-16">
           <Reveal className="max-w-[390px] space-y-7">
             <div className="space-y-5">
-              <p className="font-body text-[11px] font-semibold uppercase tracking-[0.28em] text-subtext">
+              <p className="font-heading text-[12px] font-medium uppercase leading-tight text-accent">
                 {content.signature.eyebrow}
               </p>
-              <h2 className="font-heading text-[clamp(34px,4.2vw,58px)] font-semibold leading-tight text-primary">
+              <h2 className="font-heading text-[clamp(20px,1.8vw,26px)] font-semibold leading-tight text-primary">
                 {content.signature.title}
               </h2>
             </div>
-            <p className="max-w-sm font-body text-[14px] leading-7 text-text">
+            <p className="max-w-sm whitespace-pre-line font-body text-[13px] leading-6 text-text">
               {content.signature.body}
             </p>
           </Reveal>
 
           <Reveal className="grid items-stretch gap-5 sm:grid-cols-3">
-            {content.rings.slice(2, 5).map((item) => (
+            {content.signature.projects.map((item) => (
               <RevealItem key={item.image} className="h-full">
                 <Link
                   href={withLocale(locale, '/specialty/collection')}
@@ -180,11 +177,11 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
                       />
                     </div>
                   </div>
-                  <div className="grid min-h-[104px] grid-rows-[auto_1fr] gap-2 px-1 pb-2 pt-4">
-                    <h3 className="font-heading text-[clamp(18px,1.35vw,22px)] font-semibold leading-tight text-primary">
+                  <div className="grid min-h-[98px] grid-rows-[auto_1fr] gap-2 px-1 pb-4 pt-4 text-center">
+                    <h3 className="font-heading text-[clamp(16px,1.15vw,20px)] font-semibold leading-tight text-primary">
                       {item.title}
                     </h3>
-                    <p className="self-end font-body text-[12px] leading-5 text-subtext">
+                    <p className="self-start whitespace-pre-line font-heading text-[11px] font-medium uppercase leading-[1.1] text-primary">
                       {item.caption}
                     </p>
                   </div>
@@ -193,6 +190,29 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
             ))}
           </Reveal>
         </div>
+      </section>
+
+      <section className="bg-[#62302F] py-[clamp(92px,10vw,150px)] text-[#F4E6E1]">
+        <Reveal className="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-container sm:grid-cols-2 lg:grid-cols-5 lg:gap-0">
+          {content.statBand.map((item, index) => (
+            <div
+              key={`${item.value}-${item.label}`}
+              className={`grid justify-items-center gap-4 text-center lg:min-h-[220px] lg:px-9 ${
+                index > 0 ? 'lg:border-l lg:border-[#F4E6E1]/70' : ''
+              }`}
+            >
+              <p className="home-stat-band__value text-[clamp(42px,4vw,68px)] leading-none tracking-normal">
+                {item.value}
+              </p>
+              <p className="home-stat-band__label whitespace-pre-line text-[15px] uppercase leading-[1.08] tracking-[0.03em]">
+                {item.label}
+              </p>
+              <p className="home-stat-band__body whitespace-pre-line text-[15px] leading-[1.35]">
+                {item.body}
+              </p>
+            </div>
+          ))}
+        </Reveal>
       </section>
 
       <section className="bg-white pb-[clamp(92px,10vw,150px)] pt-[clamp(38px,4vw,64px)]">
