@@ -82,11 +82,11 @@ type GolfConfiguratorProps = {
   locale: Locale;
 };
 
-const golfShaftVisuals: Record<string, {image: string; swatch: string}> = {
-  black: {image: '/images/golf/golf-day-shaft-black.jpg', swatch: '#0b0b0d'},
-  white: {image: '/images/golf/golf-day-shaft-white.jpg', swatch: '#f4f1ec'},
-  burgundy: {image: '/images/golf/golf-day-shaft-burgundy.jpg', swatch: '#601426'},
-  navy: {image: '/images/golf/golf-day-shaft-navy.jpg', swatch: '#0a2348'}
+const golfShaftVisuals: Record<string, string> = {
+  black: '/images/golf_shaft_black.png',
+  white: '/images/golf_shaft_white.png',
+  burgundy: '/images/golf_shaft_burgundy.png',
+  navy: '/images/golf_shaft_navy.png'
 };
 
 const golfProcessSteps = [
@@ -277,42 +277,33 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
       </section>
 
       <section className="bg-white py-[clamp(72px,9vw,132px)] text-primary">
-        <div className="mx-auto max-w-[1120px] space-y-[clamp(44px,6vw,78px)] px-container">
-          <Reveal className="text-center">
-            <h2 className="font-heading text-[clamp(20px,2vw,28px)] font-semibold">
-              {content.shafts.title}
-            </h2>
-          </Reveal>
+        <div className="mx-auto max-w-[1120px] space-y-[clamp(70px,8vw,118px)] px-container">
+          <div className="mx-auto max-w-[900px] space-y-[clamp(34px,4vw,44px)]">
+            <Reveal className="text-center">
+              <h2 className="font-body text-[clamp(18px,1.8vw,24px)] font-semibold tracking-[0.02em]">
+                {locale === 'ko' ? '샤프트 색상' : 'Shaft Color'}
+              </h2>
+            </Reveal>
 
-          <div
-            className="grid grid-cols-2 gap-x-5 gap-y-9 md:grid-cols-4 md:gap-x-9"
-            aria-label={content.labels.shaftGroup}
-          >
-            {content.shafts.items.map((item) => {
-              const visual = golfShaftVisuals[item.id] ?? golfShaftVisuals.navy;
-              const isSelected = item.id === selectedShaft?.id;
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setSelectedShaftId(item.id)}
-                  aria-pressed={isSelected}
-                  className="group min-h-11 text-center transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-                >
-                  <div className={`relative mx-auto aspect-[3/4] w-full max-w-[170px] overflow-hidden transition duration-hover ease-brand ${isSelected ? 'scale-[1.03]' : 'group-hover:-translate-y-1'}`}>
+            <div
+              className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4 md:gap-x-9"
+              aria-label={content.labels.shaftGroup}
+            >
+              {content.shafts.items.map((item) => (
+                <figure key={item.id} className="text-center">
+                  <div className="relative mx-auto aspect-[0.68/1] w-full max-w-[178px] overflow-hidden bg-white">
                     <GolfStaticImage
-                      src={visual.image}
+                      src={golfShaftVisuals[item.id] ?? golfShaftVisuals.navy}
                       alt={item.caption}
-                      className="object-cover"
+                      className="scale-[1.55] object-cover object-[50%_25%] mix-blend-multiply"
                     />
                   </div>
-                  <span className="mt-4 block font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                  <figcaption className="mt-6 font-heading text-[14px] font-semibold uppercase [letter-spacing:0] text-primary">
                     {item.label}
-                  </span>
-                </button>
-              );
-            })}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
 
           <div className="grid items-center gap-[clamp(34px,5vw,70px)] pt-[clamp(22px,4vw,42px)] lg:grid-cols-[0.9fr_1.1fr]">
