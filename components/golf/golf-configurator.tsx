@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {useMemo, useState} from 'react';
-import {AnimatePresence, motion} from 'framer-motion';
+import {motion} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {Reveal} from '@/components/motion/reveal';
@@ -82,6 +82,22 @@ type GolfConfiguratorProps = {
   locale: Locale;
 };
 
+const golfShaftVisuals: Record<string, {image: string; swatch: string}> = {
+  black: {image: '/images/golf/golf-day-shaft-black.jpg', swatch: '#0b0b0d'},
+  white: {image: '/images/golf/golf-day-shaft-white.jpg', swatch: '#f4f1ec'},
+  burgundy: {image: '/images/golf/golf-day-shaft-burgundy.jpg', swatch: '#601426'},
+  navy: {image: '/images/golf/golf-day-shaft-navy.jpg', swatch: '#0a2348'}
+};
+
+const golfProcessSteps = [
+  {id: '01', ko: '헤드 선택', en: 'Choose head', lines: ['아이언', '퍼터', '우드']},
+  {id: '02', ko: '컬러 선택', en: 'Choose color', lines: ['블랙', '화이트', '네이비']},
+  {id: '03', ko: '샤프트 색상 선택', en: 'Select shaft', lines: ['블랙', '화이트', '버건디', '네이비']},
+  {id: '04', ko: '개인 문구 각인 선택', en: 'Engraving', lines: ['이름', '날짜']},
+  {id: '05', ko: '상담 문의', en: 'Inquiry', lines: ['수량', '일정']},
+  {id: '06', ko: '제작 진행', en: 'Production', lines: ['시안 확인', '제작 완료']}
+];
+
 export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [selectedHeadId, setSelectedHeadId] = useState(content.heads.items[0]?.id ?? '');
@@ -97,335 +113,232 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
       content.shafts.items[0],
     [content.shafts.items, selectedShaftId]
   );
-  const heroImage = selectedShaft?.image ?? content.hero.image;
-  const heroAlt = `${selectedShaft?.label ?? content.hero.specLabel} ${content.hero.subtitle}`;
+  const selectedShaftIndex = Math.max(
+    0,
+    content.shafts.items.findIndex((item) => item.id === selectedShaft?.id)
+  );
   const engravingSample = 'JUDY KIM 2026.05.03';
   const inquiryHref = `/${locale}/golf/inquiry?head=${selectedHead?.id ?? ''}&shaft=${selectedShaft?.id ?? ''}&engraving=${encodeURIComponent(engravingSample)}`;
+  const requestLabel = locale === 'ko' ? '견적 문의하러 가기' : 'Request an estimate';
+  const quoteText = locale === 'ko' ? '순간을 영원히 기억하세요.' : 'Remember the moment, permanently.';
+  const changeShaft = (direction: 1 | -1) => {
+    const items = content.shafts.items;
+
+    if (items.length === 0) {
+      return;
+    }
+
+    const nextIndex = (selectedShaftIndex + direction + items.length) % items.length;
+    setSelectedShaftId(items[nextIndex].id);
+  };
 
   return (
-    <main className="bg-bg text-text">
-      <section className="relative min-h-dvh overflow-hidden bg-white pt-32">
-        <div className="mx-auto grid min-h-[calc(100dvh-128px)] max-w-[1440px] gap-12 px-container pb-16 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
-          <motion.div
+    <main className="bg-black text-[#f8f6f2]">
+      <section className="relative overflow-hidden bg-black pt-28">
+        <div className="mx-auto max-w-[1240px] px-container pb-[clamp(62px,8vw,110px)]">
+          <motion.p
             initial={{opacity: 0, y: prefersReducedMotion ? 0 : 24}}
             animate={{opacity: 1, y: 0}}
             transition={{duration: prefersReducedMotion ? 0 : 0.72, ease: [0.16, 1, 0.3, 1]}}
-            className="relative z-10 space-y-8"
+            className="text-center font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-white/72"
           >
-            <div className="space-y-4">
-              <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-subtext">
-                {content.hero.eyebrow}
-              </p>
-              <h1 className="font-heading text-[clamp(48px,8vw,92px)] font-semibold leading-[0.78] text-primary">
+            {content.hero.eyebrow}
+          </motion.p>
+
+          <div className="relative mt-[clamp(30px,4vw,58px)] min-h-[clamp(300px,48vw,610px)]">
+            <button
+              type="button"
+              onClick={() => changeShaft(-1)}
+              className="absolute left-0 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center text-white/62 transition duration-hover ease-brand hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              aria-label="Previous shaft color"
+            >
+              <ChevronIcon direction="left" />
+            </button>
+            <button
+              type="button"
+              onClick={() => changeShaft(1)}
+              className="absolute right-0 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center text-white/62 transition duration-hover ease-brand hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              aria-label="Next shaft color"
+            >
+              <ChevronIcon direction="right" />
+            </button>
+
+            <motion.div
+              key={selectedShaft?.id ?? 'hero'}
+              initial={{opacity: 0, y: prefersReducedMotion ? 0 : 18}}
+              animate={{opacity: 1, y: 0}}
+              transition={{duration: prefersReducedMotion ? 0 : 0.56, ease: [0.16, 1, 0.3, 1]}}
+              className="absolute left-1/2 top-0 h-full w-[min(82vw,920px)] -translate-x-1/2"
+            >
+              <GolfStaticImage
+                src="/images/golf/golf-night-hero-product.jpg"
+                alt={content.hero.subtitle}
+                className="object-contain"
+                priority
+              />
+            </motion.div>
+          </div>
+
+          <div className="mt-[clamp(42px,5vw,72px)] grid items-end gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+            <Reveal className="max-w-[390px] space-y-4">
+              <h1 className="font-heading text-[clamp(48px,7vw,80px)] font-semibold uppercase leading-[0.82] text-white">
                 {content.hero.titleLines.map((line) => (
                   <span key={line} className="block">
                     {line}
                   </span>
                 ))}
               </h1>
-            </div>
-            <p className="max-w-xl font-body text-[15px] leading-7 text-text">
-              {content.hero.subtitle}
-            </p>
-            <div className="grid max-w-lg grid-cols-2 border-y border-hairline py-4 font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-subtext">
-              <span>{content.labels.selectedHead}</span>
-              <span className="text-right text-primary">{selectedHead?.label}</span>
-              <span className="mt-3">{content.labels.selectedShaft}</span>
-              <span className="mt-3 text-right text-primary">{selectedShaft?.label}</span>
-            </div>
-            <Link
-              href={inquiryHref}
-              className="consult-cta consult-cta--accent consult-cta--large w-fit"
-            >
-              <span className="consult-cta__label">{content.labels.inquiryCta}</span>
-            </Link>
-          </motion.div>
+              <p className="max-w-[260px] font-body text-[13px] font-semibold leading-6 text-white/76">
+                {content.hero.subtitle}
+              </p>
+            </Reveal>
 
-          <div className="relative min-h-[440px] lg:min-h-[650px]">
-            <div className="golf-float-a absolute inset-x-0 top-4 overflow-hidden bg-white shadow-[0_32px_110px_rgba(16,29,48,0.08)]">
-              <div className="relative aspect-[16/9] w-full">
-                <GolfImage
-                  filename={content.hero.image}
-                  alt={content.hero.subtitle}
-                  assets={assets}
-                  className="object-cover"
-                  priority
+            <Reveal className="relative min-h-[210px] overflow-hidden lg:min-h-[270px]">
+              <div className="absolute inset-y-0 right-[-12%] w-[92%]">
+                <GolfStaticImage
+                  src="/images/golf/golf-day-statement-product.jpg"
+                  alt={content.statement.body}
+                  className="object-contain object-right"
                 />
               </div>
-            </div>
-
-            <div className="golf-shadow absolute bottom-6 left-[12%] h-16 w-[72%] bg-primary/10 blur-2xl" />
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedShaft?.id ?? 'shaft'}
-                initial={{opacity: 0, y: prefersReducedMotion ? 0 : 22, scale: 0.985}}
-                animate={{opacity: 1, y: 0, scale: 1}}
-                exit={{opacity: 0, y: prefersReducedMotion ? 0 : -12, scale: 0.985}}
-                transition={{duration: prefersReducedMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1]}}
-                className="golf-float-b absolute bottom-0 right-0 w-[44%] min-w-[190px] bg-white p-3 shadow-[0_28px_86px_rgba(16,29,48,0.12)] md:w-[34%]"
-              >
-                <div className="relative aspect-[4/5] w-full overflow-hidden">
-                  <GolfImage
-                    filename={heroImage}
-                    alt={heroAlt}
-                    assets={assets}
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedHead?.id ?? 'head'}
-                initial={{opacity: 0, x: prefersReducedMotion ? 0 : -24}}
-                animate={{opacity: 1, x: 0}}
-                exit={{opacity: 0, x: prefersReducedMotion ? 0 : 16}}
-                transition={{duration: prefersReducedMotion ? 0 : 0.4, ease: [0.16, 1, 0.3, 1]}}
-                className="absolute bottom-8 left-0 w-[42%] min-w-[180px] border border-hairline bg-bg p-3 shadow-[0_20px_65px_rgba(16,29,48,0.09)] md:w-[30%]"
-              >
-                <div className="hover-zoom">
-                  <div className="hover-zoom-media relative aspect-square w-full overflow-hidden bg-white">
-                    <GolfImage
-                      filename={selectedHead?.image ?? content.hero.image}
-                      alt={selectedHead?.caption ?? content.hero.subtitle}
-                      assets={assets}
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      <section className="overflow-hidden bg-bg py-section">
-        <div className="mx-auto grid max-w-[1440px] gap-12 px-container lg:grid-cols-[0.86fr_1.14fr] lg:items-center">
-          <Reveal className="space-y-8">
-            <h2 className="font-heading text-[clamp(44px,7vw,78px)] font-semibold leading-[0.78] text-primary">
-              {content.statement.titleLines.map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
-            </h2>
-            <p className="max-w-xl font-body text-[15px] leading-7 text-text">
-              {content.statement.body}
-            </p>
-          </Reveal>
-
-          <motion.div
-            initial={{opacity: 0, x: prefersReducedMotion ? 0 : 72}}
-            whileInView={{opacity: 1, x: 0}}
-            viewport={{once: true, amount: 0.35}}
-            transition={{duration: prefersReducedMotion ? 0 : 0.82, ease: [0.16, 1, 0.3, 1]}}
-            className="relative min-h-[420px]"
-          >
-            <div className="relative ml-auto aspect-[3/2] w-full overflow-hidden bg-white shadow-[0_30px_100px_rgba(16,29,48,0.09)] lg:w-[86%]">
-              <GolfImage
-                filename={content.statement.image}
-                alt={content.statement.body}
-                assets={assets}
-                className="object-cover"
-              />
-            </div>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`statement-${selectedHead?.id ?? 'head'}`}
-                initial={{opacity: 0, y: prefersReducedMotion ? 0 : 26}}
-                animate={{opacity: 1, y: 0}}
-                exit={{opacity: 0, y: prefersReducedMotion ? 0 : -14}}
-                transition={{duration: prefersReducedMotion ? 0 : 0.38, ease: [0.16, 1, 0.3, 1]}}
-                className="absolute bottom-0 left-0 w-[48%] border border-hairline bg-white p-3 shadow-[0_24px_72px_rgba(16,29,48,0.10)] md:w-[34%]"
-              >
-                <div className="relative aspect-square overflow-hidden">
-                  <GolfImage
-                    filename={selectedHead?.image ?? content.statement.image}
-                    alt={selectedHead?.label ?? content.statement.body}
-                    assets={assets}
-                    className="object-cover"
-                  />
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="bg-white py-section">
-        <div className="mx-auto max-w-[1440px] space-y-12 px-container">
-          <Reveal className="mx-auto max-w-3xl space-y-5 text-center">
-            <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-subtext">
-              {content.heads.eyebrow}
-            </p>
-            <h2 className="font-heading text-[clamp(30px,4.4vw,54px)] font-semibold leading-none text-primary">
+      <section className="bg-black pb-[clamp(72px,9vw,132px)]">
+        <div className="mx-auto max-w-[1240px] space-y-[clamp(46px,6vw,72px)] px-container">
+          <Reveal className="mx-auto max-w-[360px] space-y-3 text-center">
+            <h2 className="font-heading text-[clamp(20px,2vw,27px)] font-semibold leading-tight text-white">
               {content.heads.title}
             </h2>
-            <p className="font-body text-[14px] leading-7 text-text">
+            <p className="font-body text-[12px] leading-5 text-white/55">
               {content.heads.subtitle}
             </p>
           </Reveal>
 
           <div
-            className="-mx-container grid auto-cols-[72%] grid-flow-col gap-4 overflow-x-auto px-container pb-3 [scroll-snap-type:x_mandatory] md:mx-0 md:grid-flow-row md:grid-cols-4 md:overflow-visible md:px-0 md:pb-0"
+            className="grid grid-cols-2 gap-3 md:grid-cols-4"
             aria-label={content.labels.headGroup}
           >
-            {content.heads.items.map((item, index) => {
+            {content.heads.items.map((item) => {
               const isSelected = item.id === selectedHead?.id;
-
-              return (
-                <Reveal key={item.id} className="[scroll-snap-align:start]">
-                  <button
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => setSelectedHeadId(item.id)}
-                    className={`group grid min-h-11 w-full cursor-pointer gap-5 bg-white p-3 text-left shadow-[0_18px_58px_rgba(16,29,48,0.06)] transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
-                      isSelected
-                        ? 'translate-y-1 border border-primary/55'
-                        : 'border border-hairline hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_28px_86px_rgba(16,29,48,0.1)]'
-                    }`}
-                    style={{transitionDelay: `${Math.min(index * 35, 120)}ms`}}
-                  >
-                    <div className="hover-zoom">
-                      <div className="hover-zoom-media relative aspect-square overflow-hidden bg-bg">
-                        <GolfImage
-                          filename={item.image}
-                          alt={item.caption}
-                          assets={assets}
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
-                    <span className="grid gap-2 px-1 pb-2">
-                      <span className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-                        {item.kicker}
-                      </span>
-                      <span className="font-heading text-[22px] font-semibold leading-none text-primary">
-                        {item.label}
-                      </span>
-                      <span className="font-body text-sm leading-6 text-subtext">
-                        {item.caption}
-                      </span>
-                    </span>
-                  </button>
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white pb-section">
-        <div className="mx-auto max-w-[1440px] space-y-10 px-container">
-          <Reveal className="grid gap-6 border-t border-primary/50 pt-12 lg:grid-cols-[0.58fr_1fr] lg:items-end">
-            <div>
-              <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-subtext">
-                {content.shafts.eyebrow}
-              </p>
-              <h2 className="mt-4 font-heading text-[clamp(30px,4.4vw,54px)] font-semibold leading-none text-primary">
-                {content.shafts.title}
-              </h2>
-            </div>
-            <p className="max-w-2xl font-body text-[14px] leading-7 text-text lg:justify-self-end">
-              {content.shafts.subtitle}
-            </p>
-          </Reveal>
-
-          <div
-            className="-mx-container grid auto-cols-[70%] grid-flow-col gap-4 overflow-x-auto px-container pb-3 [scroll-snap-type:x_mandatory] md:mx-0 md:grid-flow-row md:grid-cols-4 md:overflow-visible md:px-0 md:pb-0"
-            aria-label={content.labels.shaftGroup}
-          >
-            {content.shafts.items.map((item) => {
-              const isSelected = item.id === selectedShaft?.id;
 
               return (
                 <button
                   key={item.id}
                   type="button"
                   aria-pressed={isSelected}
-                  onClick={() => setSelectedShaftId(item.id)}
-                  className={`group min-h-11 cursor-pointer bg-white p-3 text-left shadow-[0_18px_58px_rgba(16,29,48,0.06)] transition duration-hover ease-brand [scroll-snap-align:start] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
-                    isSelected
-                      ? 'translate-y-1 border border-primary/55'
-                      : 'border border-hairline hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_28px_86px_rgba(16,29,48,0.1)]'
+                  onClick={() => setSelectedHeadId(item.id)}
+                  className={`group min-h-11 bg-white p-2 text-left transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${
+                    isSelected ? 'ring-2 ring-white/80' : 'hover:-translate-y-1'
                   }`}
                 >
-                  <div className="hover-zoom">
-                    <div className="hover-zoom-media relative aspect-[4/5] overflow-hidden bg-bg">
-                      <GolfImage
-                        filename={item.image}
-                        alt={item.caption}
-                        assets={assets}
-                        className="object-cover"
-                      />
-                    </div>
+                  <div className="relative aspect-square overflow-hidden bg-[#f8f6f2]">
+                    <GolfImage
+                      filename={item.image}
+                      alt={item.caption}
+                      assets={assets}
+                      className="object-cover"
+                    />
                   </div>
-                  <div className="space-y-2 px-1 py-4">
-                    <p className="font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-primary">
-                      {item.label}
-                    </p>
-                    <p className="font-body text-sm leading-6 text-subtext">{item.caption}</p>
-                  </div>
+                  <p className="px-1 pt-3 font-body text-[10px] font-semibold uppercase tracking-[0.08em] text-primary/70">
+                    {item.label}
+                  </p>
                 </button>
               );
             })}
           </div>
+
+          <div className="grid items-center gap-8 pt-[clamp(26px,5vw,58px)] md:grid-cols-[0.75fr_1.25fr]">
+            <Reveal className="space-y-2">
+              <p className="font-heading text-[clamp(18px,2vw,26px)] font-semibold text-white">
+                {locale === 'ko' ? '나만의 방식 선택하기' : 'Choose your own direction'}
+              </p>
+              <p className="font-body text-[11px] leading-5 text-white/42">
+                {content.labels.selectedHead}: {selectedHead?.label}
+              </p>
+            </Reveal>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {['BASIC', 'COLOUR'].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  className="relative aspect-[1.15/1] min-h-11 bg-[#d8d8d8] text-primary transition duration-hover ease-brand hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                >
+                  <span className="absolute bottom-3 right-3 font-body text-[10px] font-semibold uppercase tracking-[0.1em]">
+                    {label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="overflow-hidden bg-bg py-section">
-        <div className="mx-auto grid max-w-[1440px] gap-14 px-container lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
-          <Reveal className="space-y-8">
-            <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-subtext">
-              {content.engraving.eyebrow}
-            </p>
-            <h2 className="font-heading text-[clamp(30px,4.4vw,54px)] font-semibold leading-none text-primary">
-              {content.engraving.title}
+      <section className="bg-white py-[clamp(72px,9vw,132px)] text-primary">
+        <div className="mx-auto max-w-[1120px] space-y-[clamp(44px,6vw,78px)] px-container">
+          <Reveal className="text-center">
+            <h2 className="font-heading text-[clamp(20px,2vw,28px)] font-semibold">
+              {content.shafts.title}
             </h2>
-            <p className="max-w-xl font-body text-[14px] leading-7 text-text">
-              {content.engraving.body}
-            </p>
-            <div className="grid gap-5 pt-4">
-              {content.engraving.specs.map((spec, index) => (
-                <motion.div
-                  key={spec}
-                  initial={{opacity: 0}}
-                  whileInView={{opacity: 1}}
-                  viewport={{once: true, amount: 0.6}}
-                  transition={{duration: prefersReducedMotion ? 0 : 0.38, delay: index * 0.08}}
-                  className="grid grid-cols-[72px_1fr] items-center gap-4"
-                >
-                  <span className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <span className="relative font-body text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-                    <motion.span
-                      aria-hidden="true"
-                      className="absolute -left-20 top-1/2 h-px w-16 origin-left bg-primary/50"
-                      initial={{scaleX: 0}}
-                      whileInView={{scaleX: 1}}
-                      viewport={{once: true, amount: 0.6}}
-                      transition={{duration: prefersReducedMotion ? 0 : 0.42, delay: index * 0.1}}
-                    />
-                    {spec}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
           </Reveal>
 
-          <div className="relative min-h-[620px]">
-            <motion.div
-              initial={{opacity: 0, y: prefersReducedMotion ? 0 : -48}}
-              whileInView={{opacity: 1, y: 0}}
-              viewport={{once: true, amount: 0.25}}
-              transition={{duration: prefersReducedMotion ? 0 : 0.76, ease: [0.16, 1, 0.3, 1]}}
-              className="absolute left-0 top-0 w-[58%] bg-white p-3 shadow-[0_30px_96px_rgba(16,29,48,0.1)]"
-            >
-              <div className="relative aspect-[3/4] overflow-hidden">
+          <div
+            className="grid grid-cols-2 gap-x-5 gap-y-9 md:grid-cols-4 md:gap-x-9"
+            aria-label={content.labels.shaftGroup}
+          >
+            {content.shafts.items.map((item) => {
+              const visual = golfShaftVisuals[item.id] ?? golfShaftVisuals.navy;
+              const isSelected = item.id === selectedShaft?.id;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelectedShaftId(item.id)}
+                  aria-pressed={isSelected}
+                  className="group min-h-11 text-center transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                >
+                  <div className={`relative mx-auto aspect-[3/4] w-full max-w-[170px] overflow-hidden transition duration-hover ease-brand ${isSelected ? 'scale-[1.03]' : 'group-hover:-translate-y-1'}`}>
+                    <GolfStaticImage
+                      src={visual.image}
+                      alt={item.caption}
+                      className="object-cover"
+                    />
+                  </div>
+                  <span className="mt-4 block font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid items-center gap-[clamp(34px,5vw,70px)] pt-[clamp(22px,4vw,42px)] lg:grid-cols-[0.9fr_1.1fr]">
+            <Reveal className="space-y-7">
+              <p className="font-body text-[12px] font-semibold text-primary/52">
+                {content.engraving.eyebrow}
+              </p>
+              <div className="space-y-3">
+                <h2 className="font-heading text-[clamp(24px,3.4vw,38px)] font-semibold leading-tight">
+                  {content.engraving.title}
+                </h2>
+                <p className="font-body text-[13px] leading-7 text-text">
+                  {content.engraving.body}
+                </p>
+              </div>
+              <div className="relative aspect-[1.45/1] w-full max-w-[480px] overflow-hidden bg-[#f2f0ec]">
+                <GolfStaticImage
+                  src="/images/golf/golf-day-crafted-engraving.jpg"
+                  alt={content.engraving.body}
+                  className="object-cover"
+                />
+              </div>
+            </Reveal>
+
+            <Reveal className="space-y-8">
+              <div className="relative aspect-[3/4] w-full max-w-[430px] overflow-hidden bg-[#f2f0ec] lg:ml-auto">
                 <GolfImage
                   filename={content.engraving.imagePrimary}
                   alt={content.engraving.title}
@@ -433,69 +346,110 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                   className="object-cover"
                 />
               </div>
-            </motion.div>
-            <motion.div
-              initial={{opacity: 0, y: prefersReducedMotion ? 0 : 54}}
-              whileInView={{opacity: 1, y: 0}}
-              viewport={{once: true, amount: 0.25}}
-              transition={{duration: prefersReducedMotion ? 0 : 0.78, delay: 0.12, ease: [0.16, 1, 0.3, 1]}}
-              className="absolute bottom-0 right-0 w-[66%] bg-white p-3 shadow-[0_34px_110px_rgba(16,29,48,0.12)]"
-            >
-              <div className="relative aspect-[3/2] overflow-hidden">
-                <GolfImage
-                  filename={content.engraving.imageDetail}
-                  alt={content.engraving.body}
-                  assets={assets}
-                  className="object-cover"
-                />
-              </div>
-            </motion.div>
+              <p className="max-w-[360px] font-heading text-[clamp(20px,2.4vw,30px)] font-semibold leading-tight text-primary lg:ml-auto">
+                “{quoteText}”
+              </p>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-section">
-        <div className="mx-auto grid max-w-[1440px] gap-12 px-container lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
-          <Reveal className="grid gap-5 md:grid-cols-[1fr_0.8fr] md:items-end">
-            <div className="relative aspect-[4/3] overflow-hidden bg-bg shadow-[0_24px_86px_rgba(16,29,48,0.08)]">
-              <div className="golf-ken-burns absolute inset-0">
-                <GolfImage
-                  filename={content.lifestyle.imageBox}
-                  alt={content.lifestyle.title}
-                  assets={assets}
-                  className="object-cover"
-                />
-              </div>
-            </div>
-            <div className="relative aspect-[4/5] overflow-hidden bg-bg shadow-[0_24px_86px_rgba(16,29,48,0.08)]">
-              <div className="golf-ken-burns absolute inset-0 [animation-delay:-4s]">
-                <GolfImage
-                  filename={content.lifestyle.imageLifestyle}
-                  alt={content.lifestyle.body}
-                  assets={assets}
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal className="space-y-8">
-            <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-subtext">
-              {content.lifestyle.eyebrow}
-            </p>
-            <h2 className="font-heading text-[clamp(32px,5vw,58px)] font-semibold leading-none text-primary">
-              {content.lifestyle.title}
-            </h2>
-            <p className="max-w-xl font-body text-[14px] leading-7 text-text">
-              {content.lifestyle.body}
-            </p>
-            <div className="border-t border-primary/50 pt-8 font-heading text-[clamp(28px,4vw,48px)] font-semibold leading-tight text-primary">
-              {content.lifestyle.closing}
-            </div>
+      <section className="bg-black py-[clamp(72px,9vw,132px)]">
+        <div className="mx-auto max-w-[1120px] px-container">
+          <Reveal className="relative mx-auto aspect-[1.54/1] w-full max-w-[920px] overflow-hidden">
+            <GolfStaticImage
+              src="/images/golf/golf-night-statement.jpg"
+              alt={content.lifestyle.body}
+              className="object-cover"
+            />
           </Reveal>
         </div>
       </section>
+
+      <section className="bg-white py-[clamp(72px,9vw,132px)] text-primary">
+        <div className="mx-auto max-w-[1120px] space-y-[clamp(54px,7vw,96px)] px-container">
+          <Reveal className="mx-auto grid aspect-[1.8/1] w-full max-w-[860px] place-items-center bg-[#d8d8d8]">
+            <p className="font-body text-[12px] font-semibold tracking-[0.08em] text-primary/70">
+              {locale === 'ko' ? '패키지 사진' : 'Package image'}
+            </p>
+          </Reveal>
+
+          <div className="space-y-8">
+            <h2 className="text-center font-heading text-[clamp(20px,2vw,28px)] font-semibold">
+              {locale === 'ko' ? '주문 방법' : 'Order process'}
+            </h2>
+            <div className="mx-auto grid max-w-[760px] grid-cols-2 gap-4 md:grid-cols-3">
+              {golfProcessSteps.map((step) => (
+                <Reveal key={step.id}>
+                  <div className="grid aspect-[1.2/1] place-items-center bg-[#202020] px-5 py-6 text-center text-white">
+                    <div className="space-y-2">
+                      <p className="font-numeric text-[15px] font-semibold tracking-[0.08em]">
+                        {step.id}
+                      </p>
+                      <h3 className="font-heading text-[clamp(15px,1.4vw,20px)] font-semibold leading-tight">
+                        {locale === 'ko' ? step.ko : step.en}
+                      </h3>
+                      <p className="font-body text-[10px] leading-4 text-white/52">
+                        {step.lines.join(' · ')}
+                      </p>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#F8F6F2] px-container py-[clamp(60px,7vw,92px)] text-center text-primary">
+        <Link
+          href={inquiryHref}
+          className="link-sweep inline-flex min-h-12 items-center font-heading text-[clamp(21px,2vw,30px)] font-semibold"
+        >
+          {requestLabel}
+        </Link>
+      </section>
     </main>
+  );
+}
+
+function ChevronIcon({direction}: {direction: 'left' | 'right'}) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-7 w-7"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {direction === 'left' ? <path d="M15 5 8 12l7 7" /> : <path d="m9 5 7 7-7 7" />}
+    </svg>
+  );
+}
+
+function GolfStaticImage({
+  alt,
+  className,
+  priority = false,
+  src
+}: {
+  alt: string;
+  className?: string;
+  priority?: boolean;
+  src: string;
+}) {
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      priority={priority}
+      sizes="(min-width: 1280px) 920px, (min-width: 768px) 72vw, 100vw"
+      className={className}
+    />
   );
 }
 

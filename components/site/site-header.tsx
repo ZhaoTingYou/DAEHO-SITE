@@ -225,13 +225,21 @@ export function SiteHeader({locale}: SiteHeaderProps) {
   const currentMegaItem = openMenu ? navItems.find((item) => item.id === openMenu) : undefined;
   const currentMegaDetails = openMenu ? megaMenuDetails[openMenu] : null;
   const isHeaderInteractive = isHeaderHovered || hasHeaderFocus;
+  const isGolf = relativePath === '/golf';
   const isHomeHeroTransparent =
     isHome &&
     (overHomeHero || atTop) &&
     !isMenuOpen &&
     openMenu === null &&
     !isHeaderInteractive;
-  const isSolid = !isHomeHeroTransparent && (!atTop || isMenuOpen || openMenu !== null || isHeaderInteractive);
+  const isGolfHeroTransparent =
+    isGolf &&
+    atTop &&
+    !isMenuOpen &&
+    openMenu === null &&
+    !isHeaderInteractive;
+  const isHeroTransparent = isHomeHeroTransparent || isGolfHeroTransparent;
+  const isSolid = !isHeroTransparent && (!atTop || isMenuOpen || openMenu !== null || isHeaderInteractive);
   const navVariants = prefersReducedMotion ? {hidden: {}, visible: {}} : navListVariants;
   const itemVariants = prefersReducedMotion ? instantItemVariants : navItemVariants;
 
@@ -259,7 +267,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
       className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter,color] duration-300 ease-brand ${
         isSolid
           ? 'border-b border-hairline bg-bg/95 text-primary shadow-[0_18px_60px_rgba(16,29,48,.08)] backdrop-blur-md [text-shadow:none]'
-          : isHomeHeroTransparent
+          : isHeroTransparent
             ? 'border-b border-transparent bg-transparent text-white [text-shadow:0_1px_16px_rgba(16,29,48,.42)]'
             : 'border-b border-transparent bg-transparent text-primary [text-shadow:0_1px_16px_rgba(255,255,255,.72)]'
       }`}
@@ -358,7 +366,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
 
             <Link
               href={withLocale(locale, '/contact')}
-              className={`consult-cta ${isHomeHeroTransparent ? 'consult-cta--light' : 'consult-cta--accent'}`}
+              className={`consult-cta ${isHeroTransparent ? 'consult-cta--light' : 'consult-cta--accent'}`}
             >
               <span className="consult-cta__label">{contactLabel}</span>
             </Link>
