@@ -120,16 +120,16 @@ export default async function StyleguidePage({params}: Props) {
           <SectionIntro eyebrow="03 Components" title="Reusable page blocks" />
           <div className="grid gap-8 border border-hairline bg-bg p-8 lg:grid-cols-3">
             <SectionIntro
-              eyebrow="Variant · Chronicle"
-              title="THE CHRONICLE"
+              eyebrow="Variant · Archive"
+              title="THE ARCHIVE"
               variant="chronicle"
             >
               <p>Axis-attached intro treatment for the archive timeline pages.</p>
             </SectionIntro>
-            <SectionIntro eyebrow="Variant · Legacy" title="THE MEANING" variant="legacy">
+            <SectionIntro eyebrow="Variant · Heritage" title="THE MEANING" variant="legacy">
               <p>A centered, slow, monument-like intro with much larger title rhythm.</p>
             </SectionIntro>
-            <SectionIntro eyebrow="Variant · News" title="NEWS" variant="news">
+            <SectionIntro eyebrow="Variant · Journal" title="JOURNAL" variant="news">
               <p>Masthead-style rule line for dense editorial pages.</p>
             </SectionIntro>
           </div>
@@ -151,7 +151,7 @@ export default async function StyleguidePage({params}: Props) {
           <TimelineEntry
             year="19XX"
             title="Engraved milestone"
-            body="A lightweight entry shape for CHRONICLE before the full scroll-drawn timeline arrives."
+            body="A lightweight entry shape for ARCHIVE before the full scroll-drawn timeline arrives."
             image="chronicle_milestone_01.png"
             first
           />

@@ -109,25 +109,25 @@
       "title": "Four stories that prove DEAHO",
       "items": [
         {
-          "title": "CHRONICLE",
+          "title": "ARCHIVE",
           "caption": "We created this market",
           "image": "home_pillar_chronicle.png",
           "href": "/chronicle"
         },
         {
-          "title": "LEGACY",
+          "title": "HERITAGE",
           "caption": "That is why we can be trusted",
           "image": "home_pillar_legacy.png",
           "href": "/legacy"
         },
         {
-          "title": "SPECIALTY",
+          "title": "MASTERY",
           "caption": "That is why we are the best",
           "image": "home_pillar_specialty.png",
           "href": "/specialty"
         },
         {
-          "title": "NEWS",
+          "title": "JOURNAL",
           "caption": "And we are still creating now",
           "image": "home_pillar_news.png",
           "href": "/news"
@@ -145,7 +145,7 @@
   "chronicle": {
     "hero": {
       "eyebrow": "EST. 1988",
-      "title": "THE CHRONICLE",
+      "title": "THE ARCHIVE",
       "koreanTitle": "Archive of History",
       "subtitle": "The history of DEAHO is the history of championship and appointment rings in Korea.",
       "image": "chronicle_hero.png"
@@ -204,7 +204,7 @@
     "closing": {
       "title": "This market — we built it.",
       "subtitle": "A record of time becomes evidence of trust.",
-      "cta": "View legacy"
+      "cta": "View heritage"
     }
   },
   "legacy": {
@@ -270,13 +270,13 @@
     },
     "closing": {
       "title": "A record is quiet, but it lasts.",
-      "cta": "View specialty"
+      "cta": "View mastery"
     }
   },
   "legacyPages": {
     "loyalty": {
       "hero": {
-        "eyebrow": "LEGACY · LOYALTY",
+        "eyebrow": "HERITAGE · LOYALTY",
         "title": "LOYALTY",
         "subtitle": "A chapter for relationships that endure and clients who return.",
         "image": "legacy_loyalty_hero.png"
@@ -299,7 +299,7 @@
     },
     "credibility": {
       "hero": {
-        "eyebrow": "LEGACY · CREDIBILITY",
+        "eyebrow": "HERITAGE · CREDIBILITY",
         "title": "CREDIBILITY",
         "subtitle": "Trust is not decoration. It is an arrangement of verifiable numbers and relationships.",
         "image": "legacy_credibility_hero.png"
@@ -348,7 +348,7 @@
     },
     "achievement": {
       "hero": {
-        "eyebrow": "LEGACY · ACHIEVEMENT",
+        "eyebrow": "HERITAGE · ACHIEVEMENT",
         "title": "ACHIEVEMENT",
         "subtitle": "Recognition and notable moments are kept as records filled with light.",
         "image": "legacy_achievement_hero.png"
@@ -449,20 +449,20 @@
   "specialtyPages": {
     "technique": {
       "hero": {
-        "eyebrow": "SPECIALTY · TECHNIQUE",
-        "title": "THE PROCESS",
+        "eyebrow": "",
+        "title": "MAKING",
         "subtitle": "Before a ring is complete, DEAHO's process passes through seven acts of inspection.",
         "image": "specialty_technique_hero.png"
       },
       "process": {
         "eyebrow": "SEVEN-STEP PROCESS",
         "title": "Seven steps behind a finished work",
-        "body": "As the page scrolls, design, modeling, casting, setting, polishing, packaging, and delivery unfold like an anatomy of craft.",
+        "body": "",
         "steps": [
           {
             "number": "01",
-            "label": "DESIGN SKETCH",
-            "title": "Design sketch",
+            "label": "DESIGN CONSULTING",
+            "title": "Design consulting",
             "body": "The team's symbols, names, and records are first arranged inside the structure of the ring.",
             "image": "specialty_process_1_sketch.png"
           },
@@ -542,7 +542,7 @@
     },
     "collection": {
       "hero": {
-        "eyebrow": "SPECIALTY · COLLECTION",
+        "eyebrow": "MASTERY · COLLECTION",
         "title": "THE WORKS",
         "subtitle": "Championship, appointment, and bespoke forms are shown inside a bright gallery.",
         "image": "specialty_collection_hero.png"
@@ -688,7 +688,7 @@
   },
   "news": {
     "masthead": {
-      "title": "NEWS",
+      "title": "JOURNAL",
       "issue": "DEAHO JOURNAL · ISSUE 2026",
       "body": "Project stories, workshop notes, press features, and collaborations gathered in one journal field.",
       "ticker": [
@@ -917,15 +917,15 @@
       "contactCta": "Contact",
       "items": {
         "home": "HOME",
-        "chronicle": "CHRONICLE",
-        "legacy": "LEGACY",
+        "chronicle": "ARCHIVE",
+        "legacy": "HERITAGE",
         "loyalty": "LOYALTY",
         "credibility": "CREDIBILITY",
         "achievement": "ACHIEVEMENT",
-        "specialty": "SPECIALTY",
-        "technique": "TECHNIQUE",
-        "collection": "COLLECTION",
-        "news": "NEWS",
+        "specialty": "MASTERY",
+        "technique": "MAKING",
+        "collection": "CREATIONS",
+        "news": "JOURNAL",
         "golf": "GOLF"
       },
       "mega": {
@@ -940,8 +940,8 @@
           }
         },
         "specialty": {
-          "eyebrow": "CRAFT ANATOMY",
-          "title": "Seven steps of precision",
+          "eyebrow": "STANDARD OF COMPLETION",
+          "title": "The difference made by precision",
           "motif": "01-07",
           "descriptions": {
             "technique": "Technique · Seven careful stages",
@@ -1010,7 +1010,7 @@
     }
   },
   "legacyUi": {
-    "backToLegacy": "Back to chronicle"
+    "backToLegacy": "Back to archive"
   },
   "specialtyUi": {
     "anatomyLabel": "Anatomy of Craft"
@@ -1021,17 +1021,17 @@
       "title": "DEAHO, Now",
       "body": "And we are still creating now.",
       "question": "A piece or project worth remembering?",
-      "primaryTitle": "NEW LEGACY RELEASED",
+      "primaryTitle": "NEW HERITAGE RELEASED",
       "primaryCta": "Explore More",
       "secondaryTitle": "RECENT HIGHLIGHT",
       "secondaryCta": "Explore More"
     },
     "latestNews": {
-      "eyebrow": "LATEST NEWS",
-      "title": "Latest News",
+      "eyebrow": "LATEST JOURNAL",
+      "title": "Latest Journal",
       "open": "Read more",
       "close": "Close",
-      "label": "Latest news popup",
+      "label": "Latest journal popup",
       "fallback": "Image pending",
       "body": "Verified source material will replace this article body when it arrives. For now, this popup keeps DEAHO’s recent production rhythm and project context in place."
     },
@@ -1129,16 +1129,16 @@
     }
   },
   "chronicleUi": {
-    "horizontalAriaLabel": "DEAHO chronicle horizontal timeline",
-    "yearNavAriaLabel": "Chronicle year navigation",
+    "horizontalAriaLabel": "DEAHO archive horizontal timeline",
+    "yearNavAriaLabel": "Archive year navigation",
     "endNav": {
-      "label": "Next chronicle navigation",
+      "label": "Next archive navigation",
       "title": "See what DEAHO is making now",
       "href": "/news"
     }
   },
   "newsUi": {
-    "filtersLabel": "News filters",
+    "filtersLabel": "Journal filters",
     "empty": {
       "title": "No stories yet",
       "body": "New verified journal entries will appear here when they are ready."
@@ -1149,7 +1149,7 @@
       "copied": "Link copied."
     },
     "detail": {
-      "back": "Back to news",
+      "back": "Back to journal",
       "author": "DEAHO Journal",
       "lead": "Verified source material will replace this article body when available.",
       "paragraphs": [

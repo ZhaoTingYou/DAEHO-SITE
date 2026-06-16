@@ -9,10 +9,10 @@ export type NavItem = {
 
 export const navItems: NavItem[] = [
   {id: 'home', label: 'HOME', href: '/'},
-  {id: 'chronicle', label: 'CHRONICLE', href: '/chronicle'},
+  {id: 'chronicle', label: 'ARCHIVE', href: '/chronicle'},
   {
     id: 'legacy',
-    label: 'LEGACY',
+    label: 'HERITAGE',
     href: '/legacy',
     children: [
       {id: 'loyalty', label: 'LOYALTY', href: '/legacy/loyalty'},
@@ -22,14 +22,14 @@ export const navItems: NavItem[] = [
   },
   {
     id: 'specialty',
-    label: 'SPECIALTY',
+    label: 'MASTERY',
     href: '/specialty',
     children: [
-      {id: 'technique', label: 'TECHNIQUE', href: '/specialty/technique'},
-      {id: 'collection', label: 'COLLECTION', href: '/specialty/collection'}
+      {id: 'technique', label: 'MAKING', href: '/specialty/technique'},
+      {id: 'collection', label: 'CREATIONS', href: '/specialty/collection'}
     ]
   },
-  {id: 'news', label: 'NEWS', href: '/news'},
+  {id: 'news', label: 'JOURNAL', href: '/news'},
   {id: 'golf', label: 'GOLF', href: '/golf'}
 ];
 

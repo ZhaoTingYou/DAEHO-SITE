@@ -42,13 +42,15 @@ export default async function TechniquePage({params}: Props) {
       <section className="bg-white pt-28">
         <div className="mx-auto max-w-[1280px] px-container pb-[clamp(72px,8vw,128px)] pt-[clamp(64px,8vw,120px)]">
           <ScrollText className="mx-auto max-w-3xl space-y-6 text-center">
-            <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-subtext">
-              {content.hero.eyebrow}
-            </p>
-            <h1 className="font-heading text-[clamp(28px,3.6vw,44px)] font-semibold leading-[1.12] text-primary">
+            {content.hero.eyebrow ? (
+              <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-subtext">
+                {content.hero.eyebrow}
+              </p>
+            ) : null}
+            <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(36px,3.4vw,52px)] font-bold uppercase leading-none tracking-normal text-accent">
               {content.hero.title}
             </h1>
-            <p className="mx-auto max-w-xl font-body text-[14px] leading-[1.85] text-text">
+            <p className="mx-auto max-w-xl font-heading text-[14px] font-semibold leading-[1.85] text-primary">
               {content.hero.subtitle}
             </p>
           </ScrollText>
@@ -72,7 +74,7 @@ export default async function TechniquePage({params}: Props) {
               title={content.process.title}
               variant="specialty"
             >
-              <p>{content.process.body}</p>
+              {content.process.body ? <p>{content.process.body}</p> : null}
             </SectionIntro>
           </ScrollText>
         </div>

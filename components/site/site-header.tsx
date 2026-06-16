@@ -477,7 +477,11 @@ export function SiteHeader({locale}: SiteHeaderProps) {
 
             <div className="mx-auto grid max-w-[1440px] grid-cols-[0.8fr_1.7fr_0.7fr] gap-10 px-container py-9">
               <div>
-                <p className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-subtext">
+                <p
+                  className={`font-body text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                    currentMegaItem.id === 'legacy' || currentMegaItem.id === 'specialty' ? 'text-accent' : 'text-subtext'
+                  }`}
+                >
                   {currentMegaDetails.eyebrow}
                 </p>
                 <p className="mt-3 max-w-[16rem] font-heading text-[22px] font-semibold leading-none">

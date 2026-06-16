@@ -109,25 +109,25 @@
       "title": "대호를 증명하는 네 가지 이야기",
       "items": [
         {
-          "title": "CHRONICLE",
+          "title": "ARCHIVE",
           "caption": "우리가 시장을 만들었다",
           "image": "home_pillar_chronicle.png",
           "href": "/chronicle"
         },
         {
-          "title": "LEGACY",
+          "title": "HERITAGE",
           "caption": "그래서 신뢰할 수 있다",
           "image": "home_pillar_legacy.png",
           "href": "/legacy"
         },
         {
-          "title": "SPECIALTY",
+          "title": "MASTERY",
           "caption": "그래서 우리가 최고다",
           "image": "home_pillar_specialty.png",
           "href": "/specialty"
         },
         {
-          "title": "NEWS",
+          "title": "JOURNAL",
           "caption": "그리고 지금도 만들고 있다",
           "image": "home_pillar_news.png",
           "href": "/news"
@@ -145,7 +145,7 @@
   "chronicle": {
     "hero": {
       "eyebrow": "EST. 1988",
-      "title": "THE CHRONICLE",
+      "title": "THE ARCHIVE",
       "koreanTitle": "역사의 기록물",
       "subtitle": "대호의 역사가 곧 한국 우승·임관 반지의 역사입니다.",
       "image": "chronicle_hero.png"
@@ -204,7 +204,7 @@
     "closing": {
       "title": "이 시장은, 우리가 만들었습니다.",
       "subtitle": "시간의 기록은 곧 신뢰의 증거가 됩니다.",
-      "cta": "Legacy 보기"
+      "cta": "HERITAGE 보기"
     }
   },
   "legacy": {
@@ -276,7 +276,7 @@
   "legacyPages": {
     "loyalty": {
       "hero": {
-        "eyebrow": "LEGACY · LOYALTY",
+        "eyebrow": "HERITAGE · LOYALTY",
         "title": "신의",
         "subtitle": "오래 이어지는 관계와 다시 찾는 신뢰를 위한 장입니다.",
         "image": "legacy_loyalty_hero.png"
@@ -299,7 +299,7 @@
     },
     "credibility": {
       "hero": {
-        "eyebrow": "LEGACY · CREDIBILITY",
+        "eyebrow": "HERITAGE · CREDIBILITY",
         "title": "신뢰",
         "subtitle": "신뢰는 장식이 아니라 검증 가능한 숫자와 관계의 배열입니다.",
         "image": "legacy_credibility_hero.png"
@@ -348,7 +348,7 @@
     },
     "achievement": {
       "hero": {
-        "eyebrow": "LEGACY · ACHIEVEMENT",
+        "eyebrow": "HERITAGE · ACHIEVEMENT",
         "title": "성취",
         "subtitle": "인정과 화제의 순간을 빛이 스며든 기록으로 남깁니다.",
         "image": "legacy_achievement_hero.png"
@@ -449,20 +449,20 @@
   "specialtyPages": {
     "technique": {
       "hero": {
-        "eyebrow": "SPECIALTY · TECHNIQUE",
-        "title": "THE PROCESS",
+        "eyebrow": "",
+        "title": "MAKING",
         "subtitle": "한 점의 반지가 완성되기까지, 대호의 공정은 일곱 번의 검증을 통과합니다.",
         "image": "specialty_technique_hero.png"
       },
       "process": {
         "eyebrow": "SEVEN-STEP PROCESS",
         "title": "한 작품이 완성되는 일곱 단계",
-        "body": "스크롤을 따라 설계, 모델링, 주조, 세팅, 연마, 포장, 전달의 순서가 하나의 해부도처럼 이어집니다.",
+        "body": "",
         "steps": [
           {
             "number": "01",
-            "label": "DESIGN SKETCH",
-            "title": "설계 스케치",
+            "label": "DESIGN CONSULTING",
+            "title": "디자인 컨설팅",
             "body": "팀의 상징, 이름, 기록을 반지의 구조 안에 배치하는 첫 단계입니다.",
             "image": "specialty_process_1_sketch.png"
           },
@@ -542,7 +542,7 @@
     },
     "collection": {
       "hero": {
-        "eyebrow": "SPECIALTY · COLLECTION",
+        "eyebrow": "MASTERY · COLLECTION",
         "title": "THE WORKS",
         "subtitle": "챔피언, 임관, 주문 제작의 형태를 밝은 갤러리 안에서 살펴봅니다.",
         "image": "specialty_collection_hero.png"
@@ -688,7 +688,7 @@
   },
   "news": {
     "masthead": {
-      "title": "NEWS",
+      "title": "JOURNAL",
       "issue": "DEAHO JOURNAL · 발행 2026",
       "body": "프로젝트 스토리와 제작 현장, 언론/피처, 협업 소식을 한곳에 모읍니다.",
       "ticker": [
@@ -917,21 +917,21 @@
       "contactCta": "문의",
       "items": {
         "home": "HOME",
-        "chronicle": "CHRONICLE",
-        "legacy": "LEGACY",
+        "chronicle": "ARCHIVE",
+        "legacy": "HERITAGE",
         "loyalty": "LOYALTY",
         "credibility": "CREDIBILITY",
         "achievement": "ACHIEVEMENT",
-        "specialty": "SPECIALTY",
-        "technique": "TECHNIQUE",
-        "collection": "COLLECTION",
-        "news": "NEWS",
+        "specialty": "MASTERY",
+        "technique": "MAKING",
+        "collection": "CREATIONS",
+        "news": "JOURNAL",
         "golf": "GOLF"
       },
       "mega": {
         "legacy": {
-          "eyebrow": "기록의 전당",
-          "title": "오래 남는 신뢰",
+          "eyebrow": "대호가 쌓아온 기준",
+          "title": "시간으로 증명된 신뢰",
           "motif": "38 / 200,000+",
           "descriptions": {
             "loyalty": "신의 · 오래도록 함께한 신뢰",
@@ -940,8 +940,8 @@
           }
         },
         "specialty": {
-          "eyebrow": "제작의 해부도",
-          "title": "정밀한 일곱 단계",
+          "eyebrow": "완성의 기준",
+          "title": "정밀한이 만드는 차이",
           "motif": "01-07",
           "descriptions": {
             "technique": "공정 · 7단계의 정성",
@@ -1010,7 +1010,7 @@
     }
   },
   "legacyUi": {
-    "backToLegacy": "CHRONICLE로 돌아가기"
+    "backToLegacy": "ARCHIVE로 돌아가기"
   },
   "specialtyUi": {
     "anatomyLabel": "공정 구조"
@@ -1021,7 +1021,7 @@
       "title": "지금, 대호",
       "body": "그리고 지금도 만들고 있다.",
       "question": "가장 자랑하고 싶은 아이템? 프로젝트?",
-      "primaryTitle": "NEW LEGACY RELEASED",
+      "primaryTitle": "NEW HERITAGE RELEASED",
       "primaryCta": "Explore More",
       "secondaryTitle": "RECENT HIGHLIGHT",
       "secondaryCta": "Explore More"
@@ -1033,7 +1033,7 @@
       "close": "닫기",
       "label": "최근 소식 팝업",
       "fallback": "이미지 준비 중",
-      "body": "확인된 자료가 도착하면 실제 기사 본문으로 교체됩니다. 현재는 대호의 최근 제작 흐름과 프로젝트 맥락을 정리하는 뉴스 팝업으로 유지합니다."
+      "body": "확인된 자료가 도착하면 실제 기사 본문으로 교체됩니다. 현재는 대호의 최근 제작 흐름과 프로젝트 맥락을 정리하는 저널 팝업으로 유지합니다."
     },
     "partners": {
       "ariaLabel": "협업 및 후원 브랜드",
@@ -1129,16 +1129,16 @@
     }
   },
   "chronicleUi": {
-    "horizontalAriaLabel": "대호 크로니클 가로 타임라인",
-    "yearNavAriaLabel": "크로니클 연도 선택",
+    "horizontalAriaLabel": "대호 아카이브 가로 타임라인",
+    "yearNavAriaLabel": "아카이브 연도 선택",
     "endNav": {
-      "label": "크로니클 다음 탐색",
+      "label": "아카이브 다음 탐색",
       "title": "최근 대호 근황 알아보기",
       "href": "/news"
     }
   },
   "newsUi": {
-    "filtersLabel": "뉴스 필터",
+    "filtersLabel": "저널 필터",
     "empty": {
       "title": "아직 등록된 소식이 없습니다",
       "body": "검증된 자료가 준비되면 이 지면에 새로운 소식이 추가됩니다."
@@ -1149,13 +1149,13 @@
       "copied": "링크가 복사되었습니다."
     },
     "detail": {
-      "back": "뉴스 목록",
+      "back": "저널 목록",
       "author": "대호 저널",
       "lead": "확인된 자료가 도착하면 실제 기사 본문으로 교체됩니다.",
       "paragraphs": [
         "현재는 프로젝트 개요와 제작 맥락을 정리하는 밝은 기사 템플릿으로 유지합니다.",
         "사진, 날짜, 출처, 세부 수치는 모두 검증 후 업데이트됩니다.",
-        "대호의 뉴스 내지는 잡지형 지면의 규칙선과 좁은 판형을 유지합니다."
+        "대호의 저널 내지는 잡지형 지면의 규칙선과 좁은 판형을 유지합니다."
       ],
       "quote": "승리의 순간을 영원의 형태로 남긴다는 원칙은 기사 내지에서도 같은 리듬으로 이어집니다.",
       "tags": [

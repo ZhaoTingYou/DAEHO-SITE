@@ -7,6 +7,7 @@ import {setRequestLocale} from 'next-intl/server';
 
 import {HomeHero} from '@/components/home/home-hero';
 import {HomeNewsPopups, type HomeNewsPopupCard} from '@/components/home/home-news-popups';
+import {HomeStatBand} from '@/components/home/home-stat-band';
 import {Reveal, RevealItem} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
@@ -145,7 +146,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
       </section>
 
       <section className="bg-white pb-[clamp(54px,5.5vw,88px)] pt-[clamp(36px,5vw,72px)]">
-        <div className="mx-auto grid max-w-[1180px] gap-10 px-container lg:grid-cols-[minmax(240px,0.34fr)_minmax(0,0.66fr)] lg:items-center xl:gap-16">
+        <div className="mx-auto grid max-w-[1320px] gap-10 px-container lg:grid-cols-[minmax(320px,0.30fr)_minmax(0,0.70fr)] lg:items-center xl:grid-cols-[minmax(390px,0.30fr)_minmax(0,0.70fr)] xl:gap-20">
           <Reveal className="max-w-[390px] space-y-7">
             <div className="space-y-5">
               <p className="font-heading text-[12px] font-medium uppercase leading-tight text-accent">
@@ -160,7 +161,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
             </p>
           </Reveal>
 
-          <Reveal className="grid items-stretch gap-5 sm:grid-cols-3">
+          <Reveal className="grid items-stretch gap-6 sm:grid-cols-3">
             {content.signature.projects.map((item) => (
               <RevealItem key={item.image} className="h-full">
                 <Link
@@ -193,37 +194,20 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
       </section>
 
       <section className="bg-[#62302F] py-[clamp(92px,10vw,150px)] text-[#F4E6E1]">
-        <Reveal className="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-container sm:grid-cols-2 lg:grid-cols-5 lg:gap-0">
-          {content.statBand.map((item, index) => (
-            <div
-              key={`${item.value}-${item.label}`}
-              className={`grid justify-items-center gap-4 text-center lg:min-h-[220px] lg:px-9 ${
-                index > 0 ? 'lg:border-l lg:border-[#F4E6E1]/70' : ''
-              }`}
-            >
-              <p className="home-stat-band__value text-[clamp(42px,4vw,68px)] leading-none tracking-normal">
-                {item.value}
-              </p>
-              <p className="home-stat-band__label whitespace-pre-line text-[15px] uppercase leading-[1.08] tracking-[0.03em]">
-                {item.label}
-              </p>
-              <p className="home-stat-band__body whitespace-pre-line text-[15px] leading-[1.35]">
-                {item.body}
-              </p>
-            </div>
-          ))}
-        </Reveal>
+        <HomeStatBand items={content.statBand} locale={locale} />
       </section>
 
       <section className="bg-white pb-[clamp(92px,10vw,150px)] pt-[clamp(38px,4vw,64px)]">
-        <div className="mx-auto max-w-[1180px] space-y-10 px-container">
-          <Reveal className="max-w-[760px] space-y-5">
-            <p className="font-body text-[10px] font-semibold uppercase tracking-[0.28em] text-subtext">
-              {latestNewsText.eyebrow}
-            </p>
-            <h2 className="font-heading text-[clamp(22px,2.4vw,34px)] font-semibold leading-tight text-primary">
-              {latestNewsText.title}
-            </h2>
+        <div className="mx-auto max-w-[1320px] space-y-10 px-container">
+          <Reveal className="max-w-[390px] space-y-7">
+            <div className="space-y-5">
+              <p className="font-heading text-[12px] font-medium uppercase leading-tight text-accent">
+                {latestNewsText.eyebrow}
+              </p>
+              <h2 className="font-heading text-[clamp(20px,1.8vw,26px)] font-semibold leading-tight text-primary">
+                {latestNewsText.title}
+              </h2>
+            </div>
           </Reveal>
           <Reveal>
             <HomeNewsPopups cards={latestNews} text={latestNewsText} />
