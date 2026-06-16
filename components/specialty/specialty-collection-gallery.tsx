@@ -799,14 +799,6 @@ function BespokeFloatingNav({
       <button
         type="button"
         onClick={() => setDisplayMode('archive')}
-        className="inline-flex min-h-11 items-center gap-2 px-4 text-primary/55 transition duration-hover ease-brand hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        History
-        <BookIcon />
-      </button>
-      <button
-        type="button"
-        onClick={() => setDisplayMode('archive')}
         className={`inline-flex min-h-11 items-center gap-2 px-4 transition duration-hover ease-brand hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
           displayMode === 'archive' ? 'text-primary' : 'text-primary/55'
         }`}
@@ -1186,24 +1178,6 @@ function ShuffleIcon() {
       <path d="M2 13h2.8c.9 0 1.6-.8 2.2-1.9" />
       <path d="M11 5h5" />
       <path d="M13 2l3 3-3 3" />
-    </svg>
-  );
-}
-
-function BookIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="h-[15px] w-[15px]"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.25"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3.5 4.2c1.8-.7 3.2-.5 5.5.9v9c-2.3-1.4-3.7-1.6-5.5-.9v-9Z" />
-      <path d="M14.5 4.2c-1.8-.7-3.2-.5-5.5.9v9c2.3-1.4 3.7-1.6 5.5-.9v-9Z" />
     </svg>
   );
 }

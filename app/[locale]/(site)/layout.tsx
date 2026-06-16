@@ -3,6 +3,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
 import {SiteFooter} from '@/components/site/site-footer';
+import {SiteCursor} from '@/components/site/site-cursor';
 import {SiteHeader} from '@/components/site/site-header';
 import {routing, type Locale} from '@/i18n/routing';
 
@@ -22,9 +23,12 @@ export default async function SiteLayout({children, params}: Props) {
 
   return (
     <>
-      <SiteHeader locale={locale as Locale} />
-      {children}
-      <SiteFooter locale={locale as Locale} />
+      <SiteCursor />
+      <div className="site-cursor-scope">
+        <SiteHeader locale={locale as Locale} />
+        {children}
+        <SiteFooter locale={locale as Locale} />
+      </div>
     </>
   );
 }

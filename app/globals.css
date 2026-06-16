@@ -107,6 +107,93 @@ a {
   text-decoration: none;
 }
 
+.site-cursor-scope.is-site-cursor-enabled,
+.site-cursor-scope.is-site-cursor-enabled * {
+  cursor: none !important;
+}
+
+.site-cursor {
+  --site-cursor-x: -100px;
+  --site-cursor-y: -100px;
+  --site-cursor-ring-x: -100px;
+  --site-cursor-ring-y: -100px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  width: 0;
+  height: 0;
+  color: #fff;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  opacity: 0;
+  transition: opacity 180ms var(--ease);
+}
+
+.site-cursor[data-active="true"][data-visible="true"] {
+  opacity: 1;
+}
+
+.site-cursor__ring,
+.site-cursor__dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: block;
+  pointer-events: none;
+  will-change: transform, width, height, opacity;
+}
+
+.site-cursor__ring {
+  width: 34px;
+  height: 34px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(255, 255, 255, .12);
+  opacity: .82;
+  transform: translate3d(calc(var(--site-cursor-ring-x) - 17px), calc(var(--site-cursor-ring-y) - 17px), 0);
+  transition:
+    width 180ms var(--ease),
+    height 180ms var(--ease),
+    opacity 180ms var(--ease),
+    box-shadow 180ms var(--ease);
+}
+
+.site-cursor__dot {
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 999px;
+  opacity: .92;
+  transform: translate3d(calc(var(--site-cursor-x) - 2px), calc(var(--site-cursor-y) - 2px), 0);
+}
+
+.site-cursor[data-interactive="true"] .site-cursor__ring {
+  width: 44px;
+  height: 44px;
+  opacity: .64;
+  box-shadow: 0 0 24px rgba(255, 255, 255, .18);
+  transform: translate3d(calc(var(--site-cursor-ring-x) - 22px), calc(var(--site-cursor-ring-y) - 22px), 0);
+}
+
+.site-cursor[data-pressed="true"] .site-cursor__ring {
+  width: 26px;
+  height: 26px;
+  opacity: .9;
+  transform: translate3d(calc(var(--site-cursor-ring-x) - 13px), calc(var(--site-cursor-ring-y) - 13px), 0);
+}
+
+@media (pointer: coarse) {
+  .site-cursor {
+    display: none;
+  }
+
+  .site-cursor-scope.is-site-cursor-enabled,
+  .site-cursor-scope.is-site-cursor-enabled * {
+    cursor: auto !important;
+  }
+}
+
 button,
 input,
 textarea,

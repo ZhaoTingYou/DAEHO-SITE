@@ -196,6 +196,31 @@ export function SiteHeader({locale}: SiteHeaderProps) {
   }, [hasHeaderFocus, isHeaderHovered, isHome, isMenuOpen, openMenu]);
 
   useEffect(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    const y = window.scrollY;
+    const nextAtTop = y < 8;
+    const heroExitY = Math.max(360, window.innerHeight - 96);
+
+    lastScrollYRef.current = y;
+    scrollDeltaRef.current = 0;
+    const frame = window.requestAnimationFrame(() => {
+      setAtTop(nextAtTop);
+      setOverHomeHero(isHome && y < heroExitY);
+      setIsHidden(false);
+      setIsHeaderHovered(false);
+      setHasHeaderFocus(false);
+      setOpenMenu(null);
+      setIsMenuOpen(false);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isHome, pathname]);
+
+  useEffect(() => {
     document.body.style.overflow = isMenuOpen ? 'hidden' : '';
 
     return () => {
