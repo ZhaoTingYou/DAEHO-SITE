@@ -23,7 +23,7 @@ type LoyaltyFeatureCarouselProps = {
 
 export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouselProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
-  const [current, setCurrent] = useState({index: 0, direction: 1});
+  const [current, setCurrent] = useState<{index: number; direction: 1 | -1}>({index: 0, direction: 1});
   const activeSlide = slides[current.index] ?? slides[0];
   const previousSlide = slides[(current.index - 1 + slides.length) % slides.length];
   const nextSlide = slides[(current.index + 1) % slides.length];
@@ -44,7 +44,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
     : {duration: 0.52, ease: [0.16, 1, 0.3, 1]};
   const previewTransition: Transition = prefersReducedMotion
     ? {duration: 0.01}
-    : {duration: 0.9, ease: [0.16, 1, 0.3, 1]};
+    : {duration: 1.05, ease: [0.16, 1, 0.3, 1]};
 
   if (!activeSlide) {
     return null;
@@ -82,13 +82,13 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
       <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(circle_at_22%_24%,rgba(255,232,205,0.55),transparent_26%),radial-gradient(circle_at_62%_12%,rgba(255,236,210,0.42),transparent_30%),linear-gradient(150deg,transparent_0%,rgba(77,27,23,0.4)_78%)]" />
 
       <SidePreview
-        keyName={`left-${previousSlide.previewImage}`}
+        direction={current.direction}
         slide={previousSlide}
         side="left"
         transition={previewTransition}
       />
       <SidePreview
-        keyName={`right-${nextSlide.previewImage}`}
+        direction={current.direction}
         slide={nextSlide}
         side="right"
         transition={previewTransition}
@@ -156,35 +156,35 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
 }
 
 function SidePreview({
-  keyName,
+  direction,
   slide,
   side,
   transition
 }: {
-  keyName: string;
+  direction: 1 | -1;
   slide: LoyaltyFeatureSlide;
   side: 'left' | 'right';
   transition: Transition;
 }) {
+  const enterX = direction === 1 ? 28 : -28;
+
   return (
-    <div className={`absolute top-[18%] hidden w-[21%] min-w-[190px] bg-white/10 p-0 md:block ${side === 'left' ? 'left-0' : 'right-0'}`}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={keyName}
-          initial={{opacity: 0, x: side === 'left' ? -28 : 28}}
-          animate={{opacity: 1, x: 0}}
-          exit={{opacity: 0, x: side === 'left' ? -18 : 18}}
-          transition={transition}
-        >
-          <Image
-            src={`/images/${slide.previewImage}`}
-            alt={slide.title}
-            width={520}
-            height={680}
-            className="aspect-[3/4] w-full object-cover opacity-[0.88] saturate-[0.92] contrast-[0.98]"
-          />
-        </motion.div>
-      </AnimatePresence>
+    <div className={`absolute top-[24%] hidden aspect-[3/4] w-[21%] min-w-[190px] overflow-hidden md:block ${side === 'left' ? 'left-0' : 'right-0'}`}>
+      <motion.div
+        key={`${side}-${slide.previewImage}`}
+        initial={{x: enterX}}
+        animate={{x: 0}}
+        transition={transition}
+        className="absolute -left-7 inset-y-0 w-[calc(100%+56px)]"
+      >
+        <Image
+          src={`/images/${slide.previewImage}`}
+          alt={slide.title}
+          fill
+          sizes="(min-width: 768px) 24vw, 0px"
+          className="object-cover opacity-[0.88] saturate-[0.92] contrast-[0.98]"
+        />
+      </motion.div>
     </div>
   );
 }
