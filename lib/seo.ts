@@ -84,37 +84,37 @@ function getPageSeo(locale: Locale, pageKey: PageKey): PageSeo {
       };
     case 'chronicle':
       return {
-        path: '/chronicle',
+        path: '/archive',
         title: messages.chronicle.hero.title,
         description: messages.chronicle.hero.subtitle
       };
     case 'loyalty':
       return {
-        path: '/legacy/loyalty',
+        path: '/heritage/loyalty',
         title: messages.legacyPages.loyalty.hero.title,
         description: messages.legacyPages.loyalty.hero.subtitle
       };
     case 'credibility':
       return {
-        path: '/legacy/credibility',
+        path: '/heritage/credibility',
         title: messages.legacyPages.credibility.hero.title,
         description: messages.legacyPages.credibility.hero.subtitle
       };
     case 'achievement':
       return {
-        path: '/legacy/achievement',
+        path: '/heritage/achievement',
         title: messages.legacyPages.achievement.hero.title,
         description: messages.legacyPages.achievement.hero.subtitle
       };
     case 'technique':
       return {
-        path: '/specialty/technique',
+        path: '/mastery/making',
         title: messages.specialtyPages.technique.hero.title,
         description: messages.specialtyPages.technique.hero.subtitle
       };
     case 'collection':
       return {
-        path: '/specialty/collection',
+        path: '/mastery/creations',
         title: messages.specialtyPages.collection.hero.title,
         description: messages.specialtyPages.collection.hero.subtitle
       };

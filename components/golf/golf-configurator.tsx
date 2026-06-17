@@ -83,19 +83,19 @@ type GolfConfiguratorProps = {
 };
 
 const golfShaftVisuals: Record<string, string> = {
-  black: '/images/golf_shaft_black.png',
-  white: '/images/golf_shaft_white.png',
-  burgundy: '/images/golf_shaft_burgundy.png',
-  navy: '/images/golf_shaft_navy.png'
+  black: 'object-[9%_50%]',
+  white: 'object-[38%_50%]',
+  burgundy: 'object-[66%_50%]',
+  navy: 'object-[93%_50%]'
 };
 
 const golfProcessSteps = [
-  {id: '01', ko: '헤드 선택', en: 'Choose head', lines: ['아이언', '퍼터', '우드']},
-  {id: '02', ko: '컬러 선택', en: 'Choose color', lines: ['블랙', '화이트', '네이비']},
-  {id: '03', ko: '샤프트 색상 선택', en: 'Select shaft', lines: ['블랙', '화이트', '버건디', '네이비']},
-  {id: '04', ko: '개인 문구 각인 선택', en: 'Engraving', lines: ['이름', '날짜']},
-  {id: '05', ko: '상담 문의', en: 'Inquiry', lines: ['수량', '일정']},
-  {id: '06', ko: '제작 진행', en: 'Production', lines: ['시안 확인', '제작 완료']}
+  {id: '01', ko: '헤드 선택', en: 'Choose head', lines: ['골프공', '아이언', '드라이버', '퍼터']},
+  {id: '02', ko: '헤드 옵션 선택', en: 'Choose head option', lines: ['베이직', '젬스톤']},
+  {id: '03', ko: '샤프트 색상 선택', en: 'Select shaft color', lines: ['블랙', '화이트', '버건디', '민트', '네이비']},
+  {id: '04', ko: '개인 맞춤형 각인 선택', en: 'Personal engraving', lines: []},
+  {id: '05', ko: '함량 선택', en: 'Choose gold purity', lines: ['18K', '14K']},
+  {id: '06', ko: '색상 선택', en: 'Choose gold color', lines: ['옐로우 골드', '핑크 골드', '화이트 골드']}
 ];
 
 export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProps) {
@@ -120,7 +120,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   const engravingSample = 'JUDY KIM 2026.05.03';
   const inquiryHref = `/${locale}/golf/inquiry?head=${selectedHead?.id ?? ''}&shaft=${selectedShaft?.id ?? ''}&engraving=${encodeURIComponent(engravingSample)}`;
   const requestLabel = locale === 'ko' ? '견적 문의하러 가기' : 'Request an estimate';
-  const quoteText = locale === 'ko' ? '순간을 영원히 기억하세요.' : 'Remember the moment, permanently.';
+  const quoteText = locale === 'ko' ? '순간을 영원히 기념하세요' : 'Celebrate the moment forever.';
   const changeShaft = (direction: 1 | -1) => {
     const items = content.shafts.items;
 
@@ -171,7 +171,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               className="absolute left-1/2 top-0 h-full w-[min(82vw,920px)] -translate-x-1/2"
             >
               <GolfStaticImage
-                src="/images/golf/golf-night-hero-product.jpg"
+                src="/images/golf/golf1.png"
                 alt={content.hero.subtitle}
                 className="object-contain"
                 priority
@@ -179,24 +179,24 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             </motion.div>
           </div>
 
-          <div className="mt-[clamp(42px,5vw,72px)] grid items-end gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-            <Reveal className="max-w-[390px] space-y-4">
-              <h1 className="font-heading text-[clamp(48px,7vw,80px)] font-semibold uppercase leading-[0.82] text-white">
+          <div className="relative left-1/2 mt-[clamp(42px,5vw,72px)] min-h-[clamp(460px,35vw,680px)] w-screen -translate-x-1/2 overflow-hidden bg-black">
+            <Reveal className="relative z-10 flex min-h-[clamp(460px,35vw,680px)] max-w-[520px] flex-col justify-center space-y-5 px-container py-20 lg:ml-[clamp(84px,12.5vw,240px)] lg:px-0">
+              <h1 className="font-heading text-[clamp(64px,6.4vw,112px)] font-semibold uppercase leading-[0.82] text-white">
                 {content.hero.titleLines.map((line) => (
                   <span key={line} className="block">
                     {line}
                   </span>
                 ))}
               </h1>
-              <p className="max-w-[260px] font-body text-[13px] font-semibold leading-6 text-white/76">
+              <p className="max-w-[380px] font-body text-[clamp(18px,1.45vw,27px)] font-semibold leading-[1.35] text-white/58">
                 {content.hero.subtitle}
               </p>
             </Reveal>
 
-            <Reveal className="relative min-h-[210px] overflow-hidden lg:min-h-[270px]">
-              <div className="absolute inset-y-0 right-[-12%] w-[92%]">
+            <Reveal className="pointer-events-none absolute right-[-70vw] top-1/2 h-[clamp(360px,33vw,650px)] w-[clamp(620px,56vw,1080px)] -translate-y-1/2 overflow-hidden sm:right-[-25vw] md:right-0">
+              <div className="absolute inset-0">
                 <GolfStaticImage
-                  src="/images/golf/golf-day-statement-product.jpg"
+                  src={`/images/${content.statement.image}`}
                   alt={content.statement.body}
                   className="object-contain object-right"
                 />
@@ -253,10 +253,10 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
           <div className="grid items-center gap-8 pt-[clamp(26px,5vw,58px)] md:grid-cols-[0.75fr_1.25fr]">
             <Reveal className="space-y-2">
               <p className="font-heading text-[clamp(18px,2vw,26px)] font-semibold text-white">
-                {locale === 'ko' ? '나만의 방식 선택하기' : 'Choose your own direction'}
+                {locale === 'ko' ? '나만의 팔찌 디자인하기' : 'Design your own bracelet'}
               </p>
               <p className="font-body text-[11px] leading-5 text-white/42">
-                {content.labels.selectedHead}: {selectedHead?.label}
+                {locale === 'ko' ? '취향에 맞게, 스타일에 맞게' : `For your taste, for your style`}
               </p>
             </Reveal>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -293,9 +293,9 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                 <figure key={item.id} className="text-center">
                   <div className="relative mx-auto aspect-[0.68/1] w-full max-w-[178px] overflow-hidden bg-white">
                     <GolfStaticImage
-                      src={golfShaftVisuals[item.id] ?? golfShaftVisuals.navy}
+                      src="/images/golf/Mask group.png"
                       alt={item.caption}
-                      className="scale-[1.55] object-cover object-[50%_25%] mix-blend-multiply"
+                      className={`scale-[1.35] object-cover ${golfShaftVisuals[item.id] ?? golfShaftVisuals.navy} mix-blend-multiply`}
                     />
                   </div>
                   <figcaption className="mt-6 font-heading text-[14px] font-semibold uppercase [letter-spacing:0] text-primary">
@@ -321,7 +321,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               </div>
               <div className="relative aspect-[1.45/1] w-full max-w-[480px] overflow-hidden bg-[#f2f0ec]">
                 <GolfStaticImage
-                  src="/images/golf/golf-day-crafted-engraving.jpg"
+                  src={`/images/${content.engraving.imageDetail}`}
                   alt={content.engraving.body}
                   className="object-cover"
                 />
@@ -347,12 +347,21 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
 
       <section className="bg-black py-[clamp(72px,9vw,132px)]">
         <div className="mx-auto max-w-[1120px] px-container">
-          <Reveal className="relative mx-auto aspect-[1.54/1] w-full max-w-[920px] overflow-hidden">
-            <GolfStaticImage
-              src="/images/golf/golf-night-statement.jpg"
-              alt={content.lifestyle.body}
-              className="object-cover"
-            />
+          <Reveal className="relative mx-auto min-h-[clamp(420px,58vw,720px)] w-full max-w-[920px]">
+            <div className="absolute right-0 top-0 aspect-[1.34/1] w-[78%] overflow-hidden">
+              <GolfStaticImage
+                src={`/images/${content.lifestyle.imageBox}`}
+                alt={content.lifestyle.body}
+                className="object-cover"
+              />
+            </div>
+            <div className="absolute bottom-0 left-0 aspect-[1.44/1] w-[58%] overflow-hidden">
+              <GolfStaticImage
+                src={`/images/${content.lifestyle.imageLifestyle}`}
+                alt={content.lifestyle.closing}
+                className="object-cover"
+              />
+            </div>
           </Reveal>
         </div>
       </section>
@@ -380,9 +389,13 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                       <h3 className="font-heading text-[clamp(15px,1.4vw,20px)] font-semibold leading-tight">
                         {locale === 'ko' ? step.ko : step.en}
                       </h3>
-                      <p className="font-body text-[10px] leading-4 text-white/52">
-                        {step.lines.join(' · ')}
-                      </p>
+                      {step.lines.length > 0 ? (
+                        <div className="space-y-0.5 font-body text-[10px] leading-4 text-white/52">
+                          {step.lines.map((line) => (
+                            <p key={line}>{line}</p>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </Reveal>
@@ -437,6 +450,7 @@ function GolfStaticImage({
       src={src}
       alt={alt}
       fill
+      unoptimized
       priority={priority}
       sizes="(min-width: 1280px) 920px, (min-width: 768px) 72vw, 100vw"
       className={className}
@@ -474,6 +488,7 @@ function GolfImage({
       src={`/images/${filename}`}
       alt={alt}
       fill
+      unoptimized
       priority={priority}
       sizes="(min-width: 1280px) 760px, (min-width: 768px) 60vw, 100vw"
       className={className}

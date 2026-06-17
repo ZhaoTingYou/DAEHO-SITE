@@ -29,25 +29,25 @@ const productItems: ProductGridItem[] = [
     title: 'Signature 01',
     caption: '밝은 제품 카드와 hover zoom 기준',
     image: 'home_ring_01.png',
-    href: '/ko/specialty/collection'
+    href: '/ko/mastery/creations'
   },
   {
     title: 'Signature 02',
     caption: '이미지 내부만 scale 1.04',
     image: 'home_ring_02.png',
-    href: '/ko/specialty/collection'
+    href: '/ko/mastery/creations'
   },
   {
     title: 'Signature 03',
     caption: '외부 카드 레이아웃은 고정',
     image: 'home_ring_03.png',
-    href: '/ko/specialty/collection'
+    href: '/ko/mastery/creations'
   },
   {
     title: 'Signature 04',
     caption: '문자 링크는 wine underline sweep',
     image: 'home_ring_04.png',
-    href: '/ko/specialty/collection'
+    href: '/ko/mastery/creations'
   }
 ];
 
@@ -129,7 +129,7 @@ export default async function StyleguidePage({params}: Props) {
             <SectionIntro eyebrow="Variant · Heritage" title="THE MEANING" variant="legacy">
               <p>A centered, slow, monument-like intro with much larger title rhythm.</p>
             </SectionIntro>
-            <SectionIntro eyebrow="Variant · Journal" title="JOURNAL" variant="news">
+            <SectionIntro eyebrow="Variant · News" title="NEWS" variant="news">
               <p>Masthead-style rule line for dense editorial pages.</p>
             </SectionIntro>
           </div>

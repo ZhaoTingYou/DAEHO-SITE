@@ -27,12 +27,12 @@ export async function getCollectionCategoryMetadata({
   const category = messages.specialtyPages.collection.gallery.filters.find((filter) => filter.id === categoryId);
 
   if (!category) {
-    return getDetailMetadata(locale, '/specialty/collection', 'COLLECTION', '');
+    return getDetailMetadata(locale, '/mastery/creations', 'COLLECTION', '');
   }
 
   return getDetailMetadata(
     locale,
-    `/specialty/collection/${categoryId}`,
+    `/mastery/creations/${categoryId}`,
     category.label,
     category.description ?? ''
   );

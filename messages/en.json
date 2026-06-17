@@ -112,22 +112,22 @@
           "title": "ARCHIVE",
           "caption": "We created this market",
           "image": "home_pillar_chronicle.png",
-          "href": "/chronicle"
+          "href": "/archive"
         },
         {
           "title": "HERITAGE",
           "caption": "That is why we can be trusted",
           "image": "home_pillar_legacy.png",
-          "href": "/legacy"
+          "href": "/heritage/loyalty"
         },
         {
           "title": "MASTERY",
           "caption": "That is why we are the best",
           "image": "home_pillar_specialty.png",
-          "href": "/specialty"
+          "href": "/mastery/making"
         },
         {
-          "title": "JOURNAL",
+          "title": "NEWS",
           "caption": "And we are still creating now",
           "image": "home_pillar_news.png",
           "href": "/news"
@@ -227,7 +227,7 @@
           "title": "Loyalty",
           "body": "Enduring relationships and returning trust are arranged as a quiet record.",
           "image": "legacy_card_loyalty.png",
-          "href": "/legacy/loyalty",
+          "href": "/heritage/loyalty",
           "cta": "View loyalty"
         },
         {
@@ -235,7 +235,7 @@
           "title": "Credibility",
           "body": "Years, production volume, and collaboration records are shown without exaggeration.",
           "image": "legacy_card_credibility.png",
-          "href": "/legacy/credibility",
+          "href": "/heritage/credibility",
           "cta": "View credibility"
         },
         {
@@ -243,7 +243,7 @@
           "title": "Achievement",
           "body": "Recognition, awards, and notable projects become one quiet archive.",
           "image": "legacy_card_achievement.png",
-          "href": "/legacy/achievement",
+          "href": "/heritage/achievement",
           "cta": "View achievement"
         }
       ]
@@ -406,7 +406,7 @@
           "title": "Technique",
           "body": "From sketch to delivery, seven steps reveal how a single work is completed in the light of the workshop.",
           "image": "specialty_card_technique.png",
-          "href": "/specialty/technique",
+          "href": "/mastery/making",
           "cta": "View technique"
         },
         {
@@ -414,7 +414,7 @@
           "title": "Collection",
           "body": "Championship, appointment, and bespoke forms are arranged as one bright gallery.",
           "image": "specialty_card_collection.png",
-          "href": "/specialty/collection",
+          "href": "/mastery/creations",
           "cta": "View collection"
         }
       ]
@@ -688,12 +688,12 @@
   },
   "news": {
     "masthead": {
-      "title": "JOURNAL",
-      "issue": "DEAHO JOURNAL · ISSUE 2026",
-      "body": "Project stories, workshop notes, press features, and collaborations gathered in one journal field.",
+      "title": "NEWS",
+      "issue": "DEAHO NEWS · ISSUE 2026",
+      "body": "Project stories, workshop notes, press features, and collaborations gathered in one news field.",
       "ticker": [
         "New production cases will be updated here when verified materials arrive.",
-        "Project stories, press features, and collaborations are gathered in one journal field.",
+        "Project stories, press features, and collaborations are gathered in one news field.",
         "DEAHO is still shaping the moments of victory into form."
       ]
     },
@@ -706,8 +706,8 @@
       "image": "news_featured.png.png"
     },
     "grid": {
-      "eyebrow": "LATEST INDEX",
-      "title": "DEAHO Journal",
+      "eyebrow": "",
+      "title": "",
       "filters": [
         {
           "id": "all",
@@ -788,14 +788,14 @@
   },
   "golf": {
     "hero": {
-      "eyebrow": "PREMIUM CUSTOMIZED GOLF BRACELET",
+      "eyebrow": "PREMIUM CUTOMIZED GOLF BRACELET",
       "titleLines": [
         "FORM",
         "OF THE",
         "GAME"
       ],
       "subtitle": "Reinterpreting the structure of golf as a singular object.",
-      "image": "golf_hero.png",
+      "image": "golf/golf1.png",
       "specLabel": "Configured bracelet"
     },
     "statement": {
@@ -805,7 +805,7 @@
         "GAME"
       ],
       "body": "The rhythm of a round, the line of a club, and the feeling on the wrist are arranged into one bright object.",
-      "image": "golf_hero_2.png"
+      "image": "golf/9ef0c9b8-2bdd-4c05-967f-b29287865f9a.png"
     },
     "heads": {
       "eyebrow": "CLUB HEAD",
@@ -817,28 +817,28 @@
           "label": "Ball + Tee",
           "kicker": "01",
           "caption": "A symbolic head with ball and tee held together.",
-          "image": "golf_head_ball.png"
+          "image": "golf/Group 10.png"
         },
         {
           "id": "iron",
           "label": "Iron",
           "kicker": "02",
           "caption": "A classic iron with a precise club line.",
-          "image": "golf_head_iron.png"
+          "image": "golf/Group 12.png"
+        },
+        {
+          "id": "driver",
+          "label": "Driver",
+          "kicker": "03",
+          "caption": "A driver profile carrying the curve of distance.",
+          "image": "golf/Group 14.png"
         },
         {
           "id": "putter",
           "label": "Putter",
-          "kicker": "03",
-          "caption": "A putter form shaped by the final touch on the green.",
-          "image": "golf_head_putter.png"
-        },
-        {
-          "id": "wood",
-          "label": "Wood",
           "kicker": "04",
-          "caption": "A wood profile carrying the curve of distance.",
-          "image": "golf_head_wood.png"
+          "caption": "A putter form shaped by the final touch on the green.",
+          "image": "golf/Group 13.png"
         }
       ]
     },
@@ -851,25 +851,25 @@
           "id": "black",
           "label": "BLACK",
           "caption": "The grip with the clearest contrast.",
-          "image": "golf_shaft_black.png"
+          "image": "golf/Mask group.png"
         },
         {
           "id": "white",
           "label": "WHITE",
           "caption": "The lightest grip in the brightest setting.",
-          "image": "golf_shaft_white.png"
+          "image": "golf/Mask group.png"
         },
         {
           "id": "burgundy",
           "label": "BURGUNDY",
           "caption": "A grip echoing DEAHO's accent color.",
-          "image": "golf_shaft_burgundy.png"
+          "image": "golf/Mask group.png"
         },
         {
           "id": "navy",
           "label": "NAVY",
           "caption": "A calm grip with a navy sensibility.",
-          "image": "golf_shaft_navy.png"
+          "image": "golf/Mask group.png"
         }
       ]
     },
@@ -877,8 +877,8 @@
       "eyebrow": "PERSONAL ENGRAVING",
       "title": "Engrave names, dates, and records",
       "body": "Scores, initials, dates, and course memories can be arranged on bright metal for a longer life.",
-      "imagePrimary": "golf_engrave_studio.png",
-      "imageDetail": "golf_engrave_detail.png",
+      "imagePrimary": "golf/ChatGPT Image 2026년 5월 3일 오후 05_34_00 1.png",
+      "imageDetail": "golf/ChatGPT Image 2026년 5월 3일 오후 05_34_00 2.png",
       "specs": [
         "Name",
         "Date",
@@ -890,8 +890,8 @@
       "eyebrow": "OBJECT & LIFESTYLE",
       "title": "A form beyond the round",
       "body": "As an object in its box and as a living piece on the wrist, the structure of golf remains longer.",
-      "imageBox": "golf_box.png",
-      "imageLifestyle": "golf_lifestyle.png",
+      "imageBox": "golf/ChatGPT Image 2026년 4월 30일 오후 01_13_41 1.png",
+      "imageLifestyle": "golf/ChatGPT Image 2026년 5월 3일 오후 05_21_01 1.png",
       "closing": "Your round, held for eternity"
     },
     "labels": {
@@ -925,7 +925,7 @@
         "specialty": "MASTERY",
         "technique": "MAKING",
         "collection": "CREATIONS",
-        "news": "JOURNAL",
+        "news": "NEWS",
         "golf": "GOLF"
       },
       "mega": {
@@ -1027,11 +1027,11 @@
       "secondaryCta": "Explore More"
     },
     "latestNews": {
-      "eyebrow": "LATEST JOURNAL",
-      "title": "Latest Journal",
+      "eyebrow": "LATEST NEWS",
+      "title": "Latest News",
       "open": "Read more",
       "close": "Close",
-      "label": "Latest journal popup",
+      "label": "Latest news popup",
       "fallback": "Image pending",
       "body": "Verified source material will replace this article body when it arrives. For now, this popup keeps DEAHO’s recent production rhythm and project context in place."
     },
@@ -1138,28 +1138,28 @@
     }
   },
   "newsUi": {
-    "filtersLabel": "Journal filters",
+    "filtersLabel": "News filters",
     "empty": {
       "title": "No stories yet",
-      "body": "New verified journal entries will appear here when they are ready."
+      "body": "New verified news entries will appear here when they are ready."
     },
-    "indexBody": "New production cases and project notes remain in this bright journal field as they are verified.",
+    "indexBody": "",
     "share": {
       "label": "Share",
       "copied": "Link copied."
     },
     "detail": {
-      "back": "Back to journal",
-      "author": "DEAHO Journal",
+      "back": "Back to news",
+      "author": "DEAHO News",
       "lead": "Verified source material will replace this article body when available.",
       "paragraphs": [
         "For now, this bright article template keeps the project overview and production context in place.",
         "Images, dates, sources, and exact figures will be updated only after verification.",
-        "The page keeps the rule-line masthead and narrow editorial measure of the DEAHO journal."
+        "The page keeps the rule-line masthead and narrow editorial measure of DEAHO news."
       ],
       "quote": "The principle of shaping victorious moments into permanence continues inside the article page.",
       "tags": [
-        "DEAHO JOURNAL",
+        "DEAHO NEWS",
         "COMING SOON"
       ],
       "ctaTitle": "Curious about this project?",

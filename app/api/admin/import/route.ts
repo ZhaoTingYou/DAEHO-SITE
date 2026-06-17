@@ -62,7 +62,7 @@ function revalidateCmsPaths() {
   const localizedPaths = locales.flatMap((locale) => [
     `/${locale}`,
     `/${locale}/news`,
-    `/${locale}/specialty/collection`
+    `/${locale}/mastery/creations`
   ]);
 
   for (const path of [

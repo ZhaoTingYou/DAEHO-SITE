@@ -93,14 +93,14 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
                 {currentPulse.primaryTitle}
               </h2>
               <Link
-                href={withLocale(locale, '/legacy')}
+                href={withLocale(locale, '/heritage/loyalty')}
                 className="home-feature-link inline-flex font-body text-[16px] leading-none transition duration-hover ease-brand"
               >
                 {currentPulse.primaryCta}
               </Link>
             </div>
 
-            <Link href={withLocale(locale, '/legacy')} className="group block">
+            <Link href={withLocale(locale, '/heritage/loyalty')} className="group block">
               <div className="relative overflow-hidden bg-bg">
                 <div className="hover-zoom">
                   <div className="hover-zoom-media">
@@ -117,7 +117,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
           </Reveal>
 
           <Reveal className="grid gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(220px,0.28fr)] lg:items-center xl:gap-[72px]">
-            <Link href={withLocale(locale, '/specialty/collection')} className="group block">
+            <Link href={withLocale(locale, '/mastery/creations')} className="group block">
               <div className="hover-zoom">
                 <div className="hover-zoom-media">
                   <SafeImage
@@ -165,7 +165,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
             {content.signature.projects.map((item) => (
               <RevealItem key={item.image} className="h-full">
                 <Link
-                  href={withLocale(locale, '/specialty/collection')}
+                  href={withLocale(locale, '/mastery/creations')}
                   className="group grid h-full grid-rows-[auto_1fr] bg-white p-2.5 shadow-[0_18px_70px_rgba(16,29,48,0.055)] transition duration-hover ease-brand hover:-translate-y-1 hover:shadow-[0_28px_90px_rgba(16,29,48,0.10)]"
                 >
                   <div className="hover-zoom">

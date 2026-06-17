@@ -42,12 +42,12 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const item = getCollectionItemForSite(locale, slug);
 
   if (!item) {
-    return getDetailMetadata(locale, '/specialty/collection', 'COLLECTION', '');
+    return getDetailMetadata(locale, '/mastery/creations', 'COLLECTION', '');
   }
 
   return getDetailMetadata(
     locale,
-    `/specialty/collection/${slug}`,
+    `/mastery/creations/${slug}`,
     item.seoTitle,
     item.seoDescription,
     `/images/${item.ogImagePath}`
@@ -84,7 +84,7 @@ export default async function CollectionDetailPage({params}: Props) {
     <main className="bg-bg text-text">
       <section className="bg-white pt-28">
         <div className="mx-auto max-w-[1280px] px-container pb-section pt-[clamp(40px,5vw,72px)]">
-          <Link href={withLocale(locale, '/specialty/collection')} className="link-sweep font-body text-[12px] font-semibold uppercase tracking-[0.16em]">
+          <Link href={withLocale(locale, '/mastery/creations')} className="link-sweep font-body text-[12px] font-semibold uppercase tracking-[0.16em]">
             {text.back}
           </Link>
           <div className="mt-[clamp(40px,5vw,64px)] grid gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.72fr)] lg:items-start lg:gap-16">
@@ -148,7 +148,7 @@ export default async function CollectionDetailPage({params}: Props) {
           <p className="font-heading text-[clamp(22px,2.4vw,32px)] font-semibold leading-[1.25] text-primary">
             {text.processTitle}
           </p>
-          <Link href={withLocale(locale, '/specialty/technique')} className="link-sweep inline-flex font-body text-[12px] font-semibold uppercase tracking-[0.16em]">
+          <Link href={withLocale(locale, '/mastery/making')} className="link-sweep inline-flex font-body text-[12px] font-semibold uppercase tracking-[0.16em]">
             {text.processCta}
           </Link>
         </Reveal>
@@ -184,7 +184,7 @@ export default async function CollectionDetailPage({params}: Props) {
               {related.map((entry) => (
                 <Link
                   key={entry.id}
-                  href={withLocale(locale, `/specialty/collection/${entry.id}`)}
+                  href={withLocale(locale, `/mastery/creations/${entry.id}`)}
                   className="group block bg-white p-3 shadow-[0_14px_50px_rgba(16,29,48,0.05)] transition duration-hover ease-brand hover:-translate-y-1"
                 >
                   <SafeImage filename={entry.image} alt={entry.title} aspect="aspect-square" variant="plain" />

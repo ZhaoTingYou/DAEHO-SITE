@@ -5,6 +5,7 @@ import {useState} from 'react';
 import {AnimatePresence, motion, type Transition} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import type {Locale} from '@/i18n/routing';
 
 export type LoyaltyFeatureSlide = {
   kicker: string;
@@ -19,9 +20,10 @@ export type LoyaltyFeatureSlide = {
 type LoyaltyFeatureCarouselProps = {
   slides: LoyaltyFeatureSlide[];
   imageAlt: string;
+  locale: Locale;
 };
 
-export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouselProps) {
+export function LoyaltyFeatureCarousel({slides, imageAlt, locale}: LoyaltyFeatureCarouselProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [current, setCurrent] = useState<{index: number; direction: 1 | -1}>({index: 0, direction: 1});
   const activeSlide = slides[current.index] ?? slides[0];
@@ -45,6 +47,10 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
   const previewTransition: Transition = prefersReducedMotion
     ? {duration: 0.01}
     : {duration: 1.05, ease: [0.16, 1, 0.3, 1]};
+  const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
+  const bodyTextClass = locale === 'ko'
+    ? "[font-family:'MaruBuri',serif] font-semibold"
+    : englishTextClass;
 
   if (!activeSlide) {
     return null;
@@ -119,15 +125,17 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
           animate={{opacity: 1, x: 0}}
           exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0, x: current.direction * -28}}
           transition={contentTransition}
-          className="absolute left-1/2 top-1/2 z-10 w-[min(78vw,690px)] -translate-x-1/2 -translate-y-1/2 bg-white px-8 py-14 text-center shadow-[0_24px_80px_rgba(56,33,28,0.16)] md:px-20 md:py-20"
+          className="absolute left-1/2 top-1/2 z-10 w-[min(78vw,760px)] -translate-x-1/2 -translate-y-1/2 bg-white px-8 py-12 text-center shadow-[0_24px_80px_rgba(56,33,28,0.16)] md:px-16 md:py-16"
         >
-          <p className="omega-kicker text-subtext">
-            {activeSlide.kicker}
-          </p>
-          <h2 className="omega-display mt-7 text-primary">
+          {activeSlide.kicker ? (
+            <p className={`${englishTextClass} text-[14px] uppercase leading-[19px] tracking-[0.2em] text-subtext`}>
+              {activeSlide.kicker}
+            </p>
+          ) : null}
+          <h2 className={`${englishTextClass} text-[clamp(24px,2.2vw,34px)] leading-tight tracking-normal text-primary ${activeSlide.kicker ? 'mt-7' : ''}`}>
             {activeSlide.title}
           </h2>
-          <p className="omega-copy mx-auto mt-8 max-w-[520px] text-text">
+          <p className={`${bodyTextClass} mx-auto mt-8 max-w-[600px] whitespace-pre-line text-[14px] leading-[1.68] tracking-normal text-text`}>
             {activeSlide.body}
           </p>
         </motion.article>

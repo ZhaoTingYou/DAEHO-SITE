@@ -328,7 +328,133 @@ select {
 .link-sweep {
   position: relative;
   display: inline-flex;
-  color: var(--primary);
+}
+
+.ring-blueprint-layer {
+  transform: translate3d(6px, -10px, 0) rotate(-.12deg) scale(1.01);
+}
+
+.ring-blueprint-svg {
+  transform-origin: 50% 50%;
+}
+
+.making-draft-grid-plane,
+.making-draft-coordinate-system,
+.making-draft-coordinate-labels,
+.making-draft-ring-primary,
+.making-draft-ring-secondary,
+.making-draft-section-layer,
+.making-draft-measure-layer {
+  will-change: opacity;
+}
+
+.making-draft-grid-plane {
+  opacity: .9;
+}
+
+.making-draft-coordinate-system {
+  opacity: .95;
+}
+
+.making-draft-coordinate-labels {
+  opacity: .82;
+}
+
+.making-draft-ring-primary {
+  opacity: .86;
+}
+
+.making-draft-ring-secondary {
+  opacity: .18;
+}
+
+.making-draft-section-layer,
+.making-draft-measure-layer {
+  opacity: 0;
+}
+
+@supports (animation-timeline: scroll(root block)) {
+  .ring-blueprint-layer {
+    animation-name: ring-blueprint-scroll;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 3600px;
+  }
+
+  .making-draft-grid-plane {
+    animation: making-draft-grid-change 1s linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 4200px;
+  }
+
+  .making-draft-coordinate-system {
+    animation: making-draft-coordinate-change 1s linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 4200px;
+  }
+
+  .making-draft-coordinate-labels {
+    animation: making-draft-label-change 1s linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 4200px;
+  }
+
+  .making-draft-ring-primary {
+    animation: making-draft-primary-change 1s linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 4200px;
+  }
+
+  .making-draft-ring-secondary {
+    animation: making-draft-secondary-change 1s linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 4200px;
+  }
+
+  .making-draft-section-layer {
+    animation: making-draft-section-change 1s linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 4200px;
+  }
+
+  .making-draft-measure-layer {
+    animation: making-draft-measure-change 1s linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 4200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-blueprint-layer,
+  .ring-blueprint-svg,
+  .making-draft-grid-plane,
+  .making-draft-coordinate-system,
+  .making-draft-coordinate-labels,
+  .making-draft-ring-primary,
+  .making-draft-ring-secondary,
+  .making-draft-section-layer,
+  .making-draft-measure-layer {
+    animation: none;
+  }
+
+  .ring-blueprint-layer,
+  .ring-blueprint-svg {
+    transform: none;
+  }
+
+  .making-draft-section-layer {
+    opacity: .18;
+  }
+
+  .making-draft-measure-layer {
+    opacity: .08;
+  }
+}
+
+.link-sweep.text-accent {
+  color: var(--accent);
 }
 
 .link-sweep::after {
@@ -1139,6 +1265,143 @@ select {
   50% {
     opacity: 1;
     transform: translate3d(0, 6px, 0);
+  }
+}
+
+@keyframes ring-blueprint-scroll {
+  from {
+    transform: translate3d(6px, -10px, 0) rotate(-.12deg) scale(1.01);
+  }
+
+  to {
+    transform: translate3d(-5px, 10px, 0) rotate(.08deg) scale(1.012);
+  }
+}
+
+@keyframes making-draft-grid-change {
+  0% {
+    opacity: .92;
+  }
+
+  34% {
+    opacity: .66;
+  }
+
+  68% {
+    opacity: .86;
+  }
+
+  100% {
+    opacity: .72;
+  }
+}
+
+@keyframes making-draft-coordinate-change {
+  0% {
+    opacity: .96;
+  }
+
+  38% {
+    opacity: .64;
+  }
+
+  72% {
+    opacity: .78;
+  }
+
+  100% {
+    opacity: .88;
+  }
+}
+
+@keyframes making-draft-label-change {
+  0% {
+    opacity: .82;
+  }
+
+  30% {
+    opacity: .46;
+  }
+
+  58% {
+    opacity: .18;
+  }
+
+  100% {
+    opacity: .58;
+  }
+}
+
+@keyframes making-draft-primary-change {
+  0% {
+    opacity: .86;
+  }
+
+  28% {
+    opacity: .62;
+  }
+
+  54% {
+    opacity: .16;
+  }
+
+  100% {
+    opacity: .08;
+  }
+}
+
+@keyframes making-draft-secondary-change {
+  0% {
+    opacity: .12;
+  }
+
+  34% {
+    opacity: .32;
+  }
+
+  62% {
+    opacity: .62;
+  }
+
+  100% {
+    opacity: .24;
+  }
+}
+
+@keyframes making-draft-section-change {
+  0% {
+    opacity: 0;
+  }
+
+  26% {
+    opacity: .08;
+  }
+
+  52% {
+    opacity: .48;
+  }
+
+  78% {
+    opacity: .34;
+  }
+
+  100% {
+    opacity: .14;
+  }
+}
+
+@keyframes making-draft-measure-change {
+  0%,
+  40% {
+    opacity: 0;
+  }
+
+  64% {
+    opacity: .42;
+  }
+
+  100% {
+    opacity: .16;
   }
 }
 

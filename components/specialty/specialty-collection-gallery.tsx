@@ -80,20 +80,10 @@ export function SpecialtyCollectionGallery({
   filters,
   items,
   chooseLabel,
-  countSuffix,
   viewLabel,
   locale
 }: SpecialtyCollectionGalleryProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
-  const formatCount = (count: number) => `${count}${locale === 'en' ? ' ' : ''}${countSuffix}`;
-
-  const counts = useMemo(() => {
-    const map: Record<string, number> = {};
-    items.forEach((item) => {
-      map[item.category] = (map[item.category] ?? 0) + 1;
-    });
-    return map;
-  }, [items]);
 
   const categoryCards = useMemo(
     () =>
@@ -101,7 +91,6 @@ export function SpecialtyCollectionGallery({
         const categoryItems = items.filter((item) => item.category === filter.id);
         return {
           ...filter,
-          count: counts[filter.id] ?? 0,
           item:
             filter.image && filter.hasImage
               ? {
@@ -114,7 +103,7 @@ export function SpecialtyCollectionGallery({
           description: filter.description ?? categoryItems[0]?.caption ?? ''
         };
       }),
-    [counts, filters, items]
+    [filters, items]
   );
 
   return (
@@ -137,9 +126,8 @@ export function SpecialtyCollectionGallery({
               index={index}
               label={category.label}
               description={category.description}
-              countText={formatCount(category.count)}
               viewLabel={viewLabel}
-              href={`/${locale}/specialty/collection/${category.id}`}
+              href={`/${locale}/mastery/creations/${category.id}`}
               item={category.item}
               reducedMotion={prefersReducedMotion}
               textSide={imageSide === 'left' ? 'right' : 'left'}
@@ -158,7 +146,6 @@ export function SpecialtyCollectionCategory({
   empty,
   filterLabel,
   allLabel,
-  countSuffix,
   finder,
   locale
 }: SpecialtyCollectionCategoryProps) {
@@ -170,8 +157,7 @@ export function SpecialtyCollectionCategory({
     () => items.filter((item) => item.category === categoryId),
     [categoryId, items]
   );
-  const formatCount = (count: number) => `${count}${locale === 'en' ? ' ' : ''}${countSuffix}`;
-  const backHref = `/${locale}/specialty/collection`;
+  const backHref = `/${locale}/mastery/creations`;
 
   if (!activeFilter) {
     return null;
@@ -233,7 +219,6 @@ export function SpecialtyCollectionCategory({
       filterLabel={filterLabel}
       activeLabel={activeFilter.label}
       allLabel={allLabel}
-      countText={formatCount(visibleItems.length)}
       backHref={backHref}
       locale={locale}
     />
@@ -567,7 +552,6 @@ function BespokeCreationsView({
           </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 py-5 pl-0 text-primary/45 md:pl-8">
             <span className="text-primary/45">{activeLabel}</span>
-            <span className="text-primary/45">{`${filteredItems.length}${locale === 'en' ? ' results' : '점'}`}</span>
             {activeFilterCount > 0 ? (
               <button
                 type="button"
@@ -742,7 +726,7 @@ function BespokeCanvasItem({
       }}
     >
       <Link
-        href={`/${locale}/specialty/collection/${item.id}`}
+        href={`/${locale}/mastery/creations/${item.id}`}
         className="group relative block h-full w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         aria-label={`${item.title}: ${item.caption}`}
       >
@@ -900,7 +884,7 @@ function BespokeCreationCard({
 }) {
   return (
     <Link
-      href={`/${locale}/specialty/collection/${item.id}`}
+      href={`/${locale}/mastery/creations/${item.id}`}
       className="group block min-h-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
       aria-label={`${item.title}: ${item.caption}`}
     >
@@ -1116,7 +1100,7 @@ function BespokeFilterSection({
         aria-expanded={open}
       >
         <span>{section.title}</span>
-        <span className="font-numeric text-[13px] text-primary/45">{selected.length}</span>
+        <span className="font-numeric text-[18px] text-primary/45">{open ? '-' : '+'}</span>
       </button>
       <AnimatePresence initial={false}>
         {open ? (
@@ -1132,7 +1116,6 @@ function BespokeFilterSection({
                 <FilterOptionButton
                   key={option.id}
                   label={option.label}
-                  count={option.count}
                   active={selected.includes(option.id)}
                   onClick={() => onToggle(option.id)}
                 />
@@ -1260,7 +1243,6 @@ function CollectionGridView({
   filterLabel,
   activeLabel,
   allLabel,
-  countText,
   backHref,
   locale
 }: {
@@ -1272,7 +1254,6 @@ function CollectionGridView({
   filterLabel: string;
   activeLabel: string;
   allLabel: string;
-  countText: string;
   backHref: string;
   locale: Locale;
 }) {
@@ -1290,9 +1271,6 @@ function CollectionGridView({
             {activeLabel}
           </h2>
         </div>
-        <span className="font-numeric text-[12px] font-semibold tracking-[0.04em] text-subtext">
-          {countText}
-        </span>
       </div>
 
       {items.length === 0 ? (
@@ -1370,7 +1348,7 @@ function AppointmentCollectionView({
               }}
             >
               <Link
-                href={`/${locale}/specialty/collection/${item.id}`}
+                href={`/${locale}/mastery/creations/${item.id}`}
                 className="group block min-h-11 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
                 aria-label={`${item.title}: ${item.caption}`}
               >
@@ -1546,7 +1524,7 @@ function CollectionProductGrid({
           }}
         >
           <Link
-            href={`/${locale}/specialty/collection/${item.id}`}
+            href={`/${locale}/mastery/creations/${item.id}`}
             className="group block min-h-11 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
             aria-label={`${item.title}: ${item.caption}`}
           >
@@ -1730,7 +1708,6 @@ function FilterSection({
             <div className="space-y-1 pb-7">
               <FilterOptionButton
                 label={allLabel}
-                count={options.reduce((sum, option) => sum + option.count, 0)}
                 active={selected.length === 0}
                 onClick={() => setSelected([])}
               />
@@ -1738,7 +1715,6 @@ function FilterSection({
                 <FilterOptionButton
                   key={option.id}
                   label={option.label}
-                  count={option.count}
                   active={selected.includes(option.id)}
                   onClick={() => setSelected(toggleCollectionFilter(selected, option.id))}
                 />
@@ -1753,12 +1729,10 @@ function FilterSection({
 
 function FilterOptionButton({
   label,
-  count,
   active,
   onClick
 }: {
   label: string;
-  count: number;
   active: boolean;
   onClick: () => void;
 }) {
@@ -1780,7 +1754,6 @@ function FilterOptionButton({
         <CheckIcon />
       </span>
       <span className="flex-1">{label}</span>
-      <span className="font-numeric text-[11px] text-subtext">{count}</span>
     </button>
   );
 }
@@ -1864,7 +1837,6 @@ function CollectionStagePanel({
   index,
   label,
   description,
-  countText,
   viewLabel,
   href,
   item,
@@ -1874,7 +1846,6 @@ function CollectionStagePanel({
   index: number;
   label: string;
   description: string;
-  countText: string;
   viewLabel: string;
   href: string;
   item?: CollectionImageSource;
@@ -1942,13 +1913,10 @@ function CollectionStagePanel({
             <h2 className="font-heading text-[clamp(26px,3.1vw,42px)] font-semibold leading-[1.12] text-on-navy">
               {label}
             </h2>
-            <p className="font-numeric text-[11px] font-semibold tracking-[0.08em] text-on-navy/60">
-              {String(index + 1).padStart(2, '0')} / {countText}
-            </p>
           </div>
           <Link
             href={href}
-            className="inline-flex min-h-11 items-center justify-center rounded-full border border-on-navy/45 px-6 py-2.5 font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-on-navy transition duration-hover ease-brand hover:border-on-navy hover:bg-on-navy hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-on-navy"
+            className="link-sweep inline-flex min-h-11 items-center justify-center font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
             {viewLabel}
           </Link>

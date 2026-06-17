@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import {
@@ -33,21 +32,26 @@ type LoyaltyCommitmentPageProps = {
 const pageCopy = {
   ko: {
     heroLabel: 'LOYALTY',
+    heroTitle: 'RELATIONSHIP',
     introLines: [
       '대호가 생각하는 관계는 한 번의 제작으로 끝나지 않습니다.',
-      '고객의 목적을 이해하고, 필요한 정보를 정확히 기록하며,',
-      '다음 의뢰에서도 다시 문의할 수 있는 제작 흐름을 유지합니다.',
+      '고객의 목적을 이해하고, 필요한 정보를 정확히 관리하며,',
+      '납품 이후에도 다시 문의할 수 있는 제작사로 남는 것이 중요합니다.',
       '반복되는 신뢰는 과정의 안정성에서 만들어집니다.'
     ],
+    imagePlaceholder: '여기는 이미지',
+    quoteTitle: 'Loyalty, Built Through Time',
+    quoteBody: '오래 함께한 시간은 가장 큰 증거입니다',
+    discoverLead: '대호의 프로젝트 더 알아보기',
     featureTitle: '01. Repeat Trust',
     featureBody:
-      '고객이 다시 제작을 맡기는 이유는 단순히 이전 결과물이 만족스러웠기 때문만은 아닙니다. 처음 상담부터 디자인 제안, 수정, 제작, 검수, 전달까지 전 과정이 안정적으로 보존되고 공유되기 때문입니다. 대호는 고객이 다시 같은 프로젝트를 맡겼을 때, 이전의 기준과 정보를 바탕으로 더 효율적이고 정확하게 진행할 수 있도록 관리합니다.',
+      '고객이 다시 제작을 맡기는 이유는 단순히 이전 결과물이 만족스러웠기 때문만은 아닙니다. 처음 상담부터 디자인 제안, 수정, 제작, 검수, 납품까지 전 과정이 안정적으로 진행되었는지가 중요합니다. 대호는 고객이 다시 같은 프로젝트를 맡겼을 때, 이전의 기준과 정보를 바탕으로 더 효율적이고 정확하게 진행할 수 있도록 관리합니다.\n\n우승반지, 임관반지, 단체 기념반지는 같은 고객이 시즌, 기수, 연도에 따라 반복 제작을 요청하는 경우가 많습니다. 이때 중요한 것은 이전 제품의 구조와 기준을 이해하고, 새로운 프로젝트에 맞게 필요한 부분만 정확히 조정하는 능력입니다. 대호는 반복 제작 경험을 통해 고객이 다시 맡길 수 있는 제작 환경을 만들어왔습니다.',
     featureKicker: 'LOYALTY STANDARD',
     featureSlides: [
       {
-        kicker: 'LOYALTY STANDARD',
+        kicker: '',
         title: '01. Repeat Trust',
-        body: '고객이 다시 제작을 맡기는 이유는 단순히 이전 결과물이 만족스러웠기 때문만은 아닙니다. 처음 상담부터 디자인 제안, 수정, 제작, 검수, 전달까지 전 과정이 안정적으로 보존되고 공유되기 때문입니다. 대호는 고객이 다시 같은 프로젝트를 맡겼을 때, 이전의 기준과 정보를 바탕으로 더 효율적이고 정확하게 진행할 수 있도록 관리합니다.',
+        body: '고객이 다시 제작을 맡기는 이유는 단순히 이전 결과물이 만족스러웠기 때문만은 아닙니다. 처음 상담부터 디자인 제안, 수정, 제작, 검수, 납품까지 전 과정이 안정적으로 진행되었는지가 중요합니다. 대호는 고객이 다시 같은 프로젝트를 맡겼을 때, 이전의 기준과 정보를 바탕으로 더 효율적이고 정확하게 진행할 수 있도록 관리합니다.\n\n우승반지, 임관반지, 단체 기념반지는 같은 고객이 시즌, 기수, 연도에 따라 반복 제작을 요청하는 경우가 많습니다. 이때 중요한 것은 이전 제품의 구조와 기준을 이해하고, 새로운 프로젝트에 맞게 필요한 부분만 정확히 조정하는 능력입니다. 대호는 반복 제작 경험을 통해 고객이 다시 맡길 수 있는 제작 환경을 만들어왔습니다.',
         backgroundImage: 'legacy_loyalty_hero.png',
         previewImage: 'legacy_card_loyalty.png',
         accentStart: 'rgba(180,66,54,0.95)',
@@ -76,12 +80,17 @@ const pageCopy = {
   },
   en: {
     heroLabel: 'LOYALTY',
+    heroTitle: 'RELATIONSHIP',
     introLines: [
       'For DEAHO, loyalty does not end with a single commission.',
       'It begins by understanding the client, preserving the right information,',
       'and keeping a production flow that makes every return easier.',
       'Repeat trust is built through a process that stays stable over time.'
     ],
+    imagePlaceholder: 'Image area',
+    quoteTitle: 'Loyalty, Built Through Time',
+    quoteBody: 'Time spent together is the clearest proof.',
+    discoverLead: 'Discover more DEAHO projects',
     featureTitle: '01. Repeat Trust',
     featureBody:
       'Clients return not only because the previous result was satisfying, but because the full process remains clear: consultation, design direction, revisions, production, inspection, and delivery. DEAHO keeps the standards and context from each project so the next commission can begin with confidence and move with greater precision.',
@@ -119,7 +128,12 @@ const pageCopy = {
   }
 } satisfies Record<Locale, {
   heroLabel: string;
+  heroTitle: string;
   introLines: string[];
+  imagePlaceholder: string;
+  quoteTitle: string;
+  quoteBody: string;
+  discoverLead: string;
   featureTitle: string;
   featureBody: string;
   featureKicker: string;
@@ -129,49 +143,65 @@ const pageCopy = {
 
 export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPageProps) {
   const copy = pageCopy[locale];
+  const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
+  const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
+  const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
 
   return (
-    <main className="bg-bg text-primary">
-      <section className="bg-bg px-[clamp(20px,2.4vw,36px)] pb-[clamp(54px,7vw,92px)] pt-[clamp(92px,10vw,132px)]">
-        <div className="relative mx-auto h-[clamp(320px,43vw,560px)] max-w-[1500px] overflow-hidden bg-primary">
-          <Image
-            src={`/images/${content.hero.image}`}
-            alt={content.hero.subtitle}
-            fill
-            priority
-            sizes="100vw"
-            className="scale-110 object-cover opacity-35 mix-blend-multiply blur-[1px] saturate-50"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,246,242,0.16),rgba(16,29,48,0.62)),radial-gradient(circle_at_42%_18%,rgba(255,255,255,0.48),transparent_34%),radial-gradient(circle_at_72%_82%,rgba(8,15,26,0.48),transparent_42%)]" />
-          <div className="absolute inset-0 opacity-55 [background-image:linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(180deg,rgba(16,29,48,0.18)_1px,transparent_1px)] [background-size:38px_38px]" />
-          <Reveal className="absolute left-1/2 top-1/2 w-[min(74vw,680px)] -translate-x-1/2 -translate-y-1/2 bg-white px-8 py-12 text-center shadow-[0_18px_60px_rgba(16,29,48,0.08)] md:px-16 md:py-16">
-            <h1 className="omega-title text-primary">
-              {copy.heroLabel}
-            </h1>
-            <span className="mx-auto mt-7 block h-2.5 w-2.5 rotate-45 border-b border-r border-primary/70" />
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="bg-bg pb-[clamp(76px,9vw,126px)]">
+    <main className="bg-white text-primary">
+      <section className="grid min-h-[100svh] place-items-center bg-white py-24">
         <div className="mx-auto max-w-3xl px-container text-center">
-          <Reveal className="space-y-3 text-[#252525]">
-            {copy.introLines.map((line) => (
-              <p key={line} className="omega-intro-copy">{line}</p>
-            ))}
+          <Reveal className="space-y-5 text-[#252525]">
+            <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
+              {copy.heroLabel}
+            </p>
+            <h1 className={`${englishTextClass} text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
+              {copy.heroTitle}
+            </h1>
+            <div className="space-y-1.5 pt-1">
+              {copy.introLines.map((line) => (
+                <p key={line} className={`${bodyTextClass} text-[15px] leading-[1.85] text-[#252525]`}>
+                  {line}
+                </p>
+              ))}
+            </div>
           </Reveal>
         </div>
       </section>
 
-      <section className="bg-bg px-[clamp(20px,2.4vw,36px)] pb-[clamp(30px,5vw,56px)]">
-        <LoyaltyFeatureCarousel slides={copy.featureSlides} imageAlt={content.hero.subtitle} />
+      <section className="bg-white pb-4">
+        <div className="px-container">
+          <p className={`${bodyTextClass} text-[15px] leading-none text-[#252525]`}>
+            {copy.imagePlaceholder}
+          </p>
+        </div>
       </section>
 
-      <section className="bg-bg pb-24 md:pb-28">
+      <section className="bg-[#f4f1ee] py-[clamp(100px,12vw,174px)]">
+        <Reveal className="mx-auto max-w-4xl px-container text-center text-primary">
+          <p className={`${englishTextClass} text-[clamp(58px,7vw,92px)] leading-none text-black`}>“</p>
+          <p className={`${englishTextClass} mt-7 text-[clamp(24px,2.4vw,34px)] italic leading-tight text-primary`}>
+            {copy.quoteTitle}
+          </p>
+          <p className={`${bodyTextClass} mt-4 text-[clamp(27px,3vw,43px)] leading-tight text-primary`}>
+            {copy.quoteBody}
+          </p>
+          <p className={`${englishTextClass} mt-7 text-[clamp(58px,7vw,92px)] leading-none text-black`}>”</p>
+        </Reveal>
+      </section>
+
+      <section className="bg-white px-[clamp(20px,2.4vw,36px)] pb-[clamp(30px,5vw,56px)] pt-0">
+        <LoyaltyFeatureCarousel slides={copy.featureSlides} imageAlt={content.hero.subtitle} locale={locale} />
+      </section>
+
+      <section className="bg-white pb-24 pt-[clamp(92px,10vw,150px)] md:pb-28">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
+          <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
+            {copy.discoverLead}
+          </p>
           <Link
-            href={withLocale(locale, '/specialty/collection')}
-            className="link-sweep omega-kicker"
+            href={withLocale(locale, '/mastery/creations')}
+            className={`${englishTextClass} link-sweep mt-7 inline-flex text-[14px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
           >
             {copy.cta}
           </Link>

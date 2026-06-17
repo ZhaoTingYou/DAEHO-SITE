@@ -9,12 +9,12 @@ export const dynamic = 'force-dynamic';
 
 const staticPaths = [
   '/',
-  '/chronicle',
-  '/legacy/loyalty',
-  '/legacy/credibility',
-  '/legacy/achievement',
-  '/specialty/technique',
-  '/specialty/collection',
+  '/archive',
+  '/heritage/loyalty',
+  '/heritage/credibility',
+  '/heritage/achievement',
+  '/mastery/making',
+  '/mastery/creations',
   '/news',
   '/golf',
   '/golf/inquiry',
@@ -31,8 +31,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ? cmsNews.map((card) => `/news/${card.slug}`)
       : koMessages.news.grid.cards.map((card) => `/news/${card.id}`)),
     ...(cmsCollections.length > 0
-      ? cmsCollections.map((item) => `/specialty/collection/${item.slug}`)
-      : koMessages.specialtyPages.collection.gallery.items.map((item) => `/specialty/collection/${item.id}`))
+      ? cmsCollections.map((item) => `/mastery/creations/${item.slug}`)
+      : koMessages.specialtyPages.collection.gallery.items.map((item) => `/mastery/creations/${item.id}`))
   ];
   const lastModified = new Date();
 

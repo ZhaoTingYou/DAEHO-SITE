@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import {Reveal} from '@/components/motion/reveal';
@@ -23,220 +22,242 @@ type StandardRow = {
   number: string;
   title: string;
   accent: string;
-  body: string;
-  image: string;
+  paragraphs: string[];
 };
 
 const pageCopy = {
   ko: {
     heroLabel: 'CREDIBILITY',
-    introLines: [
-      '대호의 신뢰는 오랜 경험만으로 설명되지 않습니다.',
-      '각 제작, 수리, 납품까지 전 과정을 같은 기준으로 확인하고,',
-      '한 번의 결과물을 넘어 반복해서 맡길 수 있는 제작 체계를 유지합니다.'
-    ],
-    standardTitle: 'STANDARD',
-    standardLead: 'Credibility. Proven Through Standards.',
-    standardSubline: '신뢰는 기준에서 시작됩니다.',
+    heroTitle: 'STANDARD',
+    intro:
+      '대호의 신뢰는 오랜 경험만으로 설명되지 않습니다. 디자인 상담부터 제작, 검수, 납품까지 전 과정을 직접 관리하며, 정해진 일정과 기준 안에서 결과물을 완성해왔습니다. 중요한 단체 제작을 맡길 수 있는 이유는 명확한 제작 체계에 있습니다.',
+    imagePlaceholder: '여기는 이미지',
+    quoteTitle: 'Credibility, Proven Through Standards',
+    quoteBody: '신뢰는 기준에서 시작됩니다',
+    discoverLead: '대호의 프로젝트 더 알아보기',
     cta: 'DISCOVER MORE',
     rows: [
       {
         number: '01.',
         title: '38년의 업력',
         accent: '변하지 않는 제작 기준',
-        body:
-          '대호는 1986년부터 우승반지, 단체반지, 단체 기념제품을 만들어온 제작사입니다. 같은 기준으로 상담과 제작을 이어오며, 디자인 제안, 소재 선택, 각인, 사이즈 확인, 검수까지 필요한 과정을 내부 기준으로 정리해 왔습니다.',
-        image: 'legacy_card_credibility.png'
+        paragraphs: [
+          '대호는 1988년부터 우승반지, 임관반지, 단체 기념제품을 전문적으로 제작해왔습니다. 오랜 시간동안 프로스포츠 구단, 군 관련 단체, 학교, 기관, 기업 등 다양한 고객의 프로젝트를 진행하며, 중요한 기념 제품에 필요한 기준과 제작 방식을 축적해왔습니다.',
+          '38년의 경험은 단순히 오래 운영되었다는 의미가 아닙니다. 고객의 행사 일정, 단체별 상징, 개인별 각인, 수량 관리, 납품 방식 등 실제 제작 과정에서 발생하는 다양한 변수를 경험하고 해결해온 시간입니다. 대호는 이러한 경험을 바탕으로 고객이 중요한 프로젝트를 안정적으로 맡길 수 있는 제작 기준을 만들어왔습니다.'
+        ]
       },
       {
         number: '02.',
         title: '100% 자체 전공정 관리',
         accent: '디자인부터 납품까지 직접 관리',
-        body:
-          '대호는 디자인 상담, 3D 설계, 주조, 세공, 도금, 세팅, 포장까지 주요 제작 과정을 직접 관리합니다. 여러 담당자가 같은 제작 기록을 기준으로 움직이기 때문에 단체 주문에서도 사양과 일정의 흔들림을 줄일 수 있습니다.',
-        image: 'legacy_credibility_hero.png'
+        paragraphs: [
+          '대호는 디자인, 3D 설계, 주조, 세공, 보석 세팅, 각인, 표면 마감, 검수, 포장까지 주요 제작 과정을 자체적으로 관리합니다. 여러 외부 공정에 의존할 경우 디자인 의도, 품질, 일정 관리에 변수가 생길 수 있습니다.',
+          '대호는 이러한 변동성을 줄이기 위해 제작 전 과정을 하나의 기준 안에서 운영합니다. 우승반지와 임관반지, 단체 기념제품은 일반 주얼리보다 확인해야 할 요소가 많습니다. 로고, 문장, 이름, 연도, 개인 각인, 사이즈, 수량이 모두 정확해야 하며, 디자인이 실제 제품으로 구현될 때 구조적 안정성과 착용감도 함께 고려되어야 합니다. 대호는 각 단계에서 제작 가능성과 완성도를 검토하며, 고객의 의도와 실제 제품의 품질이 일치하도록 관리합니다.'
+        ]
       },
       {
         number: '03.',
         title: '0% 납품 사고',
-        accent: '정밀 검수와 작업지도 제작',
-        body:
-          '수량, 이름, 사이즈, 각인, 포장 방식처럼 단체 주문에서 놓치기 쉬운 항목은 출고 전 다시 확인합니다. 제작 과정의 작은 차이가 최종 전달의 신뢰로 이어지기 때문에, 대호는 작업지와 검수 흐름을 함께 관리합니다.',
-        image: 'chronicle_detail_01.png'
+        accent: '정해진 일정까지 책임지는 제작',
+        paragraphs: [
+          '우승 기념행사, 임관식, 수여식, 창립 기념식, 은퇴식처럼 날짜가 정해진 프로젝트는 납품 일정이 매우 중요합니다. 제품의 완성도가 높더라도 정해진 날짜에 전달되지 않으면 프로젝트 전체에 문제가 생길 수 있습니다. 대호는 제품을 만드는 과정뿐 아니라 고객의 행사 일정에 맞춰 정확히 납품하는 것까지 제작의 일부로 보고 관리합니다.',
+          '납품 안정성은 단순히 빠르게 제작하는 능력이 아닙니다. 상담 단계에서부터 제작 기간, 디자인 확정 시점, 사이즈 취합, 각인 확인, 검수, 포장, 배송 일정을 함께 고려해야 합니다. 대호는 38년 동안 다양한 단체 주문과 기념 제작 프로젝트를 진행하며 일정 관리의 중요성을 경험해왔고, 납품 사고 없이 프로젝트를 마무리해온 기록을 쌓아왔습니다.'
+        ]
       },
       {
         number: '04.',
         title: '단체 주문 관리 시스템',
         accent: '이름, 사이즈, 각인까지 정확하게',
-        body:
-          '팀 주문은 한 명의 제품이 아니라 여러 사람의 정보를 동시에 관리하는 일입니다. 대호는 이름, 번호, 사이즈, 문구, 포장 요청을 표준화된 기록으로 정리해 제작과 검수 단계에서 같은 정보를 확인할 수 있게 합니다.',
-        image: 'legacy_partner_placeholder.png'
+        paragraphs: [
+          '단체 제작은 제품 하나를 잘 만드는 것만으로 완성되지 않습니다. 수십 명, 수백 명의 이름, 사이즈, 각인 내용, 수량, 포장 방식이 모두 정확히 반영되어야 합니다. 특히 우승반지나 임관반지처럼 개인별 정보가 들어가는 제품은 작은 오류도 고객 전체의 신뢰도에 영향을 줄 수 있습니다.',
+          '대호는 단체 주문의 특성을 고려해 제작 단계부터 개인별 데이터를 확인하고 관리합니다. 이름 표기, 호수, 각인 위치, 문구, 옵션, 수량, 케이스 구성 등을 정리하고, 최종 납품 전까지 누락이나 오류가 발생하지 않도록 점검합니다. 고객 입장에서는 복잡한 단체 주문을 안정적으로 맡길 수 있어야 하며, 대호는 이러한 관리 체계를 통해 프로젝트의 완성도를 높입니다.'
+        ]
       },
       {
         number: '05.',
+        title: '지속적 R&D',
+        accent: '신뢰를 높이는 기준의 개선',
+        paragraphs: [
+          '대호의 연구개발은 새로운 기술을 보여주기 위한 목적에만 머무르지 않습니다. 더 안정적인 품질, 더 정확한 제작, 더 만족도 높은 결과물을 만들기 위해 소재, 주조, 세공, 각인, 표면 처리, 보석 세팅 등 제품 완성도에 영향을 주는 모든 공정을 지속적으로 점검하고 개선합니다.',
+          '특히 단체 주문과 기념 제품은 동일한 디자인 안에서도 사이즈, 각인, 수량, 일정, 납품 기준이 모두 정확하게 관리되어야 합니다. 대호는 축적된 제작 경험과 지속적인 기술 개선을 바탕으로 오차를 줄이고, 완성도를 높이며, 고객이 안심하고 맡길 수 있는 제작 기준을 만들어가고 있습니다. 이러한 꾸준한 연구개발은 대호의 신뢰를 유지하는 가장 중요한 기반입니다.'
+        ]
+      },
+      {
+        number: '06.',
         title: '품질 검수 기준',
         accent: '보이지 않는 부분까지 확인',
-        body:
-          '완성품은 표면 상태, 도금 균일도, 스톤 고정, 각인 상태, 포장 상태를 확인한 뒤 전달됩니다. 눈에 잘 보이는 장식뿐 아니라 착용감과 마감의 안정성까지 확인하는 것이 대호의 품질 기준입니다.',
-        image: 'home_stats_bg.png'
+        paragraphs: [
+          '품질은 제품의 외형만으로 판단되지 않습니다. 금속 표면의 마감 상태, 각인의 선명도, 보석 세팅의 안정성, 로고와 문양의 비율, 착용감, 사이즈 정확도, 패키지 상태까지 모두 확인되어야 합니다. 대호는 완성된 제품이 고객에게 전달되기 전, 세부 기준에 따라 제품을 점검합니다.',
+          '특히 기념 제품은 오랜 시간 보관되거나 중요한 행사에서 전달되는 경우가 많기 때문에, 제품의 첫인상과 완성도가 모두 중요합니다. 반지 자체의 품질뿐 아니라 케이스, 포장, 전달 상태까지 전체 경험의 일부로 봐야 합니다. 대호는 납품 전 최종 검수를 통해 제품의 디테일과 기능, 포장 상태를 확인하고, 고객이 안심하고 받을 수 있는 결과물을 완성합니다.'
+        ]
       }
     ]
   },
   en: {
     heroLabel: 'CREDIBILITY',
-    introLines: [
-      'DEAHO credibility is not explained by history alone.',
-      'Every commission, repair, and delivery is checked through the same operating standard,',
-      'so clients can return with confidence beyond a single finished piece.'
-    ],
-    standardTitle: 'STANDARD',
-    standardLead: 'Credibility. Proven Through Standards.',
-    standardSubline: 'Trust begins with standards.',
+    heroTitle: 'STANDARD',
+    intro:
+      'DEAHO credibility is not explained by experience alone. From design consultation to production, inspection, and delivery, every stage is managed directly so important group projects can be completed within clear standards and schedules.',
+    imagePlaceholder: 'Image area',
+    quoteTitle: 'Credibility, Proven Through Standards',
+    quoteBody: 'Trust begins with standards.',
+    discoverLead: 'Discover more DEAHO projects',
     cta: 'DISCOVER MORE',
     rows: [
       {
         number: '01.',
         title: '38 years of craft',
         accent: 'A standard that does not drift',
-        body:
-          'Since 1986, DEAHO has produced championship rings, group rings, and commemorative jewelry. Consultation, design direction, material choices, engraving, sizing, and inspection are kept inside a consistent working standard.',
-        image: 'legacy_card_credibility.png'
+        paragraphs: [
+          'Since 1988, DEAHO has specialized in championship rings, commission rings, and group commemorative products for sports teams, military organizations, schools, institutions, and companies.',
+          'This experience is not only a matter of time. It is a record of solving real production variables such as event schedules, symbols, engraving, quantities, and delivery methods.'
+        ]
       },
       {
         number: '02.',
         title: '100% in-house process control',
-        accent: 'From design to delivery',
-        body:
-          'DEAHO directly manages key stages including design consultation, 3D planning, casting, finishing, plating, setting, packing, and delivery. A shared production record keeps specifications and schedules steady for group orders.',
-        image: 'legacy_credibility_hero.png'
+        accent: 'Managed directly from design to delivery',
+        paragraphs: [
+          'DEAHO manages design, 3D planning, casting, finishing, stone setting, engraving, surface treatment, inspection, and packing under one production standard.',
+          'This reduces variables in quality, design intent, and schedule control, especially for group orders with many details to verify.'
+        ]
       },
       {
         number: '03.',
         title: '0% delivery incidents',
-        accent: 'Inspection before handoff',
-        body:
-          'Quantities, names, sizes, engraving, and packing details are checked before delivery. Small differences during production can affect trust at the final handoff, so DEAHO manages both work sheets and inspection flow.',
-        image: 'chronicle_detail_01.png'
+        accent: 'Responsible through the confirmed schedule',
+        paragraphs: [
+          'Projects tied to ceremonies and official events require reliable delivery as much as product quality.',
+          'DEAHO treats schedule management as part of production, planning confirmation, sizing, engraving, inspection, packing, and shipping around the client’s event date.'
+        ]
       },
       {
         number: '04.',
         title: 'Group order management system',
-        accent: 'Names, sizes, and engraving tracked',
-        body:
-          'A team order means managing many people at once. DEAHO organizes names, numbers, sizes, messages, and packing requests into a clear record that can be checked through production and inspection.',
-        image: 'legacy_partner_placeholder.png'
+        accent: 'Names, sizes, and engraving tracked accurately',
+        paragraphs: [
+          'Group production requires accurate handling of names, sizes, engraving, quantities, and packing formats for every recipient.',
+          'DEAHO organizes individual data from the production stage and checks it through final delivery.'
+        ]
       },
       {
         number: '05.',
+        title: 'Continuous R&D',
+        accent: 'Improving standards that build trust',
+        paragraphs: [
+          'DEAHO’s research and development is focused on stable quality, accurate production, and better results across materials, casting, finishing, engraving, surface treatment, and setting.',
+          'Continuous improvement helps reduce error and strengthens the standard clients can trust.'
+        ]
+      },
+      {
+        number: '06.',
         title: 'Quality inspection standard',
         accent: 'Checked beyond the visible surface',
-        body:
-          'Finished pieces are reviewed for surface condition, plating consistency, stone security, engraving quality, and packaging. DEAHO checks both visible decoration and the stability of the final fit and finish.',
-        image: 'home_stats_bg.png'
+        paragraphs: [
+          'Quality is not judged only by appearance. Surface finish, engraving clarity, setting stability, proportions, comfort, sizing, and package condition must all be checked.',
+          'Before delivery, DEAHO reviews the product details, function, and packaging so clients can receive the final result with confidence.'
+        ]
       }
     ]
   }
 } satisfies Record<Locale, {
   heroLabel: string;
-  introLines: string[];
-  standardTitle: string;
-  standardLead: string;
-  standardSubline: string;
+  heroTitle: string;
+  intro: string;
+  imagePlaceholder: string;
+  quoteTitle: string;
+  quoteBody: string;
+  discoverLead: string;
   cta: string;
   rows: StandardRow[];
 }>;
 
-export function CredibilityCompliancePage({locale, content}: CredibilityCompliancePageProps) {
+export function CredibilityCompliancePage({locale}: CredibilityCompliancePageProps) {
   const copy = pageCopy[locale];
+  const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
+  const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
+  const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
 
   return (
-    <main className="bg-bg text-primary">
-      <section className="bg-bg px-[clamp(20px,2.4vw,36px)] pb-16 pt-24 md:pb-20 md:pt-32">
-        <div className="relative mx-auto h-[360px] max-w-[1500px] overflow-hidden bg-primary md:h-[480px] xl:h-[560px]">
-          <Image
-            src={`/images/${content.hero.image}`}
-            alt={content.hero.subtitle}
-            fill
-            priority
-            sizes="100vw"
-            className="scale-110 object-cover opacity-35 mix-blend-multiply blur-[1px] saturate-50"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,246,242,0.16),rgba(16,29,48,0.62)),radial-gradient(circle_at_44%_18%,rgba(255,255,255,0.48),transparent_34%),radial-gradient(circle_at_72%_82%,rgba(8,15,26,0.48),transparent_42%)]" />
-          <div className="absolute inset-0 opacity-55 [background-image:linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(180deg,rgba(16,29,48,0.18)_1px,transparent_1px)] [background-size:38px_38px]" />
-          <Reveal className="absolute left-1/2 top-1/2 w-[min(74vw,680px)] -translate-x-1/2 -translate-y-1/2 bg-white px-8 py-12 text-center shadow-[0_18px_60px_rgba(16,29,48,0.08)] md:px-16 md:py-16">
-            <h1 className="omega-title text-primary">
-              {copy.heroLabel}
-            </h1>
-            <span className="mx-auto mt-7 block h-2.5 w-2.5 rotate-45 border-b border-r border-primary/70" />
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="bg-bg pb-20 md:pb-28">
+    <main className="bg-white text-primary">
+      <section className="grid min-h-[100svh] place-items-center bg-white py-24">
         <div className="mx-auto max-w-3xl px-container text-center">
-          <Reveal className="space-y-3 text-[#252525]">
-            {copy.introLines.map((line) => (
-              <p key={line} className="omega-intro-copy">{line}</p>
-            ))}
+          <Reveal className="space-y-5 text-[#252525]">
+            <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
+              {copy.heroLabel}
+            </p>
+            <h1 className={`${englishTextClass} text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
+              {copy.heroTitle}
+            </h1>
+            <p className={`${bodyTextClass} mx-auto max-w-[560px] text-[15px] leading-[1.85] text-[#252525]`}>
+              {copy.intro}
+            </p>
           </Reveal>
         </div>
       </section>
 
-      <section className="omega-section-y bg-bg px-container">
-        <Reveal className="mx-auto max-w-3xl text-center">
-          <h2 className="omega-display text-primary">
-            {copy.standardTitle}
-          </h2>
-          <p className="omega-intro-copy mt-5 text-[#111827]">
-            {copy.standardLead}
+      <section className="bg-white pb-4">
+        <div className="px-container">
+          <p className={`${bodyTextClass} text-[15px] leading-none text-[#252525]`}>
+            {copy.imagePlaceholder}
           </p>
-          <p className="omega-intro-copy mt-2 text-[#111827]">
-            {copy.standardSubline}
-          </p>
-        </Reveal>
+        </div>
+      </section>
 
-        <div className="mx-auto mt-16 max-w-[1180px] bg-white px-7 py-8 shadow-[0_18px_70px_rgba(43,34,22,0.04)] md:px-16 md:py-12 lg:px-20">
+      <section className="bg-[#f4efe6] py-[clamp(100px,12vw,174px)]">
+        <Reveal className="mx-auto max-w-4xl px-container text-center text-primary">
+          <p className={`${englishTextClass} text-[clamp(58px,7vw,92px)] leading-none text-black`}>“</p>
+          <p className={`${englishTextClass} mt-7 text-[clamp(24px,2.4vw,34px)] italic leading-tight text-primary`}>
+            {copy.quoteTitle}
+          </p>
+          <p className={`${bodyTextClass} mt-4 text-[clamp(27px,3vw,43px)] leading-tight text-primary`}>
+            {copy.quoteBody}
+          </p>
+          <p className={`${englishTextClass} mt-7 text-[clamp(58px,7vw,92px)] leading-none text-black`}>”</p>
+        </Reveal>
+      </section>
+
+      <section className="bg-[#f4efe6] px-container pb-[clamp(96px,10vw,150px)]">
+        <div className="mx-auto max-w-[1180px] bg-white px-7 py-8 md:px-16 md:py-12 lg:px-20">
           {copy.rows.map((row, index) => (
             <Reveal
               key={row.title}
-              className={`grid gap-10 py-14 md:grid-cols-[1fr_0.82fr] md:items-center md:gap-16 lg:gap-24 ${
+              className={`grid gap-10 py-14 md:grid-cols-[1fr_0.7fr] md:items-center md:gap-16 lg:gap-24 ${
                 index === 0 ? 'pt-4' : ''
               } ${index < copy.rows.length - 1 ? 'border-b border-[#b65c55]/70' : 'pb-4'}`}
             >
-              <div className="max-w-[500px]">
-                <h3 className="omega-title text-primary">
+              <div className="max-w-[620px]">
+                <h2 className={`${bodyTextClass} text-[clamp(25px,2.3vw,36px)] leading-tight tracking-normal text-primary`}>
                   <span>{row.number}</span>
                   {' '}
-                  <span className="ml-3">{row.title}</span>
-                </h3>
-                <p className="omega-small-title mt-3 text-[#b0443c]">
+                  <span>{row.title}</span>
+                </h2>
+                <p className={`${bodyTextClass} mt-3 text-[14px] leading-tight text-accent`}>
                   {row.accent}
                 </p>
-                <p className="omega-copy mt-5 text-[#111827]">
-                  {row.body}
-                </p>
+                <div className="mt-6 space-y-4">
+                  {row.paragraphs.map((paragraph) => (
+                    <p key={paragraph} className={`${bodyTextClass} text-[13px] leading-[1.78] text-[#111827]`}>
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </div>
 
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#d7d7d7] md:ml-auto md:max-w-[320px]">
-                <Image
-                  src={`/images/${row.image}`}
-                  alt={`${row.title} - ${content.hero.title}`}
-                  fill
-                  sizes="(min-width: 768px) 320px, 100vw"
-                  className="object-cover opacity-30 grayscale"
-                />
-                <div className="absolute inset-0 bg-[#d6d6d6]/45" />
-              </div>
+              <div className="aspect-[4/3] w-full bg-[#d7d7d7] md:ml-auto md:max-w-[320px]" aria-hidden="true" />
             </Reveal>
           ))}
         </div>
       </section>
 
-      <section className="bg-bg pb-20">
+      <section className="bg-white pb-24 pt-[clamp(92px,10vw,150px)] md:pb-28">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
+          <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
+            {copy.discoverLead}
+          </p>
           <Link
-            href={withLocale(locale, '/specialty/collection')}
-            className="link-sweep omega-kicker"
+            href={withLocale(locale, '/mastery/creations')}
+            className={`${englishTextClass} link-sweep mt-7 inline-flex text-[14px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
           >
             {copy.cta}
           </Link>

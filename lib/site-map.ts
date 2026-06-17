@@ -9,27 +9,27 @@ export type NavItem = {
 
 export const navItems: NavItem[] = [
   {id: 'home', label: 'HOME', href: '/'},
-  {id: 'chronicle', label: 'ARCHIVE', href: '/chronicle'},
+  {id: 'chronicle', label: 'ARCHIVE', href: '/archive'},
   {
     id: 'legacy',
     label: 'HERITAGE',
-    href: '/legacy',
+    href: '/heritage',
     children: [
-      {id: 'loyalty', label: 'LOYALTY', href: '/legacy/loyalty'},
-      {id: 'credibility', label: 'CREDIBILITY', href: '/legacy/credibility'},
-      {id: 'achievement', label: 'ACHIEVEMENT', href: '/legacy/achievement'}
+      {id: 'loyalty', label: 'LOYALTY', href: '/heritage/loyalty'},
+      {id: 'credibility', label: 'CREDIBILITY', href: '/heritage/credibility'},
+      {id: 'achievement', label: 'ACHIEVEMENT', href: '/heritage/achievement'}
     ]
   },
   {
     id: 'specialty',
     label: 'MASTERY',
-    href: '/specialty',
+    href: '/mastery',
     children: [
-      {id: 'technique', label: 'MAKING', href: '/specialty/technique'},
-      {id: 'collection', label: 'CREATIONS', href: '/specialty/collection'}
+      {id: 'technique', label: 'MAKING', href: '/mastery/making'},
+      {id: 'collection', label: 'CREATIONS', href: '/mastery/creations'}
     ]
   },
-  {id: 'news', label: 'JOURNAL', href: '/news'},
+  {id: 'news', label: 'NEWS', href: '/news'},
   {id: 'golf', label: 'GOLF', href: '/golf'}
 ];
 

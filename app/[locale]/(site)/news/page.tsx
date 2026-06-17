@@ -4,7 +4,6 @@ import {setRequestLocale} from 'next-intl/server';
 import {NewsJournalGrid, type NewsCard} from '@/components/news/news-journal-grid';
 import {Reveal} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
-import {SectionIntro} from '@/components/section-intro';
 import type {Locale} from '@/i18n/routing';
 import {getNewsCardsForSite} from '@/lib/cms/public-content';
 import {getLocaleMessages} from '@/lib/locale-messages';
@@ -102,17 +101,6 @@ export default async function NewsPage({params}: Props) {
 
       <section id="news-grid" className="bg-white py-section">
         <div className="mx-auto max-w-[1440px] space-y-10 px-container">
-          <Reveal className="grid gap-8 lg:grid-cols-[minmax(280px,0.5fr)_1fr] lg:items-end">
-            <SectionIntro
-              eyebrow={content.grid.eyebrow}
-              title={content.grid.title}
-              variant="news"
-            />
-            <p className="max-w-2xl font-body text-[14px] leading-7 text-text lg:justify-self-end">
-              {text.indexBody}
-            </p>
-          </Reveal>
-
           <Reveal>
             <NewsJournalGrid
               filters={content.grid.filters}

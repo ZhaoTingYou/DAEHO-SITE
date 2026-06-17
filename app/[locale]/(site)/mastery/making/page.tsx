@@ -6,6 +6,7 @@ import {Reveal} from '@/components/motion/reveal';
 import {ScrollText} from '@/components/motion/scroll-text';
 import {SafeImage} from '@/components/safe-image';
 import {SectionIntro} from '@/components/section-intro';
+import {RingDrawingBackground} from '@/components/specialty/ring-drawing-background';
 import {SpecialtyDetailTriplet} from '@/components/specialty/specialty-detail-triplet';
 import {SpecialtyProcess} from '@/components/specialty/specialty-process';
 import type {Locale} from '@/i18n/routing';
@@ -38,8 +39,9 @@ export default async function TechniquePage({params}: Props) {
   }));
 
   return (
-    <main className="bg-bg text-text">
-      <section className="bg-white pt-28">
+    <main className="relative isolate overflow-hidden bg-[#F8F6F2] text-text">
+      <RingDrawingBackground />
+      <section className="relative z-10 pt-28">
         <div className="mx-auto max-w-[1280px] px-container pb-[clamp(72px,8vw,128px)] pt-[clamp(64px,8vw,120px)]">
           <ScrollText className="mx-auto max-w-3xl space-y-6 text-center">
             {content.hero.eyebrow ? (
@@ -54,7 +56,7 @@ export default async function TechniquePage({params}: Props) {
               {content.hero.subtitle}
             </p>
           </ScrollText>
-          <Reveal className="mx-auto mt-[clamp(48px,6vw,88px)] w-full max-w-[1180px]">
+          <Reveal className="mx-auto mt-[clamp(48px,6vw,88px)] w-full max-w-[1180px] bg-white/82 p-3 shadow-[0_24px_90px_rgba(16,29,48,0.08)] backdrop-blur-[2px]">
             <SafeImage
               filename={content.hero.image}
               alt={content.hero.subtitle}
@@ -66,7 +68,7 @@ export default async function TechniquePage({params}: Props) {
         </div>
       </section>
 
-      <section className="bg-bg pb-[clamp(48px,5vw,80px)] pt-section">
+      <section className="relative z-10 pb-[clamp(48px,5vw,80px)] pt-section">
         <div className="mx-auto max-w-[1180px] px-container">
           <ScrollText>
             <SectionIntro
@@ -82,7 +84,7 @@ export default async function TechniquePage({params}: Props) {
 
       <SpecialtyProcess steps={processSteps} />
 
-      <section className="bg-white py-section">
+      <section className="relative z-10 py-section">
         <div className="mx-auto max-w-[1180px] space-y-[clamp(56px,6vw,88px)] px-container">
           <ScrollText>
             <SectionIntro
@@ -97,33 +99,19 @@ export default async function TechniquePage({params}: Props) {
         </div>
       </section>
 
-      <section className="bg-bg py-section">
-        <div className="mx-auto grid max-w-[1180px] items-center gap-12 px-container lg:grid-cols-2 lg:gap-16">
-          <ScrollText className="order-2 max-w-md space-y-5 lg:order-1">
-            <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-accent">
-              {content.bespoke.eyebrow}
-            </p>
-            <h2 className="font-heading text-[clamp(22px,2.4vw,32px)] font-semibold leading-[1.25] text-primary">
-              {content.bespoke.title}
+      <section className="relative z-10 py-section">
+        <div className="mx-auto max-w-3xl px-container text-center">
+          <ScrollText className="space-y-7">
+            <h2 className="font-heading text-[clamp(26px,2.5vw,38px)] font-semibold leading-tight text-primary">
+              대호의 메이킹 보러가기
             </h2>
-            <p className="font-body text-[14px] leading-[1.85] text-text">
-              {content.bespoke.body}
-            </p>
             <Link
-              href={withLocale(locale, '/specialty/collection')}
-              className="link-sweep inline-flex pt-1 font-body text-[12px] font-semibold uppercase tracking-[0.16em]"
+              href={withLocale(locale, '/mastery/making')}
+              className="link-sweep inline-flex font-body text-[14px] font-semibold uppercase leading-[19px] tracking-[0.2em] text-accent"
             >
-              {content.bespoke.cta}
+              DISCOVER MORE
             </Link>
           </ScrollText>
-          <Reveal className="order-1 lg:order-2">
-            <SafeImage
-              filename={content.bespoke.image}
-              alt={content.bespoke.body}
-              aspect="aspect-[4/3]"
-              variant="plain"
-            />
-          </Reveal>
         </div>
       </section>
     </main>

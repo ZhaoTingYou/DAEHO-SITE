@@ -139,7 +139,7 @@ export function LegacyDetailPage({locale, content}: LegacyDetailPageProps) {
       <section className="bg-bg py-section">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <Link
-            href={withLocale(locale, '/chronicle')}
+            href={withLocale(locale, '/archive')}
             className="link-sweep font-body text-[12px] font-semibold uppercase tracking-[0.16em]"
           >
             {messages.legacyUi.backToLegacy}

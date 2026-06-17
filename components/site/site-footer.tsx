@@ -31,34 +31,34 @@ export function SiteFooter({locale}: SiteFooterProps) {
   const contactLabel = text.navigation.contactCta;
   const collectionCategoryLinks = locale === 'ko'
     ? [
-        {label: '우승반지', href: '/specialty/collection/champion'},
-        {label: '임관반지', href: '/specialty/collection/appointment'},
-        {label: '주문제작', href: '/specialty/collection/bespoke'}
+        {label: '우승반지', href: '/mastery/creations/champion'},
+        {label: '임관반지', href: '/mastery/creations/appointment'},
+        {label: '주문제작', href: '/mastery/creations/bespoke'}
       ]
     : [
-        {label: 'Championship Rings', href: '/specialty/collection/champion'},
-        {label: 'Commission Rings', href: '/specialty/collection/appointment'},
-        {label: 'Custom Products', href: '/specialty/collection/bespoke'}
+        {label: 'Championship Rings', href: '/mastery/creations/champion'},
+        {label: 'Commission Rings', href: '/mastery/creations/appointment'},
+        {label: 'Custom Products', href: '/mastery/creations/bespoke'}
       ];
   const footerGroups: FooterGroup[] = [
     {
       heading: navLabels.chronicle,
-      href: '/chronicle',
+      href: '/archive',
       links: []
     },
     {
       heading: navLabels.legacy,
       links: [
-        {label: navLabels.loyalty, href: '/legacy/loyalty'},
-        {label: navLabels.credibility, href: '/legacy/credibility'},
-        {label: navLabels.achievement, href: '/legacy/achievement'}
+        {label: navLabels.loyalty, href: '/heritage/loyalty'},
+        {label: navLabels.credibility, href: '/heritage/credibility'},
+        {label: navLabels.achievement, href: '/heritage/achievement'}
       ]
     },
     {
       heading: navLabels.specialty,
       links: [
-        {label: navLabels.technique, href: '/specialty/technique'},
-        {label: navLabels.collection, href: '/specialty/collection'},
+        {label: navLabels.technique, href: '/mastery/making'},
+        {label: navLabels.collection, href: '/mastery/creations'},
         ...collectionCategoryLinks
       ]
     },
@@ -83,7 +83,7 @@ export function SiteFooter({locale}: SiteFooterProps) {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-hairline bg-white text-primary">
+    <footer className="relative z-20 border-t border-hairline bg-white text-primary">
       <div className="mx-auto max-w-[1440px] px-container py-[clamp(56px,7vw,96px)]">
         <div className="grid gap-10 border-b border-hairline pb-12 lg:grid-cols-[minmax(260px,0.52fr)_minmax(0,0.48fr)] lg:items-start">
           <div className="space-y-4">

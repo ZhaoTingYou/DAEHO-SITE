@@ -279,7 +279,7 @@ const enMessages: Record<string, string> = {
   'overview.configured': 'Configured',
   'overview.notConfigured': 'Not configured',
   'news.title': 'News',
-  'news.description': 'Manage journal cards, Korean and English content, visibility, and SEO data for News pages.',
+  'news.description': 'Manage news cards, Korean and English content, visibility, and SEO data for News pages.',
   'news.newArticle': 'New article',
   'news.noItemsTitle': 'No news items',
   'news.noItemsBody': 'Create the first article to start filling the News section.',

@@ -112,22 +112,22 @@
           "title": "ARCHIVE",
           "caption": "우리가 시장을 만들었다",
           "image": "home_pillar_chronicle.png",
-          "href": "/chronicle"
+          "href": "/archive"
         },
         {
           "title": "HERITAGE",
           "caption": "그래서 신뢰할 수 있다",
           "image": "home_pillar_legacy.png",
-          "href": "/legacy"
+          "href": "/heritage/loyalty"
         },
         {
           "title": "MASTERY",
           "caption": "그래서 우리가 최고다",
           "image": "home_pillar_specialty.png",
-          "href": "/specialty"
+          "href": "/mastery/making"
         },
         {
-          "title": "JOURNAL",
+          "title": "NEWS",
           "caption": "그리고 지금도 만들고 있다",
           "image": "home_pillar_news.png",
           "href": "/news"
@@ -227,7 +227,7 @@
           "title": "신의",
           "body": "오래 지속되는 관계와 다시 찾는 신뢰를 밝은 기록으로 정리합니다.",
           "image": "legacy_card_loyalty.png",
-          "href": "/legacy/loyalty",
+          "href": "/heritage/loyalty",
           "cta": "Loyalty 보기"
         },
         {
@@ -235,7 +235,7 @@
           "title": "신뢰",
           "body": "업력, 제작 수량, 협업 기록을 과장 없이 숫자로 보여줍니다.",
           "image": "legacy_card_credibility.png",
-          "href": "/legacy/credibility",
+          "href": "/heritage/credibility",
           "cta": "Credibility 보기"
         },
         {
@@ -243,7 +243,7 @@
           "title": "성취",
           "body": "인정, 수상, 화제 프로젝트를 하나의 조용한 아카이브로 남깁니다.",
           "image": "legacy_card_achievement.png",
-          "href": "/legacy/achievement",
+          "href": "/heritage/achievement",
           "cta": "Achievement 보기"
         }
       ]
@@ -406,7 +406,7 @@
           "title": "공정",
           "body": "스케치에서 전달까지, 한 작품이 완성되는 일곱 단계를 밝은 공방의 구조로 보여줍니다.",
           "image": "specialty_card_technique.png",
-          "href": "/specialty/technique",
+          "href": "/mastery/making",
           "cta": "공정 보기"
         },
         {
@@ -414,7 +414,7 @@
           "title": "작품",
           "body": "챔피언, 임관, 주문 제작의 형태를 하나의 갤러리에서 정리합니다.",
           "image": "specialty_card_collection.png",
-          "href": "/specialty/collection",
+          "href": "/mastery/creations",
           "cta": "작품 보기"
         }
       ]
@@ -688,8 +688,8 @@
   },
   "news": {
     "masthead": {
-      "title": "JOURNAL",
-      "issue": "DEAHO JOURNAL · 발행 2026",
+      "title": "NEWS",
+      "issue": "DEAHO NEWS · 발행 2026",
       "body": "프로젝트 스토리와 제작 현장, 언론/피처, 협업 소식을 한곳에 모읍니다.",
       "ticker": [
         "최신 제작 사례는 확인 자료가 도착하면 이 지면에 업데이트됩니다.",
@@ -706,8 +706,8 @@
       "image": "news_featured.png.png"
     },
     "grid": {
-      "eyebrow": "LATEST INDEX",
-      "title": "대호 저널",
+      "eyebrow": "",
+      "title": "",
       "filters": [
         {
           "id": "all",
@@ -788,14 +788,14 @@
   },
   "golf": {
     "hero": {
-      "eyebrow": "PREMIUM CUSTOMIZED GOLF BRACELET",
+      "eyebrow": "PREMIUM CUTOMIZED GOLF BRACELET",
       "titleLines": [
         "FORM",
         "OF THE",
         "GAME"
       ],
-      "subtitle": "골프의 구조를 하나의 오브젝트로 재해석하다.",
-      "image": "golf_hero.png",
+      "subtitle": "골프의 구조를 하나의 오브젝트로 재해석하다",
+      "image": "golf/golf1.png",
       "specLabel": "Configured bracelet"
     },
     "statement": {
@@ -804,81 +804,81 @@
         "OF THE",
         "GAME"
       ],
-      "body": "라운드의 리듬, 클럽의 선, 손목 위의 감각을 하나의 밝은 형태로 정리합니다.",
-      "image": "golf_hero_2.png"
+      "body": "골프의 구조를 하나의 오브젝트로 재해석하다",
+      "image": "golf/9ef0c9b8-2bdd-4c05-967f-b29287865f9a.png"
     },
     "heads": {
       "eyebrow": "CLUB HEAD",
       "title": "자신의 시그니처 골프채로",
-      "subtitle": "클럽 헤드 형태를 원하는 골프채로 선택합니다.",
+      "subtitle": "클럽 헤드 형태 원하는 골프채로 선택",
       "items": [
         {
           "id": "ball",
-          "label": "Ball + Tee",
+          "label": "골프공",
           "kicker": "01",
-          "caption": "볼과 티를 함께 세운 상징적인 헤드.",
-          "image": "golf_head_ball.png"
+          "caption": "골프공",
+          "image": "golf/Group 10.png"
         },
         {
           "id": "iron",
-          "label": "Iron",
+          "label": "아이언",
           "kicker": "02",
-          "caption": "정교한 라인을 살린 클래식 아이언.",
-          "image": "golf_head_iron.png"
+          "caption": "아이언",
+          "image": "golf/Group 12.png"
+        },
+        {
+          "id": "driver",
+          "label": "드라이버",
+          "kicker": "03",
+          "caption": "드라이버",
+          "image": "golf/Group 14.png"
         },
         {
           "id": "putter",
-          "label": "Putter",
-          "kicker": "03",
-          "caption": "그린 위의 마지막 감각을 닮은 퍼터.",
-          "image": "golf_head_putter.png"
-        },
-        {
-          "id": "wood",
-          "label": "Wood",
+          "label": "퍼터",
           "kicker": "04",
-          "caption": "긴 비거리의 곡선을 담은 우드.",
-          "image": "golf_head_wood.png"
+          "caption": "퍼터",
+          "image": "golf/Group 13.png"
         }
       ]
     },
     "shafts": {
       "eyebrow": "SHAFT COLOR",
-      "title": "손목 위의 그립 컬러",
-      "subtitle": "컬러는 배경이 아니라 손잡이의 인상입니다. 밝은 화면 안에서 대비와 질감만 바뀝니다.",
+      "title": "샤프트 색상",
+      "subtitle": "BLACK WHITE BURGUNDY NAVY",
       "items": [
         {
           "id": "black",
           "label": "BLACK",
-          "caption": "가장 선명한 대비의 그립.",
-          "image": "golf_shaft_black.png"
+          "caption": "BLACK",
+          "image": "golf/Mask group.png"
         },
         {
           "id": "white",
           "label": "WHITE",
-          "caption": "빛에 가장 가볍게 놓이는 그립.",
-          "image": "golf_shaft_white.png"
+          "caption": "WHITE",
+          "image": "golf/Mask group.png"
         },
         {
           "id": "burgundy",
           "label": "BURGUNDY",
-          "caption": "대호의 포인트 컬러를 닮은 그립.",
-          "image": "golf_shaft_burgundy.png"
+          "caption": "BURGUNDY",
+          "image": "golf/Mask group.png"
         },
         {
           "id": "navy",
           "label": "NAVY",
-          "caption": "차분한 해군색 감도의 그립.",
-          "image": "golf_shaft_navy.png"
+          "caption": "NAVY",
+          "image": "golf/Mask group.png"
         }
       ]
     },
     "engraving": {
-      "eyebrow": "PERSONAL ENGRAVING",
-      "title": "이름·날짜·기록을 새깁니다",
-      "body": "스코어, 이니셜, 라운드의 날짜처럼 오래 남기고 싶은 정보를 밝은 금속 위에 정리합니다.",
-      "imagePrimary": "golf_engrave_studio.png",
-      "imageDetail": "golf_engrave_detail.png",
+      "eyebrow": "나만의 기록 각인",
+      "title": "첫 싱글/첫 이글/첫 홀인원/첫 라운딩",
+      "body": "모든 순간을 의미있게",
+      "imagePrimary": "golf/ChatGPT Image 2026년 5월 3일 오후 05_34_00 1.png",
+      "imageDetail": "golf/ChatGPT Image 2026년 5월 3일 오후 05_34_00 2.png",
       "specs": [
         "Name",
         "Date",
@@ -890,8 +890,8 @@
       "eyebrow": "OBJECT & LIFESTYLE",
       "title": "라운드 밖에서도 남는 형태",
       "body": "박스 안의 오브젝트로, 손목 위의 생활감으로, 골프의 구조는 더 오래 머무릅니다.",
-      "imageBox": "golf_box.png",
-      "imageLifestyle": "golf_lifestyle.png",
+      "imageBox": "golf/ChatGPT Image 2026년 4월 30일 오후 01_13_41 1.png",
+      "imageLifestyle": "golf/ChatGPT Image 2026년 5월 3일 오후 05_21_01 1.png",
       "closing": "당신의 라운드를 영원히"
     },
     "labels": {
@@ -925,7 +925,7 @@
         "specialty": "MASTERY",
         "technique": "MAKING",
         "collection": "CREATIONS",
-        "news": "JOURNAL",
+        "news": "NEWS",
         "golf": "GOLF"
       },
       "mega": {
@@ -1143,14 +1143,14 @@
       "title": "아직 등록된 소식이 없습니다",
       "body": "검증된 자료가 준비되면 이 지면에 새로운 소식이 추가됩니다."
     },
-    "indexBody": "새로운 제작 사례와 프로젝트 소식은 확인되는 순서대로 이 밝은 저널 지면에 남습니다.",
+    "indexBody": "",
     "share": {
       "label": "공유",
       "copied": "링크가 복사되었습니다."
     },
     "detail": {
       "back": "저널 목록",
-      "author": "대호 저널",
+      "author": "대호 뉴스",
       "lead": "확인된 자료가 도착하면 실제 기사 본문으로 교체됩니다.",
       "paragraphs": [
         "현재는 프로젝트 개요와 제작 맥락을 정리하는 밝은 기사 템플릿으로 유지합니다.",
@@ -1159,7 +1159,7 @@
       ],
       "quote": "승리의 순간을 영원의 형태로 남긴다는 원칙은 기사 내지에서도 같은 리듬으로 이어집니다.",
       "tags": [
-        "대호 저널",
+        "대호 뉴스",
         "업데이트 예정"
       ],
       "ctaTitle": "이 프로젝트가 궁금하신가요?",

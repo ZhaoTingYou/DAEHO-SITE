@@ -21,7 +21,7 @@ type SpecialtyProcessProps = {
 
 export function SpecialtyProcess({steps}: SpecialtyProcessProps) {
   return (
-    <section className="bg-white">
+    <section className="relative z-10">
       <div className="mx-auto max-w-[1180px] px-container py-[clamp(48px,6vw,96px)]">
         <div className="space-y-[clamp(96px,13vw,200px)]">
           {steps.map((step, index) => (
