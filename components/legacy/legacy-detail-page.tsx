@@ -44,7 +44,7 @@ export function LegacyDetailPage({locale, content}: LegacyDetailPageProps) {
 
   return (
     <main className="bg-bg text-text">
-      <section className="bg-white pt-28">
+      <section className="bg-bg pt-28">
         <div className="mx-auto max-w-[1280px] px-container pb-[clamp(72px,8vw,128px)] pt-[clamp(64px,8vw,120px)]">
           <Reveal className="mx-auto max-w-3xl space-y-6 text-center">
             <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-subtext">
@@ -85,7 +85,7 @@ export function LegacyDetailPage({locale, content}: LegacyDetailPageProps) {
       </section>
 
       {content.partners ? (
-        <section className="bg-white py-section">
+        <section className="bg-bg py-section">
           <div className="mx-auto max-w-[1180px] space-y-[clamp(56px,6vw,88px)] px-container">
             <Reveal>
               <SectionIntro
@@ -102,7 +102,7 @@ export function LegacyDetailPage({locale, content}: LegacyDetailPageProps) {
       ) : null}
 
       {content.gallery ? (
-        <section className="bg-white py-section">
+        <section className="bg-bg py-section">
           <div className="mx-auto max-w-[1180px] space-y-[clamp(56px,6vw,88px)] px-container">
             <Reveal>
               <SectionIntro

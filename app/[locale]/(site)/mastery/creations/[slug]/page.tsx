@@ -82,7 +82,7 @@ export default async function CollectionDetailPage({params}: Props) {
 
   return (
     <main className="bg-bg text-text">
-      <section className="bg-white pt-28">
+      <section className="bg-bg pt-28">
         <div className="mx-auto max-w-[1280px] px-container pb-section pt-[clamp(40px,5vw,72px)]">
           <Link href={withLocale(locale, '/mastery/creations')} className="link-sweep font-body text-[12px] font-semibold uppercase tracking-[0.16em]">
             {text.back}
@@ -143,7 +143,7 @@ export default async function CollectionDetailPage({params}: Props) {
         </div>
       </section>
 
-      <section className="bg-white py-section">
+      <section className="bg-bg py-section">
         <Reveal className="mx-auto max-w-3xl space-y-7 px-container text-center">
           <p className="font-heading text-[clamp(22px,2.4vw,32px)] font-semibold leading-[1.25] text-primary">
             {text.processTitle}

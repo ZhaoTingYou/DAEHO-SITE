@@ -19,7 +19,7 @@ export default async function TermsPage({params}: Props) {
   const content = getLocaleMessages(locale).legalPages.terms;
 
   return (
-    <main className="bg-white text-text">
+    <main className="bg-bg text-text">
       <section className="pt-28">
         <div className="mx-auto max-w-[760px] px-container pb-section pt-[clamp(48px,7vw,104px)]">
           <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-subtext">

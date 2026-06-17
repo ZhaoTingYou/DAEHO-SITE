@@ -1432,7 +1432,7 @@ function CollectionFinderView({
   };
 
   return (
-    <div className="relative bg-white pb-[calc(112px+env(safe-area-inset-bottom))]">
+    <div className="relative bg-[#F8F6F2] pb-[calc(112px+env(safe-area-inset-bottom))]">
       <div className="mx-auto max-w-[1480px] px-container">
         <div className="border-b border-hairline pb-[clamp(24px,4vw,48px)] pt-[clamp(10px,2vw,22px)]">
           <Link

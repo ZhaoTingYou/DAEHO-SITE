@@ -33,7 +33,7 @@ export default async function CollectionPage({params}: Props) {
   }));
 
   return (
-    <main className="bg-white text-text">
+    <main className="bg-bg text-text">
       <section className="pt-28">
         <div className="mx-auto max-w-[1180px] px-container pb-[clamp(44px,5vw,80px)] pt-[clamp(64px,7vw,112px)]">
           <ScrollText className="mx-auto max-w-3xl space-y-5 text-center">

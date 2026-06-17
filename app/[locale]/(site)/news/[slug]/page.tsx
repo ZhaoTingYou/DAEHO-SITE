@@ -60,7 +60,7 @@ export default async function NewsDetailPage({params}: Props) {
   return (
     <main className="bg-bg text-text">
       <NewsReadingProgress />
-      <article className="bg-white pt-28">
+      <article className="bg-bg pt-28">
         <div className="mx-auto max-w-5xl px-container py-section">
           <Link href={withLocale(locale, '/news')} className="link-sweep font-body text-sm font-semibold uppercase tracking-[0.12em]">
             {text.back}
@@ -118,7 +118,7 @@ export default async function NewsDetailPage({params}: Props) {
         </div>
       </section>
 
-      <section className="bg-white py-section">
+      <section className="bg-bg py-section">
         <div className="mx-auto max-w-[1440px] space-y-8 px-container">
           <Reveal>
             <h2 className="font-heading text-[clamp(30px,4.4vw,54px)] font-semibold leading-none text-primary">

@@ -179,8 +179,8 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
 
   return (
-    <main className="bg-white text-primary">
-      <section className="grid min-h-[100svh] place-items-center bg-white py-24">
+    <main className="bg-bg text-primary">
+      <section className="grid min-h-[100svh] place-items-center bg-bg py-24">
         <div className="mx-auto max-w-3xl px-container text-center">
           <Reveal className="space-y-5 text-[#252525]">
             <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
@@ -196,7 +196,7 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
         </div>
       </section>
 
-      <section className="bg-white pb-4">
+      <section className="bg-bg pb-4">
         <div className="px-container">
           <p className={`${bodyTextClass} text-[15px] leading-none text-[#252525]`}>
             {copy.imagePlaceholder}
@@ -250,7 +250,7 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
         </div>
       </section>
 
-      <section className="bg-white pb-24 pt-[clamp(92px,10vw,150px)] md:pb-28">
+      <section className="bg-bg pb-24 pt-[clamp(92px,10vw,150px)] md:pb-28">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
             {copy.discoverLead}

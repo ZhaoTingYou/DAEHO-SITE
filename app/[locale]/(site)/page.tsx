@@ -85,7 +85,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         webmSrc={heroVideo.webmSrc}
       />
 
-      <section className="bg-white py-[clamp(96px,10vw,156px)]">
+      <section className="bg-bg py-[clamp(96px,10vw,156px)]">
         <div className="mx-auto max-w-[1180px] space-y-20 px-container">
           <Reveal className="grid gap-10 lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)] lg:items-center xl:gap-[72px]">
             <div className="max-w-[260px] space-y-7 lg:text-center">
@@ -145,7 +145,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         </div>
       </section>
 
-      <section className="bg-white pb-[clamp(54px,5.5vw,88px)] pt-[clamp(36px,5vw,72px)]">
+      <section className="bg-bg pb-[clamp(54px,5.5vw,88px)] pt-[clamp(36px,5vw,72px)]">
         <div className="mx-auto grid max-w-[1320px] gap-10 px-container lg:grid-cols-[minmax(320px,0.30fr)_minmax(0,0.70fr)] lg:items-center xl:grid-cols-[minmax(390px,0.30fr)_minmax(0,0.70fr)] xl:gap-20">
           <Reveal className="max-w-[390px] space-y-7">
             <div className="space-y-5">
@@ -197,7 +197,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         <HomeStatBand items={content.statBand} locale={locale} />
       </section>
 
-      <section className="bg-white pb-[clamp(92px,10vw,150px)] pt-[clamp(38px,4vw,64px)]">
+      <section className="bg-bg pb-[clamp(92px,10vw,150px)] pt-[clamp(38px,4vw,64px)]">
         <div className="mx-auto max-w-[1320px] space-y-10 px-container">
           <Reveal className="max-w-[390px] space-y-7">
             <div className="space-y-5">
@@ -215,7 +215,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         </div>
       </section>
 
-      <section className="overflow-hidden bg-white pb-section pt-[clamp(42px,6vw,90px)]">
+      <section className="overflow-hidden bg-bg pb-section pt-[clamp(42px,6vw,90px)]">
         <div className="home-brand-marquee" aria-label={partners.ariaLabel}>
           {partners.rows.map((row, rowIndex) => (
             <div className="home-brand-row" key={rowIndex}>

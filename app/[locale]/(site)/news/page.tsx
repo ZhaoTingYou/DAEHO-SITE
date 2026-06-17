@@ -99,7 +99,7 @@ export default async function NewsPage({params}: Props) {
         </div>
       </section>
 
-      <section id="news-grid" className="bg-white py-section">
+      <section id="news-grid" className="bg-bg py-section">
         <div className="mx-auto max-w-[1440px] space-y-10 px-container">
           <Reveal>
             <NewsJournalGrid

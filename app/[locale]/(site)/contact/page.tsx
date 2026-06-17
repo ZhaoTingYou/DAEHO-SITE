@@ -31,7 +31,7 @@ export default async function ContactPage({params, searchParams}: Props) {
 
   return (
     <main className="bg-bg text-text">
-      <section className="bg-white pt-28">
+      <section className="bg-bg pt-28">
         <div className="mx-auto grid min-h-[74dvh] max-w-[1440px] gap-12 px-container py-section lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
           <Reveal>
             <SectionIntro eyebrow={text.hero.eyebrow} title={text.hero.title}>

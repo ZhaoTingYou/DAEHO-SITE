@@ -34,7 +34,7 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
 
   return (
     <main className="bg-bg text-text">
-      <section className="bg-white pt-28">
+      <section className="bg-bg pt-28">
         <div className="mx-auto grid min-h-[82dvh] max-w-[1440px] gap-12 px-container py-section lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <Reveal className="space-y-7">
             <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-accent">

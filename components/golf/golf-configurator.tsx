@@ -133,11 +133,11 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   };
 
   return (
-    <main className="bg-black text-[#f8f6f2]">
+    <main className="bg-[#F8F6F2] text-[#f8f6f2]">
       <section className="relative overflow-hidden bg-black pt-28">
         <div className="mx-auto max-w-[1240px] px-container pb-[clamp(62px,8vw,110px)]">
           <motion.p
-            initial={{opacity: 0, y: prefersReducedMotion ? 0 : 24}}
+            initial={false}
             animate={{opacity: 1, y: 0}}
             transition={{duration: prefersReducedMotion ? 0 : 0.72, ease: [0.16, 1, 0.3, 1]}}
             className="text-center font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-white/72"
@@ -165,7 +165,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
 
             <motion.div
               key={selectedShaft?.id ?? 'hero'}
-              initial={{opacity: 0, y: prefersReducedMotion ? 0 : 18}}
+              initial={false}
               animate={{opacity: 1, y: 0}}
               transition={{duration: prefersReducedMotion ? 0 : 0.56, ease: [0.16, 1, 0.3, 1]}}
               className="absolute left-1/2 top-0 h-full w-[min(82vw,920px)] -translate-x-1/2"
@@ -179,8 +179,8 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             </motion.div>
           </div>
 
-          <div className="relative left-1/2 mt-[clamp(42px,5vw,72px)] min-h-[clamp(460px,35vw,680px)] w-screen -translate-x-1/2 overflow-hidden bg-black">
-            <Reveal className="relative z-10 flex min-h-[clamp(460px,35vw,680px)] max-w-[520px] flex-col justify-center space-y-5 px-container py-20 lg:ml-[clamp(84px,12.5vw,240px)] lg:px-0">
+          <div className="relative left-1/2 mt-[clamp(42px,5vw,72px)] min-h-[clamp(520px,35vw,680px)] w-screen -translate-x-1/2 overflow-hidden bg-black">
+            <Reveal className="relative z-10 flex min-h-[clamp(520px,35vw,680px)] max-w-[520px] flex-col justify-center space-y-5 px-container pb-[clamp(210px,62vw,340px)] pt-16 md:py-20 lg:ml-[clamp(84px,12.5vw,240px)] lg:px-0">
               <h1 className="font-heading text-[clamp(64px,6.4vw,112px)] font-semibold uppercase leading-[0.82] text-white">
                 {content.hero.titleLines.map((line) => (
                   <span key={line} className="block">
@@ -193,7 +193,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               </p>
             </Reveal>
 
-            <Reveal className="pointer-events-none absolute right-[-70vw] top-1/2 h-[clamp(360px,33vw,650px)] w-[clamp(620px,56vw,1080px)] -translate-y-1/2 overflow-hidden sm:right-[-25vw] md:right-0">
+            <Reveal className="pointer-events-none absolute bottom-[clamp(22px,7vw,56px)] right-[-34vw] h-[clamp(220px,60vw,360px)] w-[clamp(430px,120vw,700px)] overflow-hidden sm:right-[-18vw] md:bottom-auto md:right-0 md:top-1/2 md:h-[clamp(360px,33vw,650px)] md:w-[clamp(620px,56vw,1080px)] md:-translate-y-1/2">
               <div className="absolute inset-0">
                 <GolfStaticImage
                   src={`/images/${content.statement.image}`}
@@ -276,7 +276,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white py-[clamp(72px,9vw,132px)] text-primary">
+      <section className="bg-[#F8F6F2] py-[clamp(72px,9vw,132px)] text-primary">
         <div className="mx-auto max-w-[1120px] space-y-[clamp(70px,8vw,118px)] px-container">
           <div className="mx-auto max-w-[900px] space-y-[clamp(34px,4vw,44px)]">
             <Reveal className="text-center">
@@ -366,7 +366,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white py-[clamp(72px,9vw,132px)] text-primary">
+      <section className="bg-[#F8F6F2] py-[clamp(72px,9vw,132px)] text-primary">
         <div className="mx-auto max-w-[1120px] space-y-[clamp(54px,7vw,96px)] px-container">
           <Reveal className="mx-auto grid aspect-[1.8/1] w-full max-w-[860px] place-items-center bg-[#d8d8d8]">
             <p className="font-body text-[12px] font-semibold tracking-[0.08em] text-primary/70">
@@ -408,7 +408,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
       <section className="bg-[#F8F6F2] px-container py-[clamp(60px,7vw,92px)] text-center text-primary">
         <Link
           href={inquiryHref}
-          className="link-sweep inline-flex min-h-12 items-center font-heading text-[clamp(21px,2vw,30px)] font-semibold"
+          className="link-sweep inline-flex min-h-12 items-center bg-[#F8F6F2] font-heading text-[clamp(21px,2vw,30px)] font-semibold"
         >
           {requestLabel}
         </Link>

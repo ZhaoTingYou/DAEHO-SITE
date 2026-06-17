@@ -148,8 +148,8 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
 
   return (
-    <main className="bg-white text-primary">
-      <section className="grid min-h-[100svh] place-items-center bg-white py-24">
+    <main className="bg-bg text-primary">
+      <section className="grid min-h-[100svh] place-items-center bg-bg py-24">
         <div className="mx-auto max-w-3xl px-container text-center">
           <Reveal className="space-y-5 text-[#252525]">
             <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
@@ -169,7 +169,7 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
         </div>
       </section>
 
-      <section className="bg-white pb-4">
+      <section className="bg-bg pb-4">
         <div className="px-container">
           <p className={`${bodyTextClass} text-[15px] leading-none text-[#252525]`}>
             {copy.imagePlaceholder}
@@ -190,11 +190,11 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
         </Reveal>
       </section>
 
-      <section className="bg-white px-[clamp(20px,2.4vw,36px)] pb-[clamp(30px,5vw,56px)] pt-0">
+      <section className="bg-bg px-[clamp(20px,2.4vw,36px)] pb-[clamp(30px,5vw,56px)] pt-0">
         <LoyaltyFeatureCarousel slides={copy.featureSlides} imageAlt={content.hero.subtitle} locale={locale} />
       </section>
 
-      <section className="bg-white pb-24 pt-[clamp(92px,10vw,150px)] md:pb-28">
+      <section className="bg-bg pb-24 pt-[clamp(92px,10vw,150px)] md:pb-28">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
             {copy.discoverLead}
