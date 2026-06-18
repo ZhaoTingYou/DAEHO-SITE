@@ -306,42 +306,42 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             </div>
           </div>
 
-          <div className="grid items-center gap-[clamp(34px,5vw,70px)] pt-[clamp(22px,4vw,42px)] lg:grid-cols-[0.9fr_1.1fr]">
-            <Reveal className="space-y-7">
-              <p className="font-body text-[12px] font-semibold text-primary/52">
+          <Reveal className="relative mx-auto grid max-w-[1120px] gap-8 pt-[clamp(12px,3vw,28px)] md:min-h-[clamp(620px,58vw,760px)]">
+            <div className="space-y-12 md:absolute md:left-[5%] md:top-[16%] md:w-[52%]">
+              <p className="font-body text-[12px] font-semibold text-primary/70">
                 {content.engraving.eyebrow}
               </p>
-              <div className="space-y-3">
-                <h2 className="font-heading text-[clamp(24px,3.4vw,38px)] font-semibold leading-tight">
+              <div className="space-y-2.5">
+                <h2 className="whitespace-nowrap font-heading text-[clamp(18px,1.75vw,26px)] font-semibold leading-tight">
                   {content.engraving.title}
                 </h2>
-                <p className="font-body text-[13px] leading-7 text-text">
+                <p className="font-body text-[12px] leading-6 text-text">
                   {content.engraving.body}
                 </p>
               </div>
-              <div className="relative aspect-[1.45/1] w-full max-w-[480px] overflow-hidden bg-[#f2f0ec]">
-                <GolfStaticImage
-                  src={`/images/${content.engraving.imageDetail}`}
-                  alt={content.engraving.body}
-                  className="object-cover"
-                />
-              </div>
-            </Reveal>
+            </div>
 
-            <Reveal className="space-y-8">
-              <div className="relative aspect-[3/4] w-full max-w-[430px] overflow-hidden bg-[#f2f0ec] lg:ml-auto">
-                <GolfImage
-                  filename={content.engraving.imagePrimary}
-                  alt={content.engraving.title}
-                  assets={assets}
-                  className="object-cover"
-                />
-              </div>
-              <p className="max-w-[360px] font-heading text-[clamp(20px,2.4vw,30px)] font-semibold leading-tight text-primary lg:ml-auto">
-                “{quoteText}”
-              </p>
-            </Reveal>
-          </div>
+            <div className="relative aspect-[0.74/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:right-0 md:top-0 md:w-[45%]">
+              <GolfImage
+                filename={content.engraving.imagePrimary}
+                alt={content.engraving.title}
+                assets={assets}
+                className="object-cover"
+              />
+            </div>
+
+            <div className="relative aspect-[1.37/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:bottom-[5%] md:left-[2.5%] md:z-10 md:w-[58%]">
+              <GolfStaticImage
+                src={`/images/${content.engraving.imageDetail}`}
+                alt={content.engraving.body}
+                className="object-cover"
+              />
+            </div>
+
+            <p className="whitespace-nowrap text-center font-heading text-[clamp(18px,1.8vw,26px)] font-semibold leading-tight text-primary md:absolute md:bottom-[8%] md:right-[2%] md:w-[40%]">
+              “{quoteText}”
+            </p>
+          </Reveal>
         </div>
       </section>
 
@@ -368,7 +368,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
 
       <section className="bg-[#F8F6F2] py-[clamp(72px,9vw,132px)] text-primary">
         <div className="mx-auto max-w-[1120px] space-y-[clamp(54px,7vw,96px)] px-container">
-          <Reveal className="mx-auto grid aspect-[1.8/1] w-full max-w-[860px] place-items-center bg-[#d8d8d8]">
+          <Reveal className="mx-auto grid aspect-[1.8/1] w-full place-items-center bg-[#d8d8d8]">
             <p className="font-body text-[12px] font-semibold tracking-[0.08em] text-primary/70">
               {locale === 'ko' ? '패키지 사진' : 'Package image'}
             </p>
@@ -378,7 +378,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             <h2 className="text-center font-heading text-[clamp(20px,2vw,28px)] font-semibold">
               {locale === 'ko' ? '주문 방법' : 'Order process'}
             </h2>
-            <div className="mx-auto grid max-w-[760px] grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="mx-auto grid w-full grid-cols-2 gap-4 md:grid-cols-3">
               {golfProcessSteps.map((step) => (
                 <Reveal key={step.id}>
                   <div className="grid aspect-[1.2/1] place-items-center bg-[#202020] px-5 py-6 text-center text-white">

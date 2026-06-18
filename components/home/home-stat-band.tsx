@@ -88,7 +88,7 @@ function HomeStatBandCell({
 
   return (
     <div
-      className={`grid justify-items-center gap-4 text-center lg:min-h-[220px] lg:px-9 ${
+      className={`grid justify-items-center gap-5 text-center lg:min-h-[168px] lg:px-7 ${
         index > 0 ? 'lg:border-l lg:border-[#F4E6E1]/70' : ''
       }`}
     >
@@ -99,7 +99,7 @@ function HomeStatBandCell({
       <p className="home-stat-band__label whitespace-pre-line text-[15px] uppercase leading-[1.08] tracking-[0.03em]">
         {item.label}
       </p>
-      <p className="home-stat-band__body whitespace-pre-line text-[15px] leading-[1.35]">
+      <p className="home-stat-band__body max-w-[190px] whitespace-pre-line text-[14px] leading-[1.32]">
         {item.body}
       </p>
     </div>

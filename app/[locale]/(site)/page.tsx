@@ -88,7 +88,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
       <section className="bg-bg py-[clamp(96px,10vw,156px)]">
         <div className="mx-auto max-w-[1180px] space-y-20 px-container">
           <Reveal className="grid gap-10 lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)] lg:items-center xl:gap-[72px]">
-            <div className="max-w-[260px] space-y-7 lg:text-center">
+            <div className="max-w-[260px] space-y-3 lg:text-center">
               <h2 className="font-heading text-[clamp(20px,1.7vw,30px)] font-medium uppercase leading-tight text-primary">
                 {currentPulse.primaryTitle}
               </h2>
@@ -130,7 +130,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
               </div>
             </Link>
 
-            <div className="space-y-7 lg:max-w-[260px] lg:justify-self-end lg:text-center">
+            <div className="space-y-3 lg:max-w-[260px] lg:justify-self-end lg:text-center">
               <p className="font-heading text-[clamp(20px,1.7vw,30px)] font-medium uppercase leading-tight text-primary">
                 {currentPulse.secondaryTitle}
               </p>
@@ -145,44 +145,44 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         </div>
       </section>
 
-      <section className="bg-bg pb-[clamp(54px,5.5vw,88px)] pt-[clamp(36px,5vw,72px)]">
-        <div className="mx-auto grid max-w-[1320px] gap-10 px-container lg:grid-cols-[minmax(320px,0.30fr)_minmax(0,0.70fr)] lg:items-center xl:grid-cols-[minmax(390px,0.30fr)_minmax(0,0.70fr)] xl:gap-20">
-          <Reveal className="max-w-[390px] space-y-7">
+      <section className="flex min-h-screen items-center bg-bg py-[clamp(72px,7vw,112px)]">
+        <div className="mx-auto grid w-full max-w-[1180px] items-center gap-[clamp(40px,4.5vw,64px)] px-container lg:grid-cols-[minmax(280px,0.30fr)_minmax(0,0.70fr)]">
+          <Reveal className="mx-auto max-w-[390px] space-y-8 lg:mx-0">
             <div className="space-y-5">
               <p className="font-heading text-[12px] font-medium uppercase leading-tight text-accent">
                 {content.signature.eyebrow}
               </p>
-              <h2 className="font-heading text-[clamp(20px,1.8vw,26px)] font-semibold leading-tight text-primary">
+              <h2 className="font-heading text-[clamp(24px,2.15vw,34px)] font-semibold leading-tight text-primary">
                 {content.signature.title}
               </h2>
             </div>
-            <p className="max-w-sm whitespace-pre-line font-body text-[13px] leading-6 text-text">
+            <p className="max-w-[410px] whitespace-pre-line font-body text-[clamp(13px,0.95vw,15px)] leading-[1.9] text-text">
               {content.signature.body}
             </p>
           </Reveal>
 
-          <Reveal className="grid items-stretch gap-6 sm:grid-cols-3">
+          <Reveal className="grid items-stretch gap-[clamp(18px,1.6vw,24px)] sm:grid-cols-3">
             {content.signature.projects.map((item) => (
               <RevealItem key={item.image} className="h-full">
                 <Link
                   href={withLocale(locale, '/mastery/creations')}
-                  className="group grid h-full grid-rows-[auto_1fr] bg-white p-2.5 shadow-[0_18px_70px_rgba(16,29,48,0.055)] transition duration-hover ease-brand hover:-translate-y-1 hover:shadow-[0_28px_90px_rgba(16,29,48,0.10)]"
+                  className="group grid h-full grid-rows-[auto_1fr] bg-white p-[clamp(10px,0.85vw,14px)] shadow-[0_18px_70px_rgba(16,29,48,0.055)] transition duration-hover ease-brand hover:-translate-y-1 hover:shadow-[0_28px_90px_rgba(16,29,48,0.10)]"
                 >
                   <div className="hover-zoom">
                     <div className="hover-zoom-media">
                       <SafeImage
                         filename={item.image}
                         alt={item.caption}
-                        aspect="aspect-[4/3]"
+                        aspect="aspect-square"
                         variant="plain"
                       />
                     </div>
                   </div>
-                  <div className="grid min-h-[98px] grid-rows-[auto_1fr] gap-2 px-1 pb-4 pt-4 text-center">
-                    <h3 className="font-heading text-[clamp(16px,1.15vw,20px)] font-semibold leading-tight text-primary">
+                  <div className="grid min-h-[118px] grid-rows-[auto_1fr] gap-3 px-1 pb-5 pt-5 text-center">
+                    <h3 className="font-heading text-[clamp(19px,1.25vw,24px)] font-semibold leading-tight text-primary">
                       {item.title}
                     </h3>
-                    <p className="self-start whitespace-pre-line font-heading text-[11px] font-medium uppercase leading-[1.1] text-primary">
+                    <p className="self-start whitespace-pre-line font-heading text-[clamp(11px,0.72vw,13px)] font-medium uppercase leading-[1.1] text-primary">
                       {item.caption}
                     </p>
                   </div>
@@ -193,7 +193,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         </div>
       </section>
 
-      <section className="bg-[#62302F] py-[clamp(92px,10vw,150px)] text-[#F4E6E1]">
+      <section className="bg-[#62302F] py-[clamp(64px,7vw,96px)] text-[#F4E6E1]">
         <HomeStatBand items={content.statBand} locale={locale} />
       </section>
 

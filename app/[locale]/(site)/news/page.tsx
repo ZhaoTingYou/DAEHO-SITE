@@ -62,7 +62,7 @@ export default async function NewsPage({params}: Props) {
         </div>
       </section>
 
-      <section className="bg-bg py-section">
+      <section className="bg-bg pb-[clamp(28px,3.5vw,52px)] pt-section">
         <div className="mx-auto max-w-[1440px] px-container">
           <Reveal className="group grid gap-10 bg-white p-4 shadow-[0_24px_90px_rgba(16,29,48,0.08)] md:p-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch">
             <div className="hover-zoom relative">
@@ -99,7 +99,7 @@ export default async function NewsPage({params}: Props) {
         </div>
       </section>
 
-      <section id="news-grid" className="bg-bg py-section">
+      <section id="news-grid" className="bg-bg pb-section pt-[clamp(22px,3vw,44px)]">
         <div className="mx-auto max-w-[1440px] space-y-10 px-container">
           <Reveal>
             <NewsJournalGrid

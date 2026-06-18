@@ -5,8 +5,8 @@
   },
   "home": {
     "eyebrow": "CUSTOM JEWELRY · SYMBOLIC OBJECTS · DESIGN CONSULTING",
-    "title": "WE DESIGN SYMBOLS THAT LAST",
-    "subtitle": "브랜드의 이야기를,\n오래 남는 상징으로 설계합니다",
+    "title": "브랜드의 이야기를,\n오래 남는 상징으로 설계합니다",
+    "subtitle": "WE DESIGN SYMBOLS THAT LAST",
     "image": "home_hero.png",
     "signature": {
       "eyebrow": "SIGNATURE PROJECTS / 대표 프로젝트",
@@ -1194,7 +1194,7 @@
     "allCategories": "전체 분류",
     "countSuffix": "점",
     "chooseLabel": "분류 선택",
-    "view": "자세히 보기",
+    "view": "DISCOVER MORE",
     "finder": {
       "eyebrow": "CHAMPIONSHIP RING FINDER",
       "title": "우승반지 찾기",

@@ -26,7 +26,7 @@ export function HomeHero({
   webmSrc
 }: HomeHeroProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
-  const words = title.split(' ');
+  const titleLines = title.split('\n');
   const isNumericWord = (word: string) => /^[\d,]+$/.test(word);
   const titleVariants: Variants = {
     hidden: {},
@@ -48,10 +48,9 @@ export function HomeHero({
     }
   };
   const copyVariants: Variants = {
-    hidden: {opacity: 0, y: prefersReducedMotion ? 0 : 18},
+    hidden: {opacity: 0},
     visible: {
       opacity: 1,
-      y: 0,
       transition: {
         duration: prefersReducedMotion ? 0.18 : 0.65,
         ease: [0.16, 1, 0.3, 1]
@@ -73,7 +72,7 @@ export function HomeHero({
         <motion.div
           initial="hidden"
           animate="visible"
-          className="max-w-5xl space-y-7 text-white [text-shadow:0_2px_20px_rgba(16,29,48,.34)] md:space-y-8"
+          className="max-w-5xl space-y-4 text-white [text-shadow:0_2px_20px_rgba(16,29,48,.34)]"
         >
           <motion.p
             variants={copyVariants}
@@ -83,22 +82,26 @@ export function HomeHero({
           </motion.p>
           <motion.h1
             variants={titleVariants}
-            className="font-heading text-hero font-bold leading-none tracking-normal"
+            className="flex flex-col gap-4 font-heading text-hero font-bold leading-none tracking-normal"
           >
-            {words.map((word, index) => (
-              <span key={`${word}-${index}`} className="inline-block overflow-hidden">
-                <motion.span variants={wordVariants} className="inline-block">
-                  <span className={isNumericWord(word) ? 'home-hero__number' : undefined}>
-                    {word}
+            {titleLines.map((line, lineIndex) => (
+              <span key={`${line}-${lineIndex}`} className="block overflow-hidden">
+                {line.split(' ').map((word, wordIndex, words) => (
+                  <span key={`${word}-${lineIndex}-${wordIndex}`} className="inline-block overflow-hidden">
+                    <motion.span variants={wordVariants} className="inline-block">
+                      <span className={isNumericWord(word) ? 'home-hero__number' : undefined}>
+                        {word}
+                      </span>
+                      {wordIndex < words.length - 1 ? '\u00A0' : ''}
+                    </motion.span>
                   </span>
-                  {index < words.length - 1 ? '\u00A0' : ''}
-                </motion.span>
+                ))}
               </span>
             ))}
           </motion.h1>
           <motion.p
             variants={copyVariants}
-            className="max-w-2xl whitespace-pre-line font-body text-body leading-[1.7]"
+            className="max-w-2xl -mt-1 whitespace-pre-line font-body text-body leading-[1.7]"
           >
             {subtitle}
           </motion.p>

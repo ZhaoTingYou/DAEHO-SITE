@@ -163,7 +163,7 @@ function NewsImage({
     return (
       <div
         className={`flex w-full items-center justify-center break-all border border-hairline bg-white p-5 text-center font-body text-xs font-semibold leading-5 tracking-[0.08em] text-subtext ${
-          fillFrame ? 'min-h-[300px] md:min-h-[520px]' : 'aspect-[3/4]'
+          fillFrame ? 'min-h-[260px] md:min-h-[360px]' : 'aspect-[3/4]'
         }`}
         role="img"
         aria-label={card.image}
@@ -174,7 +174,7 @@ function NewsImage({
   }
 
   return (
-    <div className={`relative w-full overflow-hidden bg-bg ${fillFrame ? 'min-h-[300px] md:min-h-[520px]' : 'aspect-[3/4]'}`}>
+    <div className={`relative w-full overflow-hidden bg-bg ${fillFrame ? 'min-h-[260px] md:min-h-[360px]' : 'aspect-[3/4]'}`}>
       <Image
         src={`/images/${card.image}`}
         alt={`${card.categoryLabel} ${card.title}`}
