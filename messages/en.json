@@ -788,7 +788,7 @@
   },
   "golf": {
     "hero": {
-      "eyebrow": "PREMIUM CUTOMIZED GOLF BRACELET",
+      "eyebrow": "PREMIUM CUSTOMIZED GOLF BRACELET",
       "titleLines": [
         "FORM",
         "OF THE",
@@ -805,7 +805,7 @@
         "GAME"
       ],
       "body": "The rhythm of a round, the line of a club, and the feeling on the wrist are arranged into one bright object.",
-      "image": "golf/9ef0c9b8-2bdd-4c05-967f-b29287865f9a.png"
+      "image": "golf/section2.png"
     },
     "heads": {
       "eyebrow": "CLUB HEAD",
@@ -877,8 +877,8 @@
       "eyebrow": "PERSONAL ENGRAVING",
       "title": "Engrave names, dates, and records",
       "body": "Scores, initials, dates, and course memories can be arranged on bright metal for a longer life.",
-      "imagePrimary": "golf/ChatGPT Image 2026년 5월 3일 오후 05_34_00 1.png",
-      "imageDetail": "golf/ChatGPT Image 2026년 5월 3일 오후 05_34_00 2.png",
+      "imagePrimary": "golf/1.png",
+      "imageDetail": "golf/2.png",
       "specs": [
         "Name",
         "Date",
@@ -899,7 +899,75 @@
       "selectedShaft": "Selected shaft",
       "headGroup": "Club head selection",
       "shaftGroup": "Shaft color selection",
-      "inquiryCta": "Inquire with this configuration"
+      "inquiryCta": "Inquire with this configuration",
+      "requestEstimate": "Request an estimate",
+      "quoteText": "Celebrate the moment forever.",
+      "braceletTitle": "Design your own bracelet",
+      "braceletBody": "For your taste, for your style",
+      "shaftTitle": "Shaft Color",
+      "previousShaft": "Previous shaft color",
+      "nextShaft": "Next shaft color",
+      "styleOptions": [
+        "BASIC",
+        "COLOUR"
+      ]
+    },
+    "process": {
+      "packageImageLabel": "Package image",
+      "title": "Order process",
+      "steps": [
+        {
+          "id": "01",
+          "title": "Choose head",
+          "lines": [
+            "Golf ball",
+            "Iron",
+            "Driver",
+            "Putter"
+          ]
+        },
+        {
+          "id": "02",
+          "title": "Choose head option",
+          "lines": [
+            "Basic",
+            "Gemstone"
+          ]
+        },
+        {
+          "id": "03",
+          "title": "Select shaft color",
+          "lines": [
+            "Black",
+            "White",
+            "Burgundy",
+            "Mint",
+            "Navy"
+          ]
+        },
+        {
+          "id": "04",
+          "title": "Personal engraving",
+          "lines": []
+        },
+        {
+          "id": "05",
+          "title": "Choose gold purity",
+          "lines": [
+            "18K",
+            "14K"
+          ]
+        },
+        {
+          "id": "06",
+          "title": "Choose gold color",
+          "lines": [
+            "Yellow gold",
+            "Pink gold",
+            "White gold"
+          ]
+        }
+      ]
     }
   },
   "common": {
@@ -960,6 +1028,21 @@
         "oh": "OH",
         "vulcan": "VULCAN"
       },
+      "collectionCategoryLinks": [
+        {
+          "label": "Championship Rings",
+          "href": "/mastery/creations/champion"
+        },
+        {
+          "label": "Commission Rings",
+          "href": "/mastery/creations/appointment"
+        },
+        {
+          "label": "Custom Products",
+          "href": "/mastery/creations/bespoke"
+        }
+      ],
+      "golfInquiry": "Golf Inquiry",
       "business": {
         "heading": "Business information",
         "items": [

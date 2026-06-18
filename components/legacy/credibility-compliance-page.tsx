@@ -222,7 +222,7 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
           {copy.rows.map((row, index) => (
             <Reveal
               key={row.title}
-              className={`grid gap-10 py-14 md:grid-cols-[1fr_0.7fr] md:items-center md:gap-16 lg:gap-24 ${
+              className={`grid gap-8 py-14 md:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] md:items-center md:gap-10 lg:gap-12 ${
                 index === 0 ? 'pt-4' : ''
               } ${index < copy.rows.length - 1 ? 'border-b border-[#b65c55]/70' : 'pb-4'}`}
             >
@@ -244,13 +244,13 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
                 </div>
               </div>
 
-              <div className="aspect-[4/3] w-full bg-[#d7d7d7] md:ml-auto md:max-w-[320px]" aria-hidden="true" />
+              <div className="aspect-[4/3] w-full bg-[#d7d7d7]" aria-hidden="true" />
             </Reveal>
           ))}
         </div>
       </section>
 
-      <section className="bg-bg pb-24 pt-[clamp(92px,10vw,150px)] md:pb-28">
+      <section className="bg-bg py-[clamp(96px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
             {copy.discoverLead}

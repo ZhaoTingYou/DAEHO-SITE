@@ -83,13 +83,14 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         videoPoster={heroVideo.videoPoster}
         videoSrc={heroVideo.videoSrc}
         webmSrc={heroVideo.webmSrc}
+        locale={locale}
       />
 
       <section className="bg-bg py-[clamp(96px,10vw,156px)]">
         <div className="mx-auto max-w-[1180px] space-y-20 px-container">
           <Reveal className="grid gap-10 lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)] lg:items-center xl:gap-[72px]">
             <div className="max-w-[260px] space-y-3 lg:text-center">
-              <h2 className="font-heading text-[clamp(20px,1.7vw,30px)] font-medium uppercase leading-tight text-primary">
+              <h2 className="font-heading text-[clamp(18px,1.45vw,26px)] font-medium uppercase leading-tight text-primary">
                 {currentPulse.primaryTitle}
               </h2>
               <Link
@@ -131,7 +132,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
             </Link>
 
             <div className="space-y-3 lg:max-w-[260px] lg:justify-self-end lg:text-center">
-              <p className="font-heading text-[clamp(20px,1.7vw,30px)] font-medium uppercase leading-tight text-primary">
+              <p className="font-heading text-[clamp(18px,1.45vw,26px)] font-medium uppercase leading-tight text-primary">
                 {currentPulse.secondaryTitle}
               </p>
               <Link
@@ -147,8 +148,8 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
 
       <section className="flex min-h-screen items-center bg-bg py-[clamp(72px,7vw,112px)]">
         <div className="mx-auto grid w-full max-w-[1180px] items-center gap-[clamp(40px,4.5vw,64px)] px-container lg:grid-cols-[minmax(280px,0.30fr)_minmax(0,0.70fr)]">
-          <Reveal className="mx-auto max-w-[390px] space-y-8 lg:mx-0">
-            <div className="space-y-5">
+          <Reveal className="mx-auto max-w-[390px] space-y-5 lg:mx-0">
+            <div className="space-y-3">
               <p className="font-heading text-[12px] font-medium uppercase leading-tight text-accent">
                 {content.signature.eyebrow}
               </p>
@@ -178,11 +179,11 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
                       />
                     </div>
                   </div>
-                  <div className="grid min-h-[118px] grid-rows-[auto_1fr] gap-3 px-1 pb-5 pt-5 text-center">
+                  <div className="flex min-h-[118px] flex-col items-center justify-center gap-1.5 px-1 py-5 text-center">
                     <h3 className="font-heading text-[clamp(19px,1.25vw,24px)] font-semibold leading-tight text-primary">
                       {item.title}
                     </h3>
-                    <p className="self-start whitespace-pre-line font-heading text-[clamp(11px,0.72vw,13px)] font-medium uppercase leading-[1.1] text-primary">
+                    <p className="whitespace-pre-line font-heading text-[clamp(11px,0.72vw,13px)] font-medium uppercase leading-[1.08] text-primary">
                       {item.caption}
                     </p>
                   </div>

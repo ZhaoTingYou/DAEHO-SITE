@@ -73,6 +73,23 @@ export type GolfConfiguratorContent = {
     headGroup: string;
     shaftGroup: string;
     inquiryCta: string;
+    requestEstimate: string;
+    quoteText: string;
+    braceletTitle: string;
+    braceletBody: string;
+    shaftTitle: string;
+    previousShaft: string;
+    nextShaft: string;
+    styleOptions: string[];
+  };
+  process: {
+    packageImageLabel: string;
+    title: string;
+    steps: Array<{
+      id: string;
+      title: string;
+      lines: string[];
+    }>;
   };
 };
 
@@ -88,15 +105,6 @@ const golfShaftVisuals: Record<string, string> = {
   burgundy: 'object-[66%_50%]',
   navy: 'object-[93%_50%]'
 };
-
-const golfProcessSteps = [
-  {id: '01', ko: '헤드 선택', en: 'Choose head', lines: ['골프공', '아이언', '드라이버', '퍼터']},
-  {id: '02', ko: '헤드 옵션 선택', en: 'Choose head option', lines: ['베이직', '젬스톤']},
-  {id: '03', ko: '샤프트 색상 선택', en: 'Select shaft color', lines: ['블랙', '화이트', '버건디', '민트', '네이비']},
-  {id: '04', ko: '개인 맞춤형 각인 선택', en: 'Personal engraving', lines: []},
-  {id: '05', ko: '함량 선택', en: 'Choose gold purity', lines: ['18K', '14K']},
-  {id: '06', ko: '색상 선택', en: 'Choose gold color', lines: ['옐로우 골드', '핑크 골드', '화이트 골드']}
-];
 
 export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -119,8 +127,12 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   );
   const engravingSample = 'JUDY KIM 2026.05.03';
   const inquiryHref = `/${locale}/golf/inquiry?head=${selectedHead?.id ?? ''}&shaft=${selectedShaft?.id ?? ''}&engraving=${encodeURIComponent(engravingSample)}`;
-  const requestLabel = locale === 'ko' ? '견적 문의하러 가기' : 'Request an estimate';
-  const quoteText = locale === 'ko' ? '순간을 영원히 기념하세요' : 'Celebrate the moment forever.';
+  const labels = content.labels;
+  const process = content.process;
+  const styleOptions = labels.styleOptions?.length ? labels.styleOptions : ['BASIC', 'COLOUR'];
+  const engravingTitleLines =
+    locale === 'ko' ? [content.engraving.eyebrow, content.engraving.body] : [content.engraving.title];
+  const engravingDetail = locale === 'ko' ? content.engraving.title : content.engraving.body;
   const changeShaft = (direction: 1 | -1) => {
     const items = content.shafts.items;
 
@@ -140,7 +152,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             initial={false}
             animate={{opacity: 1, y: 0}}
             transition={{duration: prefersReducedMotion ? 0 : 0.72, ease: [0.16, 1, 0.3, 1]}}
-            className="text-center font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-white/72"
+            className="text-center [font-family:'Cormorant_Garamond',serif] text-[18px] font-bold uppercase tracking-[0.08em] text-white/72"
           >
             {content.hero.eyebrow}
           </motion.p>
@@ -150,7 +162,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               type="button"
               onClick={() => changeShaft(-1)}
               className="absolute left-0 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center text-white/62 transition duration-hover ease-brand hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              aria-label="Previous shaft color"
+              aria-label={labels.previousShaft}
             >
               <ChevronIcon direction="left" />
             </button>
@@ -158,7 +170,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               type="button"
               onClick={() => changeShaft(1)}
               className="absolute right-0 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center text-white/62 transition duration-hover ease-brand hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              aria-label="Next shaft color"
+              aria-label={labels.nextShaft}
             >
               <ChevronIcon direction="right" />
             </button>
@@ -188,7 +200,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                   </span>
                 ))}
               </h1>
-              <p className="max-w-[380px] font-body text-[clamp(18px,1.45vw,27px)] font-semibold leading-[1.35] text-white/58">
+              <p className="max-w-[380px] font-body text-[clamp(18px,1.45vw,27px)] font-medium leading-[1.35] text-white/58">
                 {content.hero.subtitle}
               </p>
             </Reveal>
@@ -212,7 +224,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             <h2 className="font-heading text-[clamp(20px,2vw,27px)] font-semibold leading-tight text-white">
               {content.heads.title}
             </h2>
-            <p className="font-body text-[12px] leading-5 text-white/55">
+            <p className="font-body text-[18px] leading-[1.3] text-white/55">
               {content.heads.subtitle}
             </p>
           </Reveal>
@@ -242,7 +254,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                       className="object-cover"
                     />
                   </div>
-                  <p className="px-1 pt-3 font-body text-[10px] font-semibold uppercase tracking-[0.08em] text-primary/70">
+                  <p className="px-1 pt-3 font-body text-[18px] font-semibold uppercase tracking-[0.02em] text-primary/70">
                     {item.label}
                   </p>
                 </button>
@@ -253,20 +265,20 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
           <div className="grid items-center gap-8 pt-[clamp(26px,5vw,58px)] md:grid-cols-[0.75fr_1.25fr]">
             <Reveal className="space-y-2">
               <p className="font-heading text-[clamp(18px,2vw,26px)] font-semibold text-white">
-                {locale === 'ko' ? '나만의 팔찌 디자인하기' : 'Design your own bracelet'}
+                {labels.braceletTitle}
               </p>
-              <p className="font-body text-[11px] leading-5 text-white/42">
-                {locale === 'ko' ? '취향에 맞게, 스타일에 맞게' : `For your taste, for your style`}
+              <p className="font-body text-[18px] leading-[1.3] text-white/42">
+                {labels.braceletBody}
               </p>
             </Reveal>
             <div className="grid gap-4 sm:grid-cols-2">
-              {['BASIC', 'COLOUR'].map((label) => (
+              {styleOptions.map((label) => (
                 <button
                   key={label}
                   type="button"
                   className="relative aspect-[1.15/1] min-h-11 bg-[#d8d8d8] text-primary transition duration-hover ease-brand hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                 >
-                  <span className="absolute bottom-3 right-3 font-body text-[10px] font-semibold uppercase tracking-[0.1em]">
+                  <span className="absolute bottom-3 right-3 font-body text-[18px] font-semibold uppercase tracking-[0.02em]">
                     {label}
                   </span>
                 </button>
@@ -280,8 +292,14 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         <div className="mx-auto max-w-[1120px] space-y-[clamp(70px,8vw,118px)] px-container">
           <div className="mx-auto max-w-[900px] space-y-[clamp(34px,4vw,44px)]">
             <Reveal className="text-center">
-              <h2 className="font-body text-[clamp(18px,1.8vw,24px)] font-semibold tracking-[0.02em]">
-                {locale === 'ko' ? '샤프트 색상' : 'Shaft Color'}
+              <h2
+                className={`text-[clamp(24px,2.5vw,36px)] leading-tight text-primary ${
+                  locale === 'ko'
+                    ? "[font-family:'MaruBuri',serif] font-semibold"
+                    : "[font-family:'Cormorant_Garamond',serif] font-bold uppercase tracking-normal"
+                }`}
+              >
+                {labels.shaftTitle}
               </h2>
             </Reveal>
 
@@ -298,7 +316,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                       className={`scale-[1.35] object-cover ${golfShaftVisuals[item.id] ?? golfShaftVisuals.navy} mix-blend-multiply`}
                     />
                   </div>
-                  <figcaption className="mt-6 font-heading text-[14px] font-semibold uppercase [letter-spacing:0] text-primary">
+                  <figcaption className="mt-6 font-heading text-[18px] font-semibold uppercase [letter-spacing:0] text-primary">
                     {item.label}
                   </figcaption>
                 </figure>
@@ -306,19 +324,24 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             </div>
           </div>
 
-          <Reveal className="relative mx-auto grid max-w-[1120px] gap-8 pt-[clamp(12px,3vw,28px)] md:min-h-[clamp(620px,58vw,760px)]">
-            <div className="space-y-12 md:absolute md:left-[5%] md:top-[16%] md:w-[52%]">
-              <p className="font-body text-[12px] font-semibold text-primary/70">
-                {content.engraving.eyebrow}
+          <Reveal className="relative mx-auto grid max-w-[1120px] gap-8 pt-[clamp(20px,3vw,36px)] md:min-h-[clamp(780px,62vw,920px)]">
+            <div className="relative z-20 space-y-4 md:absolute md:left-[6%] md:top-[16%] md:w-[40%]">
+              <h2
+                className={`text-[clamp(26px,2.45vw,36px)] font-semibold leading-[1.28] text-primary ${
+                  locale === 'ko'
+                    ? "[font-family:'MaruBuri',serif]"
+                    : "[font-family:'Cormorant_Garamond',serif]"
+                }`}
+              >
+                {engravingTitleLines.map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </h2>
+              <p className="font-body text-[clamp(14px,1.1vw,17px)] leading-[1.45] text-primary">
+                {engravingDetail}
               </p>
-              <div className="space-y-2.5">
-                <h2 className="whitespace-nowrap font-heading text-[clamp(18px,1.75vw,26px)] font-semibold leading-tight">
-                  {content.engraving.title}
-                </h2>
-                <p className="font-body text-[12px] leading-6 text-text">
-                  {content.engraving.body}
-                </p>
-              </div>
             </div>
 
             <div className="relative aspect-[0.74/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:right-0 md:top-0 md:w-[45%]">
@@ -330,7 +353,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               />
             </div>
 
-            <div className="relative aspect-[1.37/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:bottom-[5%] md:left-[2.5%] md:z-10 md:w-[58%]">
+            <div className="relative aspect-[1.37/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:bottom-0 md:left-[1%] md:w-[56%]">
               <GolfStaticImage
                 src={`/images/${content.engraving.imageDetail}`}
                 alt={content.engraving.body}
@@ -338,8 +361,8 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               />
             </div>
 
-            <p className="whitespace-nowrap text-center font-heading text-[clamp(18px,1.8vw,26px)] font-semibold leading-tight text-primary md:absolute md:bottom-[8%] md:right-[2%] md:w-[40%]">
-              “{quoteText}”
+            <p className="relative z-20 whitespace-nowrap text-center font-heading text-[clamp(18px,1.8vw,26px)] font-semibold leading-tight text-primary md:absolute md:bottom-[8%] md:right-[2%] md:w-[40%]">
+              “{labels.quoteText}”
             </p>
           </Reveal>
         </div>
@@ -369,17 +392,17 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
       <section className="bg-[#F8F6F2] py-[clamp(72px,9vw,132px)] text-primary">
         <div className="mx-auto max-w-[1120px] space-y-[clamp(54px,7vw,96px)] px-container">
           <Reveal className="mx-auto grid aspect-[1.8/1] w-full place-items-center bg-[#d8d8d8]">
-            <p className="font-body text-[12px] font-semibold tracking-[0.08em] text-primary/70">
-              {locale === 'ko' ? '패키지 사진' : 'Package image'}
+            <p className="font-body text-[18px] font-semibold tracking-[0.04em] text-primary/70">
+              {process.packageImageLabel}
             </p>
           </Reveal>
 
           <div className="space-y-8">
             <h2 className="text-center font-heading text-[clamp(20px,2vw,28px)] font-semibold">
-              {locale === 'ko' ? '주문 방법' : 'Order process'}
+              {process.title}
             </h2>
             <div className="mx-auto grid w-full grid-cols-2 gap-4 md:grid-cols-3">
-              {golfProcessSteps.map((step) => (
+              {process.steps.map((step) => (
                 <Reveal key={step.id}>
                   <div className="grid aspect-[1.2/1] place-items-center bg-[#202020] px-5 py-6 text-center text-white">
                     <div className="space-y-2">
@@ -387,10 +410,10 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                         {step.id}
                       </p>
                       <h3 className="font-heading text-[clamp(15px,1.4vw,20px)] font-semibold leading-tight">
-                        {locale === 'ko' ? step.ko : step.en}
+                        {step.title}
                       </h3>
                       {step.lines.length > 0 ? (
-                        <div className="space-y-0.5 font-body text-[10px] leading-4 text-white/52">
+                        <div className="space-y-1 font-body text-[18px] leading-[1.25] text-white/52">
                           {step.lines.map((line) => (
                             <p key={line}>{line}</p>
                           ))}
@@ -405,12 +428,12 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-[#F8F6F2] px-container py-[clamp(60px,7vw,92px)] text-center text-primary">
+      <section className="bg-[#F8F6F2] px-container pb-[clamp(150px,18vw,260px)] pt-[clamp(60px,7vw,92px)] text-center text-primary">
         <Link
           href={inquiryHref}
           className="link-sweep inline-flex min-h-12 items-center bg-[#F8F6F2] font-heading text-[clamp(21px,2vw,30px)] font-semibold"
         >
-          {requestLabel}
+          {labels.requestEstimate}
         </Link>
       </section>
     </main>

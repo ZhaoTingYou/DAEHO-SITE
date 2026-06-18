@@ -194,7 +194,7 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
         <LoyaltyFeatureCarousel slides={copy.featureSlides} imageAlt={content.hero.subtitle} locale={locale} />
       </section>
 
-      <section className="bg-bg pb-24 pt-[clamp(92px,10vw,150px)] md:pb-28">
+      <section className="bg-bg py-[clamp(96px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
             {copy.discoverLead}

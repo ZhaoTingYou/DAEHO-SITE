@@ -3,6 +3,7 @@
 import {motion, type Variants} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import type {Locale} from '@/i18n/routing';
 
 import {HeroMedia} from './hero-media';
 
@@ -14,6 +15,7 @@ type HomeHeroProps = {
   videoPoster?: string;
   videoSrc?: string;
   webmSrc?: string;
+  locale: Locale;
 };
 
 export function HomeHero({
@@ -23,10 +25,12 @@ export function HomeHero({
   poster,
   videoPoster,
   videoSrc,
-  webmSrc
+  webmSrc,
+  locale
 }: HomeHeroProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const titleLines = title.split('\n');
+  const titleWeightClass = locale === 'ko' ? 'font-semibold' : 'font-bold';
   const isNumericWord = (word: string) => /^[\d,]+$/.test(word);
   const titleVariants: Variants = {
     hidden: {},
@@ -76,13 +80,13 @@ export function HomeHero({
         >
           <motion.p
             variants={copyVariants}
-            className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em]"
+            className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-accent"
           >
             {eyebrow}
           </motion.p>
           <motion.h1
             variants={titleVariants}
-            className="flex flex-col gap-4 font-heading text-hero font-bold leading-none tracking-normal"
+            className={`flex flex-col gap-4 font-heading text-hero ${titleWeightClass} leading-none tracking-normal`}
           >
             {titleLines.map((line, lineIndex) => (
               <span key={`${line}-${lineIndex}`} className="block overflow-hidden">
@@ -101,7 +105,7 @@ export function HomeHero({
           </motion.h1>
           <motion.p
             variants={copyVariants}
-            className="max-w-2xl -mt-1 whitespace-pre-line font-body text-body leading-[1.7]"
+            className="max-w-2xl -mt-2 whitespace-pre-line font-body text-body leading-[1.7]"
           >
             {subtitle}
           </motion.p>

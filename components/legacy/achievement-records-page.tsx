@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import {DraggableScroll} from '@/components/draggable-scroll';
 import type {HomeStatBandItem} from '@/components/home/home-stat-band';
 import {AnimatedStatScope, AnimatedStatValue} from '@/components/legacy/animated-stat-value';
 import {Reveal, RevealItem} from '@/components/motion/reveal';
@@ -72,7 +73,7 @@ const pageCopy = {
       {
         value: '95%',
         label: 'CHAMPIONSHIP\nRING SHARE',
-        body: '국내 우승반지 시장에서\n가장 많이 선택받은 제작 경험'
+        body: '국내 우승반지 시장에서\n가장 많이 선택받은\n제작 경험'
       },
       {
         value: '90%',
@@ -334,13 +335,13 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
       <section className="bg-[#f4efe6] px-container py-[clamp(112px,12vw,178px)]">
         <div className="mx-auto max-w-[980px]">
           <Reveal className="mx-auto max-w-[680px] text-center">
-            <p className={`${englishTextClass} text-[11px] uppercase leading-none text-accent`}>
+            <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
               {copy.marketLabel}
             </p>
-            <h2 className={`${bodyTextClass} mt-2 text-[clamp(24px,2.35vw,34px)] leading-tight text-primary`}>
+            <h2 className={`${bodyTextClass} mt-3 text-[clamp(28px,2.75vw,40px)] leading-tight text-primary`}>
               {copy.marketTitle}
             </h2>
-            <p className={`${bodyTextClass} mt-7 whitespace-pre-line text-[13px] leading-[1.72] text-[#252525]`}>
+            <p className={`${bodyTextClass} mt-7 whitespace-pre-line text-[15px] leading-[1.74] text-[#252525]`}>
               {copy.marketIntro}
             </p>
           </Reveal>
@@ -374,25 +375,30 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
           </h2>
         </Reveal>
 
-        <Reveal className="mt-16 flex gap-6 overflow-x-auto px-container pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {archiveImages.map((image, index) => (
-            <div
-              key={`${image}-${index}`}
-              className="relative aspect-[3/4] w-[min(46vw,300px)] shrink-0 overflow-hidden bg-[#d8d8d8]"
-            >
-              <Image
-                src={`/images/${image}`}
-                alt={`${copy.archiveTitle} ${index + 1}`}
-                fill
-                sizes="(min-width: 1024px) 300px, 46vw"
-                className="object-cover"
-              />
-            </div>
-          ))}
+        <Reveal className="mt-16">
+          <DraggableScroll
+            ariaLabel={copy.archiveTitle}
+            className="flex gap-6 overflow-x-auto px-container pb-4 [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden"
+          >
+            {archiveImages.map((image, index) => (
+              <div
+                key={`${image}-${index}`}
+                className="relative aspect-[3/4] w-[min(46vw,300px)] shrink-0 overflow-hidden bg-[#d8d8d8]"
+              >
+                <Image
+                  src={`/images/${image}`}
+                  alt={`${copy.archiveTitle} ${index + 1}`}
+                  fill
+                  sizes="(min-width: 1024px) 300px, 46vw"
+                  className="pointer-events-none object-cover"
+                />
+              </div>
+            ))}
+          </DraggableScroll>
         </Reveal>
       </section>
 
-      <section className="bg-bg pb-24 pt-[clamp(44px,6vw,86px)] md:pb-28">
+      <section className="bg-bg py-[clamp(96px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
             {copy.discoverLead}
@@ -751,12 +757,12 @@ function MarketText({item, locale}: {item: MarketFeature; locale: Locale}) {
       <h3 className={`${englishTextClass} mt-3 whitespace-pre-line text-[18px] uppercase leading-[1.05] text-primary`}>
         {item.title}
       </h3>
-      <p className={`${bodyTextClass} mt-7 whitespace-pre-line text-[13px] leading-[1.55] text-accent`}>
+      <p className={`${bodyTextClass} mt-7 whitespace-pre-line text-[15px] leading-[1.58] text-accent`}>
         {item.accent}
       </p>
       <div className="mt-7 space-y-4">
         {item.paragraphs.map((paragraph) => (
-          <p key={paragraph} className={`${bodyTextClass} text-[12px] leading-[1.72] text-[#252525]`}>
+          <p key={paragraph} className={`${bodyTextClass} text-[14px] leading-[1.74] text-[#252525]`}>
             {paragraph}
           </p>
         ))}

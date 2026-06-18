@@ -35,7 +35,7 @@ export default async function ContactPage({params, searchParams}: Props) {
         <div className="mx-auto grid min-h-[74dvh] max-w-[1440px] gap-12 px-container py-section lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
           <Reveal>
             <SectionIntro eyebrow={text.hero.eyebrow} title={text.hero.title}>
-              <p>{text.hero.body}</p>
+              {text.hero.body ? <p>{text.hero.body}</p> : null}
             </SectionIntro>
           </Reveal>
           <Reveal className="bg-bg p-5 shadow-[0_24px_80px_rgba(16,29,48,0.08)] md:p-8">
@@ -45,17 +45,7 @@ export default async function ContactPage({params, searchParams}: Props) {
       </section>
 
       <section className="bg-bg py-section">
-        <div className="mx-auto grid max-w-[1440px] gap-8 px-container lg:grid-cols-[0.9fr_1.1fr]">
-          <Reveal className="space-y-6 bg-white p-6 shadow-[0_18px_70px_rgba(16,29,48,0.06)] md:p-8">
-            <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-accent">
-              {text.infoTitle}
-            </p>
-            {[text.address, text.phone, text.email, text.hours].map((item) => (
-              <div key={item} className="border-t border-hairline pt-4 font-body text-[14px] leading-7 text-primary">
-                {item}
-              </div>
-            ))}
-          </Reveal>
+        <div className="mx-auto max-w-3xl px-container">
           <Reveal className="space-y-5">
             <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-subtext">
               {text.faqTitle}

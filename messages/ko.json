@@ -86,7 +86,7 @@
       {
         "value": "95%",
         "label": "CHAMPIONSHIP\nRING SHARE",
-        "body": "국내 우승반지 시장에서\n가장 많이 선택받은 제작 경험"
+        "body": "국내 우승반지 시장에서\n가장 많이 선택받은\n제작 경험"
       },
       {
         "value": "90%",
@@ -788,7 +788,7 @@
   },
   "golf": {
     "hero": {
-      "eyebrow": "PREMIUM CUTOMIZED GOLF BRACELET",
+      "eyebrow": "PREMIUM CUSTOMIZED GOLF BRACELET",
       "titleLines": [
         "FORM",
         "OF THE",
@@ -805,7 +805,7 @@
         "GAME"
       ],
       "body": "골프의 구조를 하나의 오브젝트로 재해석하다",
-      "image": "golf/9ef0c9b8-2bdd-4c05-967f-b29287865f9a.png"
+      "image": "golf/section2.png"
     },
     "heads": {
       "eyebrow": "CLUB HEAD",
@@ -877,8 +877,8 @@
       "eyebrow": "나만의 기록 각인",
       "title": "첫 싱글/첫 이글/첫 홀인원/첫 라운딩",
       "body": "모든 순간을 의미있게",
-      "imagePrimary": "golf/ChatGPT Image 2026년 5월 3일 오후 05_34_00 1.png",
-      "imageDetail": "golf/ChatGPT Image 2026년 5월 3일 오후 05_34_00 2.png",
+      "imagePrimary": "golf/1.png",
+      "imageDetail": "golf/2.png",
       "specs": [
         "Name",
         "Date",
@@ -899,7 +899,75 @@
       "selectedShaft": "Selected shaft",
       "headGroup": "클럽 헤드 선택",
       "shaftGroup": "샤프트 컬러 선택",
-      "inquiryCta": "이 구성으로 문의하기"
+      "inquiryCta": "이 구성으로 문의하기",
+      "requestEstimate": "견적 문의하러 가기",
+      "quoteText": "순간을 영원히 기념하세요",
+      "braceletTitle": "나만의 팔찌 디자인하기",
+      "braceletBody": "취향에 맞게, 스타일에 맞게",
+      "shaftTitle": "샤프트 색상",
+      "previousShaft": "이전 샤프트 색상",
+      "nextShaft": "다음 샤프트 색상",
+      "styleOptions": [
+        "BASIC",
+        "COLOUR"
+      ]
+    },
+    "process": {
+      "packageImageLabel": "패키지 사진",
+      "title": "주문 방법",
+      "steps": [
+        {
+          "id": "01",
+          "title": "헤드 선택",
+          "lines": [
+            "골프공",
+            "아이언",
+            "드라이버",
+            "퍼터"
+          ]
+        },
+        {
+          "id": "02",
+          "title": "헤드 옵션 선택",
+          "lines": [
+            "베이직",
+            "젬스톤"
+          ]
+        },
+        {
+          "id": "03",
+          "title": "샤프트 색상 선택",
+          "lines": [
+            "블랙",
+            "화이트",
+            "버건디",
+            "민트",
+            "네이비"
+          ]
+        },
+        {
+          "id": "04",
+          "title": "개인 맞춤형 각인 선택",
+          "lines": []
+        },
+        {
+          "id": "05",
+          "title": "함량 선택",
+          "lines": [
+            "18K",
+            "14K"
+          ]
+        },
+        {
+          "id": "06",
+          "title": "색상 선택",
+          "lines": [
+            "옐로우 골드",
+            "핑크 골드",
+            "화이트 골드"
+          ]
+        }
+      ]
     }
   },
   "common": {
@@ -960,6 +1028,21 @@
         "oh": "OH",
         "vulcan": "VULCAN"
       },
+      "collectionCategoryLinks": [
+        {
+          "label": "우승반지",
+          "href": "/mastery/creations/champion"
+        },
+        {
+          "label": "임관반지",
+          "href": "/mastery/creations/appointment"
+        },
+        {
+          "label": "주문제작",
+          "href": "/mastery/creations/bespoke"
+        }
+      ],
+      "golfInquiry": "골프 문의",
       "business": {
         "heading": "사업자 정보",
         "items": [
@@ -1065,9 +1148,9 @@
   },
   "contact": {
     "hero": {
-      "eyebrow": "문의",
-      "title": "승리의 의미를 형태로",
-      "body": "임관, 우승, 맞춤 제작 상담은 확인 가능한 정보만 남겨 주세요. 결제나 카드 정보는 받지 않습니다."
+      "eyebrow": "의뢰",
+      "title": "기념을 영원한 상징으로",
+      "body": ""
     },
     "infoTitle": "직접 문의",
     "address": "주소 확인 예정",
