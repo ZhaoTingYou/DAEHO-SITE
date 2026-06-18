@@ -515,12 +515,12 @@ function AchievementPentagonStats({items, locale}: {items: HomeStatBandItem[]; l
   return (
     <div className="mx-auto max-w-[1240px] px-container">
       <Reveal className="hidden md:block">
-        <AnimatedStatScope className="relative min-h-[620px]">
+        <AnimatedStatScope className="relative min-h-[650px]">
           <PentagonDiagram centerCaption={centerCaption} />
           <AchievementPentagonStat
             item={years}
             index={0}
-            className="left-1/2 top-0 w-[210px] -translate-x-1/2"
+            className="left-1/2 top-0 w-[220px] -translate-x-1/2"
             align="center"
             locale={locale}
             bodyTextClass={bodyTextClass}
@@ -547,7 +547,7 @@ function AchievementPentagonStats({items, locale}: {items: HomeStatBandItem[]; l
           <AchievementPentagonStat
             item={delivery}
             index={3}
-            className="bottom-[7%] left-[13%] w-[280px]"
+            className="bottom-[4%] left-[14%] w-[280px]"
             align="center"
             locale={locale}
             bodyTextClass={bodyTextClass}
@@ -556,7 +556,7 @@ function AchievementPentagonStats({items, locale}: {items: HomeStatBandItem[]; l
           <AchievementPentagonStat
             item={endToEnd}
             index={4}
-            className="bottom-[7%] right-[13%] w-[280px]"
+            className="bottom-[6.6%] right-[14%] w-[280px]"
             align="center"
             locale={locale}
             bodyTextClass={bodyTextClass}
@@ -599,41 +599,61 @@ function PentagonDiagram({
 }) {
   return (
     <svg
-      className={compact ? 'h-full w-full' : 'absolute left-1/2 top-[106px] h-[430px] w-[760px] -translate-x-1/2'}
-      viewBox="0 0 1000 560"
+      className={compact ? 'h-full w-full' : 'absolute left-1/2 top-[112px] h-[490px] w-[760px] -translate-x-1/2'}
+      viewBox="0 0 1000 620"
       role="img"
       aria-label="DEAHO trust pentagon"
     >
       <g fill="#F4E6E1">
         <path
-          d="M500 104 L664 224 L601 418 L399 418 L336 224 Z"
-          opacity="0.07"
+          d="M500 118 L730 285 L642 540 L358 540 L270 285 Z"
+          opacity="0.065"
         />
-        <path d="M500 104 L664 224 L500 292 Z" opacity="0.055" />
-        <path d="M664 224 L601 418 L500 292 Z" opacity="0.035" />
-        <path d="M601 418 L399 418 L500 292 Z" opacity="0.06" />
-        <path d="M399 418 L336 224 L500 292 Z" opacity="0.04" />
-        <path d="M336 224 L500 104 L500 292 Z" opacity="0.028" />
+        <path d="M500 118 L730 285 L500 354 Z" opacity="0.045" />
+        <path d="M730 285 L642 540 L500 354 Z" opacity="0.028" />
+        <path d="M642 540 L358 540 L500 354 Z" opacity="0.052" />
+        <path d="M358 540 L270 285 L500 354 Z" opacity="0.032" />
+        <path d="M270 285 L500 118 L500 354 Z" opacity="0.04" />
+      </g>
+      <g fill="none" stroke="#F4E6E1" strokeLinecap="round" strokeLinejoin="round">
+        <path
+          d="M500 118 L730 285 L642 540 L358 540 L270 285 Z"
+          opacity="0.46"
+          strokeWidth="1.6"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d="M500 168 L675 296 L608 490 L392 490 L325 296 Z"
+          opacity="0.18"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d="M500 168 L500 354 M325 296 L500 354 M675 296 L500 354 M392 490 L500 354 M608 490 L500 354"
+          opacity="0.12"
+          strokeWidth="0.8"
+          vectorEffect="non-scaling-stroke"
+        />
       </g>
       <g fill="#F4E6E1">
         {[500, 336, 664, 399, 601].map((_, index) => {
           const points = [
-            [500, 104],
-            [336, 224],
-            [664, 224],
-            [399, 418],
-            [601, 418]
+            [500, 118],
+            [270, 285],
+            [730, 285],
+            [358, 540],
+            [642, 540]
           ];
           const [cx, cy] = points[index];
 
-          return <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" opacity="0.58" />;
+          return <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" opacity="0.68" />;
         })}
         <text
           x="500"
-          y="296"
+          y="344"
           textAnchor="middle"
           fontFamily="Cormorant Garamond, serif"
-          fontSize="42"
+          fontSize="44"
           fontWeight="700"
           letterSpacing="4"
         >
@@ -641,10 +661,10 @@ function PentagonDiagram({
         </text>
         <text
           x="500"
-          y="339"
+          y="383"
           textAnchor="middle"
           fontFamily="Cormorant Garamond, serif"
-          fontSize="24"
+          fontSize="22"
           fontWeight="700"
           letterSpacing="2.5"
         >
@@ -654,7 +674,7 @@ function PentagonDiagram({
           <text
             key={line}
             x="500"
-            y={376 + index * 28}
+            y={420 + index * 26}
             textAnchor="middle"
             fontFamily="MaruBuri, serif"
             fontSize="18"
