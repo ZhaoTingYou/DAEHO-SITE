@@ -146,7 +146,7 @@ export function SiteFooter({locale}: SiteFooterProps) {
         </nav>
       </div>
 
-      <div className="bg-[#F8F6F2] px-container py-8">
+      <div className="bg-white px-container py-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="font-body text-[12px] leading-6 text-subtext">

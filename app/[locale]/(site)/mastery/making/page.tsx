@@ -6,7 +6,6 @@ import {Reveal} from '@/components/motion/reveal';
 import {ScrollText} from '@/components/motion/scroll-text';
 import {SafeImage} from '@/components/safe-image';
 import {SectionIntro} from '@/components/section-intro';
-import {RingDrawingBackground} from '@/components/specialty/ring-drawing-background';
 import {SpecialtyDetailTriplet} from '@/components/specialty/specialty-detail-triplet';
 import {SpecialtyProcess} from '@/components/specialty/specialty-process';
 import type {Locale} from '@/i18n/routing';
@@ -39,8 +38,7 @@ export default async function TechniquePage({params}: Props) {
   }));
 
   return (
-    <main className="relative isolate overflow-hidden bg-[#F8F6F2] text-text">
-      <RingDrawingBackground />
+    <main className="relative isolate overflow-hidden bg-white text-text">
       <section className="relative z-10 pt-28">
         <div className="mx-auto max-w-[1280px] px-container pb-[clamp(72px,8vw,128px)] pt-[clamp(64px,8vw,120px)]">
           <ScrollText className="mx-auto max-w-3xl space-y-6 text-center">

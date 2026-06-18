@@ -80,7 +80,7 @@ function ProcessMedia({
   if (!step.hasImage) {
     return (
       <div
-        className="flex aspect-[4/3] w-full items-center justify-center break-all bg-bg p-5 text-center font-body text-xs font-medium leading-5 tracking-[0.04em] text-subtext"
+        className="flex aspect-square w-full items-center justify-center break-all bg-bg p-5 text-center font-body text-xs font-medium leading-5 tracking-[0.04em] text-subtext"
         role="img"
         aria-label={step.image}
       >
@@ -90,7 +90,7 @@ function ProcessMedia({
   }
 
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden bg-bg">
+    <div className="relative aspect-square w-full overflow-hidden bg-bg">
       <motion.div className="absolute inset-0 will-change-transform" style={{y: parallax, scale: 1.14}}>
         <Image
           src={`/images/${step.image}`}
