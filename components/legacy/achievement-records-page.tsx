@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import {HomeStatBand, type HomeStatBandItem} from '@/components/home/home-stat-band';
+import type {HomeStatBandItem} from '@/components/home/home-stat-band';
+import {AnimatedStatScope, AnimatedStatValue} from '@/components/legacy/animated-stat-value';
 import {Reveal, RevealItem} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {withLocale} from '@/lib/site-map';
@@ -57,7 +58,7 @@ const pageCopy = {
     marketLabel: 'MARKET LEADERSHIP',
     marketTitle: '압도적인 시장 점유율',
     marketIntro:
-      '대호의 시장 점유율은 단순한 숫자가 아니라, 오랜 시간 축적된 신뢰의 결과입니다. 우승반지와 임관반지처럼 중요한 순간을 기념하는 제품은 디자인 완성도, 제작 안정성, 납기 관리, 품질 검수까지 모든 기준이 충족되어야 선택받을 수 있습니다.\n대호는 수많은 팀과 기관의 프로젝트를 안정적으로 수행하며, 국내 기념 주얼리 시장에서 가장 신뢰받는 제작 기준을 만들어가고 있습니다.',
+      '대호의 시장 점유율은 단순한 숫자가 아니라, 오랜 시간 축적된 신뢰의 결과입니다.\n우승반지와 임관반지처럼 중요한 순간을 기념하는 제품은 디자인 완성도, 제작 안정성,\n납기 관리, 품질 검수까지 모든 기준이 충족되어야 선택받을 수 있습니다.\n대호는 수많은 팀과 기관의 프로젝트를 안정적으로 수행하며,\n국내 기념 주얼리 시장에서 가장 신뢰받는 제작 기준을 만들어가고 있습니다.',
     archiveLabel: 'PROJECT ARCHIVE',
     archiveTitle: '다양한 분야의 프로젝트',
     discoverLead: '대호의 프로젝트 더 알아보기',
@@ -85,7 +86,7 @@ const pageCopy = {
       },
       {
         value: '100%',
-        label: 'END-TO\n-END',
+        label: 'END-TO-END',
         body: '처음부터 끝까지\n전 공정 책임제'
       }
     ],
@@ -173,7 +174,7 @@ const pageCopy = {
       },
       {
         value: '100%',
-        label: 'END-TO\n-END',
+        label: 'END-TO-END',
         body: 'Full-process responsibility\nfrom start to finish'
       }
     ],
@@ -279,8 +280,9 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </div>
       </section>
 
-      <section className="bg-[#62302F] py-[clamp(92px,10vw,150px)] text-[#F4E6E1]">
-        <HomeStatBand items={copy.statBand} locale={locale} />
+      <section className="bg-[#62302F] py-[clamp(84px,9vw,132px)] text-[#F4E6E1]">
+        <AchievementPentagonStats items={copy.statBand} locale={locale} />
+        <AchievementStatAnimationScript />
       </section>
 
       <section className="bg-[#f4efe6] py-[clamp(100px,12vw,174px)]">
@@ -329,26 +331,28 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </div>
       </section>
 
-      <section className="bg-[#f4efe6] px-container py-[clamp(118px,13vw,190px)]">
-        <div className="mx-auto max-w-[1120px]">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <p className={`${englishTextClass} text-[12px] uppercase leading-none text-accent`}>
+      <section className="bg-[#f4efe6] px-container py-[clamp(112px,12vw,178px)]">
+        <div className="mx-auto max-w-[980px]">
+          <Reveal className="mx-auto max-w-[680px] text-center">
+            <p className={`${englishTextClass} text-[11px] uppercase leading-none text-accent`}>
               {copy.marketLabel}
             </p>
-            <h2 className={`${bodyTextClass} mt-3 text-[clamp(27px,3vw,42px)] leading-tight text-primary`}>
+            <h2 className={`${bodyTextClass} mt-2 text-[clamp(24px,2.35vw,34px)] leading-tight text-primary`}>
               {copy.marketTitle}
             </h2>
-            <p className={`${bodyTextClass} mt-8 whitespace-pre-line text-[15px] leading-[1.85] text-[#252525]`}>
+            <p className={`${bodyTextClass} mt-7 whitespace-pre-line text-[13px] leading-[1.72] text-[#252525]`}>
               {copy.marketIntro}
             </p>
           </Reveal>
 
-          <div className="mt-[clamp(88px,11vw,150px)] space-y-[clamp(90px,12vw,160px)]">
+          <div className="mt-[clamp(86px,10vw,132px)] space-y-[clamp(112px,14vw,180px)]">
             {copy.marketFeatures.map((item, index) => (
               <Reveal
                 key={item.value}
-                className={`grid gap-10 md:grid-cols-[1fr_0.48fr] md:items-center md:gap-16 lg:gap-24 ${
-                  index % 2 === 1 ? 'md:grid-cols-[0.48fr_1fr]' : ''
+                className={`grid gap-10 md:items-center md:gap-[clamp(56px,7vw,92px)] ${
+                  index % 2 === 1
+                    ? 'md:grid-cols-[minmax(248px,0.34fr)_minmax(0,0.66fr)]'
+                    : 'md:grid-cols-[minmax(0,0.66fr)_minmax(248px,0.34fr)]'
                 }`}
               >
                 {index % 2 === 1 ? <MarketText item={item} locale={locale} /> : null}
@@ -405,14 +409,309 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
   );
 }
 
+function AchievementStatAnimationScript() {
+  return (
+    <script
+      id="achievement-stat-animation"
+      dangerouslySetInnerHTML={{
+        __html: `
+        (() => {
+          const selector = '[data-achievement-stat-value]';
+          const parseValue = (value) => {
+            const match = String(value || '').trim().match(/^(-?\\d+(?:\\.\\d+)?)(.*)$/);
+            if (!match) return null;
+            const number = Number(match[1]);
+            if (!Number.isFinite(number)) return null;
+            return {
+              decimals: match[1].includes('.') ? (match[1].split('.')[1] || '').length : 0,
+              number,
+              suffix: match[2] || ''
+            };
+          };
+          const formatValue = (locale, decimals, value) => {
+            return new Intl.NumberFormat(locale, {maximumFractionDigits: decimals}).format(Number(value.toFixed(decimals)));
+          };
+          const animateValue = (element) => {
+            if (element.dataset.achievementStatAnimated === 'true') return;
+            element.dataset.achievementStatAnimated = 'true';
+
+            const parsed = parseValue(element.dataset.achievementStatValue);
+            const numberNode = element.querySelector('[data-achievement-stat-number]');
+            const suffixNode = element.querySelector('[data-achievement-stat-suffix]');
+            if (!numberNode || !parsed) {
+              if (numberNode) numberNode.textContent = element.dataset.achievementStatValue || '';
+              return;
+            }
+
+            const locale = element.dataset.achievementStatLocale || 'ko';
+            const index = Number(element.dataset.achievementStatIndex || 0);
+            const delay = index * 80;
+            const duration = 2100;
+            const start = performance.now() + delay;
+            numberNode.textContent = formatValue(locale, parsed.decimals, 0);
+            if (suffixNode) suffixNode.textContent = parsed.suffix;
+
+            const tick = (now) => {
+              if (now < start) {
+                requestAnimationFrame(tick);
+                return;
+              }
+              const progress = Math.min((now - start) / duration, 1);
+              const eased = 1 - Math.pow(1 - progress, 3);
+              numberNode.textContent = formatValue(locale, parsed.decimals, parsed.number * eased);
+              if (progress < 1) {
+                requestAnimationFrame(tick);
+              } else {
+                numberNode.textContent = formatValue(locale, parsed.decimals, parsed.number);
+              }
+            };
+            requestAnimationFrame(tick);
+          };
+          const setup = () => {
+            const elements = Array.from(document.querySelectorAll(selector));
+            if (!elements.length) return false;
+            const root = elements[0].closest('section') || document.documentElement;
+            const run = () => elements.forEach(animateValue);
+            const isVisible = () => {
+              const rect = root.getBoundingClientRect();
+              const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+              const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
+              return visibleHeight / Math.min(rect.height, viewportHeight) >= 0.35;
+            };
+            if (isVisible()) {
+              run();
+              return true;
+            }
+            const observer = new IntersectionObserver((entries) => {
+              if (entries.some((entry) => entry.isIntersecting)) {
+                run();
+                observer.disconnect();
+              }
+            }, {threshold: 0.35});
+            observer.observe(root);
+            return true;
+          };
+          if (!setup()) {
+            window.addEventListener('load', setup, {once: true});
+            window.setTimeout(setup, 500);
+          }
+        })();
+      `
+      }}
+    />
+  );
+}
+
+function AchievementPentagonStats({items, locale}: {items: HomeStatBandItem[]; locale: Locale}) {
+  const [years, championship, commission, delivery, endToEnd] = items;
+  const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
+  const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
+  const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
+  const centerCaption =
+    locale === 'ko'
+      ? '장인정신으로 완성한\n신뢰 구조'
+      : 'A trust structure\ncompleted by craft';
+
+  return (
+    <div className="mx-auto max-w-[1240px] px-container">
+      <Reveal className="hidden md:block">
+        <AnimatedStatScope className="relative min-h-[620px]">
+          <PentagonDiagram centerCaption={centerCaption} />
+          <AchievementPentagonStat
+            item={years}
+            index={0}
+            className="left-1/2 top-0 w-[210px] -translate-x-1/2"
+            align="center"
+            locale={locale}
+            bodyTextClass={bodyTextClass}
+            englishTextClass={englishTextClass}
+          />
+          <AchievementPentagonStat
+            item={championship}
+            index={1}
+            className="left-[5%] top-[36%] w-[300px]"
+            align="center"
+            locale={locale}
+            bodyTextClass={bodyTextClass}
+            englishTextClass={englishTextClass}
+          />
+          <AchievementPentagonStat
+            item={commission}
+            index={2}
+            className="right-[5%] top-[36%] w-[300px]"
+            align="center"
+            locale={locale}
+            bodyTextClass={bodyTextClass}
+            englishTextClass={englishTextClass}
+          />
+          <AchievementPentagonStat
+            item={delivery}
+            index={3}
+            className="bottom-[7%] left-[13%] w-[280px]"
+            align="center"
+            locale={locale}
+            bodyTextClass={bodyTextClass}
+            englishTextClass={englishTextClass}
+          />
+          <AchievementPentagonStat
+            item={endToEnd}
+            index={4}
+            className="bottom-[7%] right-[13%] w-[280px]"
+            align="center"
+            locale={locale}
+            bodyTextClass={bodyTextClass}
+            englishTextClass={englishTextClass}
+          />
+        </AnimatedStatScope>
+      </Reveal>
+
+      <Reveal className="md:hidden">
+        <AnimatedStatScope className="grid gap-8 text-center">
+          <div className="relative mx-auto aspect-square w-full max-w-[360px]">
+            <PentagonDiagram centerCaption={centerCaption} compact />
+          </div>
+          <div className="grid gap-8 sm:grid-cols-2">
+            {items.map((item, index) => (
+              <AchievementPentagonStat
+                key={`${item.value}-${item.label}`}
+                item={item}
+                index={index}
+                className="relative"
+                align="center"
+                locale={locale}
+                bodyTextClass={bodyTextClass}
+                englishTextClass={englishTextClass}
+              />
+            ))}
+          </div>
+        </AnimatedStatScope>
+      </Reveal>
+    </div>
+  );
+}
+
+function PentagonDiagram({
+  centerCaption,
+  compact = false
+}: {
+  centerCaption: string;
+  compact?: boolean;
+}) {
+  return (
+    <svg
+      className={compact ? 'h-full w-full' : 'absolute left-1/2 top-[106px] h-[430px] w-[760px] -translate-x-1/2'}
+      viewBox="0 0 1000 560"
+      role="img"
+      aria-label="DEAHO trust pentagon"
+    >
+      <g fill="#F4E6E1">
+        <path
+          d="M500 104 L664 224 L601 418 L399 418 L336 224 Z"
+          opacity="0.07"
+        />
+        <path d="M500 104 L664 224 L500 292 Z" opacity="0.055" />
+        <path d="M664 224 L601 418 L500 292 Z" opacity="0.035" />
+        <path d="M601 418 L399 418 L500 292 Z" opacity="0.06" />
+        <path d="M399 418 L336 224 L500 292 Z" opacity="0.04" />
+        <path d="M336 224 L500 104 L500 292 Z" opacity="0.028" />
+      </g>
+      <g fill="#F4E6E1">
+        {[500, 336, 664, 399, 601].map((_, index) => {
+          const points = [
+            [500, 104],
+            [336, 224],
+            [664, 224],
+            [399, 418],
+            [601, 418]
+          ];
+          const [cx, cy] = points[index];
+
+          return <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" opacity="0.58" />;
+        })}
+        <text
+          x="500"
+          y="296"
+          textAnchor="middle"
+          fontFamily="Cormorant Garamond, serif"
+          fontSize="42"
+          fontWeight="700"
+          letterSpacing="4"
+        >
+          DEAHO
+        </text>
+        <text
+          x="500"
+          y="339"
+          textAnchor="middle"
+          fontFamily="Cormorant Garamond, serif"
+          fontSize="24"
+          fontWeight="700"
+          letterSpacing="2.5"
+        >
+          TRUST PENTAGON
+        </text>
+        {centerCaption.split('\n').map((line, index) => (
+          <text
+            key={line}
+            x="500"
+            y={376 + index * 28}
+            textAnchor="middle"
+            fontFamily="MaruBuri, serif"
+            fontSize="18"
+            fontWeight="600"
+            opacity="0.86"
+          >
+            {line}
+          </text>
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+function AchievementPentagonStat({
+  item,
+  index,
+  className,
+  align,
+  locale,
+  bodyTextClass,
+  englishTextClass
+}: {
+  item: HomeStatBandItem;
+  index: number;
+  className: string;
+  align: 'center';
+  locale: Locale;
+  bodyTextClass: string;
+  englishTextClass: string;
+}) {
+  return (
+    <div className={`${className} ${align === 'center' ? 'text-center' : ''} md:absolute`}>
+      <AnimatedStatValue
+        className={`${englishTextClass} text-[clamp(44px,5.3vw,74px)] leading-none text-[#F4E6E1]`}
+        index={index}
+        locale={locale}
+        value={item.value}
+      />
+      <p className={`${englishTextClass} mt-2 whitespace-pre-line text-[16px] uppercase leading-[1.05] tracking-[0.05em] text-[#F4E6E1]`}>
+        {item.label}
+      </p>
+      <p className={`${bodyTextClass} mx-auto mt-5 max-w-[250px] whitespace-pre-line text-[14px] leading-[1.45] text-[#F4E6E1]/90`}>
+        {item.body}
+      </p>
+    </div>
+  );
+}
+
 function MarketImage({image, alt}: {image: string; alt: string}) {
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden bg-white">
+    <div className="relative aspect-[1.45/1] w-full overflow-hidden bg-white">
       <Image
         src={`/images/${image}`}
         alt={alt}
         fill
-        sizes="(min-width: 768px) 650px, 100vw"
+        sizes="(min-width: 768px) 760px, 100vw"
         className="object-cover opacity-0"
       />
     </div>
@@ -425,19 +724,19 @@ function MarketText({item, locale}: {item: MarketFeature; locale: Locale}) {
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
 
   return (
-    <div className="text-primary">
-      <p className={`${englishTextClass} text-[clamp(34px,4vw,56px)] leading-none text-primary`}>
+    <div className="mx-auto max-w-[270px] text-primary md:mx-0">
+      <p className={`${englishTextClass} text-[clamp(36px,4.2vw,58px)] leading-none text-primary`}>
         {item.value}
       </p>
-      <h3 className={`${englishTextClass} mt-3 whitespace-pre-line text-[20px] uppercase leading-[1.05] text-primary`}>
+      <h3 className={`${englishTextClass} mt-3 whitespace-pre-line text-[18px] uppercase leading-[1.05] text-primary`}>
         {item.title}
       </h3>
-      <p className={`${bodyTextClass} mt-6 whitespace-pre-line text-[14px] leading-[1.5] text-accent`}>
+      <p className={`${bodyTextClass} mt-7 whitespace-pre-line text-[13px] leading-[1.55] text-accent`}>
         {item.accent}
       </p>
       <div className="mt-7 space-y-4">
         {item.paragraphs.map((paragraph) => (
-          <p key={paragraph} className={`${bodyTextClass} text-[13px] leading-[1.78] text-[#252525]`}>
+          <p key={paragraph} className={`${bodyTextClass} text-[12px] leading-[1.72] text-[#252525]`}>
             {paragraph}
           </p>
         ))}
