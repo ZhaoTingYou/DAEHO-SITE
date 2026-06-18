@@ -462,7 +462,7 @@
           {
             "number": "01",
             "label": "DESIGN CONSULTING",
-            "title": "Design consulting",
+            "title": "Design consulting\nDesign sketch",
             "body": "The team's symbols, names, and records are first arranged inside the structure of the ring.",
             "image": "specialty_process_1_sketch.png"
           },
@@ -482,9 +482,9 @@
           },
           {
             "number": "04",
-            "label": "STONE SETTING",
-            "title": "Stone setting",
-            "body": "Position and depth are tuned so the symbols stay clear inside the light.",
+            "label": "CRAFTMANSHIP",
+            "title": "Craft work",
+            "body": "Cast metal is precisely refined and finished to improve the form and completeness of the product.",
             "image": "specialty_process_4_setting.png"
           },
           {
@@ -890,8 +890,8 @@
       "eyebrow": "OBJECT & LIFESTYLE",
       "title": "A form beyond the round",
       "body": "As an object in its box and as a living piece on the wrist, the structure of golf remains longer.",
-      "imageBox": "golf/ChatGPT Image 2026년 4월 30일 오후 01_13_41 1.png",
-      "imageLifestyle": "golf/ChatGPT Image 2026년 5월 3일 오후 05_21_01 1.png",
+      "imageBox": "golf/3.png",
+      "imageLifestyle": "golf/4.png",
       "closing": "Your round, held for eternity"
     },
     "labels": {

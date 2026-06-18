@@ -145,7 +145,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   };
 
   return (
-    <main className="bg-[#F8F6F2] text-[#f8f6f2]">
+    <main className="bg-white text-[#f8f6f2]">
       <section className="relative overflow-hidden bg-black pt-28">
         <div className="mx-auto max-w-[1240px] px-container pb-[clamp(62px,8vw,110px)]">
           <motion.p
@@ -246,7 +246,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                     isSelected ? 'ring-2 ring-white/80' : 'hover:-translate-y-1'
                   }`}
                 >
-                  <div className="relative aspect-square overflow-hidden bg-[#f8f6f2]">
+                  <div className="relative aspect-square overflow-hidden bg-white">
                     <GolfImage
                       filename={item.image}
                       alt={item.caption}
@@ -288,7 +288,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-[#F8F6F2] py-[clamp(72px,9vw,132px)] text-primary">
+      <section className="bg-white pb-0 pt-[clamp(72px,9vw,132px)] text-primary">
         <div className="mx-auto max-w-[1120px] space-y-[clamp(70px,8vw,118px)] px-container">
           <div className="mx-auto max-w-[900px] space-y-[clamp(34px,4vw,44px)]">
             <Reveal className="text-center">
@@ -324,61 +324,63 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             </div>
           </div>
 
-          <Reveal className="relative mx-auto grid max-w-[1120px] gap-8 pt-[clamp(20px,3vw,36px)] md:min-h-[clamp(780px,62vw,920px)]">
-            <div className="relative z-20 space-y-4 md:absolute md:left-[6%] md:top-[16%] md:w-[40%]">
-              <h2
-                className={`text-[clamp(26px,2.45vw,36px)] font-semibold leading-[1.28] text-primary ${
-                  locale === 'ko'
-                    ? "[font-family:'MaruBuri',serif]"
-                    : "[font-family:'Cormorant_Garamond',serif]"
-                }`}
-              >
-                {engravingTitleLines.map((line) => (
-                  <span key={line} className="block">
-                    {line}
-                  </span>
-                ))}
-              </h2>
-              <p className="font-body text-[clamp(14px,1.1vw,17px)] leading-[1.45] text-primary">
-                {engravingDetail}
+          <div className="relative left-1/2 w-screen -translate-x-1/2 bg-black">
+            <Reveal className="relative mx-auto grid max-w-[1120px] gap-8 px-container py-[clamp(72px,9vw,132px)] md:min-h-[clamp(780px,62vw,920px)]">
+              <div className="relative z-20 space-y-4 md:absolute md:left-[6%] md:top-[16%] md:w-[40%]">
+                <h2
+                  className={`text-[clamp(26px,2.45vw,36px)] font-semibold leading-[1.28] text-white ${
+                    locale === 'ko'
+                      ? "[font-family:'MaruBuri',serif]"
+                      : "[font-family:'Cormorant_Garamond',serif]"
+                  }`}
+                >
+                  {engravingTitleLines.map((line) => (
+                    <span key={line} className="block">
+                      {line}
+                    </span>
+                  ))}
+                </h2>
+                <p className="font-body text-[clamp(14px,1.1vw,17px)] leading-[1.45] text-white/78">
+                  {engravingDetail}
+                </p>
+              </div>
+
+              <div className="relative aspect-[0.74/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:right-0 md:top-0 md:w-[45%]">
+                <GolfImage
+                  filename={content.engraving.imagePrimary}
+                  alt={content.engraving.title}
+                  assets={assets}
+                  className="object-cover"
+                />
+              </div>
+
+              <div className="relative aspect-[1.37/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:bottom-0 md:left-[1%] md:w-[56%]">
+                <GolfStaticImage
+                  src={`/images/${content.engraving.imageDetail}`}
+                  alt={content.engraving.body}
+                  className="object-cover"
+                />
+              </div>
+
+              <p className="relative z-20 whitespace-nowrap text-center font-heading text-[clamp(18px,1.8vw,26px)] font-semibold leading-tight text-white md:absolute md:bottom-[8%] md:right-[2%] md:w-[40%]">
+                “{labels.quoteText}”
               </p>
-            </div>
-
-            <div className="relative aspect-[0.74/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:right-0 md:top-0 md:w-[45%]">
-              <GolfImage
-                filename={content.engraving.imagePrimary}
-                alt={content.engraving.title}
-                assets={assets}
-                className="object-cover"
-              />
-            </div>
-
-            <div className="relative aspect-[1.37/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:bottom-0 md:left-[1%] md:w-[56%]">
-              <GolfStaticImage
-                src={`/images/${content.engraving.imageDetail}`}
-                alt={content.engraving.body}
-                className="object-cover"
-              />
-            </div>
-
-            <p className="relative z-20 whitespace-nowrap text-center font-heading text-[clamp(18px,1.8vw,26px)] font-semibold leading-tight text-primary md:absolute md:bottom-[8%] md:right-[2%] md:w-[40%]">
-              “{labels.quoteText}”
-            </p>
-          </Reveal>
+            </Reveal>
+          </div>
         </div>
       </section>
 
       <section className="bg-black py-[clamp(72px,9vw,132px)]">
         <div className="mx-auto max-w-[1120px] px-container">
-          <Reveal className="relative mx-auto min-h-[clamp(420px,58vw,720px)] w-full max-w-[920px]">
-            <div className="absolute right-0 top-0 aspect-[1.34/1] w-[78%] overflow-hidden">
+          <Reveal className="mx-auto w-full max-w-[1040px]">
+            <div className="relative ml-auto aspect-[1.34/1] w-full overflow-hidden md:w-[68%]">
               <GolfStaticImage
                 src={`/images/${content.lifestyle.imageBox}`}
                 alt={content.lifestyle.body}
                 className="object-cover"
               />
             </div>
-            <div className="absolute bottom-0 left-0 aspect-[1.44/1] w-[58%] overflow-hidden">
+            <div className="relative mt-[clamp(22px,3.5vw,48px)] aspect-[1.44/1] w-full overflow-hidden md:ml-[8%] md:w-[58%]">
               <GolfStaticImage
                 src={`/images/${content.lifestyle.imageLifestyle}`}
                 alt={content.lifestyle.closing}
@@ -389,7 +391,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-[#F8F6F2] py-[clamp(72px,9vw,132px)] text-primary">
+      <section className="bg-white py-[clamp(72px,9vw,132px)] text-primary">
         <div className="mx-auto max-w-[1120px] space-y-[clamp(54px,7vw,96px)] px-container">
           <Reveal className="mx-auto grid aspect-[1.8/1] w-full place-items-center bg-[#d8d8d8]">
             <p className="font-body text-[18px] font-semibold tracking-[0.04em] text-primary/70">
@@ -428,10 +430,10 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-[#F8F6F2] px-container pb-[clamp(150px,18vw,260px)] pt-[clamp(60px,7vw,92px)] text-center text-primary">
+      <section className="bg-white px-container pb-[clamp(150px,18vw,260px)] pt-[clamp(60px,7vw,92px)] text-center text-primary">
         <Link
           href={inquiryHref}
-          className="link-sweep inline-flex min-h-12 items-center bg-[#F8F6F2] font-heading text-[clamp(21px,2vw,30px)] font-semibold"
+          className="link-sweep inline-flex min-h-12 items-center bg-white font-heading text-[clamp(21px,2vw,30px)] font-semibold"
         >
           {labels.requestEstimate}
         </Link>

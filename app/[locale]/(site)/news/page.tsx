@@ -27,7 +27,6 @@ export default async function NewsPage({params}: Props) {
   const content = messages.news;
   const text = messages.newsUi;
   const cards: NewsCard[] = getNewsCardsForSite(locale);
-  const tickerItems = [...content.masthead.ticker, ...content.masthead.ticker];
 
   return (
     <main className="bg-bg text-text">
@@ -47,22 +46,10 @@ export default async function NewsPage({params}: Props) {
             </div>
           </Reveal>
 
-          <div className="news-rule-line mt-5 h-px w-full bg-primary/70" aria-hidden="true" />
-
-          <div className="mt-3 overflow-hidden border-y border-hairline bg-white/45 py-2.5">
-            <div className="news-ticker-track flex w-max items-center gap-7 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-              {tickerItems.map((item, index) => (
-                <span key={`${item}-${index}`} className="flex items-center gap-7">
-                  <span>{item}</span>
-                  <span className="h-1 w-1 bg-accent" aria-hidden="true" />
-                </span>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
-      <section className="bg-bg pb-[clamp(28px,3.5vw,52px)] pt-section">
+      <section className="bg-bg pb-[clamp(28px,3.5vw,52px)] pt-[clamp(36px,4.5vw,68px)]">
         <div className="mx-auto max-w-[1440px] px-container">
           <Reveal className="group grid gap-10 bg-white p-4 shadow-[0_24px_90px_rgba(16,29,48,0.08)] md:p-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch">
             <div className="hover-zoom relative">

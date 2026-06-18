@@ -23,9 +23,9 @@ export function SpecialtyProcess({steps}: SpecialtyProcessProps) {
   return (
     <section className="relative z-10">
       <div className="mx-auto max-w-[1180px] px-container py-[clamp(48px,6vw,96px)]">
-        <div className="space-y-[clamp(96px,13vw,200px)]">
-          {steps.map((step, index) => (
-            <ProcessChapter key={step.number} step={step} reversed={index % 2 === 1} />
+        <div className="space-y-[clamp(48px,7vw,104px)]">
+          {steps.map((step) => (
+            <ProcessChapter key={step.number} step={step} />
           ))}
         </div>
       </div>
@@ -33,7 +33,7 @@ export function SpecialtyProcess({steps}: SpecialtyProcessProps) {
   );
 }
 
-function ProcessChapter({step, reversed}: {step: SpecialtyProcessStep; reversed: boolean}) {
+function ProcessChapter({step}: {step: SpecialtyProcessStep}) {
   const ref = useRef<HTMLElement | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const {scrollYProgress} = useScroll({
@@ -50,19 +50,23 @@ function ProcessChapter({step, reversed}: {step: SpecialtyProcessStep; reversed:
       aria-label={`${step.number} ${step.title}`}
       className="grid items-center gap-[clamp(32px,4vw,72px)] lg:grid-cols-2"
     >
-      <div className={reversed ? 'lg:order-2' : ''}>
+      <div>
         <ProcessMedia step={step} parallax={parallax} />
       </div>
 
       <motion.div
-        className={`max-w-md ${reversed ? 'lg:order-1 lg:justify-self-end' : ''}`}
+        className="max-w-md"
         style={{opacity: textOpacity, y: textY}}
       >
         <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-accent">
           {step.number} / {step.label}
         </p>
         <h2 className="mt-5 font-heading text-[clamp(22px,2.4vw,32px)] font-semibold leading-[1.22] text-primary">
-          {step.title}
+          {step.title.split('\n').map((line) => (
+            <span key={line} className="block">
+              {line}
+            </span>
+          ))}
         </h2>
         <p className="mt-6 font-body text-[14px] leading-[1.9] text-text">{step.body}</p>
       </motion.div>

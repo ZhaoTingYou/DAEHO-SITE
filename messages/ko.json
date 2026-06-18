@@ -462,7 +462,7 @@
           {
             "number": "01",
             "label": "DESIGN CONSULTING",
-            "title": "디자인 컨설팅",
+            "title": "디자인 컨설팅\n설계 스케치",
             "body": "팀의 상징, 이름, 기록을 반지의 구조 안에 배치하는 첫 단계입니다.",
             "image": "specialty_process_1_sketch.png"
           },
@@ -482,9 +482,9 @@
           },
           {
             "number": "04",
-            "label": "STONE SETTING",
-            "title": "스톤 세팅",
-            "body": "빛이 머무는 위치와 깊이를 조율해 상징이 또렷하게 드러나도록 합니다.",
+            "label": "CRAFTMANSHIP",
+            "title": "세공 작업",
+            "body": "주조된 금속을 정교하게 다듬고 손질해 제품의 형태와 완성도를 높입니다.",
             "image": "specialty_process_4_setting.png"
           },
           {
@@ -890,8 +890,8 @@
       "eyebrow": "OBJECT & LIFESTYLE",
       "title": "라운드 밖에서도 남는 형태",
       "body": "박스 안의 오브젝트로, 손목 위의 생활감으로, 골프의 구조는 더 오래 머무릅니다.",
-      "imageBox": "golf/ChatGPT Image 2026년 4월 30일 오후 01_13_41 1.png",
-      "imageLifestyle": "golf/ChatGPT Image 2026년 5월 3일 오후 05_21_01 1.png",
+      "imageBox": "golf/3.png",
+      "imageLifestyle": "golf/4.png",
       "closing": "당신의 라운드를 영원히"
     },
     "labels": {
