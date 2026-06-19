@@ -255,11 +255,11 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
     <main className="bg-bg text-primary">
       <section className="grid min-h-[100svh] place-items-center bg-bg py-24">
         <div className="mx-auto max-w-3xl px-container text-center">
-          <Reveal className="space-y-5 text-[#252525]">
-            <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
+          <Reveal className="flex flex-col items-center text-[#252525]">
+            <p className={`${englishTextClass} mb-[50px] text-[15px] uppercase leading-none text-accent`}>
               {copy.heroLabel}
             </p>
-            <h1 className={`${englishTextClass} text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
+            <h1 className={`${englishTextClass} mb-[15px] text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
               {copy.heroTitle}
             </h1>
             <div className="mx-auto max-w-[520px] space-y-1.5">
@@ -283,7 +283,6 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
 
       <section className="bg-[#62302F] py-[clamp(84px,9vw,132px)] text-[#F4E6E1]">
         <AchievementPentagonStats items={copy.statBand} locale={locale} />
-        <AchievementStatAnimationScript />
       </section>
 
       <section className="bg-[#f4efe6] py-[clamp(100px,12vw,174px)]">
@@ -400,111 +399,18 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
 
       <section className="bg-bg py-[clamp(96px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
+          <p className="[font-family:'MaruBuri',serif] text-[32px] font-semibold leading-tight text-primary">
             {copy.discoverLead}
           </p>
           <Link
             href={withLocale(locale, '/mastery/creations')}
-            className={`${englishTextClass} link-sweep mt-7 inline-flex text-[14px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
+            className={`${englishTextClass} link-sweep mt-[10px] inline-flex text-[15px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
           >
             {copy.cta}
           </Link>
         </Reveal>
       </section>
     </main>
-  );
-}
-
-function AchievementStatAnimationScript() {
-  return (
-    <script
-      id="achievement-stat-animation"
-      dangerouslySetInnerHTML={{
-        __html: `
-        (() => {
-          const selector = '[data-achievement-stat-value]';
-          const parseValue = (value) => {
-            const match = String(value || '').trim().match(/^(-?\\d+(?:\\.\\d+)?)(.*)$/);
-            if (!match) return null;
-            const number = Number(match[1]);
-            if (!Number.isFinite(number)) return null;
-            return {
-              decimals: match[1].includes('.') ? (match[1].split('.')[1] || '').length : 0,
-              number,
-              suffix: match[2] || ''
-            };
-          };
-          const formatValue = (locale, decimals, value) => {
-            return new Intl.NumberFormat(locale, {maximumFractionDigits: decimals}).format(Number(value.toFixed(decimals)));
-          };
-          const animateValue = (element) => {
-            if (element.dataset.achievementStatAnimated === 'true') return;
-            element.dataset.achievementStatAnimated = 'true';
-
-            const parsed = parseValue(element.dataset.achievementStatValue);
-            const numberNode = element.querySelector('[data-achievement-stat-number]');
-            const suffixNode = element.querySelector('[data-achievement-stat-suffix]');
-            if (!numberNode || !parsed) {
-              if (numberNode) numberNode.textContent = element.dataset.achievementStatValue || '';
-              return;
-            }
-
-            const locale = element.dataset.achievementStatLocale || 'ko';
-            const index = Number(element.dataset.achievementStatIndex || 0);
-            const delay = index * 80;
-            const duration = 2100;
-            const start = performance.now() + delay;
-            numberNode.textContent = formatValue(locale, parsed.decimals, 0);
-            if (suffixNode) suffixNode.textContent = parsed.suffix;
-
-            const tick = (now) => {
-              if (now < start) {
-                requestAnimationFrame(tick);
-                return;
-              }
-              const progress = Math.min((now - start) / duration, 1);
-              const eased = 1 - Math.pow(1 - progress, 3);
-              numberNode.textContent = formatValue(locale, parsed.decimals, parsed.number * eased);
-              if (progress < 1) {
-                requestAnimationFrame(tick);
-              } else {
-                numberNode.textContent = formatValue(locale, parsed.decimals, parsed.number);
-              }
-            };
-            requestAnimationFrame(tick);
-          };
-          const setup = () => {
-            const elements = Array.from(document.querySelectorAll(selector));
-            if (!elements.length) return false;
-            const root = elements[0].closest('section') || document.documentElement;
-            const run = () => elements.forEach(animateValue);
-            const isVisible = () => {
-              const rect = root.getBoundingClientRect();
-              const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-              const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
-              return visibleHeight / Math.min(rect.height, viewportHeight) >= 0.35;
-            };
-            if (isVisible()) {
-              run();
-              return true;
-            }
-            const observer = new IntersectionObserver((entries) => {
-              if (entries.some((entry) => entry.isIntersecting)) {
-                run();
-                observer.disconnect();
-              }
-            }, {threshold: 0.35});
-            observer.observe(root);
-            return true;
-          };
-          if (!setup()) {
-            window.addEventListener('load', setup, {once: true});
-            window.setTimeout(setup, 500);
-          }
-        })();
-      `
-      }}
-    />
   );
 }
 

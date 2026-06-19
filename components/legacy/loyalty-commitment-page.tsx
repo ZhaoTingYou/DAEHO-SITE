@@ -151,14 +151,14 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
     <main className="bg-bg text-primary">
       <section className="grid min-h-[100svh] place-items-center bg-bg py-24">
         <div className="mx-auto max-w-3xl px-container text-center">
-          <Reveal className="space-y-5 text-[#252525]">
-            <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
+          <Reveal className="flex flex-col items-center text-[#252525]">
+            <p className={`${englishTextClass} mb-[50px] text-[15px] uppercase leading-none text-accent`}>
               {copy.heroLabel}
             </p>
-            <h1 className={`${englishTextClass} text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
+            <h1 className={`${englishTextClass} mb-[15px] text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
               {copy.heroTitle}
             </h1>
-            <div className="space-y-1.5 pt-1">
+            <div className="space-y-1.5">
               {copy.introLines.map((line) => (
                 <p key={line} className={`${bodyTextClass} text-[15px] leading-[1.85] text-[#252525]`}>
                   {line}
@@ -196,12 +196,12 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
 
       <section className="bg-bg py-[clamp(96px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
+          <p className="[font-family:'MaruBuri',serif] text-[32px] font-semibold leading-tight text-primary">
             {copy.discoverLead}
           </p>
           <Link
             href={withLocale(locale, '/mastery/creations')}
-            className={`${englishTextClass} link-sweep mt-7 inline-flex text-[14px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
+            className={`${englishTextClass} link-sweep mt-[10px] inline-flex text-[15px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
           >
             {copy.cta}
           </Link>

@@ -31,6 +31,7 @@ export function HomeHero({
   const prefersReducedMotion = usePrefersReducedMotion();
   const titleLines = title.split('\n');
   const titleWeightClass = locale === 'ko' ? 'font-semibold' : 'font-bold';
+  const titleSizeClass = locale === 'ko' ? 'text-[clamp(30px,4.35vw,62px)]' : 'text-[clamp(38px,5.4vw,80px)]';
   const isNumericWord = (word: string) => /^[\d,]+$/.test(word);
   const titleVariants: Variants = {
     hidden: {},
@@ -80,16 +81,16 @@ export function HomeHero({
         >
           <motion.p
             variants={copyVariants}
-            className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-accent"
+            className="font-body text-[clamp(13px,1vw,18px)] font-semibold uppercase tracking-[0.22em] text-accent"
           >
             {eyebrow}
           </motion.p>
           <motion.h1
             variants={titleVariants}
-            className={`flex flex-col gap-4 font-heading text-hero ${titleWeightClass} leading-none tracking-normal`}
+            className={`flex flex-col gap-3 font-heading ${titleSizeClass} ${titleWeightClass} leading-none tracking-normal`}
           >
             {titleLines.map((line, lineIndex) => (
-              <span key={`${line}-${lineIndex}`} className="block overflow-hidden">
+              <span key={`${line}-${lineIndex}`} className="block overflow-hidden whitespace-nowrap">
                 {line.split(' ').map((word, wordIndex, words) => (
                   <span key={`${word}-${lineIndex}-${wordIndex}`} className="inline-block overflow-hidden">
                     <motion.span variants={wordVariants} className="inline-block">
@@ -105,7 +106,7 @@ export function HomeHero({
           </motion.h1>
           <motion.p
             variants={copyVariants}
-            className="max-w-2xl -mt-2 whitespace-pre-line font-body text-body leading-[1.7]"
+            className="max-w-2xl -mt-1 whitespace-pre-line [font-family:'Cormorant_Garamond',serif] text-[clamp(20px,1.55vw,28px)] font-bold leading-tight"
           >
             {subtitle}
           </motion.p>

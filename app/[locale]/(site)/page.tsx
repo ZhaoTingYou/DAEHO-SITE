@@ -89,13 +89,13 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
       <section className="bg-bg py-[clamp(96px,10vw,156px)]">
         <div className="mx-auto max-w-[1180px] space-y-20 px-container">
           <Reveal className="grid gap-10 lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)] lg:items-center xl:gap-[72px]">
-            <div className="max-w-[260px] space-y-3 lg:text-center">
-              <h2 className="font-heading text-[clamp(18px,1.45vw,26px)] font-medium uppercase leading-tight text-primary">
+            <div className="max-w-[260px] space-y-[10px] lg:text-center">
+              <h2 className="font-heading text-[20px] font-medium uppercase leading-tight text-primary">
                 {currentPulse.primaryTitle}
               </h2>
               <Link
                 href={withLocale(locale, '/heritage/loyalty')}
-                className="home-feature-link inline-flex font-body text-[16px] leading-none transition duration-hover ease-brand"
+                className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[13px] leading-none transition duration-hover ease-brand"
               >
                 {currentPulse.primaryCta}
               </Link>
@@ -131,13 +131,13 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
               </div>
             </Link>
 
-            <div className="space-y-3 lg:max-w-[260px] lg:justify-self-end lg:text-center">
-              <p className="font-heading text-[clamp(18px,1.45vw,26px)] font-medium uppercase leading-tight text-primary">
+            <div className="space-y-[10px] lg:max-w-[260px] lg:justify-self-end lg:text-center">
+              <p className="font-heading text-[20px] font-medium uppercase leading-tight text-primary">
                 {currentPulse.secondaryTitle}
               </p>
               <Link
                 href={withLocale(locale, '/news')}
-                className="home-feature-link inline-flex font-body text-[16px] leading-none transition duration-hover ease-brand"
+                className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[13px] leading-none transition duration-hover ease-brand"
               >
                 {currentPulse.secondaryCta}
               </Link>
@@ -147,13 +147,13 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
       </section>
 
       <section className="flex min-h-screen items-center bg-bg py-[clamp(72px,7vw,112px)]">
-        <div className="mx-auto grid w-full max-w-[1180px] items-center gap-[clamp(40px,4.5vw,64px)] px-container lg:grid-cols-[minmax(280px,0.30fr)_minmax(0,0.70fr)]">
-          <Reveal className="mx-auto max-w-[390px] space-y-5 lg:mx-0">
+        <div className="mx-auto grid w-full max-w-[1320px] items-center gap-[clamp(40px,4.2vw,68px)] px-container lg:grid-cols-[minmax(280px,0.28fr)_minmax(0,0.72fr)]">
+          <Reveal className="mx-auto max-w-[400px] space-y-5 lg:mx-0">
             <div className="space-y-3">
-              <p className="font-heading text-[12px] font-medium uppercase leading-tight text-accent">
+              <p className="font-heading text-[13px] font-medium uppercase leading-tight text-accent">
                 {content.signature.eyebrow}
               </p>
-              <h2 className="font-heading text-[clamp(24px,2.15vw,34px)] font-semibold leading-tight text-primary">
+              <h2 className="whitespace-nowrap font-heading text-[20px] font-semibold leading-tight text-primary">
                 {content.signature.title}
               </h2>
             </div>
@@ -162,24 +162,24 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
             </p>
           </Reveal>
 
-          <Reveal className="grid items-stretch gap-[clamp(18px,1.6vw,24px)] sm:grid-cols-3">
+          <Reveal className="grid items-stretch gap-[clamp(18px,1.4vw,24px)] sm:grid-cols-3">
             {content.signature.projects.map((item) => (
               <RevealItem key={item.image} className="h-full">
                 <Link
                   href={withLocale(locale, '/mastery/creations')}
-                  className="group grid h-full grid-rows-[auto_1fr] bg-white p-[clamp(10px,0.85vw,14px)] shadow-[0_18px_70px_rgba(16,29,48,0.055)] transition duration-hover ease-brand hover:-translate-y-1 hover:shadow-[0_28px_90px_rgba(16,29,48,0.10)]"
+                  className="group mx-auto grid h-full w-full max-w-[330px] grid-rows-[auto_1fr] bg-white p-[clamp(14px,1.05vw,18px)] shadow-[0_18px_70px_rgba(16,29,48,0.055)] transition duration-hover ease-brand hover:-translate-y-1 hover:shadow-[0_28px_90px_rgba(16,29,48,0.10)]"
                 >
                   <div className="hover-zoom">
                     <div className="hover-zoom-media">
                       <SafeImage
                         filename={item.image}
                         alt={item.caption}
-                        aspect="aspect-square"
+                        aspect="aspect-[4/3]"
                         variant="plain"
                       />
                     </div>
                   </div>
-                  <div className="flex min-h-[118px] flex-col items-center justify-center gap-1.5 px-1 py-5 text-center">
+                  <div className="flex min-h-[clamp(82px,5vw,98px)] flex-col items-center justify-center gap-1.5 px-1 py-3 text-center">
                     <h3 className="font-heading text-[clamp(19px,1.25vw,24px)] font-semibold leading-tight text-primary">
                       {item.title}
                     </h3>

@@ -23,7 +23,7 @@ type LoyaltyFeatureCarouselProps = {
   locale: Locale;
 };
 
-export function LoyaltyFeatureCarousel({slides, imageAlt, locale}: LoyaltyFeatureCarouselProps) {
+export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouselProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [current, setCurrent] = useState<{index: number; direction: 1 | -1}>({index: 0, direction: 1});
   const activeSlide = slides[current.index] ?? slides[0];
@@ -48,9 +48,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt, locale}: LoyaltyFeatur
     ? {duration: 0.01}
     : {duration: 1.05, ease: [0.16, 1, 0.3, 1]};
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
-  const bodyTextClass = locale === 'ko'
-    ? "[font-family:'MaruBuri',serif] font-semibold"
-    : englishTextClass;
+  const carouselBodyTextClass = "[font-family:Pretendard,sans-serif] font-normal";
 
   if (!activeSlide) {
     return null;
@@ -132,10 +130,10 @@ export function LoyaltyFeatureCarousel({slides, imageAlt, locale}: LoyaltyFeatur
               {activeSlide.kicker}
             </p>
           ) : null}
-          <h2 className={`${englishTextClass} text-[clamp(24px,2.2vw,34px)] leading-tight tracking-normal text-primary ${activeSlide.kicker ? 'mt-7' : ''}`}>
+          <h2 className={`${englishTextClass} text-[32px] leading-tight tracking-normal text-primary ${activeSlide.kicker ? 'mt-7' : ''}`}>
             {activeSlide.title}
           </h2>
-          <p className={`${bodyTextClass} mx-auto mt-8 max-w-[600px] whitespace-pre-line text-[14px] leading-[1.68] tracking-normal text-text`}>
+          <p className={`${carouselBodyTextClass} mx-auto mt-8 max-w-[600px] whitespace-pre-line text-[15px] leading-[1.72] tracking-normal text-text`}>
             {activeSlide.body}
           </p>
         </motion.article>

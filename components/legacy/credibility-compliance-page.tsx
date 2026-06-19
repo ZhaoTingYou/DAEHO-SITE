@@ -182,11 +182,11 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
     <main className="bg-white text-primary">
       <section className="grid min-h-[100svh] place-items-center bg-white py-24">
         <div className="mx-auto max-w-3xl px-container text-center">
-          <Reveal className="space-y-5 text-[#252525]">
-            <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
+          <Reveal className="flex flex-col items-center text-[#252525]">
+            <p className={`${englishTextClass} mb-[50px] text-[15px] uppercase leading-none text-accent`}>
               {copy.heroLabel}
             </p>
-            <h1 className={`${englishTextClass} text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
+            <h1 className={`${englishTextClass} mb-[15px] text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
               {copy.heroTitle}
             </h1>
             <p className={`${bodyTextClass} mx-auto max-w-[560px] text-[15px] leading-[1.85] text-[#252525]`}>
@@ -227,17 +227,17 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
               } ${index < copy.rows.length - 1 ? 'border-b border-[#b65c55]/70' : 'pb-4'}`}
             >
               <div className="max-w-[620px]">
-                <h2 className={`${bodyTextClass} text-[clamp(25px,2.3vw,36px)] leading-tight tracking-normal text-primary`}>
+                <h2 className="[font-family:'MaruBuri',serif] text-[32px] font-semibold leading-tight tracking-normal text-primary">
                   <span>{row.number}</span>
                   {' '}
                   <span>{row.title}</span>
                 </h2>
-                <p className={`${bodyTextClass} mt-3 text-[14px] leading-tight text-accent`}>
+                <p className="mt-[10px] [font-family:'Pretendard',sans-serif] text-[20px] font-normal leading-tight text-accent">
                   {row.accent}
                 </p>
-                <div className="mt-6 space-y-4">
+                <div className="mt-[15px] space-y-4">
                   {row.paragraphs.map((paragraph) => (
-                    <p key={paragraph} className={`${bodyTextClass} text-[13px] leading-[1.78] text-[#111827]`}>
+                    <p key={paragraph} className="[font-family:'Pretendard',sans-serif] text-[13px] font-normal leading-[1.78] text-[#111827]">
                       {paragraph}
                     </p>
                   ))}
@@ -252,12 +252,12 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
 
       <section className="bg-white py-[clamp(96px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className={`${bodyTextClass} text-[clamp(26px,2.5vw,38px)] leading-tight text-primary`}>
+          <p className="[font-family:'MaruBuri',serif] text-[32px] font-semibold leading-tight text-primary">
             {copy.discoverLead}
           </p>
           <Link
             href={withLocale(locale, '/mastery/creations')}
-            className={`${englishTextClass} link-sweep mt-7 inline-flex text-[14px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
+            className={`${englishTextClass} link-sweep mt-[10px] inline-flex text-[15px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
           >
             {copy.cta}
           </Link>
