@@ -5,6 +5,7 @@ import type {NextRequest} from 'next/server';
 import {hasAdminSession} from '@/lib/cms/admin-session';
 import {requireAdmin} from '@/lib/cms/auth';
 import {getCmsDb} from '@/lib/cms/db';
+import {maxImportBodyBytes, rejectOversizedRequest} from '@/lib/cms/http';
 import {
   getCmsImportCounts,
   importCmsSnapshot,
@@ -22,6 +23,11 @@ export async function POST(request: NextRequest) {
   }
 
   const shouldReplace = request.nextUrl.searchParams.get('replace') === '1';
+  const oversized = rejectOversizedRequest(request, maxImportBodyBytes);
+
+  if (oversized) {
+    return oversized;
+  }
 
   try {
     const snapshot = readCmsImportSnapshotFromText(await request.text());

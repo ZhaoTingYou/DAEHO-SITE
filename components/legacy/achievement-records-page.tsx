@@ -5,7 +5,7 @@ import {DraggableScroll} from '@/components/draggable-scroll';
 import type {HomeStatBandItem} from '@/components/home/home-stat-band';
 import {AnimatedStatScope, AnimatedStatValue} from '@/components/legacy/animated-stat-value';
 import {HeritageHero} from '@/components/legacy/heritage-hero';
-import {Reveal, RevealItem} from '@/components/motion/reveal';
+import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {withLocale} from '@/lib/site-map';
 
@@ -57,6 +57,7 @@ const pageCopy = {
     quoteTitle: 'Records that Became Standards',
     quoteBody: '대호가 만든 기록은 업계의 기준이 되었습니다',
     firstTitle: 'FIRST RECORDS',
+    firstHeading: '국내 최초 기록',
     marketLabel: 'MARKET LEADERSHIP',
     marketTitle: '압도적인 시장 점유율',
     marketIntro:
@@ -145,6 +146,7 @@ const pageCopy = {
     quoteTitle: 'Records that Became Standards',
     quoteBody: 'The records DEAHO built became industry standards.',
     firstTitle: 'FIRST RECORDS',
+    firstHeading: 'First records by DEAHO',
     marketLabel: 'MARKET LEADERSHIP',
     marketTitle: 'Dominant market share',
     marketIntro:
@@ -228,6 +230,7 @@ const pageCopy = {
   quoteTitle: string;
   quoteBody: string;
   firstTitle: string;
+  firstHeading: string;
   marketLabel: string;
   marketTitle: string;
   marketIntro: string;
@@ -279,37 +282,42 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </Reveal>
       </section>
 
-      <section className="bg-bg px-container py-[clamp(104px,11vw,164px)]">
-        <div className="mx-auto max-w-[1120px]">
-          <Reveal className="text-center">
-            <h2 className={`${englishTextClass} text-[clamp(25px,2.55vw,38px)] uppercase leading-none tracking-[0.04em] text-primary`}>
-              {copy.firstTitle}
-            </h2>
-          </Reveal>
-          <Reveal className="mt-[clamp(54px,6vw,78px)] grid gap-12 text-center md:grid-cols-3">
+      <section className="overflow-hidden bg-bg py-[clamp(104px,11vw,164px)]">
+        <Reveal className="px-container text-center">
+          <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
+            {copy.firstTitle}
+          </p>
+          <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
+            {copy.firstHeading}
+          </h2>
+        </Reveal>
+
+        <Reveal className="mt-[clamp(54px,6vw,78px)]">
+          <DraggableScroll
+            ariaLabel={copy.firstHeading}
+            className="flex gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden"
+          >
             {copy.firstRecords.map((record) => (
-              <RevealItem key={record.title}>
-                <article>
-                  <div className="relative mx-auto aspect-square w-[min(58vw,250px)] overflow-hidden bg-[#d8d8d8]">
-                    <Image
-                      src={`/images/${record.image}`}
-                      alt={record.title}
-                      fill
-                      sizes="(min-width: 768px) 250px, 58vw"
-                      className="object-cover opacity-0"
-                    />
-                  </div>
-                  <h3 className={`${englishTextClass} mt-8 whitespace-pre-line text-[15px] uppercase leading-[1.18] tracking-[0.04em] text-primary`}>
-                    {record.title}
-                  </h3>
-                  <p className={`${bodyTextClass} mt-2 text-[15px] leading-tight text-primary`}>
-                    {record.body}
-                  </p>
-                </article>
-              </RevealItem>
+              <article key={record.title} className="w-[min(72vw,330px)] shrink-0">
+                <div className="relative aspect-[3/4] overflow-hidden bg-[#d8d8d8]">
+                  <Image
+                    src={`/images/${record.image}`}
+                    alt={record.title}
+                    fill
+                    sizes="(min-width: 1024px) 330px, 72vw"
+                    className="pointer-events-none object-cover"
+                  />
+                </div>
+                <p className={`${bodyTextClass} mt-6 text-[15px] leading-tight text-primary`}>
+                  {record.body}
+                </p>
+                <h3 className={`${englishTextClass} mt-2 whitespace-pre-line text-[15px] uppercase leading-[1.18] tracking-[0.04em] text-primary`}>
+                  {record.title}
+                </h3>
+              </article>
             ))}
-          </Reveal>
-        </div>
+          </DraggableScroll>
+        </Reveal>
       </section>
 
       <section className="bg-[#f4efe6] px-container py-[clamp(116px,12vw,182px)]">

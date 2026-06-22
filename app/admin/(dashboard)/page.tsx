@@ -8,6 +8,7 @@ import {
   listNews,
   listPages
 } from '@/lib/cms/repositories';
+import {managedPageDefinitions} from '@/lib/cms/page-catalog';
 import {getCmsStatus} from '@/lib/cms/status';
 
 import {PageHeader, Panel} from '../_components/admin-shell';
@@ -64,7 +65,7 @@ export default async function AdminOverviewPage() {
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('overview.contentInventory')}</h2>
             </div>
             <div className="grid gap-3 p-5">
-              <InventoryRow label={t('overview.editablePageGroups')} value={pages.length} href="/admin/pages" />
+              <InventoryRow label={t('overview.editablePageGroups')} value={managedPageDefinitions.length || pages.length} href="/admin/pages" />
               <InventoryRow label={t('overview.visibleNewsItems')} value={news.filter((item) => item.isVisible).length} href="/admin/news" />
               <InventoryRow label={t('overview.visibleCollections')} value={collections.filter((item) => item.isVisible).length} href="/admin/collections" />
               <InventoryRow label={t('overview.publicImageRecords')} value={media.filter((item) => item.storageProvider === 'public').length} href="/admin/media" />

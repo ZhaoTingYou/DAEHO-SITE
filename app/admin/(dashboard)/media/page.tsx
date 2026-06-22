@@ -28,7 +28,7 @@ export default async function AdminMediaPage({searchParams}: Props) {
       />
 
       <Panel className="mb-6 p-5">
-        <form action={uploadMediaAction} className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
+        <form action={uploadMediaAction} encType="multipart/form-data" className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
           <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
             <span>{t('media.file')}</span>
             <input

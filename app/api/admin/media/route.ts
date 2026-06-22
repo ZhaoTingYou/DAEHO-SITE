@@ -6,8 +6,17 @@ import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
 import {requireAdmin} from '@/lib/cms/auth';
-import {parseJsonBody, validationError} from '@/lib/cms/http';
+import {
+  maxAdminJsonBodyBytes,
+  parseJsonBody,
+  rejectOversizedRequest,
+  validationError
+} from '@/lib/cms/http';
 import {createMedia, listMedia} from '@/lib/cms/repositories';
+import {
+  getImageUploadError,
+  maxMultipartImageRequestBytes
+} from '@/lib/cms/upload-policy';
 import {mediaPayloadSchema} from '@/lib/cms/validation';
 
 export const runtime = 'nodejs';
@@ -32,6 +41,12 @@ export async function POST(request: NextRequest) {
   const contentType = request.headers.get('content-type') ?? '';
 
   if (!contentType.includes('multipart/form-data')) {
+    const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
+
+    if (oversized) {
+      return oversized;
+    }
+
     const parsed = await parseJsonBody(request, mediaPayloadSchema);
 
     if (!parsed.success) {
@@ -41,11 +56,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({item: createMedia(parsed.data)}, {status: 201});
   }
 
+  const oversized = rejectOversizedRequest(request, maxMultipartImageRequestBytes);
+
+  if (oversized) {
+    return oversized;
+  }
+
   const formData = await request.formData();
   const file = formData.get('file');
 
   if (!(file instanceof File)) {
     return NextResponse.json({error: 'A file field is required.'}, {status: 400});
+  }
+
+  const uploadError = getImageUploadError(file);
+
+  if (uploadError) {
+    return NextResponse.json({error: uploadError}, {status: 400});
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());

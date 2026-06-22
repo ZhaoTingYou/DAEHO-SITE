@@ -5,6 +5,7 @@ import {createAdminTranslator, getContentLocaleLabel} from '@/lib/admin-i18n';
 import {locales, type Locale} from '@/lib/locales';
 import {
   CheckboxField,
+  ImageUploadField,
   SecondaryLink,
   SubmitButton,
   TextAreaField,
@@ -38,9 +39,11 @@ type CollectionTranslation = {
 
 export function CollectionForm({item, messages}: {item?: CollectionItem; messages: Record<string, string>}) {
   const t = createAdminTranslator(messages);
+  const gallery = normalizeGallery(item?.gallery, item?.imagePath);
+  const specs = normalizeSpecs(item?.specs);
 
   return (
-    <form action={saveCollectionAction} className="grid gap-6">
+    <form action={saveCollectionAction} encType="multipart/form-data" className="grid gap-6">
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
 
       <Panel className="p-5">
@@ -48,13 +51,39 @@ export function CollectionForm({item, messages}: {item?: CollectionItem; message
           <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="ring-01" />
           <TextField label={t('form.category')} name="category" defaultValue={item?.category} required placeholder="champion" />
           <TextField label={t('form.sportCategory')} name="sportCategory" defaultValue={item?.sportCategory} placeholder="baseball" />
-          <TextField label={t('form.imageFilename')} name="imagePath" defaultValue={item?.imagePath} placeholder="collection_ring_01.png" />
           <TextField label={t('common.sortOrder')} name="sortOrder" type="number" defaultValue={item?.sortOrder ?? 0} />
           <CheckboxField label={t('form.visible')} name="isVisible" defaultChecked={item?.isVisible ?? true} />
         </div>
         <div className="mt-4 grid gap-4 xl:grid-cols-2">
-          <TextAreaField label={t('form.galleryJson')} name="gallery" defaultValue={formatJson(item?.gallery ?? [])} rows={7} />
-          <TextAreaField label={t('form.specsJson')} name="specs" defaultValue={formatJson(item?.specs ?? {})} rows={7} />
+          <ImageUploadField
+            label={t('form.imageFilename')}
+            name="imagePath"
+            uploadName="imageUpload"
+            defaultValue={item?.imagePath}
+            uploadLabel={t('page.uploadLocalImage')}
+            uploadHint={t('page.uploadLocalImageHint')}
+          />
+          <div className="grid gap-4 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.specs')}</p>
+            <TextField label={t('form.year')} name="specs.year" defaultValue={specs.year} />
+            <TextField label={t('form.sportCategory')} name="specs.sportCategory" defaultValue={specs.sportCategory} />
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4">
+          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.gallery')}</p>
+          <div className="grid gap-3 md:grid-cols-2">
+            {Array.from({length: 6}).map((_, index) => (
+              <ImageUploadField
+                key={index}
+                label={t('form.galleryImage', {count: index + 1})}
+                name={`gallery.${index}`}
+                uploadName={`galleryUpload.${index}`}
+                defaultValue={gallery[index] ?? ''}
+                uploadLabel={t('page.uploadLocalImage')}
+                uploadHint={t('page.uploadLocalImageHint')}
+              />
+            ))}
+          </div>
         </div>
       </Panel>
 
@@ -104,7 +133,14 @@ function TranslationPanel({
         <TextField label={t('form.sportCategoryLabel')} name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} />
         <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
         <TextAreaField label={t('form.seoDescription')} name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
-        <TextField label={t('form.ogImage')} name={`${locale}.ogImagePath`} defaultValue={translation.ogImagePath} />
+        <ImageUploadField
+          label={t('form.ogImage')}
+          name={`${locale}.ogImagePath`}
+          uploadName={`${locale}.ogImageUpload`}
+          defaultValue={translation.ogImagePath}
+          uploadLabel={t('page.uploadLocalImage')}
+          uploadHint={t('page.uploadLocalImageHint')}
+        />
       </div>
     </Panel>
   );
@@ -114,6 +150,26 @@ function getTranslation(item: CollectionItem | undefined, locale: Locale) {
   return (item?.translations[locale] ?? {}) as CollectionTranslation;
 }
 
-function formatJson(value: unknown) {
-  return JSON.stringify(value ?? {}, null, 2);
+function normalizeGallery(value: unknown, fallbackImage?: string) {
+  const gallery = Array.isArray(value)
+    ? value.filter((image): image is string => typeof image === 'string' && image.length > 0)
+    : [];
+
+  return gallery.length > 0 ? gallery : [fallbackImage].filter((image): image is string => Boolean(image));
+}
+
+function normalizeSpecs(value: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {
+      year: '',
+      sportCategory: ''
+    };
+  }
+
+  const specs = value as Record<string, unknown>;
+
+  return {
+    year: typeof specs.year === 'string' ? specs.year : '',
+    sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : ''
+  };
 }

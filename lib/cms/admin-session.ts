@@ -5,6 +5,17 @@ import {redirect} from 'next/navigation';
 
 const adminSessionCookie = 'deaho_admin_session';
 const sessionMaxAgeSeconds = 60 * 60 * 8;
+const loginAttemptWindowMs = 15 * 60 * 1000;
+const loginLockMs = 15 * 60 * 1000;
+const maxFailedLoginAttempts = 5;
+
+type LoginAttemptState = {
+  count: number;
+  firstAttemptAt: number;
+  lockedUntil: number;
+};
+
+const failedLoginAttempts = new Map<string, LoginAttemptState>();
 
 export async function assertAdminSession() {
   if (!(await hasAdminSession())) {
@@ -50,6 +61,45 @@ export function validateAdminPassword(password: string) {
   }
 
   return constantTimeEqual(password, expected);
+}
+
+export function isAdminLoginRateLimited(key: string) {
+  const now = Date.now();
+  const current = failedLoginAttempts.get(key);
+
+  if (!current) {
+    return false;
+  }
+
+  if (current.lockedUntil > now) {
+    return true;
+  }
+
+  if (now - current.firstAttemptAt > loginAttemptWindowMs) {
+    failedLoginAttempts.delete(key);
+  }
+
+  return false;
+}
+
+export function recordFailedAdminLogin(key: string) {
+  const now = Date.now();
+  const current = failedLoginAttempts.get(key);
+  const next =
+    current && now - current.firstAttemptAt <= loginAttemptWindowMs
+      ? {...current, count: current.count + 1}
+      : {count: 1, firstAttemptAt: now, lockedUntil: 0};
+
+  if (next.count >= maxFailedLoginAttempts) {
+    next.lockedUntil = now + loginLockMs;
+  }
+
+  failedLoginAttempts.set(key, next);
+  cleanupLoginAttempts(now);
+}
+
+export function clearAdminLoginFailures(key: string) {
+  failedLoginAttempts.delete(key);
 }
 
 export function getAdminPasswordHint() {
@@ -99,6 +149,17 @@ function getAdminPassword() {
     process.env.CMS_ADMIN_API_KEY ??
     (process.env.NODE_ENV !== 'production' ? 'admin' : '')
   );
+}
+
+function cleanupLoginAttempts(now: number) {
+  for (const [key, value] of failedLoginAttempts) {
+    const staleWindow = now - value.firstAttemptAt > loginAttemptWindowMs;
+    const unlocked = value.lockedUntil === 0 || value.lockedUntil <= now;
+
+    if (staleWindow && unlocked) {
+      failedLoginAttempts.delete(key);
+    }
+  }
 }
 
 function constantTimeEqual(value: string, expected: string) {

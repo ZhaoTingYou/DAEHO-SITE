@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export function TextField({
   label,
   name,
@@ -134,4 +136,72 @@ export function DangerButton({children}: {children: React.ReactNode}) {
       {children}
     </button>
   );
+}
+
+export function ImageUploadField({
+  label,
+  name,
+  uploadName,
+  defaultValue,
+  placeholder = 'image-name.png',
+  uploadLabel,
+  uploadHint,
+  preview = true
+}: {
+  label: string;
+  name: string;
+  uploadName: string;
+  defaultValue?: string;
+  placeholder?: string;
+  uploadLabel: string;
+  uploadHint?: string;
+  preview?: boolean;
+}) {
+  return (
+    <div className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+      <span>{label}</span>
+      <div className={`grid gap-3 ${preview ? 'md:grid-cols-[112px_minmax(0,1fr)]' : ''}`}>
+        {preview ? (
+          <div className="relative aspect-[4/3] overflow-hidden rounded-md border border-[#d9dee7] bg-[#eef2f6]">
+            {defaultValue ? (
+              <Image
+                src={imageSrc(defaultValue)}
+                alt=""
+                fill
+                sizes="112px"
+                className="object-cover"
+                unoptimized={defaultValue.endsWith('.svg')}
+              />
+            ) : (
+              <div className="grid h-full place-items-center text-xs font-semibold text-[#98a2b3]">No image</div>
+            )}
+          </div>
+        ) : null}
+        <div className="grid gap-2">
+          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto]">
+            <input
+              name={name}
+              defaultValue={defaultValue}
+              placeholder={placeholder}
+              className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
+            />
+            <label className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054] transition hover:bg-[#f8fafc]">
+              <span className="font-numeric text-base leading-none">+</span>
+              <span>{uploadLabel}</span>
+              <input name={uploadName} type="file" accept="image/*" className="sr-only" />
+            </label>
+          </div>
+          {uploadHint ? <p className="text-xs font-medium leading-5 text-[#647084]">{uploadHint}</p> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function imageSrc(value: string) {
+  if (value.startsWith('/')) {
+    return value;
+  }
+
+  return `/images/${value}`;
 }

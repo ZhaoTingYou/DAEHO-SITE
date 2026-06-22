@@ -2,7 +2,12 @@ import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
 import {requireAdmin} from '@/lib/cms/auth';
-import {parseJsonBody, validationError} from '@/lib/cms/http';
+import {
+  maxAdminJsonBodyBytes,
+  parseJsonBody,
+  rejectOversizedRequest,
+  validationError
+} from '@/lib/cms/http';
 import {getPage, upsertPage} from '@/lib/cms/repositories';
 import {pagePayloadSchema} from '@/lib/cms/validation';
 
@@ -34,6 +39,12 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
   if (unauthorized) {
     return unauthorized;
+  }
+
+  const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
+
+  if (oversized) {
+    return oversized;
   }
 
   const parsed = await parseJsonBody(request, pagePayloadSchema);

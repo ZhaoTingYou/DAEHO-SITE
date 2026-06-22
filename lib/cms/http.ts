@@ -4,9 +4,35 @@ import type {ZodError, ZodSchema} from 'zod';
 
 import {localeSchema} from './validation';
 
+export const maxPublicJsonBodyBytes = 64 * 1024;
+export const maxAdminJsonBodyBytes = 1024 * 1024;
+export const maxImportBodyBytes = 5 * 1024 * 1024;
+
 export async function parseJsonBody<T>(request: NextRequest, schema: ZodSchema<T>) {
   const body = await request.json().catch(() => null);
   return schema.safeParse(body);
+}
+
+export function rejectOversizedRequest(request: NextRequest, maxBytes: number) {
+  const contentLength = request.headers.get('content-length');
+
+  if (!contentLength) {
+    return null;
+  }
+
+  const size = Number(contentLength);
+
+  if (!Number.isFinite(size) || size <= maxBytes) {
+    return null;
+  }
+
+  return NextResponse.json(
+    {
+      error: 'Payload too large',
+      maxBytes
+    },
+    {status: 413}
+  );
 }
 
 export function validationError(error: ZodError) {

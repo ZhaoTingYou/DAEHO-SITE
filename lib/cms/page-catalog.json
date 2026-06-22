@@ -1,0 +1,326 @@
+[
+  {
+    "pageKey": "home",
+    "title": "首页",
+    "description": "管理官网首屏、Signature 项目、数字证据和首页导流内容。",
+    "section": "Home",
+    "sortOrder": 10,
+    "href": "/",
+    "sourcePath": "home",
+    "contentGroups": [
+      {"key": "main", "title": "首页主内容", "sourcePath": "home"},
+      {"key": "homeUi", "title": "首页弹窗、按钮和辅助文案", "sourcePath": "homeUi"}
+    ],
+    "fields": [
+      {"path": "eyebrow", "label": "眉标"},
+      {"path": "title", "label": "主标题", "type": "textarea", "rows": 3},
+      {"path": "subtitle", "label": "副标题", "type": "textarea", "rows": 3},
+      {"path": "image", "label": "主视觉图片", "type": "image"},
+      {"path": "signature.eyebrow", "label": "Signature 眉标"},
+      {"path": "signature.title", "label": "Signature 标题"},
+      {"path": "signature.body", "label": "Signature 正文", "type": "textarea", "rows": 4},
+      {"path": "signature.projects", "label": "Signature 项目卡片", "type": "json"},
+      {"path": "statBand", "label": "首页数字带", "type": "json"},
+      {"path": "pillars.items", "label": "四个导流章节", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "archive",
+    "title": "Archive",
+    "description": "管理品牌历史时间轴与 Archive 页核心内容。",
+    "section": "Archive",
+    "sortOrder": 20,
+    "href": "/archive",
+    "sourcePath": "chronicle",
+    "contentGroups": [
+      {"key": "main", "title": "Archive 主内容", "sourcePath": "chronicle"},
+      {"key": "chronicleUi", "title": "Archive 横向浏览和结尾按钮", "sourcePath": "chronicleUi"}
+    ],
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.title", "label": "Hero 标题"},
+      {"path": "hero.koreanTitle", "label": "Hero 本地标题"},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "timeline.eyebrow", "label": "时间轴眉标"},
+      {"path": "timeline.title", "label": "时间轴标题"},
+      {"path": "timeline.body", "label": "时间轴说明", "type": "textarea", "rows": 3},
+      {"path": "timeline.items", "label": "时间轴项目", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "heritage-loyalty",
+    "title": "Heritage / Loyalty",
+    "description": "管理信义页面的 Hero、指标和说明内容。",
+    "section": "Heritage",
+    "sortOrder": 30,
+    "href": "/heritage/loyalty",
+    "sourcePath": "legacyPages.loyalty",
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.title", "label": "Hero 标题"},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "metrics", "label": "指标", "type": "json"},
+      {"path": "statement", "label": "说明文案", "type": "textarea", "rows": 4}
+    ]
+  },
+  {
+    "pageKey": "heritage-credibility",
+    "title": "Heritage / Credibility",
+    "description": "管理信赖页面的 Hero、数字证据和合作墙内容。",
+    "section": "Heritage",
+    "sortOrder": 31,
+    "href": "/heritage/credibility",
+    "sourcePath": "legacyPages.credibility",
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.title", "label": "Hero 标题"},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "metrics", "label": "指标", "type": "json"},
+      {"path": "statement", "label": "说明文案", "type": "textarea", "rows": 4},
+      {"path": "partners", "label": "合作伙伴", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "heritage-achievement",
+    "title": "Heritage / Achievement",
+    "description": "管理成就页面的 Hero、指标和荣誉图库。",
+    "section": "Heritage",
+    "sortOrder": 32,
+    "href": "/heritage/achievement",
+    "sourcePath": "legacyPages.achievement",
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.title", "label": "Hero 标题"},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "metrics", "label": "指标", "type": "json"},
+      {"path": "gallery.eyebrow", "label": "图库眉标"},
+      {"path": "gallery.title", "label": "图库标题"},
+      {"path": "gallery.items", "label": "图库项目", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "mastery-making",
+    "title": "Mastery / Making",
+    "description": "管理制作工艺页面的 Hero、七步流程和细节说明。",
+    "section": "Mastery",
+    "sortOrder": 40,
+    "href": "/mastery/making",
+    "sourcePath": "specialtyPages.technique",
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.title", "label": "Hero 标题"},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "process.eyebrow", "label": "流程眉标"},
+      {"path": "process.title", "label": "流程标题"},
+      {"path": "process.body", "label": "流程说明", "type": "textarea", "rows": 3},
+      {"path": "process.steps", "label": "七步流程", "type": "json"},
+      {"path": "details.items", "label": "细节卡片", "type": "json"},
+      {"path": "bespoke", "label": "Bespoke 区块", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "mastery-creations",
+    "title": "Mastery / Creations",
+    "description": "管理作品集首页、筛选分类和作品 Finder 内容。",
+    "section": "Mastery",
+    "sortOrder": 41,
+    "href": "/mastery/creations",
+    "sourcePath": "specialtyPages.collection",
+    "contentGroups": [
+      {"key": "main", "title": "Creations 主内容", "sourcePath": "specialtyPages.collection"},
+      {"key": "collectionUi", "title": "作品列表、筛选和详情页共用文案", "sourcePath": "collectionUi"}
+    ],
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.title", "label": "Hero 标题"},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "gallery.eyebrow", "label": "图库眉标"},
+      {"path": "gallery.title", "label": "图库标题"},
+      {"path": "gallery.filters", "label": "分类筛选", "type": "json"},
+      {"path": "gallery.items", "label": "默认作品项目", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "mastery-creations-champion",
+    "title": "Creations / Champion",
+    "description": "管理冠军戒指分类页的分类卡片和 SEO 基础内容。",
+    "section": "Mastery",
+    "sortOrder": 42,
+    "href": "/mastery/creations/champion",
+    "sourcePath": "specialtyPages.collection.gallery.filters.0",
+    "fields": [
+      {"path": "label", "label": "分类名称"},
+      {"path": "description", "label": "分类说明", "type": "textarea", "rows": 3},
+      {"path": "image", "label": "分类图片", "type": "image"}
+    ]
+  },
+  {
+    "pageKey": "mastery-creations-appointment",
+    "title": "Creations / Appointment",
+    "description": "管理任命/纪念类作品分类页的分类卡片和 SEO 基础内容。",
+    "section": "Mastery",
+    "sortOrder": 43,
+    "href": "/mastery/creations/appointment",
+    "sourcePath": "specialtyPages.collection.gallery.filters.1",
+    "fields": [
+      {"path": "label", "label": "分类名称"},
+      {"path": "description", "label": "分类说明", "type": "textarea", "rows": 3},
+      {"path": "image", "label": "分类图片", "type": "image"}
+    ]
+  },
+  {
+    "pageKey": "mastery-creations-bespoke",
+    "title": "Creations / Bespoke",
+    "description": "管理定制作品分类页的分类卡片和 SEO 基础内容。",
+    "section": "Mastery",
+    "sortOrder": 44,
+    "href": "/mastery/creations/bespoke",
+    "sourcePath": "specialtyPages.collection.gallery.filters.2",
+    "fields": [
+      {"path": "label", "label": "分类名称"},
+      {"path": "description", "label": "分类说明", "type": "textarea", "rows": 3},
+      {"path": "image", "label": "分类图片", "type": "image"}
+    ]
+  },
+  {
+    "pageKey": "news",
+    "title": "News",
+    "description": "管理 News 列表页文案；具体新闻文章在新闻模块维护。",
+    "section": "News",
+    "sortOrder": 50,
+    "href": "/news",
+    "sourcePath": "news",
+    "contentGroups": [
+      {"key": "main", "title": "News 列表页主内容", "sourcePath": "news"},
+      {"key": "newsUi", "title": "News 筛选、分享和详情页共用文案", "sourcePath": "newsUi"}
+    ],
+    "fields": [
+      {"path": "masthead.eyebrow", "label": "页头眉标"},
+      {"path": "masthead.title", "label": "页头标题"},
+      {"path": "masthead.body", "label": "页头说明", "type": "textarea", "rows": 3},
+      {"path": "grid.cards", "label": "默认新闻卡片", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "golf",
+    "title": "Golf",
+    "description": "管理 Golf 定制手链页面的配置器、材质和展示内容。",
+    "section": "Golf",
+    "sortOrder": 60,
+    "href": "/golf",
+    "sourcePath": "golf",
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.titleLines", "label": "Hero 标题行", "type": "stringList", "rows": 3},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "statement.titleLines", "label": "Statement 标题行", "type": "stringList", "rows": 3},
+      {"path": "statement.body", "label": "Statement 正文", "type": "textarea", "rows": 4},
+      {"path": "heads.items", "label": "Club head 选项", "type": "json"},
+      {"path": "shafts.items", "label": "Shaft 选项", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "golf-inquiry",
+    "title": "Golf / Inquiry",
+    "description": "管理 Golf 咨询提交页的说明和配置摘要文案。",
+    "section": "Golf",
+    "sortOrder": 61,
+    "href": "/golf/inquiry",
+    "sourcePath": "golfInquiry",
+    "contentGroups": [
+      {"key": "main", "title": "Golf 咨询页主内容", "sourcePath": "golfInquiry"},
+      {"key": "form", "title": "Golf 咨询表单字段和提交提示", "sourcePath": "forms.golfInquiry"}
+    ],
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.title", "label": "Hero 标题"},
+      {"path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4},
+      {"path": "summary", "label": "摘要标题"},
+      {"path": "head", "label": "Head 标签"},
+      {"path": "shaft", "label": "Shaft 标签"},
+      {"path": "engraving", "label": "刻字标签"},
+      {"path": "edit", "label": "返回编辑按钮"}
+    ]
+  },
+  {
+    "pageKey": "contact",
+    "title": "Contact",
+    "description": "管理联系页文案、联系信息和 FAQ。",
+    "section": "Contact",
+    "sortOrder": 70,
+    "href": "/contact",
+    "sourcePath": "contact",
+    "contentGroups": [
+      {"key": "main", "title": "Contact 页面内容", "sourcePath": "contact"},
+      {"key": "form", "title": "Contact 表单字段、选项和提交提示", "sourcePath": "forms.contact"}
+    ],
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标"},
+      {"path": "hero.title", "label": "Hero 标题"},
+      {"path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4},
+      {"path": "infoTitle", "label": "联系信息标题"},
+      {"path": "address", "label": "地址"},
+      {"path": "phone", "label": "电话"},
+      {"path": "email", "label": "邮箱"},
+      {"path": "hours", "label": "营业时间"},
+      {"path": "faqTitle", "label": "FAQ 标题"},
+      {"path": "faqs", "label": "FAQ 列表", "type": "json"}
+    ]
+  },
+  {
+    "pageKey": "terms",
+    "title": "Terms",
+    "description": "管理使用条款页面。",
+    "section": "Legal",
+    "sortOrder": 80,
+    "href": "/terms",
+    "sourcePath": "legalPages.terms",
+    "fields": [
+      {"path": "eyebrow", "label": "眉标"},
+      {"path": "title", "label": "标题"},
+      {"path": "notice", "label": "正文", "type": "textarea", "rows": 8}
+    ]
+  },
+  {
+    "pageKey": "privacy",
+    "title": "Privacy",
+    "description": "管理隐私政策页面。",
+    "section": "Legal",
+    "sortOrder": 81,
+    "href": "/privacy",
+    "sourcePath": "legalPages.privacy",
+    "fields": [
+      {"path": "eyebrow", "label": "眉标"},
+      {"path": "title", "label": "标题"},
+      {"path": "notice", "label": "正文", "type": "textarea", "rows": 8}
+    ]
+  },
+  {
+    "pageKey": "common",
+    "title": "Common / Navigation",
+    "description": "管理页脚、导航、全站 SEO 和跨页面共用 UI 文案。",
+    "section": "Settings",
+    "sortOrder": 100,
+    "href": "/",
+    "sourcePath": "common",
+    "contentGroups": [
+      {"key": "main", "title": "导航和页脚", "sourcePath": "common"},
+      {"key": "metadata", "title": "全站 SEO 默认标题和描述", "sourcePath": "metadata"},
+      {"key": "legacyUi", "title": "Heritage 共用按钮文案", "sourcePath": "legacyUi"},
+      {"key": "specialtyUi", "title": "Mastery 共用辅助文案", "sourcePath": "specialtyUi"},
+      {"key": "notFound", "title": "404 页面文案", "sourcePath": "notFound"}
+    ],
+    "fields": [
+      {"path": "nav", "label": "导航文案", "type": "json"},
+      {"path": "footer", "label": "页脚文案", "type": "json"},
+      {"path": "language", "label": "语言切换文案", "type": "json"}
+    ]
+  }
+]

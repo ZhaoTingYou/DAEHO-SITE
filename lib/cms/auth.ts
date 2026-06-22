@@ -1,3 +1,5 @@
+import {timingSafeEqual} from 'node:crypto';
+
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
@@ -19,9 +21,20 @@ export function requireAdmin(request: NextRequest) {
   const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
   const headerToken = request.headers.get('x-admin-api-key') ?? '';
 
-  if (bearerToken === expectedKey || headerToken === expectedKey) {
+  if (constantTimeEqual(bearerToken, expectedKey) || constantTimeEqual(headerToken, expectedKey)) {
     return null;
   }
 
   return NextResponse.json({error: 'Unauthorized'}, {status: 401});
+}
+
+function constantTimeEqual(value: string, expected: string) {
+  const valueBuffer = Buffer.from(value);
+  const expectedBuffer = Buffer.from(expected);
+
+  if (valueBuffer.length !== expectedBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(valueBuffer, expectedBuffer);
 }

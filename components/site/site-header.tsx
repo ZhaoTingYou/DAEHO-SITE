@@ -293,7 +293,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
         isSolid
           ? 'border-b border-hairline bg-bg/95 text-primary shadow-[0_18px_60px_rgba(16,29,48,.08)] backdrop-blur-md [text-shadow:none]'
           : isHeroTransparent
-            ? 'border-b border-transparent bg-transparent text-white [text-shadow:0_1px_16px_rgba(16,29,48,.42)]'
+            ? 'border-b border-transparent bg-transparent text-white mix-blend-difference [text-shadow:none]'
             : 'border-b border-transparent bg-transparent text-primary [text-shadow:0_1px_16px_rgba(255,255,255,.72)]'
       }`}
     >

@@ -7,6 +7,11 @@ export const localeSchema = z.enum(locales);
 const optionalText = z.string().trim().optional().default('');
 const optionalJson = z.unknown().optional().default({});
 const optionalJsonArray = z.array(z.unknown()).optional().default([]);
+const inquiryName = z.string().trim().min(1).max(120);
+const inquiryContact = z.string().trim().min(1).max(180);
+const inquiryShortText = z.string().trim().max(160).optional().default('');
+const inquiryMediumText = z.string().trim().max(300).optional().default('');
+const inquiryLongText = z.string().trim().max(3000).optional().default('');
 
 export const pagePayloadSchema = z.object({
   pageKey: z.string().trim().min(1).optional(),
@@ -85,30 +90,30 @@ export const collectionPayloadSchema = z.object({
 
 export const contactInquirySchema = z.object({
   locale: localeSchema.optional().default('ko'),
-  name: z.string().trim().min(1),
-  organization: optionalText,
-  contact: z.string().trim().min(1),
-  type: optionalText,
-  message: optionalText,
-  pagePath: optionalText
+  name: inquiryName,
+  organization: inquiryShortText,
+  contact: inquiryContact,
+  type: inquiryShortText,
+  message: inquiryLongText,
+  pagePath: inquiryMediumText
 });
 
 export const golfInquirySchema = z.object({
   locale: localeSchema.optional().default('ko'),
-  name: z.string().trim().min(1),
-  contact: z.string().trim().min(1),
+  name: inquiryName,
+  contact: inquiryContact,
   quantity: z.preprocess(
     (value) => (value === '' || value === null ? undefined : value),
-    z.coerce.number().int().positive().optional()
+    z.coerce.number().int().positive().max(10000).optional()
   ),
-  due: optionalText,
-  team: optionalText,
-  use: optionalText,
-  message: optionalText,
-  selectedHead: optionalText,
-  selectedShaft: optionalText,
-  engravingSample: optionalText,
-  pagePath: optionalText
+  due: inquiryShortText,
+  team: inquiryShortText,
+  use: inquiryShortText,
+  message: inquiryLongText,
+  selectedHead: inquiryShortText,
+  selectedShaft: inquiryShortText,
+  engravingSample: inquiryMediumText,
+  pagePath: inquiryMediumText
 });
 
 export const inquiryStatusSchema = z.object({

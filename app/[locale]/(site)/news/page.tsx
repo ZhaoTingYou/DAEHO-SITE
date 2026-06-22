@@ -40,9 +40,6 @@ export default async function NewsPage({params}: Props) {
               {content.masthead.title}
             </h1>
             <div className="space-y-[15px] pb-1 text-left lg:text-right">
-              <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.22em] text-accent`}>
-                {content.masthead.issue}
-              </p>
               <p className={`${bodyTextClass} text-[15px] leading-[1.86] text-text`}>
                 {content.masthead.body}
               </p>

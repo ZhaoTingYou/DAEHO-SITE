@@ -1,8 +1,5 @@
 'use client';
 
-import {motion, type Variants} from 'framer-motion';
-
-import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import type {Locale} from '@/i18n/routing';
 
 import {HeroMedia} from './hero-media';
@@ -28,40 +25,9 @@ export function HomeHero({
   webmSrc,
   locale
 }: HomeHeroProps) {
-  const prefersReducedMotion = usePrefersReducedMotion();
   const titleLines = title.split('\n');
   const titleWeightClass = locale === 'ko' ? 'font-semibold' : 'font-bold';
-  const titleSizeClass = locale === 'ko' ? 'text-[clamp(22px,3.35vw,52px)]' : 'text-[clamp(38px,5.4vw,80px)]';
-  const isNumericWord = (word: string) => /^[\d,]+$/.test(word);
-  const titleVariants: Variants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.12
-      }
-    }
-  };
-  const wordVariants: Variants = {
-    hidden: {opacity: 0, y: prefersReducedMotion ? 0 : 40},
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: prefersReducedMotion ? 0.18 : 0.9,
-        ease: [0.16, 1, 0.3, 1]
-      }
-    }
-  };
-  const copyVariants: Variants = {
-    hidden: {opacity: 0},
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: prefersReducedMotion ? 0.18 : 0.65,
-        ease: [0.16, 1, 0.3, 1]
-      }
-    }
-  };
+  const titleSizeClass = locale === 'ko' ? 'text-[clamp(15px,2.7vw,39px)]' : 'text-[clamp(36px,4.8vw,64px)]';
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-bg">
@@ -73,44 +39,22 @@ export function HomeHero({
         priority
         className="absolute inset-0 h-[110%] w-full"
       />
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-[1440px] items-end px-container pb-24 pt-32 md:pb-16">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          className="max-w-[920px] space-y-[12px] text-white [text-shadow:0_2px_20px_rgba(16,29,48,.34)]"
-        >
-          <motion.p
-            variants={copyVariants}
-            className="font-body text-[clamp(15px,1.08vw,19px)] font-medium uppercase tracking-[0.22em] text-accent"
-          >
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-[1440px] items-end px-[clamp(16px,2.6vw,42px)] pb-[clamp(84px,9vh,116px)] pt-32">
+        <div className="flex max-w-[920px] flex-col items-start gap-[clamp(12px,1.5vw,20px)] text-left text-white [text-shadow:0_2px_20px_rgba(16,29,48,.34)]">
+          <p className="font-body text-[clamp(9px,0.7vw,11px)] font-medium uppercase leading-[1.35] tracking-[0.2em] text-accent">
             {eyebrow}
-          </motion.p>
-          <motion.h1
-            variants={titleVariants}
-            className={`flex flex-col gap-[8px] font-heading ${titleSizeClass} ${titleWeightClass} leading-[1.08] tracking-normal`}
-          >
+          </p>
+          <h1 className={`flex max-w-full flex-col items-start gap-[clamp(8px,1vw,14px)] font-heading ${titleSizeClass} ${titleWeightClass} leading-[1.08] tracking-[0.01em]`}>
             {titleLines.map((line, lineIndex) => (
-              <span key={`${line}-${lineIndex}`} className="block overflow-visible whitespace-nowrap">
-                {line.split(' ').map((word, wordIndex, words) => (
-                  <span key={`${word}-${lineIndex}-${wordIndex}`} className="inline-block overflow-visible">
-                    <motion.span variants={wordVariants} className="inline-block">
-                      <span className={isNumericWord(word) ? 'home-hero__number' : undefined}>
-                        {word}
-                      </span>
-                      {wordIndex < words.length - 1 ? '\u00A0' : ''}
-                    </motion.span>
-                  </span>
-                ))}
+              <span key={`${line}-${lineIndex}`} className="block max-w-full overflow-visible whitespace-nowrap">
+                {line}
               </span>
             ))}
-          </motion.h1>
-          <motion.p
-            variants={copyVariants}
-            className="max-w-2xl whitespace-pre-line [font-family:'Cormorant_Garamond',serif] text-[clamp(22px,1.85vw,32px)] font-bold leading-tight"
-          >
+          </h1>
+          <p className="max-w-[880px] whitespace-pre-line [font-family:'Cormorant_Garamond',serif] text-[clamp(12px,1.17vw,18px)] font-bold uppercase leading-[1.35] tracking-[0.12em]">
             {subtitle}
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-6 z-10 flex justify-center pb-[env(safe-area-inset-bottom)]" aria-hidden="true">
         <div className="home-scroll-hint flex flex-col items-center gap-3 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-white [text-shadow:0_1px_14px_rgba(16,29,48,.38)]">

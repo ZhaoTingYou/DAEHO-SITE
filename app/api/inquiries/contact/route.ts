@@ -2,13 +2,25 @@ import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
 import {notifyInquiry} from '@/lib/cms/email';
-import {getRequestMeta, parseJsonBody, validationError} from '@/lib/cms/http';
+import {
+  getRequestMeta,
+  maxPublicJsonBodyBytes,
+  parseJsonBody,
+  rejectOversizedRequest,
+  validationError
+} from '@/lib/cms/http';
 import {createContactInquiry} from '@/lib/cms/repositories';
 import {contactInquirySchema} from '@/lib/cms/validation';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+  const oversized = rejectOversizedRequest(request, maxPublicJsonBodyBytes);
+
+  if (oversized) {
+    return oversized;
+  }
+
   const parsed = await parseJsonBody(request, contactInquirySchema);
 
   if (!parsed.success) {

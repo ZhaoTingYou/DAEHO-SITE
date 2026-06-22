@@ -5,6 +5,7 @@ import {createAdminTranslator, getContentLocaleLabel} from '@/lib/admin-i18n';
 import {locales, type Locale} from '@/lib/locales';
 import {
   CheckboxField,
+  ImageUploadField,
   SecondaryLink,
   SubmitButton,
   TextAreaField,
@@ -39,18 +40,27 @@ export function NewsForm({item, messages}: {item?: NewsItem; messages: Record<st
   const t = createAdminTranslator(messages);
 
   return (
-    <form action={saveNewsAction} className="grid gap-6">
+    <form action={saveNewsAction} encType="multipart/form-data" className="grid gap-6">
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
 
       <Panel className="p-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="news-slug" />
           <TextField label={t('form.category')} name="category" defaultValue={item?.category} required placeholder="making" />
-          <TextField label={t('form.imageFilename')} name="imagePath" defaultValue={item?.imagePath} placeholder="news_card_01.png" />
           <TextField label={t('form.publishedAt')} name="publishedAt" defaultValue={item?.publishedAt} placeholder="2026.00.00" />
           <TextField label={t('common.sortOrder')} name="sortOrder" type="number" defaultValue={item?.sortOrder ?? 0} />
           <CheckboxField label={t('form.featured')} name="isFeatured" defaultChecked={item?.isFeatured ?? false} />
           <CheckboxField label={t('form.visible')} name="isVisible" defaultChecked={item?.isVisible ?? true} />
+        </div>
+        <div className="mt-4">
+          <ImageUploadField
+            label={t('form.imageFilename')}
+            name="imagePath"
+            uploadName="imageUpload"
+            defaultValue={item?.imagePath}
+            uploadLabel={t('page.uploadLocalImage')}
+            uploadHint={t('page.uploadLocalImageHint')}
+          />
         </div>
       </Panel>
 
@@ -96,17 +106,21 @@ function TranslationPanel({
         <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required />
         <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
         <TextAreaField label={t('form.excerpt')} name={`${locale}.excerpt`} defaultValue={translation.excerpt} rows={3} />
-        <TextAreaField
-          label={t('form.bodyJson')}
-          name={`${locale}.body`}
-          defaultValue={formatJson(translation.body ?? {})}
-          rows={9}
-          placeholder='{"lead":"","paragraphs":[]}'
-        />
+        <TextAreaField label={t('form.lead')} name={`${locale}.body.lead`} defaultValue={newsBody(translation.body).lead} rows={3} />
+        <TextAreaField label={t('form.paragraphs')} name={`${locale}.body.paragraphs`} defaultValue={newsBody(translation.body).paragraphs.join('\n\n')} rows={8} />
+        <TextAreaField label={t('form.quote')} name={`${locale}.body.quote`} defaultValue={newsBody(translation.body).quote} rows={3} />
+        <TextField label={t('form.ctaTitle')} name={`${locale}.body.ctaTitle`} defaultValue={newsBody(translation.body).ctaTitle} />
         <TextField label={t('form.tags')} name={`${locale}.tags`} defaultValue={(translation.tags ?? []).join(', ')} placeholder="tag 1, tag 2" />
         <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
         <TextAreaField label={t('form.seoDescription')} name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
-        <TextField label={t('form.ogImage')} name={`${locale}.ogImagePath`} defaultValue={translation.ogImagePath} />
+        <ImageUploadField
+          label={t('form.ogImage')}
+          name={`${locale}.ogImagePath`}
+          uploadName={`${locale}.ogImageUpload`}
+          defaultValue={translation.ogImagePath}
+          uploadLabel={t('page.uploadLocalImage')}
+          uploadHint={t('page.uploadLocalImageHint')}
+        />
       </div>
     </Panel>
   );
@@ -116,6 +130,24 @@ function getTranslation(item: NewsItem | undefined, locale: Locale) {
   return (item?.translations[locale] ?? {}) as NewsTranslation;
 }
 
-function formatJson(value: unknown) {
-  return JSON.stringify(value ?? {}, null, 2);
+function newsBody(value: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {
+      lead: '',
+      paragraphs: [],
+      quote: '',
+      ctaTitle: ''
+    };
+  }
+
+  const body = value as Record<string, unknown>;
+
+  return {
+    lead: typeof body.lead === 'string' ? body.lead : '',
+    paragraphs: Array.isArray(body.paragraphs)
+      ? body.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === 'string')
+      : [],
+    quote: typeof body.quote === 'string' ? body.quote : '',
+    ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : ''
+  };
 }

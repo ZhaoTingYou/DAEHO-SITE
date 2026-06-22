@@ -2,7 +2,12 @@ import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
 import {requireAdmin} from '@/lib/cms/auth';
-import {parseJsonBody, validationError} from '@/lib/cms/http';
+import {
+  maxAdminJsonBodyBytes,
+  parseJsonBody,
+  rejectOversizedRequest,
+  validationError
+} from '@/lib/cms/http';
 import {createNews, listNews} from '@/lib/cms/repositories';
 import {newsPayloadSchema} from '@/lib/cms/validation';
 
@@ -23,6 +28,12 @@ export async function POST(request: NextRequest) {
 
   if (unauthorized) {
     return unauthorized;
+  }
+
+  const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
+
+  if (oversized) {
+    return oversized;
   }
 
   const parsed = await parseJsonBody(request, newsPayloadSchema);

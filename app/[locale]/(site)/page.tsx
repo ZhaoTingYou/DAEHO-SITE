@@ -131,7 +131,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
               </div>
             </Link>
 
-            <div className="space-y-[10px] lg:max-w-[260px] lg:justify-self-end lg:text-center">
+            <div className="space-y-[10px] lg:max-w-[260px] lg:justify-self-start lg:text-center">
               <p className="font-heading text-[20px] font-medium uppercase leading-[1.18] text-primary">
                 {currentPulse.secondaryTitle}
               </p>
@@ -202,9 +202,6 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         <div className="mx-auto max-w-[1240px] space-y-[clamp(32px,4vw,52px)] px-container">
           <Reveal className="border-t border-primary/20 pt-[clamp(26px,3vw,42px)]">
             <div className="max-w-[460px] space-y-[14px]">
-              <p className="font-heading text-[15px] font-medium uppercase leading-tight text-accent">
-                {latestNewsText.eyebrow}
-              </p>
               <h2 className="font-heading text-[clamp(24px,2.4vw,36px)] font-semibold leading-tight text-primary">
                 {latestNewsText.title}
               </h2>

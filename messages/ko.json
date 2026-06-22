@@ -542,8 +542,8 @@
     },
     "collection": {
       "hero": {
-        "eyebrow": "MASTERY · COLLECTION",
-        "title": "THE WORKS",
+        "eyebrow": "",
+        "title": "CREATION",
         "subtitle": "챔피언, 임관, 주문 제작의 형태를 밝은 갤러리 안에서 살펴봅니다.",
         "image": "specialty_collection_hero.png"
       },
@@ -689,7 +689,7 @@
   "news": {
     "masthead": {
       "title": "NEWS",
-      "issue": "DEAHO NEWS · 발행 2026",
+      "issue": "",
       "body": "프로젝트 스토리와 제작 현장, 언론/피처, 협업 소식을 한곳에 모읍니다.",
       "ticker": [
         "최신 제작 사례는 확인 자료가 도착하면 이 지면에 업데이트됩니다.",

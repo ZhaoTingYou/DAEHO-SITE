@@ -6,6 +6,7 @@ import {randomUUID} from 'node:crypto';
 const root = process.cwd();
 const dbPath = process.env.CMS_DB_PATH ?? path.join(root, 'data', 'cms.sqlite');
 const schemaPath = path.join(root, 'database', 'cms-schema.sql');
+const pageCatalog = JSON.parse(readFileSync(path.join(root, 'lib', 'cms', 'page-catalog.json'), 'utf8'));
 const ko = JSON.parse(readFileSync(path.join(root, 'messages', 'ko.json'), 'utf8'));
 const en = JSON.parse(readFileSync(path.join(root, 'messages', 'en.json'), 'utf8'));
 
@@ -23,20 +24,6 @@ seedMedia();
 console.log(`CMS database initialized: ${dbPath}`);
 
 function seedPages() {
-  const pageKeys = [
-    'metadata',
-    'home',
-    'chronicle',
-    'legacy',
-    'legacyPages',
-    'specialty',
-    'specialtyPages',
-    'news',
-    'golf',
-    'contact',
-    'forms',
-    'common'
-  ];
   const statement = db.prepare(`
     INSERT INTO cms_pages (
       page_key, section, sort_order, content_ko, content_en,
@@ -52,17 +39,40 @@ function seedPages() {
       updated_at = datetime('now')
   `);
 
-  pageKeys.forEach((key, index) => {
+  pageCatalog.forEach((page, index) => {
+    const contentKo = createPageContentFromCatalog(ko, page);
+    const contentEn = createPageContentFromCatalog(en, page);
+
     statement.run(
-      key,
-      'site',
-      index,
-      JSON.stringify(ko[key] ?? {}),
-      JSON.stringify(en[key] ?? {}),
-      JSON.stringify(key === 'metadata' ? ko.metadata ?? {} : {}),
-      JSON.stringify(key === 'metadata' ? en.metadata ?? {} : {})
+      page.pageKey,
+      page.section ?? 'site',
+      page.sortOrder ?? index,
+      JSON.stringify(contentKo),
+      JSON.stringify(contentEn),
+      JSON.stringify(createSeoFromContent(getPrimaryPageContent(contentKo), page)),
+      JSON.stringify(createSeoFromContent(getPrimaryPageContent(contentEn), page))
     );
   });
+}
+
+function createPageContentFromCatalog(messages, page) {
+  if (!Array.isArray(page.contentGroups) || page.contentGroups.length === 0) {
+    return readPath(messages, page.sourcePath) ?? {};
+  }
+
+  return {
+    __groups: Object.fromEntries(
+      page.contentGroups.map((group) => [group.key, readPath(messages, group.sourcePath) ?? {}])
+    )
+  };
+}
+
+function getPrimaryPageContent(content) {
+  if (content && typeof content === 'object' && content.__groups && typeof content.__groups === 'object') {
+    return content.__groups.main ?? Object.values(content.__groups)[0] ?? {};
+  }
+
+  return content;
 }
 
 function seedNews() {
@@ -278,4 +288,36 @@ function guessMime(filename) {
   }
 
   return 'application/octet-stream';
+}
+
+function readPath(value, pathValue) {
+  return pathValue.split('.').reduce((current, segment) => {
+    if (current == null) {
+      return undefined;
+    }
+
+    const key = Array.isArray(current) && /^\d+$/.test(segment) ? Number(segment) : segment;
+    return current[key];
+  }, value);
+}
+
+function createSeoFromContent(content, page) {
+  if (!content || typeof content !== 'object') {
+    return {
+      title: page.title,
+      description: '',
+      ogImagePath: ''
+    };
+  }
+
+  return {
+    title: readPath(content, 'hero.title') ?? content.title ?? page.title,
+    description:
+      readPath(content, 'hero.subtitle') ??
+      readPath(content, 'hero.body') ??
+      content.subtitle ??
+      content.notice ??
+      '',
+    ogImagePath: readPath(content, 'hero.image') ?? content.image ?? ''
+  };
 }

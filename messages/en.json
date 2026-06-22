@@ -542,8 +542,8 @@
     },
     "collection": {
       "hero": {
-        "eyebrow": "MASTERY · COLLECTION",
-        "title": "THE WORKS",
+        "eyebrow": "",
+        "title": "CREATION",
         "subtitle": "Championship, appointment, and bespoke forms are shown inside a bright gallery.",
         "image": "specialty_collection_hero.png"
       },
@@ -689,7 +689,7 @@
   "news": {
     "masthead": {
       "title": "NEWS",
-      "issue": "DEAHO NEWS · ISSUE 2026",
+      "issue": "",
       "body": "Project stories, workshop notes, press features, and collaborations gathered in one news field.",
       "ticker": [
         "New production cases will be updated here when verified materials arrive.",

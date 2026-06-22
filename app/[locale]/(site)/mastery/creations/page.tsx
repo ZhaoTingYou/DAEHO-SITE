@@ -35,15 +35,12 @@ export default async function CollectionPage({params}: Props) {
   return (
     <main className="bg-bg text-text">
       <section className="pt-28">
-        <div className="mx-auto max-w-[1180px] px-container pb-[clamp(44px,5vw,80px)] pt-[clamp(64px,7vw,112px)]">
-          <ScrollText className="mx-auto max-w-3xl space-y-5 text-center">
-            <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-subtext">
-              {content.hero.eyebrow}
-            </p>
-            <h1 className="font-heading text-[clamp(30px,3.4vw,44px)] font-semibold leading-[1.12] text-primary">
+        <div className="mx-auto max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)]">
+          <ScrollText className="mx-auto max-w-[720px] space-y-[18px] text-center">
+            <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </h1>
-            <p className="mx-auto max-w-2xl font-body text-[14px] leading-[1.85] text-text">
+            <p className="mx-auto max-w-xl font-heading text-[15px] font-semibold leading-[1.85] text-primary">
               {content.hero.subtitle}
             </p>
           </ScrollText>

@@ -2,7 +2,12 @@ import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
 import {requireAdmin} from '@/lib/cms/auth';
-import {parseJsonBody, validationError} from '@/lib/cms/http';
+import {
+  maxAdminJsonBodyBytes,
+  parseJsonBody,
+  rejectOversizedRequest,
+  validationError
+} from '@/lib/cms/http';
 import {deleteMedia, getMedia, updateMedia} from '@/lib/cms/repositories';
 import {mediaUpdateSchema} from '@/lib/cms/validation';
 
@@ -34,6 +39,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
   if (unauthorized) {
     return unauthorized;
+  }
+
+  const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
+
+  if (oversized) {
+    return oversized;
   }
 
   const parsed = await parseJsonBody(request, mediaUpdateSchema);
