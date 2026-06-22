@@ -360,13 +360,15 @@ export function SiteHeader({locale}: SiteHeaderProps) {
               {languageLinks.map((item, index) => (
                 <span key={item.locale} className="contents">
                   {index > 0 ? (
-                    <span className="opacity-40" aria-hidden="true">
+                    <span className={isHeroTransparent ? 'opacity-70' : 'opacity-40'} aria-hidden="true">
                       /
                     </span>
                   ) : null}
                   <Link
                     href={item.href}
-                    className={`site-nav-link no-underline ${locale === item.locale ? 'opacity-100' : 'opacity-60'}`}
+                    className={`site-nav-link no-underline ${
+                      locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-60'
+                    }`}
                     aria-current={locale === item.locale ? 'page' : undefined}
                   >
                     {item.label}
@@ -438,11 +440,11 @@ export function SiteHeader({locale}: SiteHeaderProps) {
           {languageLinks.map((item, index) => (
             <span key={item.locale} className="contents">
               {index > 0 ? (
-                <span className="opacity-35" aria-hidden="true">
+                <span className={isHeroTransparent ? 'opacity-70' : 'opacity-35'} aria-hidden="true">
                   /
                 </span>
               ) : null}
-              <Link href={item.href} className={locale === item.locale ? 'opacity-100' : 'opacity-55'}>
+              <Link href={item.href} className={locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-55'}>
                 {item.label}
               </Link>
             </span>

@@ -1,6 +1,3 @@
-import {existsSync} from 'node:fs';
-import path from 'node:path';
-
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {setRequestLocale} from 'next-intl/server';
@@ -35,42 +32,19 @@ export default async function HomePage({params}: Props) {
   const messages = getLocaleMessages(locale);
   const content = messages.home;
   const homeUi = messages.homeUi;
-  const heroVideo = getHomeHeroVideo();
   const latestNews: HomeNewsPopupCard[] = getHomeNewsCardsForSite(locale);
 
-  return <HomeContent content={content} heroVideo={heroVideo} homeUi={homeUi} latestNews={latestNews} locale={locale} />;
-}
-
-function getHomeHeroVideo() {
-  const videoDir = path.join(process.cwd(), 'public', 'videos');
-  const imageDir = path.join(process.cwd(), 'public', 'images');
-  const mp4Candidates = ['home_hero.mp4', 'home.mp4'];
-  const webmCandidates = ['home_hero.webm', 'home.webm'];
-  const posterCandidates = ['home_video_poster.jpg', 'home_video_poster.png'];
-  const mp4 = mp4Candidates.find((filename) => existsSync(path.join(videoDir, filename)));
-  const webm = webmCandidates.find((filename) => existsSync(path.join(videoDir, filename)));
-  const videoPoster = posterCandidates.find((filename) => existsSync(path.join(imageDir, filename)));
-
-  return {
-    videoSrc: mp4 ? `/videos/${mp4}` : undefined,
-    webmSrc: webm ? `/videos/${webm}` : undefined,
-    videoPoster
-  };
+  return <HomeContent content={content} homeUi={homeUi} latestNews={latestNews} locale={locale} />;
 }
 
 type HomeContentProps = {
   content: typeof koMessages.home;
   homeUi: typeof koMessages.homeUi;
-  heroVideo: {
-    videoSrc?: string;
-    webmSrc?: string;
-    videoPoster?: string;
-  };
   latestNews: HomeNewsPopupCard[];
   locale: Locale;
 };
 
-function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeContentProps) {
+function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
   const {currentPulse, latestNews: latestNewsText, partners} = homeUi;
 
   return (
@@ -79,10 +53,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         eyebrow={content.eyebrow}
         title={content.title}
         subtitle={content.subtitle}
-        poster={content.image}
-        videoPoster={heroVideo.videoPoster}
-        videoSrc={heroVideo.videoSrc}
-        webmSrc={heroVideo.webmSrc}
+        poster="home hero.png"
         locale={locale}
       />
 

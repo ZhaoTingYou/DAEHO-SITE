@@ -109,22 +109,34 @@ const golfShaftVisuals: Record<string, string> = {
 export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [selectedHeadId, setSelectedHeadId] = useState(content.heads.items[0]?.id ?? '');
-  const [selectedShaftId, setSelectedShaftId] = useState(content.shafts.items[0]?.id ?? '');
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
 
   const selectedHead = useMemo(
     () => content.heads.items.find((item) => item.id === selectedHeadId) ?? content.heads.items[0],
     [content.heads.items, selectedHeadId]
   );
-  const selectedShaft = useMemo(
-    () =>
-      content.shafts.items.find((item) => item.id === selectedShaftId) ??
-      content.shafts.items[0],
-    [content.shafts.items, selectedShaftId]
+  const selectedShaft = content.shafts.items[0];
+  const heroSlides = useMemo(
+    () => [
+      {
+        src: '/images/golf/golf1.png',
+        alt: content.hero.subtitle,
+        imageClass: 'object-contain object-center origin-center scale-[1.12]'
+      },
+      {
+        src: '/images/golf/\u1111\u1165\u1110\u1165.png',
+        alt: 'Putter golf bracelet',
+        imageClass: 'object-contain object-center origin-center scale-[0.88]'
+      },
+      {
+        src: '/images/golf/\u1103\u1173\u1105\u1161\u110b\u1175\u1107\u1165.png',
+        alt: 'Driver golf bracelet',
+        imageClass: 'object-contain object-center origin-center scale-[0.92]'
+      }
+    ],
+    [content.hero.subtitle]
   );
-  const selectedShaftIndex = Math.max(
-    0,
-    content.shafts.items.findIndex((item) => item.id === selectedShaft?.id)
-  );
+  const activeHeroSlide = heroSlides[heroSlideIndex] ?? heroSlides[0];
   const engravingSample = 'JUDY KIM 2026.05.03';
   const inquiryHref = `/${locale}/golf/inquiry?head=${selectedHead?.id ?? ''}&shaft=${selectedShaft?.id ?? ''}&engraving=${encodeURIComponent(engravingSample)}`;
   const labels = content.labels;
@@ -133,15 +145,8 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   const engravingTitleLines =
     locale === 'ko' ? [content.engraving.eyebrow, content.engraving.body] : [content.engraving.title];
   const engravingDetail = locale === 'ko' ? content.engraving.title : content.engraving.body;
-  const changeShaft = (direction: 1 | -1) => {
-    const items = content.shafts.items;
-
-    if (items.length === 0) {
-      return;
-    }
-
-    const nextIndex = (selectedShaftIndex + direction + items.length) % items.length;
-    setSelectedShaftId(items[nextIndex].id);
+  const changeHeroSlide = (direction: 1 | -1) => {
+    setHeroSlideIndex((current) => (current + direction + heroSlides.length) % heroSlides.length);
   };
 
   return (
@@ -160,33 +165,33 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
           <div className="relative mt-[clamp(30px,4vw,58px)] min-h-[clamp(300px,48vw,610px)]">
             <button
               type="button"
-              onClick={() => changeShaft(-1)}
+              onClick={() => changeHeroSlide(-1)}
               className="absolute left-0 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center text-white/62 transition duration-hover ease-brand hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              aria-label={labels.previousShaft}
+              aria-label={locale === 'ko' ? '이전 이미지' : 'Previous image'}
             >
               <ChevronIcon direction="left" />
             </button>
             <button
               type="button"
-              onClick={() => changeShaft(1)}
+              onClick={() => changeHeroSlide(1)}
               className="absolute right-0 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center text-white/62 transition duration-hover ease-brand hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              aria-label={labels.nextShaft}
+              aria-label={locale === 'ko' ? '다음 이미지' : 'Next image'}
             >
               <ChevronIcon direction="right" />
             </button>
 
             <motion.div
-              key={selectedShaft?.id ?? 'hero'}
-              initial={false}
+              key={activeHeroSlide.src}
+              initial={{opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : 12}}
               animate={{opacity: 1, y: 0}}
               transition={{duration: prefersReducedMotion ? 0 : 0.56, ease: [0.16, 1, 0.3, 1]}}
               className="absolute left-1/2 top-0 h-full w-[min(82vw,920px)] -translate-x-1/2"
             >
               <GolfStaticImage
-                src="/images/golf/golf1.png"
-                alt={content.hero.subtitle}
-                className="object-contain"
-                priority
+                src={activeHeroSlide.src}
+                alt={activeHeroSlide.alt}
+                className={activeHeroSlide.imageClass}
+                priority={heroSlideIndex === 0}
               />
             </motion.div>
           </div>
