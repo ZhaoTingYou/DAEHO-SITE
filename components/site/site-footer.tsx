@@ -23,23 +23,15 @@ type FooterGroup = {
   links: FooterLink[];
 };
 
+const showFooterExternalLinks = false;
+
 export function SiteFooter({locale}: SiteFooterProps) {
   const text = getLocaleMessages(locale).common;
   const navLabels = text.navigation.items;
   const externalLabels = text.footer.externalSites;
   const {business, legal} = text.footer;
   const contactLabel = text.navigation.contactCta;
-  const collectionCategoryLinks = locale === 'ko'
-    ? [
-        {label: '우승반지', href: '/mastery/creations/champion'},
-        {label: '임관반지', href: '/mastery/creations/appointment'},
-        {label: '주문제작', href: '/mastery/creations/bespoke'}
-      ]
-    : [
-        {label: 'Championship Rings', href: '/mastery/creations/champion'},
-        {label: 'Commission Rings', href: '/mastery/creations/appointment'},
-        {label: 'Custom Products', href: '/mastery/creations/bespoke'}
-      ];
+  const collectionCategoryLinks = text.footer.collectionCategoryLinks ?? [];
   const footerGroups: FooterGroup[] = [
     {
       heading: navLabels.chronicle,
@@ -71,7 +63,7 @@ export function SiteFooter({locale}: SiteFooterProps) {
       heading: navLabels.golf,
       href: '/golf',
       links: [
-        {label: locale === 'ko' ? '골프 문의' : 'Golf Inquiry', href: '/golf/inquiry'}
+        {label: text.footer.golfInquiry, href: '/golf/inquiry'}
       ]
     },
     {
@@ -96,16 +88,18 @@ export function SiteFooter({locale}: SiteFooterProps) {
           </div>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:border-l lg:border-hairline lg:pl-16">
-            <div>
-              <p className="footer-label">{text.footer.otherSites}</p>
-              <div className="mt-5 flex flex-wrap gap-x-7 gap-y-3">
-                <ExternalSiteLink label={externalLabels.daeho} href={externalLinks.daeho} className="footer-link" />
-                <ExternalSiteLink label={externalLabels.oh} href={externalLinks.oh} className="footer-link" />
-                <ExternalSiteLink label={externalLabels.vulcan} href={externalLinks.vulcan} className="footer-link" />
+            {showFooterExternalLinks ? (
+              <div>
+                <p className="footer-label">{text.footer.otherSites}</p>
+                <div className="mt-5 flex flex-wrap gap-x-7 gap-y-3">
+                  <ExternalSiteLink label={externalLabels.daeho} href={externalLinks.daeho} className="footer-link" />
+                  <ExternalSiteLink label={externalLabels.oh} href={externalLinks.oh} className="footer-link" />
+                  <ExternalSiteLink label={externalLabels.vulcan} href={externalLinks.vulcan} className="footer-link" />
+                </div>
               </div>
-            </div>
+            ) : null}
 
-            <div>
+            <div className={showFooterExternalLinks ? '' : 'sm:col-start-2'}>
               <p className="footer-label">{text.footer.locale}</p>
               <div className="mt-5 flex gap-5">
                 {locales.map((targetLocale) => (

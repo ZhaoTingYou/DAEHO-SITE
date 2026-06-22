@@ -77,7 +77,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
               <h3 className="font-heading text-[clamp(18px,1.35vw,22px)] font-semibold leading-tight text-primary">
                 {card.title}
               </h3>
-              <span className="w-fit border-b border-primary/30 pb-1 [font-family:'Pretendard',sans-serif] text-[13px] font-normal leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent">
+              <span className="w-fit border-b border-primary/30 pb-1 [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent">
                 {text.open}
               </span>
             </div>
@@ -136,7 +136,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                     {activeCard.title}
                   </h3>
                 </div>
-                <p className="font-body text-[13px] leading-7 text-text">
+                <p className="font-body text-[15px] leading-7 text-text">
                   {text.body}
                 </p>
               </div>

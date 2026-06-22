@@ -522,7 +522,7 @@ function BespokeCreationsView({
           </Link>
 
           <div className="mt-[clamp(34px,6vw,88px)] grid gap-8 md:grid-cols-[minmax(140px,0.34fr)_1fr_minmax(180px,0.34fr)] md:items-end">
-            <p className="font-numeric text-[13px] font-semibold uppercase tracking-[0.14em] text-primary/65">
+            <p className="font-numeric text-[15px] font-semibold uppercase tracking-[0.14em] text-primary/65">
               {copy.period}
             </p>
             <div className="space-y-4 text-center md:space-y-5">
@@ -530,7 +530,7 @@ function BespokeCreationsView({
                 {copy.collectionTitle}
               </h1>
               <div className="mx-auto h-px w-12 bg-accent/70" />
-              <p className="font-body text-[13px] font-semibold uppercase tracking-[0.22em] text-primary/65">
+              <p className="font-body text-[15px] font-semibold uppercase tracking-[0.22em] text-primary/65">
                 {activeLabel}
               </p>
             </div>
@@ -760,7 +760,7 @@ function BespokeCanvasChapterCard({copy}: {copy: BespokeViewCopy}) {
   return (
     <div className="col-span-2 grid min-h-[260px] place-items-center bg-white px-8 py-10 text-center shadow-[0_16px_34px_rgba(16,29,48,.08)] md:absolute md:left-1/2 md:top-[840px] md:h-[320px] md:w-[430px] md:-translate-x-1/2">
       <div className="space-y-5">
-        <p className="font-numeric text-[13px] font-semibold uppercase tracking-[0.16em] text-primary">
+        <p className="font-numeric text-[15px] font-semibold uppercase tracking-[0.16em] text-primary">
           {copy.archiveChapterPeriod}
         </p>
         <h2 className="font-heading text-[clamp(32px,3.6vw,54px)] font-semibold uppercase leading-[0.98] text-primary">
@@ -918,7 +918,7 @@ function BespokeCreationCard({
           <p className="font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">
             {item.categoryLabel}
           </p>
-          <p className="font-body text-[13px] leading-6 text-subtext">{item.caption}</p>
+          <p className="font-body text-[15px] leading-6 text-subtext">{item.caption}</p>
         </div>
         <p className="font-numeric text-[12px] font-semibold tracking-[0.12em] text-primary/45">
           {String(index + 1).padStart(2, '0')}
@@ -1367,7 +1367,7 @@ function AppointmentCollectionView({
                   <h3 className="font-heading text-[clamp(24px,3vw,34px)] font-semibold leading-tight text-primary">
                     {item.title}
                   </h3>
-                  <p className="font-body text-[13px] leading-7 text-subtext">{item.caption}</p>
+                  <p className="font-body text-[15px] leading-7 text-subtext">{item.caption}</p>
                 </div>
               </Link>
             </motion.article>
@@ -1740,7 +1740,7 @@ function FilterOptionButton({
     <button
       type="button"
       onClick={onClick}
-      className={`group flex min-h-12 w-full items-center gap-4 text-left font-body text-[13px] transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+      className={`group flex min-h-12 w-full items-center gap-4 text-left font-body text-[15px] transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
         active ? 'text-primary' : 'text-text hover:text-primary'
       }`}
       aria-pressed={active}

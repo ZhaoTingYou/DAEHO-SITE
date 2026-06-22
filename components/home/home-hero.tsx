@@ -81,7 +81,7 @@ export function HomeHero({
         >
           <motion.p
             variants={copyVariants}
-            className="font-body text-[clamp(13px,1vw,18px)] font-semibold uppercase tracking-[0.22em] text-accent"
+            className="font-body text-[clamp(15px,1vw,18px)] font-semibold uppercase tracking-[0.22em] text-accent"
           >
             {eyebrow}
           </motion.p>

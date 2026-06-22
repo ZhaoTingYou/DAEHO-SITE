@@ -104,7 +104,7 @@ export default async function CollectionDetailPage({params}: Props) {
                 </div>
                 <div className="space-y-1">
                   {specs.map(([label, value]) => (
-                    <div key={label} className="grid grid-cols-[0.8fr_1.2fr] gap-5 border-t border-hairline py-4 font-body text-[13px]">
+                    <div key={label} className="grid grid-cols-[0.8fr_1.2fr] gap-5 border-t border-hairline py-4 font-body text-[15px]">
                       <span className="font-semibold uppercase tracking-[0.16em] text-subtext">{label}</span>
                       <span className="text-right text-primary">{value}</span>
                     </div>

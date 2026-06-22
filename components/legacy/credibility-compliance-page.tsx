@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {withLocale} from '@/lib/site-map';
@@ -180,64 +181,48 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
 
   return (
     <main className="bg-white text-primary">
-      <section className="grid min-h-[100svh] place-items-center bg-white py-24">
-        <div className="mx-auto max-w-3xl px-container text-center">
-          <Reveal className="flex flex-col items-center text-[#252525]">
-            <p className={`${englishTextClass} mb-[50px] text-[15px] uppercase leading-none text-accent`}>
-              {copy.heroLabel}
-            </p>
-            <h1 className={`${englishTextClass} mb-[15px] text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
-              {copy.heroTitle}
-            </h1>
-            <p className={`${bodyTextClass} mx-auto max-w-[560px] text-[15px] leading-[1.85] text-[#252525]`}>
-              {copy.intro}
-            </p>
-          </Reveal>
-        </div>
-      </section>
+      <HeritageHero
+        body={copy.intro}
+        imagePlaceholder={copy.imagePlaceholder}
+        label={copy.heroLabel}
+        locale={locale}
+        title={copy.heroTitle}
+      />
 
-      <section className="bg-white pb-4">
-        <div className="px-container">
-          <p className={`${bodyTextClass} text-[15px] leading-none text-[#252525]`}>
-            {copy.imagePlaceholder}
-          </p>
-        </div>
-      </section>
-
-      <section className="bg-white py-[clamp(100px,12vw,174px)]">
-        <Reveal className="mx-auto max-w-4xl px-container text-center text-primary">
-          <p className={`${englishTextClass} text-[clamp(58px,7vw,92px)] leading-none text-black`}>“</p>
-          <p className={`${englishTextClass} mt-7 text-[clamp(24px,2.4vw,34px)] italic leading-tight text-primary`}>
+      <section className="bg-white py-[clamp(108px,12vw,176px)]">
+        <Reveal className="mx-auto max-w-[760px] px-container text-center text-primary">
+          <div className="mx-auto mb-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
+          <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
             {copy.quoteTitle}
           </p>
-          <p className={`${bodyTextClass} mt-4 text-[clamp(27px,3vw,43px)] leading-tight text-primary`}>
+          <p className={`${bodyTextClass} mt-[14px] text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
             {copy.quoteBody}
           </p>
-          <p className={`${englishTextClass} mt-7 text-[clamp(58px,7vw,92px)] leading-none text-black`}>”</p>
+          <div className="mx-auto mt-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
         </Reveal>
       </section>
 
-      <section className="bg-white px-container pb-[clamp(96px,10vw,150px)]">
-        <div className="mx-auto max-w-[1180px] bg-white px-7 py-8 md:px-16 md:py-12 lg:px-20">
+      <section className="bg-white px-container pb-[clamp(104px,10vw,154px)]">
+        <div className="mx-auto max-w-[1120px] bg-white">
           {copy.rows.map((row, index) => (
             <Reveal
               key={row.title}
-              className={`grid gap-8 py-14 md:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] md:items-center md:gap-10 lg:gap-12 ${
-                index === 0 ? 'pt-4' : ''
-              } ${index < copy.rows.length - 1 ? 'border-b border-[#b65c55]/70' : 'pb-4'}`}
+              className={`grid gap-[clamp(28px,4vw,52px)] py-[clamp(42px,5vw,66px)] md:grid-cols-[minmax(0,1fr)_minmax(240px,310px)] md:items-center ${
+                index < copy.rows.length - 1 ? 'border-b border-[#b65c55]/45' : ''
+              }`}
             >
               <div className="max-w-[620px]">
-                <h2 className="[font-family:'MaruBuri',serif] text-[32px] font-semibold leading-tight tracking-normal text-primary">
+                <h2 className="[font-family:'MaruBuri',serif] text-[clamp(27px,2.5vw,32px)] font-semibold leading-[1.22] tracking-normal text-primary">
                   <span>{row.number}</span>
                   {' '}
                   <span>{row.title}</span>
                 </h2>
-                <p className="mt-[10px] [font-family:'Pretendard',sans-serif] text-[20px] font-normal leading-tight text-accent">
+                <p className="mt-[10px] [font-family:'Pretendard',sans-serif] text-[clamp(18px,1.55vw,20px)] font-normal leading-[1.35] text-accent">
                   {row.accent}
                 </p>
-                <div className="mt-[15px] space-y-4">
+                <div className="mt-[18px] space-y-[14px]">
                   {row.paragraphs.map((paragraph) => (
-                    <p key={paragraph} className="[font-family:'Pretendard',sans-serif] text-[13px] font-normal leading-[1.78] text-[#111827]">
+                    <p key={paragraph} className="[font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-[1.82] text-[#111827]">
                       {paragraph}
                     </p>
                   ))}
@@ -250,9 +235,9 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
         </div>
       </section>
 
-      <section className="bg-white py-[clamp(96px,11vw,168px)]">
+      <section className="bg-white py-[clamp(104px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className="[font-family:'MaruBuri',serif] text-[32px] font-semibold leading-tight text-primary">
+          <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
             {copy.discoverLead}
           </p>
           <Link

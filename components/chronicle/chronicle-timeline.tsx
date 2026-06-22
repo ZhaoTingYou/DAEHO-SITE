@@ -171,7 +171,7 @@ function MilestoneEntry({
                           {text.title} · {item.year}
                         </p>
                         <p className="mt-3 font-body text-[14px] leading-7 text-text">{item.body}</p>
-                        <p className="mt-3 font-body text-[13px] leading-6 text-subtext">{text.next}</p>
+                        <p className="mt-3 font-body text-[15px] leading-6 text-subtext">{text.next}</p>
                         <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-hairline pt-4 font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-subtext">
                           {previousYear ? (
                             <span>

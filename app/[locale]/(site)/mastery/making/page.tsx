@@ -40,21 +40,21 @@ export default async function TechniquePage({params}: Props) {
   return (
     <main className="relative isolate overflow-hidden bg-white text-text">
       <section className="relative z-10 pt-28">
-        <div className="mx-auto max-w-[1280px] px-container pb-[clamp(72px,8vw,128px)] pt-[clamp(64px,8vw,120px)]">
-          <ScrollText className="mx-auto max-w-3xl space-y-6 text-center">
+        <div className="mx-auto max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)]">
+          <ScrollText className="mx-auto max-w-[720px] space-y-[18px] text-center">
             {content.hero.eyebrow ? (
-              <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-subtext">
+              <p className="font-body text-[15px] font-semibold uppercase leading-none tracking-[0.24em] text-subtext">
                 {content.hero.eyebrow}
               </p>
             ) : null}
-            <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(36px,3.4vw,52px)] font-bold uppercase leading-none tracking-normal text-accent">
+            <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </h1>
-            <p className="mx-auto max-w-xl font-heading text-[14px] font-semibold leading-[1.85] text-primary">
+            <p className="mx-auto max-w-xl font-heading text-[15px] font-semibold leading-[1.85] text-primary">
               {content.hero.subtitle}
             </p>
           </ScrollText>
-          <Reveal className="mx-auto mt-[clamp(48px,6vw,88px)] w-full max-w-[1180px] bg-white/82 p-3 shadow-[0_24px_90px_rgba(16,29,48,0.08)] backdrop-blur-[2px]">
+          <Reveal className="mx-auto mt-[clamp(52px,6vw,88px)] w-full max-w-[1120px] border border-primary/12 bg-white p-2">
             <SafeImage
               filename={content.hero.image}
               alt={content.hero.subtitle}
@@ -66,7 +66,7 @@ export default async function TechniquePage({params}: Props) {
         </div>
       </section>
 
-      <section className="relative z-10 pb-[clamp(48px,5vw,80px)] pt-section">
+      <section className="relative z-10 py-[clamp(78px,8vw,122px)]">
         <div className="mx-auto max-w-[1180px] px-container">
           <ScrollText>
             <SectionIntro
@@ -82,8 +82,8 @@ export default async function TechniquePage({params}: Props) {
 
       <SpecialtyProcess steps={processSteps} />
 
-      <section className="relative z-10 py-section">
-        <div className="mx-auto max-w-[1180px] space-y-[clamp(56px,6vw,88px)] px-container">
+      <section className="relative z-10 py-[clamp(86px,9vw,138px)]">
+        <div className="mx-auto max-w-[1120px] space-y-[clamp(54px,6vw,82px)] px-container">
           <ScrollText>
             <SectionIntro
               eyebrow={content.details.eyebrow}
@@ -97,17 +97,17 @@ export default async function TechniquePage({params}: Props) {
         </div>
       </section>
 
-      <section className="relative z-10 py-section">
+      <section className="relative z-10 py-[clamp(104px,11vw,168px)]">
         <div className="mx-auto max-w-3xl px-container text-center">
-          <ScrollText className="space-y-7">
-            <h2 className="font-heading text-[clamp(26px,2.5vw,38px)] font-semibold leading-tight text-primary">
-              대호의 메이킹 보러가기
+          <ScrollText className="space-y-[18px]">
+            <h2 className="font-heading text-[clamp(28px,2.7vw,38px)] font-semibold leading-[1.25] text-primary">
+              {content.bespoke.title}
             </h2>
             <Link
-              href={withLocale(locale, '/mastery/making')}
-              className="link-sweep inline-flex font-body text-[14px] font-semibold uppercase leading-[19px] tracking-[0.2em] text-accent"
+              href={withLocale(locale, '/mastery/creations')}
+              className="link-sweep inline-flex font-body text-[15px] font-semibold uppercase leading-[19px] tracking-[0.2em] text-accent"
             >
-              DISCOVER MORE
+              {content.bespoke.cta}
             </Link>
           </ScrollText>
         </div>

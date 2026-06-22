@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {DraggableScroll} from '@/components/draggable-scroll';
 import type {HomeStatBandItem} from '@/components/home/home-stat-band';
 import {AnimatedStatScope, AnimatedStatValue} from '@/components/legacy/animated-stat-value';
+import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal, RevealItem} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {withLocale} from '@/lib/site-map';
@@ -253,59 +254,39 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
 
   return (
     <main className="bg-bg text-primary">
-      <section className="grid min-h-[100svh] place-items-center bg-bg py-24">
-        <div className="mx-auto max-w-3xl px-container text-center">
-          <Reveal className="flex flex-col items-center text-[#252525]">
-            <p className={`${englishTextClass} mb-[50px] text-[15px] uppercase leading-none text-accent`}>
-              {copy.heroLabel}
-            </p>
-            <h1 className={`${englishTextClass} mb-[15px] text-[clamp(30px,3.4vw,44px)] uppercase leading-none text-primary`}>
-              {copy.heroTitle}
-            </h1>
-            <div className="mx-auto max-w-[520px] space-y-1.5">
-              {copy.introLines.map((line) => (
-                <p key={line} className={`${bodyTextClass} text-[15px] leading-[1.65] text-[#252525]`}>
-                  {line}
-                </p>
-              ))}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="bg-bg pb-4">
-        <div className="px-container">
-          <p className={`${bodyTextClass} text-[15px] leading-none text-[#252525]`}>
-            {copy.imagePlaceholder}
-          </p>
-        </div>
-      </section>
+      <HeritageHero
+        imagePlaceholder={copy.imagePlaceholder}
+        label={copy.heroLabel}
+        lines={copy.introLines}
+        locale={locale}
+        title={copy.heroTitle}
+      />
 
       <section className="bg-[#62302F] py-[clamp(84px,9vw,132px)] text-[#F4E6E1]">
         <AchievementPentagonStats items={copy.statBand} locale={locale} />
       </section>
 
-      <section className="bg-[#f4efe6] py-[clamp(100px,12vw,174px)]">
-        <Reveal className="mx-auto max-w-4xl px-container text-center text-primary">
-          <p className={`${englishTextClass} text-[clamp(58px,7vw,92px)] leading-none text-black`}>“</p>
-          <p className={`${englishTextClass} mt-7 text-[clamp(24px,2.4vw,34px)] italic leading-tight text-primary`}>
+      <section className="bg-[#f4efe6] py-[clamp(108px,12vw,176px)]">
+        <Reveal className="mx-auto max-w-[760px] px-container text-center text-primary">
+          <div className="mx-auto mb-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
+          <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
             {copy.quoteTitle}
           </p>
-          <p className={`${bodyTextClass} mt-4 text-[clamp(24px,2.8vw,40px)] leading-tight text-primary`}>
+          <p className={`${bodyTextClass} mt-[14px] text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
             {copy.quoteBody}
           </p>
-          <p className={`${englishTextClass} mt-7 text-[clamp(58px,7vw,92px)] leading-none text-black`}>”</p>
+          <div className="mx-auto mt-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
         </Reveal>
       </section>
 
-      <section className="bg-bg px-container py-[clamp(96px,11vw,160px)]">
+      <section className="bg-bg px-container py-[clamp(104px,11vw,164px)]">
         <div className="mx-auto max-w-[1120px]">
           <Reveal className="text-center">
-            <h2 className={`${englishTextClass} text-[clamp(28px,3vw,42px)] uppercase leading-none text-primary`}>
+            <h2 className={`${englishTextClass} text-[clamp(25px,2.55vw,38px)] uppercase leading-none tracking-[0.04em] text-primary`}>
               {copy.firstTitle}
             </h2>
           </Reveal>
-          <Reveal className="mt-16 grid gap-12 text-center md:grid-cols-3">
+          <Reveal className="mt-[clamp(54px,6vw,78px)] grid gap-12 text-center md:grid-cols-3">
             {copy.firstRecords.map((record) => (
               <RevealItem key={record.title}>
                 <article>
@@ -318,10 +299,10 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
                       className="object-cover opacity-0"
                     />
                   </div>
-                  <h3 className={`${englishTextClass} mt-8 whitespace-pre-line text-[13px] uppercase leading-[1.18] text-primary`}>
+                  <h3 className={`${englishTextClass} mt-8 whitespace-pre-line text-[15px] uppercase leading-[1.18] tracking-[0.04em] text-primary`}>
                     {record.title}
                   </h3>
-                  <p className={`${bodyTextClass} mt-2 text-[13px] leading-tight text-primary`}>
+                  <p className={`${bodyTextClass} mt-2 text-[15px] leading-tight text-primary`}>
                     {record.body}
                   </p>
                 </article>
@@ -331,16 +312,16 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </div>
       </section>
 
-      <section className="bg-[#f4efe6] px-container py-[clamp(112px,12vw,178px)]">
+      <section className="bg-[#f4efe6] px-container py-[clamp(116px,12vw,182px)]">
         <div className="mx-auto max-w-[980px]">
           <Reveal className="mx-auto max-w-[680px] text-center">
-            <p className={`${englishTextClass} text-[15px] uppercase leading-none text-accent`}>
+            <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
               {copy.marketLabel}
             </p>
-            <h2 className={`${bodyTextClass} mt-3 text-[clamp(28px,2.75vw,40px)] leading-tight text-primary`}>
+            <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(29px,2.7vw,40px)] leading-[1.25] text-primary`}>
               {copy.marketTitle}
             </h2>
-            <p className={`${bodyTextClass} mt-7 whitespace-pre-line text-[15px] leading-[1.74] text-[#252525]`}>
+            <p className={`${bodyTextClass} mt-[26px] whitespace-pre-line text-[15px] leading-[1.82] text-[#252525]`}>
               {copy.marketIntro}
             </p>
           </Reveal>
@@ -364,12 +345,12 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </div>
       </section>
 
-      <section className="overflow-hidden bg-bg py-[clamp(92px,10vw,150px)]">
+      <section className="overflow-hidden bg-bg py-[clamp(100px,10vw,154px)]">
         <Reveal className="px-container text-center">
-          <p className={`${englishTextClass} text-[12px] uppercase leading-none text-accent`}>
+          <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
             {copy.archiveLabel}
           </p>
-          <h2 className={`${bodyTextClass} mt-3 text-[clamp(27px,3vw,42px)] leading-tight text-primary`}>
+          <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
             {copy.archiveTitle}
           </h2>
         </Reveal>
@@ -397,9 +378,9 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </Reveal>
       </section>
 
-      <section className="bg-bg py-[clamp(96px,11vw,168px)]">
+      <section className="bg-bg py-[clamp(104px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className="[font-family:'MaruBuri',serif] text-[32px] font-semibold leading-tight text-primary">
+          <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
             {copy.discoverLead}
           </p>
           <Link
@@ -660,15 +641,15 @@ function MarketText({item, locale}: {item: MarketFeature; locale: Locale}) {
       <p className={`${englishTextClass} text-[clamp(36px,4.2vw,58px)] leading-none text-primary`}>
         {item.value}
       </p>
-      <h3 className={`${englishTextClass} mt-3 whitespace-pre-line text-[18px] uppercase leading-[1.05] text-primary`}>
+      <h3 className={`${englishTextClass} mt-3 whitespace-pre-line text-[18px] uppercase leading-[1.08] tracking-[0.04em] text-primary`}>
         {item.title}
       </h3>
-      <p className={`${bodyTextClass} mt-7 whitespace-pre-line text-[15px] leading-[1.58] text-accent`}>
+      <p className={`${bodyTextClass} mt-6 whitespace-pre-line text-[15px] leading-[1.62] text-accent`}>
         {item.accent}
       </p>
-      <div className="mt-7 space-y-4">
+      <div className="mt-6 space-y-[14px]">
         {item.paragraphs.map((paragraph) => (
-          <p key={paragraph} className={`${bodyTextClass} text-[14px] leading-[1.74] text-[#252525]`}>
+          <p key={paragraph} className={`${bodyTextClass} text-[15px] leading-[1.82] text-[#252525]`}>
             {paragraph}
           </p>
         ))}

@@ -36,6 +36,10 @@ type NewsJournalGridProps = {
 
 export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: NewsJournalGridProps) {
   const [activeFilter, setActiveFilter] = useState(filters[0]?.id ?? 'all');
+  const titleTextClass = locale === 'ko'
+    ? "[font-family:'MaruBuri',serif] font-semibold"
+    : "[font-family:'Cormorant_Garamond',serif] font-bold";
+  const bodyTextClass = "[font-family:'Pretendard',sans-serif] font-normal";
   const visibleCards = useMemo(
     () => (activeFilter === 'all' ? cards : cards.filter((card) => card.category === activeFilter)),
     [activeFilter, cards]
@@ -43,9 +47,9 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
 
   return (
     <LayoutGroup>
-      <div className="space-y-8">
+      <div className="space-y-[clamp(32px,4vw,54px)]">
         <div
-          className="-mx-container flex gap-3 overflow-x-auto px-container pb-2 [scroll-snap-type:x_mandatory] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0"
+          className="-mx-container flex gap-3 overflow-x-auto border-y border-primary/15 px-container py-3 [scroll-snap-type:x_mandatory] md:mx-0 md:flex-wrap md:gap-2 md:overflow-visible md:px-0"
           aria-label={filterLabel}
         >
           {filters.map((filter) => {
@@ -57,10 +61,10 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`relative min-h-11 shrink-0 cursor-pointer border px-4 py-3 font-body text-[12px] font-semibold uppercase tracking-[0.12em] transition duration-hover ease-brand [scroll-snap-align:start] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
+                className={`relative min-h-11 shrink-0 cursor-pointer border px-5 py-3 ${bodyTextClass} text-[15px] leading-none tracking-normal transition duration-hover ease-brand [scroll-snap-align:start] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
                   isActive
-                    ? 'border-primary/30 bg-white text-primary'
-                    : 'border-hairline bg-white/70 text-subtext hover:border-primary/30 hover:text-primary'
+                    ? 'border-primary/35 bg-white text-primary'
+                    : 'border-transparent bg-transparent text-subtext hover:border-primary/25 hover:text-primary'
                 }`}
               >
                 {filter.label}
@@ -79,7 +83,7 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
         {visibleCards.length === 0 ? (
           <EmptyState title={empty.title} body={empty.body} />
         ) : (
-          <motion.div layout className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <motion.div layout className="grid gap-x-[clamp(24px,2.4vw,34px)] gap-y-[clamp(42px,5vw,66px)] md:grid-cols-2 xl:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {visibleCards.map((card, index) => (
                 <motion.article
@@ -93,7 +97,7 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
                     delay: Math.min(index * 0.04, 0.18),
                     ease: [0.16, 1, 0.3, 1]
                   }}
-                  className="bg-white p-3 shadow-[0_16px_48px_rgba(16,29,48,0.055)] transition duration-hover ease-brand hover:-translate-y-1.5 hover:shadow-[0_30px_86px_rgba(16,29,48,0.11)]"
+                  className="border-t border-primary/18 bg-transparent pt-[clamp(14px,1.6vw,22px)] transition duration-hover ease-brand hover:-translate-y-1"
                 >
                   <Link
                     href={`/${locale}/news/${card.id}`}
@@ -105,19 +109,19 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
                         <NewsCardImage card={card} />
                       </div>
                     </div>
-                    <div className="space-y-4 px-1 py-5">
+                    <div className="px-0 py-[20px]">
                       <motion.div
                         initial={{opacity: 0, y: 8}}
                         whileInView={{opacity: 1, y: 0}}
                         viewport={{once: true, amount: 0.4}}
                         transition={{duration: 0.36, delay: 0.15, ease: [0.16, 1, 0.3, 1]}}
-                        className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-subtext"
+                        className={`${bodyTextClass} flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] leading-none text-subtext`}
                       >
                         <span className="text-accent">{card.categoryLabel}</span>
                         <span className="h-3 w-px bg-hairline" aria-hidden="true" />
                         <span>{card.date}</span>
                       </motion.div>
-                      <h3 className="font-heading text-[clamp(23px,2.2vw,31px)] font-semibold leading-tight text-primary">
+                      <h3 className={`${titleTextClass} mt-[12px] text-[clamp(20px,1.7vw,24px)] leading-[1.3] text-primary`}>
                         {card.title}
                       </h3>
                     </div>
@@ -136,7 +140,7 @@ function NewsCardImage({card}: {card: NewsCard}) {
   if (!card.hasImage) {
     return (
       <div
-        className="flex aspect-[3/2] w-full items-center justify-center break-all border border-hairline bg-bg p-5 text-center font-body text-xs font-semibold leading-5 tracking-[0.06em] text-subtext"
+        className="flex aspect-[4/3] w-full items-center justify-center break-all border border-hairline bg-bg p-5 text-center [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-5 tracking-normal text-subtext"
         role="img"
         aria-label={card.image}
       >
@@ -146,7 +150,7 @@ function NewsCardImage({card}: {card: NewsCard}) {
   }
 
   return (
-    <div className="relative aspect-[3/2] w-full overflow-hidden bg-bg">
+    <div className="relative aspect-[4/3] w-full overflow-hidden bg-bg">
       <Image
         src={`/images/${card.image}`}
         alt={`${card.categoryLabel} ${card.title}`}

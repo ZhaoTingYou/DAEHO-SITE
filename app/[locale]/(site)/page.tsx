@@ -95,7 +95,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
               </h2>
               <Link
                 href={withLocale(locale, '/heritage/loyalty')}
-                className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[13px] leading-none transition duration-hover ease-brand"
+                className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none transition duration-hover ease-brand"
               >
                 {currentPulse.primaryCta}
               </Link>
@@ -137,7 +137,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
               </p>
               <Link
                 href={withLocale(locale, '/news')}
-                className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[13px] leading-none transition duration-hover ease-brand"
+                className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none transition duration-hover ease-brand"
               >
                 {currentPulse.secondaryCta}
               </Link>
@@ -150,14 +150,14 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         <div className="mx-auto grid w-full max-w-[1320px] items-center gap-[clamp(40px,4.2vw,68px)] px-container lg:grid-cols-[minmax(280px,0.28fr)_minmax(0,0.72fr)]">
           <Reveal className="mx-auto max-w-[400px] space-y-5 lg:mx-0">
             <div className="space-y-3">
-              <p className="font-heading text-[13px] font-medium uppercase leading-tight text-accent">
+              <p className="font-heading text-[15px] font-medium uppercase leading-tight text-accent">
                 {content.signature.eyebrow}
               </p>
               <h2 className="whitespace-nowrap font-heading text-[20px] font-semibold leading-tight text-primary">
                 {content.signature.title}
               </h2>
             </div>
-            <p className="max-w-[410px] whitespace-pre-line font-body text-[clamp(13px,0.95vw,15px)] leading-[1.9] text-text">
+            <p className="max-w-[410px] whitespace-pre-line font-body text-[clamp(15px,0.95vw,15px)] leading-[1.9] text-text">
               {content.signature.body}
             </p>
           </Reveal>
@@ -183,7 +183,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
                     <h3 className="font-heading text-[clamp(19px,1.25vw,24px)] font-semibold leading-tight text-primary">
                       {item.title}
                     </h3>
-                    <p className="whitespace-pre-line font-heading text-[clamp(11px,0.72vw,13px)] font-medium uppercase leading-[1.08] text-primary">
+                    <p className="whitespace-pre-line font-heading text-[clamp(11px,0.72vw,15px)] font-medium uppercase leading-[1.08] text-primary">
                       {item.caption}
                     </p>
                   </div>
