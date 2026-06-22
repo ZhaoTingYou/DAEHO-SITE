@@ -55,26 +55,26 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
 
   return (
     <>
-      <div className="grid items-stretch gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid items-stretch gap-[clamp(22px,2vw,32px)] md:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <button
             key={card.id}
             type="button"
             onClick={() => setActiveCard(card)}
-            className="group grid h-full cursor-pointer grid-rows-[auto_1fr] bg-bg p-3 text-left shadow-[0_16px_54px_rgba(16,29,48,0.055)] transition duration-hover ease-brand hover:-translate-y-1 hover:shadow-[0_24px_78px_rgba(16,29,48,0.10)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+            className="group grid h-full cursor-pointer grid-rows-[auto_1fr] border-t border-primary/15 bg-transparent pt-4 text-left transition duration-hover ease-brand hover:-translate-y-1 hover:border-accent/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           >
             <div className="hover-zoom">
               <div className="hover-zoom-media">
                 <NewsImage card={card} />
               </div>
             </div>
-            <div className="grid min-h-[166px] grid-rows-[auto_1fr_auto] gap-3 px-1 py-4">
-              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[10px] font-semibold uppercase tracking-[0.15em] text-subtext">
+            <div className="grid min-h-[176px] grid-rows-[auto_1fr_auto] gap-4 py-4">
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[15px] font-medium uppercase tracking-[0.08em] text-subtext">
                 <span className="text-accent">{card.categoryLabel}</span>
                 <span className="h-3 w-px bg-hairline" aria-hidden="true" />
                 <span>{card.date}</span>
               </p>
-              <h3 className="font-heading text-[clamp(18px,1.35vw,22px)] font-semibold leading-tight text-primary">
+              <h3 className="font-heading text-[clamp(20px,1.55vw,25px)] font-semibold leading-[1.2] text-primary">
                 {card.title}
               </h3>
               <span className="w-fit border-b border-primary/30 pb-1 [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent">
@@ -124,7 +124,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
 
               <div className="flex flex-col justify-start gap-6 px-2 pb-2 pt-14 md:px-8 md:py-10">
                 <div className="space-y-4">
-                  <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[10px] font-semibold uppercase tracking-[0.16em] text-subtext">
+                  <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[15px] font-medium uppercase tracking-[0.08em] text-subtext">
                     <span className="text-accent">{activeCard.categoryLabel}</span>
                     <span className="h-3 w-px bg-hairline" aria-hidden="true" />
                     <span>{activeCard.date}</span>
@@ -162,7 +162,7 @@ function NewsImage({
   if (!card.hasImage) {
     return (
       <div
-        className={`flex w-full items-center justify-center break-all border border-hairline bg-white p-5 text-center font-body text-xs font-semibold leading-5 tracking-[0.08em] text-subtext ${
+        className={`flex w-full items-center justify-center break-all border border-hairline bg-white p-5 text-center font-body text-[15px] font-semibold leading-5 tracking-[0.08em] text-subtext ${
           fillFrame ? 'min-h-[260px] md:min-h-[360px]' : 'aspect-[3/4]'
         }`}
         role="img"

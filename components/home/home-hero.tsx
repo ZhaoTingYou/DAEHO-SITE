@@ -31,7 +31,7 @@ export function HomeHero({
   const prefersReducedMotion = usePrefersReducedMotion();
   const titleLines = title.split('\n');
   const titleWeightClass = locale === 'ko' ? 'font-semibold' : 'font-bold';
-  const titleSizeClass = locale === 'ko' ? 'text-[clamp(30px,4.35vw,62px)]' : 'text-[clamp(38px,5.4vw,80px)]';
+  const titleSizeClass = locale === 'ko' ? 'text-[clamp(22px,3.35vw,52px)]' : 'text-[clamp(38px,5.4vw,80px)]';
   const isNumericWord = (word: string) => /^[\d,]+$/.test(word);
   const titleVariants: Variants = {
     hidden: {},
@@ -77,22 +77,22 @@ export function HomeHero({
         <motion.div
           initial="hidden"
           animate="visible"
-          className="max-w-5xl space-y-4 text-white [text-shadow:0_2px_20px_rgba(16,29,48,.34)]"
+          className="max-w-[920px] space-y-[12px] text-white [text-shadow:0_2px_20px_rgba(16,29,48,.34)]"
         >
           <motion.p
             variants={copyVariants}
-            className="font-body text-[clamp(15px,1vw,18px)] font-semibold uppercase tracking-[0.22em] text-accent"
+            className="font-body text-[clamp(15px,1.08vw,19px)] font-medium uppercase tracking-[0.22em] text-accent"
           >
             {eyebrow}
           </motion.p>
           <motion.h1
             variants={titleVariants}
-            className={`flex flex-col gap-3 font-heading ${titleSizeClass} ${titleWeightClass} leading-none tracking-normal`}
+            className={`flex flex-col gap-[8px] font-heading ${titleSizeClass} ${titleWeightClass} leading-[1.08] tracking-normal`}
           >
             {titleLines.map((line, lineIndex) => (
-              <span key={`${line}-${lineIndex}`} className="block overflow-hidden whitespace-nowrap">
+              <span key={`${line}-${lineIndex}`} className="block overflow-visible whitespace-nowrap">
                 {line.split(' ').map((word, wordIndex, words) => (
-                  <span key={`${word}-${lineIndex}-${wordIndex}`} className="inline-block overflow-hidden">
+                  <span key={`${word}-${lineIndex}-${wordIndex}`} className="inline-block overflow-visible">
                     <motion.span variants={wordVariants} className="inline-block">
                       <span className={isNumericWord(word) ? 'home-hero__number' : undefined}>
                         {word}
@@ -106,7 +106,7 @@ export function HomeHero({
           </motion.h1>
           <motion.p
             variants={copyVariants}
-            className="max-w-2xl -mt-1 whitespace-pre-line [font-family:'Cormorant_Garamond',serif] text-[clamp(20px,1.55vw,28px)] font-bold leading-tight"
+            className="max-w-2xl whitespace-pre-line [font-family:'Cormorant_Garamond',serif] text-[clamp(22px,1.85vw,32px)] font-bold leading-tight"
           >
             {subtitle}
           </motion.p>
