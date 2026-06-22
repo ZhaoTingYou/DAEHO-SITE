@@ -295,7 +295,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         <Reveal className="mt-[clamp(54px,6vw,78px)]">
           <DraggableScroll
             ariaLabel={copy.firstHeading}
-            className="flex gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden"
+            className="mx-auto flex w-full gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] lg:max-w-[1110px] lg:justify-center lg:px-0 [&::-webkit-scrollbar]:hidden"
           >
             {copy.firstRecords.map((record) => (
               <article key={record.title} className="w-[min(72vw,330px)] shrink-0">

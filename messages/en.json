@@ -17,17 +17,17 @@
         {
           "title": "Championship Rings",
           "caption": "CHAMPIONSHIP\nRINGS",
-          "image": "home_ring_03.png"
+          "image": "c1.png"
         },
         {
           "title": "Commission Rings",
           "caption": "COMMISSION\nRINGS",
-          "image": "home_ring_04.png"
+          "image": "c2.png"
         },
         {
           "title": "Custom Products",
           "caption": "CUSTOM\nPRODUCTS",
-          "image": "home_ring_05.png"
+          "image": "c3.png"
         }
       ]
     },
@@ -543,7 +543,7 @@
     "collection": {
       "hero": {
         "eyebrow": "",
-        "title": "CREATION",
+        "title": "CREATIONS",
         "subtitle": "Championship, appointment, and bespoke forms are shown inside a bright gallery.",
         "image": "specialty_collection_hero.png"
       },
@@ -555,19 +555,19 @@
             "id": "champion",
             "label": "Championship Rings",
             "description": "The winning moment, made permanent",
-            "image": "collection_category_champion.png"
+            "image": "c1.png"
           },
           {
             "id": "appointment",
             "label": "Appointment Rings",
             "description": "Rings for belonging and appointment",
-            "image": "collection_category_appointment.png"
+            "image": "c2.png"
           },
           {
             "id": "bespoke",
             "label": "Bespoke",
             "description": "Made-to-order works shaped by a story",
-            "image": "collection_category_bespoke.png"
+            "image": "c3.png"
           }
         ],
         "items": [

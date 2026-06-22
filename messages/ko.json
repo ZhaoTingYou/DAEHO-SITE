@@ -17,17 +17,17 @@
         {
           "title": "우승반지",
           "caption": "CHAMPIONSHIP\nRINGS",
-          "image": "home_ring_03.png"
+          "image": "c1.png"
         },
         {
           "title": "임관반지",
           "caption": "COMMISSION\nRINGS",
-          "image": "home_ring_04.png"
+          "image": "c2.png"
         },
         {
           "title": "주문제작",
           "caption": "CUSTOM\nPRODUCTS",
-          "image": "home_ring_05.png"
+          "image": "c3.png"
         }
       ]
     },
@@ -543,7 +543,7 @@
     "collection": {
       "hero": {
         "eyebrow": "",
-        "title": "CREATION",
+        "title": "CREATIONS",
         "subtitle": "챔피언, 임관, 주문 제작의 형태를 밝은 갤러리 안에서 살펴봅니다.",
         "image": "specialty_collection_hero.png"
       },
@@ -555,19 +555,19 @@
             "id": "champion",
             "label": "우승반지",
             "description": "승리의 순간을 영원의 형태로",
-            "image": "collection_category_champion.png"
+            "image": "c1.png"
           },
           {
             "id": "appointment",
             "label": "임관반지",
             "description": "소속과 임명의 의미를 담은 반지",
-            "image": "collection_category_appointment.png"
+            "image": "c2.png"
           },
           {
             "id": "bespoke",
             "label": "주문제작",
             "description": "이야기에서 시작되는 맞춤 제작",
-            "image": "collection_category_bespoke.png"
+            "image": "c3.png"
           }
         ],
         "items": [

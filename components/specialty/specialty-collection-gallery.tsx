@@ -1950,7 +1950,7 @@ function StageImage({
   }
 
   return (
-    <motion.div className="absolute inset-0 will-change-transform" style={{y, scale}}>
+    <motion.div className="absolute inset-x-0 -inset-y-10 will-change-transform" style={{y, scale}}>
       <Image
         src={`/images/${item.image}`}
         alt={`${item.title} ${item.caption}`}
