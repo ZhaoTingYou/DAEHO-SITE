@@ -97,7 +97,7 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
                     delay: Math.min(index * 0.04, 0.18),
                     ease: [0.16, 1, 0.3, 1]
                   }}
-                  className="border-t border-primary/18 bg-transparent pt-[clamp(14px,1.6vw,22px)] transition duration-hover ease-brand hover:-translate-y-1"
+                  className="bg-transparent transition duration-hover ease-brand hover:-translate-y-1"
                 >
                   <Link
                     href={`/${locale}/news/${card.id}`}

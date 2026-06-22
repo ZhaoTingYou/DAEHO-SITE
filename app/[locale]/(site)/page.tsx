@@ -87,7 +87,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
       />
 
       <section className="bg-bg py-[clamp(110px,10vw,164px)]">
-        <div className="mx-auto max-w-[1240px] space-y-[clamp(54px,6vw,84px)] px-container">
+        <div className="mx-auto max-w-[1240px] space-y-[clamp(30px,3.2vw,46px)] px-container">
           <Reveal className="grid border-y border-primary/15 py-[clamp(30px,3.2vw,46px)] lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)] lg:items-center lg:gap-[clamp(48px,6vw,82px)]">
             <div className="max-w-[260px] space-y-[10px] lg:text-center">
               <h2 className="font-heading text-[20px] font-medium uppercase leading-[1.18] text-primary">
@@ -146,7 +146,7 @@ function HomeContent({content, heroVideo, homeUi, latestNews, locale}: HomeConte
         </div>
       </section>
 
-      <section className="flex min-h-screen items-center bg-bg py-[clamp(108px,10vw,168px)]">
+      <section className="bg-bg pb-[clamp(108px,10vw,168px)] pt-0">
         <div className="mx-auto grid w-full max-w-[1240px] items-center gap-[clamp(42px,4.5vw,72px)] px-container lg:grid-cols-[minmax(280px,0.32fr)_minmax(0,0.68fr)]">
           <Reveal className="mx-auto max-w-[390px] space-y-[18px] lg:mx-0">
             <div className="space-y-[14px]">

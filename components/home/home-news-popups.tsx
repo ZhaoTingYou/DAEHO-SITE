@@ -61,7 +61,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
             key={card.id}
             type="button"
             onClick={() => setActiveCard(card)}
-            className="group grid h-full cursor-pointer grid-rows-[auto_1fr] border-t border-primary/15 bg-transparent pt-4 text-left transition duration-hover ease-brand hover:-translate-y-1 hover:border-accent/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+            className="group grid h-full cursor-pointer grid-rows-[auto_1fr] bg-transparent text-left transition duration-hover ease-brand hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           >
             <div className="hover-zoom">
               <div className="hover-zoom-media">
