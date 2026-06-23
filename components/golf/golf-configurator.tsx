@@ -340,12 +340,12 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
           </div>
 
           <div className="relative left-1/2 w-screen -translate-x-1/2 bg-black">
-            <Reveal className="relative mx-auto grid max-w-[980px] gap-10 px-container py-[clamp(82px,11vw,150px)] md:min-h-[clamp(980px,74vw,1240px)]">
-              <p className="relative z-20 text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:left-1/2 md:top-[10%] md:-translate-x-1/2">
+            <Reveal className="relative mx-auto grid max-w-[980px] gap-10 px-container py-[clamp(82px,11vw,150px)] md:min-h-[clamp(1080px,82vw,1400px)]">
+              <p className="relative z-20 text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:left-1/2 md:top-[8%] md:-translate-x-1/2">
                 “{labels.quoteText}”
               </p>
 
-              <div className="relative z-20 space-y-[12px] text-left md:absolute md:left-[6%] md:top-[33%] md:w-[34%]">
+              <div className="relative z-20 space-y-[12px] text-left md:absolute md:left-[6%] md:top-[30%] md:w-[34%]">
                 <h2
                   className={`text-[clamp(20px,1.65vw,25px)] font-semibold leading-[1.45] text-white ${
                     locale === 'ko'
@@ -364,7 +364,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                 </p>
               </div>
 
-              <div className="relative aspect-[0.74/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:right-[10%] md:top-[23%] md:w-[39%]">
+              <div className="relative aspect-[0.74/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:right-[10%] md:top-[20%] md:w-[39%]">
                 <GolfImage
                   filename={content.engraving.imagePrimary}
                   alt={content.engraving.title}
@@ -373,7 +373,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                 />
               </div>
 
-              <div className="relative aspect-[1.36/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:bottom-[7%] md:left-[3%] md:w-[43%]">
+              <div className="relative aspect-[1.36/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:bottom-[4%] md:left-[3%] md:w-[43%]">
                 <GolfStaticImage
                   src={`/images/${content.engraving.imageDetail}`}
                   alt={content.engraving.body}
@@ -381,7 +381,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                 />
               </div>
 
-              <p className="relative z-20 whitespace-nowrap text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:bottom-[20%] md:right-[8%] md:w-[37%]">
+              <p className="relative z-20 whitespace-nowrap text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:bottom-[17%] md:right-[8%] md:w-[37%]">
                 “{labels.quoteText}”
               </p>
             </Reveal>
