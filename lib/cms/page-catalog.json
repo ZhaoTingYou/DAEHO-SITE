@@ -222,6 +222,7 @@
       {"path": "hero.image", "label": "Hero 图片", "type": "image"},
       {"path": "statement.titleLines", "label": "Statement 标题行", "type": "stringList", "rows": 3},
       {"path": "statement.body", "label": "Statement 正文", "type": "textarea", "rows": 4},
+      {"path": "statement.image", "label": "Statement 图片", "type": "image"},
       {"path": "heads.items", "label": "Club head 选项", "type": "json"},
       {"path": "shafts.items", "label": "Shaft 选项", "type": "json"}
     ]

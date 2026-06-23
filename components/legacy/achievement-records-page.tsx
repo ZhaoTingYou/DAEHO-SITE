@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import {DraggableScroll} from '@/components/draggable-scroll';
 import type {HomeStatBandItem} from '@/components/home/home-stat-band';
-import {AnimatedStatScope, AnimatedStatValue} from '@/components/legacy/animated-stat-value';
+import {AchievementPentagonStats} from '@/components/legacy/achievement-pentagon-stats';
 import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
@@ -363,7 +363,18 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
           </h2>
         </Reveal>
 
-        <Reveal className="mt-16">
+        <Reveal className="mx-auto mt-[clamp(32px,4vw,48px)] flex max-w-[1540px] justify-center px-container sm:justify-end">
+          <p
+            className={`archive-drag-hint ${englishTextClass} text-[13px] uppercase leading-none tracking-[0.22em]`}
+            aria-hidden="true"
+          >
+            <span className="archive-drag-hint__arrow archive-drag-hint__arrow--left">←</span>
+            <span>DRAG</span>
+            <span className="archive-drag-hint__arrow archive-drag-hint__arrow--right">→</span>
+          </p>
+        </Reveal>
+
+        <Reveal className="mt-6">
           <DraggableScroll
             ariaLabel={copy.archiveTitle}
             className="flex gap-6 overflow-x-auto px-container pb-4 [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden"
@@ -400,228 +411,6 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </Reveal>
       </section>
     </main>
-  );
-}
-
-function AchievementPentagonStats({items, locale}: {items: HomeStatBandItem[]; locale: Locale}) {
-  const [years, championship, commission, delivery, endToEnd] = items;
-  const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
-  const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
-  const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
-  const centerCaption =
-    locale === 'ko'
-      ? '장인정신으로 완성한\n신뢰 구조'
-      : 'A trust structure\ncompleted by craft';
-
-  return (
-    <div className="mx-auto max-w-[1240px] px-container">
-      <Reveal className="hidden md:block">
-        <AnimatedStatScope className="relative min-h-[650px]">
-          <PentagonDiagram centerCaption={centerCaption} />
-          <AchievementPentagonStat
-            item={years}
-            index={0}
-            className="left-1/2 top-0 w-[220px] -translate-x-1/2"
-            align="center"
-            locale={locale}
-            bodyTextClass={bodyTextClass}
-            englishTextClass={englishTextClass}
-          />
-          <AchievementPentagonStat
-            item={championship}
-            index={1}
-            className="left-[5%] top-[36%] w-[300px]"
-            align="center"
-            locale={locale}
-            bodyTextClass={bodyTextClass}
-            englishTextClass={englishTextClass}
-          />
-          <AchievementPentagonStat
-            item={commission}
-            index={2}
-            className="right-[5%] top-[36%] w-[300px]"
-            align="center"
-            locale={locale}
-            bodyTextClass={bodyTextClass}
-            englishTextClass={englishTextClass}
-          />
-          <AchievementPentagonStat
-            item={delivery}
-            index={3}
-            className="bottom-[4%] left-[14%] w-[280px]"
-            align="center"
-            locale={locale}
-            bodyTextClass={bodyTextClass}
-            englishTextClass={englishTextClass}
-          />
-          <AchievementPentagonStat
-            item={endToEnd}
-            index={4}
-            className="bottom-[6.6%] right-[14%] w-[280px]"
-            align="center"
-            locale={locale}
-            bodyTextClass={bodyTextClass}
-            englishTextClass={englishTextClass}
-          />
-        </AnimatedStatScope>
-      </Reveal>
-
-      <Reveal className="md:hidden">
-        <AnimatedStatScope className="grid gap-8 text-center">
-          <div className="relative mx-auto aspect-square w-full max-w-[360px]">
-            <PentagonDiagram centerCaption={centerCaption} compact />
-          </div>
-          <div className="grid gap-8 sm:grid-cols-2">
-            {items.map((item, index) => (
-              <AchievementPentagonStat
-                key={`${item.value}-${item.label}`}
-                item={item}
-                index={index}
-                className="relative"
-                align="center"
-                locale={locale}
-                bodyTextClass={bodyTextClass}
-                englishTextClass={englishTextClass}
-              />
-            ))}
-          </div>
-        </AnimatedStatScope>
-      </Reveal>
-    </div>
-  );
-}
-
-function PentagonDiagram({
-  centerCaption,
-  compact = false
-}: {
-  centerCaption: string;
-  compact?: boolean;
-}) {
-  return (
-    <svg
-      className={compact ? 'h-full w-full' : 'absolute left-1/2 top-[112px] h-[490px] w-[760px] -translate-x-1/2'}
-      viewBox="0 0 1000 620"
-      role="img"
-      aria-label="DEAHO trust pentagon"
-    >
-      <g fill="#F4E6E1">
-        <path
-          d="M500 118 L730 285 L642 540 L358 540 L270 285 Z"
-          opacity="0.065"
-        />
-        <path d="M500 118 L730 285 L500 354 Z" opacity="0.045" />
-        <path d="M730 285 L642 540 L500 354 Z" opacity="0.028" />
-        <path d="M642 540 L358 540 L500 354 Z" opacity="0.052" />
-        <path d="M358 540 L270 285 L500 354 Z" opacity="0.032" />
-        <path d="M270 285 L500 118 L500 354 Z" opacity="0.04" />
-      </g>
-      <g fill="none" stroke="#F4E6E1" strokeLinecap="round" strokeLinejoin="round">
-        <path
-          d="M500 118 L730 285 L642 540 L358 540 L270 285 Z"
-          opacity="0.46"
-          strokeWidth="1.6"
-          vectorEffect="non-scaling-stroke"
-        />
-        <path
-          d="M500 168 L675 296 L608 490 L392 490 L325 296 Z"
-          opacity="0.18"
-          strokeWidth="1"
-          vectorEffect="non-scaling-stroke"
-        />
-        <path
-          d="M500 168 L500 354 M325 296 L500 354 M675 296 L500 354 M392 490 L500 354 M608 490 L500 354"
-          opacity="0.12"
-          strokeWidth="0.8"
-          vectorEffect="non-scaling-stroke"
-        />
-      </g>
-      <g fill="#F4E6E1">
-        {[500, 336, 664, 399, 601].map((_, index) => {
-          const points = [
-            [500, 118],
-            [270, 285],
-            [730, 285],
-            [358, 540],
-            [642, 540]
-          ];
-          const [cx, cy] = points[index];
-
-          return <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" opacity="0.68" />;
-        })}
-        <text
-          x="500"
-          y="344"
-          textAnchor="middle"
-          fontFamily="Cormorant Garamond, serif"
-          fontSize="44"
-          fontWeight="700"
-          letterSpacing="4"
-        >
-          DEAHO
-        </text>
-        <text
-          x="500"
-          y="383"
-          textAnchor="middle"
-          fontFamily="Cormorant Garamond, serif"
-          fontSize="22"
-          fontWeight="700"
-          letterSpacing="2.5"
-        >
-          TRUST PENTAGON
-        </text>
-        {centerCaption.split('\n').map((line, index) => (
-          <text
-            key={line}
-            x="500"
-            y={420 + index * 26}
-            textAnchor="middle"
-            fontFamily="MaruBuri, serif"
-            fontSize="18"
-            fontWeight="600"
-            opacity="0.86"
-          >
-            {line}
-          </text>
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-function AchievementPentagonStat({
-  item,
-  index,
-  className,
-  align,
-  locale,
-  bodyTextClass,
-  englishTextClass
-}: {
-  item: HomeStatBandItem;
-  index: number;
-  className: string;
-  align: 'center';
-  locale: Locale;
-  bodyTextClass: string;
-  englishTextClass: string;
-}) {
-  return (
-    <div className={`${className} ${align === 'center' ? 'text-center' : ''} md:absolute`}>
-      <AnimatedStatValue
-        className={`${englishTextClass} text-[clamp(44px,5.3vw,74px)] leading-none text-[#F4E6E1]`}
-        index={index}
-        locale={locale}
-        value={item.value}
-      />
-      <p className={`${englishTextClass} mt-2 whitespace-pre-line text-[16px] uppercase leading-[1.05] tracking-[0.05em] text-[#F4E6E1]`}>
-        {item.label}
-      </p>
-      <p className={`${bodyTextClass} mx-auto mt-5 max-w-[250px] whitespace-pre-line text-[14px] leading-[1.45] text-[#F4E6E1]/90`}>
-        {item.body}
-      </p>
-    </div>
   );
 }
 

@@ -794,7 +794,7 @@
         "OF THE",
         "GAME"
       ],
-      "subtitle": "골프의 구조를 하나의 오브젝트로 재해석하다",
+      "subtitle": "골프이 구조를\n하나의 오브젝트로 재해석하다",
       "image": "golf/golf1.png",
       "specLabel": "Configured bracelet"
     },
@@ -805,7 +805,7 @@
         "GAME"
       ],
       "body": "골프의 구조를 하나의 오브젝트로 재해석하다",
-      "image": "golf/section2.png"
+      "image": "golf/section2 nb.png"
     },
     "heads": {
       "eyebrow": "CLUB HEAD",
@@ -814,31 +814,31 @@
       "items": [
         {
           "id": "ball",
-          "label": "골프공",
+          "label": "골프공과 티",
           "kicker": "01",
-          "caption": "골프공",
-          "image": "golf/Group 10.png"
+          "caption": "골프공과 티",
+          "image": "golf/golf s1.png"
         },
         {
           "id": "iron",
           "label": "아이언",
           "kicker": "02",
           "caption": "아이언",
-          "image": "golf/Group 12.png"
-        },
-        {
-          "id": "driver",
-          "label": "드라이버",
-          "kicker": "03",
-          "caption": "드라이버",
-          "image": "golf/Group 14.png"
+          "image": "golf/golf s2.png"
         },
         {
           "id": "putter",
           "label": "퍼터",
-          "kicker": "04",
+          "kicker": "03",
           "caption": "퍼터",
-          "image": "golf/Group 13.png"
+          "image": "golf/golf s3.png"
+        },
+        {
+          "id": "driver",
+          "label": "드라이버",
+          "kicker": "04",
+          "caption": "드라이버",
+          "image": "golf/golf s4.png"
         }
       ]
     },
@@ -889,7 +889,7 @@
     "lifestyle": {
       "eyebrow": "OBJECT & LIFESTYLE",
       "title": "라운드 밖에서도 남는 형태",
-      "body": "박스 안의 오브젝트로, 손목 위의 생활감으로, 골프의 구조는 더 오래 머무릅니다.",
+      "body": "박스 안의 오브젝트로, 손목 위의 생활감으로, 골프의 구조는 더 오래 머무릅니다",
       "imageBox": "golf/3.png",
       "imageLifestyle": "golf/4.png",
       "closing": "당신의 라운드를 영원히"

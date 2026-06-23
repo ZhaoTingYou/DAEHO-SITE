@@ -62,26 +62,30 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
         animate={{x: `${visualTrackOffset}%`}}
         transition={trackTransition}
       >
-        {slides.map((slide, index) => (
-          <div
-            key={slide.backgroundImage}
-            className="relative h-full overflow-hidden"
-            style={{
-              width: `${100 / slides.length}%`,
-              background: `linear-gradient(115deg, ${slide.accentStart}, ${slide.accentEnd})`
-            }}
-          >
-            <Image
-              src={`/images/${slide.backgroundImage}`}
-              alt={imageAlt}
-              fill
-              loading={index === current.index ? 'eager' : 'lazy'}
-              sizes="100vw"
-              className="object-cover opacity-62 mix-blend-luminosity"
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(180,66,54,0.28),rgba(176,82,66,0.12)_42%,rgba(40,72,50,0.26)_100%)]" />
-          </div>
-        ))}
+        {slides.map((slide, index) => {
+          const visualImage = slide.previewImage || slide.backgroundImage;
+
+          return (
+            <div
+              key={`${slide.title}-${visualImage}`}
+              className="relative h-full overflow-hidden"
+              style={{
+                width: `${100 / slides.length}%`,
+                background: `linear-gradient(115deg, ${slide.accentStart}, ${slide.accentEnd})`
+              }}
+            >
+              <Image
+                src={`/images/${visualImage}`}
+                alt={imageAlt}
+                fill
+                loading={index === current.index ? 'eager' : 'lazy'}
+                sizes="100vw"
+                className="object-cover opacity-62 mix-blend-luminosity"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(180,66,54,0.28),rgba(176,82,66,0.12)_42%,rgba(40,72,50,0.26)_100%)]" />
+            </div>
+          );
+        })}
       </motion.div>
       <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(circle_at_22%_24%,rgba(255,232,205,0.55),transparent_26%),radial-gradient(circle_at_62%_12%,rgba(255,236,210,0.42),transparent_30%),linear-gradient(150deg,transparent_0%,rgba(77,27,23,0.4)_78%)]" />
 
