@@ -237,7 +237,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white pb-[clamp(108px,13.5vw,198px)]">
+      <section className="bg-white pb-[clamp(81px,10vw,149px)]">
         <div className="mx-auto max-w-[1240px] space-y-[clamp(46px,6vw,72px)] px-container">
           <Reveal className="mx-auto max-w-[360px] space-y-3 text-center">
             <h2 className="font-heading text-[clamp(20px,2vw,27px)] font-semibold leading-tight text-primary">
@@ -458,7 +458,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white px-container pb-[clamp(225px,27vw,390px)] pt-[clamp(90px,10.5vw,138px)] text-center text-primary">
+      <section className="bg-white px-container pb-[clamp(150px,18vw,260px)] pt-[clamp(60px,7vw,92px)] text-center text-primary">
         <Link
           href={inquiryHref}
           className="link-sweep inline-flex min-h-12 items-center bg-white font-heading text-[clamp(21px,2vw,30px)] font-semibold"
