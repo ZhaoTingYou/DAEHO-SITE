@@ -534,10 +534,10 @@
       },
       "bespoke": {
         "eyebrow": "BESPOKE CAPABILITY",
-        "title": "팀의 이야기를 작품 안으로",
+        "title": "대호의 프로젝트 더 알아보기",
         "body": "챔피언십 링은 같은 모양의 제품이 아니라, 팀의 상징과 시즌의 기억을 담아 설계되는 주문 제작 작품입니다.",
         "image": "specialty_bespoke.png",
-        "cta": "작품 보기"
+        "cta": "DISCOVER MORE"
       }
     },
     "collection": {
@@ -690,7 +690,7 @@
     "masthead": {
       "title": "NEWS",
       "issue": "",
-      "body": "프로젝트 스토리와 제작 현장, 언론/피처, 협업 소식을 한곳에 모읍니다.",
+      "body": "프로젝트 스토리와 제작 현장, 언론/피처, 협업 소식을\n한곳에 모읍니다.",
       "ticker": [
         "최신 제작 사례는 확인 자료가 도착하면 이 지면에 업데이트됩니다.",
         "프로젝트 스토리 · 언론/피처 · 협업 소식을 한곳에 모읍니다.",
@@ -1104,9 +1104,9 @@
       "title": "지금, 대호",
       "body": "그리고 지금도 만들고 있다.",
       "question": "가장 자랑하고 싶은 아이템? 프로젝트?",
-      "primaryTitle": "NEW HERITAGE RELEASED",
+      "primaryTitle": "NEW LEGACY\nRELEASED",
       "primaryCta": "자세히 보기",
-      "secondaryTitle": "RECENT HIGHLIGHT",
+      "secondaryTitle": "RECENT\nHIGHLIGHT",
       "secondaryCta": "자세히 보기"
     },
     "latestNews": {

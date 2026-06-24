@@ -42,11 +42,6 @@ export default async function TechniquePage({params}: Props) {
       <section className="relative z-10 pt-28">
         <div className="mx-auto max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)]">
           <ScrollText className="mx-auto max-w-[720px] space-y-[18px] text-center">
-            {content.hero.eyebrow ? (
-              <p className="font-body text-[15px] font-semibold uppercase leading-none tracking-[0.24em] text-subtext">
-                {content.hero.eyebrow}
-              </p>
-            ) : null}
             <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </h1>
@@ -66,16 +61,15 @@ export default async function TechniquePage({params}: Props) {
         </div>
       </section>
 
-      <section className="relative z-10 py-[clamp(78px,8vw,122px)]">
-        <div className="mx-auto max-w-[1180px] px-container">
-          <ScrollText>
-            <SectionIntro
-              eyebrow={content.process.eyebrow}
-              title={content.process.title}
-              variant="specialty"
-            >
-              {content.process.body ? <p>{content.process.body}</p> : null}
-            </SectionIntro>
+      <section className="relative z-10 bg-[#f8f6f2] py-[clamp(86px,9vw,132px)]">
+        <div className="mx-auto max-w-[1120px] px-container">
+          <ScrollText className="border-l border-accent/45 py-[6px] pl-[clamp(28px,3.6vw,48px)] text-left">
+            <p className="font-body text-[13px] font-semibold uppercase leading-none tracking-[0.34em] text-text/45">
+              {content.process.eyebrow}
+            </p>
+            <h2 className="mt-[24px] font-heading text-[clamp(34px,3.4vw,48px)] font-semibold leading-[1.25] text-primary">
+              {content.process.title}
+            </h2>
           </ScrollText>
         </div>
       </section>
@@ -100,12 +94,12 @@ export default async function TechniquePage({params}: Props) {
       <section className="relative z-10 py-[clamp(104px,11vw,168px)]">
         <div className="mx-auto max-w-3xl px-container text-center">
           <ScrollText className="space-y-[18px]">
-            <h2 className="font-heading text-[clamp(28px,2.7vw,38px)] font-semibold leading-[1.25] text-primary">
+            <h2 className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
               {content.bespoke.title}
             </h2>
             <Link
               href={withLocale(locale, '/mastery/creations')}
-              className="link-sweep inline-flex font-body text-[15px] font-semibold uppercase leading-[19px] tracking-[0.2em] text-accent"
+              className="link-sweep inline-flex [font-family:'Cormorant_Garamond',serif] text-[15px] font-bold uppercase leading-[19px] tracking-[0.2em] text-accent"
             >
               {content.bespoke.cta}
             </Link>

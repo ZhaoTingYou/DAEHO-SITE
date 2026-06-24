@@ -534,10 +534,10 @@
       },
       "bespoke": {
         "eyebrow": "BESPOKE CAPABILITY",
-        "title": "A team's story inside the work",
+        "title": "Discover more DEAHO projects",
         "body": "A championship ring is not a repeated product. It is a bespoke work designed around symbols and season memories.",
         "image": "specialty_bespoke.png",
-        "cta": "View collection"
+        "cta": "DISCOVER MORE"
       }
     },
     "collection": {
@@ -1104,9 +1104,9 @@
       "title": "DEAHO, Now",
       "body": "And we are still creating now.",
       "question": "A piece or project worth remembering?",
-      "primaryTitle": "NEW HERITAGE RELEASED",
+      "primaryTitle": "NEW LEGACY\nRELEASED",
       "primaryCta": "Explore More",
-      "secondaryTitle": "RECENT HIGHLIGHT",
+      "secondaryTitle": "RECENT\nHIGHLIGHT",
       "secondaryCta": "Explore More"
     },
     "latestNews": {

@@ -110,17 +110,11 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
                       </div>
                     </div>
                     <div className="px-0 py-[20px]">
-                      <motion.div
-                        initial={{opacity: 0, y: 8}}
-                        whileInView={{opacity: 1, y: 0}}
-                        viewport={{once: true, amount: 0.4}}
-                        transition={{duration: 0.36, delay: 0.15, ease: [0.16, 1, 0.3, 1]}}
-                        className={`${bodyTextClass} flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] leading-none text-subtext`}
-                      >
+                      <div className={`${bodyTextClass} flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] leading-none text-subtext`}>
                         <span className="text-accent">{card.categoryLabel}</span>
                         <span className="h-3 w-px bg-hairline" aria-hidden="true" />
                         <span>{card.date}</span>
-                      </motion.div>
+                      </div>
                       <h3 className={`${titleTextClass} mt-[12px] text-[clamp(20px,1.7vw,24px)] leading-[1.3] text-primary`}>
                         {card.title}
                       </h3>

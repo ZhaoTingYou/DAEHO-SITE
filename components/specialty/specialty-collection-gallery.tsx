@@ -1889,10 +1889,10 @@ function CollectionStagePanel({
       </motion.div>
 
       <div
-        className={`pointer-events-none absolute inset-0 ${
+        className={`pointer-events-none absolute inset-y-0 w-1/2 ${
           textSide === 'left'
-            ? 'bg-gradient-to-r from-black via-black/68 to-black/5'
-            : 'bg-gradient-to-l from-black via-black/68 to-black/5'
+            ? 'left-0 bg-gradient-to-r from-black via-black/68 to-transparent'
+            : 'right-0 bg-gradient-to-l from-black via-black/68 to-transparent'
         }`}
         aria-hidden="true"
       />

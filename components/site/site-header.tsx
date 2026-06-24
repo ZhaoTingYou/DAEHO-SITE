@@ -251,6 +251,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
   const currentMegaDetails = openMenu ? megaMenuDetails[openMenu] : null;
   const isHeaderInteractive = isHeaderHovered || hasHeaderFocus;
   const isGolf = relativePath === '/golf';
+  const isHeritage = relativePath.startsWith('/heritage');
   const isHomeHeroTransparent =
     isHome &&
     (overHomeHero || atTop) &&
@@ -263,7 +264,13 @@ export function SiteHeader({locale}: SiteHeaderProps) {
     !isMenuOpen &&
     openMenu === null &&
     !isHeaderInteractive;
-  const isHeroTransparent = isHomeHeroTransparent || isGolfHeroTransparent;
+  const isHeritageHeroTransparent =
+    isHeritage &&
+    atTop &&
+    !isMenuOpen &&
+    openMenu === null &&
+    !isHeaderInteractive;
+  const isHeroTransparent = isHomeHeroTransparent || isGolfHeroTransparent || isHeritageHeroTransparent;
   const isSolid = !isHeroTransparent && (!atTop || isMenuOpen || openMenu !== null || isHeaderInteractive);
   const navVariants = prefersReducedMotion ? {hidden: {}, visible: {}} : navListVariants;
   const itemVariants = prefersReducedMotion ? instantItemVariants : navItemVariants;
@@ -293,7 +300,11 @@ export function SiteHeader({locale}: SiteHeaderProps) {
         isSolid
           ? 'border-b border-hairline bg-bg/95 text-primary shadow-[0_18px_60px_rgba(16,29,48,.08)] backdrop-blur-md [text-shadow:none]'
           : isHeroTransparent
-            ? 'border-b border-transparent bg-transparent text-white mix-blend-difference [text-shadow:none]'
+            ? `border-b border-transparent bg-transparent text-white ${
+                isHeritageHeroTransparent
+                  ? '[text-shadow:0_1px_18px_rgba(0,0,0,.26)]'
+                  : 'mix-blend-difference [text-shadow:none]'
+              }`
             : 'border-b border-transparent bg-transparent text-primary [text-shadow:0_1px_16px_rgba(255,255,255,.72)]'
       }`}
     >

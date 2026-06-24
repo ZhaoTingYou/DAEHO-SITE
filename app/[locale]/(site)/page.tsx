@@ -59,59 +59,67 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
 
       <section className="bg-bg py-[clamp(110px,10vw,164px)]">
         <div className="mx-auto max-w-[1240px] space-y-[clamp(30px,3.2vw,46px)] px-container">
-          <Reveal className="grid border-y border-primary/15 py-[clamp(30px,3.2vw,46px)] lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)] lg:items-center lg:gap-[clamp(48px,6vw,82px)]">
-            <div className="max-w-[260px] space-y-[10px] lg:text-center">
-              <h2 className="font-heading text-[20px] font-medium uppercase leading-[1.18] text-primary">
-                {currentPulse.primaryTitle}
-              </h2>
-              <Link
-                href={withLocale(locale, '/heritage/loyalty')}
-                className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none transition duration-hover ease-brand"
-              >
-                {currentPulse.primaryCta}
+          <Reveal className="border-y border-primary/15 py-[clamp(30px,3.2vw,46px)]">
+            <div className="mx-auto grid w-full max-w-[1180px] lg:grid-cols-[minmax(260px,320px)_minmax(0,820px)] lg:items-center lg:gap-[clamp(44px,4vw,68px)]">
+              <div className="flex min-h-[clamp(190px,20vw,270px)] w-full items-center justify-center lg:text-center">
+                <div className="w-full max-w-[300px] space-y-[10px]">
+                  <h2 className="whitespace-pre-line font-heading text-[20px] font-medium uppercase leading-[1.18] text-primary">
+                    {currentPulse.primaryTitle}
+                  </h2>
+                  <Link
+                    href={withLocale(locale, '/heritage/loyalty')}
+                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none transition duration-hover ease-brand"
+                  >
+                    {currentPulse.primaryCta}
+                  </Link>
+                </div>
+              </div>
+
+              <Link href={withLocale(locale, '/heritage/loyalty')} className="group block">
+                <div className="relative overflow-hidden bg-bg">
+                  <div className="hover-zoom">
+                    <div className="hover-zoom-media">
+                      <SafeImage
+                        filename="news_featured.png.png"
+                        alt={currentPulse.primaryTitle}
+                        aspect="aspect-[2.05/1]"
+                        variant="plain"
+                      />
+                    </div>
+                  </div>
+                </div>
               </Link>
             </div>
+          </Reveal>
 
-            <Link href={withLocale(locale, '/heritage/loyalty')} className="group block">
-              <div className="relative overflow-hidden bg-bg">
+          <Reveal className="border-b border-primary/15 pb-[clamp(30px,3.2vw,46px)]">
+            <div className="mx-auto grid w-full max-w-[1180px] lg:grid-cols-[minmax(0,820px)_minmax(260px,320px)] lg:items-center lg:gap-[clamp(44px,4vw,68px)]">
+              <Link href={withLocale(locale, '/mastery/creations')} className="group block">
                 <div className="hover-zoom">
                   <div className="hover-zoom-media">
                     <SafeImage
-                      filename="news_featured.png.png"
-                      alt={currentPulse.primaryTitle}
-                      aspect="aspect-[2.28/1]"
+                      filename="home_ring_01.png"
+                      alt={currentPulse.secondaryTitle}
+                      aspect="aspect-[2.05/1]"
                       variant="plain"
                     />
                   </div>
                 </div>
-              </div>
-            </Link>
-          </Reveal>
+              </Link>
 
-          <Reveal className="grid border-b border-primary/15 pb-[clamp(30px,3.2vw,46px)] lg:grid-cols-[minmax(0,0.72fr)_minmax(220px,0.28fr)] lg:items-center lg:gap-[clamp(48px,6vw,82px)]">
-            <Link href={withLocale(locale, '/mastery/creations')} className="group block">
-              <div className="hover-zoom">
-                <div className="hover-zoom-media">
-                  <SafeImage
-                    filename="home_ring_01.png"
-                    alt={currentPulse.secondaryTitle}
-                    aspect="aspect-[2.28/1]"
-                    variant="plain"
-                  />
+              <div className="flex min-h-[clamp(190px,20vw,270px)] w-full items-center justify-center lg:text-center">
+                <div className="w-full max-w-[300px] space-y-[10px]">
+                  <p className="whitespace-pre-line font-heading text-[20px] font-medium uppercase leading-[1.18] text-primary">
+                    {currentPulse.secondaryTitle}
+                  </p>
+                  <Link
+                    href={withLocale(locale, '/news')}
+                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none transition duration-hover ease-brand"
+                  >
+                    {currentPulse.secondaryCta}
+                  </Link>
                 </div>
               </div>
-            </Link>
-
-            <div className="space-y-[10px] lg:max-w-[260px] lg:justify-self-start lg:text-center">
-              <p className="font-heading text-[20px] font-medium uppercase leading-[1.18] text-primary">
-                {currentPulse.secondaryTitle}
-              </p>
-              <Link
-                href={withLocale(locale, '/news')}
-                className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none transition duration-hover ease-brand"
-              >
-                {currentPulse.secondaryCta}
-              </Link>
             </div>
           </Reveal>
         </div>
@@ -173,7 +181,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
         <div className="mx-auto max-w-[1240px] space-y-[clamp(32px,4vw,52px)] px-container">
           <Reveal className="border-t border-primary/20 pt-[clamp(26px,3vw,42px)]">
             <div className="max-w-[460px] space-y-[14px]">
-              <h2 className="font-heading text-[clamp(24px,2.4vw,36px)] font-semibold leading-tight text-primary">
+              <h2 className="font-heading text-[20px] font-medium leading-[1.18] text-primary">
                 {latestNewsText.title}
               </h2>
             </div>

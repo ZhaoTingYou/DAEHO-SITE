@@ -30,6 +30,10 @@ export default async function NewsPage({params}: Props) {
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const titleTextClass = locale === 'ko' ? "[font-family:'MaruBuri',serif] font-semibold" : englishTextClass;
   const bodyTextClass = "[font-family:'Pretendard',sans-serif] font-normal";
+  const mastheadBodyLines =
+    locale === 'ko'
+      ? ['프로젝트 스토리와 제작 현장, 언론/피처, 협업 소식을', '한곳에 모읍니다']
+      : content.masthead.body.split('\n').filter(Boolean);
 
   return (
     <main className="bg-bg text-text">
@@ -39,9 +43,13 @@ export default async function NewsPage({params}: Props) {
             <h1 className={`${englishTextClass} text-[clamp(56px,8vw,104px)] leading-[0.86] tracking-[0.025em] text-primary`}>
               {content.masthead.title}
             </h1>
-            <div className="space-y-[15px] pb-1 text-left lg:text-right">
+            <div className="space-y-[15px] pb-1 text-right">
               <p className={`${bodyTextClass} text-[15px] leading-[1.86] text-text`}>
-                {content.masthead.body}
+                {mastheadBodyLines.map((line, index) => (
+                  <span key={`${line}-${index}`} className="block sm:whitespace-nowrap">
+                    {line}
+                  </span>
+                ))}
               </p>
             </div>
           </Reveal>

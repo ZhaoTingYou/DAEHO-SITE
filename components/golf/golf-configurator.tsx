@@ -106,6 +106,10 @@ const golfShaftVisuals: Record<string, string> = {
   navy: 'object-[93%_50%]'
 };
 
+const golfHeadVisuals: Record<string, string> = {
+  ball: '[clip-path:inset(0_29%_0_0)]'
+};
+
 export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [selectedHeadId, setSelectedHeadId] = useState(content.heads.items[0]?.id ?? '');
@@ -233,7 +237,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white pb-[clamp(72px,9vw,132px)]">
+      <section className="bg-white pb-[clamp(108px,13.5vw,198px)]">
         <div className="mx-auto max-w-[1240px] space-y-[clamp(46px,6vw,72px)] px-container">
           <Reveal className="mx-auto max-w-[360px] space-y-3 text-center">
             <h2 className="font-heading text-[clamp(20px,2vw,27px)] font-semibold leading-tight text-primary">
@@ -257,16 +261,14 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => setSelectedHeadId(item.id)}
-                  className={`group min-h-11 bg-white p-2 text-left transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary ${
-                    isSelected ? 'ring-2 ring-primary/25' : 'hover:-translate-y-1'
-                  }`}
+                  className="group min-h-11 bg-white p-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                 >
                   <div className="relative aspect-square overflow-hidden bg-white">
                     <GolfImage
                       filename={item.image}
                       alt={item.caption}
                       assets={assets}
-                      className="object-cover"
+                      className={`object-cover ${golfHeadVisuals[item.id] ?? ''}`}
                     />
                   </div>
                   <p className="px-1 pt-3 font-body text-[18px] font-semibold uppercase tracking-[0.02em] text-primary/70">
@@ -303,7 +305,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white pb-0 pt-[clamp(72px,9vw,132px)] text-primary">
+      <section className="bg-white pb-0 pt-[clamp(108px,13.5vw,198px)] text-primary">
         <div className="mx-auto max-w-[1120px] space-y-[clamp(70px,8vw,118px)] px-container">
           <div className="mx-auto max-w-[900px] space-y-[clamp(34px,4vw,44px)]">
             <Reveal className="text-center">
@@ -339,7 +341,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             </div>
           </div>
 
-          <div className="relative left-1/2 w-screen -translate-x-1/2 bg-black">
+          <div className="relative left-1/2 w-screen -translate-x-1/2 bg-black pb-[clamp(129px,15vw,240px)]">
             <Reveal className="relative mx-auto grid max-w-[980px] gap-10 px-container py-[clamp(82px,11vw,150px)] md:min-h-[clamp(1080px,82vw,1400px)]">
               <p className="relative z-20 text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:left-1/2 md:top-[8%] md:-translate-x-1/2">
                 “{labels.quoteText}”
@@ -389,7 +391,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white py-[clamp(86px,11vw,156px)]">
+      <section className="bg-white py-[clamp(129px,16.5vw,234px)]">
         <div className="mx-auto max-w-[900px] px-container">
           <Reveal className="relative mx-auto min-h-[clamp(680px,82vw,1120px)] w-full">
             <div className="absolute right-[12%] top-0 aspect-[0.94/1] w-[34%] overflow-hidden bg-[#111] max-md:right-0 max-md:w-[43%]">
@@ -417,8 +419,8 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white py-[clamp(72px,9vw,132px)] text-primary">
-        <div className="mx-auto max-w-[1120px] space-y-[clamp(54px,7vw,96px)] px-container">
+      <section className="bg-white py-[clamp(108px,13.5vw,198px)] text-primary">
+        <div className="mx-auto max-w-[1120px] space-y-[clamp(162px,21vw,288px)] px-container">
           <Reveal className="mx-auto grid aspect-[1.8/1] w-full place-items-center bg-[#d8d8d8]">
             <p className="font-body text-[18px] font-semibold tracking-[0.04em] text-primary/70">
               {process.packageImageLabel}
@@ -456,7 +458,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white px-container pb-[clamp(150px,18vw,260px)] pt-[clamp(60px,7vw,92px)] text-center text-primary">
+      <section className="bg-white px-container pb-[clamp(225px,27vw,390px)] pt-[clamp(90px,10.5vw,138px)] text-center text-primary">
         <Link
           href={inquiryHref}
           className="link-sweep inline-flex min-h-12 items-center bg-white font-heading text-[clamp(21px,2vw,30px)] font-semibold"
