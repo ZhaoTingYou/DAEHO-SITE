@@ -36,8 +36,8 @@ export default async function NewsPage({params}: Props) {
       : content.masthead.body.split('\n').filter(Boolean);
 
   return (
-    <main className="bg-bg text-text">
-      <section className="overflow-hidden bg-bg pt-[clamp(100px,10vw,148px)]">
+    <main className="bg-white text-text">
+      <section className="overflow-hidden bg-white pt-[clamp(100px,10vw,148px)]">
         <div className="mx-auto max-w-[1240px] px-container pb-[clamp(34px,3.5vw,56px)] pt-5">
           <Reveal className="grid gap-[clamp(32px,4vw,58px)] lg:grid-cols-[minmax(0,0.72fr)_minmax(320px,0.48fr)] lg:items-end">
             <h1 className={`${englishTextClass} text-[clamp(56px,8vw,104px)] leading-[0.86] tracking-[0.025em] text-primary`}>
@@ -57,9 +57,9 @@ export default async function NewsPage({params}: Props) {
         </div>
       </section>
 
-      <section className="bg-bg pb-[clamp(58px,6vw,96px)] pt-[clamp(28px,3.5vw,48px)]">
+      <section className="bg-white pb-[clamp(58px,6vw,96px)] pt-[clamp(28px,3.5vw,48px)]">
         <div className="mx-auto max-w-[1240px] px-container">
-          <Reveal className="group grid gap-[clamp(28px,4vw,58px)] border-y border-primary/20 bg-white py-[clamp(20px,2.6vw,34px)] lg:grid-cols-[minmax(0,0.58fr)_minmax(0,0.42fr)] lg:items-stretch">
+          <Reveal className="group grid gap-[clamp(28px,4vw,58px)] border-y border-primary/20 bg-bg px-[clamp(18px,2vw,32px)] py-[clamp(20px,2.6vw,34px)] lg:grid-cols-[minmax(0,0.58fr)_minmax(0,0.42fr)] lg:items-stretch">
             <div className="hover-zoom relative">
               <div className="hover-zoom-media">
                 <SafeImage
@@ -94,7 +94,7 @@ export default async function NewsPage({params}: Props) {
         </div>
       </section>
 
-      <section id="news-grid" className="bg-bg pb-section pt-[clamp(10px,2vw,24px)]">
+      <section id="news-grid" className="bg-white pb-section pt-[clamp(10px,2vw,24px)]">
         <div className="mx-auto max-w-[1240px] space-y-[clamp(34px,4vw,52px)] px-container">
           <Reveal>
             <NewsJournalGrid

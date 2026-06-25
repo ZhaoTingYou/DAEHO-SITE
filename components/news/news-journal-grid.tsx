@@ -63,7 +63,7 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
                 onClick={() => setActiveFilter(filter.id)}
                 className={`relative min-h-11 shrink-0 cursor-pointer border px-5 py-3 ${bodyTextClass} text-[15px] leading-none tracking-normal transition duration-hover ease-brand [scroll-snap-align:start] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
                   isActive
-                    ? 'border-primary/35 bg-white text-primary'
+                    ? 'border-transparent bg-transparent text-primary'
                     : 'border-transparent bg-transparent text-subtext hover:border-primary/25 hover:text-primary'
                 }`}
               >
