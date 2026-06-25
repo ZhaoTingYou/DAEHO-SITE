@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 
 const source = readFileSync(new URL('./specialty-collection-gallery.tsx', import.meta.url), 'utf8');
+const globals = readFileSync(new URL('../../app/globals.css', import.meta.url), 'utf8');
 const bespokeViewSource = source.slice(
   source.indexOf('function BespokeCreationsView('),
   source.indexOf('const bespokeCanvasPlacements')
@@ -40,6 +41,26 @@ test('collection stage cards declare separate background and product artwork in 
   ]);
 });
 
+test('collection stage product artwork uses the original transparent PNG proportions', () => {
+  assert.ok(
+    source.includes("{background: 'bg1.jpg', product: 'c1.png', productWidth: 1672, productHeight: 941"),
+    'the first ring product should use the real c1.png dimensions'
+  );
+  assert.ok(
+    source.includes("{background: 'bg3.jpg', product: 'c2.png', productWidth: 1672, productHeight: 941"),
+    'the second product should use the real c2.png dimensions'
+  );
+  assert.ok(
+    source.includes("{background: 'bg2.jpg', product: 'c3.png', productWidth: 1535, productHeight: 1024"),
+    'the third product should use the real c3.png dimensions'
+  );
+  assert.ok(
+    stageImageSource.includes('width={artwork.productWidth}') &&
+      stageImageSource.includes('height={artwork.productHeight}'),
+    'Next Image should receive the original product dimensions instead of a square placeholder ratio'
+  );
+});
+
 test('collection stage cards restore category description copy with Patek-like text scale', () => {
   assert.ok(stagePanelSource.includes('description'), 'CollectionStagePanel should accept category description text');
   assert.ok(
@@ -75,15 +96,23 @@ test('collection stage panels fill the desktop viewport like the reference', () 
     'stage panels should fill the viewport without exposing the next section'
   );
   assert.ok(
-    stagePanelSource.includes('max-md:pt-[42svh]'),
-    'mobile stage text should be pushed below the product image'
+    stagePanelSource.includes('max-lg:pt-[42svh]'),
+    'mobile and tablet stage text should be pushed below the product image'
   );
 });
 
-test('collection stage product artwork is separated from text on mobile', () => {
+test('collection stage product artwork is separated from text on mobile and tablet', () => {
   assert.ok(
-    stageImageSource.includes('max-md:top-[12svh]') && stageImageSource.includes('max-md:h-[30svh]'),
-    'mobile product artwork should sit above the text instead of overlapping it'
+    stageImageSource.includes('max-lg:top-[12svh]') && stageImageSource.includes('max-lg:h-[30svh]'),
+    'mobile and tablet product artwork should sit above the text instead of overlapping it'
+  );
+  assert.ok(
+    source.includes("productClassName: 'collection-stage-product--c1'") &&
+      globals.includes('.collection-stage-product--c1') &&
+      globals.includes('flex-shrink: 0') &&
+      globals.includes('max-height: none !important') &&
+      globals.includes('@media (max-width: 1023px)'),
+    'the first ring artwork should compensate for its left-weighted transparent canvas on desktop and mobile'
   );
 });
 
@@ -101,9 +130,9 @@ test('collection stage product artwork uses Patek-like side proportions', () => 
     stageImageSource.includes('max-h-[88svh]') && stageImageSource.includes('max-w-full'),
     'product artwork should preserve full visibility across responsive viewports'
   );
-  assert.equal(
-    stageImageSource.includes('max-w-none'),
-    false,
-    'product artwork should not force overflow beyond its responsive frame'
+  assert.ok(
+    source.includes('productClassName?: string') &&
+      stageImageSource.includes('artwork.productClassName'),
+    'asset-specific positioning should stay in the artwork mapping instead of hard-coded image conditionals'
   );
 });

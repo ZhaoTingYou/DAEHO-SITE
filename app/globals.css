@@ -102,6 +102,29 @@ body.is-chronicle-intro-locked {
   word-break: keep-all;
 }
 
+.collection-stage-product--c1 {
+  flex-shrink: 0;
+  height: auto !important;
+  max-height: none !important;
+  width: clamp(1480px, 94vw, 1900px) !important;
+  max-width: none !important;
+  transform: translateX(-3%);
+}
+
+@media (max-width: 1023px) {
+  .collection-stage-product--c1 {
+    width: min(132vw, 980px) !important;
+    transform: translateX(12%);
+  }
+}
+
+@media (max-width: 767px) {
+  .collection-stage-product--c1 {
+    width: min(184vw, 760px) !important;
+    transform: translateX(20%);
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;

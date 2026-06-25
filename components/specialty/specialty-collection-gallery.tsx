@@ -27,12 +27,15 @@ type CollectionImageSource = {
 type CollectionStageArtwork = {
   background: string;
   product: string;
+  productWidth: number;
+  productHeight: number;
+  productClassName?: string;
 };
 
 const collectionStageArtwork = [
-  {background: 'bg1.jpg', product: 'c1.png'},
-  {background: 'bg3.jpg', product: 'c2.png'},
-  {background: 'bg2.jpg', product: 'c3.png'}
+  {background: 'bg1.jpg', product: 'c1.png', productWidth: 1672, productHeight: 941, productClassName: 'collection-stage-product--c1'},
+  {background: 'bg3.jpg', product: 'c2.png', productWidth: 1672, productHeight: 941},
+  {background: 'bg2.jpg', product: 'c3.png', productWidth: 1535, productHeight: 1024}
 ] as const;
 
 export type SpecialtyCollectionItem = {
@@ -1880,7 +1883,7 @@ function CollectionStagePanel({
       </motion.div>
 
       <div
-        className={`pointer-events-none absolute inset-y-0 w-1/2 ${
+        className={`pointer-events-none absolute inset-y-0 hidden w-[42%] lg:block ${
           textSide === 'left'
             ? 'left-0 bg-gradient-to-r from-black via-black/68 to-transparent'
             : 'right-0 bg-gradient-to-l from-black via-black/68 to-transparent'
@@ -1888,13 +1891,13 @@ function CollectionStagePanel({
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto grid min-h-[100svh] max-w-[1440px] items-center px-container py-[clamp(84px,9vw,150px)] max-md:pb-20 max-md:pt-[42svh] md:grid-cols-2">
+      <div className="relative z-10 mx-auto grid min-h-[100svh] max-w-[1440px] items-center px-container py-[clamp(84px,9vw,150px)] max-lg:pb-20 max-lg:pt-[42svh] lg:grid-cols-2">
         <motion.div
           style={{opacity: textOpacity, x: textX, y: textY}}
           className={`max-w-[340px] space-y-5 ${
             textSide === 'left'
-              ? 'ml-[clamp(20px,6vw,96px)] justify-self-start text-left md:col-start-1'
-              : 'mr-[clamp(20px,6vw,96px)] justify-self-end text-left md:col-start-2'
+              ? 'ml-[clamp(20px,6vw,96px)] justify-self-start text-left lg:col-start-1'
+              : 'mr-[clamp(20px,6vw,96px)] justify-self-end text-left lg:col-start-2'
           }`}
         >
           <div className="space-y-3">
@@ -1946,7 +1949,7 @@ function StageImage({
       />
       <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
       <div
-        className={`absolute inset-y-[-6%] flex items-center max-md:inset-x-4 max-md:inset-y-auto max-md:top-[12svh] max-md:h-[30svh] max-md:justify-center ${
+        className={`absolute inset-y-[-6%] flex items-center max-lg:inset-x-4 max-lg:inset-y-auto max-lg:top-[12svh] max-lg:h-[30svh] max-lg:justify-center ${
           productSide === 'left'
             ? 'left-[clamp(32px,4vw,96px)] right-[28%] justify-start'
             : 'left-[24%] right-[clamp(32px,4vw,96px)] justify-end'
@@ -1955,11 +1958,11 @@ function StageImage({
         <Image
           src={`/images/${artwork.product}`}
           alt={productAlt}
-          width={1200}
-          height={1200}
+          width={artwork.productWidth}
+          height={artwork.productHeight}
           sizes="(min-width: 1024px) 68vw, calc(100vw - 2rem)"
           priority={priority}
-          className="h-auto max-h-[88svh] w-[clamp(980px,82vw,1700px)] max-w-full object-contain drop-shadow-[0_34px_62px_rgba(0,0,0,0.46)]"
+          className={`h-auto max-h-[88svh] w-[clamp(980px,82vw,1700px)] max-w-full object-contain drop-shadow-[0_34px_62px_rgba(0,0,0,0.46)] ${artwork.productClassName ?? ''}`}
         />
       </div>
     </motion.div>
