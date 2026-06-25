@@ -146,7 +146,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
               <RevealItem key={item.image} className="h-full">
                 <Link
                   href={withLocale(locale, '/mastery/creations')}
-                  className="group mx-auto grid h-full w-full max-w-[300px] grid-rows-[auto_1fr] bg-white p-[clamp(12px,0.95vw,16px)] transition duration-hover ease-brand hover:-translate-y-1"
+                  className="group mx-auto grid h-full w-full max-w-[300px] grid-rows-[auto_1fr] border border-transparent bg-white p-[clamp(12px,0.95vw,16px)] transition duration-hover ease-brand hover:-translate-y-1 hover:border-primary/25 focus-visible:border-primary/35"
                 >
                   <div className="hover-zoom">
                     <div className="hover-zoom-media">
