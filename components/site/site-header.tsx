@@ -366,7 +366,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
             })}
           </motion.nav>
 
-          <div className="flex items-center justify-end gap-5 font-body text-[13pt] font-[300] uppercase tracking-[0.12em]">
+          <div className="flex items-center justify-end gap-5 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
             <div className="flex items-center gap-3" aria-label={navText('languageSwitcherLabel')}>
               {languageLinks.map((item, index) => (
                 <span key={item.locale} className="contents">
@@ -447,7 +447,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
           DAEHO
         </Link>
 
-        <div className="flex min-h-11 items-center gap-2 font-body text-[13pt] font-[300] uppercase tracking-[0.12em]">
+        <div className="flex min-h-11 items-center gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
           {languageLinks.map((item, index) => (
             <span key={item.locale} className="contents">
               {index > 0 ? (
@@ -490,14 +490,16 @@ export function SiteHeader({locale}: SiteHeaderProps) {
 
             <div className="mx-auto grid max-w-[1440px] grid-cols-[0.8fr_1.7fr_0.7fr] gap-10 px-container py-9">
               <div>
-                <p
-                  className={`font-body text-[11px] font-semibold uppercase tracking-[0.18em] ${
-                    currentMegaItem.id === 'legacy' || currentMegaItem.id === 'specialty' ? 'text-accent' : 'text-subtext'
-                  }`}
-                >
-                  {currentMegaDetails.eyebrow}
-                </p>
-                <p className="mt-3 max-w-[16rem] font-heading text-[22px] font-semibold leading-none">
+                {currentMegaDetails.eyebrow ? (
+                  <p
+                    className={`font-body text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                      currentMegaItem.id === 'legacy' || currentMegaItem.id === 'specialty' ? 'text-accent' : 'text-subtext'
+                    }`}
+                  >
+                    {currentMegaDetails.eyebrow}
+                  </p>
+                ) : null}
+                <p className={`${currentMegaDetails.eyebrow ? 'mt-3' : 'pt-[28px]'} max-w-[16rem] font-heading text-[22px] font-semibold leading-none`}>
                   {currentMegaDetails.title}
                 </p>
               </div>

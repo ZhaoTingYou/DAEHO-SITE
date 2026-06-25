@@ -254,6 +254,9 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
     'home_ring_01.png',
     'collection_ring_03.png'
   ].slice(0, 7);
+  const loopedArchiveImages = archiveImages.length > 1
+    ? [...archiveImages, ...archiveImages]
+    : archiveImages;
 
   return (
     <main className="bg-white text-primary">
@@ -265,151 +268,162 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         title={copy.heroTitle}
       />
 
-      <section className="relative z-10 bg-[#62302F] py-[clamp(84px,9vw,132px)] text-[#F4E6E1]">
-        <AchievementPentagonStats items={copy.statBand} locale={locale} />
-      </section>
+      <div className="relative z-10 bg-white">
+        <section className="bg-[#62302F] py-[clamp(84px,9vw,132px)] text-[#F4E6E1]">
+          <AchievementPentagonStats items={copy.statBand} locale={locale} />
+        </section>
 
-      <section className="bg-[#f4efe6] py-[clamp(108px,12vw,176px)]">
-        <Reveal className="mx-auto max-w-[760px] px-container text-center text-primary">
-          <div className="mx-auto mb-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
-          <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
-            {copy.quoteTitle}
-          </p>
-          <p className={`${bodyTextClass} mt-[14px] text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
-            {copy.quoteBody}
-          </p>
-          <div className="mx-auto mt-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
-        </Reveal>
-      </section>
-
-      <section className="overflow-hidden bg-bg py-[clamp(104px,11vw,164px)]">
-        <Reveal className="px-container text-center">
-          <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
-            {copy.firstTitle}
-          </p>
-          <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
-            {copy.firstHeading}
-          </h2>
-        </Reveal>
-
-        <Reveal className="mt-[clamp(54px,6vw,78px)]">
-          <DraggableScroll
-            ariaLabel={copy.firstHeading}
-            className="mx-auto flex w-full gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] lg:max-w-[1110px] lg:justify-center lg:px-0 [&::-webkit-scrollbar]:hidden"
-          >
-            {copy.firstRecords.map((record) => (
-              <article key={record.title} className="w-[min(72vw,330px)] shrink-0">
-                <div className="relative aspect-[3/4] overflow-hidden bg-[#d8d8d8]">
-                  <Image
-                    src={`/images/${record.image}`}
-                    alt={record.title}
-                    fill
-                    sizes="(min-width: 1024px) 330px, 72vw"
-                    className="pointer-events-none object-cover"
-                  />
-                </div>
-                <p className={`${bodyTextClass} mt-6 text-[15px] leading-tight text-primary`}>
-                  {record.body}
-                </p>
-                <h3 className={`${englishTextClass} mt-2 whitespace-pre-line text-[15px] uppercase leading-[1.18] tracking-[0.04em] text-primary`}>
-                  {record.title}
-                </h3>
-              </article>
-            ))}
-          </DraggableScroll>
-        </Reveal>
-      </section>
-
-      <section className="bg-[#f4efe6] px-container py-[clamp(116px,12vw,182px)]">
-        <div className="mx-auto max-w-[980px]">
-          <Reveal className="mx-auto max-w-[680px] text-center">
-            <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
-              {copy.marketLabel}
+        <section className="bg-[#f4efe6] py-[clamp(108px,12vw,176px)]">
+          <Reveal className="mx-auto max-w-[760px] px-container text-center text-primary">
+            <div className="mx-auto mb-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
+            <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
+              {copy.quoteTitle}
             </p>
-            <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(29px,2.7vw,40px)] leading-[1.25] text-primary`}>
-              {copy.marketTitle}
+            <p className={`${bodyTextClass} mt-[14px] text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
+              {copy.quoteBody}
+            </p>
+            <div className="mx-auto mt-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
+          </Reveal>
+        </section>
+
+        <section className="overflow-hidden bg-bg py-[clamp(104px,11vw,164px)]">
+          <Reveal className="px-container text-center">
+            <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
+              {copy.firstTitle}
+            </p>
+            <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
+              {copy.firstHeading}
             </h2>
-            <p className={`${bodyTextClass} mt-[26px] whitespace-pre-line text-[15px] leading-[1.82] text-[#252525]`}>
-              {copy.marketIntro}
+          </Reveal>
+
+          <Reveal className="mt-[clamp(54px,6vw,78px)]">
+            <DraggableScroll
+              ariaLabel={copy.firstHeading}
+              className="mx-auto flex w-full gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] lg:max-w-[1110px] lg:justify-center lg:px-0 [&::-webkit-scrollbar]:hidden"
+            >
+              {copy.firstRecords.map((record) => (
+                <article key={record.title} className="w-[min(72vw,330px)] shrink-0">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-[#d8d8d8]">
+                    <Image
+                      src={`/images/${record.image}`}
+                      alt={record.title}
+                      fill
+                      sizes="(min-width: 1024px) 330px, 72vw"
+                      className="pointer-events-none object-cover"
+                    />
+                  </div>
+                  <p className={`${bodyTextClass} mt-6 text-[15px] leading-tight text-primary`}>
+                    {record.body}
+                  </p>
+                  <h3 className={`${englishTextClass} mt-2 whitespace-pre-line text-[15px] uppercase leading-[1.18] tracking-[0.04em] text-primary`}>
+                    {record.title}
+                  </h3>
+                </article>
+              ))}
+            </DraggableScroll>
+          </Reveal>
+        </section>
+
+        <section className="bg-[#f4efe6] px-container py-[clamp(116px,12vw,182px)]">
+          <div className="mx-auto max-w-[980px]">
+            <Reveal className="mx-auto max-w-[680px] text-center">
+              <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
+                {copy.marketLabel}
+              </p>
+              <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(29px,2.7vw,40px)] leading-[1.25] text-primary`}>
+                {copy.marketTitle}
+              </h2>
+              <p className={`${bodyTextClass} mt-[26px] whitespace-pre-line text-[15px] leading-[1.82] text-[#252525]`}>
+                {copy.marketIntro}
+              </p>
+            </Reveal>
+
+            <div className="mt-[clamp(86px,10vw,132px)] space-y-[clamp(112px,14vw,180px)]">
+              {copy.marketFeatures.map((item, index) => (
+                <Reveal
+                  key={item.value}
+                  className={`grid gap-10 md:items-center md:gap-[clamp(56px,7vw,92px)] ${
+                    index % 2 === 1
+                      ? 'md:grid-cols-[minmax(248px,0.34fr)_minmax(0,0.66fr)]'
+                      : 'md:grid-cols-[minmax(0,0.66fr)_minmax(248px,0.34fr)]'
+                  }`}
+                >
+                  {index % 2 === 1 ? <MarketText item={item} locale={locale} /> : null}
+                  <MarketImage image={item.image} alt={item.title} />
+                  {index % 2 === 0 ? <MarketText item={item} locale={locale} /> : null}
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="overflow-hidden bg-white py-[clamp(100px,10vw,154px)]">
+          <Reveal className="px-container text-center">
+            <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
+              {copy.archiveLabel}
+            </p>
+            <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
+              {copy.archiveTitle}
+            </h2>
+          </Reveal>
+
+          <Reveal className="mx-auto mt-[clamp(32px,4vw,48px)] flex max-w-[1540px] justify-center px-container">
+            <p
+              className={`archive-drag-hint ${englishTextClass} text-[13px] uppercase leading-none tracking-[0.22em]`}
+              aria-hidden="true"
+            >
+              <span className="archive-drag-hint__arrow archive-drag-hint__arrow--left">←</span>
+              <span>DRAG</span>
+              <span className="archive-drag-hint__arrow archive-drag-hint__arrow--right">→</span>
             </p>
           </Reveal>
 
-          <div className="mt-[clamp(86px,10vw,132px)] space-y-[clamp(112px,14vw,180px)]">
-            {copy.marketFeatures.map((item, index) => (
-              <Reveal
-                key={item.value}
-                className={`grid gap-10 md:items-center md:gap-[clamp(56px,7vw,92px)] ${
-                  index % 2 === 1
-                    ? 'md:grid-cols-[minmax(248px,0.34fr)_minmax(0,0.66fr)]'
-                    : 'md:grid-cols-[minmax(0,0.66fr)_minmax(248px,0.34fr)]'
-                }`}
-              >
-                {index % 2 === 1 ? <MarketText item={item} locale={locale} /> : null}
-                <MarketImage image={item.image} alt={item.title} />
-                {index % 2 === 0 ? <MarketText item={item} locale={locale} /> : null}
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+          <Reveal className="mt-6">
+            <DraggableScroll
+              ariaLabel={copy.archiveTitle}
+              autoScroll
+              autoScrollResetRatio={archiveImages.length > 1 ? 0.5 : 1}
+              autoScrollSpeed={48}
+              className="flex gap-6 overflow-x-auto px-container pb-4 [scrollbar-width:none] [touch-action:pan-y] [&::-webkit-scrollbar]:hidden"
+            >
+              {loopedArchiveImages.map((image, index) => {
+                const isDuplicate = index >= archiveImages.length;
+                const imageIndex = index % archiveImages.length;
 
-      <section className="relative z-10 overflow-hidden bg-white py-[clamp(100px,10vw,154px)]">
-        <Reveal className="px-container text-center">
-          <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
-            {copy.archiveLabel}
-          </p>
-          <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
-            {copy.archiveTitle}
-          </h2>
-        </Reveal>
+                return (
+                  <div
+                    key={`${image}-${index}`}
+                    aria-hidden={isDuplicate ? true : undefined}
+                    className="relative aspect-[3/4] w-[min(46vw,300px)] shrink-0 overflow-hidden bg-[#d8d8d8]"
+                  >
+                    <Image
+                      src={`/images/${image}`}
+                      alt={isDuplicate ? '' : `${copy.archiveTitle} ${imageIndex + 1}`}
+                      fill
+                      sizes="(min-width: 1024px) 300px, 46vw"
+                      className="pointer-events-none object-cover"
+                    />
+                  </div>
+                );
+              })}
+            </DraggableScroll>
+          </Reveal>
+        </section>
 
-        <Reveal className="mx-auto mt-[clamp(32px,4vw,48px)] flex max-w-[1540px] justify-center px-container">
-          <p
-            className={`archive-drag-hint ${englishTextClass} text-[13px] uppercase leading-none tracking-[0.22em]`}
-            aria-hidden="true"
-          >
-            <span className="archive-drag-hint__arrow archive-drag-hint__arrow--left">←</span>
-            <span>DRAG</span>
-            <span className="archive-drag-hint__arrow archive-drag-hint__arrow--right">→</span>
-          </p>
-        </Reveal>
-
-        <Reveal className="mt-6">
-          <DraggableScroll
-            ariaLabel={copy.archiveTitle}
-            className="flex gap-6 overflow-x-auto px-container pb-4 [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden"
-          >
-            {archiveImages.map((image, index) => (
-              <div
-                key={`${image}-${index}`}
-                className="relative aspect-[3/4] w-[min(46vw,300px)] shrink-0 overflow-hidden bg-[#d8d8d8]"
-              >
-                <Image
-                  src={`/images/${image}`}
-                  alt={`${copy.archiveTitle} ${index + 1}`}
-                  fill
-                  sizes="(min-width: 1024px) 300px, 46vw"
-                  className="pointer-events-none object-cover"
-                />
-              </div>
-            ))}
-          </DraggableScroll>
-        </Reveal>
-      </section>
-
-      <section className="relative z-10 bg-white py-[clamp(104px,11vw,168px)]">
-        <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
-            {copy.discoverLead}
-          </p>
-          <Link
-            href={withLocale(locale, '/mastery/creations')}
-            className={`${englishTextClass} link-sweep mt-[10px] inline-flex text-[15px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
-          >
-            {copy.cta}
-          </Link>
-        </Reveal>
-      </section>
+        <section className="bg-white py-[clamp(104px,11vw,168px)]">
+          <Reveal className="mx-auto max-w-3xl px-container text-center">
+            <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
+              {copy.discoverLead}
+            </p>
+            <Link
+              href={withLocale(locale, '/mastery/creations')}
+              className={`${englishTextClass} link-sweep mt-[10px] inline-flex text-[15px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
+            >
+              {copy.cta}
+            </Link>
+          </Reveal>
+        </section>
+      </div>
     </main>
   );
 }

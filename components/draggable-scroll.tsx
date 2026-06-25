@@ -6,11 +6,23 @@ type DraggableScrollProps = {
   children: ReactNode;
   className?: string;
   ariaLabel?: string;
+  autoScroll?: boolean;
+  autoScrollResetRatio?: number;
+  autoScrollSpeed?: number;
 };
 
-export function DraggableScroll({children, className, ariaLabel}: DraggableScrollProps) {
+export function DraggableScroll({
+  children,
+  className,
+  ariaLabel,
+  autoScroll = false,
+  autoScrollResetRatio = 1,
+  autoScrollSpeed = 18
+}: DraggableScrollProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const momentumRef = useRef<number | null>(null);
+  const autoScrollRef = useRef<number | null>(null);
+  const autoScrollPositionRef = useRef(0);
   const dragState = useRef({
     isActive: false,
     hasMoved: false,
@@ -80,10 +92,19 @@ export function DraggableScroll({children, className, ariaLabel}: DraggableScrol
     }
   };
 
+  const cancelAutoScroll = () => {
+    if (autoScrollRef.current === null) {
+      return;
+    }
+
+    cancelAnimationFrame(autoScrollRef.current);
+    autoScrollRef.current = null;
+  };
+
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const scroller = scrollerRef.current;
 
-    if (!scroller || event.button !== 0 || event.pointerType === 'touch') {
+    if (!scroller || event.button !== 0) {
       return;
     }
 
@@ -158,9 +179,73 @@ export function DraggableScroll({children, className, ariaLabel}: DraggableScrol
       if (momentumRef.current !== null) {
         cancelAnimationFrame(momentumRef.current);
       }
+
+      if (autoScrollRef.current !== null) {
+        cancelAnimationFrame(autoScrollRef.current);
+      }
     },
     []
   );
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+
+    if (!autoScroll || !scroller || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    let lastTime = performance.now();
+    autoScrollPositionRef.current = scroller.scrollLeft;
+
+    const animate = (time: number) => {
+      const scroller = scrollerRef.current;
+
+      if (!scroller) {
+        autoScrollRef.current = null;
+        return;
+      }
+
+      const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+      const childCount = scroller.children.length;
+      const loopChildIndex = Math.floor(childCount * autoScrollResetRatio);
+      const firstChild = scroller.children[0] as HTMLElement | undefined;
+      const loopChild = scroller.children[loopChildIndex] as HTMLElement | undefined;
+      const loopDistance =
+        firstChild && loopChild
+          ? loopChild.offsetLeft - firstChild.offsetLeft
+          : scroller.scrollWidth * autoScrollResetRatio;
+      const loopAt = Math.min(
+        maxScrollLeft,
+        Math.max(1, loopDistance)
+      );
+      const shouldMove =
+        maxScrollLeft > 0 &&
+        !dragState.current.isActive &&
+        momentumRef.current === null;
+
+      if (shouldMove) {
+        const elapsed = Math.min(32, time - lastTime);
+
+        autoScrollPositionRef.current += (autoScrollSpeed * elapsed) / 1000;
+
+        if (autoScrollPositionRef.current >= loopAt - 1) {
+          autoScrollPositionRef.current = Math.max(0, autoScrollPositionRef.current - loopAt);
+        }
+
+        scroller.scrollLeft = autoScrollPositionRef.current;
+      } else {
+        autoScrollPositionRef.current = scroller.scrollLeft;
+      }
+
+      lastTime = time;
+      autoScrollRef.current = requestAnimationFrame(animate);
+    };
+
+    cancelAutoScroll();
+    autoScrollRef.current = requestAnimationFrame(animate);
+
+    return cancelAutoScroll;
+  }, [autoScroll, autoScrollResetRatio, autoScrollSpeed]);
 
   return (
     <div

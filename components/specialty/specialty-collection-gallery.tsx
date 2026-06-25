@@ -265,6 +265,32 @@ type BespokeFilterSectionData = {
   options: BespokeFilterOption[];
 };
 
+const appointmentShowcaseCopy = {
+  ko: {
+    heroAlt: '대호 임관반지 컬렉션',
+    sections: [
+      {image: 'collection_ring2.png', width: 413, height: 593, label: '제품의 다양성'},
+      {image: 'collection_ring3.png', width: 288, height: 300, label: '반지 내부의 디테일'}
+    ],
+    thumbnailLabel: '임관반지의 디자인 + 대호의 역사'
+  },
+  en: {
+    heroAlt: 'DEAHO appointment ring collection',
+    sections: [
+      {image: 'collection_ring2.png', width: 413, height: 593, label: 'Product variety'},
+      {image: 'collection_ring3.png', width: 288, height: 300, label: 'Interior ring details'}
+    ],
+    thumbnailLabel: 'Appointment ring design + DEAHO history'
+  }
+} as const;
+
+const appointmentThumbnails = [
+  {image: 'cl1.png', width: 114, height: 129},
+  {image: 'cl2.png', width: 98, height: 124},
+  {image: 'cl3.png', width: 102, height: 119},
+  {image: 'cl4.png', width: 110, height: 116}
+] as const;
+
 const bespokeViewCopy: Record<
   Locale,
   {
@@ -540,9 +566,10 @@ function BespokeCreationsView({
         <div className="relative border-b border-primary/15 py-[clamp(74px,8vw,128px)] text-center">
           <Link
             href={backHref}
-            className="absolute left-0 top-[clamp(28px,3.5vw,48px)] border-b border-primary/25 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary transition duration-hover ease-brand hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+            aria-label={allLabel}
+            className="link-sweep !absolute left-0 top-[clamp(28px,3.5vw,48px)] font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           >
-            {allLabel}
+            <span aria-hidden="true">←</span>
           </Link>
           <h1 className="font-heading text-[clamp(42px,4vw,68px)] font-semibold leading-[1.08] text-primary">
             {locale === 'ko' ? '주문제작' : 'Bespoke'}
@@ -1268,15 +1295,16 @@ function CollectionGridView({
   locale: Locale;
 }) {
   return (
-    <div className="mx-auto max-w-[1280px] px-container">
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b border-hairline pb-5">
+    <div className="relative mx-auto max-w-[1280px] px-container">
+      <Link
+        href={backHref}
+        aria-label={allLabel}
+        className="link-sweep !absolute left-container top-0 font-body text-[20px] font-semibold leading-none text-primary"
+      >
+        <span aria-hidden="true">←</span>
+      </Link>
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b border-hairline pb-5 pt-[clamp(28px,4vw,56px)]">
         <div className="space-y-2">
-          <Link
-            href={backHref}
-            className="link-sweep font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary"
-          >
-            {allLabel}
-          </Link>
           <h2 className="font-heading text-[clamp(24px,2.6vw,36px)] font-semibold leading-tight text-primary">
             {activeLabel}
           </h2>
@@ -1300,10 +1328,7 @@ function CollectionGridView({
 }
 
 function AppointmentCollectionView({
-  items,
-  empty,
   filterLabel,
-  activeLabel,
   allLabel,
   backHref,
   locale
@@ -1319,71 +1344,98 @@ function AppointmentCollectionView({
   backHref: string;
   locale: Locale;
 }) {
-  const featuredItems = items.slice(0, 3);
+  const copy = appointmentShowcaseCopy[locale] ?? appointmentShowcaseCopy.ko;
 
   return (
-    <div className="mx-auto max-w-[1180px] px-container">
-      <div className="border-b border-hairline pb-[clamp(24px,4vw,44px)] pt-[clamp(8px,2vw,20px)] text-center">
+    <div className="-mb-[clamp(84px,9vw,132px)] -mt-28 bg-white pb-[clamp(136px,15vw,240px)] pt-28 text-primary">
+      <div className="mx-auto max-w-[1480px] px-container pt-[clamp(28px,4vw,56px)]">
         <Link
           href={backHref}
-          className="link-sweep font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary"
+          aria-label={allLabel}
+          className="link-sweep font-body text-[20px] font-semibold leading-none text-primary"
         >
-          {allLabel}
+          <span aria-hidden="true">←</span>
         </Link>
-        <h2 className="mt-[clamp(24px,4vw,52px)] font-heading text-[clamp(32px,4.2vw,54px)] font-semibold leading-none text-primary">
-          {activeLabel}
-        </h2>
       </div>
 
-      {featuredItems.length === 0 ? (
-        <div className="pt-10">
-          <EmptyState title={empty.title} body={empty.body} />
-        </div>
-      ) : (
-        <div
-          aria-label={filterLabel}
-          className="space-y-[clamp(72px,9vw,128px)] pt-[clamp(56px,7vw,96px)]"
+      <section
+        aria-label={filterLabel}
+        className="mx-auto flex max-w-[620px] flex-col items-center px-container pt-[clamp(42px,7vw,96px)] text-center"
+      >
+        <motion.div
+          initial={{opacity: 0, y: 28}}
+          whileInView={{opacity: 1, y: 0}}
+          viewport={{once: true, margin: '-12% 0px'}}
+          transition={{duration: 0.48, ease: [0.16, 1, 0.3, 1]}}
+          className="flex flex-col items-center"
         >
-          {featuredItems.map((item, index) => (
-            <motion.article
-              key={item.id}
-              className="mx-auto max-w-[760px]"
+          <Image
+            src="/images/collection_ring1.png"
+            alt={copy.heroAlt}
+            width={473}
+            height={414}
+            priority
+            className="h-auto w-[min(72vw,380px)]"
+          />
+          <div className="mt-[clamp(24px,4vw,42px)] h-[10px] w-[44px] bg-[#6F7C99]" aria-hidden="true" />
+        </motion.div>
+
+        <div className="mt-[clamp(128px,18vw,240px)] flex w-full flex-col items-center gap-[clamp(132px,19vw,260px)]">
+          {copy.sections.map((section, index) => (
+            <motion.figure
+              key={section.image}
               initial={{opacity: 0, y: 34}}
               whileInView={{opacity: 1, y: 0}}
               viewport={{once: true, margin: '-12% 0px'}}
               transition={{
                 duration: 0.48,
-                delay: Math.min(index * 0.05, 0.12),
+                delay: Math.min(index * 0.06, 0.12),
                 ease: [0.16, 1, 0.3, 1]
               }}
+              className="flex w-full flex-col items-center"
             >
-              <Link
-                href={`/${locale}/mastery/creations/${item.id}`}
-                className="group block min-h-11 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-                aria-label={`${item.title}: ${item.caption}`}
-              >
-                <div className="mx-auto w-full max-w-[min(620px,88vw)]">
-                  <CollectionImage
-                    item={item}
-                    aspect="aspect-square"
-                    sizes="(min-width: 1024px) 620px, 88vw"
-                    priority={index === 0}
+              <Image
+                src={`/images/${section.image}`}
+                alt={section.label}
+                width={section.width}
+                height={section.height}
+                className={`h-auto ${index === 0 ? 'w-[min(74vw,390px)]' : 'w-[min(58vw,288px)]'}`}
+              />
+              <figcaption className="mt-[clamp(14px,2vw,22px)] font-body text-[10px] font-normal leading-none text-primary">
+                {section.label}
+              </figcaption>
+            </motion.figure>
+          ))}
+
+          <motion.figure
+            initial={{opacity: 0, y: 34}}
+            whileInView={{opacity: 1, y: 0}}
+            viewport={{once: true, margin: '-12% 0px'}}
+            transition={{duration: 0.48, ease: [0.16, 1, 0.3, 1]}}
+            className="flex w-full flex-col items-center"
+          >
+            <div className="flex items-center justify-center gap-[clamp(12px,2.8vw,24px)]">
+              {appointmentThumbnails.map((thumb) => (
+                <div
+                  key={thumb.image}
+                  className="flex h-[clamp(58px,9vw,88px)] w-[clamp(58px,9vw,88px)] items-center justify-center rounded-full bg-[#E8E8E8]"
+                >
+                  <Image
+                    src={`/images/${thumb.image}`}
+                    alt=""
+                    width={thumb.width}
+                    height={thumb.height}
+                    className="h-[74%] w-[74%] object-contain"
                   />
                 </div>
-                <div className="mx-auto mt-[clamp(20px,3vw,34px)] max-w-[520px] space-y-2 text-center">
-                  <p className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-                    {item.categoryLabel}
-                  </p>
-                  <h3 className="font-heading text-[clamp(24px,3vw,34px)] font-semibold leading-tight text-primary">
-                    {item.title}
-                  </h3>
-                  <p className="font-body text-[15px] leading-7 text-subtext">{item.caption}</p>
-                </div>
-              </Link>
-            </motion.article>
-          ))}
+              ))}
+            </div>
+            <figcaption className="mt-[clamp(18px,2.6vw,26px)] font-body text-[10px] font-normal leading-none text-primary">
+              {copy.thumbnailLabel}
+            </figcaption>
+          </motion.figure>
         </div>
-      )}
+      </section>
     </div>
   );
 }
@@ -1444,12 +1496,13 @@ function CollectionFinderView({
   return (
     <div className="relative bg-[#F8F6F2] pb-[calc(112px+env(safe-area-inset-bottom))]">
       <div className="mx-auto max-w-[1480px] px-container">
-        <div className="border-b border-hairline pb-[clamp(42px,5vw,76px)] pt-[clamp(28px,4vw,56px)]">
+        <div className="relative border-b border-hairline pb-[clamp(63px,7.5vw,114px)] pt-[clamp(28px,4vw,56px)]">
           <Link
             href={backHref}
-            className="link-sweep mb-[clamp(44px,5.5vw,84px)] font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary"
+            aria-label={allLabel}
+            className="link-sweep !absolute left-0 top-[clamp(28px,4vw,56px)] font-body text-[20px] font-semibold leading-none text-primary"
           >
-            {allLabel}
+            <span aria-hidden="true">←</span>
           </Link>
           <div className="mx-auto max-w-3xl space-y-7 text-center">
             <div className="space-y-4">

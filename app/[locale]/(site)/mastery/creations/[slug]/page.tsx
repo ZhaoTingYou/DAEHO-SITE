@@ -84,8 +84,12 @@ export default async function CollectionDetailPage({params}: Props) {
     <main className="bg-bg text-text">
       <section className="bg-bg pt-28">
         <div className="mx-auto max-w-[1280px] px-container pb-section pt-[clamp(40px,5vw,72px)]">
-          <Link href={withLocale(locale, '/mastery/creations')} className="link-sweep font-body text-[12px] font-semibold uppercase tracking-[0.16em]">
-            {text.back}
+          <Link
+            href={withLocale(locale, '/mastery/creations')}
+            aria-label={text.back}
+            className="link-sweep font-body text-[20px] font-semibold leading-none text-primary"
+          >
+            <span aria-hidden="true">←</span>
           </Link>
           <div className="mt-[clamp(40px,5vw,64px)] grid gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.72fr)] lg:items-start lg:gap-16">
             <Reveal>
