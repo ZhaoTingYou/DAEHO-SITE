@@ -24,6 +24,17 @@ type CollectionImageSource = {
   hasImage: boolean;
 };
 
+type CollectionStageArtwork = {
+  background: string;
+  product: string;
+};
+
+const collectionStageArtwork = [
+  {background: 'bg1.jpg', product: 'c1.png'},
+  {background: 'bg3.jpg', product: 'c2.png'},
+  {background: 'bg2.jpg', product: 'c3.png'}
+] as const;
+
 export type SpecialtyCollectionItem = {
   id: string;
   title: string;
@@ -129,6 +140,7 @@ export function SpecialtyCollectionGallery({
               viewLabel={viewLabel}
               href={`/${locale}/mastery/creations/${category.id}`}
               item={category.item}
+              artwork={collectionStageArtwork[index]}
               reducedMotion={prefersReducedMotion}
               textSide={imageSide === 'left' ? 'right' : 'left'}
             />
@@ -204,7 +216,6 @@ export function SpecialtyCollectionCategory({
         items={visibleItems}
         empty={empty}
         filterLabel={filterLabel}
-        activeLabel={activeFilter.label}
         allLabel={allLabel}
         backHref={backHref}
         locale={locale}
@@ -452,9 +463,6 @@ function BespokeCreationsView({
   items,
   empty,
   filterLabel,
-  activeLabel,
-  allLabel,
-  backHref,
   locale
 }: {
   items: SpecialtyCollectionItem[];
@@ -463,7 +471,6 @@ function BespokeCreationsView({
     body: string;
   };
   filterLabel: string;
-  activeLabel: string;
   allLabel: string;
   backHref: string;
   locale: Locale;
@@ -513,29 +520,10 @@ function BespokeCreationsView({
   return (
     <div className="bg-[#F8F6F2] text-primary">
       <section className="mx-auto max-w-[1580px] px-container">
-        <div className="border-b border-primary/15 pb-[clamp(26px,4vw,54px)] pt-[clamp(8px,2vw,22px)]">
-          <Link
-            href={backHref}
-            className="link-sweep font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary"
-          >
-            {allLabel}
-          </Link>
-
-          <div className="mt-[clamp(34px,6vw,88px)] grid gap-8 md:grid-cols-[minmax(140px,0.34fr)_1fr_minmax(180px,0.34fr)] md:items-end">
-            <p className="font-numeric text-[15px] font-semibold uppercase tracking-[0.14em] text-primary/65">
-              {copy.period}
-            </p>
-            <div className="space-y-4 text-center md:space-y-5">
-              <h1 className="font-heading text-[clamp(48px,8vw,116px)] font-semibold leading-[0.88] text-primary">
-                {copy.collectionTitle}
-              </h1>
-              <div className="mx-auto h-px w-12 bg-accent/70" />
-              <p className="font-body text-[15px] font-semibold uppercase tracking-[0.22em] text-primary/65">
-                {activeLabel}
-              </p>
-            </div>
-            <div className="hidden md:block" aria-hidden="true" />
-          </div>
+        <div className="border-b border-primary/15 py-[clamp(74px,8vw,128px)] text-center">
+          <h1 className="font-heading text-[clamp(42px,4vw,68px)] font-semibold leading-[1.08] text-primary">
+            {locale === 'ko' ? '주문제작' : 'Bespoke'}
+          </h1>
         </div>
 
         <div className="grid border-b border-primary/15 font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-primary md:grid-cols-[180px_1fr]">
@@ -551,7 +539,6 @@ function BespokeCreationsView({
             </button>
           </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 py-5 pl-0 text-primary/45 md:pl-8">
-            <span className="text-primary/45">{activeLabel}</span>
             {activeFilterCount > 0 ? (
               <button
                 type="button"
@@ -1434,10 +1421,10 @@ function CollectionFinderView({
   return (
     <div className="relative bg-[#F8F6F2] pb-[calc(112px+env(safe-area-inset-bottom))]">
       <div className="mx-auto max-w-[1480px] px-container">
-        <div className="border-b border-hairline pb-[clamp(24px,4vw,48px)] pt-[clamp(10px,2vw,22px)]">
+        <div className="border-b border-hairline pb-[clamp(42px,5vw,76px)] pt-[clamp(28px,4vw,56px)]">
           <Link
             href={backHref}
-            className="link-sweep mb-[clamp(34px,5vw,72px)] font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary"
+            className="link-sweep mb-[clamp(44px,5.5vw,84px)] font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary"
           >
             {allLabel}
           </Link>
@@ -1840,6 +1827,7 @@ function CollectionStagePanel({
   viewLabel,
   href,
   item,
+  artwork,
   reducedMotion,
   textSide
 }: {
@@ -1849,6 +1837,7 @@ function CollectionStagePanel({
   viewLabel: string;
   href: string;
   item?: CollectionImageSource;
+  artwork: CollectionStageArtwork;
   reducedMotion: boolean;
   textSide: 'left' | 'right';
 }) {
@@ -1870,7 +1859,7 @@ function CollectionStagePanel({
   return (
     <section
       ref={ref}
-      className="relative min-h-[78svh] overflow-hidden bg-black text-on-navy md:min-h-[92svh]"
+      className="relative min-h-[100svh] overflow-hidden bg-black text-on-navy"
       aria-label={label}
     >
       <motion.div
@@ -1882,6 +1871,8 @@ function CollectionStagePanel({
       >
         <StageImage
           item={item}
+          artwork={artwork}
+          productSide={textSide === 'left' ? 'right' : 'left'}
           priority={index === 0}
           y={imageY}
           scale={imageScale}
@@ -1897,20 +1888,20 @@ function CollectionStagePanel({
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto grid min-h-[78svh] max-w-[1440px] items-center px-container py-[clamp(84px,9vw,150px)] md:min-h-[92svh] md:grid-cols-2">
+      <div className="relative z-10 mx-auto grid min-h-[100svh] max-w-[1440px] items-center px-container py-[clamp(84px,9vw,150px)] max-md:pb-20 max-md:pt-[42svh] md:grid-cols-2">
         <motion.div
           style={{opacity: textOpacity, x: textX, y: textY}}
           className={`max-w-[340px] space-y-5 ${
             textSide === 'left'
               ? 'ml-[clamp(20px,6vw,96px)] justify-self-start text-left md:col-start-1'
-              : 'mr-[clamp(20px,6vw,96px)] justify-self-end text-right md:col-start-2'
+              : 'mr-[clamp(20px,6vw,96px)] justify-self-end text-left md:col-start-2'
           }`}
         >
           <div className="space-y-3">
-            <p className="font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-on-navy/70">
+            <p className="font-body text-[clamp(16px,1.02vw,21px)] font-normal uppercase leading-[1.3] tracking-[0.08em] text-on-navy/78">
               {description}
             </p>
-            <h2 className="font-heading text-[clamp(26px,3.1vw,42px)] font-semibold leading-[1.12] text-on-navy">
+            <h2 className="font-heading text-[clamp(34px,2.15vw,46px)] font-normal uppercase leading-[1.08] tracking-[0.04em] text-on-navy">
               {label}
             </h2>
           </div>
@@ -1928,37 +1919,49 @@ function CollectionStagePanel({
 
 function StageImage({
   item,
+  artwork,
+  productSide,
   priority,
   y,
   scale
 }: {
   item?: CollectionImageSource;
+  artwork: CollectionStageArtwork;
+  productSide: 'left' | 'right';
   priority: boolean;
   y: MotionValue<number>;
   scale: MotionValue<number>;
 }) {
-  if (!item || !item.hasImage) {
-    return (
-      <div
-        className="flex h-full w-full items-center justify-center break-all bg-black p-8 text-center font-body text-[10px] font-semibold leading-5 tracking-[0.04em] text-on-navy/60"
-        role="img"
-        aria-label={item?.image ?? 'image pending'}
-      >
-        {item?.image ?? 'image pending'}
-      </div>
-    );
-  }
+  const productAlt = item ? `${item.title} ${item.caption}` : 'collection product image';
 
   return (
     <motion.div className="absolute inset-x-0 -inset-y-10 will-change-transform" style={{y, scale}}>
       <Image
-        src={`/images/${item.image}`}
-        alt={`${item.title} ${item.caption}`}
+        src={`/images/${artwork.background}`}
+        alt=""
         fill
         sizes="100vw"
         priority={priority}
         className="object-cover object-center"
       />
+      <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
+      <div
+        className={`absolute inset-y-[-6%] flex items-center max-md:inset-x-4 max-md:inset-y-auto max-md:top-[12svh] max-md:h-[30svh] max-md:justify-center ${
+          productSide === 'left'
+            ? 'left-[clamp(32px,4vw,96px)] right-[28%] justify-start'
+            : 'left-[24%] right-[clamp(32px,4vw,96px)] justify-end'
+        }`}
+      >
+        <Image
+          src={`/images/${artwork.product}`}
+          alt={productAlt}
+          width={1200}
+          height={1200}
+          sizes="(min-width: 1024px) 68vw, calc(100vw - 2rem)"
+          priority={priority}
+          className="h-auto max-h-[88svh] w-[clamp(980px,82vw,1700px)] max-w-full object-contain drop-shadow-[0_34px_62px_rgba(0,0,0,0.46)]"
+        />
+      </div>
     </motion.div>
   );
 }
