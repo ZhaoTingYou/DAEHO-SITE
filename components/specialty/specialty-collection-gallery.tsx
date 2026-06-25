@@ -14,6 +14,8 @@ export type SpecialtyCollectionFilter = {
   label: string;
   description?: string;
   image?: string;
+  background?: string;
+  product?: string;
   hasImage?: boolean;
 };
 
@@ -37,6 +39,16 @@ const collectionStageArtwork = [
   {background: 'bg3.jpg', product: 'c2.png', productWidth: 1672, productHeight: 941},
   {background: 'bg2.jpg', product: 'c3.png', productWidth: 1535, productHeight: 1024}
 ] as const;
+
+function getCollectionStageArtwork(filter: SpecialtyCollectionFilter, index: number): CollectionStageArtwork {
+  const fallback = collectionStageArtwork[index] ?? collectionStageArtwork[0];
+
+  return {
+    ...fallback,
+    background: filter.background ?? fallback.background,
+    product: filter.product ?? filter.image ?? fallback.product
+  };
+}
 
 export type SpecialtyCollectionItem = {
   id: string;
@@ -143,7 +155,7 @@ export function SpecialtyCollectionGallery({
               viewLabel={viewLabel}
               href={`/${locale}/mastery/creations/${category.id}`}
               item={category.item}
-              artwork={collectionStageArtwork[index]}
+              artwork={getCollectionStageArtwork(category, index)}
               reducedMotion={prefersReducedMotion}
               textSide={imageSide === 'left' ? 'right' : 'left'}
             />
@@ -466,6 +478,8 @@ function BespokeCreationsView({
   items,
   empty,
   filterLabel,
+  allLabel,
+  backHref,
   locale
 }: {
   items: SpecialtyCollectionItem[];
@@ -523,7 +537,13 @@ function BespokeCreationsView({
   return (
     <div className="bg-[#F8F6F2] text-primary">
       <section className="mx-auto max-w-[1580px] px-container">
-        <div className="border-b border-primary/15 py-[clamp(74px,8vw,128px)] text-center">
+        <div className="relative border-b border-primary/15 py-[clamp(74px,8vw,128px)] text-center">
+          <Link
+            href={backHref}
+            className="absolute left-0 top-[clamp(28px,3.5vw,48px)] border-b border-primary/25 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary transition duration-hover ease-brand hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+          >
+            {allLabel}
+          </Link>
           <h1 className="font-heading text-[clamp(42px,4vw,68px)] font-semibold leading-[1.08] text-primary">
             {locale === 'ko' ? '주문제작' : 'Bespoke'}
           </h1>

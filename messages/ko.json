@@ -9,8 +9,8 @@
     "subtitle": "WE DESIGN SYMBOLS THAT LAST",
     "image": "home_hero.png",
     "signature": {
-      "eyebrow": "SIGNATURE PROJECTS / 대표 프로젝트",
-      "title": "기억되어야 할 순간을 설계합니다",
+      "eyebrow": "대표 프로젝트",
+      "title": "기억되어야 할 순간을 설계합니다.",
       "body": "우승의 기록, 임관의 상징, 브랜드의 이야기를\n하나의 제품으로 완성합니다.",
       "cta": "Collection 보기",
       "projects": [
@@ -555,19 +555,25 @@
             "id": "champion",
             "label": "우승반지",
             "description": "승리의 순간을 영원의 형태로",
-            "image": "c1.png"
+            "image": "c1.png",
+            "background": "bg1.jpg",
+            "product": "c1.png"
           },
           {
             "id": "appointment",
             "label": "임관반지",
             "description": "소속과 임명의 의미를 담은 반지",
-            "image": "c2.png"
+            "image": "c2.png",
+            "background": "bg3.jpg",
+            "product": "c2.png"
           },
           {
             "id": "bespoke",
             "label": "주문제작",
             "description": "이야기에서 시작되는 맞춤 제작",
-            "image": "c3.png"
+            "image": "c3.png",
+            "background": "bg2.jpg",
+            "product": "c3.png"
           }
         ],
         "items": [

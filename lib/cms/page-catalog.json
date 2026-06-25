@@ -157,7 +157,9 @@
     "fields": [
       {"path": "label", "label": "分类名称"},
       {"path": "description", "label": "分类说明", "type": "textarea", "rows": 3},
-      {"path": "image", "label": "分类图片", "type": "image"}
+      {"path": "image", "label": "分类图片", "type": "image"},
+      {"path": "background", "label": "展示背景图", "type": "image"},
+      {"path": "product", "label": "展示产品 PNG", "type": "image"}
     ]
   },
   {
@@ -171,7 +173,9 @@
     "fields": [
       {"path": "label", "label": "分类名称"},
       {"path": "description", "label": "分类说明", "type": "textarea", "rows": 3},
-      {"path": "image", "label": "分类图片", "type": "image"}
+      {"path": "image", "label": "分类图片", "type": "image"},
+      {"path": "background", "label": "展示背景图", "type": "image"},
+      {"path": "product", "label": "展示产品 PNG", "type": "image"}
     ]
   },
   {
@@ -185,7 +189,9 @@
     "fields": [
       {"path": "label", "label": "分类名称"},
       {"path": "description", "label": "分类说明", "type": "textarea", "rows": 3},
-      {"path": "image", "label": "分类图片", "type": "image"}
+      {"path": "image", "label": "分类图片", "type": "image"},
+      {"path": "background", "label": "展示背景图", "type": "image"},
+      {"path": "product", "label": "展示产品 PNG", "type": "image"}
     ]
   },
   {

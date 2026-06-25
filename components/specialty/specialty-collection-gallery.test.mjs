@@ -4,6 +4,9 @@ import test from 'node:test';
 
 const source = readFileSync(new URL('./specialty-collection-gallery.tsx', import.meta.url), 'utf8');
 const globals = readFileSync(new URL('../../app/globals.css', import.meta.url), 'utf8');
+const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
+const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
+const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
 const bespokeViewSource = source.slice(
   source.indexOf('function BespokeCreationsView('),
   source.indexOf('const bespokeCanvasPlacements')
@@ -23,6 +26,10 @@ test('bespoke toolbar does not render the active category label beside the filte
     false,
     'BespokeCreationsView should not render or accept activeLabel in its toolbar'
   );
+  assert.ok(
+    bespokeViewSource.includes('href={backHref}') && bespokeViewSource.includes('{allLabel}'),
+    'BespokeCreationsView should render the all categories return link'
+  );
 });
 
 test('collection stage cards declare separate background and product artwork in order', () => {
@@ -39,6 +46,34 @@ test('collection stage cards declare separate background and product artwork in 
     {background: 'bg3.jpg', product: 'c2.png'},
     {background: 'bg2.jpg', product: 'c3.png'}
   ]);
+});
+
+test('collection stage artwork is exposed through CMS content fields', () => {
+  assert.ok(
+    source.includes('filter.background ?? fallback.background') &&
+      source.includes('filter.product ?? filter.image ?? fallback.product'),
+    'stage artwork should prefer CMS background/product fields before falling back'
+  );
+
+  for (const messages of [koMessages, enMessages]) {
+    const pairs = messages.specialtyPages.collection.gallery.filters.map(({background, product}) => ({background, product}));
+
+    assert.deepEqual(pairs, [
+      {background: 'bg1.jpg', product: 'c1.png'},
+      {background: 'bg3.jpg', product: 'c2.png'},
+      {background: 'bg2.jpg', product: 'c3.png'}
+    ]);
+  }
+
+  const categoryPages = pageCatalog.filter((page) => page.pageKey.startsWith('mastery-creations-'));
+
+  assert.equal(categoryPages.length, 3, 'each creations category should have its own CMS page entry');
+  for (const page of categoryPages) {
+    const fieldPaths = page.fields.map((field) => field.path);
+
+    assert.ok(fieldPaths.includes('background'), `${page.pageKey} should expose a background image field`);
+    assert.ok(fieldPaths.includes('product'), `${page.pageKey} should expose a product PNG field`);
+  }
 });
 
 test('collection stage product artwork uses the original transparent PNG proportions', () => {

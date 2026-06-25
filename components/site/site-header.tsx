@@ -366,7 +366,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
             })}
           </motion.nav>
 
-          <div className="flex items-center justify-end gap-5 font-body text-[12px] font-semibold uppercase tracking-[0.12em]">
+          <div className="flex items-center justify-end gap-5 font-body text-[13pt] font-[300] uppercase tracking-[0.12em]">
             <div className="flex items-center gap-3" aria-label={navText('languageSwitcherLabel')}>
               {languageLinks.map((item, index) => (
                 <span key={item.locale} className="contents">
@@ -447,7 +447,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
           DAEHO
         </Link>
 
-        <div className="flex min-h-11 items-center gap-2 font-body text-[12px] font-semibold uppercase tracking-[0.12em]">
+        <div className="flex min-h-11 items-center gap-2 font-body text-[13pt] font-[300] uppercase tracking-[0.12em]">
           {languageLinks.map((item, index) => (
             <span key={item.locale} className="contents">
               {index > 0 ? (

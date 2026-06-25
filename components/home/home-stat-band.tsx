@@ -49,6 +49,8 @@ function HomeStatBandCell({
   const valueRef = useRef<HTMLSpanElement>(null);
   const parsedValue = useMemo(() => parseDisplayValue(item.value), [item.value]);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const isKorean = locale === 'ko';
+  const showLabel = !isKorean;
 
   useEffect(() => {
     if (!isActive || !valueRef.current) {
@@ -92,14 +94,16 @@ function HomeStatBandCell({
         index > 0 ? 'lg:border-l lg:border-[#F4E6E1]/70' : ''
       }`}
     >
-      <p className="home-stat-band__value text-[clamp(42px,4vw,68px)] leading-none tracking-normal">
+      <p className="home-stat-band__value justify-self-center text-center text-[clamp(42px,4vw,68px)] leading-none tracking-normal">
         <span ref={valueRef}>{parsedValue ? '0' : item.value}</span>
         {parsedValue?.suffix ? <span>{parsedValue.suffix}</span> : null}
       </p>
-      <p className="home-stat-band__label whitespace-pre-line text-[15px] uppercase leading-[1.08] tracking-[0.03em]">
-        {item.label}
-      </p>
-      <p className="home-stat-band__body max-w-[210px] whitespace-pre-line text-[15px] leading-[1.36]">
+      {showLabel ? (
+        <p className="home-stat-band__label whitespace-pre-line text-[15px] uppercase leading-[1.08] tracking-[0.03em]">
+          {item.label}
+        </p>
+      ) : null}
+      <p className={`home-stat-band__body max-w-[210px] whitespace-pre-line ${isKorean ? 'text-[13px] leading-[1.45]' : 'text-[15px] leading-[1.36]'}`}>
         {item.body}
       </p>
     </div>

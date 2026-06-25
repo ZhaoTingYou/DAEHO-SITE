@@ -125,17 +125,17 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
       {
         src: '/images/golf/golf1.png',
         alt: content.hero.subtitle,
-        imageClass: 'object-contain object-center origin-center scale-[1.12]'
+        imageClass: 'object-contain object-center origin-center scale-100'
       },
       {
         src: '/images/golf/\u1111\u1165\u1110\u1165.png',
         alt: 'Putter golf bracelet',
-        imageClass: 'object-contain object-center origin-center scale-[0.88]'
+        imageClass: 'object-contain object-center origin-center scale-[0.80]'
       },
       {
         src: '/images/golf/\u1103\u1173\u1105\u1161\u110b\u1175\u1107\u1165.png',
         alt: 'Driver golf bracelet',
-        imageClass: 'object-contain object-center origin-center scale-[0.92]'
+        imageClass: 'object-contain object-center origin-center scale-[0.84]'
       }
     ],
     [content.hero.subtitle]
@@ -194,8 +194,8 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               key={activeHeroSlide.src}
               initial={{opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : 12}}
               animate={{opacity: 1, y: 0}}
-              transition={{duration: prefersReducedMotion ? 0 : 0.56, ease: [0.16, 1, 0.3, 1]}}
-              className="absolute left-1/2 top-0 h-full w-[min(82vw,920px)] -translate-x-1/2"
+              transition={{duration: prefersReducedMotion ? 0 : 0.82, ease: [0.16, 1, 0.3, 1]}}
+              className="absolute left-1/2 top-0 h-full w-[min(76vw,840px)] -translate-x-1/2"
             >
               <GolfStaticImage
                 src={activeHeroSlide.src}
@@ -237,7 +237,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         </div>
       </section>
 
-      <section className="bg-white pb-[clamp(81px,10vw,149px)]">
+      <section className="bg-white pb-[clamp(81px,10vw,149px)] pt-[clamp(96px,11vw,160px)]">
         <div className="mx-auto max-w-[1240px] space-y-[clamp(46px,6vw,72px)] px-container">
           <Reveal className="mx-auto max-w-[360px] space-y-3 text-center">
             <h2 className="font-heading text-[clamp(20px,2vw,27px)] font-semibold leading-tight text-primary">
@@ -306,7 +306,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
       </section>
 
       <section className="bg-white pb-0 pt-[clamp(108px,13.5vw,198px)] text-primary">
-        <div className="mx-auto max-w-[1120px] space-y-[clamp(70px,8vw,118px)] px-container">
+        <div className="mx-auto max-w-[1120px] space-y-[clamp(105px,12vw,177px)] px-container">
           <div className="mx-auto max-w-[900px] space-y-[clamp(34px,4vw,44px)]">
             <Reveal className="text-center">
               <h2

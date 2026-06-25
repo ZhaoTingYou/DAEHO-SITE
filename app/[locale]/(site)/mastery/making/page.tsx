@@ -64,10 +64,10 @@ export default async function TechniquePage({params}: Props) {
       <section className="relative z-10 bg-[#f8f6f2] py-[clamp(86px,9vw,132px)]">
         <div className="mx-auto max-w-[1120px] px-container">
           <ScrollText className="border-l border-accent/45 py-[6px] pl-[clamp(28px,3.6vw,48px)] text-left">
-            <p className="font-body text-[13px] font-semibold uppercase leading-none tracking-[0.34em] text-text/45">
+            <p className="font-body text-[10px] font-semibold uppercase leading-none tracking-[0.34em] text-text/45">
               {content.process.eyebrow}
             </p>
-            <h2 className="mt-[24px] font-heading text-[clamp(34px,3.4vw,48px)] font-semibold leading-[1.25] text-primary">
+            <h2 className="mt-[24px] font-heading text-[clamp(26px,2.55vw,36px)] font-semibold leading-[1.25] text-primary">
               {content.process.title}
             </h2>
           </ScrollText>

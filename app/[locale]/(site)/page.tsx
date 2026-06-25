@@ -63,12 +63,12 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
             <div className="mx-auto grid w-full max-w-[1180px] lg:grid-cols-[minmax(260px,320px)_minmax(0,820px)] lg:items-center lg:gap-[clamp(44px,4vw,68px)]">
               <div className="flex min-h-[clamp(190px,20vw,270px)] w-full items-center justify-center lg:text-center">
                 <div className="w-full max-w-[300px] space-y-[10px]">
-                  <h2 className="whitespace-pre-line font-heading text-[20px] font-medium uppercase leading-[1.18] text-primary">
+                  <h2 className="whitespace-pre-line font-heading text-[20px] font-medium uppercase leading-[1.18] tracking-[0.08em] text-primary">
                     {currentPulse.primaryTitle}
                   </h2>
                   <Link
                     href={withLocale(locale, '/heritage/loyalty')}
-                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none transition duration-hover ease-brand"
+                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none tracking-[0.12em] transition duration-hover ease-brand"
                   >
                     {currentPulse.primaryCta}
                   </Link>
@@ -108,13 +108,13 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
               </Link>
 
               <div className="flex min-h-[clamp(190px,20vw,270px)] w-full items-center justify-center lg:text-center">
-                <div className="w-full max-w-[300px] space-y-[10px]">
-                  <p className="whitespace-pre-line font-heading text-[20px] font-medium uppercase leading-[1.18] text-primary">
+                <div className="w-full max-w-[300px] space-y-[10px] lg:-translate-x-[24px]">
+                  <p className="whitespace-pre-line font-heading text-[20px] font-medium uppercase leading-[1.18] tracking-[0.08em] text-primary">
                     {currentPulse.secondaryTitle}
                   </p>
                   <Link
                     href={withLocale(locale, '/news')}
-                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none transition duration-hover ease-brand"
+                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none tracking-[0.12em] transition duration-hover ease-brand"
                   >
                     {currentPulse.secondaryCta}
                   </Link>
@@ -127,12 +127,12 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
 
       <section className="bg-bg pb-[clamp(108px,10vw,168px)] pt-0">
         <div className="mx-auto grid w-full max-w-[1240px] items-center gap-[clamp(42px,4.5vw,72px)] px-container lg:grid-cols-[minmax(280px,0.32fr)_minmax(0,0.68fr)]">
-          <Reveal className="mx-auto max-w-[390px] space-y-[18px] lg:mx-0">
+          <Reveal className="mx-auto max-w-[390px] space-y-[10px] lg:mx-0">
             <div className="space-y-[14px]">
-              <p className="font-heading text-[15px] font-medium uppercase leading-tight text-accent">
+              <p className="[font-family:'MaruBuri',serif] text-[20px] font-semibold uppercase leading-tight text-accent">
                 {content.signature.eyebrow}
               </p>
-              <h2 className="whitespace-nowrap font-heading text-[20px] font-semibold leading-tight text-primary">
+              <h2 className="whitespace-nowrap font-body text-[15px] font-normal leading-[1.75] text-primary">
                 {content.signature.title}
               </h2>
             </div>
@@ -146,7 +146,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
               <RevealItem key={item.image} className="h-full">
                 <Link
                   href={withLocale(locale, '/mastery/creations')}
-                  className="group mx-auto grid h-full w-full max-w-[300px] grid-rows-[auto_1fr] border border-primary/10 bg-white p-[clamp(12px,0.95vw,16px)] transition duration-hover ease-brand hover:-translate-y-1 hover:border-accent/35"
+                  className="group mx-auto grid h-full w-full max-w-[300px] grid-rows-[auto_1fr] bg-white p-[clamp(12px,0.95vw,16px)] transition duration-hover ease-brand hover:-translate-y-1"
                 >
                   <div className="hover-zoom">
                     <div className="hover-zoom-media">
@@ -158,13 +158,10 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                       />
                     </div>
                   </div>
-                  <div className="flex min-h-[clamp(98px,7vw,128px)] flex-col items-center justify-center gap-[8px] px-1 py-[clamp(16px,1.4vw,22px)] text-center">
-                    <h3 className="font-heading text-[clamp(20px,1.35vw,25px)] font-semibold leading-tight text-primary">
+                  <div className="flex min-h-[clamp(98px,7vw,128px)] flex-col items-center justify-center px-1 py-[clamp(16px,1.4vw,22px)] text-center">
+                    <h3 className="font-heading text-[clamp(20px,1.35vw,25px)] font-semibold leading-tight text-primary/80">
                       {item.title}
                     </h3>
-                    <p className="whitespace-pre-line font-heading text-[15px] font-medium uppercase leading-[1.05] text-primary">
-                      {item.caption}
-                    </p>
                   </div>
                 </Link>
               </RevealItem>

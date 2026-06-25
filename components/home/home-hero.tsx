@@ -41,7 +41,7 @@ export function HomeHero({
       />
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1440px] items-end px-[clamp(16px,2.6vw,42px)] pb-[clamp(84px,9vh,116px)] pt-32">
         <div className="flex max-w-[920px] flex-col items-start gap-[clamp(12px,1.5vw,20px)] text-left text-white [text-shadow:0_2px_20px_rgba(16,29,48,.34)]">
-          <p className="font-body text-[clamp(9px,0.7vw,11px)] font-medium uppercase leading-[1.35] tracking-[0.2em] text-accent">
+          <p className="font-body text-[clamp(9px,0.7vw,11px)] font-medium uppercase leading-[1.35] tracking-[0.2em]">
             {eyebrow}
           </p>
           <h1 className={`flex max-w-full flex-col items-start gap-[clamp(8px,1vw,14px)] font-heading ${titleSizeClass} ${titleWeightClass} leading-[1.08] tracking-[0.01em]`}>

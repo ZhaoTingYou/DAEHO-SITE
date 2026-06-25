@@ -189,7 +189,7 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
         title={copy.heroTitle}
       />
 
-      <section className="bg-white py-[clamp(108px,12vw,176px)]">
+      <section className="relative z-10 bg-white py-[clamp(108px,12vw,176px)]">
         <Reveal className="mx-auto max-w-[760px] px-container text-center text-primary">
           <div className="mx-auto mb-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
           <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
@@ -202,7 +202,7 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
         </Reveal>
       </section>
 
-      <section className="bg-white px-container pb-[clamp(104px,10vw,154px)]">
+      <section className="relative z-10 bg-white px-container pb-[clamp(104px,10vw,154px)]">
         <div className="mx-auto max-w-[1120px] bg-white">
           {copy.rows.map((row, index) => (
             <Reveal
@@ -235,7 +235,7 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
         </div>
       </section>
 
-      <section className="bg-white py-[clamp(104px,11vw,168px)]">
+      <section className="relative z-10 bg-white py-[clamp(104px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
             {copy.discoverLead}

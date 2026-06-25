@@ -124,7 +124,7 @@ const pageCopy = {
       {
         value: '90%',
         title: 'COMMISSIONING\nRING SHARE',
-        accent: '국내 임관반지 분야에서 축적한 전문 제작 기록',
+        accent: '국내 임관반지 분야에서\n축적한 전문 제작 기록',
         paragraphs: [
           '임관반지는 개인의 출발이자 조직의 정체성을 함께 담는 상징물입니다.',
           '대호는 오랜 기간 임관반지를 제작하며 정확한 단체 주문 관리, 안정적인 품질, 세밀한 각인 기준을 축적해왔습니다.'
@@ -256,7 +256,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
   ].slice(0, 7);
 
   return (
-    <main className="bg-bg text-primary">
+    <main className="bg-white text-primary">
       <HeritageHero
         imagePlaceholder={copy.imagePlaceholder}
         label={copy.heroLabel}
@@ -265,7 +265,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         title={copy.heroTitle}
       />
 
-      <section className="bg-[#62302F] py-[clamp(84px,9vw,132px)] text-[#F4E6E1]">
+      <section className="relative z-10 bg-[#62302F] py-[clamp(84px,9vw,132px)] text-[#F4E6E1]">
         <AchievementPentagonStats items={copy.statBand} locale={locale} />
       </section>
 
@@ -353,7 +353,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </div>
       </section>
 
-      <section className="overflow-hidden bg-bg py-[clamp(100px,10vw,154px)]">
+      <section className="relative z-10 overflow-hidden bg-white py-[clamp(100px,10vw,154px)]">
         <Reveal className="px-container text-center">
           <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
             {copy.archiveLabel}
@@ -363,7 +363,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
           </h2>
         </Reveal>
 
-        <Reveal className="mx-auto mt-[clamp(32px,4vw,48px)] flex max-w-[1540px] justify-center px-container sm:justify-end">
+        <Reveal className="mx-auto mt-[clamp(32px,4vw,48px)] flex max-w-[1540px] justify-center px-container">
           <p
             className={`archive-drag-hint ${englishTextClass} text-[13px] uppercase leading-none tracking-[0.22em]`}
             aria-hidden="true"
@@ -397,7 +397,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </Reveal>
       </section>
 
-      <section className="bg-bg py-[clamp(104px,11vw,168px)]">
+      <section className="relative z-10 bg-white py-[clamp(104px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
           <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
             {copy.discoverLead}
