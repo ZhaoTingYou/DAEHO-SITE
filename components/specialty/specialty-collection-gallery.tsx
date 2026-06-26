@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {type ReactNode, useEffect, useMemo, useRef, useState} from 'react';
 import {AnimatePresence, motion, useScroll, useTransform, type MotionValue} from 'framer-motion';
 
 import {EmptyState} from '@/components/empty-state';
@@ -268,19 +268,91 @@ type BespokeFilterSectionData = {
 const appointmentShowcaseCopy = {
   ko: {
     heroAlt: '대호 임관반지 컬렉션',
-    sections: [
-      {image: 'collection_ring2.png', width: 413, height: 593, label: '제품의 다양성'},
-      {image: 'collection_ring3.png', width: 288, height: 300, label: '반지 내부의 디테일'}
-    ],
-    thumbnailLabel: '임관반지의 디자인 + 대호의 역사'
+    intro: {
+      title: '세대를 잇는 명예의 반지',
+      lines: [
+        '대호는 수많은 임관의 순간을 반지에 담아왔습니다.',
+        '군의 상징, 기수의 자부심, 개인의 이름까지 하나의 형태로 완성합니다.',
+        '한 번의 임관을 넘어, 한 가족의 역사로 남는 반지.',
+        '아버지와 자녀가 함께 기억하는 임관의 순간을 제작합니다.'
+      ]
+    },
+    honor: {
+      title: '명예를 손에 새기다',
+      lines: [
+        '임관반지는 대한민국 장교로서의 시작을 기념하는 상징입니다.',
+        '소속, 기수, 이름을 담아 책임과 자부심의 순간을 오래 간직합니다.'
+      ]
+    },
+    keepsake: {
+      title: '제품의 반지를 넘어, 함께 간직하는 기념',
+      lines: [
+        '임관의 의미는 착용자 한 사람에게만 머물지 않습니다.',
+        '대호는 가족과 소중한 사람들도 함께 간직할 수 있도록 펜던트,',
+        '기념 주얼리 등 다양한 제품을 디자인해왔습니다.'
+      ]
+    },
+    inside: {
+      title: '안쪽까지 이어지는 상징성',
+      lines: [
+        '반지의 외형뿐 아니라, 착용자만이 볼 수 있는 내부 공간까지 설계합니다.',
+        '대호는 임관반지 안쪽에 의미를 새기는 디자인을 통해 새로운 기준을',
+        '만들어가고 있습니다.'
+      ]
+    },
+    evolution: {
+      title: '임관반지 디자인의 변화',
+      lines: [
+        '전통적인 상징에서 현대적인 세공과 맞춤 설계까지.',
+        '대호는 시대에 맞춰 임관반지의 형태를 꾸준히 발전시켜왔습니다.'
+      ]
+    },
+    timelineStart: 'past',
+    timelineEnd: 'today'
   },
   en: {
     heroAlt: 'DEAHO appointment ring collection',
-    sections: [
-      {image: 'collection_ring2.png', width: 413, height: 593, label: 'Product variety'},
-      {image: 'collection_ring3.png', width: 288, height: 300, label: 'Interior ring details'}
-    ],
-    thumbnailLabel: 'Appointment ring design + DEAHO history'
+    intro: {
+      title: 'A ring of honor across generations',
+      lines: [
+        'DEAHO has shaped countless appointment moments into rings.',
+        'Military symbols, class pride, and personal names are completed as one form.',
+        'Beyond one appointment, the ring remains as family history.',
+        'We create appointment moments remembered by parents and children together.'
+      ]
+    },
+    honor: {
+      title: 'Engraving honor in hand',
+      lines: [
+        'An appointment ring commemorates the beginning of service as an officer.',
+        'Affiliation, class, and name preserve a moment of responsibility and pride.'
+      ]
+    },
+    keepsake: {
+      title: 'Beyond the ring, a keepsake to share',
+      lines: [
+        'The meaning of appointment does not stay with the wearer alone.',
+        'DEAHO has designed pendants, commemorative jewelry, and related pieces',
+        'so family and loved ones can keep the moment together.'
+      ]
+    },
+    inside: {
+      title: 'Symbolism carried inside',
+      lines: [
+        'We design not only the exterior, but also the private interior space only the wearer can see.',
+        'Through designs that engrave meaning inside appointment rings,',
+        'DEAHO continues to build a new standard.'
+      ]
+    },
+    evolution: {
+      title: 'The evolution of appointment ring design',
+      lines: [
+        'From traditional symbols to modern craftsmanship and custom planning.',
+        'DEAHO has steadily evolved appointment ring forms for each era.'
+      ]
+    },
+    timelineStart: 'past',
+    timelineEnd: 'today'
   }
 } as const;
 
@@ -1329,6 +1401,7 @@ function CollectionGridView({
 
 function AppointmentCollectionView({
   filterLabel,
+  activeLabel,
   allLabel,
   backHref,
   locale
@@ -1347,95 +1420,157 @@ function AppointmentCollectionView({
   const copy = appointmentShowcaseCopy[locale] ?? appointmentShowcaseCopy.ko;
 
   return (
-    <div className="-mb-[clamp(84px,9vw,132px)] -mt-28 bg-white pb-[clamp(136px,15vw,240px)] pt-28 text-primary">
-      <div className="mx-auto max-w-[1480px] px-container pt-[clamp(28px,4vw,56px)]">
-        <Link
-          href={backHref}
-          aria-label={allLabel}
-          className="link-sweep font-body text-[20px] font-semibold leading-none text-primary"
-        >
-          <span aria-hidden="true">←</span>
-        </Link>
+    <div className="-mb-[clamp(84px,9vw,132px)] -mt-28 overflow-x-hidden bg-white pb-[clamp(220px,26vw,340px)] pt-28 text-primary">
+      <div className="mx-auto max-w-[1480px] px-container">
+        <div className="relative border-b border-hairline pb-[clamp(63px,7.5vw,114px)] pt-[clamp(28px,4vw,56px)]">
+          <Link
+            href={backHref}
+            aria-label={allLabel}
+            className="link-sweep !absolute left-0 top-[clamp(28px,4vw,56px)] font-body text-[20px] font-semibold leading-none text-primary"
+          >
+            <span aria-hidden="true">←</span>
+          </Link>
+          <div className="mx-auto max-w-3xl space-y-7 text-center">
+            <div className="space-y-4">
+              <h1 className="font-heading text-[clamp(32px,4.2vw,54px)] font-semibold leading-none text-primary">
+                {activeLabel}
+              </h1>
+            </div>
+          </div>
+        </div>
       </div>
 
       <section
         aria-label={filterLabel}
-        className="mx-auto flex max-w-[620px] flex-col items-center px-container pt-[clamp(42px,7vw,96px)] text-center"
+        className="mx-auto flex w-full flex-col items-center px-[clamp(22px,5vw,42px)] pt-[clamp(76px,8vw,118px)] text-center lg:w-[60vw] lg:max-w-[980px]"
       >
-        <motion.div
-          initial={{opacity: 0, y: 28}}
-          whileInView={{opacity: 1, y: 0}}
-          viewport={{once: true, margin: '-12% 0px'}}
-          transition={{duration: 0.48, ease: [0.16, 1, 0.3, 1]}}
-          className="flex flex-col items-center"
-        >
+        <AppointmentTextBlock title={copy.intro.title} lines={copy.intro.lines} />
+
+        <AppointmentReveal className="mt-[clamp(56px,7.2vw,78px)] flex flex-col items-center">
           <Image
             src="/images/collection_ring1.png"
             alt={copy.heroAlt}
             width={473}
             height={414}
             priority
-            className="h-auto w-[min(72vw,380px)]"
+            className="h-auto w-[82vw] max-w-[760px] max-lg:max-w-[340px] lg:w-[60vw]"
           />
-          <div className="mt-[clamp(24px,4vw,42px)] h-[10px] w-[44px] bg-[#6F7C99]" aria-hidden="true" />
-        </motion.div>
+        </AppointmentReveal>
 
-        <div className="mt-[clamp(128px,18vw,240px)] flex w-full flex-col items-center gap-[clamp(132px,19vw,260px)]">
-          {copy.sections.map((section, index) => (
-            <motion.figure
-              key={section.image}
-              initial={{opacity: 0, y: 34}}
-              whileInView={{opacity: 1, y: 0}}
-              viewport={{once: true, margin: '-12% 0px'}}
-              transition={{
-                duration: 0.48,
-                delay: Math.min(index * 0.06, 0.12),
-                ease: [0.16, 1, 0.3, 1]
-              }}
-              className="flex w-full flex-col items-center"
-            >
-              <Image
-                src={`/images/${section.image}`}
-                alt={section.label}
-                width={section.width}
-                height={section.height}
-                className={`h-auto ${index === 0 ? 'w-[min(74vw,390px)]' : 'w-[min(58vw,288px)]'}`}
-              />
-              <figcaption className="mt-[clamp(14px,2vw,22px)] font-body text-[10px] font-normal leading-none text-primary">
-                {section.label}
-              </figcaption>
-            </motion.figure>
-          ))}
+        <AppointmentTextBlock
+          title={copy.honor.title}
+          lines={copy.honor.lines}
+          className="mt-[clamp(86px,13vw,144px)]"
+        />
 
-          <motion.figure
-            initial={{opacity: 0, y: 34}}
-            whileInView={{opacity: 1, y: 0}}
-            viewport={{once: true, margin: '-12% 0px'}}
-            transition={{duration: 0.48, ease: [0.16, 1, 0.3, 1]}}
-            className="flex w-full flex-col items-center"
-          >
-            <div className="flex items-center justify-center gap-[clamp(12px,2.8vw,24px)]">
-              {appointmentThumbnails.map((thumb) => (
-                <div
-                  key={thumb.image}
-                  className="flex h-[clamp(58px,9vw,88px)] w-[clamp(58px,9vw,88px)] items-center justify-center rounded-full bg-[#E8E8E8]"
-                >
-                  <Image
-                    src={`/images/${thumb.image}`}
-                    alt=""
-                    width={thumb.width}
-                    height={thumb.height}
-                    className="h-[74%] w-[74%] object-contain"
-                  />
-                </div>
-              ))}
+        <AppointmentReveal className="mt-[clamp(58px,8vw,84px)] flex w-full justify-center">
+          <Image
+            src="/images/collection_ring2.png"
+            alt={copy.honor.title}
+            width={413}
+            height={593}
+            className="h-auto w-[78vw] max-w-[620px] max-lg:max-w-[320px] lg:w-[52vw]"
+          />
+        </AppointmentReveal>
+
+        <AppointmentTextBlock
+          title={copy.keepsake.title}
+          lines={copy.keepsake.lines}
+          className="mt-[clamp(104px,15vw,168px)]"
+        />
+
+        <AppointmentReveal className="mt-[clamp(62px,9vw,96px)] flex w-full justify-center">
+          <Image
+            src="/images/collection_ring3.png"
+            alt={copy.keepsake.title}
+            width={288}
+            height={300}
+            className="h-auto w-[58vw] max-w-[460px] max-lg:max-w-[250px] lg:w-[36vw]"
+          />
+        </AppointmentReveal>
+
+        <AppointmentTextBlock
+          title={copy.inside.title}
+          lines={copy.inside.lines}
+          className="mt-[clamp(92px,13vw,150px)]"
+        />
+
+        <AppointmentReveal className="mt-[clamp(74px,10vw,112px)] box-border flex w-screen max-w-[1180px] flex-col items-center px-[clamp(24px,3vw,48px)]">
+          <div className="flex w-full items-center justify-between gap-[clamp(14px,3vw,60px)]">
+            {appointmentThumbnails.map((thumb) => (
+              <div
+                key={thumb.image}
+                className="flex h-[clamp(76px,15.6vw,214px)] w-[clamp(76px,15.6vw,214px)] shrink-0 items-center justify-center rounded-full bg-[#E8E8E8]"
+              >
+                <Image
+                  src={`/images/${thumb.image}`}
+                  alt=""
+                  width={thumb.width}
+                  height={thumb.height}
+                  className="h-[78%] w-[78%] object-contain"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mx-auto mt-[clamp(20px,2.8vw,34px)] grid w-full max-w-[980px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-[clamp(10px,1.4vw,18px)] font-body text-[clamp(14px,1.32vw,22px)] font-normal leading-none text-accent">
+            <span>{copy.timelineStart}</span>
+            <div className="relative h-px bg-accent/60" aria-hidden="true">
+              <span className="absolute right-0 top-1/2 h-[7px] w-[7px] -translate-y-1/2 rotate-45 border-r border-t border-accent/70" />
             </div>
-            <figcaption className="mt-[clamp(18px,2.6vw,26px)] font-body text-[10px] font-normal leading-none text-primary">
-              {copy.thumbnailLabel}
-            </figcaption>
-          </motion.figure>
-        </div>
+            <span>{copy.timelineEnd}</span>
+          </div>
+        </AppointmentReveal>
+
+        <AppointmentTextBlock
+          title={copy.evolution.title}
+          lines={copy.evolution.lines}
+          className="mt-[clamp(118px,15vw,170px)]"
+        />
       </section>
+    </div>
+  );
+}
+
+function AppointmentReveal({
+  children,
+  className
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{opacity: 0, y: 28}}
+      whileInView={{opacity: 1, y: 0}}
+      viewport={{once: true, margin: '-12% 0px'}}
+      transition={{duration: 0.48, ease: [0.16, 1, 0.3, 1]}}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function AppointmentTextBlock({
+  title,
+  lines,
+  className
+}: {
+  title: string;
+  lines: readonly string[];
+  className?: string;
+}) {
+  return (
+    <div className={`mx-auto w-full max-w-[720px] ${className ?? ''}`}>
+      <h2 className="[font-family:'MaruBuri',serif] text-[clamp(20px,1.95vw,30px)] font-normal leading-[1.35] tracking-normal text-primary">
+        {title}
+      </h2>
+      <div className="mt-[clamp(28px,3.5vw,42px)] space-y-[2px] [font-family:'Pretendard',sans-serif] text-[clamp(12px,1.08vw,16px)] font-normal leading-[1.72] tracking-normal text-[#111111]">
+        {lines.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
     </div>
   );
 }

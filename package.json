@@ -3,8 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "ensure:sqlite": "node scripts/ensure-better-sqlite3.cjs",
+    "predev": "npm run ensure:sqlite",
     "dev": "next dev --webpack",
+    "predev:turbo": "npm run ensure:sqlite",
     "dev:turbo": "next dev --turbopack",
+    "prebuild": "npm run ensure:sqlite",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
