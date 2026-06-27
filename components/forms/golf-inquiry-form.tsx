@@ -39,6 +39,7 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
         }
       }}
     >
+      <SpamTrapField />
       {configuration ? (
         <>
           <input type="hidden" name="selectedHead" value={configuration.head} />
@@ -46,17 +47,27 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
           <input type="hidden" name="engravingSample" value={configuration.engraving} />
         </>
       ) : null}
-      <TextField id="golf-name" label={text.name} name="name" autoComplete="name" />
-      <TextField id="golf-contact" label={text.contact} name="contact" type="tel" inputMode="tel" autoComplete="tel" />
+      <TextField id="golf-name" label={text.name} name="name" autoComplete="name" maxLength={120} required />
+      <TextField
+        id="golf-contact"
+        label={text.contact}
+        name="contact"
+        type="tel"
+        inputMode="tel"
+        autoComplete="tel"
+        maxLength={180}
+        required
+      />
       <TextField id="golf-quantity" label={text.quantity} name="quantity" type="number" inputMode="numeric" min="1" />
       <TextField id="golf-due" label={text.due} name="due" type="date" />
-      <TextField id="golf-team" label={text.team} name="team" autoComplete="organization" />
-      <TextField id="golf-use" label={text.use} name="use" />
+      <TextField id="golf-team" label={text.team} name="team" autoComplete="organization" maxLength={160} />
+      <TextField id="golf-use" label={text.use} name="use" maxLength={160} />
       <label className="block space-y-2 font-body text-sm font-semibold uppercase tracking-[0.12em] text-subtext md:col-span-2">
         <span>{text.message}</span>
         <textarea
           name="message"
           rows={6}
+          maxLength={3000}
           autoComplete="off"
           className="w-full resize-none border-b border-primary/30 bg-transparent py-3 text-base normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent"
         />
@@ -64,7 +75,8 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
       <div className="space-y-4 md:col-span-2">
         <button
           type="submit"
-          disabled={status === 'submitting'}
+          disabled={status === 'submitting' || isSubmitted}
+          aria-busy={status === 'submitting'}
           className="min-h-12 border border-accent bg-accent px-7 py-3 font-body text-sm font-semibold uppercase tracking-[0.14em] text-white transition duration-hover ease-brand hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         >
           {text.submit}
@@ -104,6 +116,7 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
         selectedHead: String(formData.get('selectedHead') ?? ''),
         selectedShaft: String(formData.get('selectedShaft') ?? ''),
         engravingSample: String(formData.get('engravingSample') ?? ''),
+        website: String(formData.get('website') ?? ''),
         locale: getCurrentLocale(),
         pagePath: `${window.location.pathname}${window.location.search}`
       })
@@ -126,7 +139,9 @@ function TextField({
   type = 'text',
   inputMode,
   autoComplete,
-  min
+  min,
+  maxLength,
+  required = false
 }: {
   id: string;
   label: string;
@@ -135,6 +150,8 @@ function TextField({
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   autoComplete?: string;
   min?: string;
+  maxLength?: number;
+  required?: boolean;
 }) {
   return (
     <label htmlFor={id} className="block space-y-2 font-body text-sm font-semibold uppercase tracking-[0.12em] text-subtext">
@@ -146,9 +163,24 @@ function TextField({
         inputMode={inputMode}
         autoComplete={autoComplete}
         min={min}
+        maxLength={maxLength}
+        required={required}
         className="min-h-12 w-full border-b border-primary/30 bg-transparent py-3 text-base normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent"
       />
     </label>
+  );
+}
+
+function SpamTrapField() {
+  return (
+    <input
+      type="text"
+      name="website"
+      tabIndex={-1}
+      autoComplete="off"
+      aria-hidden="true"
+      className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden opacity-0"
+    />
   );
 }
 

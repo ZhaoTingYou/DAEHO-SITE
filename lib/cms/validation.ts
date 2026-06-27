@@ -12,6 +12,7 @@ const inquiryContact = z.string().trim().min(1).max(180);
 const inquiryShortText = z.string().trim().max(160).optional().default('');
 const inquiryMediumText = z.string().trim().max(300).optional().default('');
 const inquiryLongText = z.string().trim().max(3000).optional().default('');
+const inquiryHoneypot = z.string().trim().max(240).optional().default('');
 
 export const pagePayloadSchema = z.object({
   pageKey: z.string().trim().min(1).optional(),
@@ -95,7 +96,8 @@ export const contactInquirySchema = z.object({
   contact: inquiryContact,
   type: inquiryShortText,
   message: inquiryLongText,
-  pagePath: inquiryMediumText
+  pagePath: inquiryMediumText,
+  website: inquiryHoneypot
 });
 
 export const golfInquirySchema = z.object({
@@ -113,7 +115,8 @@ export const golfInquirySchema = z.object({
   selectedHead: inquiryShortText,
   selectedShaft: inquiryShortText,
   engravingSample: inquiryMediumText,
-  pagePath: inquiryMediumText
+  pagePath: inquiryMediumText,
+  website: inquiryHoneypot
 });
 
 export const inquiryStatusSchema = z.object({

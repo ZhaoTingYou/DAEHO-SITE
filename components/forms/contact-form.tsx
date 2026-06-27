@@ -36,9 +36,19 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         }
       }}
     >
-      <TextField id="contact-name" label={text.name} name="name" autoComplete="name" />
-      <TextField id="contact-organization" label={text.organization} name="organization" autoComplete="organization" />
-      <TextField id="contact-contact" label={text.contact} name="contact" type="tel" inputMode="tel" autoComplete="tel" />
+      <SpamTrapField />
+      <TextField id="contact-name" label={text.name} name="name" autoComplete="name" maxLength={120} required />
+      <TextField id="contact-organization" label={text.organization} name="organization" autoComplete="organization" maxLength={160} />
+      <TextField
+        id="contact-contact"
+        label={text.contact}
+        name="contact"
+        type="tel"
+        inputMode="tel"
+        autoComplete="tel"
+        maxLength={180}
+        required
+      />
       <label className="block space-y-2 font-body text-sm font-semibold uppercase tracking-[0.12em] text-subtext">
         <span>{text.type}</span>
         <select
@@ -58,13 +68,15 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         <textarea
           name="message"
           rows={6}
+          maxLength={3000}
           autoComplete="off"
           className="w-full resize-none border-b border-primary/30 bg-transparent py-3 text-base normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent"
         />
       </label>
       <button
         type="submit"
-        disabled={status === 'submitting'}
+        disabled={status === 'submitting' || isSubmitted}
+        aria-busy={status === 'submitting'}
         className="min-h-12 border border-accent bg-accent px-7 py-3 font-body text-sm font-semibold uppercase tracking-[0.14em] text-white transition duration-hover ease-brand hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
       >
         {text.submit}
@@ -98,6 +110,7 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         contact: String(formData.get('contact') ?? ''),
         type: String(formData.get('type') ?? ''),
         message: String(formData.get('message') ?? ''),
+        website: String(formData.get('website') ?? ''),
         locale: getCurrentLocale(),
         pagePath: `${window.location.pathname}${window.location.search}`
       })
@@ -119,7 +132,9 @@ function TextField({
   name,
   type = 'text',
   inputMode,
-  autoComplete
+  autoComplete,
+  maxLength,
+  required = false
 }: {
   id: string;
   label: string;
@@ -127,6 +142,8 @@ function TextField({
   type?: React.HTMLInputTypeAttribute;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   autoComplete?: string;
+  maxLength?: number;
+  required?: boolean;
 }) {
   return (
     <label htmlFor={id} className="block space-y-2 font-body text-sm font-semibold uppercase tracking-[0.12em] text-subtext">
@@ -137,9 +154,24 @@ function TextField({
         type={type}
         inputMode={inputMode}
         autoComplete={autoComplete}
+        maxLength={maxLength}
+        required={required}
         className="min-h-12 w-full border-b border-primary/30 bg-transparent py-3 text-base normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent"
       />
     </label>
+  );
+}
+
+function SpamTrapField() {
+  return (
+    <input
+      type="text"
+      name="website"
+      tabIndex={-1}
+      autoComplete="off"
+      aria-hidden="true"
+      className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden opacity-0"
+    />
   );
 }
 

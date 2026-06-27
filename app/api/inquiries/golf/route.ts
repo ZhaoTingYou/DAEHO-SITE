@@ -8,6 +8,7 @@ import {
   rejectOversizedRequest,
   validationError
 } from '@/lib/cms/http';
+import {rejectUnsafeInquiry} from '@/lib/cms/inquiry-protection';
 import {createGolfInquiry} from '@/lib/cms/repositories';
 import {golfInquirySchema} from '@/lib/cms/validation';
 
@@ -26,7 +27,20 @@ export async function POST(request: NextRequest) {
     return validationError(parsed.error);
   }
 
-  const result = await createGolfInquiry(parsed.data, getRequestMeta(request));
+  const requestMeta = getRequestMeta(request);
+  const unsafe = rejectUnsafeInquiry({
+    source: 'golf',
+    payload: parsed.data,
+    ipAddress: requestMeta.ipAddress,
+    userAgent: requestMeta.userAgent,
+    allowedPagePathPrefixes: ['/ko/golf/inquiry', '/en/golf/inquiry']
+  });
+
+  if (unsafe) {
+    return unsafe;
+  }
+
+  const result = await createGolfInquiry(parsed.data, requestMeta);
 
   if (!result?.inquiry) {
     return NextResponse.json({error: 'Failed to create inquiry'}, {status: 500});
