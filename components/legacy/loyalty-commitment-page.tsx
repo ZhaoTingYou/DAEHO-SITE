@@ -93,7 +93,7 @@ const defaultPageCopy = {
     heroLabel: 'LOYALTY',
     heroTitle: 'RELATIONSHIP',
     introLines: [
-      'For DEAHO, loyalty does not end with a single commission.',
+      'For DAEHO, loyalty does not end with a single commission.',
       'It begins by understanding the client, preserving the right information,',
       'and keeping a production flow that makes every return easier.',
       'Repeat trust is built through a process that stays stable over time.'
@@ -101,12 +101,12 @@ const defaultPageCopy = {
     imagePlaceholder: 'Image area',
     quoteTitle: 'Loyalty, Built Through Time',
     quoteBody: 'Time spent together is the clearest proof.',
-    discoverLead: 'Discover more DEAHO projects',
+    discoverLead: 'Discover more DAEHO projects',
     featureSlides: [
       {
         kicker: 'LOYALTY STANDARD',
         title: '01. Repeat Trust',
-        body: 'Clients return not only because the previous result was satisfying, but because the full process remains clear: consultation, design direction, revisions, production, inspection, and delivery. DEAHO keeps the standards and context from each project so the next commission can begin with confidence and move with greater precision.',
+        body: 'Clients return not only because the previous result was satisfying, but because the full process remains clear: consultation, design direction, revisions, production, inspection, and delivery. DAEHO keeps the standards and context from each project so the next commission can begin with confidence and move with greater precision.',
         backgroundImage: 'legacy_loyalty_hero.png',
         previewImage: 'legacy_card_loyalty.png',
         accentStart: 'rgba(180,66,54,0.95)',
@@ -115,7 +115,7 @@ const defaultPageCopy = {
       {
         kicker: 'LOYALTY STANDARD',
         title: '02. Shared Memory',
-        body: 'A symbol made once continues to live in the memory of a team or an individual. DEAHO preserves the intention and specifications of previous projects so the next request can continue the same story with consistency.',
+        body: 'A symbol made once continues to live in the memory of a team or an individual. DAEHO preserves the intention and specifications of previous projects so the next request can continue the same story with consistency.',
         backgroundImage: 'home_stats_bg.png',
         previewImage: 'home_pillar_legacy.png',
         accentStart: 'rgba(111,103,160,0.88)',

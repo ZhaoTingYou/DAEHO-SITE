@@ -194,7 +194,7 @@ function PentagonDiagram({
       className={compact ? 'h-full w-full' : 'absolute left-1/2 top-[112px] h-[490px] w-[760px] -translate-x-1/2'}
       viewBox="0 0 1000 620"
       role="img"
-      aria-label="DEAHO trust pentagon"
+      aria-label="DAEHO trust pentagon"
     >
       <g fill="#F4E6E1">
         <path
@@ -291,7 +291,7 @@ function PentagonDiagram({
           fontWeight="700"
           letterSpacing="4"
         >
-          DEAHO
+          DAEHO
         </text>
         <text
           x="500"

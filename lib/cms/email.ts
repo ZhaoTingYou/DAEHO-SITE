@@ -22,7 +22,7 @@ type InquiryForEmail = {
 
 export async function notifyInquiry(inquiry: InquiryForEmail) {
   const config = getSmtpConfig();
-  const subject = `[DEAHO] New ${inquiry.source === 'golf' ? 'Golf' : 'Contact'} inquiry`;
+  const subject = `[DAEHO] New ${inquiry.source === 'golf' ? 'Golf' : 'Contact'} inquiry`;
 
   if (!config) {
     createEmailEvent({
@@ -135,7 +135,7 @@ function renderInquiryHtml(inquiry: InquiryForEmail) {
 
   return `
     <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.5">
-      <h2 style="margin:0 0 16px">New DEAHO inquiry</h2>
+      <h2 style="margin:0 0 16px">New DAEHO inquiry</h2>
       <table style="border-collapse:collapse;width:100%;max-width:720px">
         ${rows
           .map(

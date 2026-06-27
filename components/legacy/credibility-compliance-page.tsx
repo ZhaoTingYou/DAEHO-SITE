@@ -130,11 +130,11 @@ const defaultPageCopy = {
     heroLabel: 'CREDIBILITY',
     heroTitle: 'STANDARD',
     intro:
-      'DEAHO credibility is not explained by experience alone. From design consultation to production, inspection, and delivery, every stage is managed directly so important group projects can be completed within clear standards and schedules.',
+      'DAEHO credibility is not explained by experience alone. From design consultation to production, inspection, and delivery, every stage is managed directly so important group projects can be completed within clear standards and schedules.',
     imagePlaceholder: 'legacy_credibility_hero.png',
     quoteTitle: 'Credibility, Proven Through Standards',
     quoteBody: 'Trust begins with standards.',
-    discoverLead: 'Discover more DEAHO projects',
+    discoverLead: 'Discover more DAEHO projects',
     cta: 'DISCOVER MORE',
     rows: [
       {
@@ -142,7 +142,7 @@ const defaultPageCopy = {
         title: '38 years of craft',
         accent: 'A standard that does not drift',
         paragraphs: [
-          'Since 1988, DEAHO has specialized in championship rings, commission rings, and group commemorative products for sports teams, military organizations, schools, institutions, and companies.',
+          'Since 1988, DAEHO has specialized in championship rings, commission rings, and group commemorative products for sports teams, military organizations, schools, institutions, and companies.',
           'This experience is not only a matter of time. It is a record of solving real production variables such as event schedules, symbols, engraving, quantities, and delivery methods.'
         ]
       },
@@ -151,7 +151,7 @@ const defaultPageCopy = {
         title: '100% in-house process control',
         accent: 'Managed directly from design to delivery',
         paragraphs: [
-          'DEAHO manages design, 3D planning, casting, finishing, stone setting, engraving, surface treatment, inspection, and packing under one production standard.',
+          'DAEHO manages design, 3D planning, casting, finishing, stone setting, engraving, surface treatment, inspection, and packing under one production standard.',
           'This reduces variables in quality, design intent, and schedule control, especially for group orders with many details to verify.'
         ]
       },
@@ -161,7 +161,7 @@ const defaultPageCopy = {
         accent: 'Responsible through the confirmed schedule',
         paragraphs: [
           'Projects tied to ceremonies and official events require reliable delivery as much as product quality.',
-          'DEAHO treats schedule management as part of production, planning confirmation, sizing, engraving, inspection, packing, and shipping around the client’s event date.'
+          'DAEHO treats schedule management as part of production, planning confirmation, sizing, engraving, inspection, packing, and shipping around the client’s event date.'
         ]
       },
       {
@@ -170,7 +170,7 @@ const defaultPageCopy = {
         accent: 'Names, sizes, and engraving tracked accurately',
         paragraphs: [
           'Group production requires accurate handling of names, sizes, engraving, quantities, and packing formats for every recipient.',
-          'DEAHO organizes individual data from the production stage and checks it through final delivery.'
+          'DAEHO organizes individual data from the production stage and checks it through final delivery.'
         ]
       },
       {
@@ -178,7 +178,7 @@ const defaultPageCopy = {
         title: 'Continuous R&D',
         accent: 'Improving standards that build trust',
         paragraphs: [
-          'DEAHO’s research and development is focused on stable quality, accurate production, and better results across materials, casting, finishing, engraving, surface treatment, and setting.',
+          'DAEHO’s research and development is focused on stable quality, accurate production, and better results across materials, casting, finishing, engraving, surface treatment, and setting.',
           'Continuous improvement helps reduce error and strengthens the standard clients can trust.'
         ]
       },
@@ -188,7 +188,7 @@ const defaultPageCopy = {
         accent: 'Checked beyond the visible surface',
         paragraphs: [
           'Quality is not judged only by appearance. Surface finish, engraving clarity, setting stability, proportions, comfort, sizing, and package condition must all be checked.',
-          'Before delivery, DEAHO reviews the product details, function, and packaging so clients can receive the final result with confidence.'
+          'Before delivery, DAEHO reviews the product details, function, and packaging so clients can receive the final result with confidence.'
         ]
       }
     ]

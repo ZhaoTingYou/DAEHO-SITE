@@ -17,7 +17,7 @@ type Props = {
 };
 
 export const metadata: Metadata = {
-  title: 'DEAHO Styleguide',
+  title: 'DAEHO Styleguide',
   robots: {
     index: false,
     follow: false
@@ -67,7 +67,7 @@ export default async function StyleguidePage({params}: Props) {
         <section className="mx-auto max-w-[1440px] px-container py-section">
           <PageEntranceItem className="max-w-4xl space-y-6">
             <p className="font-body text-eyebrow font-medium uppercase tracking-[0.22em] text-subtext">
-              DEAHO STYLEGUIDE
+              DAEHO STYLEGUIDE
             </p>
             <h1 className="font-heading text-hero font-bold leading-none tracking-normal text-primary">
               Bright Quiet Luxury
@@ -82,7 +82,7 @@ export default async function StyleguidePage({params}: Props) {
       <section className="bg-white py-section">
         <div className="mx-auto max-w-[1440px] space-y-12 px-container">
           <SectionIntro eyebrow="01 Tokens" title="Five-color foundation">
-            <p>Only the documented DEAHO palette is represented here.</p>
+            <p>Only the documented DAEHO palette is represented here.</p>
           </SectionIntro>
           <ColorSwatchRow />
         </div>
@@ -138,7 +138,7 @@ export default async function StyleguidePage({params}: Props) {
             title="THE FIRST LIGHT"
             subtitle="A high-key hero composition with safe image fallback."
             image="home_hero.png"
-            imageAlt="DEAHO championship ring in bright light"
+            imageAlt="DAEHO championship ring in bright light"
           />
           <MediaText
             eyebrow="Media Text"
@@ -170,7 +170,7 @@ export default async function StyleguidePage({params}: Props) {
               <RevealItem key={label} className="border border-hairline bg-white p-8">
                 <p className="font-heading text-3xl font-semibold text-primary">{label}</p>
                 <p className="mt-3 font-body text-sm leading-6 text-subtext">
-                  Enters once at 20% viewport with the DEAHO reveal timing.
+                  Enters once at 20% viewport with the DAEHO reveal timing.
                 </p>
               </RevealItem>
             ))}

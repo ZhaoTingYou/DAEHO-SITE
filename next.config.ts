@@ -1,7 +1,7 @@
 import type {NextConfig} from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
-const isFrontendOnlyBuild = process.env.DEAHO_FRONTEND_ONLY === 'true';
+const isFrontendOnlyBuild = process.env.DAEHO_FRONTEND_ONLY === 'true';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,

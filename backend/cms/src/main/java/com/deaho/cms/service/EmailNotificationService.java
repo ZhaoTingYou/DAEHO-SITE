@@ -30,7 +30,7 @@ public class EmailNotificationService {
   }
 
   public Map<String, Object> notifyInquiry(Map<String, Object> inquiry) {
-    var subject = "[DEAHO] New " + ("golf".equals(inquiry.get("source")) ? "Golf" : "Contact") + " inquiry";
+    var subject = "[DAEHO] New " + ("golf".equals(inquiry.get("source")) ? "Golf" : "Contact") + " inquiry";
     var to = text(properties.notifyTo());
     var from = text(properties.smtpFrom());
     var host = text(environment.getProperty("spring.mail.host"));

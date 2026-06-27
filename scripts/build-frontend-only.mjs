@@ -72,7 +72,7 @@ try {
       ...process.env,
       CMS_PREVIEW_STATIC: 'true',
       PREVIEW_NOINDEX: 'true',
-      DEAHO_FRONTEND_ONLY: 'true'
+      DAEHO_FRONTEND_ONLY: 'true'
     }
   });
 

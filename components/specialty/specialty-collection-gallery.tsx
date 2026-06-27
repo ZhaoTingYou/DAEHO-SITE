@@ -519,12 +519,12 @@ const defaultAppointmentShowcaseCopy: Record<Locale, AppointmentShowcaseCopy> = 
     timelineEnd: 'today'
   },
   en: {
-    heroAlt: 'DEAHO appointment ring collection',
+    heroAlt: 'DAEHO appointment ring collection',
     heroImage: 'collection_ring1.png',
     intro: {
       title: 'A ring of honor across generations',
       lines: [
-        'DEAHO has shaped countless appointment moments into rings.',
+        'DAEHO has shaped countless appointment moments into rings.',
         'Military symbols, class pride, and personal names are completed as one form.',
         'Beyond one appointment, the ring remains as family history.',
         'We create appointment moments remembered by parents and children together.'
@@ -543,7 +543,7 @@ const defaultAppointmentShowcaseCopy: Record<Locale, AppointmentShowcaseCopy> = 
       image: 'collection_ring3.png',
       lines: [
         'The meaning of appointment does not stay with the wearer alone.',
-        'DEAHO has designed pendants, commemorative jewelry, and related pieces',
+        'DAEHO has designed pendants, commemorative jewelry, and related pieces',
         'so family and loved ones can keep the moment together.'
       ]
     },
@@ -552,7 +552,7 @@ const defaultAppointmentShowcaseCopy: Record<Locale, AppointmentShowcaseCopy> = 
       lines: [
         'We design not only the exterior, but also the private interior space only the wearer can see.',
         'Through designs that engrave meaning inside appointment rings,',
-        'DEAHO continues to build a new standard.'
+        'DAEHO continues to build a new standard.'
       ]
     },
     thumbnails: [
@@ -565,7 +565,7 @@ const defaultAppointmentShowcaseCopy: Record<Locale, AppointmentShowcaseCopy> = 
       title: 'The evolution of appointment ring design',
       lines: [
         'From traditional symbols to modern craftsmanship and custom planning.',
-        'DEAHO has steadily evolved appointment ring forms for each era.'
+        'DAEHO has steadily evolved appointment ring forms for each era.'
       ]
     },
     timelineStart: 'past',

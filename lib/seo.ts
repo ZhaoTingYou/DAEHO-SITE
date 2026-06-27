@@ -55,7 +55,7 @@ export function getDetailMetadata(
   description: string,
   image = '/images/home_hero.png'
 ): Metadata {
-  const title = `${pageTitle} | DEAHO`;
+  const title = `${pageTitle} | DAEHO`;
 
   return {
     title,
@@ -73,13 +73,13 @@ export function getDetailMetadata(
       title,
       description,
       url: withLocale(locale, path),
-      siteName: 'DEAHO',
+      siteName: 'DAEHO',
       locale: locale === 'ko' ? 'ko_KR' : 'en_US',
       type: 'website',
       images: [
         {
           url: image,
-          alt: 'DEAHO'
+          alt: 'DAEHO'
         }
       ]
     },

@@ -23,7 +23,7 @@ export default async function AdminLoginPage({searchParams}: Props) {
     <main className="admin-on-dark grid min-h-dvh place-items-center bg-[#101827] px-4 py-10 text-[#ffffff]">
       <section className="w-full max-w-[420px] rounded-lg border border-white/10 bg-white p-6 text-[#182033] shadow-2xl">
         <div className="border-b border-[#e4e7ec] pb-5">
-          <p className="font-heading text-[28px] font-semibold tracking-[0.14em] text-[#101827]">DEAHO</p>
+          <p className="font-heading text-[28px] font-semibold tracking-[0.14em] text-[#101827]">DAEHO</p>
           <h1 className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-[#647084]">{t('login.title')}</h1>
         </div>
         <form action={loginAction} className="mt-6 grid gap-4">

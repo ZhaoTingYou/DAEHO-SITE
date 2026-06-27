@@ -172,23 +172,23 @@ const defaultPageCopy = {
     heroLabel: 'ACHIEVEMENTS',
     heroTitle: 'RESULT',
     introLines: [
-      'DEAHO achievements are not simple production quantities.',
+      'DAEHO achievements are not simple production quantities.',
       'They are records of leadership in championship and commission rings,',
       'first domestic applications, and repeated projects that shaped',
       'the standard for commemorative ring production.'
     ],
     imagePlaceholder: 'Image area',
     quoteTitle: 'Records that Became Standards',
-    quoteBody: 'The records DEAHO built became industry standards.',
+    quoteBody: 'The records DAEHO built became industry standards.',
     firstTitle: 'FIRST RECORDS',
-    firstHeading: 'First records by DEAHO',
+    firstHeading: 'First records by DAEHO',
     marketLabel: 'MARKET LEADERSHIP',
     marketTitle: 'Dominant market share',
     marketIntro:
-      'DEAHO market share is not only a number. It is the result of trust built over time. Products that commemorate important moments, such as championship rings and commission rings, are chosen only when design completion, production stability, delivery control, and inspection standards are all met.\nBy completing projects for many teams and institutions, DEAHO continues to build one of the most trusted production standards in Korea.',
+      'DAEHO market share is not only a number. It is the result of trust built over time. Products that commemorate important moments, such as championship rings and commission rings, are chosen only when design completion, production stability, delivery control, and inspection standards are all met.\nBy completing projects for many teams and institutions, DAEHO continues to build one of the most trusted production standards in Korea.',
     archiveLabel: 'PROJECT ARCHIVE',
     archiveTitle: 'Projects across many fields',
-    discoverLead: 'Discover more DEAHO projects',
+    discoverLead: 'Discover more DAEHO projects',
     cta: 'DISCOVER MORE',
     statBand: [
       {
@@ -221,19 +221,19 @@ const defaultPageCopy = {
       {
         title: 'FIRST INITIAL ENGRAVING',
         body: 'First domestic application of initial engraving',
-        hoverText: 'DEAHO introduced individual initial engraving as a first in Korea commemorative ring production.',
+        hoverText: 'DAEHO introduced individual initial engraving as a first in Korea commemorative ring production.',
         image: 'legacy_achievement_01.png'
       },
       {
         title: 'FIRST ANTIQUE COATING',
         body: 'First domestic application of antique black coating',
-        hoverText: 'DEAHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.',
+        hoverText: 'DAEHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.',
         image: 'legacy_achievement_02.png'
       },
       {
         title: 'FIRST DESIGN APPROACH',
         body: 'First domestic approach to interior ring design',
-        hoverText: 'DEAHO first expanded ring design inward, giving the interior surface its own meaning and story.',
+        hoverText: 'DAEHO first expanded ring design inward, giving the interior surface its own meaning and story.',
         image: 'legacy_achievement_03.png'
       }
     ],
@@ -244,7 +244,7 @@ const defaultPageCopy = {
         accent: 'The most selected production record in Korea championship ring market',
         paragraphs: [
           'A championship moment happens only once, so the final object must hold both completion and symbolism.',
-          'Based on professional sports championship ring experience, DEAHO has completed the history and meaning of victory as one ring.'
+          'Based on professional sports championship ring experience, DAEHO has completed the history and meaning of victory as one ring.'
         ],
         image: 'legacy_achievement_02.png'
       },
@@ -254,7 +254,7 @@ const defaultPageCopy = {
         accent: 'Specialized production records built in Korea commission ring field',
         paragraphs: [
           'A commission ring symbolizes both a personal beginning and an organization identity.',
-          'Through long-term commission ring production, DEAHO has accumulated accurate group order management, stable quality, and detailed engraving standards.'
+          'Through long-term commission ring production, DAEHO has accumulated accurate group order management, stable quality, and detailed engraving standards.'
         ],
         image: 'legacy_achievement_03.png'
       }

@@ -4,7 +4,7 @@ import '@/app/globals.css';
 import {getAdminLocale} from '@/lib/admin-i18n';
 
 export const metadata: Metadata = {
-  title: 'DEAHO Admin',
+  title: 'DAEHO Admin',
   robots: {
     index: false,
     follow: false

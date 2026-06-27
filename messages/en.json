@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "DEAHO",
+    "title": "DAEHO",
     "description": "The moment of victory, shaped for eternity."
   },
   "home": {
@@ -106,7 +106,7 @@
     ],
     "pillars": {
       "eyebrow": "FOUR CHAPTERS",
-      "title": "Four stories that prove DEAHO",
+      "title": "Four stories that prove DAEHO",
       "items": [
         {
           "title": "ARCHIVE",
@@ -147,7 +147,7 @@
       "eyebrow": "EST. 1988",
       "title": "THE ARCHIVE",
       "koreanTitle": "Archive of History",
-      "subtitle": "The history of DEAHO is the history of championship and appointment rings in Korea.",
+      "subtitle": "The history of DAEHO is the history of championship and appointment rings in Korea.",
       "image": "chronicle_hero.png"
     },
     "timeline": {
@@ -158,7 +158,7 @@
         {
           "year": "1988",
           "kicker": "FOUNDATION",
-          "title": "The beginning of DEAHO",
+          "title": "The beginning of DAEHO",
           "body": "The starting point of the brand. The full founding narrative will be expanded when verified materials arrive.",
           "image": "chronicle_milestone_01.png"
         },
@@ -196,7 +196,7 @@
           "year": "Today",
           "kicker": "ONGOING",
           "title": "The record continues",
-          "body": "A present-tense entry for current projects and the next markers in DEAHO's archive.",
+          "body": "A present-tense entry for current projects and the next markers in DAEHO's archive.",
           "image": "chronicle_milestone_06.png"
         }
       ]
@@ -300,7 +300,7 @@
         "heroLabel": "LOYALTY",
         "heroTitle": "RELATIONSHIP",
         "introLines": [
-          "For DEAHO, loyalty does not end with a single commission.",
+          "For DAEHO, loyalty does not end with a single commission.",
           "It begins by understanding the client, preserving the right information,",
           "and keeping a production flow that makes every return easier.",
           "Repeat trust is built through a process that stays stable over time."
@@ -308,12 +308,12 @@
         "imagePlaceholder": "Image area",
         "quoteTitle": "Loyalty, Built Through Time",
         "quoteBody": "Time spent together is the clearest proof.",
-        "discoverLead": "Discover more DEAHO projects",
+        "discoverLead": "Discover more DAEHO projects",
         "featureSlides": [
           {
             "kicker": "LOYALTY STANDARD",
             "title": "01. Repeat Trust",
-            "body": "Clients return not only because the previous result was satisfying, but because the full process remains clear: consultation, design direction, revisions, production, inspection, and delivery. DEAHO keeps the standards and context from each project so the next commission can begin with confidence and move with greater precision.",
+            "body": "Clients return not only because the previous result was satisfying, but because the full process remains clear: consultation, design direction, revisions, production, inspection, and delivery. DAEHO keeps the standards and context from each project so the next commission can begin with confidence and move with greater precision.",
             "backgroundImage": "legacy_loyalty_hero.png",
             "previewImage": "legacy_card_loyalty.png",
             "accentStart": "rgba(180,66,54,0.95)",
@@ -322,7 +322,7 @@
           {
             "kicker": "LOYALTY STANDARD",
             "title": "02. Shared Memory",
-            "body": "A symbol made once continues to live in the memory of a team or an individual. DEAHO preserves the intention and specifications of previous projects so the next request can continue the same story with consistency.",
+            "body": "A symbol made once continues to live in the memory of a team or an individual. DAEHO preserves the intention and specifications of previous projects so the next request can continue the same story with consistency.",
             "backgroundImage": "home_stats_bg.png",
             "previewImage": "home_pillar_legacy.png",
             "accentStart": "rgba(111,103,160,0.88)",
@@ -392,11 +392,11 @@
       "copy": {
         "heroLabel": "CREDIBILITY",
         "heroTitle": "STANDARD",
-        "intro": "DEAHO credibility is not explained by experience alone. From design consultation to production, inspection, and delivery, every stage is managed directly so important group projects can be completed within clear standards and schedules.",
+        "intro": "DAEHO credibility is not explained by experience alone. From design consultation to production, inspection, and delivery, every stage is managed directly so important group projects can be completed within clear standards and schedules.",
         "imagePlaceholder": "legacy_credibility_hero.png",
         "quoteTitle": "Credibility, Proven Through Standards",
         "quoteBody": "Trust begins with standards.",
-        "discoverLead": "Discover more DEAHO projects",
+        "discoverLead": "Discover more DAEHO projects",
         "cta": "DISCOVER MORE",
         "rows": [
           {
@@ -404,7 +404,7 @@
             "title": "38 years of craft",
             "accent": "A standard that does not drift",
             "paragraphs": [
-              "Since 1988, DEAHO has specialized in championship rings, commission rings, and group commemorative products for sports teams, military organizations, schools, institutions, and companies.",
+              "Since 1988, DAEHO has specialized in championship rings, commission rings, and group commemorative products for sports teams, military organizations, schools, institutions, and companies.",
               "This experience is not only a matter of time. It is a record of solving real production variables such as event schedules, symbols, engraving, quantities, and delivery methods."
             ],
             "image": "legacy_achievement_01.png"
@@ -414,7 +414,7 @@
             "title": "100% in-house process control",
             "accent": "Managed directly from design to delivery",
             "paragraphs": [
-              "DEAHO manages design, 3D planning, casting, finishing, stone setting, engraving, surface treatment, inspection, and packing under one production standard.",
+              "DAEHO manages design, 3D planning, casting, finishing, stone setting, engraving, surface treatment, inspection, and packing under one production standard.",
               "This reduces variables in quality, design intent, and schedule control, especially for group orders with many details to verify."
             ],
             "image": "legacy_achievement_02.png"
@@ -425,7 +425,7 @@
             "accent": "Responsible through the confirmed schedule",
             "paragraphs": [
               "Projects tied to ceremonies and official events require reliable delivery as much as product quality.",
-              "DEAHO treats schedule management as part of production, planning confirmation, sizing, engraving, inspection, packing, and shipping around the client’s event date."
+              "DAEHO treats schedule management as part of production, planning confirmation, sizing, engraving, inspection, packing, and shipping around the client’s event date."
             ],
             "image": "legacy_achievement_03.png"
           },
@@ -435,7 +435,7 @@
             "accent": "Names, sizes, and engraving tracked accurately",
             "paragraphs": [
               "Group production requires accurate handling of names, sizes, engraving, quantities, and packing formats for every recipient.",
-              "DEAHO organizes individual data from the production stage and checks it through final delivery."
+              "DAEHO organizes individual data from the production stage and checks it through final delivery."
             ],
             "image": "legacy_achievement_04.png"
           },
@@ -444,7 +444,7 @@
             "title": "Continuous R&D",
             "accent": "Improving standards that build trust",
             "paragraphs": [
-              "DEAHO’s research and development is focused on stable quality, accurate production, and better results across materials, casting, finishing, engraving, surface treatment, and setting.",
+              "DAEHO’s research and development is focused on stable quality, accurate production, and better results across materials, casting, finishing, engraving, surface treatment, and setting.",
               "Continuous improvement helps reduce error and strengthens the standard clients can trust."
             ],
             "image": "chronicle_detail_01.png"
@@ -455,7 +455,7 @@
             "accent": "Checked beyond the visible surface",
             "paragraphs": [
               "Quality is not judged only by appearance. Surface finish, engraving clarity, setting stability, proportions, comfort, sizing, and package condition must all be checked.",
-              "Before delivery, DEAHO reviews the product details, function, and packaging so clients can receive the final result with confidence."
+              "Before delivery, DAEHO reviews the product details, function, and packaging so clients can receive the final result with confidence."
             ],
             "image": "chronicle_detail_02.png"
           }
@@ -507,22 +507,22 @@
         "heroLabel": "ACHIEVEMENTS",
         "heroTitle": "RESULT",
         "introLines": [
-          "DEAHO achievements are not simple production quantities.",
+          "DAEHO achievements are not simple production quantities.",
           "They are records of leadership in championship and commission rings,",
           "first domestic applications, and repeated projects that shaped",
           "the standard for commemorative ring production."
         ],
         "imagePlaceholder": "Image area",
         "quoteTitle": "Records that Became Standards",
-        "quoteBody": "The records DEAHO built became industry standards.",
+        "quoteBody": "The records DAEHO built became industry standards.",
         "firstTitle": "FIRST RECORDS",
-        "firstHeading": "First records by DEAHO",
+        "firstHeading": "First records by DAEHO",
         "marketLabel": "MARKET LEADERSHIP",
         "marketTitle": "Dominant market share",
-        "marketIntro": "DEAHO market share is not only a number. It is the result of trust built over time. Products that commemorate important moments, such as championship rings and commission rings, are chosen only when design completion, production stability, delivery control, and inspection standards are all met.\nBy completing projects for many teams and institutions, DEAHO continues to build one of the most trusted production standards in Korea.",
+        "marketIntro": "DAEHO market share is not only a number. It is the result of trust built over time. Products that commemorate important moments, such as championship rings and commission rings, are chosen only when design completion, production stability, delivery control, and inspection standards are all met.\nBy completing projects for many teams and institutions, DAEHO continues to build one of the most trusted production standards in Korea.",
         "archiveLabel": "PROJECT ARCHIVE",
         "archiveTitle": "Projects across many fields",
-        "discoverLead": "Discover more DEAHO projects",
+        "discoverLead": "Discover more DAEHO projects",
         "cta": "DISCOVER MORE",
         "statBand": [
           {
@@ -555,19 +555,19 @@
           {
             "title": "FIRST INITIAL ENGRAVING",
             "body": "First domestic application of initial engraving",
-            "hoverText": "DEAHO introduced individual initial engraving as a first in Korea commemorative ring production.",
+            "hoverText": "DAEHO introduced individual initial engraving as a first in Korea commemorative ring production.",
             "image": "legacy_achievement_01.png"
           },
           {
             "title": "FIRST ANTIQUE COATING",
             "body": "First domestic application of antique black coating",
-            "hoverText": "DEAHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.",
+            "hoverText": "DAEHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.",
             "image": "legacy_achievement_02.png"
           },
           {
             "title": "FIRST DESIGN APPROACH",
             "body": "First domestic approach to interior ring design",
-            "hoverText": "DEAHO first expanded ring design inward, giving the interior surface its own meaning and story.",
+            "hoverText": "DAEHO first expanded ring design inward, giving the interior surface its own meaning and story.",
             "image": "legacy_achievement_03.png"
           }
         ],
@@ -578,7 +578,7 @@
             "accent": "The most selected production record in Korea championship ring market",
             "paragraphs": [
               "A championship moment happens only once, so the final object must hold both completion and symbolism.",
-              "Based on professional sports championship ring experience, DEAHO has completed the history and meaning of victory as one ring."
+              "Based on professional sports championship ring experience, DAEHO has completed the history and meaning of victory as one ring."
             ],
             "image": "legacy_achievement_02.png"
           },
@@ -588,7 +588,7 @@
             "accent": "Specialized production records built in Korea commission ring field",
             "paragraphs": [
               "A commission ring symbolizes both a personal beginning and an organization identity.",
-              "Through long-term commission ring production, DEAHO has accumulated accurate group order management, stable quality, and detailed engraving standards."
+              "Through long-term commission ring production, DAEHO has accumulated accurate group order management, stable quality, and detailed engraving standards."
             ],
             "image": "legacy_achievement_03.png"
           }
@@ -600,7 +600,7 @@
     "hero": {
       "eyebrow": "ANATOMY OF CRAFT",
       "title": "THE DIFFERENCE",
-      "koreanTitle": "Why DEAHO is different",
+      "koreanTitle": "Why DAEHO is different",
       "subtitle": "This is not a product anyone can make.",
       "image": "specialty_hero.png"
     },
@@ -658,7 +658,7 @@
       "hero": {
         "eyebrow": "",
         "title": "MAKING",
-        "subtitle": "Before a ring is complete, DEAHO's process passes through seven acts of inspection.",
+        "subtitle": "Before a ring is complete, DAEHO's process passes through seven acts of inspection.",
         "image": "specialty_technique_hero.png"
       },
       "process": {
@@ -741,7 +741,7 @@
       },
       "bespoke": {
         "eyebrow": "BESPOKE CAPABILITY",
-        "title": "Discover more DEAHO projects",
+        "title": "Discover more DAEHO projects",
         "body": "A championship ring is not a repeated product. It is a bespoke work designed around symbols and season memories.",
         "image": "specialty_bespoke.png",
         "cta": "DISCOVER MORE"
@@ -907,14 +907,14 @@
       "ticker": [
         "New production cases will be updated here when verified materials arrive.",
         "Project stories, press features, and collaborations are gathered in one news field.",
-        "DEAHO is still shaping the moments of victory into form."
+        "DAEHO is still shaping the moments of victory into form."
       ]
     },
     "featured": {
       "eyebrow": "COMING SOON",
       "category": "TOP STORY",
       "date": "2026.00.00",
-      "title": "The next record from DEAHO begins here.",
+      "title": "The next record from DAEHO begins here.",
       "body": "New projects, workshop scenes, and collaboration notes will be arranged here first when verified materials arrive.",
       "image": "news_featured.png.png"
     },
@@ -1085,7 +1085,7 @@
         {
           "id": "burgundy",
           "label": "BURGUNDY",
-          "caption": "A grip echoing DEAHO's accent color.",
+          "caption": "A grip echoing DAEHO's accent color.",
           "image": "golf/Mask group.png"
         },
         {
@@ -1324,7 +1324,7 @@
   "homeUi": {
     "currentPulse": {
       "eyebrow": "THE CURRENT PULSE",
-      "title": "DEAHO, Now",
+      "title": "DAEHO, Now",
       "body": "And we are still creating now.",
       "question": "A piece or project worth remembering?",
       "primaryTitle": "NEW LEGACY\nRELEASED",
@@ -1341,7 +1341,7 @@
       "close": "Close",
       "label": "Latest news popup",
       "fallback": "Image pending",
-      "body": "Verified source material will replace this article body when it arrives. For now, this popup keeps DEAHO’s recent production rhythm and project context in place.",
+      "body": "Verified source material will replace this article body when it arrives. For now, this popup keeps DAEHO’s recent production rhythm and project context in place.",
       "cards": [
         {
           "id": "news-01",
@@ -1553,11 +1553,11 @@
     }
   },
   "chronicleUi": {
-    "horizontalAriaLabel": "DEAHO archive horizontal timeline",
+    "horizontalAriaLabel": "DAEHO archive horizontal timeline",
     "yearNavAriaLabel": "Archive year navigation",
     "endNav": {
       "label": "Next archive navigation",
-      "title": "See what DEAHO is making now",
+      "title": "See what DAEHO is making now",
       "href": "/news"
     }
   },
@@ -1574,17 +1574,17 @@
     },
     "detail": {
       "back": "Back to news",
-      "author": "DEAHO News",
+      "author": "DAEHO News",
       "ogImagePath": "news_detail_hero.png",
       "lead": "Verified source material will replace this article body when available.",
       "paragraphs": [
         "For now, this bright article template keeps the project overview and production context in place.",
         "Images, dates, sources, and exact figures will be updated only after verification.",
-        "The page keeps the rule-line masthead and narrow editorial measure of DEAHO news."
+        "The page keeps the rule-line masthead and narrow editorial measure of DAEHO news."
       ],
       "quote": "The principle of shaping victorious moments into permanence continues inside the article page.",
       "tags": [
-        "DEAHO NEWS",
+        "DAEHO NEWS",
         "COMING SOON"
       ],
       "ctaTitle": "Curious about this project?",
@@ -1623,7 +1623,7 @@
     "finder": {
       "eyebrow": "CHAMPIONSHIP RING FINDER",
       "title": "Find your championship ring",
-      "body": "Explore DEAHO championship ring works by sport category and production year.",
+      "body": "Explore DAEHO championship ring works by sport category and production year.",
       "filterButton": "Filter",
       "filterBy": "Filter by",
       "sportCategory": "Sport category",
@@ -1635,12 +1635,12 @@
       "results": "Showing"
     },
     "appointment": {
-      "heroAlt": "DEAHO appointment ring collection",
+      "heroAlt": "DAEHO appointment ring collection",
       "heroImage": "collection_ring1.png",
       "intro": {
         "title": "A ring of honor across generations",
         "lines": [
-          "DEAHO has shaped countless appointment moments into rings.",
+          "DAEHO has shaped countless appointment moments into rings.",
           "Military symbols, class pride, and personal names are completed as one form.",
           "Beyond one appointment, the ring remains as family history.",
           "We create appointment moments remembered by parents and children together."
@@ -1659,7 +1659,7 @@
         "image": "collection_ring3.png",
         "lines": [
           "The meaning of appointment does not stay with the wearer alone.",
-          "DEAHO has designed pendants, commemorative jewelry, and related pieces",
+          "DAEHO has designed pendants, commemorative jewelry, and related pieces",
           "so family and loved ones can keep the moment together."
         ]
       },
@@ -1668,7 +1668,7 @@
         "lines": [
           "We design not only the exterior, but also the private interior space only the wearer can see.",
           "Through designs that engrave meaning inside appointment rings,",
-          "DEAHO continues to build a new standard."
+          "DAEHO continues to build a new standard."
         ]
       },
       "thumbnails": [
@@ -1699,7 +1699,7 @@
         "title": "The evolution of appointment ring design",
         "lines": [
           "From traditional symbols to modern craftsmanship and custom planning.",
-          "DEAHO has steadily evolved appointment ring forms for each era."
+          "DAEHO has steadily evolved appointment ring forms for each era."
         ]
       }
     },

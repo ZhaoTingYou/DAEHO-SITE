@@ -14,8 +14,8 @@
   <groupId>com.deaho</groupId>
   <artifactId>deaho-cms</artifactId>
   <version>0.1.0</version>
-  <name>DEAHO CMS</name>
-  <description>Spring Boot CMS backend for the DEAHO official site.</description>
+  <name>DAEHO CMS</name>
+  <description>Spring Boot CMS backend for the DAEHO official site.</description>
 
   <properties>
     <java.version>17</java.version>
