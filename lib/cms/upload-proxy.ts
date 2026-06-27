@@ -7,6 +7,7 @@ import {getCmsBackendBaseUrl} from './repositories';
 
 type UploadProxyOptions = {
   publicImagesFallback?: boolean;
+  publicUploadsFallback?: boolean;
 };
 
 const immutableImageCache = 'public, max-age=31536000, immutable';
@@ -23,6 +24,14 @@ export async function getUploadAssetResponse(
 
   if (options.publicImagesFallback) {
     const localResponse = await readPublicImage(assetPath);
+
+    if (localResponse) {
+      return localResponse;
+    }
+  }
+
+  if (options.publicUploadsFallback) {
+    const localResponse = await readPublicUpload(assetPath);
 
     if (localResponse) {
       return localResponse;
@@ -54,11 +63,18 @@ export async function getUploadAssetResponse(
   });
 }
 
-async function readPublicImage(assetPath: string) {
-  const publicImagesRoot = path.resolve(process.cwd(), 'public', 'images');
-  const filePath = path.resolve(publicImagesRoot, assetPath);
+async function readPublicUpload(assetPath: string) {
+  return readPublicAsset(path.resolve(process.cwd(), 'public', 'uploads'), assetPath);
+}
 
-  if (!filePath.startsWith(`${publicImagesRoot}${path.sep}`)) {
+async function readPublicImage(assetPath: string) {
+  return readPublicAsset(path.resolve(process.cwd(), 'public', 'images'), assetPath);
+}
+
+async function readPublicAsset(root: string, assetPath: string) {
+  const filePath = path.resolve(root, assetPath);
+
+  if (!filePath.startsWith(`${root}${path.sep}`)) {
     return null;
   }
 
