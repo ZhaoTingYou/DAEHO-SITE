@@ -322,6 +322,10 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     footer: '页脚',
     language: '语言',
     notice: '正文',
+    effective: '生效日期',
+    intro: '引言',
+    sections: '章节',
+    heading: '章节标题',
     hoverText: '翻面显示文字'
   },
   ko: {
@@ -412,6 +416,10 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     footer: '푸터',
     language: '언어',
     notice: '본문',
+    effective: '시행일',
+    intro: '도입 문구',
+    sections: '조항',
+    heading: '조항 제목',
     hoverText: '뒤집힘 표시 문구'
   },
   en: {
@@ -502,6 +510,10 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     footer: 'Footer',
     language: 'Language',
     notice: 'Body',
+    effective: 'Effective date',
+    intro: 'Intro',
+    sections: 'Sections',
+    heading: 'Section heading',
     hoverText: 'Flip-side copy'
   }
 };
