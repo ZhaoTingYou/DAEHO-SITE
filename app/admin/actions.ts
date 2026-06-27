@@ -52,6 +52,7 @@ import {
   getEditableLeaves,
   getEditableLeavesForPageGroup,
   getManagedPageDefinition,
+  managedPageDefinitions,
   getObjectValueAtPath,
   getPageFieldDefinitionsForGroup,
   getPageContentGroups,
@@ -216,6 +217,7 @@ export async function savePageAction(formData: FormData) {
   const pageKey = stringFromForm(formData, 'pageKey');
   const definition = getManagedPageDefinition(pageKey);
   const pageEditorPath = `/admin/pages/${encodeURIComponent(pageKey)}`;
+  const returnTo = safeAdminReturnPath(stringFromForm(formData, 'returnTo')) ?? pageEditorPath;
   const previousImages = collectImageFilenames(pageKey ? await getPage(pageKey) : null);
   const sharedContentImages = await readSharedPageContentImageUploads(formData, pageEditorPath);
   const sharedSeoImages = await readSharedPageSeoImageUploads(formData, pageEditorPath);
@@ -239,14 +241,17 @@ export async function savePageAction(formData: FormData) {
 
   revalidatePath('/admin/pages');
   revalidatePath(`/admin/pages/${pageKey}`);
+  revalidatePath(returnTo);
 
-  if (definition?.href) {
+  if (pageKey === 'common') {
+    revalidateManagedPublicPaths();
+  } else if (definition?.href) {
     for (const locale of locales) {
       revalidatePath(`/${locale}${definition.href === '/' ? '' : definition.href}`);
     }
   }
 
-  redirect(pageEditorPath);
+  redirect(returnTo);
 }
 
 export async function uploadMediaAction(formData: FormData) {
@@ -702,6 +707,24 @@ async function readUploadedImageOrText(
 function stringFromForm(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function safeAdminReturnPath(value: string) {
+  if (!value || (value !== '/admin' && !value.startsWith('/admin/')) || value.startsWith('//') || value.includes('://')) {
+    return null;
+  }
+
+  return value;
+}
+
+function revalidateManagedPublicPaths() {
+  const hrefs = new Set(managedPageDefinitions.map((definition) => definition.href).filter(Boolean));
+
+  for (const href of hrefs) {
+    for (const locale of locales) {
+      revalidatePath(`/${locale}${href === '/' ? '' : href}`);
+    }
+  }
 }
 
 function parseTags(value: string) {

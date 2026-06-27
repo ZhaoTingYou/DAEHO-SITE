@@ -707,9 +707,57 @@
       {"key": "notFound", "title": "404 页面文案", "sourcePath": "notFound"}
     ],
     "fields": [
-      {"path": "nav", "label": "导航文案", "type": "json"},
-      {"path": "footer", "label": "页脚文案", "type": "json"},
-      {"path": "language", "label": "语言切换文案", "type": "json"}
+      {"path": "footer.tagline", "label": "品牌标语", "labels": {"ko": "브랜드 문구", "en": "Brand tagline"}, "type": "textarea", "rows": 2},
+      {"path": "footer.navigation", "label": "Footer 导航辅助文案", "labels": {"ko": "푸터 내비게이션 접근성 라벨", "en": "Footer navigation aria label"}},
+      {"path": "footer.locale", "label": "语言区标题", "labels": {"ko": "언어 영역 제목", "en": "Language section title"}},
+      {"path": "footer.otherSites", "label": "相关站点标题", "labels": {"ko": "관련 사이트 제목", "en": "Related sites title"}},
+      {"path": "footer.golfInquiry", "label": "Golf 문의链接文案", "labels": {"ko": "Golf 문의 링크 문구", "en": "Golf inquiry link label"}},
+
+      {"path": "footer.legal.heading", "label": "法律区标题", "labels": {"ko": "약관 영역 제목", "en": "Legal section heading"}},
+      {"path": "footer.legal.terms", "label": "Terms 链接文案", "labels": {"ko": "이용약관 링크 문구", "en": "Terms link label"}},
+      {"path": "footer.legal.privacy", "label": "Privacy 链接文案", "labels": {"ko": "개인정보처리방침 링크 문구", "en": "Privacy link label"}},
+      {"path": "footer.legal.rights", "label": "版权声明", "labels": {"ko": "저작권 문구", "en": "Rights notice"}},
+
+      {"path": "footer.business.heading", "label": "企业信息标题", "labels": {"ko": "사업자 정보 제목", "en": "Business information heading"}},
+      {"path": "footer.business.items.0.label", "label": "企业信息 1 标签：公司名", "labels": {"ko": "사업자 정보 1 라벨: 상호", "en": "Business item 1 label: Company"}},
+      {"path": "footer.business.items.0.value", "label": "企业信息 1 内容：公司名", "labels": {"ko": "사업자 정보 1 내용: 상호", "en": "Business item 1 value: Company"}},
+      {"path": "footer.business.items.1.label", "label": "企业信息 2 标签：代表", "labels": {"ko": "사업자 정보 2 라벨: 대표자", "en": "Business item 2 label: Representative"}},
+      {"path": "footer.business.items.1.value", "label": "企业信息 2 内容：代表", "labels": {"ko": "사업자 정보 2 내용: 대표자", "en": "Business item 2 value: Representative"}},
+      {"path": "footer.business.items.2.label", "label": "企业信息 3 标签：营业执照号", "labels": {"ko": "사업자 정보 3 라벨: 사업자등록번호", "en": "Business item 3 label: Registration no."}},
+      {"path": "footer.business.items.2.value", "label": "企业信息 3 内容：营业执照号", "labels": {"ko": "사업자 정보 3 내용: 사업자등록번호", "en": "Business item 3 value: Registration no."}},
+      {"path": "footer.business.items.3.label", "label": "企业信息 4 标签：通信销售申报号", "labels": {"ko": "사업자 정보 4 라벨: 통신판매업신고번호", "en": "Business item 4 label: Mail-order license"}},
+      {"path": "footer.business.items.3.value", "label": "企业信息 4 内容：通信销售申报号", "labels": {"ko": "사업자 정보 4 내용: 통신판매업신고번호", "en": "Business item 4 value: Mail-order license"}},
+      {"path": "footer.business.items.4.label", "label": "企业信息 5 标签：地址", "labels": {"ko": "사업자 정보 5 라벨: 주소", "en": "Business item 5 label: Address"}},
+      {"path": "footer.business.items.4.value", "label": "企业信息 5 内容：地址", "labels": {"ko": "사업자 정보 5 내용: 주소", "en": "Business item 5 value: Address"}},
+      {"path": "footer.business.items.5.label", "label": "企业信息 6 标签：客服", "labels": {"ko": "사업자 정보 6 라벨: 고객센터", "en": "Business item 6 label: Customer center"}},
+      {"path": "footer.business.items.5.value", "label": "企业信息 6 内容：客服", "labels": {"ko": "사업자 정보 6 내용: 고객센터", "en": "Business item 6 value: Customer center"}},
+      {"path": "footer.business.items.6.label", "label": "企业信息 7 标签：邮箱", "labels": {"ko": "사업자 정보 7 라벨: 이메일", "en": "Business item 7 label: Email"}},
+      {"path": "footer.business.items.6.value", "label": "企业信息 7 内容：邮箱", "labels": {"ko": "사업자 정보 7 내용: 이메일", "en": "Business item 7 value: Email"}},
+      {"path": "footer.business.items.7.label", "label": "企业信息 8 标签：隐私负责人", "labels": {"ko": "사업자 정보 8 라벨: 개인정보보호책임자", "en": "Business item 8 label: Privacy officer"}},
+      {"path": "footer.business.items.7.value", "label": "企业信息 8 内容：隐私负责人", "labels": {"ko": "사업자 정보 8 내용: 개인정보보호책임자", "en": "Business item 8 value: Privacy officer"}},
+      {"path": "footer.business.items.8.label", "label": "企业信息 9 标签：托管服务商", "labels": {"ko": "사업자 정보 9 라벨: 호스팅 제공자", "en": "Business item 9 label: Hosting provider"}},
+      {"path": "footer.business.items.8.value", "label": "企业信息 9 内容：托管服务商", "labels": {"ko": "사업자 정보 9 내용: 호스팅 제공자", "en": "Business item 9 value: Hosting provider"}},
+
+      {"path": "footer.collectionCategoryLinks.0.label", "label": "作品分类 1：冠军戒指", "labels": {"ko": "작품 분류 1: 우승반지", "en": "Collection category 1: Championship"}},
+      {"path": "footer.collectionCategoryLinks.1.label", "label": "作品分类 2：任命戒指", "labels": {"ko": "작품 분류 2: 임관반지", "en": "Collection category 2: Appointment"}},
+      {"path": "footer.collectionCategoryLinks.2.label", "label": "作品分类 3：定制产品", "labels": {"ko": "작품 분류 3: 주문제작", "en": "Collection category 3: Bespoke"}},
+
+      {"path": "footer.externalSites.daeho", "label": "相关站点：DAEHO", "labels": {"ko": "관련 사이트: DAEHO", "en": "Related site: DAEHO"}},
+      {"path": "footer.externalSites.oh", "label": "相关站点：OH", "labels": {"ko": "관련 사이트: OH", "en": "Related site: OH"}},
+      {"path": "footer.externalSites.vulcan", "label": "相关站点：VULCAN", "labels": {"ko": "관련 사이트: VULCAN", "en": "Related site: VULCAN"}},
+
+      {"path": "navigation.items.home", "label": "导航：HOME", "labels": {"ko": "내비게이션: HOME", "en": "Navigation: HOME"}},
+      {"path": "navigation.items.chronicle", "label": "导航：ARCHIVE", "labels": {"ko": "내비게이션: ARCHIVE", "en": "Navigation: ARCHIVE"}},
+      {"path": "navigation.items.legacy", "label": "导航：HERITAGE", "labels": {"ko": "내비게이션: HERITAGE", "en": "Navigation: HERITAGE"}},
+      {"path": "navigation.items.loyalty", "label": "导航：LOYALTY", "labels": {"ko": "내비게이션: LOYALTY", "en": "Navigation: LOYALTY"}},
+      {"path": "navigation.items.credibility", "label": "导航：CREDIBILITY", "labels": {"ko": "내비게이션: CREDIBILITY", "en": "Navigation: CREDIBILITY"}},
+      {"path": "navigation.items.achievement", "label": "导航：ACHIEVEMENT", "labels": {"ko": "내비게이션: ACHIEVEMENT", "en": "Navigation: ACHIEVEMENT"}},
+      {"path": "navigation.items.specialty", "label": "导航：MASTERY", "labels": {"ko": "내비게이션: MASTERY", "en": "Navigation: MASTERY"}},
+      {"path": "navigation.items.technique", "label": "导航：MAKING", "labels": {"ko": "내비게이션: MAKING", "en": "Navigation: MAKING"}},
+      {"path": "navigation.items.collection", "label": "导航：CREATIONS", "labels": {"ko": "내비게이션: CREATIONS", "en": "Navigation: CREATIONS"}},
+      {"path": "navigation.items.news", "label": "导航：NEWS", "labels": {"ko": "내비게이션: NEWS", "en": "Navigation: NEWS"}},
+      {"path": "navigation.items.golf", "label": "导航：GOLF", "labels": {"ko": "내비게이션: GOLF", "en": "Navigation: GOLF"}},
+      {"path": "navigation.contactCta", "label": "导航：CONTACT", "labels": {"ko": "내비게이션: CONTACT", "en": "Navigation: CONTACT"}}
     ]
   }
 ]

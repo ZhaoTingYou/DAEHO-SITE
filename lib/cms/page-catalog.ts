@@ -5,6 +5,7 @@ export type PageFieldType = 'text' | 'textarea' | 'image' | 'stringList' | 'json
 export type PageArrayItemFieldDefinition = {
   path: string;
   label: string;
+  labels?: Record<string, string>;
   type?: PageFieldType;
   rows?: number;
   placeholder?: string;
@@ -14,6 +15,7 @@ export type PageFieldDefinition = {
   groupKey?: string;
   path: string;
   label: string;
+  labels?: Record<string, string>;
   type?: PageFieldType;
   rows?: number;
   placeholder?: string;

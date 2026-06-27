@@ -552,6 +552,10 @@ export function getLocalizedPageFieldLabel(field: PageFieldDefinition, adminLoca
     return field.label;
   }
 
+  if (field.labels?.[adminLocale]) {
+    return field.labels[adminLocale];
+  }
+
   return getLocalizedPathLabel(field.path, adminLocale);
 }
 
@@ -565,7 +569,7 @@ export function getLocalizedArrayItemFields(
 
   return itemFields.map((field) => ({
     ...field,
-    label: getLocalizedPathLabel(field.path, adminLocale)
+    label: field.labels?.[adminLocale] ?? getLocalizedPathLabel(field.path, adminLocale)
   }));
 }
 
