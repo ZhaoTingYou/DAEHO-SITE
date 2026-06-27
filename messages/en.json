@@ -1808,130 +1808,245 @@
       "eyebrow": "LEGAL",
       "title": "Terms of Use",
       "effective": "Effective date: 2026-06-27",
-      "notice": "These Terms of Use govern access to and use of the official DAEHO website. Product images and production examples on the Site are provided for information and consultation purposes only. Actual order and production conditions are governed by the individual consultation, quotation, order confirmation, or separate agreement agreed with DAEHO.",
-      "intro": "These Terms set out the rights, obligations, and responsibilities between DAEHO (the “Company”) and users in relation to the official website operated by the Company (the “Site”). The Company provides brand information and inquiry services for commemorative rings, championship rings, appointment rings, bespoke products, and golf-related products.",
+      "notice": "These Terms govern use of the official DAEHO website. The DAEHO Site currently does not provide public member registration, shopping cart, or instant online payment functions. Product production proceeds only after inquiry, individual consultation, quotation, order confirmation, or separate agreement.",
+      "intro": "DAEHO (the “Company”) operates the official website (the “Site”) to provide brand information and production consultation for commemorative rings, championship rings, appointment rings, bespoke products, and golf-related products. These Terms define the rights, obligations, and responsibilities of the Company and users in relation to use of the Site.",
       "sections": [
         {
           "heading": "Article 1 (Purpose)",
           "body": [
-            "The purpose of these Terms is to define the conditions and procedures for using the Site, including brand introductions, product and portfolio information, production and order inquiries, and related responses, as well as the rights, obligations, and responsibilities of the Company and users."
+            "The purpose of these Terms is to define the rights, obligations, and responsibilities of the Company and users in relation to internet-related services provided through the Site (the “Services”).",
+            "The Services focus on brand introductions, product and production example information, production, order, and collaboration inquiries, and consultation responses."
           ]
         },
         {
           "heading": "Article 2 (Definitions)",
           "body": [
-            "1. “Site” means the website operated by the Company to provide information about its brand, products, production examples, and inquiry channels.",
-            "2. “User” means any person who accesses or uses the Site under these Terms.",
-            "3. “Content” means all materials posted on the Site, including text, images, video, designs, logos, production examples, drawings, arrangements, and related materials.",
-            "4. “Inquiry” means a request submitted by a user through the Site, including Contact or Golf Inquiry forms, regarding production consultation, quotations, schedules, quantities, or product specifications.",
-            "5. “Bespoke production” means planning or producing a product by reflecting a user’s requested symbols, emblems, logos, records, specifications, or separately agreed requirements."
+            "The terms used in these Terms have the following meanings:",
+            "1. “Site” means the official website operated by the Company to provide brand, product, production example, process, and inquiry information.",
+            "2. “User” means any person who accesses the Site and uses the Services under these Terms.",
+            "3. “Services” means brand and product information, production example introductions, news, inquiry receipt, consultation responses, and other internet-related services determined by the Company through the Site.",
+            "4. “Inquiry” means contacting the Company through Contact, Golf Inquiry, or other forms regarding product production, quotation, schedule, quantity, specifications, or collaboration.",
+            "5. “Individual Agreement” means a separately agreed contract between the Company and a user after inquiry, covering production specifications, price, payment, delivery schedule, inspection, shipping, or handover conditions.",
+            "6. “Content” means text, images, video, logos, designs, production examples, drawings, arrangements, data, and other materials posted on the Site.",
+            "7. “Bespoke production” means planning or producing a product by reflecting a user’s requested symbols, logos, emblems, records, specifications, wearing purpose, or separately agreed requirements.",
+            "Terms not defined in these Terms are interpreted in accordance with applicable laws and general commercial practices."
           ]
         },
         {
           "heading": "Article 3 (Posting and Amendment of Terms)",
           "body": [
-            "1. The Company posts these Terms on the Site so that users can easily review them.",
-            "2. The Company may amend these Terms within the scope permitted by applicable law.",
-            "3. If these Terms are amended, the Company will post the effective date and key changes on the Site. The amended Terms take effect from the posted effective date.",
-            "4. A user’s continued use of the Site after the effective date of amended Terms will be deemed acceptance of the amended Terms, except where separate consent is required by applicable law."
+            "The Company posts these Terms in the footer of the Site or on a linked page so that users can easily review them.",
+            "The Company may amend these Terms within the scope permitted by applicable law.",
+            "If these Terms are amended, the Company will post the effective date and key changes on the Site. For important or unfavorable changes to users, the Company will provide notice with a sufficient prior period where reasonably possible.",
+            "The amended Terms take effect from the posted effective date. Continued use of the Site after the effective date will be deemed acceptance of the amended Terms, except where separate consent is required by applicable law.",
+            "Matters not provided in these Terms and interpretation of these Terms are governed by applicable Korean laws and commercial practices."
           ]
         },
         {
-          "heading": "Article 4 (Services)",
+          "heading": "Article 4 (Provision and Change of Services)",
           "body": [
-            "The Company provides the following services through the Site:",
+            "The Company provides the following Services:",
             "1. Company and brand introductions",
             "2. Information about commemorative rings, championship rings, appointment rings, bespoke products, and golf-related products",
             "3. Information about production examples, processes, materials, design direction, and portfolios",
             "4. Receipt and response to inquiries regarding production, orders, quotations, and collaborations",
-            "5. News, notices, and other information that the Company considers necessary"
+            "5. News, notices, and other information that the Company considers necessary",
+            "The Company may change product specifications, images, production examples, service composition, or Site functions. Site information is general information only, and actual conditions may vary depending on individual consultation and separate agreement."
           ]
         },
         {
-          "heading": "Article 5 (Inquiries and Production Agreements)",
+          "heading": "Article 5 (Service Hours)",
           "body": [
-            "1. Submission of an inquiry form on the Site is a request for consultation only and does not by itself create a product purchase agreement, production agreement, or supply agreement.",
-            "2. Production feasibility, specifications, materials, quantity, price, delivery schedule, payment terms, inspection, and delivery conditions are confirmed through individual consultation, quotation, order confirmation, or a separate agreement between the Company and the user.",
-            "3. If materials provided by a user for bespoke production, including emblems, logos, trademarks, images, text, organization names, personal names, or records, include third-party rights, the user must warrant that the user has lawful authority to use those materials.",
-            "4. The Company may decline consultation or production if it determines that the requested content violates laws, public order, third-party rights, or the Company’s production standards."
+            "In principle, the Site is available 24 hours a day, year-round, unless there are business or technical circumstances affecting operation.",
+            "Use of the Site may be temporarily restricted or suspended due to system maintenance, server failure, communication network failure, security measures, force majeure, or other unavoidable reasons.",
+            "Where necessary for regular maintenance or service operation, the Company may adjust available hours or the scope of Services and may provide notice through the Site."
           ]
         },
         {
-          "heading": "Article 6 (User Obligations)",
+          "heading": "Article 6 (Modification, Change, Suspension, and Notice of the Site)",
           "body": [
-            "Users must not engage in any of the following acts while using the Site:",
-            "1. Submitting inquiries using false information or another person’s information",
-            "2. Infringing the copyright, trademark rights, design rights, portrait rights, reputation, trade secrets, or other rights of the Company or any third party",
-            "3. Reproducing, storing, distributing, transmitting, posting, editing, creating derivative works from, or commercially using Site Content without the Company’s prior written consent",
-            "4. Interfering with normal Site operation or creating security risks",
-            "5. Submitting inquiries, requests, or materials that violate laws or public order and morals"
+            "The Company may modify or change the design, Content, menus, functions, operation method, or URL structure of the Site.",
+            "Where normal operation of the Site is difficult, the Company may temporarily suspend operation after posting the reason and schedule in advance where reasonably possible.",
+            "Where prior notice is difficult due to national emergency, power outage, communication interruption, natural disaster, facility failure, excessive service use, emergency security measures, or urgent system maintenance, the Company may provide notice after the fact.",
+            "If the Company permanently discontinues Site operation due to business or technical needs, the Company will provide notice through the Site where reasonably possible."
           ]
         },
         {
-          "heading": "Article 7 (Intellectual Property)",
+          "heading": "Article 7 (Membership and Account Services)",
           "body": [
-            "1. Copyrights, trademarks, design rights, and other intellectual property rights in the Site and its Content belong to the Company or the lawful rights holder.",
-            "2. Production examples, images, product names, logos, layouts, and design elements displayed on the Site may be viewed only for information and consultation purposes.",
-            "3. Users may not use Site Content in promotional materials, sales materials, product production, third-party proposals, social media, or any other media without the Company’s express prior written consent.",
-            "4. Rights in materials provided by a user for bespoke production remain with the user or the relevant rights holder. However, the user permits the Company to use such materials to the extent necessary for consultation, quotation, design review, and production feasibility assessment."
+            "The Site currently does not provide public member registration, login accounts, My Page, shopping cart, or online purchase history functions.",
+            "Administrator CMS or internal operation accounts are for Company operations and are not membership services provided to general users.",
+            "If the Company provides member registration or account-based services in the future, the Company may provide separate terms and privacy notices or amend these Terms."
           ]
         },
         {
-          "heading": "Article 8 (Accuracy of Information and Product Display)",
+          "heading": "Article 8 (Submission of Inquiries)",
           "body": [
-            "1. The Company makes reasonable efforts to provide accurate and current information on the Site. However, Site Content is provided for general information, and actual product colors, sizes, weights, material textures, and detailed specifications may vary depending on photography conditions, screen settings, production methods, and individually agreed requirements.",
-            "2. Production examples posted on the Site may be past work or illustrative images and do not guarantee identical or similar production results.",
-            "3. If Site Content conflicts with an individual written agreement regarding product specifications, quotation, delivery schedule, or production feasibility, the individual written agreement prevails."
+            "Users may submit inquiries regarding production consultation, quotations, schedules, quantities, product specifications, or collaboration through Contact, Golf Inquiry, or other inquiry channels provided by the Company.",
+            "Submission of an inquiry is only a request for consultation and does not by itself create a purchase agreement, production agreement, supply agreement, or acceptance by the Company.",
+            "Users must provide accurate and current information when submitting inquiries and must not use false information or another person’s information.",
+            "Users should not include unnecessary sensitive information, payment card information, account passwords, resident registration numbers, or other information unnecessary for Site consultation in inquiry content."
           ]
         },
         {
-          "heading": "Article 9 (Privacy)",
+          "heading": "Article 9 (Individual Agreements and Production Conditions)",
           "body": [
-            "1. The Company processes personal information to the extent necessary for Site operation and inquiry response, and protects personal information in accordance with applicable law and the separate Privacy Policy.",
-            "2. Users must provide accurate contact information and necessary details when submitting an inquiry. False or inaccurate information may delay or prevent consultation."
+            "Production feasibility, design direction, materials, specifications, quantity, price, payment terms, delivery schedule, inspection, shipping, or handover conditions are confirmed through individual consultation, quotation, order confirmation, or separate agreement between the Company and the user.",
+            "Production examples, images, descriptions, estimated schedules, or price-related information displayed on the Site are reference materials and do not bind the Company or user unless confirmed as part of an Individual Agreement.",
+            "The Company may refuse consultation or production if it determines that the request violates laws, public order, third-party rights, or the Company’s production standards.",
+            "If a user is a minor or acts on behalf of a corporation or organization, the user must have the necessary consent or authority."
           ]
         },
         {
-          "heading": "Article 10 (External Links)",
+          "heading": "Article 10 (Prices, Quotations, and Payment)",
           "body": [
-            "The Site may include links to websites or services not operated by the Company. The operator of each external site is responsible for its content, policies, security, and use. Except where liability is recognized under applicable law, the Company is not responsible for external sites."
+            "The Site currently does not provide instant online payment, credit card payment, simple payment, or online payment functions.",
+            "Quotation amount, payment method, payment timing, tax invoice or receipt issuance, and related matters are determined through individual consultation, quotation, order confirmation, or separate agreement.",
+            "Due to the nature of bespoke production, prices may vary depending on material, quantity, size, plating or craft method, design complexity, delivery schedule, packaging, shipping, and other requests.",
+            "Even where prices are displayed on the Site, the Company may correct obvious typographical errors, system errors, or specification changes through individual consultation."
           ]
         },
         {
-          "heading": "Article 11 (Changes and Suspension of Services)",
+          "heading": "Article 11 (Production, Supply, and Delivery)",
           "body": [
-            "1. The Company may improve, change, or discontinue the structure, Content, functions, or operation of the Site.",
-            "2. Use of the Site may be temporarily restricted or suspended due to system maintenance, failures, communication network issues, force majeure, emergency security measures, or other unavoidable reasons.",
-            "3. Where possible, the Company will announce changes or suspensions through the Site. In urgent or unavoidable cases, notice may be provided after the fact."
+            "Product production and supply schedules follow the schedule set in the Individual Agreement.",
+            "Production or delivery schedules may change depending on design confirmation, sample approval, raw material supply, quantity, inspection, packaging, shipping, or delays in materials provided by the user.",
+            "Where shipping or handover is required, shipping address, recipient, cost allocation, transfer of risk, and inspection method follow the Individual Agreement or separate notice.",
+            "The user is responsible for delays or damages caused by inaccurate address, contact, or recipient information provided by the user."
           ]
         },
         {
-          "heading": "Article 12 (Disclaimer and Limitation of Liability)",
+          "heading": "Article 12 (Order Changes, Cancellation, Exchange, and Refund)",
           "body": [
-            "1. The Company is not liable for failure to provide services due to reasons beyond its reasonable control, including force majeure, war, disasters, communication failures, third-party service failures, or causes attributable to users.",
-            "2. The Company is not liable for damage arising from a user’s discretionary interpretation or use of information posted on the Site without individual confirmation with the Company.",
-            "3. The Company has no obligation to intervene in disputes between users or between a user and a third party arising in connection with use of the Site, and is not liable for resulting damages.",
-            "4. This Article is not intended to exclude liability arising from the Company’s intentional misconduct or gross negligence."
+            "At the inquiry stage, no order is formed, so users may stop consultation at any time.",
+            "After an Individual Agreement is formed, order changes, cancellation, exchange, refund, withdrawal rights, and cost allocation are governed by the Individual Agreement, applicable laws, and conditions notified in advance by the Company.",
+            "For bespoke products made according to a user’s request, changes or cancellation may be restricted depending on the production stage, including design confirmation, raw material ordering, mold making, engraving, or craft work.",
+            "If a product is performed differently from the Individual Agreement or defects arise due to reasons attributable to the Company, the Company will take necessary measures in accordance with applicable law and the Individual Agreement."
           ]
         },
         {
-          "heading": "Article 13 (Governing Law and Dispute Resolution)",
+          "heading": "Article 13 (Notices)",
           "body": [
-            "1. These Terms are governed by the laws of the Republic of Korea.",
-            "2. Disputes between the Company and users should first be resolved through mutual consultation.",
-            "3. If a dispute cannot be resolved through consultation, litigation will be filed with the competent court under applicable law."
+            "When the Company provides individual notice to a user, it may use the email address, phone number, message channel, or other contact information provided during inquiry or contract procedures.",
+            "General notices to unspecified users may be substituted by posting on the Site.",
+            "The user is responsible for disadvantages caused by providing inaccurate contact information or failing to notify the Company of changes."
           ]
         },
         {
-          "heading": "Article 14 (Contact)",
+          "heading": "Article 14 (Privacy)",
           "body": [
-            "Questions regarding these Terms or use of the Site may be submitted through the Contact page of the Site or through contact details separately announced by the Company."
+            "The Company complies with applicable laws to protect users’ personal information.",
+            "Details regarding collection, use, retention, destruction, third-party provision, outsourcing, and exercise of user rights are governed by the Privacy Policy posted on the Site."
+          ]
+        },
+        {
+          "heading": "Article 15 (Company Obligations)",
+          "body": [
+            "The Company does not engage in acts prohibited by law or these Terms or contrary to public order and morals.",
+            "The Company takes reasonable security measures for stable Site operation and personal information protection.",
+            "The Company does not send commercial advertising emails unwanted by users in violation of applicable law.",
+            "The Company makes efforts to provide accurate information on the Site. However, the Company does not guarantee that all Site information is always complete, current, or fit for a particular purpose."
+          ]
+        },
+        {
+          "heading": "Article 16 (User Obligations)",
+          "body": [
+            "Users must not engage in any of the following acts:",
+            "1. Submitting inquiries using false information, another person’s information, or unauthorized corporate or organization information",
+            "2. Modifying information posted on the Site without authorization or interfering with Site operation",
+            "3. Infringing the copyright, trademark rights, design rights, portrait rights, reputation, trade secrets, or other rights of the Company or any third party",
+            "4. Interfering with stable Site operation through computer viruses, malicious programs, abnormal access, automated collection, hacking, or similar acts",
+            "5. Using the Site for advertising, sales, spam, pyramid-style solicitation, or other commercial solicitation without the Company’s prior consent",
+            "6. Submitting obscene, violent, discriminatory, insulting, or public-order-violating content",
+            "7. Any act prohibited by law or these Terms"
+          ]
+        },
+        {
+          "heading": "Article 17 (Protection of Intellectual Property)",
+          "body": [
+            "Unless otherwise stated, copyrights, trademarks, design rights, and other intellectual property rights in the Site and Site Content belong to the Company or the lawful rights holder.",
+            "Users may not reproduce, modify, distribute, transmit, post, publish, broadcast, display, sell, lease, create derivative works from, or commercially use Site Content without the Company’s prior written consent.",
+            "Production examples, product images, logos, layouts, copy, and design elements on the Site may be viewed only for information and consultation purposes."
+          ]
+        },
+        {
+          "heading": "Article 18 (Materials Provided by Users)",
+          "body": [
+            "Rights in logos, emblems, trademarks, images, text, organization names, personal names, records, and design materials provided by users for bespoke production or consultation remain with the user or the relevant rights holder.",
+            "The user permits the Company to use submitted materials to the extent necessary for consultation, quotation, design review, production feasibility assessment, and performance of Individual Agreements.",
+            "The user warrants that materials provided by the user do not infringe third-party rights and that the user has secured all necessary authority or consent.",
+            "If a dispute with a third party arises from materials provided by the user, the user must resolve it at the user’s own responsibility and expense, and must compensate the Company for any damage incurred."
+          ]
+        },
+        {
+          "heading": "Article 19 (Management of Inquiry Content and Posts)",
+          "body": [
+            "If the Company determines that inquiries, materials, or content provided through any Site posting function fall under any of the following, the Company may refuse consultation or take necessary measures, including restricting access, deleting, retaining, or reporting to authorities, without prior notice:",
+            "1. Infringing another person’s rights, reputation, credit, or legitimate interests",
+            "2. Violating public order or morals",
+            "3. Relating to criminal acts or violating laws",
+            "4. Infringing intellectual property rights of the Company or a third party",
+            "5. Interfering with Company business or Site operation",
+            "6. Including false facts or refusing fact verification",
+            "7. Otherwise reasonably determined by the Company to violate these Terms or applicable law"
+          ]
+        },
+        {
+          "heading": "Article 20 (Linked Sites and External Services)",
+          "body": [
+            "The Site may contain links to external websites or services not operated by the Company.",
+            "The Company does not control external site content, policies, security, personal information processing, or transactions between users and external sites.",
+            "Use of external sites is governed by the terms and policies of those external sites, and the Company is not liable for them except where liability is recognized under applicable law."
+          ]
+        },
+        {
+          "heading": "Article 21 (Accuracy of Information and Product Display)",
+          "body": [
+            "The Company makes efforts to provide accurate and current information on the Site.",
+            "However, product color, size, weight, material texture, gloss, and detailed specifications may vary depending on photography conditions, screen settings, raw material supply, production method, and individually agreed requirements.",
+            "Production examples posted on the Site may be past work or illustrative images and do not guarantee identical or similar production results.",
+            "If Site Content conflicts with an individual written agreement, the individual written agreement prevails."
+          ]
+        },
+        {
+          "heading": "Article 22 (Disclaimer)",
+          "body": [
+            "The Company is not liable for failure to provide Services due to reasons beyond its reasonable control, including force majeure, war, disaster, power outage, communication network failure, third-party service failure, emergency security measures, or causes attributable to users.",
+            "The Company is not liable for damage arising from a user’s discretionary interpretation or use of Site information without individual confirmation with the Company.",
+            "The Company is not liable for damage caused by the user’s device, network, browser environment, or security settings.",
+            "The Company has no obligation to intervene in disputes between users and third parties or among users arising through use of the Site, and is not liable for resulting damages.",
+            "This Article is not intended to exclude liability arising from the Company’s intentional misconduct or gross negligence."
+          ]
+        },
+        {
+          "heading": "Article 23 (Damages)",
+          "body": [
+            "If a user causes damage to the Company or a third party by violating these Terms or applicable law, the user is liable to compensate for such damage.",
+            "Where the Company’s liability is recognized, the Company compensates damages within the scope provided by applicable law and the Individual Agreement.",
+            "Liability for indirect, special, consequential, business-loss, or loss-of-expected-profit damages is limited to the extent permitted by applicable law."
+          ]
+        },
+        {
+          "heading": "Article 24 (Dispute Resolution)",
+          "body": [
+            "The Company makes efforts to promptly handle legitimate opinions or complaints raised by users.",
+            "Where prompt handling is difficult, the Company will provide the reason and processing schedule where reasonably possible.",
+            "If a dispute arises between the Company and a user, both parties will endeavor to resolve the dispute through mutual consultation."
+          ]
+        },
+        {
+          "heading": "Article 25 (Jurisdiction and Governing Law)",
+          "body": [
+            "These Terms and disputes between the Company and users in relation to Site use are governed by the laws of the Republic of Korea.",
+            "Litigation concerning disputes will be filed with the competent court under applicable law.",
+            "For disputes with users residing outside Korea, jurisdiction and governing law are determined in accordance with applicable laws, including private international law."
           ]
         },
         {
           "heading": "Addendum",
           "body": [
-            "These Terms take effect on June 27, 2026."
+            "These Terms take effect on June 27, 2026.",
+            "If the Company provides additional services such as public member registration, online purchase, payment, or delivery tracking through the Site in the future, the Company may amend these Terms or post separate terms of use."
           ]
         }
       ]
