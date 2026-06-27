@@ -6,6 +6,7 @@
     "dev": "next dev --webpack",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
+    "build:frontend-only": "node scripts/build-frontend-only.mjs",
     "start": "next start",
     "lint": "eslint",
     "cms:init": "node scripts/cms-db-init.mjs",
