@@ -24,9 +24,28 @@ type PageSeo = {
 
 export const metadataBase = getMetadataBase();
 
-export function getPageMetadata(locale: Locale, pageKey: PageKey): Metadata {
-  const page = getPageSeo(locale, pageKey);
+export async function getPageMetadata(locale: Locale, pageKey: PageKey): Promise<Metadata> {
+  const page = await getPageSeo(locale, pageKey);
   return getDetailMetadata(locale, page.path, page.title, page.description);
+}
+
+export function isPreviewNoindexEnabled() {
+  return process.env.PREVIEW_NOINDEX === 'true';
+}
+
+export function previewNoindexRobots(): Metadata['robots'] | undefined {
+  if (!isPreviewNoindexEnabled()) {
+    return undefined;
+  }
+
+  return {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false
+    }
+  };
 }
 
 export function getDetailMetadata(
@@ -41,6 +60,7 @@ export function getDetailMetadata(
   return {
     title,
     description,
+    robots: previewNoindexRobots(),
     alternates: {
       canonical: withLocale(locale, path),
       languages: {
@@ -72,8 +92,8 @@ export function getDetailMetadata(
   };
 }
 
-function getPageSeo(locale: Locale, pageKey: PageKey): PageSeo {
-  const messages = getLocaleMessages(locale);
+async function getPageSeo(locale: Locale, pageKey: PageKey): Promise<PageSeo> {
+  const messages = await getLocaleMessages(locale);
 
   switch (pageKey) {
     case 'home':

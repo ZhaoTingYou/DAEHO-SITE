@@ -4,13 +4,8 @@ import type {NextRequest} from 'next/server';
 
 import {hasAdminSession} from '@/lib/cms/admin-session';
 import {requireAdmin} from '@/lib/cms/auth';
-import {getCmsDb} from '@/lib/cms/db';
 import {maxImportBodyBytes, rejectOversizedRequest} from '@/lib/cms/http';
-import {
-  getCmsImportCounts,
-  importCmsSnapshot,
-  readCmsImportSnapshotFromText
-} from '@/lib/cms/import-core.mjs';
+import {getCmsBackendBaseUrl} from '@/lib/cms/repositories';
 import {locales} from '@/lib/locales';
 
 export const runtime = 'nodejs';
@@ -29,39 +24,28 @@ export async function POST(request: NextRequest) {
     return oversized;
   }
 
-  try {
-    const snapshot = readCmsImportSnapshotFromText(await request.text());
-    const counts = getCmsImportCounts(snapshot);
-    const totalRows = counts.reduce((total, item) => total + item.count, 0);
+  const response = await fetch(`${getCmsBackendBaseUrl()}/api/admin/import${shouldReplace ? '?replace=1' : ''}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-api-key': process.env.CMS_BACKEND_API_KEY || process.env.CMS_ADMIN_API_KEY || ''
+    },
+    body: await request.text(),
+    cache: 'no-store'
+  });
+  const body = await response.text();
 
-    if (!shouldReplace) {
-      return NextResponse.json({
-        dryRun: true,
-        replaced: false,
-        schemaVersion: snapshot.schemaVersion,
-        exportedAt: snapshot.exportedAt ?? '',
-        totalRows,
-        counts
-      });
-    }
-
-    importCmsSnapshot(getCmsDb(), snapshot);
+  if (response.ok && shouldReplace) {
     revalidateCmsPaths();
-
-    return NextResponse.json({
-      dryRun: false,
-      replaced: true,
-      schemaVersion: snapshot.schemaVersion,
-      exportedAt: snapshot.exportedAt ?? '',
-      totalRows,
-      counts
-    });
-  } catch (error) {
-    return NextResponse.json(
-      {error: error instanceof Error ? error.message : 'Invalid CMS import payload.'},
-      {status: 400}
-    );
   }
+
+  return new NextResponse(body, {
+    status: response.status,
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': response.headers.get('content-type') || 'application/json; charset=utf-8'
+    }
+  });
 }
 
 function revalidateCmsPaths() {

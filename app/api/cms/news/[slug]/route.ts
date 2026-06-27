@@ -13,7 +13,7 @@ type RouteContext = {
 export async function GET(request: NextRequest, context: RouteContext) {
   const {slug} = await context.params;
   const locale = getLocaleFromSearch(request);
-  const item = getPublicNews(slug, locale);
+  const item = await getPublicNews(slug, locale);
 
   if (!item) {
     return NextResponse.json({error: 'News item not found'}, {status: 404});

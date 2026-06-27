@@ -15,12 +15,14 @@ import {PageHeader, Panel} from '../_components/admin-shell';
 
 export default async function AdminOverviewPage() {
   const {t} = await getAdminI18n();
-  const inquiries = listInquiries({});
-  const news = listNews();
-  const collections = listCollections();
-  const media = listMedia();
-  const pages = listPages();
-  const cmsStatus = getCmsStatus();
+  const [inquiries, news, collections, media, pages, cmsStatus] = await Promise.all([
+    listInquiries({}),
+    listNews(),
+    listCollections(),
+    listMedia(),
+    listPages(),
+    getCmsStatus()
+  ]);
   const newInquiries = inquiries.filter((item) => item.status === 'new').length;
   const tableTotal = cmsStatus.tables.reduce((total, table) => total + table.count, 0);
 
@@ -68,7 +70,7 @@ export default async function AdminOverviewPage() {
               <InventoryRow label={t('overview.editablePageGroups')} value={managedPageDefinitions.length || pages.length} href="/admin/pages" />
               <InventoryRow label={t('overview.visibleNewsItems')} value={news.filter((item) => item.isVisible).length} href="/admin/news" />
               <InventoryRow label={t('overview.visibleCollections')} value={collections.filter((item) => item.isVisible).length} href="/admin/collections" />
-              <InventoryRow label={t('overview.publicImageRecords')} value={media.filter((item) => item.storageProvider === 'public').length} href="/admin/media" />
+              <InventoryRow label={t('overview.publicImageRecords')} value={media.filter((item) => item.storageProvider === 'public' || item.storageProvider === 'local').length} href="/admin/media" />
             </div>
           </Panel>
 

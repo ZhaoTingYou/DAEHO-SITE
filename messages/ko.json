@@ -295,7 +295,51 @@
           "label": "재의뢰"
         }
       ],
-      "statement": "확인 전 수치는 자리표시자로 유지하고, 실제 자료가 도착하면 같은 구조 안에서 교체합니다."
+      "statement": "확인 전 수치는 자리표시자로 유지하고, 실제 자료가 도착하면 같은 구조 안에서 교체합니다.",
+      "copy": {
+        "heroLabel": "LOYALTY",
+        "heroTitle": "RELATIONSHIP",
+        "introLines": [
+          "대호가 생각하는 관계는 한 번의 제작으로 끝나지 않습니다.",
+          "고객의 목적을 이해하고, 필요한 정보를 정확히 관리하며,",
+          "납품 이후에도 다시 문의할 수 있는 제작사로 남는 것이 중요합니다.",
+          "반복되는 신뢰는 과정의 안정성에서 만들어집니다."
+        ],
+        "imagePlaceholder": "여기는 이미지",
+        "quoteTitle": "Loyalty, Built Through Time",
+        "quoteBody": "오래 함께한 시간은 가장 큰 증거입니다",
+        "discoverLead": "대호의 프로젝트 더 알아보기",
+        "featureSlides": [
+          {
+            "kicker": "",
+            "title": "01. Repeat Trust",
+            "body": "고객이 다시 제작을 맡기는 이유는 단순히 이전 결과물이 만족스러웠기 때문만은 아닙니다. 처음 상담부터 디자인 제안, 수정, 제작, 검수, 납품까지 전 과정이 안정적으로 진행되었는지가 중요합니다. 대호는 고객이 다시 같은 프로젝트를 맡겼을 때, 이전의 기준과 정보를 바탕으로 더 효율적이고 정확하게 진행할 수 있도록 관리합니다.\n\n우승반지, 임관반지, 단체 기념반지는 같은 고객이 시즌, 기수, 연도에 따라 반복 제작을 요청하는 경우가 많습니다. 이때 중요한 것은 이전 제품의 구조와 기준을 이해하고, 새로운 프로젝트에 맞게 필요한 부분만 정확히 조정하는 능력입니다. 대호는 반복 제작 경험을 통해 고객이 다시 맡길 수 있는 제작 환경을 만들어왔습니다.",
+            "backgroundImage": "legacy_loyalty_hero.png",
+            "previewImage": "legacy_card_loyalty.png",
+            "accentStart": "rgba(180,66,54,0.95)",
+            "accentEnd": "rgba(40,72,50,0.88)"
+          },
+          {
+            "kicker": "LOYALTY STANDARD",
+            "title": "02. Shared Memory",
+            "body": "한 번 제작된 상징은 팀과 개인의 기억 안에서 계속 사용됩니다. 대호는 이전 프로젝트의 의도와 사양을 기준으로 남겨, 다음 의뢰에서도 같은 이야기가 흔들리지 않고 이어질 수 있도록 돕습니다.",
+            "backgroundImage": "home_stats_bg.png",
+            "previewImage": "home_pillar_legacy.png",
+            "accentStart": "rgba(111,103,160,0.88)",
+            "accentEnd": "rgba(159,114,78,0.82)"
+          },
+          {
+            "kicker": "LOYALTY STANDARD",
+            "title": "03. Documented Care",
+            "body": "제작 이후의 문의와 추가 요청도 관계의 일부입니다. 확인 사항을 기록하고 필요한 이미지를 정리해 두면, 다음 시즌의 제작이나 보완 요청까지 더 빠르고 정확하게 연결됩니다.",
+            "backgroundImage": "chronicle_detail_01.png",
+            "previewImage": "chronicle_detail_01.png",
+            "accentStart": "rgba(54,80,110,0.9)",
+            "accentEnd": "rgba(47,83,64,0.86)"
+          }
+        ],
+        "cta": "DISCOVER MORE"
+      }
     },
     "credibility": {
       "hero": {
@@ -344,6 +388,78 @@
           "PARTNER 11",
           "PARTNER 12"
         ]
+      },
+      "copy": {
+        "heroLabel": "CREDIBILITY",
+        "heroTitle": "STANDARD",
+        "intro": "대호의 신뢰는 오랜 경험만으로 설명되지 않습니다. 디자인 상담부터 제작, 검수, 납품까지 전 과정을 직접 관리하며, 정해진 일정과 기준 안에서 결과물을 완성해왔습니다. 중요한 단체 제작을 맡길 수 있는 이유는 명확한 제작 체계에 있습니다.",
+        "imagePlaceholder": "legacy_credibility_hero.png",
+        "quoteTitle": "Credibility, Proven Through Standards",
+        "quoteBody": "신뢰는 기준에서 시작됩니다",
+        "discoverLead": "대호의 프로젝트 더 알아보기",
+        "cta": "DISCOVER MORE",
+        "rows": [
+          {
+            "number": "01.",
+            "title": "38년의 업력",
+            "accent": "변하지 않는 제작 기준",
+            "paragraphs": [
+              "대호는 1988년부터 우승반지, 임관반지, 단체 기념제품을 전문적으로 제작해왔습니다. 오랜 시간동안 프로스포츠 구단, 군 관련 단체, 학교, 기관, 기업 등 다양한 고객의 프로젝트를 진행하며, 중요한 기념 제품에 필요한 기준과 제작 방식을 축적해왔습니다.",
+              "38년의 경험은 단순히 오래 운영되었다는 의미가 아닙니다. 고객의 행사 일정, 단체별 상징, 개인별 각인, 수량 관리, 납품 방식 등 실제 제작 과정에서 발생하는 다양한 변수를 경험하고 해결해온 시간입니다. 대호는 이러한 경험을 바탕으로 고객이 중요한 프로젝트를 안정적으로 맡길 수 있는 제작 기준을 만들어왔습니다."
+            ],
+            "image": "legacy_achievement_01.png"
+          },
+          {
+            "number": "02.",
+            "title": "100% 자체 전공정 관리",
+            "accent": "디자인부터 납품까지 직접 관리",
+            "paragraphs": [
+              "대호는 디자인, 3D 설계, 주조, 세공, 보석 세팅, 각인, 표면 마감, 검수, 포장까지 주요 제작 과정을 자체적으로 관리합니다. 여러 외부 공정에 의존할 경우 디자인 의도, 품질, 일정 관리에 변수가 생길 수 있습니다.",
+              "대호는 이러한 변동성을 줄이기 위해 제작 전 과정을 하나의 기준 안에서 운영합니다. 우승반지와 임관반지, 단체 기념제품은 일반 주얼리보다 확인해야 할 요소가 많습니다. 로고, 문장, 이름, 연도, 개인 각인, 사이즈, 수량이 모두 정확해야 하며, 디자인이 실제 제품으로 구현될 때 구조적 안정성과 착용감도 함께 고려되어야 합니다. 대호는 각 단계에서 제작 가능성과 완성도를 검토하며, 고객의 의도와 실제 제품의 품질이 일치하도록 관리합니다."
+            ],
+            "image": "legacy_achievement_02.png"
+          },
+          {
+            "number": "03.",
+            "title": "0% 납품 사고",
+            "accent": "정해진 일정까지 책임지는 제작",
+            "paragraphs": [
+              "우승 기념행사, 임관식, 수여식, 창립 기념식, 은퇴식처럼 날짜가 정해진 프로젝트는 납품 일정이 매우 중요합니다. 제품의 완성도가 높더라도 정해진 날짜에 전달되지 않으면 프로젝트 전체에 문제가 생길 수 있습니다. 대호는 제품을 만드는 과정뿐 아니라 고객의 행사 일정에 맞춰 정확히 납품하는 것까지 제작의 일부로 보고 관리합니다.",
+              "납품 안정성은 단순히 빠르게 제작하는 능력이 아닙니다. 상담 단계에서부터 제작 기간, 디자인 확정 시점, 사이즈 취합, 각인 확인, 검수, 포장, 배송 일정을 함께 고려해야 합니다. 대호는 38년 동안 다양한 단체 주문과 기념 제작 프로젝트를 진행하며 일정 관리의 중요성을 경험해왔고, 납품 사고 없이 프로젝트를 마무리해온 기록을 쌓아왔습니다."
+            ],
+            "image": "legacy_achievement_03.png"
+          },
+          {
+            "number": "04.",
+            "title": "단체 주문 관리 시스템",
+            "accent": "이름, 사이즈, 각인까지 정확하게",
+            "paragraphs": [
+              "단체 제작은 제품 하나를 잘 만드는 것만으로 완성되지 않습니다. 수십 명, 수백 명의 이름, 사이즈, 각인 내용, 수량, 포장 방식이 모두 정확히 반영되어야 합니다. 특히 우승반지나 임관반지처럼 개인별 정보가 들어가는 제품은 작은 오류도 고객 전체의 신뢰도에 영향을 줄 수 있습니다.",
+              "대호는 단체 주문의 특성을 고려해 제작 단계부터 개인별 데이터를 확인하고 관리합니다. 이름 표기, 호수, 각인 위치, 문구, 옵션, 수량, 케이스 구성 등을 정리하고, 최종 납품 전까지 누락이나 오류가 발생하지 않도록 점검합니다. 고객 입장에서는 복잡한 단체 주문을 안정적으로 맡길 수 있어야 하며, 대호는 이러한 관리 체계를 통해 프로젝트의 완성도를 높입니다."
+            ],
+            "image": "legacy_achievement_04.png"
+          },
+          {
+            "number": "05.",
+            "title": "지속적 R&D",
+            "accent": "신뢰를 높이는 기준의 개선",
+            "paragraphs": [
+              "대호의 연구개발은 새로운 기술을 보여주기 위한 목적에만 머무르지 않습니다. 더 안정적인 품질, 더 정확한 제작, 더 만족도 높은 결과물을 만들기 위해 소재, 주조, 세공, 각인, 표면 처리, 보석 세팅 등 제품 완성도에 영향을 주는 모든 공정을 지속적으로 점검하고 개선합니다.",
+              "특히 단체 주문과 기념 제품은 동일한 디자인 안에서도 사이즈, 각인, 수량, 일정, 납품 기준이 모두 정확하게 관리되어야 합니다. 대호는 축적된 제작 경험과 지속적인 기술 개선을 바탕으로 오차를 줄이고, 완성도를 높이며, 고객이 안심하고 맡길 수 있는 제작 기준을 만들어가고 있습니다. 이러한 꾸준한 연구개발은 대호의 신뢰를 유지하는 가장 중요한 기반입니다."
+            ],
+            "image": "chronicle_detail_01.png"
+          },
+          {
+            "number": "06.",
+            "title": "품질 검수 기준",
+            "accent": "보이지 않는 부분까지 확인",
+            "paragraphs": [
+              "품질은 제품의 외형만으로 판단되지 않습니다. 금속 표면의 마감 상태, 각인의 선명도, 보석 세팅의 안정성, 로고와 문양의 비율, 착용감, 사이즈 정확도, 패키지 상태까지 모두 확인되어야 합니다. 대호는 완성된 제품이 고객에게 전달되기 전, 세부 기준에 따라 제품을 점검합니다.",
+              "특히 기념 제품은 오랜 시간 보관되거나 중요한 행사에서 전달되는 경우가 많기 때문에, 제품의 첫인상과 완성도가 모두 중요합니다. 반지 자체의 품질뿐 아니라 케이스, 포장, 전달 상태까지 전체 경험의 일부로 봐야 합니다. 대호는 납품 전 최종 검수를 통해 제품의 디테일과 기능, 포장 상태를 확인하고, 고객이 안심하고 받을 수 있는 결과물을 완성합니다."
+            ],
+            "image": "chronicle_detail_02.png"
+          }
+        ]
       }
     },
     "achievement": {
@@ -384,6 +500,97 @@
           {
             "title": "Achievement 04",
             "image": "legacy_achievement_04.png"
+          }
+        ]
+      },
+      "copy": {
+        "heroLabel": "ACHIEVEMENTS",
+        "heroTitle": "RESULT",
+        "introLines": [
+          "대호의 성과는 단순한 제작 수량이 아닙니다.",
+          "우승반지와 임관반지 시장에서 쌓아온 대표성,",
+          "국내 최초 기술 적용, 그리고 수많은 프로젝트를 통해",
+          "기념반지 제작의 기준을 만들어왔습니다."
+        ],
+        "imagePlaceholder": "여기는 이미지",
+        "quoteTitle": "Records that Became Standards",
+        "quoteBody": "대호가 만든 기록은 업계의 기준이 되었습니다",
+        "firstTitle": "FIRST RECORDS",
+        "firstHeading": "국내 최초 기록",
+        "marketLabel": "MARKET LEADERSHIP",
+        "marketTitle": "압도적인 시장 점유율",
+        "marketIntro": "대호의 시장 점유율은 단순한 숫자가 아니라, 오랜 시간 축적된 신뢰의 결과입니다.\n우승반지와 임관반지처럼 중요한 순간을 기념하는 제품은 디자인 완성도, 제작 안정성,\n납기 관리, 품질 검수까지 모든 기준이 충족되어야 선택받을 수 있습니다.\n대호는 수많은 팀과 기관의 프로젝트를 안정적으로 수행하며,\n국내 기념 주얼리 시장에서 가장 신뢰받는 제작 기준을 만들어가고 있습니다.",
+        "archiveLabel": "PROJECT ARCHIVE",
+        "archiveTitle": "다양한 분야의 프로젝트",
+        "discoverLead": "대호의 프로젝트 더 알아보기",
+        "cta": "DISCOVER MORE",
+        "statBand": [
+          {
+            "value": "38",
+            "label": "YEARS",
+            "body": "역사가 유구한\n장인기업"
+          },
+          {
+            "value": "95%",
+            "label": "CHAMPIONSHIP\nRING SHARE",
+            "body": "국내 우승반지 시장에서\n가장 많이 선택받은\n제작 경험"
+          },
+          {
+            "value": "90%",
+            "label": "COMMISSION\nRING SHARE",
+            "body": "국내 임관반지 분야에서\n축적한 전문 제작 기록"
+          },
+          {
+            "value": "0%",
+            "label": "DELIVERY\nFAILURE",
+            "body": "한번의 납품사고도 없는\n전무후무한 기록"
+          },
+          {
+            "value": "100%",
+            "label": "END-TO-END",
+            "body": "처음부터 끝까지\n전 공정 책임제"
+          }
+        ],
+        "firstRecords": [
+          {
+            "title": "FIRST INITIAL ENGRAVING",
+            "body": "국내 최초 이니셜 조각 적용",
+            "hoverText": "국내 기념반지 제작에서 개인 이니셜 조각을 적용한 첫 기록입니다.",
+            "image": "legacy_achievement_01.png"
+          },
+          {
+            "title": "FIRST ANTIQUE COATING",
+            "body": "국내 최초 엔티크 블랙 코팅 적용",
+            "hoverText": "금속의 입체감과 문양의 깊이를 살리는 엔티크 블랙 코팅을 국내 최초로 적용했습니다.",
+            "image": "legacy_achievement_02.png"
+          },
+          {
+            "title": "FIRST DESIGN APPROACH",
+            "body": "국내 최초 반지 내부 디자인 적용",
+            "hoverText": "반지 외부뿐 아니라 내부까지 의미를 담는 디자인 접근을 국내 최초로 시도했습니다.",
+            "image": "legacy_achievement_03.png"
+          }
+        ],
+        "marketFeatures": [
+          {
+            "value": "95%",
+            "title": "CHAMPIONSHIP\nRING SHARE",
+            "accent": "국내 우승반지 시장에서\n가장 많이 선택된 제작 경험",
+            "paragraphs": [
+              "우승의 순간은 단 한 번뿐이기에, 결과물은 완성도와 상징성을 모두 갖춰야 합니다.",
+              "대호는 프로스포츠 우승반지 제작 경험을 바탕으로 팀의 역사와 승리의 의미를 하나의 반지로 완성해왔습니다."
+            ],
+            "image": "legacy_achievement_02.png"
+          },
+          {
+            "value": "90%",
+            "title": "COMMISSIONING\nRING SHARE",
+            "accent": "국내 임관반지 분야에서\n축적한 전문 제작 기록",
+            "paragraphs": [
+              "임관반지는 개인의 출발이자 조직의 정체성을 함께 담는 상징물입니다.",
+              "대호는 오랜 기간 임관반지를 제작하며 정확한 단체 주문 관리, 안정적인 품질, 세밀한 각인 기준을 축적해왔습니다."
+            ],
+            "image": "legacy_achievement_03.png"
           }
         ]
       }
@@ -802,7 +1009,17 @@
       ],
       "subtitle": "골프이 구조를\n하나의 오브젝트로 재해석하다",
       "image": "golf/golf1.png",
-      "specLabel": "Configured bracelet"
+      "specLabel": "Configured bracelet",
+      "gallery": [
+        {
+          "image": "golf/퍼터.png",
+          "alt": "퍼터 골프 브레이슬릿"
+        },
+        {
+          "image": "golf/드라이버.png",
+          "alt": "드라이버 골프 브레이슬릿"
+        }
+      ]
     },
     "statement": {
       "titleLines": [
@@ -1111,8 +1328,10 @@
       "body": "그리고 지금도 만들고 있다.",
       "question": "가장 자랑하고 싶은 아이템? 프로젝트?",
       "primaryTitle": "NEW LEGACY\nRELEASED",
+      "primaryImage": "news_featured.png.png",
       "primaryCta": "자세히 보기",
       "secondaryTitle": "RECENT\nHIGHLIGHT",
+      "secondaryImage": "home_ring_01.png",
       "secondaryCta": "자세히 보기"
     },
     "latestNews": {
@@ -1122,7 +1341,41 @@
       "close": "닫기",
       "label": "최근 소식 팝업",
       "fallback": "이미지 준비 중",
-      "body": "확인된 자료가 도착하면 실제 기사 본문으로 교체됩니다. 현재는 대호의 최근 제작 흐름과 프로젝트 맥락을 정리하는 저널 팝업으로 유지합니다."
+      "body": "확인된 자료가 도착하면 실제 기사 본문으로 교체됩니다. 현재는 대호의 최근 제작 흐름과 프로젝트 맥락을 정리하는 저널 팝업으로 유지합니다.",
+      "cards": [
+        {
+          "id": "news-01",
+          "category": "making",
+          "categoryLabel": "최근 제작 사례",
+          "date": "2026.00.00",
+          "title": "LG 트윈스 개막식 대형반지 모형 제작",
+          "image": "news_card_01.png"
+        },
+        {
+          "id": "news-02",
+          "category": "story",
+          "categoryLabel": "프로젝트 스토리",
+          "date": "2026.00.00",
+          "title": "전북현대 축구 반지 납품 완료!",
+          "image": "news_card_02.png"
+        },
+        {
+          "id": "news-03",
+          "category": "press",
+          "categoryLabel": "언론/피처",
+          "date": "2026.00.00",
+          "title": "레드포스 발로란트 우승반지 디자인",
+          "image": "news_card_03.png"
+        },
+        {
+          "id": "news-04",
+          "category": "partner",
+          "categoryLabel": "협업",
+          "date": "2026.00.00",
+          "title": "LG 트윈스 우승반지 디자인부터 납품까지",
+          "image": "news_card_04.png"
+        }
+      ]
     },
     "partners": {
       "ariaLabel": "협업 및 후원 브랜드",
@@ -1149,6 +1402,88 @@
           "KGC",
           "스카이워커스"
         ]
+      ],
+      "items": [
+        {
+          "label": "대한항공 점보스",
+          "logo": "team-logos/korean-air-jumbos.png",
+          "row": 0
+        },
+        {
+          "label": "KCC",
+          "logo": "team-logos/busan-kcc-egis.png",
+          "row": 0
+        },
+        {
+          "label": "인삼공사",
+          "logo": "team-logos/kgc-ginseng-volleyball.png",
+          "row": 0
+        },
+        {
+          "label": "두산베어스",
+          "logo": "team-logos/doosan-bears.png",
+          "row": 0
+        },
+        {
+          "label": "삼성 라이온즈",
+          "logo": "team-logos/samsung-lions.png",
+          "row": 0
+        },
+        {
+          "label": "KT위즈",
+          "logo": "team-logos/kt-wiz.png",
+          "row": 0
+        },
+        {
+          "label": "NC다이노스",
+          "logo": "team-logos/nc-dinos.png",
+          "row": 1
+        },
+        {
+          "label": "핑크스파이더스",
+          "logo": "team-logos/heungkuk-life-pink-spiders.png",
+          "row": 1
+        },
+        {
+          "label": "GS칼텍스",
+          "logo": "team-logos/gs-caltex-seoul-kixx.png",
+          "row": 1
+        },
+        {
+          "label": "SSG랜더스",
+          "logo": "team-logos/ssg-landers.png",
+          "row": 1
+        },
+        {
+          "label": "전북현대",
+          "logo": "team-logos/jeonbuk-hyundai-motors.png",
+          "row": 1
+        },
+        {
+          "label": "울산현대",
+          "logo": "team-logos/ulsan-hd-fc.png",
+          "row": 2
+        },
+        {
+          "label": "KB스타즈",
+          "logo": "team-logos/cheongju-kb-stars.png",
+          "row": 2
+        },
+        {
+          "label": "현대모비스",
+          "logo": "team-logos/ulsan-hyundai-mobis-phoebus.png",
+          "row": 2
+        },
+        {
+          "label": "KGC",
+          "logo": "team-logos/anyang-kgc.png",
+          "row": 2
+        },
+        {
+          "label": "스카이워커스",
+          "logo": "team-logos/hyundai-capital-skywalkers.png",
+          "row": 2
+        }
       ]
     }
   },
@@ -1240,6 +1575,7 @@
     "detail": {
       "back": "저널 목록",
       "author": "대호 뉴스",
+      "ogImagePath": "news_detail_hero.png",
       "lead": "확인된 자료가 도착하면 실제 기사 본문으로 교체됩니다.",
       "paragraphs": [
         "현재는 프로젝트 개요와 제작 맥락을 정리하는 밝은 기사 템플릿으로 유지합니다.",
@@ -1297,6 +1633,158 @@
       "apply": "적용",
       "close": "닫기",
       "results": "표시"
+    },
+    "appointment": {
+      "heroAlt": "대호 임관반지 컬렉션",
+      "heroImage": "collection_ring1.png",
+      "intro": {
+        "title": "세대를 잇는 명예의 반지",
+        "lines": [
+          "대호는 수많은 임관의 순간을 반지에 담아왔습니다.",
+          "군의 상징, 기수의 자부심, 개인의 이름까지 하나의 형태로 완성합니다.",
+          "한 번의 임관을 넘어, 한 가족의 역사로 남는 반지.",
+          "아버지와 자녀가 함께 기억하는 임관의 순간을 제작합니다."
+        ]
+      },
+      "honor": {
+        "title": "명예를 손에 새기다",
+        "image": "collection_ring2.png",
+        "lines": [
+          "임관반지는 대한민국 장교로서의 시작을 기념하는 상징입니다.",
+          "소속, 기수, 이름을 담아 책임과 자부심의 순간을 오래 간직합니다."
+        ]
+      },
+      "keepsake": {
+        "title": "제품의 반지를 넘어, 함께 간직하는 기념",
+        "image": "collection_ring3.png",
+        "lines": [
+          "임관의 의미는 착용자 한 사람에게만 머물지 않습니다.",
+          "대호는 가족과 소중한 사람들도 함께 간직할 수 있도록 펜던트,",
+          "기념 주얼리 등 다양한 제품을 디자인해왔습니다."
+        ]
+      },
+      "inside": {
+        "title": "안쪽까지 이어지는 상징성",
+        "lines": [
+          "반지의 외형뿐 아니라, 착용자만이 볼 수 있는 내부 공간까지 설계합니다.",
+          "대호는 임관반지 안쪽에 의미를 새기는 디자인을 통해 새로운 기준을",
+          "만들어가고 있습니다."
+        ]
+      },
+      "thumbnails": [
+        {
+          "image": "cl1.png",
+          "width": 114,
+          "height": 129
+        },
+        {
+          "image": "cl2.png",
+          "width": 98,
+          "height": 124
+        },
+        {
+          "image": "cl3.png",
+          "width": 102,
+          "height": 119
+        },
+        {
+          "image": "cl4.png",
+          "width": 110,
+          "height": 116
+        }
+      ],
+      "timelineStart": "past",
+      "timelineEnd": "today",
+      "evolution": {
+        "title": "임관반지 디자인의 변화",
+        "lines": [
+          "전통적인 상징에서 현대적인 세공과 맞춤 설계까지.",
+          "대호는 시대에 맞춰 임관반지의 형태를 꾸준히 발전시켜왔습니다."
+        ]
+      }
+    },
+    "bespoke": {
+      "period": "2022 - 2026",
+      "collectionTitle": "The collection",
+      "introTitle": "주문 제작 아카이브",
+      "introBody": "고객의 이야기, 상징, 착용감을 하나의 구조로 정리해 완성하는 맞춤 제작 기록입니다.",
+      "tabCorpus": "Scientific corpus",
+      "tabNotes": "Design notes",
+      "filter": "Filter",
+      "filterTitle": "Filter the creations",
+      "reset": "Reset",
+      "apply": "Apply",
+      "close": "Close",
+      "display": "Display",
+      "archive": "Archive",
+      "grid": "Grid",
+      "shuffle": "Shuffle the creations",
+      "withNotice": "Creation with notice",
+      "withoutNotice": "Creation without notice",
+      "filterSections": {
+        "notice": "Creation with notice",
+        "year": "Creation year",
+        "period": "Period",
+        "materials": "Materials",
+        "stones": "Stones",
+        "functions": "Functions"
+      },
+      "filterOptions": {
+        "notice": {
+          "yes": "With notice",
+          "no": "Without notice"
+        },
+        "year": {
+          "2023": "2023",
+          "2024": "2024",
+          "2025": "2025",
+          "2026": "2026"
+        },
+        "period": {
+          "contemporary": "Contemporary orders",
+          "archive": "Archive-inspired"
+        },
+        "materials": {
+          "gold": "Gold",
+          "silver": "Silver",
+          "mixed": "Mixed metal"
+        },
+        "stones": {
+          "diamond": "Diamond",
+          "color": "Color stone",
+          "none": "No stone"
+        },
+        "functions": {
+          "engraving": "Engraving",
+          "symbol": "Symbol work",
+          "comfort": "Comfort fit"
+        }
+      },
+      "archiveChapterPeriod": "2022 - 2026",
+      "archiveChapterTitle": "The bespoke brief",
+      "chapterEyebrow": "Made to order",
+      "chapterTitle": "One story, one structure",
+      "chapterBody": "주문 제작은 형태를 먼저 고르는 과정이 아니라, 사용될 장면과 남겨야 할 정보를 함께 정리하는 과정에서 시작됩니다.",
+      "featureEyebrow": "Bespoke records",
+      "featureTitle": "From briefing to final polish",
+      "featureBody": "상담 내용, 상징 요소, 소재 선택, 착용감 확인까지 같은 기준으로 남겨 다음 제작에서도 흐름이 이어지도록 관리합니다.",
+      "process": [
+        {
+          "label": "01",
+          "title": "Brief",
+          "body": "이름, 날짜, 상징, 착용 목적을 정리합니다."
+        },
+        {
+          "label": "02",
+          "title": "Drawing",
+          "body": "비율과 문양을 스케치로 검토합니다."
+        },
+        {
+          "label": "03",
+          "title": "Finish",
+          "body": "광택, 각인, 착용감을 마지막까지 확인합니다."
+        }
+      ]
     }
   },
   "golfInquiry": {
@@ -1319,12 +1807,183 @@
     "terms": {
       "eyebrow": "LEGAL",
       "title": "이용약관",
-      "notice": "본 이용약관은 법무 검토를 거쳐 최종본으로 게시될 예정입니다. 확정된 약관 전문이 준비되면 이 페이지에 게시됩니다."
+      "effective": "시행일: [YYYY-MM-DD]",
+      "notice": "본 약관은 일반적인 표준 양식을 바탕으로 작성된 초안입니다. 정식 게시 전 회사의 사업 형태에 맞추어 법무 검토를 거쳐 확정해야 하며, [ ] 표시 항목은 확정된 회사 정보로 교체해야 합니다.",
+      "intro": "본 약관은 대호(이하 '회사')가 운영하는 웹사이트(이하 '사이트')의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.",
+      "sections": [
+        {
+          "heading": "제1조 (목적)",
+          "body": [
+            "본 약관은 회사가 제공하는 사이트 및 관련 서비스의 이용조건과 절차, 회사와 이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다."
+          ]
+        },
+        {
+          "heading": "제2조 (정의)",
+          "body": [
+            "1. “사이트”란 회사가 제품 및 브랜드 정보를 제공하고 제작·주문 상담을 접수하기 위하여 운영하는 웹사이트를 말합니다.",
+            "2. “이용자”란 사이트에 접속하여 본 약관에 따라 회사가 제공하는 서비스를 이용하는 자를 말합니다.",
+            "3. “콘텐츠”란 사이트에 게시된 텍스트, 이미지, 영상 등 모든 자료를 말합니다."
+          ]
+        },
+        {
+          "heading": "제3조 (약관의 게시와 개정)",
+          "body": [
+            "1. 회사는 본 약관의 내용을 이용자가 쉽게 확인할 수 있도록 사이트 화면에 게시합니다.",
+            "2. 회사는 관련 법령을 위배하지 않는 범위에서 본 약관을 개정할 수 있습니다.",
+            "3. 약관을 개정하는 경우 적용일자 및 개정사유를 명시하여 적용일자 7일 전부터 게시하며, 이용자에게 불리한 개정의 경우 30일 전부터 공지합니다."
+          ]
+        },
+        {
+          "heading": "제4조 (서비스의 제공 및 변경)",
+          "body": [
+            "1. 회사는 제품 및 브랜드 정보 제공, 제작·주문 상담 접수, 그 밖에 회사가 정하는 서비스를 제공합니다.",
+            "2. 회사는 서비스의 내용을 변경할 수 있으며, 변경하는 경우 그 사유와 내용을 사이트에 공지합니다."
+          ]
+        },
+        {
+          "heading": "제5조 (서비스의 중단)",
+          "body": [
+            "회사는 시스템 점검·보수, 통신 장애, 천재지변 등 부득이한 사유가 있는 경우 서비스 제공을 일시적으로 중단할 수 있으며, 사전 공지가 어려운 경우 사후에 공지할 수 있습니다."
+          ]
+        },
+        {
+          "heading": "제6조 (이용자의 의무)",
+          "body": [
+            "이용자는 다음 각 호의 행위를 하여서는 안 됩니다.",
+            "1. 타인의 정보를 도용하거나 허위 정보를 등록하는 행위",
+            "2. 회사가 게시한 정보를 무단으로 변경하는 행위",
+            "3. 회사 또는 제3자의 지식재산권을 침해하는 행위",
+            "4. 법령 또는 공서양속에 위반되는 행위"
+          ]
+        },
+        {
+          "heading": "제7조 (콘텐츠의 저작권)",
+          "body": [
+            "사이트에 게시된 모든 콘텐츠의 저작권은 회사에 귀속됩니다. 이용자는 회사의 사전 서면 동의 없이 이를 복제·배포·가공·전송하거나 상업적으로 이용할 수 없습니다."
+          ]
+        },
+        {
+          "heading": "제8조 (개인정보의 보호)",
+          "body": [
+            "회사는 이용자의 개인정보를 관련 법령에 따라 보호하며, 개인정보의 수집·이용·보관·파기에 관한 구체적인 사항은 별도의 개인정보처리방침에서 정합니다."
+          ]
+        },
+        {
+          "heading": "제9조 (면책조항)",
+          "body": [
+            "1. 회사는 천재지변 또는 이에 준하는 불가항력으로 인하여 서비스를 제공할 수 없는 경우 책임이 면제됩니다.",
+            "2. 사이트에 게시된 정보는 참고용이며, 실제 제작·주문의 사양 및 결과는 개별 상담과 협의에 따라 달라질 수 있습니다."
+          ]
+        },
+        {
+          "heading": "제10조 (분쟁의 해결 및 준거법)",
+          "body": [
+            "본 약관은 대한민국 법령에 따라 해석되며, 회사와 이용자 간에 발생한 분쟁에 관한 소송은 「민사소송법」에 따른 관할법원에 제기합니다."
+          ]
+        },
+        {
+          "heading": "부칙",
+          "body": [
+            "본 약관은 [YYYY-MM-DD]부터 시행합니다."
+          ]
+        }
+      ]
     },
     "privacy": {
       "eyebrow": "LEGAL",
       "title": "개인정보처리방침",
-      "notice": "개인정보처리방침 전문은 법무 검토 후 이 페이지에 게시됩니다. 수집하는 개인정보 항목, 이용 목적, 보유 및 이용 기간, 제3자 제공, 파기 절차, 이용자의 권리와 행사 방법, 개인정보보호책임자 등 법정 고지 사항이 포함됩니다."
+      "effective": "시행일: [YYYY-MM-DD]",
+      "notice": "본 방침은 일반적인 표준 양식을 바탕으로 작성된 초안입니다. 정식 게시 전 회사의 실제 개인정보 처리 현황에 맞추어 법무 검토를 거쳐 확정해야 하며, [ ] 표시 항목은 확정된 정보로 교체해야 합니다.",
+      "intro": "대호(이하 '회사')는 「개인정보 보호법」 등 관련 법령을 준수하며, 이용자의 개인정보를 보호하고 이와 관련한 고충을 신속하게 처리하기 위하여 다음과 같이 개인정보처리방침을 수립·공개합니다.",
+      "sections": [
+        {
+          "heading": "제1조 (개인정보의 처리 목적)",
+          "body": [
+            "회사는 다음의 목적을 위하여 개인정보를 처리하며, 처리한 개인정보는 명시한 목적 외의 용도로 이용하지 않습니다.",
+            "1. 제작·주문 상담 및 문의 접수·응대",
+            "2. 본인 확인 및 연락, 상담 진행",
+            "3. 서비스 제공 및 품질 개선"
+          ]
+        },
+        {
+          "heading": "제2조 (처리하는 개인정보의 항목)",
+          "body": [
+            "1. 상담·문의 접수 시: 성명, 연락처(전화번호, 이메일), 문의 내용",
+            "2. 서비스 이용 과정에서 자동으로 생성·수집되는 정보: 접속 IP, 쿠키, 서비스 이용 기록, 기기 정보"
+          ]
+        },
+        {
+          "heading": "제3조 (개인정보의 처리 및 보유 기간)",
+          "body": [
+            "회사는 법령에 따른 보유기간 또는 이용자로부터 동의받은 보유기간 내에서 개인정보를 처리·보유합니다.",
+            "1. 상담·문의 기록: 처리 목적 달성 후 [ ]년간 보관 후 파기",
+            "2. 관련 법령에 따라 보존이 필요한 경우 해당 기간 동안 보관합니다(예: 「전자상거래 등에서의 소비자보호에 관한 법률」에 따른 소비자의 불만 또는 분쟁처리에 관한 기록 3년 등)."
+          ]
+        },
+        {
+          "heading": "제4조 (개인정보의 제3자 제공)",
+          "body": [
+            "회사는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만 이용자가 사전에 동의한 경우 또는 법령에 특별한 규정이 있는 경우에 한하여 제공할 수 있습니다."
+          ]
+        },
+        {
+          "heading": "제5조 (개인정보 처리의 위탁)",
+          "body": [
+            "회사는 원활한 서비스 제공을 위하여 필요한 경우 개인정보 처리업무를 외부에 위탁할 수 있습니다. 위탁하는 경우 수탁자와 위탁업무의 내용을 본 방침에 공개하고, 관련 법령에 따라 수탁자를 관리·감독합니다."
+          ]
+        },
+        {
+          "heading": "제6조 (정보주체의 권리·의무 및 행사방법)",
+          "body": [
+            "이용자는 언제든지 개인정보 열람, 정정·삭제, 처리정지를 요구할 수 있으며, 회사는 관련 법령에 따라 지체 없이 조치합니다.",
+            "권리 행사는 개인정보 보호책임자에게 서면, 전화, 이메일을 통하여 요청할 수 있으며, 회사는 본인 여부를 확인한 후 처리합니다."
+          ]
+        },
+        {
+          "heading": "제7조 (개인정보의 파기)",
+          "body": [
+            "회사는 개인정보의 보유기간이 경과하거나 처리목적이 달성된 경우 지체 없이 해당 개인정보를 파기합니다. 전자적 파일 형태의 정보는 복구할 수 없는 방법으로 삭제하며, 종이 문서는 분쇄하거나 소각합니다."
+          ]
+        },
+        {
+          "heading": "제8조 (개인정보의 안전성 확보 조치)",
+          "body": [
+            "회사는 개인정보의 안전성 확보를 위하여 관리적·기술적·물리적 조치를 취합니다.",
+            "개인정보 접근권한의 관리, 접근통제 시스템 운영, 개인정보의 암호화, 보안프로그램의 설치 및 점검 등을 시행합니다."
+          ]
+        },
+        {
+          "heading": "제9조 (쿠키의 설치·운영 및 거부)",
+          "body": [
+            "회사는 이용자에게 맞춤형 서비스를 제공하기 위하여 쿠키(cookie)를 사용할 수 있습니다.",
+            "이용자는 웹브라우저 설정을 통하여 쿠키 저장을 거부할 수 있으며, 쿠키 저장을 거부하는 경우 일부 서비스 이용에 제한이 있을 수 있습니다."
+          ]
+        },
+        {
+          "heading": "제10조 (개인정보 보호책임자)",
+          "body": [
+            "회사는 개인정보 처리에 관한 업무를 총괄하여 책임지는 개인정보 보호책임자를 다음과 같이 지정하고 있습니다.",
+            "· 개인정보 보호책임자: [성명] / [직책]",
+            "· 연락처: [전화번호], [이메일]"
+          ]
+        },
+        {
+          "heading": "제11조 (권익침해 구제방법)",
+          "body": [
+            "이용자는 개인정보 침해로 인한 구제를 받기 위하여 아래 기관에 분쟁 해결이나 상담을 신청할 수 있습니다.",
+            "· 개인정보분쟁조정위원회 (privacy.go.kr / 1833-6972)",
+            "· 개인정보침해신고센터 (privacy.kisa.or.kr / 118)",
+            "· 대검찰청 사이버수사과 (spo.go.kr / 1301)",
+            "· 경찰청 사이버수사국 (ecrm.police.go.kr / 182)"
+          ]
+        },
+        {
+          "heading": "제12조 (개인정보처리방침의 변경)",
+          "body": [
+            "본 방침은 [YYYY-MM-DD]부터 적용되며, 내용의 추가·삭제·수정이 있는 경우 변경사항의 시행 7일 전부터 사이트를 통하여 공지합니다."
+          ]
+        }
+      ]
     }
   }
 }

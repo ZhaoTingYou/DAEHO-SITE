@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     return unauthorized;
   }
 
-  return NextResponse.json({items: listCollections()});
+  return NextResponse.json({items: await listCollections()});
 }
 
 export async function POST(request: NextRequest) {
@@ -42,5 +42,5 @@ export async function POST(request: NextRequest) {
     return validationError(parsed.error);
   }
 
-  return NextResponse.json({item: createCollection(parsed.data)}, {status: 201});
+  return NextResponse.json({item: await createCollection(parsed.data)}, {status: 201});
 }

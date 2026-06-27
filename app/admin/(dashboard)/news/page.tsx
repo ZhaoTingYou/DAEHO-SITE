@@ -14,7 +14,7 @@ type NewsTranslation = {
 
 export default async function AdminNewsPage() {
   const {t} = await getAdminI18n();
-  const items = listNews();
+  const items = await listNews();
 
   return (
     <>

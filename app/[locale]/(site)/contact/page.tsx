@@ -25,7 +25,7 @@ export default async function ContactPage({params, searchParams}: Props) {
   const {locale} = await params;
   const query = await searchParams;
   setRequestLocale(locale);
-  const messages = getLocaleMessages(locale);
+  const messages = await getLocaleMessages(locale);
   const text = messages.contact;
   const defaultType = getInquiryType(query?.type);
 

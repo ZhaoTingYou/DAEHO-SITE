@@ -1,4 +1,5 @@
 import type {Metadata} from 'next';
+import Image from 'next/image';
 import {setRequestLocale} from 'next-intl/server';
 
 import {ScrollText} from '@/components/motion/scroll-text';
@@ -23,10 +24,10 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function CollectionPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const messages = getLocaleMessages(locale);
+  const messages = await getLocaleMessages(locale);
   const content = messages.specialtyPages.collection;
   const text = messages.collectionUi;
-  const items = getCollectionItemsForSite(locale);
+  const items = await getCollectionItemsForSite(locale);
   const filters = content.gallery.filters.map((filter) => ({
     ...filter,
     hasImage: Boolean(filter.image && imageExists(filter.image))
@@ -34,8 +35,46 @@ export default async function CollectionPage({params}: Props) {
 
   return (
     <main className="bg-bg text-text">
-      <section className="pt-28">
-        <div className="mx-auto max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)]">
+      <section className="relative overflow-hidden bg-[#F8F4ED] pt-[calc(86px+env(safe-area-inset-top))] md:bg-bg md:pt-28">
+        <div className="md:hidden">
+          <div className="mx-auto max-w-[520px] px-container pb-10 pt-9">
+            <ScrollText className="space-y-5">
+              <p className="font-body text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
+                Curated Works
+              </p>
+              <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(54px,17vw,76px)] font-bold uppercase leading-[0.82] tracking-[0.02em] text-primary">
+                {content.hero.title}
+              </h1>
+              <p className="max-w-[28rem] font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
+                {content.hero.subtitle}
+              </p>
+            </ScrollText>
+
+            <figure className="mt-8 border-y border-primary/15 py-3">
+              <div className="relative aspect-[1.08] overflow-hidden bg-white">
+                <Image
+                  src="/images/specialty_collection_hero.png"
+                  alt=""
+                  fill
+                  sizes="100vw"
+                  priority
+                  className="object-cover object-[63%_center]"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,244,237,0)_52%,rgba(248,244,237,.88)_100%)]" aria-hidden="true" />
+              </div>
+              <figcaption className="grid grid-cols-3 divide-x divide-primary/15 border-t border-primary/15 bg-[#F8F4ED]">
+                {filters.map((filter, index) => (
+                  <span key={filter.id} className="min-h-14 px-3 py-3 font-body text-[10px] font-semibold uppercase leading-[1.35] tracking-[0.12em] text-primary/68">
+                    <span className="block font-numeric text-[10px] text-accent/80">{String(index + 1).padStart(2, '0')}</span>
+                    {filter.label}
+                  </span>
+                ))}
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div className="mx-auto hidden max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)] md:block">
           <ScrollText className="mx-auto max-w-[720px] space-y-[18px] text-center">
             <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}

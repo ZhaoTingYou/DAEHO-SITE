@@ -6,6 +6,7 @@ import {locales, type Locale} from '@/lib/locales';
 import {
   CheckboxField,
   ImageUploadField,
+  type MediaLibraryItem,
   SecondaryLink,
   SubmitButton,
   TextAreaField,
@@ -36,11 +37,19 @@ type NewsTranslation = {
   ogImagePath?: string;
 };
 
-export function NewsForm({item, messages}: {item?: NewsItem; messages: Record<string, string>}) {
+export function NewsForm({
+  item,
+  mediaItems,
+  messages
+}: {
+  item?: NewsItem;
+  mediaItems: MediaLibraryItem[];
+  messages: Record<string, string>;
+}) {
   const t = createAdminTranslator(messages);
 
   return (
-    <form action={saveNewsAction} encType="multipart/form-data" className="grid gap-6">
+    <form action={saveNewsAction} className="grid gap-6">
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
 
       <Panel className="p-5">
@@ -60,6 +69,14 @@ export function NewsForm({item, messages}: {item?: NewsItem; messages: Record<st
             defaultValue={item?.imagePath}
             uploadLabel={t('page.uploadLocalImage')}
             uploadHint={t('page.uploadLocalImageHint')}
+            emptyLabel={t('common.noImage')}
+            changedLabel={t('common.changed')}
+            selectedLabel={t('common.imageSelected')}
+            mediaItems={mediaItems}
+            mediaSelectLabel={t('media.selectFromLibrary')}
+            mediaLibraryTitle={t('media.libraryTitle')}
+            mediaEmptyLabel={t('media.libraryEmpty')}
+            mediaSelectedLabel={t('media.selectedExisting')}
           />
         </div>
       </Panel>
@@ -69,6 +86,7 @@ export function NewsForm({item, messages}: {item?: NewsItem; messages: Record<st
           <TranslationPanel
             key={locale}
             locale={locale}
+            mediaItems={mediaItems}
             messages={messages}
             translation={getTranslation(item, locale)}
           />
@@ -87,10 +105,12 @@ export function NewsForm({item, messages}: {item?: NewsItem; messages: Record<st
 
 function TranslationPanel({
   locale,
+  mediaItems,
   messages,
   translation
 }: {
   locale: Locale;
+  mediaItems: MediaLibraryItem[];
   messages: Record<string, string>;
   translation: NewsTranslation;
 }) {
@@ -120,6 +140,14 @@ function TranslationPanel({
           defaultValue={translation.ogImagePath}
           uploadLabel={t('page.uploadLocalImage')}
           uploadHint={t('page.uploadLocalImageHint')}
+          emptyLabel={t('common.noImage')}
+          changedLabel={t('common.changed')}
+          selectedLabel={t('common.imageSelected')}
+          mediaItems={mediaItems}
+          mediaSelectLabel={t('media.selectFromLibrary')}
+          mediaLibraryTitle={t('media.libraryTitle')}
+          mediaEmptyLabel={t('media.libraryEmpty')}
+          mediaSelectedLabel={t('media.selectedExisting')}
         />
       </div>
     </Panel>

@@ -22,13 +22,13 @@ const statuses = ['new', 'contacted', 'in_progress', 'done', 'spam'];
 export default async function AdminInquiryDetailPage({params}: Props) {
   const {t} = await getAdminI18n();
   const {id} = await params;
-  const inquiry = getInquiry(id);
+  const inquiry = await getInquiry(id);
 
   if (!inquiry) {
     notFound();
   }
 
-  const emailEvents = listEmailEventsForInquiry(inquiry.id);
+  const emailEvents = await listEmailEventsForInquiry(inquiry.id);
 
   return (
     <>

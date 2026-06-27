@@ -1,7 +1,5 @@
 'use server';
 
-import {randomUUID} from 'node:crypto';
-import {writeFile} from 'node:fs/promises';
 import path from 'node:path';
 
 import {revalidatePath} from 'next/cache';
@@ -19,19 +17,27 @@ import {
 } from '@/lib/cms/admin-session';
 import {
   createCollection,
-  createMedia,
   createNews,
   deleteCollection,
   deleteMedia,
   deleteNews,
+  getCollection,
+  getMedia,
   getInquiry,
+  getNews,
+  getPage,
+  listCollections,
+  listMedia,
+  listNews,
+  listPages,
+  resendInquiryNotification,
   updateCollection,
   updateInquiryStatus,
   updateMedia,
   updateNews,
+  uploadMediaFile,
   upsertPage
 } from '@/lib/cms/repositories';
-import {notifyInquiry} from '@/lib/cms/email';
 import {
   collectionPayloadSchema,
   inquiryStatusSchema,
@@ -44,13 +50,18 @@ import {
   cloneJson,
   createPageContentPayload,
   getEditableLeaves,
+  getEditableLeavesForPageGroup,
   getManagedPageDefinition,
+  getObjectValueAtPath,
+  getPageFieldDefinitionsForGroup,
   getPageContentGroups,
   isImageEditableField,
   setObjectValueAtPath,
   type PageDefinition,
 } from '@/lib/cms/page-catalog';
 import {locales, type Locale} from '@/lib/locales';
+import enMessages from '@/messages/en.json';
+import koMessages from '@/messages/ko.json';
 
 export async function loginAction(formData: FormData) {
   const password = stringFromForm(formData, 'password');
@@ -84,7 +95,7 @@ export async function updateInquiryStatusAction(formData: FormData) {
   });
 
   if (id && parsed.success) {
-    updateInquiryStatus(id, parsed.data);
+    await updateInquiryStatus(id, parsed.data);
   }
 
   revalidatePath('/admin/inquiries');
@@ -97,10 +108,10 @@ export async function resendInquiryNotificationAction(formData: FormData) {
   await assertAdminSession();
 
   const id = stringFromForm(formData, 'id');
-  const inquiry = id ? getInquiry(id) : null;
+  const inquiry = id ? await getInquiry(id) : null;
 
   if (inquiry) {
-    await notifyInquiry(inquiry);
+    await resendInquiryNotification(id);
     revalidatePath('/admin/inquiries');
     revalidatePath(`/admin/inquiries/${id}`);
   }
@@ -110,6 +121,7 @@ export async function saveNewsAction(formData: FormData) {
   await assertAdminSession();
 
   const id = stringFromForm(formData, 'id');
+  const previousImages = collectImageFilenames(id ? await getNews(id) : null);
   const editorPath = `/admin/news/${id || 'new'}`;
   const imagePath = await readUploadedImageOrText(formData, 'imagePath', 'imageUpload', 'ko', editorPath);
   const payload = newsPayloadSchema.parse({
@@ -126,23 +138,24 @@ export async function saveNewsAction(formData: FormData) {
     }
   });
 
-  if (id) {
-    updateNews(id, payload);
-  } else {
-    createNews(payload);
-  }
+  const savedItem = id ? await updateNews(id, payload) : await createNews(payload);
+  const nextEditorPath = savedItem?.id ? `/admin/news/${savedItem.id}` : editorPath;
+  await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
 
   revalidatePath('/admin/news');
-  redirect('/admin/news');
+  revalidatePath(nextEditorPath);
+  redirect(nextEditorPath);
 }
 
 export async function deleteNewsAction(formData: FormData) {
   await assertAdminSession();
 
   const id = stringFromForm(formData, 'id');
+  const previousImages = collectImageFilenames(id ? await getNews(id) : null);
 
   if (id) {
-    deleteNews(id);
+    await deleteNews(id);
+    await cleanupUnreferencedPublicImages(previousImages);
   }
 
   revalidatePath('/admin/news');
@@ -152,6 +165,7 @@ export async function saveCollectionAction(formData: FormData) {
   await assertAdminSession();
 
   const id = stringFromForm(formData, 'id');
+  const previousImages = collectImageFilenames(id ? await getCollection(id) : null);
   const editorPath = `/admin/collections/${id || 'new'}`;
   const imagePath = await readUploadedImageOrText(formData, 'imagePath', 'imageUpload', 'ko', editorPath);
   const gallery = await readGalleryImages(formData, imagePath, editorPath);
@@ -173,23 +187,24 @@ export async function saveCollectionAction(formData: FormData) {
     }
   });
 
-  if (id) {
-    updateCollection(id, payload);
-  } else {
-    createCollection(payload);
-  }
+  const savedItem = id ? await updateCollection(id, payload) : await createCollection(payload);
+  const nextEditorPath = savedItem?.id ? `/admin/collections/${savedItem.id}` : editorPath;
+  await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
 
   revalidatePath('/admin/collections');
-  redirect('/admin/collections');
+  revalidatePath(nextEditorPath);
+  redirect(nextEditorPath);
 }
 
 export async function deleteCollectionAction(formData: FormData) {
   await assertAdminSession();
 
   const id = stringFromForm(formData, 'id');
+  const previousImages = collectImageFilenames(id ? await getCollection(id) : null);
 
   if (id) {
-    deleteCollection(id);
+    await deleteCollection(id);
+    await cleanupUnreferencedPublicImages(previousImages);
   }
 
   revalidatePath('/admin/collections');
@@ -201,21 +216,25 @@ export async function savePageAction(formData: FormData) {
   const pageKey = stringFromForm(formData, 'pageKey');
   const definition = getManagedPageDefinition(pageKey);
   const pageEditorPath = `/admin/pages/${encodeURIComponent(pageKey)}`;
+  const previousImages = collectImageFilenames(pageKey ? await getPage(pageKey) : null);
+  const sharedContentImages = await readSharedPageContentImageUploads(formData, pageEditorPath);
+  const sharedSeoImages = await readSharedPageSeoImageUploads(formData, pageEditorPath);
   const payload = pagePayloadSchema.parse({
     section: stringFromForm(formData, 'section') || definition?.section || 'site',
     sortOrder: stringFromForm(formData, 'sortOrder') || definition?.sortOrder || '0',
     content: {
-      ko: await readPageLocaleContent(formData, 'ko', pageEditorPath, definition),
-      en: await readPageLocaleContent(formData, 'en', pageEditorPath, definition)
+      ko: await readPageLocaleContent(formData, 'ko', pageEditorPath, definition, sharedContentImages),
+      en: await readPageLocaleContent(formData, 'en', pageEditorPath, definition, sharedContentImages)
     },
     seo: {
-      ko: await readPageLocaleSeo(formData, 'ko', pageEditorPath),
-      en: await readPageLocaleSeo(formData, 'en', pageEditorPath)
+      ko: await readPageLocaleSeo(formData, 'ko', pageEditorPath, sharedSeoImages),
+      en: await readPageLocaleSeo(formData, 'en', pageEditorPath, sharedSeoImages)
     }
   });
 
   if (pageKey) {
-    upsertPage(pageKey, payload);
+    const savedPage = await upsertPage(pageKey, payload);
+    await cleanupRemovedImages(previousImages, collectImageFilenames(savedPage));
   }
 
   revalidatePath('/admin/pages');
@@ -227,7 +246,7 @@ export async function savePageAction(formData: FormData) {
     }
   }
 
-  redirect('/admin/pages');
+  redirect(pageEditorPath);
 }
 
 export async function uploadMediaAction(formData: FormData) {
@@ -246,7 +265,7 @@ export async function uploadMediaAction(formData: FormData) {
   await savePublicImage(file, {
     altKo: stringFromForm(formData, 'altKo'),
     altEn: stringFromForm(formData, 'altEn')
-  });
+  }, stringFromForm(formData, 'filename'));
 
   revalidatePath('/admin/media');
   redirect('/admin/media');
@@ -262,7 +281,7 @@ export async function updateMediaAction(formData: FormData) {
   });
 
   if (id && parsed.success) {
-    updateMedia(id, parsed.data);
+    await updateMedia(id, parsed.data);
   }
 
   revalidatePath('/admin/media');
@@ -272,9 +291,12 @@ export async function deleteMediaAction(formData: FormData) {
   await assertAdminSession();
 
   const id = stringFromForm(formData, 'id');
+  const media = id ? await getMedia(id) : null;
+  const previousImages = collectImageFilenames(media);
 
   if (id) {
-    deleteMedia(id);
+    await deleteMedia(id);
+    await cleanupUnreferencedPublicImages(previousImages, {allowUnregistered: true});
   }
 
   revalidatePath('/admin/media');
@@ -331,11 +353,14 @@ async function readGalleryImages(formData: FormData, fallbackImage: string, edit
   return images.length > 0 ? images : [fallbackImage].filter(Boolean);
 }
 
+type SharedImageUploads = Map<string, string>;
+
 async function readPageLocaleContent(
   formData: FormData,
   locale: Locale,
   pageEditorPath: string,
-  definition: PageDefinition | null
+  definition: PageDefinition | null,
+  sharedContentImages: SharedImageUploads
 ) {
   const suffix = locale === 'ko' ? 'Ko' : 'En';
   const groups = definition ? getPageContentGroups(definition) : [{key: 'main', title: '', sourcePath: ''}];
@@ -345,7 +370,11 @@ async function readPageLocaleContent(
     const content = parseJsonField(formData, `content${suffix}.${group.key}`, {}) as Record<string, unknown>;
     const nextContent = cloneJson(content);
 
-    for (const leaf of getEditableLeaves(content)) {
+    const editableLeaves = definition
+      ? getEditableLeavesForPageGroup(definition, group.key, content)
+      : getEditableLeaves(content);
+
+    for (const leaf of editableLeaves) {
       const formKey = contentFieldFormKey(locale, group.key, leaf.path);
 
       if (!formData.has(formKey)) {
@@ -363,9 +392,22 @@ async function readPageLocaleContent(
           path: leaf.path,
           value: leaf.value,
           valueType: leaf.valueType,
+          isImage: leaf.isImage,
           locale,
-          pageEditorPath
+          pageEditorPath,
+          sharedContentImages
         })
+      );
+    }
+
+    if (definition) {
+      applyAppendablePageArrayFields(
+        formData,
+        locale,
+        group.key,
+        nextContent,
+        definition,
+        sharedContentImages
       );
     }
 
@@ -379,7 +421,12 @@ async function readPageLocaleContent(
   return createPageContentPayload(definition, nextGroups);
 }
 
-async function readPageLocaleSeo(formData: FormData, locale: Locale, pageEditorPath: string) {
+async function readPageLocaleSeo(
+  formData: FormData,
+  locale: Locale,
+  pageEditorPath: string,
+  sharedSeoImages: SharedImageUploads
+) {
   const suffix = locale === 'ko' ? 'Ko' : 'En';
   const seo = parseJsonField(formData, `seo${suffix}`, {}) as Record<string, unknown>;
   const nextSeo = cloneJson(seo);
@@ -392,7 +439,20 @@ async function readPageLocaleSeo(formData: FormData, locale: Locale, pageEditorP
     }
   }
 
-  const uploadedOgImage = await readUploadedImageFilename(formData, `seoImage.${locale}.ogImagePath`, locale, pageEditorPath);
+  const sharedOgImage = sharedSeoImages.get('ogImagePath');
+
+  if (sharedOgImage) {
+    setObjectValueAtPath(nextSeo, 'ogImagePath', sharedOgImage);
+    return nextSeo;
+  }
+
+  const uploadedOgImage = await readUploadedImageFilename(
+    formData,
+    `seoImage.${locale}.ogImagePath`,
+    locale,
+    pageEditorPath,
+    `seoField.${locale}.ogImagePath`
+  );
 
   if (uploadedOgImage) {
     setObjectValueAtPath(nextSeo, 'ogImagePath', uploadedOgImage);
@@ -401,20 +461,103 @@ async function readPageLocaleSeo(formData: FormData, locale: Locale, pageEditorP
   return nextSeo;
 }
 
+function applyAppendablePageArrayFields(
+  formData: FormData,
+  locale: Locale,
+  groupKey: string,
+  content: Record<string, unknown>,
+  definition: PageDefinition,
+  sharedContentImages: SharedImageUploads
+) {
+  const fields = getPageFieldDefinitionsForGroup(definition, groupKey, content).filter(
+    (field) => field.itemFields?.length
+  );
+
+  for (const field of fields) {
+    const existingValue = getObjectValueAtPath(content, field.path);
+    const existingItems = Array.isArray(existingValue) ? existingValue : [];
+    const appendIndexes = getSubmittedAppendIndexes(formData, locale, groupKey, field.path, existingItems.length);
+
+    if (appendIndexes.length === 0) {
+      continue;
+    }
+
+    const nextItems = [...existingItems];
+
+    for (const index of appendIndexes) {
+      const nextItem: Record<string, unknown> = {};
+
+      for (const itemField of field.itemFields ?? []) {
+        const itemPath = `${field.path}.${index}.${itemField.path}`;
+        const formKey = contentFieldFormKey(locale, groupKey, itemPath);
+        const sharedImage = itemField.type === 'image'
+          ? sharedContentImages.get(sharedPageImageKey(groupKey, itemPath))
+          : '';
+        const rawValue = sharedImage || stringFromForm(formData, formKey);
+
+        if (rawValue) {
+          setObjectValueAtPath(nextItem, itemField.path, rawValue);
+        }
+      }
+
+      if (Object.keys(nextItem).length > 0) {
+        nextItems.push(nextItem);
+      }
+    }
+
+    setObjectValueAtPath(content, field.path, nextItems);
+  }
+}
+
+function getSubmittedAppendIndexes(
+  formData: FormData,
+  locale: Locale,
+  groupKey: string,
+  arrayPath: string,
+  startIndex: number
+) {
+  const indexes = new Set<number>();
+  const prefix = contentFieldFormKey(locale, groupKey, `${arrayPath}.`);
+
+  for (const key of formData.keys()) {
+    if (!key.startsWith(prefix)) {
+      continue;
+    }
+
+    const rest = key.slice(prefix.length);
+    const index = Number(rest.split('.')[0]);
+
+    if (Number.isInteger(index) && index >= startIndex) {
+      indexes.add(index);
+    }
+  }
+
+  return Array.from(indexes).sort((a, b) => a - b);
+}
+
 async function readPageFieldValue(formData: FormData, formKey: string, field: {
   groupKey: string;
   path: string;
   value: unknown;
   valueType: 'string' | 'number' | 'boolean' | 'empty';
+  isImage: boolean;
   locale: Locale;
   pageEditorPath: string;
+  sharedContentImages: SharedImageUploads;
 }) {
-  if (isImageEditableField(field.path, field.value)) {
+  if (field.isImage || isImageEditableField(field.path, field.value)) {
+    const sharedImage = field.sharedContentImages.get(sharedPageImageKey(field.groupKey, field.path));
+
+    if (sharedImage) {
+      return sharedImage;
+    }
+
     const uploadedImage = await readUploadedImageFilename(
       formData,
       contentImageFormKey(field.locale, field.groupKey, field.path),
       field.locale,
-      field.pageEditorPath
+      field.pageEditorPath,
+      formKey
     );
 
     if (uploadedImage) {
@@ -444,11 +587,87 @@ function contentImageFormKey(locale: Locale, groupKey: string, pathValue: string
   return `contentImage.${locale}.${groupKey}.${pathValue}`;
 }
 
+async function readSharedPageContentImageUploads(formData: FormData, pageEditorPath: string) {
+  const images: SharedImageUploads = new Map();
+
+  for (const [formKey, value] of formData.entries()) {
+    const parsedKey = parseContentImageFormKey(formKey);
+
+    if (!parsedKey || images.has(sharedPageImageKey(parsedKey.groupKey, parsedKey.path)) || !(value instanceof File) || value.size === 0) {
+      continue;
+    }
+
+    images.set(
+      sharedPageImageKey(parsedKey.groupKey, parsedKey.path),
+      await saveSharedPageImage(
+        value,
+        pageEditorPath,
+        stringFromForm(formData, contentFieldFormKey(parsedKey.locale, parsedKey.groupKey, parsedKey.path))
+      )
+    );
+  }
+
+  return images;
+}
+
+async function readSharedPageSeoImageUploads(formData: FormData, pageEditorPath: string) {
+  const images: SharedImageUploads = new Map();
+
+  for (const locale of locales) {
+    const formKey = `seoImage.${locale}.ogImagePath`;
+    const value = formData.get(formKey);
+
+    if (images.has('ogImagePath') || !(value instanceof File) || value.size === 0) {
+      continue;
+    }
+
+    images.set(
+      'ogImagePath',
+      await saveSharedPageImage(value, pageEditorPath, stringFromForm(formData, `seoField.${locale}.ogImagePath`))
+    );
+  }
+
+  return images;
+}
+
+async function saveSharedPageImage(file: File, pageEditorPath: string, preferredFilename: string) {
+  if (!isAllowedImageUpload(file)) {
+    redirect(`${pageEditorPath}?error=file`);
+  }
+
+  const alt = createImageAltFromFilename(file.name);
+  const media = await savePublicImage(file, {
+    altKo: alt,
+    altEn: alt
+  }, preferredFilename);
+
+  return media.filename;
+}
+
+function parseContentImageFormKey(formKey: string) {
+  const match = /^contentImage\.(ko|en)\.([^.]+)\.(.+)$/.exec(formKey);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    locale: match[1] as Locale,
+    groupKey: match[2],
+    path: match[3]
+  };
+}
+
+function sharedPageImageKey(groupKey: string, pathValue: string) {
+  return `${groupKey}\u0000${pathValue}`;
+}
+
 async function readUploadedImageFilename(
   formData: FormData,
   formKey: string,
   locale: Locale,
-  pageEditorPath: string
+  pageEditorPath: string,
+  preferredFilenameKey?: string
 ) {
   const file = formData.get(formKey);
 
@@ -463,7 +682,7 @@ async function readUploadedImageFilename(
   const media = await savePublicImage(file, {
     altKo: locale === 'ko' ? createImageAltFromFilename(file.name) : '',
     altEn: locale === 'en' ? createImageAltFromFilename(file.name) : ''
-  });
+  }, preferredFilenameKey ? stringFromForm(formData, preferredFilenameKey) : '');
 
   return media.filename;
 }
@@ -475,7 +694,7 @@ async function readUploadedImageOrText(
   locale: Locale,
   errorPath: string
 ) {
-  const uploadedImage = await readUploadedImageFilename(formData, fileKey, locale, errorPath);
+  const uploadedImage = await readUploadedImageFilename(formData, fileKey, locale, errorPath, textKey);
 
   return uploadedImage || stringFromForm(formData, textKey);
 }
@@ -509,34 +728,152 @@ function parseJsonField(formData: FormData, key: string, fallback: unknown) {
   return JSON.parse(value);
 }
 
-function createPublicFilename(originalName: string) {
-  const extension = path.extname(originalName).toLowerCase();
-  const baseName = path
-    .basename(originalName, extension)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 60);
-
-  return `${baseName || 'asset'}-${randomUUID().slice(0, 8)}${extension}`;
+async function cleanupRemovedImages(previousImages: Set<string>, nextImages: Set<string>) {
+  const removedImages = Array.from(previousImages).filter((filename) => !nextImages.has(filename));
+  await cleanupUnreferencedPublicImages(removedImages);
 }
 
-async function savePublicImage(file: File, alt: {altKo?: string; altEn?: string}) {
-  const bytes = Buffer.from(await file.arrayBuffer());
-  const filename = createPublicFilename(file.name);
-  const diskPath = path.join(process.cwd(), 'public', 'images', filename);
-  await writeFile(diskPath, bytes);
+async function cleanupUnreferencedPublicImages(
+  candidates: Iterable<string>,
+  options: {allowUnregistered?: boolean} = {}
+) {
+  const filenames = Array.from(new Set(Array.from(candidates).map(normalizePublicImageFilename).filter(isString)));
 
-  return createMedia({
-    filename,
-    path: `public/images/${filename}`,
-    url: `/images/${filename}`,
-    mimeType: file.type,
-    sizeBytes: bytes.length,
+  for (const filename of filenames) {
+    if (await isPublicImageStillReferenced(filename)) {
+      continue;
+    }
+
+    const mediaRows = await findMediaRowsForFilename(filename);
+
+    if (!options.allowUnregistered && mediaRows.length === 0) {
+      continue;
+    }
+
+    for (const media of mediaRows) {
+      await deleteMedia(media.id);
+    }
+
+    deletePublicImageFile(filename);
+  }
+}
+
+async function isPublicImageStillReferenced(filename: string) {
+  const [news, collections, pages] = await Promise.all([
+    listNews(),
+    listCollections(),
+    listPages()
+  ]);
+
+  return (
+    hasImageReference(news, filename) ||
+    hasImageReference(collections, filename) ||
+    hasImageReference(pages, filename) ||
+    hasImageReference(getStaticMessagesImageReferences(), filename)
+  );
+}
+
+async function findMediaRowsForFilename(filename: string) {
+  return (await listMedia()).filter((media) => {
+    const values = [media.filename, media.path, media.url, media.storageKey];
+    return values.some((value) => normalizePublicImageFilename(value) === filename);
+  });
+}
+
+function deletePublicImageFile(filename: string) {
+  void filename;
+}
+
+let staticMessagesImageReferences: Set<string> | null = null;
+
+function getStaticMessagesImageReferences() {
+  staticMessagesImageReferences ??= collectImageFilenames({
+    ko: koMessages,
+    en: enMessages
+  });
+
+  return staticMessagesImageReferences;
+}
+
+function hasImageReference(value: unknown, filename: string) {
+  return collectImageFilenames(value).has(filename);
+}
+
+function collectImageFilenames(value: unknown, filenames = new Set<string>()) {
+  const filename = normalizePublicImageFilename(value);
+
+  if (filename) {
+    filenames.add(filename);
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectImageFilenames(item, filenames);
+    }
+  } else if (value && typeof value === 'object') {
+    for (const item of Object.values(value)) {
+      collectImageFilenames(item, filenames);
+    }
+  }
+
+  return filenames;
+}
+
+function normalizePublicImageFilename(value: unknown) {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  let imagePath = trimmed.split(/[?#]/)[0]?.replace(/\\/g, '/') ?? '';
+
+  if (/^https?:\/\//i.test(imagePath)) {
+    try {
+      imagePath = new URL(imagePath).pathname;
+    } catch {
+      return null;
+    }
+  }
+
+  const imageMarker = '/images/';
+  const markerIndex = imagePath.indexOf(imageMarker);
+
+  if (markerIndex >= 0) {
+    imagePath = imagePath.slice(markerIndex + imageMarker.length);
+  }
+
+  imagePath = imagePath
+    .replace(/^\/+/, '')
+    .replace(/^public\/images\//, '')
+    .replace(/^images\//, '');
+
+  if (!/\.(png|jpe?g|webp|gif|svg)$/i.test(imagePath)) {
+    return null;
+  }
+
+  const normalized = path.posix.normalize(imagePath);
+
+  if (!normalized || normalized === '.' || normalized.startsWith('../') || normalized.startsWith('/')) {
+    return null;
+  }
+
+  return normalized;
+}
+
+function isString(value: string | null): value is string {
+  return Boolean(value);
+}
+
+async function savePublicImage(file: File, alt: {altKo?: string; altEn?: string}, preferredName = '') {
+  return uploadMediaFile(file, {
+    filename: preferredName,
     altKo: alt.altKo ?? '',
-    altEn: alt.altEn ?? '',
-    storageProvider: 'public',
-    storageKey: filename
+    altEn: alt.altEn ?? ''
   });
 }
 

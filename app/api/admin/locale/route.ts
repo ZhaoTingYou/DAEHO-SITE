@@ -6,13 +6,14 @@ import {
   defaultAdminLocale,
   isAdminLocale
 } from '@/lib/admin-locales';
+import {getExternalUrl} from '@/lib/request-origin';
 
 export function GET(request: NextRequest) {
   const localeParam = request.nextUrl.searchParams.get('locale');
   const nextParam = request.nextUrl.searchParams.get('next') ?? '/admin';
   const locale = isAdminLocale(localeParam) ? localeParam : defaultAdminLocale;
   const nextPath = nextParam.startsWith('/admin') ? nextParam : '/admin';
-  const response = NextResponse.redirect(new URL(nextPath, request.url));
+  const response = NextResponse.redirect(getExternalUrl(request, nextPath));
 
   response.cookies.set(adminLocaleCookieName, locale, {
     httpOnly: true,

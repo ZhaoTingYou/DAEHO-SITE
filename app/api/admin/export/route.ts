@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     return unauthorized;
   }
 
-  const snapshot = getCmsExportSnapshot();
+  const snapshot = await getCmsExportSnapshot();
 
   return new NextResponse(JSON.stringify(snapshot, null, 2), {
     headers: {

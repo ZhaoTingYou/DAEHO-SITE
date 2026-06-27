@@ -7,6 +7,7 @@ import {
 import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
+import {imageExists} from '@/lib/image-exists';
 import {withLocale} from '@/lib/site-map';
 
 type LoyaltyContent = {
@@ -23,6 +24,7 @@ type LoyaltyContent = {
     label: string;
   }>;
   statement?: string;
+  copy?: Partial<LoyaltyPageCopy>;
 };
 
 type LoyaltyCommitmentPageProps = {
@@ -30,7 +32,19 @@ type LoyaltyCommitmentPageProps = {
   content: LoyaltyContent;
 };
 
-const pageCopy = {
+type LoyaltyPageCopy = {
+  heroLabel: string;
+  heroTitle: string;
+  introLines: string[];
+  imagePlaceholder: string;
+  quoteTitle: string;
+  quoteBody: string;
+  discoverLead: string;
+  featureSlides: LoyaltyFeatureSlide[];
+  cta: string;
+};
+
+const defaultPageCopy = {
   ko: {
     heroLabel: 'LOYALTY',
     heroTitle: 'RELATIONSHIP',
@@ -44,10 +58,6 @@ const pageCopy = {
     quoteTitle: 'Loyalty, Built Through Time',
     quoteBody: '오래 함께한 시간은 가장 큰 증거입니다',
     discoverLead: '대호의 프로젝트 더 알아보기',
-    featureTitle: '01. Repeat Trust',
-    featureBody:
-      '고객이 다시 제작을 맡기는 이유는 단순히 이전 결과물이 만족스러웠기 때문만은 아닙니다. 처음 상담부터 디자인 제안, 수정, 제작, 검수, 납품까지 전 과정이 안정적으로 진행되었는지가 중요합니다. 대호는 고객이 다시 같은 프로젝트를 맡겼을 때, 이전의 기준과 정보를 바탕으로 더 효율적이고 정확하게 진행할 수 있도록 관리합니다.\n\n우승반지, 임관반지, 단체 기념반지는 같은 고객이 시즌, 기수, 연도에 따라 반복 제작을 요청하는 경우가 많습니다. 이때 중요한 것은 이전 제품의 구조와 기준을 이해하고, 새로운 프로젝트에 맞게 필요한 부분만 정확히 조정하는 능력입니다. 대호는 반복 제작 경험을 통해 고객이 다시 맡길 수 있는 제작 환경을 만들어왔습니다.',
-    featureKicker: 'LOYALTY STANDARD',
     featureSlides: [
       {
         kicker: '',
@@ -92,10 +102,6 @@ const pageCopy = {
     quoteTitle: 'Loyalty, Built Through Time',
     quoteBody: 'Time spent together is the clearest proof.',
     discoverLead: 'Discover more DEAHO projects',
-    featureTitle: '01. Repeat Trust',
-    featureBody:
-      'Clients return not only because the previous result was satisfying, but because the full process remains clear: consultation, design direction, revisions, production, inspection, and delivery. DEAHO keeps the standards and context from each project so the next commission can begin with confidence and move with greater precision.',
-    featureKicker: 'LOYALTY STANDARD',
     featureSlides: [
       {
         kicker: 'LOYALTY STANDARD',
@@ -127,23 +133,37 @@ const pageCopy = {
     ],
     cta: 'DISCOVER MORE'
   }
-} satisfies Record<Locale, {
-  heroLabel: string;
-  heroTitle: string;
-  introLines: string[];
-  imagePlaceholder: string;
-  quoteTitle: string;
-  quoteBody: string;
-  discoverLead: string;
-  featureTitle: string;
-  featureBody: string;
-  featureKicker: string;
-  featureSlides: LoyaltyFeatureSlide[];
-  cta: string;
-}>;
+} satisfies Record<Locale, LoyaltyPageCopy>;
+
+function resolveLoyaltyCopy(locale: Locale, content: LoyaltyContent): LoyaltyPageCopy {
+  const fallback = defaultPageCopy[locale];
+  const copy = content.copy ?? {};
+
+  return {
+    ...fallback,
+    ...copy,
+    introLines: copy.introLines?.length ? copy.introLines : fallback.introLines,
+    featureSlides: normalizeLoyaltySlides(copy.featureSlides?.length ? copy.featureSlides : fallback.featureSlides)
+  };
+}
+
+function normalizeLoyaltySlides(slides: LoyaltyFeatureSlide[]): LoyaltyFeatureSlide[] {
+  const fallbackImage = 'legacy_loyalty_hero.png';
+
+  return slides.map((slide) => {
+    const backgroundImage = imageExists(slide.backgroundImage) ? slide.backgroundImage : fallbackImage;
+    const previewImage = imageExists(slide.previewImage) ? slide.previewImage : backgroundImage;
+
+    return {
+      ...slide,
+      backgroundImage,
+      previewImage
+    };
+  });
+}
 
 export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPageProps) {
-  const copy = pageCopy[locale];
+  const copy = resolveLoyaltyCopy(locale, content);
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;

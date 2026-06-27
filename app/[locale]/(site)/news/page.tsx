@@ -23,17 +23,14 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function NewsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const messages = getLocaleMessages(locale);
+  const messages = await getLocaleMessages(locale);
   const content = messages.news;
   const text = messages.newsUi;
-  const cards: NewsCard[] = getNewsCardsForSite(locale);
+  const cards: NewsCard[] = await getNewsCardsForSite(locale);
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const titleTextClass = locale === 'ko' ? "[font-family:'MaruBuri',serif] font-semibold" : englishTextClass;
   const bodyTextClass = "[font-family:'Pretendard',sans-serif] font-normal";
-  const mastheadBodyLines =
-    locale === 'ko'
-      ? ['프로젝트 스토리와 제작 현장, 언론/피처, 협업 소식을', '한곳에 모읍니다']
-      : content.masthead.body.split('\n').filter(Boolean);
+  const mastheadBodyLines = content.masthead.body.split('\n').filter(Boolean);
 
   return (
     <main className="bg-white text-text">

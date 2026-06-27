@@ -6,6 +6,7 @@ import {locales, type Locale} from '@/lib/locales';
 import {
   CheckboxField,
   ImageUploadField,
+  type MediaLibraryItem,
   SecondaryLink,
   SubmitButton,
   TextAreaField,
@@ -37,13 +38,21 @@ type CollectionTranslation = {
   ogImagePath?: string;
 };
 
-export function CollectionForm({item, messages}: {item?: CollectionItem; messages: Record<string, string>}) {
+export function CollectionForm({
+  item,
+  mediaItems,
+  messages
+}: {
+  item?: CollectionItem;
+  mediaItems: MediaLibraryItem[];
+  messages: Record<string, string>;
+}) {
   const t = createAdminTranslator(messages);
   const gallery = normalizeGallery(item?.gallery, item?.imagePath);
   const specs = normalizeSpecs(item?.specs);
 
   return (
-    <form action={saveCollectionAction} encType="multipart/form-data" className="grid gap-6">
+    <form action={saveCollectionAction} className="grid gap-6">
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
 
       <Panel className="p-5">
@@ -62,6 +71,14 @@ export function CollectionForm({item, messages}: {item?: CollectionItem; message
             defaultValue={item?.imagePath}
             uploadLabel={t('page.uploadLocalImage')}
             uploadHint={t('page.uploadLocalImageHint')}
+            emptyLabel={t('common.noImage')}
+            changedLabel={t('common.changed')}
+            selectedLabel={t('common.imageSelected')}
+            mediaItems={mediaItems}
+            mediaSelectLabel={t('media.selectFromLibrary')}
+            mediaLibraryTitle={t('media.libraryTitle')}
+            mediaEmptyLabel={t('media.libraryEmpty')}
+            mediaSelectedLabel={t('media.selectedExisting')}
           />
           <div className="grid gap-4 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4">
             <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.specs')}</p>
@@ -81,6 +98,14 @@ export function CollectionForm({item, messages}: {item?: CollectionItem; message
                 defaultValue={gallery[index] ?? ''}
                 uploadLabel={t('page.uploadLocalImage')}
                 uploadHint={t('page.uploadLocalImageHint')}
+                emptyLabel={t('common.noImage')}
+                changedLabel={t('common.changed')}
+                selectedLabel={t('common.imageSelected')}
+                mediaItems={mediaItems}
+                mediaSelectLabel={t('media.selectFromLibrary')}
+                mediaLibraryTitle={t('media.libraryTitle')}
+                mediaEmptyLabel={t('media.libraryEmpty')}
+                mediaSelectedLabel={t('media.selectedExisting')}
               />
             ))}
           </div>
@@ -92,6 +117,7 @@ export function CollectionForm({item, messages}: {item?: CollectionItem; message
           <TranslationPanel
             key={locale}
             locale={locale}
+            mediaItems={mediaItems}
             messages={messages}
             translation={getTranslation(item, locale)}
           />
@@ -110,10 +136,12 @@ export function CollectionForm({item, messages}: {item?: CollectionItem; message
 
 function TranslationPanel({
   locale,
+  mediaItems,
   messages,
   translation
 }: {
   locale: Locale;
+  mediaItems: MediaLibraryItem[];
   messages: Record<string, string>;
   translation: CollectionTranslation;
 }) {
@@ -140,6 +168,14 @@ function TranslationPanel({
           defaultValue={translation.ogImagePath}
           uploadLabel={t('page.uploadLocalImage')}
           uploadHint={t('page.uploadLocalImageHint')}
+          emptyLabel={t('common.noImage')}
+          changedLabel={t('common.changed')}
+          selectedLabel={t('common.imageSelected')}
+          mediaItems={mediaItems}
+          mediaSelectLabel={t('media.selectFromLibrary')}
+          mediaLibraryTitle={t('media.libraryTitle')}
+          mediaEmptyLabel={t('media.libraryEmpty')}
+          mediaSelectedLabel={t('media.selectedExisting')}
         />
       </div>
     </Panel>

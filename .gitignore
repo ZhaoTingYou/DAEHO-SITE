@@ -27,8 +27,13 @@ pnpm-debug.log*
 
 # local verification artifacts
 /artifacts
+/mobile-screenshots
 /data/*.sqlite
 /data/*.sqlite-*
+/backend/cms/target
+/.agents
+/skills-lock.json
+/README.updated.md
 
 # local Claude permissions/config
 .claude/

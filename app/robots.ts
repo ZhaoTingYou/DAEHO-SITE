@@ -1,8 +1,17 @@
 import type {MetadataRoute} from 'next';
 
-import {metadataBase} from '@/lib/seo';
+import {isPreviewNoindexEnabled, metadataBase} from '@/lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
+  if (isPreviewNoindexEnabled()) {
+    return {
+      rules: {
+        userAgent: '*',
+        disallow: '/'
+      }
+    };
+  }
+
   return {
     rules: {
       userAgent: '*',

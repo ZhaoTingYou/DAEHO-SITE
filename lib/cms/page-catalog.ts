@@ -2,12 +2,22 @@ import pageCatalogData from './page-catalog.json';
 
 export type PageFieldType = 'text' | 'textarea' | 'image' | 'stringList' | 'json';
 
-export type PageFieldDefinition = {
+export type PageArrayItemFieldDefinition = {
   path: string;
   label: string;
   type?: PageFieldType;
   rows?: number;
   placeholder?: string;
+};
+
+export type PageFieldDefinition = {
+  groupKey?: string;
+  path: string;
+  label: string;
+  type?: PageFieldType;
+  rows?: number;
+  placeholder?: string;
+  itemFields?: PageArrayItemFieldDefinition[];
 };
 
 export type PageContentGroupDefinition = {
@@ -95,6 +105,64 @@ export function getObjectValueAtPath(value: unknown, path: string) {
     const key = Number.isInteger(Number(segment)) && Array.isArray(current) ? Number(segment) : segment;
     return (current as Record<string, unknown>)[key as keyof typeof current];
   }, value);
+}
+
+export function getPageFieldDefinitionsForGroup(
+  definition: PageDefinition,
+  groupKey: string,
+  content: Record<string, unknown>
+) {
+  const groups = getPageContentGroups(definition);
+  const hasMultipleGroups = groups.length > 1;
+
+  return definition.fields.filter((field) => {
+    if (field.groupKey) {
+      return field.groupKey === groupKey;
+    }
+
+    if (!hasMultipleGroups) {
+      return groupKey === 'main';
+    }
+
+    return getObjectValueAtPath(content, field.path) !== undefined;
+  });
+}
+
+export function getEditableLeavesForPageGroup(
+  definition: PageDefinition,
+  groupKey: string,
+  content: Record<string, unknown>
+) {
+  const fields = getPageFieldDefinitionsForGroup(definition, groupKey, content);
+  const leaves: EditableLeaf[] = [];
+  const seenPaths = new Set<string>();
+
+  for (const field of fields) {
+    const value = getObjectValueAtPath(content, field.path);
+    const fieldLeaves = getEditableLeaves(value, field.path);
+
+    for (const leaf of fieldLeaves) {
+      if (seenPaths.has(leaf.path)) {
+        continue;
+      }
+
+      seenPaths.add(leaf.path);
+      leaves.push({
+        ...leaf,
+        isImage: field.type === 'image' || leaf.isImage
+      });
+    }
+  }
+
+  return leaves;
+}
+
+export function getEditableLeafCountForPageGroup(
+  definition: PageDefinition,
+  groupKey: string,
+  content: Record<string, unknown>
+) {
+  return getEditableLeavesForPageGroup(definition, groupKey, content).length;
 }
 
 export function setObjectValueAtPath(target: Record<string, unknown>, path: string, value: unknown) {

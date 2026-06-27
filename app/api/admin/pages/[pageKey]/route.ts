@@ -25,7 +25,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const {pageKey} = await context.params;
-  const page = getPage(pageKey);
+  const page = await getPage(pageKey);
 
   if (!page) {
     return NextResponse.json({error: 'Page not found'}, {status: 404});
@@ -54,6 +54,6 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
 
   const {pageKey} = await context.params;
-  const page = upsertPage(pageKey, parsed.data);
+  const page = await upsertPage(pageKey, parsed.data);
   return NextResponse.json({page});
 }

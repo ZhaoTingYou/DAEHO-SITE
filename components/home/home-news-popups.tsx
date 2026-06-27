@@ -27,8 +27,12 @@ type HomeNewsPopupsProps = {
 
 export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
   const [activeCard, setActiveCard] = useState<HomeNewsPopupCard | null>(null);
+  const [bodyPage, setBodyPage] = useState(0);
+  const [modalImageRatio, setModalImageRatio] = useState<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
+  const bodyPages = splitModalBody(text.body);
+  const activeBodyPage = bodyPages[bodyPage] ?? bodyPages[0] ?? '';
 
   useEffect(() => {
     if (!activeCard) {
@@ -60,7 +64,11 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
           <button
             key={card.id}
             type="button"
-            onClick={() => setActiveCard(card)}
+            onClick={() => {
+              setBodyPage(0);
+              setModalImageRatio(null);
+              setActiveCard(card);
+            }}
             className="group grid h-full cursor-pointer grid-rows-[auto_1fr] bg-transparent text-left transition duration-hover ease-brand hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           >
             <div className="hover-zoom">
@@ -104,7 +112,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
               aria-modal="true"
               aria-label={text.label}
               aria-labelledby={titleId}
-              className="relative grid max-h-[calc(100dvh-64px)] w-full max-w-[920px] overflow-y-auto bg-white p-4 shadow-[0_32px_120px_rgba(16,29,48,0.22)] md:grid-cols-[0.9fr_1fr] md:p-6"
+              className="relative grid max-h-[calc(100dvh-48px)] w-full max-w-[1180px] overflow-y-auto bg-white p-[clamp(14px,1.6vw,28px)] shadow-[0_32px_120px_rgba(16,29,48,0.22)] md:grid-cols-[minmax(320px,0.92fr)_minmax(320px,0.98fr)] md:items-stretch md:gap-[clamp(28px,3.2vw,56px)] md:overflow-hidden"
               initial={{opacity: 0, y: 18, scale: 0.98}}
               animate={{opacity: 1, y: 0, scale: 1}}
               exit={{opacity: 0, y: 12, scale: 0.98}}
@@ -120,10 +128,21 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                 <span aria-hidden="true">×</span>
               </button>
 
-              <NewsImage card={activeCard} priority fillFrame fallbackLabel={text.fallback} />
+              <NewsImage
+                card={activeCard}
+                priority
+                fillFrame
+                fallbackLabel={text.fallback}
+                aspectRatio={modalImageRatio}
+                onNaturalSize={(width, height) => {
+                  if (width > 0 && height > 0) {
+                    setModalImageRatio(width / height);
+                  }
+                }}
+              />
 
-              <div className="flex flex-col justify-start gap-6 px-2 pb-2 pt-14 md:px-8 md:py-10">
-                <div className="space-y-4">
+              <div className="flex min-h-0 flex-col justify-center gap-[clamp(24px,3vw,42px)] px-2 py-8 md:h-full md:px-0 md:py-[clamp(34px,4vw,58px)]">
+                <div className="space-y-[clamp(14px,1.8vw,22px)]">
                   <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[15px] font-medium uppercase tracking-[0.08em] text-subtext">
                     <span className="text-accent">{activeCard.categoryLabel}</span>
                     <span className="h-3 w-px bg-hairline" aria-hidden="true" />
@@ -131,14 +150,39 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                   </p>
                   <h3
                     id={titleId}
-                    className="font-heading text-[clamp(22px,2.6vw,32px)] font-semibold leading-tight text-primary"
+                    className="font-heading text-[clamp(24px,3vw,42px)] font-semibold leading-[1.18] text-primary"
                   >
                     {activeCard.title}
                   </h3>
                 </div>
-                <p className="font-body text-[15px] leading-7 text-text">
-                  {text.body}
-                </p>
+                <div className="space-y-[clamp(18px,2.4vw,28px)]">
+                  <p className="whitespace-pre-line font-body text-[15px] leading-[1.85] text-text">
+                    {activeBodyPage}
+                  </p>
+                  {bodyPages.length > 1 ? (
+                    <div className="flex items-center gap-3 font-body text-[13px] font-semibold leading-none text-primary">
+                      <button
+                        type="button"
+                        onClick={() => setBodyPage((current) => Math.max(current - 1, 0))}
+                        disabled={bodyPage === 0}
+                        aria-label="Previous page"
+                        className="grid h-11 w-11 place-items-center border border-primary/25 text-[18px] transition duration-hover ease-brand hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30"
+                      >
+                        <span aria-hidden="true">‹</span>
+                      </button>
+                      <span>{bodyPage + 1} / {bodyPages.length}</span>
+                      <button
+                        type="button"
+                        onClick={() => setBodyPage((current) => Math.min(current + 1, bodyPages.length - 1))}
+                        disabled={bodyPage >= bodyPages.length - 1}
+                        aria-label="Next page"
+                        className="grid h-11 w-11 place-items-center border border-primary/25 text-[18px] transition duration-hover ease-brand hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30"
+                      >
+                        <span aria-hidden="true">›</span>
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </motion.article>
           </motion.div>
@@ -152,18 +196,25 @@ function NewsImage({
   card,
   priority = false,
   fillFrame = false,
-  fallbackLabel
+  fallbackLabel,
+  aspectRatio,
+  onNaturalSize
 }: {
   card: HomeNewsPopupCard;
   priority?: boolean;
   fillFrame?: boolean;
   fallbackLabel?: string;
+  aspectRatio?: number | null;
+  onNaturalSize?: (width: number, height: number) => void;
 }) {
+  const frameStyle = fillFrame && aspectRatio ? {aspectRatio} : undefined;
+
   if (!card.hasImage) {
     return (
       <div
+        style={frameStyle}
         className={`flex w-full items-center justify-center break-all border border-hairline bg-white p-5 text-center font-body text-[15px] font-semibold leading-5 tracking-[0.08em] text-subtext ${
-          fillFrame ? 'min-h-[260px] md:min-h-[360px]' : 'aspect-[3/4]'
+          fillFrame ? 'aspect-square max-h-[calc(100dvh-136px)]' : 'aspect-[3/4]'
         }`}
         role="img"
         aria-label={card.image}
@@ -174,7 +225,12 @@ function NewsImage({
   }
 
   return (
-    <div className={`relative w-full overflow-hidden bg-bg ${fillFrame ? 'min-h-[260px] md:min-h-[360px]' : 'aspect-[3/4]'}`}>
+    <div
+      style={frameStyle}
+      className={`relative w-full overflow-hidden bg-bg ${
+        fillFrame ? 'aspect-square max-h-[calc(100dvh-136px)]' : 'aspect-[3/4]'
+      }`}
+    >
       <Image
         src={`/images/${card.image}`}
         alt={`${card.categoryLabel} ${card.title}`}
@@ -182,7 +238,44 @@ function NewsImage({
         priority={priority}
         sizes="(min-width: 1280px) 290px, (min-width: 768px) 50vw, 100vw"
         className="object-cover"
+        onLoad={(event) => {
+          onNaturalSize?.(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight);
+        }}
       />
     </div>
   );
+}
+
+function splitModalBody(body: string) {
+  const normalized = body.trim();
+  const maxLength = 185;
+
+  if (!normalized || normalized.length <= maxLength) {
+    return normalized ? [normalized] : [];
+  }
+
+  const sentences = normalized.match(/[^.!?。！？]+[.!?。！？]?/g) ?? [normalized];
+  const pages: string[] = [];
+  let current = '';
+
+  for (const sentence of sentences.map((item) => item.trim()).filter(Boolean)) {
+    if (!current) {
+      current = sentence;
+      continue;
+    }
+
+    if (`${current} ${sentence}`.length > maxLength) {
+      pages.push(current);
+      current = sentence;
+      continue;
+    }
+
+    current = `${current} ${sentence}`;
+  }
+
+  if (current) {
+    pages.push(current);
+  }
+
+  return pages.length > 0 ? pages : [normalized];
 }

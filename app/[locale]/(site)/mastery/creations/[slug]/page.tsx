@@ -13,6 +13,7 @@ import {
   getCollectionItemsForSite
 } from '@/lib/cms/public-content';
 import {imageExists} from '@/lib/image-exists';
+import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
@@ -39,7 +40,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const item = getCollectionItemForSite(locale, slug);
+  const item = await getCollectionItemForSite(locale, slug);
 
   if (!item) {
     return getDetailMetadata(locale, '/mastery/creations', 'COLLECTION', '');
@@ -50,15 +51,15 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     `/mastery/creations/${slug}`,
     item.seoTitle,
     item.seoDescription,
-    `/images/${item.ogImagePath}`
+    imageSrc(item.ogImagePath)
   );
 }
 
 export default async function CollectionDetailPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
-  const messages = getLocaleMessages(locale);
-  const item = getCollectionItemForSite(locale, slug);
+  const messages = await getLocaleMessages(locale);
+  const item = await getCollectionItemForSite(locale, slug);
 
   if (!item) {
     notFound();
@@ -71,7 +72,7 @@ export default async function CollectionDetailPage({params}: Props) {
     alt: `${item.title} ${item.caption}`,
     hasImage: imageExists(filename)
   }));
-  const related = getCollectionItemsForSite(locale).filter((entry) => entry.id !== slug).slice(0, 4);
+  const related = (await getCollectionItemsForSite(locale)).filter((entry) => entry.id !== slug).slice(0, 4);
   const specs = [
     [text.material, text.placeholder],
     [text.stones, text.placeholder],

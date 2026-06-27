@@ -1,0 +1,36 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: deaho-cms
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/deaho_cms}
+    username: ${SPRING_DATASOURCE_USERNAME:deaho}
+    password: ${SPRING_DATASOURCE_PASSWORD:deaho}
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASS:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:false}
+          starttls:
+            enable: ${SMTP_STARTTLS:true}
+
+cms:
+  admin-api-key: ${CMS_ADMIN_API_KEY:}
+  notify-to: ${CMS_NOTIFY_TO:}
+  smtp-from: ${SMTP_FROM:}
+  smtp-secure: ${SMTP_SECURE:false}
+  upload-dir: ${CMS_UPLOAD_DIR:./uploads}
+  public-upload-base-url: ${CMS_PUBLIC_UPLOAD_BASE_URL:/uploads}

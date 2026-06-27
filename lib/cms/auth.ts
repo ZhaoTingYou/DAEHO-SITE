@@ -4,7 +4,7 @@ import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
 export function requireAdmin(request: NextRequest) {
-  const expectedKey = process.env.CMS_ADMIN_API_KEY;
+  const expectedKey = process.env.CMS_ADMIN_API_KEY || process.env.CMS_BACKEND_API_KEY;
 
   if (!expectedKey && process.env.NODE_ENV !== 'production') {
     return null;
@@ -12,7 +12,7 @@ export function requireAdmin(request: NextRequest) {
 
   if (!expectedKey) {
     return NextResponse.json(
-      {error: 'CMS_ADMIN_API_KEY is required in production.'},
+      {error: 'CMS_ADMIN_API_KEY or CMS_BACKEND_API_KEY is required in production.'},
       {status: 500}
     );
   }

@@ -15,7 +15,7 @@ type CollectionTranslation = {
 
 export default async function AdminCollectionsPage() {
   const {t} = await getAdminI18n();
-  const items = listCollections();
+  const items = await listCollections();
 
   return (
     <>

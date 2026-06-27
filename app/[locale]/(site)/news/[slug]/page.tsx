@@ -10,6 +10,7 @@ import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
 import {routing} from '@/i18n/routing';
 import {getNewsCardsForSite, getNewsDetailForSite} from '@/lib/cms/public-content';
+import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
@@ -28,7 +29,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const detail = getNewsDetailForSite(locale, slug);
+  const detail = await getNewsDetailForSite(locale, slug);
 
   if (!detail) {
     return getDetailMetadata(locale, '/news', 'NEWS', '');
@@ -39,15 +40,15 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     `/news/${slug}`,
     detail.seoTitle || detail.card.title,
     detail.seoDescription,
-    `/images/${detail.ogImagePath}`
+    imageSrc(detail.ogImagePath)
   );
 }
 
 export default async function NewsDetailPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
-  const messages = getLocaleMessages(locale);
-  const detail = getNewsDetailForSite(locale, slug);
+  const messages = await getLocaleMessages(locale);
+  const detail = await getNewsDetailForSite(locale, slug);
 
   if (!detail) {
     notFound();
@@ -55,7 +56,7 @@ export default async function NewsDetailPage({params}: Props) {
 
   const text = messages.newsUi.detail;
   const card = detail.card;
-  const related = getNewsCardsForSite(locale).filter((item) => item.id !== slug).slice(0, 3);
+  const related = (await getNewsCardsForSite(locale)).filter((item) => item.id !== slug).slice(0, 3);
 
   return (
     <main className="bg-bg text-text">

@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const item = getCollection(id);
+  const item = await getCollection(id);
 
   if (!item) {
     return NextResponse.json({error: 'Collection item not found'}, {status: 404});
@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const item = updateCollection(id, parsed.data);
+  const item = await updateCollection(id, parsed.data);
 
   if (!item) {
     return NextResponse.json({error: 'Collection item not found'}, {status: 404});
@@ -76,7 +76,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
   const {id} = await context.params;
 
-  if (!deleteCollection(id)) {
+  if (!(await deleteCollection(id))) {
     return NextResponse.json({error: 'Collection item not found'}, {status: 404});
   }
 

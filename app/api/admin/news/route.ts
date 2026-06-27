@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     return unauthorized;
   }
 
-  return NextResponse.json({items: listNews()});
+  return NextResponse.json({items: await listNews()});
 }
 
 export async function POST(request: NextRequest) {
@@ -42,5 +42,5 @@ export async function POST(request: NextRequest) {
     return validationError(parsed.error);
   }
 
-  return NextResponse.json({item: createNews(parsed.data)}, {status: 201});
+  return NextResponse.json({item: await createNews(parsed.data)}, {status: 201});
 }

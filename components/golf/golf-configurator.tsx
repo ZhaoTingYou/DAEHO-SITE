@@ -13,6 +13,10 @@ type GolfImageRef = {
   image: string;
 };
 
+type GolfHeroSlide = GolfImageRef & {
+  alt?: string;
+};
+
 export type GolfHeadOption = GolfImageRef & {
   id: string;
   label: string;
@@ -33,6 +37,7 @@ export type GolfConfiguratorContent = {
     subtitle: string;
     image: string;
     specLabel: string;
+    gallery?: GolfHeroSlide[];
   };
   statement: {
     titleLines: string[];
@@ -121,41 +126,53 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   );
   const selectedShaft = content.shafts.items[0];
   const heroSlides = useMemo(
-    () => [
-      {
-        src: '/images/golf/golf1.png',
-        alt: content.hero.subtitle,
-        imageClass: 'object-contain object-center origin-center scale-100'
-      },
-      {
-        src: '/images/golf/\u1111\u1165\u1110\u1165.png',
-        alt: 'Putter golf bracelet',
-        imageClass: 'object-contain object-center origin-center scale-[0.80]'
-      },
-      {
-        src: '/images/golf/\u1103\u1173\u1105\u1161\u110b\u1175\u1107\u1165.png',
-        alt: 'Driver golf bracelet',
-        imageClass: 'object-contain object-center origin-center scale-[0.84]'
-      }
-    ],
-    [content.hero.subtitle]
+    () => {
+      const gallery = Array.isArray(content.hero.gallery) ? content.hero.gallery : [];
+
+      return [
+        {
+          filename: content.hero.image,
+          alt: content.hero.subtitle,
+          imageClass: 'object-contain object-center origin-center scale-100'
+        },
+        ...gallery.map((item, index) => ({
+          filename: item.image,
+          alt: item.alt || content.hero.subtitle,
+          imageClass:
+            index === 0
+              ? 'object-contain object-center origin-center scale-[0.80]'
+              : 'object-contain object-center origin-center scale-[0.84]'
+        }))
+      ].filter((item) => item.filename);
+    },
+    [content.hero.gallery, content.hero.image, content.hero.subtitle]
   );
-  const activeHeroSlide = heroSlides[heroSlideIndex] ?? heroSlides[0];
+  const activeHeroSlide = heroSlides[heroSlideIndex] ?? {
+    filename: content.hero.image,
+    alt: content.hero.subtitle,
+    imageClass: 'object-contain object-center origin-center scale-100'
+  };
   const engravingSample = 'JUDY KIM 2026.05.03';
   const inquiryHref = `/${locale}/golf/inquiry?head=${selectedHead?.id ?? ''}&shaft=${selectedShaft?.id ?? ''}&engraving=${encodeURIComponent(engravingSample)}`;
   const labels = content.labels;
   const process = content.process;
   const styleOptions = labels.styleOptions?.length ? labels.styleOptions : ['BASIC', 'COLOUR'];
+  const lifestyleImages = [
+    content.lifestyle.imageBox,
+    content.lifestyle.imageLifestyle,
+    content.lifestyle.imageBox
+  ].filter(Boolean);
   const engravingLeadLines =
     locale === 'ko'
       ? [content.engraving.eyebrow, content.engraving.body]
       : [content.engraving.eyebrow, content.engraving.title];
   const engravingRecordLine = locale === 'ko' ? content.engraving.title : content.engraving.body;
-  const heroSubtitleLines =
-    locale === 'ko'
-      ? ['골프이 구조를', '하나의 오브젝트로 재해석하다']
-      : content.hero.subtitle.split('\n');
+  const heroSubtitleLines = content.hero.subtitle.split('\n');
   const changeHeroSlide = (direction: 1 | -1) => {
+    if (heroSlides.length === 0) {
+      return;
+    }
+
     setHeroSlideIndex((current) => (current + direction + heroSlides.length) % heroSlides.length);
   };
 
@@ -191,15 +208,16 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             </button>
 
             <motion.div
-              key={activeHeroSlide.src}
+              key={activeHeroSlide.filename}
               initial={{opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : 12}}
               animate={{opacity: 1, y: 0}}
               transition={{duration: prefersReducedMotion ? 0 : 0.82, ease: [0.16, 1, 0.3, 1]}}
               className="absolute left-1/2 top-0 h-full w-[min(76vw,840px)] -translate-x-1/2"
             >
-              <GolfStaticImage
-                src={activeHeroSlide.src}
+              <GolfImage
+                filename={activeHeroSlide.filename}
                 alt={activeHeroSlide.alt}
+                assets={assets}
                 className={activeHeroSlide.imageClass}
                 priority={heroSlideIndex === 0}
               />
@@ -207,8 +225,8 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
           </div>
 
           <div className="relative left-1/2 mt-[clamp(42px,5vw,72px)] min-h-[clamp(520px,35vw,680px)] w-screen -translate-x-1/2 overflow-hidden bg-white">
-            <Reveal className="relative z-10 flex min-h-[clamp(520px,35vw,680px)] max-w-[520px] flex-col justify-center space-y-5 px-container pb-[clamp(210px,62vw,340px)] pt-16 md:py-20 lg:ml-[clamp(84px,12.5vw,240px)] lg:px-0">
-              <h1 className="font-heading text-[clamp(64px,6.4vw,112px)] font-semibold uppercase leading-[0.82] text-primary">
+            <Reveal className="relative z-10 flex min-h-[clamp(500px,35vw,680px)] max-w-[520px] flex-col justify-center space-y-5 px-container pb-[clamp(190px,56vw,300px)] pt-14 md:min-h-[clamp(520px,35vw,680px)] md:py-20 lg:ml-[clamp(84px,12.5vw,240px)] lg:px-0">
+              <h1 className="font-heading text-[clamp(44px,13vw,64px)] font-semibold uppercase leading-[0.88] text-primary md:text-[clamp(64px,6.4vw,112px)] md:leading-[0.82]">
                 {content.hero.titleLines.map((line) => (
                   <span key={line} className="block">
                     {line}
@@ -224,11 +242,12 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               </p>
             </Reveal>
 
-            <Reveal className="pointer-events-none absolute bottom-[clamp(22px,7vw,56px)] right-[-34vw] h-[clamp(220px,60vw,360px)] w-[clamp(430px,120vw,700px)] overflow-hidden sm:right-[-18vw] md:bottom-auto md:right-0 md:top-1/2 md:h-[clamp(360px,33vw,650px)] md:w-[clamp(620px,56vw,1080px)] md:-translate-y-1/2">
+            <Reveal className="pointer-events-none absolute bottom-[clamp(22px,7vw,56px)] right-[-28vw] h-[clamp(210px,55vw,330px)] w-[clamp(360px,104vw,620px)] overflow-hidden sm:right-[-16vw] md:bottom-auto md:right-0 md:top-1/2 md:h-[clamp(360px,33vw,650px)] md:w-[clamp(620px,56vw,1080px)] md:-translate-y-1/2">
               <div className="absolute inset-0">
-                <GolfStaticImage
-                  src={`/images/${content.statement.image}`}
+                <GolfImage
+                  filename={content.statement.image}
                   alt={content.statement.body}
+                  assets={assets}
                   className="object-contain object-right"
                 />
               </div>
@@ -327,9 +346,10 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               {content.shafts.items.map((item) => (
                 <figure key={item.id} className="text-center">
                   <div className="relative mx-auto aspect-[0.68/1] w-full max-w-[178px] overflow-hidden bg-white">
-                    <GolfStaticImage
-                      src="/images/golf/Mask group.png"
+                    <GolfImage
+                      filename={item.image}
                       alt={item.caption}
+                      assets={assets}
                       className={`scale-[1.35] object-cover ${golfShaftVisuals[item.id] ?? golfShaftVisuals.navy} mix-blend-multiply`}
                     />
                   </div>
@@ -356,12 +376,12 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                   }`}
                 >
                   {engravingLeadLines.map((line) => (
-                    <span key={line} className="block whitespace-nowrap">
+                    <span key={line} className="block md:whitespace-nowrap">
                       {line}
                     </span>
                   ))}
                 </h2>
-                <p className="whitespace-nowrap font-body text-[clamp(14px,1.35vw,20px)] leading-[1.35] text-white/82">
+                <p className="font-body text-[clamp(14px,1.35vw,20px)] leading-[1.35] text-white/82 md:whitespace-nowrap">
                   {engravingRecordLine}
                 </p>
               </div>
@@ -376,14 +396,15 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               </div>
 
               <div className="relative aspect-[1.36/1] w-full overflow-hidden bg-[#f2f0ec] md:absolute md:bottom-[4%] md:left-[3%] md:w-[43%]">
-                <GolfStaticImage
-                  src={`/images/${content.engraving.imageDetail}`}
+                <GolfImage
+                  filename={content.engraving.imageDetail}
                   alt={content.engraving.body}
+                  assets={assets}
                   className="object-cover"
                 />
               </div>
 
-              <p className="relative z-20 whitespace-nowrap text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:bottom-[17%] md:right-[8%] md:w-[37%]">
+              <p className="relative z-20 text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:bottom-[17%] md:right-[8%] md:w-[37%] md:whitespace-nowrap">
                 “{labels.quoteText}”
               </p>
             </Reveal>
@@ -395,23 +416,26 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
         <div className="mx-auto max-w-[900px] px-container">
           <Reveal className="relative mx-auto min-h-[clamp(680px,82vw,1120px)] w-full">
             <div className="absolute right-[12%] top-0 aspect-[0.94/1] w-[34%] overflow-hidden bg-[#111] max-md:right-0 max-md:w-[43%]">
-              <GolfStaticImage
-                src={`/images/${content.lifestyle.imageLifestyle}`}
-                alt={content.lifestyle.closing}
+              <GolfImage
+                filename={lifestyleImages[0] ?? content.lifestyle.imageLifestyle}
+                alt={content.lifestyle.title}
+                assets={assets}
                 className="object-cover"
               />
             </div>
             <div className="absolute left-[4%] top-[25%] aspect-[0.82/1] w-[45%] overflow-hidden bg-[#111] max-md:left-0 max-md:top-[30%] max-md:w-[56%]">
-              <GolfStaticImage
-                src={`/images/${content.lifestyle.imageLifestyle}`}
+              <GolfImage
+                filename={lifestyleImages[1] ?? content.lifestyle.imageLifestyle}
                 alt={content.lifestyle.body}
+                assets={assets}
                 className="object-cover"
               />
             </div>
             <div className="absolute bottom-0 right-[12%] aspect-[0.94/1] w-[34%] overflow-hidden bg-[#111] max-md:right-0 max-md:w-[43%]">
-              <GolfStaticImage
-                src={`/images/${content.lifestyle.imageLifestyle}`}
+              <GolfImage
+                filename={lifestyleImages[2] ?? content.lifestyle.imageLifestyle}
                 alt={content.lifestyle.closing}
+                assets={assets}
                 className="object-cover"
               />
             </div>
@@ -484,30 +508,6 @@ function ChevronIcon({direction}: {direction: 'left' | 'right'}) {
     >
       {direction === 'left' ? <path d="M15 5 8 12l7 7" /> : <path d="m9 5 7 7-7 7" />}
     </svg>
-  );
-}
-
-function GolfStaticImage({
-  alt,
-  className,
-  priority = false,
-  src
-}: {
-  alt: string;
-  className?: string;
-  priority?: boolean;
-  src: string;
-}) {
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      fill
-      unoptimized
-      priority={priority}
-      sizes="(min-width: 1280px) 920px, (min-width: 768px) 72vw, 100vw"
-      className={className}
-    />
   );
 }
 

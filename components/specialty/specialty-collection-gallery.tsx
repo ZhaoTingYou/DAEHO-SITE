@@ -8,6 +8,7 @@ import {AnimatePresence, motion, useScroll, useTransform, type MotionValue} from
 import {EmptyState} from '@/components/empty-state';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import type {Locale} from '@/i18n/routing';
+import {imageSrc} from '@/lib/image-src';
 
 export type SpecialtyCollectionFilter = {
   id: string;
@@ -99,6 +100,8 @@ type SpecialtyCollectionCategoryProps = {
   allLabel: string;
   countSuffix: string;
   finder: CollectionFinderLabels;
+  appointment?: Partial<AppointmentShowcaseCopy>;
+  bespoke?: Partial<BespokeViewCopy>;
   locale: Locale;
 };
 
@@ -138,10 +141,15 @@ export function SpecialtyCollectionGallery({
       animate={{opacity: 1}}
       transition={{duration: 0.4, ease: [0.16, 1, 0.3, 1]}}
     >
+      <MobileCollectionIndex
+        categories={categoryCards}
+        locale={locale}
+        viewLabel={viewLabel}
+      />
       <div
         role="group"
         aria-label={chooseLabel}
-        className="grid"
+        className="hidden lg:grid"
       >
         {categoryCards.map((category, index) => {
           const imageSide = index === 1 ? 'right' : 'left';
@@ -166,6 +174,138 @@ export function SpecialtyCollectionGallery({
   );
 }
 
+function MobileCollectionIndex({
+  categories,
+  locale,
+  viewLabel
+}: {
+  categories: Array<
+    SpecialtyCollectionFilter & {
+      item?: CollectionImageSource;
+      description: string;
+    }
+  >;
+  locale: Locale;
+  viewLabel: string;
+}) {
+  return (
+    <div className="lg:hidden bg-[#F8F4ED] px-container pb-[calc(92px+env(safe-area-inset-bottom))]">
+      <div className="mx-auto max-w-[520px] border-t border-primary/15">
+        {categories.map((category, index) => (
+          <MobileCollectionCard
+            key={category.id}
+            category={category}
+            index={index}
+            locale={locale}
+            viewLabel={viewLabel}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MobileCollectionCard({
+  category,
+  index,
+  locale,
+  viewLabel
+}: {
+  category: SpecialtyCollectionFilter & {
+    item?: CollectionImageSource;
+    description: string;
+  };
+  index: number;
+  locale: Locale;
+  viewLabel: string;
+}) {
+  const artwork = getCollectionStageArtwork(category, index);
+  const href = `/${locale}/mastery/creations/${category.id}`;
+  const copy = getMobileCollectionCopy(locale, category.id);
+
+  return (
+    <Link
+      href={href}
+      className="group block border-b border-primary/15 py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+    >
+      <div className="flex min-h-11 items-center justify-between gap-4 font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/50">
+        <span className="font-numeric text-accent/85">{String(index + 1).padStart(2, '0')}</span>
+        <span className="transition duration-hover ease-brand group-hover:text-accent">{viewLabel}</span>
+      </div>
+
+      <div className="mt-4 grid gap-5">
+        <div className="relative aspect-[1.08] overflow-hidden border border-primary/10 bg-primary">
+          <Image
+            src={imageSrc(artwork.background)}
+            alt=""
+            fill
+            sizes="(min-width: 768px) 520px, calc(100vw - 48px)"
+            className="object-cover object-center opacity-95 transition duration-700 ease-brand group-hover:scale-[1.035]"
+            priority={index === 0}
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,29,48,.1)_0%,rgba(16,29,48,.36)_100%)]" aria-hidden="true" />
+          <div className="absolute inset-x-6 bottom-7 h-12 bg-black/28 blur-2xl" aria-hidden="true" />
+          <div className="absolute inset-0 flex items-center justify-center px-3 py-7">
+            <Image
+              src={imageSrc(artwork.product)}
+              alt={`${category.label} ${copy}`}
+              width={artwork.productWidth}
+              height={artwork.productHeight}
+              sizes="(min-width: 768px) 520px, calc(100vw - 48px)"
+              className={`h-auto max-h-full object-contain drop-shadow-[0_24px_42px_rgba(0,0,0,.42)] transition duration-700 ease-brand group-hover:scale-[1.035] ${getMobileCollectionProductClass(category.id)}`}
+              priority={index === 0}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-[1fr_auto] items-end gap-5">
+          <div className="space-y-3">
+            <h2 className="font-heading text-[clamp(31px,9vw,42px)] font-semibold leading-[0.98] text-primary">
+              {category.label}
+            </h2>
+            <p className="max-w-[24rem] font-body text-[14px] leading-[1.75] text-primary/66">
+              {copy}
+            </p>
+          </div>
+          <span className="grid h-11 w-11 place-items-center border border-primary/18 text-[18px] leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent" aria-hidden="true">
+            →
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function getMobileCollectionProductClass(categoryId: string) {
+  switch (categoryId) {
+    case 'champion':
+      return 'w-[126%] max-w-none -translate-x-[3%]';
+    case 'appointment':
+      return 'w-[112%] max-w-none';
+    case 'bespoke':
+      return 'w-[82%] max-w-[280px]';
+    default:
+      return 'w-[108%] max-w-none';
+  }
+}
+
+function getMobileCollectionCopy(locale: Locale, categoryId: string) {
+  const copy: Record<Locale, Record<string, string>> = {
+    ko: {
+      champion: '우승의 기록을 상징, 중량, 세공의 균형으로 완성합니다.',
+      appointment: '임관의 순간을 세대가 간직할 기념의 구조로 설계합니다.',
+      bespoke: '개인의 이야기와 착용 장면을 하나의 맞춤 형태로 정리합니다.'
+    },
+    en: {
+      champion: 'Championship records shaped through symbol, weight, and finish.',
+      appointment: 'Appointment moments composed as keepsakes for service and family.',
+      bespoke: 'Personal symbols and wearing rituals arranged into one bespoke form.'
+    }
+  };
+
+  return copy[locale][categoryId] ?? copy.en[categoryId] ?? '';
+}
+
 export function SpecialtyCollectionCategory({
   categoryId,
   filters,
@@ -174,6 +314,8 @@ export function SpecialtyCollectionCategory({
   filterLabel,
   allLabel,
   finder,
+  appointment,
+  bespoke,
   locale
 }: SpecialtyCollectionCategoryProps) {
   const [finderOpen, setFinderOpen] = useState(false);
@@ -221,6 +363,7 @@ export function SpecialtyCollectionCategory({
         allLabel={allLabel}
         backHref={backHref}
         locale={locale}
+        appointment={appointment}
       />
     );
   }
@@ -234,6 +377,7 @@ export function SpecialtyCollectionCategory({
         allLabel={allLabel}
         backHref={backHref}
         locale={locale}
+        bespoke={bespoke}
       />
     );
   }
@@ -265,9 +409,65 @@ type BespokeFilterSectionData = {
   options: BespokeFilterOption[];
 };
 
-const appointmentShowcaseCopy = {
+type AppointmentTextSection = {
+  title: string;
+  lines: string[];
+};
+
+type AppointmentThumbnail = {
+  image: string;
+  width?: number;
+  height?: number;
+};
+
+type AppointmentShowcaseCopy = {
+  heroAlt: string;
+  heroImage: string;
+  intro: AppointmentTextSection;
+  honor: AppointmentTextSection & {image: string};
+  keepsake: AppointmentTextSection & {image: string};
+  inside: AppointmentTextSection;
+  thumbnails: AppointmentThumbnail[];
+  timelineStart: string;
+  timelineEnd: string;
+  evolution: AppointmentTextSection;
+};
+
+type BespokeViewCopy = {
+  period: string;
+  collectionTitle: string;
+  introTitle: string;
+  introBody: string;
+  tabCorpus: string;
+  tabNotes: string;
+  filter: string;
+  filterTitle: string;
+  reset: string;
+  apply: string;
+  close: string;
+  display: string;
+  archive: string;
+  grid: string;
+  shuffle: string;
+  withNotice: string;
+  withoutNotice: string;
+  filterSections: Record<BespokeFilterKey, string>;
+  filterOptions: Record<BespokeFilterKey, Record<string, string>>;
+  archiveChapterPeriod: string;
+  archiveChapterTitle: string;
+  chapterEyebrow: string;
+  chapterTitle: string;
+  chapterBody: string;
+  featureEyebrow: string;
+  featureTitle: string;
+  featureBody: string;
+  process: Array<{label: string; title: string; body: string}>;
+};
+
+const defaultAppointmentShowcaseCopy: Record<Locale, AppointmentShowcaseCopy> = {
   ko: {
     heroAlt: '대호 임관반지 컬렉션',
+    heroImage: 'collection_ring1.png',
     intro: {
       title: '세대를 잇는 명예의 반지',
       lines: [
@@ -279,6 +479,7 @@ const appointmentShowcaseCopy = {
     },
     honor: {
       title: '명예를 손에 새기다',
+      image: 'collection_ring2.png',
       lines: [
         '임관반지는 대한민국 장교로서의 시작을 기념하는 상징입니다.',
         '소속, 기수, 이름을 담아 책임과 자부심의 순간을 오래 간직합니다.'
@@ -286,6 +487,7 @@ const appointmentShowcaseCopy = {
     },
     keepsake: {
       title: '제품의 반지를 넘어, 함께 간직하는 기념',
+      image: 'collection_ring3.png',
       lines: [
         '임관의 의미는 착용자 한 사람에게만 머물지 않습니다.',
         '대호는 가족과 소중한 사람들도 함께 간직할 수 있도록 펜던트,',
@@ -300,6 +502,12 @@ const appointmentShowcaseCopy = {
         '만들어가고 있습니다.'
       ]
     },
+    thumbnails: [
+      {image: 'cl1.png', width: 114, height: 129},
+      {image: 'cl2.png', width: 98, height: 124},
+      {image: 'cl3.png', width: 102, height: 119},
+      {image: 'cl4.png', width: 110, height: 116}
+    ],
     evolution: {
       title: '임관반지 디자인의 변화',
       lines: [
@@ -312,6 +520,7 @@ const appointmentShowcaseCopy = {
   },
   en: {
     heroAlt: 'DEAHO appointment ring collection',
+    heroImage: 'collection_ring1.png',
     intro: {
       title: 'A ring of honor across generations',
       lines: [
@@ -323,6 +532,7 @@ const appointmentShowcaseCopy = {
     },
     honor: {
       title: 'Engraving honor in hand',
+      image: 'collection_ring2.png',
       lines: [
         'An appointment ring commemorates the beginning of service as an officer.',
         'Affiliation, class, and name preserve a moment of responsibility and pride.'
@@ -330,6 +540,7 @@ const appointmentShowcaseCopy = {
     },
     keepsake: {
       title: 'Beyond the ring, a keepsake to share',
+      image: 'collection_ring3.png',
       lines: [
         'The meaning of appointment does not stay with the wearer alone.',
         'DEAHO has designed pendants, commemorative jewelry, and related pieces',
@@ -344,6 +555,12 @@ const appointmentShowcaseCopy = {
         'DEAHO continues to build a new standard.'
       ]
     },
+    thumbnails: [
+      {image: 'cl1.png', width: 114, height: 129},
+      {image: 'cl2.png', width: 98, height: 124},
+      {image: 'cl3.png', width: 102, height: 119},
+      {image: 'cl4.png', width: 110, height: 116}
+    ],
     evolution: {
       title: 'The evolution of appointment ring design',
       lines: [
@@ -354,48 +571,9 @@ const appointmentShowcaseCopy = {
     timelineStart: 'past',
     timelineEnd: 'today'
   }
-} as const;
+};
 
-const appointmentThumbnails = [
-  {image: 'cl1.png', width: 114, height: 129},
-  {image: 'cl2.png', width: 98, height: 124},
-  {image: 'cl3.png', width: 102, height: 119},
-  {image: 'cl4.png', width: 110, height: 116}
-] as const;
-
-const bespokeViewCopy: Record<
-  Locale,
-  {
-    period: string;
-    collectionTitle: string;
-    introTitle: string;
-    introBody: string;
-    tabCorpus: string;
-    tabNotes: string;
-    filter: string;
-    filterTitle: string;
-    reset: string;
-    apply: string;
-    close: string;
-    display: string;
-    archive: string;
-    grid: string;
-    shuffle: string;
-    withNotice: string;
-    withoutNotice: string;
-    filterSections: Record<BespokeFilterKey, string>;
-    filterOptions: Record<BespokeFilterKey, Record<string, string>>;
-    archiveChapterPeriod: string;
-    archiveChapterTitle: string;
-    chapterEyebrow: string;
-    chapterTitle: string;
-    chapterBody: string;
-    featureEyebrow: string;
-    featureTitle: string;
-    featureBody: string;
-    process: Array<{label: string; title: string; body: string}>;
-  }
-> = {
+const defaultBespokeViewCopy: Record<Locale, BespokeViewCopy> = {
   ko: {
     period: '2022 - 2026',
     collectionTitle: 'The collection',
@@ -570,7 +748,64 @@ const bespokeViewCopy: Record<
   }
 };
 
-type BespokeViewCopy = (typeof bespokeViewCopy)['ko'];
+function resolveAppointmentShowcaseCopy(
+  locale: Locale,
+  customCopy?: Partial<AppointmentShowcaseCopy>
+): AppointmentShowcaseCopy {
+  const fallback = defaultAppointmentShowcaseCopy[locale] ?? defaultAppointmentShowcaseCopy.ko;
+
+  return {
+    ...fallback,
+    ...customCopy,
+    intro: mergeAppointmentSection(fallback.intro, customCopy?.intro),
+    honor: {
+      ...fallback.honor,
+      ...customCopy?.honor,
+      lines: customCopy?.honor?.lines?.length ? customCopy.honor.lines : fallback.honor.lines
+    },
+    keepsake: {
+      ...fallback.keepsake,
+      ...customCopy?.keepsake,
+      lines: customCopy?.keepsake?.lines?.length ? customCopy.keepsake.lines : fallback.keepsake.lines
+    },
+    inside: mergeAppointmentSection(fallback.inside, customCopy?.inside),
+    thumbnails: customCopy?.thumbnails?.length ? customCopy.thumbnails : fallback.thumbnails,
+    evolution: mergeAppointmentSection(fallback.evolution, customCopy?.evolution)
+  };
+}
+
+function mergeAppointmentSection(
+  fallback: AppointmentTextSection,
+  customSection?: Partial<AppointmentTextSection>
+): AppointmentTextSection {
+  return {
+    ...fallback,
+    ...customSection,
+    lines: customSection?.lines?.length ? customSection.lines : fallback.lines
+  };
+}
+
+function resolveBespokeViewCopy(locale: Locale, customCopy?: Partial<BespokeViewCopy>): BespokeViewCopy {
+  const fallback = defaultBespokeViewCopy[locale] ?? defaultBespokeViewCopy.ko;
+
+  return {
+    ...fallback,
+    ...customCopy,
+    filterSections: {
+      ...fallback.filterSections,
+      ...customCopy?.filterSections
+    },
+    filterOptions: {
+      notice: {...fallback.filterOptions.notice, ...customCopy?.filterOptions?.notice},
+      year: {...fallback.filterOptions.year, ...customCopy?.filterOptions?.year},
+      period: {...fallback.filterOptions.period, ...customCopy?.filterOptions?.period},
+      materials: {...fallback.filterOptions.materials, ...customCopy?.filterOptions?.materials},
+      stones: {...fallback.filterOptions.stones, ...customCopy?.filterOptions?.stones},
+      functions: {...fallback.filterOptions.functions, ...customCopy?.filterOptions?.functions}
+    },
+    process: customCopy?.process?.length ? customCopy.process : fallback.process
+  };
+}
 
 function BespokeCreationsView({
   items,
@@ -578,7 +813,8 @@ function BespokeCreationsView({
   filterLabel,
   allLabel,
   backHref,
-  locale
+  locale,
+  bespoke
 }: {
   items: SpecialtyCollectionItem[];
   empty: {
@@ -589,6 +825,7 @@ function BespokeCreationsView({
   allLabel: string;
   backHref: string;
   locale: Locale;
+  bespoke?: Partial<BespokeViewCopy>;
 }) {
   const [displayMode, setDisplayMode] = useState<BespokeDisplayMode>('archive');
   const [shuffleSeed, setShuffleSeed] = useState(0);
@@ -601,7 +838,7 @@ function BespokeCreationsView({
     stones: [],
     functions: []
   });
-  const copy = bespokeViewCopy[locale] ?? bespokeViewCopy.ko;
+  const copy = resolveBespokeViewCopy(locale, bespoke);
   const filterSections = useMemo(() => buildBespokeFilterSections(items, copy), [items, copy]);
   const activeFilterCount = Object.values(selectedFilters).reduce((sum, values) => sum + values.length, 0);
   const filteredItems = useMemo(
@@ -653,7 +890,7 @@ function BespokeCreationsView({
             <button
               type="button"
               onClick={() => setFilterOpen(true)}
-              className="inline-flex min-h-10 items-center gap-3 transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+              className="inline-flex min-h-11 items-center gap-3 transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
               aria-expanded={filterOpen}
             >
               <SlidersIcon />
@@ -772,7 +1009,7 @@ function BespokeCreationCanvas({
         <button
           type="button"
           onClick={shuffle}
-          className="inline-flex min-h-10 items-center gap-2 bg-white/92 px-4 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary shadow-[0_10px_24px_rgba(16,29,48,.12)] transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+          className="inline-flex min-h-11 items-center gap-2 bg-white/92 px-4 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary shadow-[0_10px_24px_rgba(16,29,48,.12)] transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         >
           {copy.shuffle}
           <ShuffleIcon />
@@ -1059,7 +1296,7 @@ function BespokeArchivePagination({
       <span className="text-primary/35">19</span>
       <button
         type="button"
-        className="ml-2 min-h-10 border border-primary/20 px-4 text-primary/45"
+        className="ml-2 min-h-11 border border-primary/20 px-4 text-primary/45"
         disabled
       >
         {nextLabel}
@@ -1404,7 +1641,8 @@ function AppointmentCollectionView({
   activeLabel,
   allLabel,
   backHref,
-  locale
+  locale,
+  appointment
 }: {
   items: SpecialtyCollectionItem[];
   empty: {
@@ -1416,8 +1654,9 @@ function AppointmentCollectionView({
   allLabel: string;
   backHref: string;
   locale: Locale;
+  appointment?: Partial<AppointmentShowcaseCopy>;
 }) {
-  const copy = appointmentShowcaseCopy[locale] ?? appointmentShowcaseCopy.ko;
+  const copy = resolveAppointmentShowcaseCopy(locale, appointment);
 
   return (
     <div className="-mb-[clamp(84px,9vw,132px)] -mt-28 overflow-x-hidden bg-white pb-[clamp(220px,26vw,340px)] pt-28 text-primary">
@@ -1448,7 +1687,7 @@ function AppointmentCollectionView({
 
         <AppointmentReveal className="mt-[clamp(56px,7.2vw,78px)] flex flex-col items-center">
           <Image
-            src="/images/collection_ring1.png"
+            src={`/images/${copy.heroImage}`}
             alt={copy.heroAlt}
             width={473}
             height={414}
@@ -1465,7 +1704,7 @@ function AppointmentCollectionView({
 
         <AppointmentReveal className="mt-[clamp(58px,8vw,84px)] flex w-full justify-center">
           <Image
-            src="/images/collection_ring2.png"
+            src={`/images/${copy.honor.image}`}
             alt={copy.honor.title}
             width={413}
             height={593}
@@ -1481,7 +1720,7 @@ function AppointmentCollectionView({
 
         <AppointmentReveal className="mt-[clamp(62px,9vw,96px)] flex w-full justify-center">
           <Image
-            src="/images/collection_ring3.png"
+            src={`/images/${copy.keepsake.image}`}
             alt={copy.keepsake.title}
             width={288}
             height={300}
@@ -1497,7 +1736,7 @@ function AppointmentCollectionView({
 
         <AppointmentReveal className="mt-[clamp(74px,10vw,112px)] box-border flex w-screen max-w-[1180px] flex-col items-center px-[clamp(24px,3vw,48px)]">
           <div className="flex w-full items-center justify-between gap-[clamp(14px,3vw,60px)]">
-            {appointmentThumbnails.map((thumb) => (
+            {copy.thumbnails.map((thumb) => (
               <div
                 key={thumb.image}
                 className="flex h-[clamp(76px,15.6vw,214px)] w-[clamp(76px,15.6vw,214px)] shrink-0 items-center justify-center rounded-full bg-[#E8E8E8]"
@@ -1505,8 +1744,8 @@ function AppointmentCollectionView({
                 <Image
                   src={`/images/${thumb.image}`}
                   alt=""
-                  width={thumb.width}
-                  height={thumb.height}
+                  width={thumb.width ?? 110}
+                  height={thumb.height ?? 120}
                   className="h-[78%] w-[78%] object-contain"
                 />
               </div>

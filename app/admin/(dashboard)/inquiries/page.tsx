@@ -15,7 +15,7 @@ const statuses = ['new', 'contacted', 'in_progress', 'done', 'spam'];
 export default async function AdminInquiriesPage({searchParams}: Props) {
   const {t} = await getAdminI18n();
   const query = await searchParams;
-  const inquiries = listInquiries({
+  const inquiries = await listInquiries({
     status: query?.status,
     source: query?.source
   });

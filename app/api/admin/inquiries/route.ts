@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({
-    items: listInquiries({
+    items: await listInquiries({
       status: request.nextUrl.searchParams.get('status') ?? undefined,
       source: request.nextUrl.searchParams.get('source') ?? undefined
     })

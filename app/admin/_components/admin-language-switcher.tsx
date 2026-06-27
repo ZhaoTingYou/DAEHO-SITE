@@ -1,9 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import {usePathname, useSearchParams} from 'next/navigation';
 
-import {adminLocaleLabels, adminLocales, type AdminLocale} from '@/lib/admin-locales';
+import {adminLocaleLabelsByInterface, adminLocales, type AdminLocale} from '@/lib/admin-locales';
 
 type Props = {
   activeLocale: AdminLocale;
@@ -15,6 +14,7 @@ export function AdminLanguageSwitcher({activeLocale, label}: Props) {
   const searchParams = useSearchParams();
   const query = searchParams.toString();
   const nextPath = `${pathname}${query ? `?${query}` : ''}`;
+  const labels = adminLocaleLabelsByInterface[activeLocale];
 
   return (
     <div className="grid gap-2">
@@ -24,7 +24,7 @@ export function AdminLanguageSwitcher({activeLocale, label}: Props) {
           const active = locale === activeLocale;
 
           return (
-            <Link
+            <a
               key={locale}
               href={`/api/admin/locale?locale=${locale}&next=${encodeURIComponent(nextPath)}`}
               className={`inline-flex min-h-8 items-center justify-center rounded px-2 text-xs font-semibold transition ${
@@ -33,8 +33,8 @@ export function AdminLanguageSwitcher({activeLocale, label}: Props) {
                   : 'text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
-              {adminLocaleLabels[locale]}
-            </Link>
+              {labels[locale]}
+            </a>
           );
         })}
       </div>

@@ -18,7 +18,7 @@ type Props = {
 export default async function AdminMediaPage({searchParams}: Props) {
   const {t} = await getAdminI18n();
   const query = await searchParams;
-  const items = listMedia();
+  const items = await listMedia();
 
   return (
     <>
@@ -28,7 +28,7 @@ export default async function AdminMediaPage({searchParams}: Props) {
       />
 
       <Panel className="mb-6 p-5">
-        <form action={uploadMediaAction} encType="multipart/form-data" className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
+        <form action={uploadMediaAction} className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:items-end">
           <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
             <span>{t('media.file')}</span>
             <input
@@ -39,6 +39,7 @@ export default async function AdminMediaPage({searchParams}: Props) {
               className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm"
             />
           </label>
+          <TextField label={t('media.filename')} name="filename" placeholder="hero-ring.png" />
           <TextField label={t('media.altKo')} name="altKo" />
           <TextField label={t('media.altEn')} name="altEn" />
           <SubmitButton>{t('common.upload')}</SubmitButton>
@@ -53,7 +54,7 @@ export default async function AdminMediaPage({searchParams}: Props) {
           {items.map((item) => (
             <Panel key={item.id} className="overflow-hidden">
               <div className="relative aspect-[4/3] bg-[#eef2f6]">
-                {item.url.startsWith('/images/') ? (
+                {item.url.startsWith('/') ? (
                   <Image src={item.url} alt={item.altKo || item.altEn || item.filename} fill sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw" className="object-cover" />
                 ) : null}
               </div>

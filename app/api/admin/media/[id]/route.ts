@@ -25,7 +25,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const item = getMedia(id);
+  const item = await getMedia(id);
 
   if (!item) {
     return NextResponse.json({error: 'Media item not found'}, {status: 404});
@@ -54,7 +54,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const item = updateMedia(id, parsed.data);
+  const item = await updateMedia(id, parsed.data);
 
   if (!item) {
     return NextResponse.json({error: 'Media item not found'}, {status: 404});
@@ -72,7 +72,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
   const {id} = await context.params;
 
-  if (!deleteMedia(id)) {
+  if (!(await deleteMedia(id))) {
     return NextResponse.json({error: 'Media item not found'}, {status: 404});
   }
 

@@ -26,7 +26,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function TechniquePage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = getLocaleMessages(locale).specialtyPages.technique;
+  const content = (await getLocaleMessages(locale)).specialtyPages.technique;
   const processSteps = content.process.steps.map((step) => ({
     ...step,
     hasImage: imageExists(step.image)

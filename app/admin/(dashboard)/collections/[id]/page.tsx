@@ -1,9 +1,10 @@
 import {notFound} from 'next/navigation';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
-import {getCollection} from '@/lib/cms/repositories';
+import {getCollection, listMedia} from '@/lib/cms/repositories';
 
 import {CollectionForm} from '../../../_components/collection-form';
+import type {MediaLibraryItem} from '../../../_components/admin-fields';
 import {PageHeader} from '../../../_components/admin-shell';
 
 type Props = {
@@ -15,7 +16,8 @@ export default async function AdminCollectionEditPage({params, searchParams}: Pr
   const {messages, t} = await getAdminI18n();
   const {id} = await params;
   const query = await searchParams;
-  const item = id === 'new' ? undefined : getCollection(id);
+  const item = id === 'new' ? undefined : await getCollection(id);
+  const mediaItems = await getMediaLibraryItems();
 
   if (id !== 'new' && !item) {
     notFound();
@@ -32,7 +34,15 @@ export default async function AdminCollectionEditPage({params, searchParams}: Pr
           {t('page.uploadError')}
         </div>
       ) : null}
-      <CollectionForm item={item ?? undefined} messages={messages} />
+      <CollectionForm item={item ?? undefined} mediaItems={mediaItems} messages={messages} />
     </>
   );
+}
+
+async function getMediaLibraryItems(): Promise<MediaLibraryItem[]> {
+  return (await listMedia()).map((item) => ({
+    filename: item.filename,
+    url: item.url,
+    alt: item.altKo || item.altEn || item.filename
+  }));
 }

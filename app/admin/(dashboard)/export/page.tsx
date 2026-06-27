@@ -8,7 +8,7 @@ import {PageHeader, Panel} from '../../_components/admin-shell';
 
 export default async function AdminExportPage() {
   const {messages, t} = await getAdminI18n();
-  const snapshot = getCmsExportSnapshot();
+  const snapshot = await getCmsExportSnapshot();
   const counts = getCmsExportCounts(snapshot);
   const totalRows = counts.reduce((total, item) => total + item.count, 0);
 
@@ -80,12 +80,12 @@ export default async function AdminExportPage() {
             {t('export.apiDescriptionSuffix')}
           </p>
           <CodeBlock>{`curl -X POST \\
-  -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \\
+  -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \\
   -H "Content-Type: application/json" \\
   --data-binary @deaho-cms-export.json \\
   http://localhost:3000/api/admin/import`}</CodeBlock>
           <CodeBlock>{`curl -X POST \\
-  -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \\
+  -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \\
   -H "Content-Type: application/json" \\
   --data-binary @deaho-cms-export.json \\
   "http://localhost:3000/api/admin/import?replace=1"`}</CodeBlock>

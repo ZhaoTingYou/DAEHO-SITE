@@ -5,6 +5,7 @@ import {useState} from 'react';
 import {AnimatePresence, motion, type Transition} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import {PlaceholderImg} from '@/components/placeholder-img';
 import type {Locale} from '@/i18n/routing';
 
 export type LoyaltyFeatureSlide = {
@@ -74,10 +75,9 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
                 background: `linear-gradient(115deg, ${slide.accentStart}, ${slide.accentEnd})`
               }}
             >
-              <Image
-                src={`/images/${visualImage}`}
+              <LoyaltyCarouselImage
+                filename={visualImage}
                 alt={imageAlt}
-                fill
                 loading={index === current.index ? 'eager' : 'lazy'}
                 sizes="100vw"
                 className="object-cover opacity-62 mix-blend-luminosity"
@@ -187,14 +187,45 @@ function SidePreview({
         transition={transition}
         className="absolute -left-7 inset-y-0 w-[calc(100%+56px)]"
       >
-        <Image
-          src={`/images/${slide.previewImage}`}
+        <LoyaltyCarouselImage
+          filename={slide.previewImage}
           alt={slide.title}
-          fill
           sizes="(min-width: 768px) 24vw, 0px"
           className="object-cover opacity-[0.88] saturate-[0.92] contrast-[0.98]"
         />
       </motion.div>
     </div>
+  );
+}
+
+function LoyaltyCarouselImage({
+  alt,
+  className,
+  filename,
+  loading = 'lazy',
+  sizes
+}: {
+  alt: string;
+  className: string;
+  filename: string;
+  loading?: 'eager' | 'lazy';
+  sizes: string;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return <PlaceholderImg filename={filename} aspect="h-full" />;
+  }
+
+  return (
+    <Image
+      src={`/images/${filename}`}
+      alt={alt}
+      fill
+      loading={loading}
+      sizes={sizes}
+      className={className}
+      onError={() => setFailed(true)}
+    />
   );
 }

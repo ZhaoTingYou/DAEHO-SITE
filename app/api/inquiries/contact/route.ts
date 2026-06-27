@@ -1,7 +1,6 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {notifyInquiry} from '@/lib/cms/email';
 import {
   getRequestMeta,
   maxPublicJsonBodyBytes,
@@ -27,12 +26,11 @@ export async function POST(request: NextRequest) {
     return validationError(parsed.error);
   }
 
-  const inquiry = createContactInquiry(parsed.data, getRequestMeta(request));
+  const result = await createContactInquiry(parsed.data, getRequestMeta(request));
 
-  if (!inquiry) {
+  if (!result?.inquiry) {
     return NextResponse.json({error: 'Failed to create inquiry'}, {status: 500});
   }
 
-  const email = await notifyInquiry(inquiry);
-  return NextResponse.json({inquiry, email}, {status: 201});
+  return NextResponse.json(result, {status: 201});
 }

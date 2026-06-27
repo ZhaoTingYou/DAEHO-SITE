@@ -37,6 +37,10 @@ const scrollLockKeys = new Set([
   'PageUp'
 ]);
 
+const isCompactChronicleViewport = () =>
+  typeof window !== 'undefined' &&
+  (window.innerWidth <= 960 || window.matchMedia('(max-aspect-ratio: 3 / 4)').matches);
+
 export function ChronicleHorizontal({
   ariaLabel,
   yearNavAriaLabel,
@@ -62,6 +66,7 @@ export function ChronicleHorizontal({
   const [controlsVisible, setControlsVisible] = useState(false);
   const [introExiting, setIntroExiting] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
+  const [compactViewport, setCompactViewport] = useState(() => isCompactChronicleViewport());
 
   const yearStops = useMemo(
     () => slides.map((slide, index) => ({index, year: slide.year})),
@@ -69,6 +74,26 @@ export function ChronicleHorizontal({
   );
 
   useEffect(() => {
+    const updateCompactViewport = () => setCompactViewport(isCompactChronicleViewport());
+    const aspectQuery = window.matchMedia('(max-aspect-ratio: 3 / 4)');
+
+    updateCompactViewport();
+    window.addEventListener('resize', updateCompactViewport);
+    aspectQuery.addEventListener('change', updateCompactViewport);
+
+    return () => {
+      window.removeEventListener('resize', updateCompactViewport);
+      aspectQuery.removeEventListener('change', updateCompactViewport);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (compactViewport) {
+      document.documentElement.classList.remove('is-chronicle-intro-locked');
+      document.body.classList.remove('is-chronicle-intro-locked');
+      return;
+    }
+
     document.documentElement.classList.add('is-chronicle-intro-locked');
     document.body.classList.add('is-chronicle-intro-locked');
     window.scrollTo(0, 0);
@@ -77,7 +102,7 @@ export function ChronicleHorizontal({
       document.documentElement.classList.remove('is-chronicle-intro-locked');
       document.body.classList.remove('is-chronicle-intro-locked');
     };
-  }, []);
+  }, [compactViewport]);
 
   useEffect(() => {
     if (!introComplete) {
@@ -89,7 +114,7 @@ export function ChronicleHorizontal({
   }, [introComplete]);
 
   useEffect(() => {
-    if (introComplete) {
+    if (introComplete || compactViewport) {
       return;
     }
 
@@ -142,12 +167,12 @@ export function ChronicleHorizontal({
       window.removeEventListener('keydown', preventKeyScroll, {capture: true});
       window.removeEventListener('scroll', forceTop);
     };
-  }, [introComplete]);
+  }, [compactViewport, introComplete]);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (prefersReduced) {
+    if (prefersReduced || compactViewport) {
       const reducedTimer = window.setTimeout(() => {
         setStageVisible(true);
         setIntroExiting(true);
@@ -166,7 +191,7 @@ export function ChronicleHorizontal({
       window.clearTimeout(exitTimer);
       window.clearTimeout(completeTimer);
     };
-  }, []);
+  }, [compactViewport]);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -285,7 +310,7 @@ export function ChronicleHorizontal({
   }, [activeIndex, displayYear, firstYear, slides]);
 
   useEffect(() => {
-    if (!introComplete) {
+    if (!introComplete || compactViewport) {
       return;
     }
 
@@ -353,7 +378,7 @@ export function ChronicleHorizontal({
       document.removeEventListener('touchstart', rememberTouchStart, {capture: true});
       document.removeEventListener('touchmove', preventForwardTouch, {capture: true});
     };
-  }, [introComplete]);
+  }, [compactViewport, introComplete]);
 
   const trackStyle = useMemo(
     () =>

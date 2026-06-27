@@ -295,7 +295,51 @@
           "label": "repeat requests"
         }
       ],
-      "statement": "Unconfirmed numbers remain as placeholders and can be replaced in the same structure when verified material arrives."
+      "statement": "Unconfirmed numbers remain as placeholders and can be replaced in the same structure when verified material arrives.",
+      "copy": {
+        "heroLabel": "LOYALTY",
+        "heroTitle": "RELATIONSHIP",
+        "introLines": [
+          "For DEAHO, loyalty does not end with a single commission.",
+          "It begins by understanding the client, preserving the right information,",
+          "and keeping a production flow that makes every return easier.",
+          "Repeat trust is built through a process that stays stable over time."
+        ],
+        "imagePlaceholder": "Image area",
+        "quoteTitle": "Loyalty, Built Through Time",
+        "quoteBody": "Time spent together is the clearest proof.",
+        "discoverLead": "Discover more DEAHO projects",
+        "featureSlides": [
+          {
+            "kicker": "LOYALTY STANDARD",
+            "title": "01. Repeat Trust",
+            "body": "Clients return not only because the previous result was satisfying, but because the full process remains clear: consultation, design direction, revisions, production, inspection, and delivery. DEAHO keeps the standards and context from each project so the next commission can begin with confidence and move with greater precision.",
+            "backgroundImage": "legacy_loyalty_hero.png",
+            "previewImage": "legacy_card_loyalty.png",
+            "accentStart": "rgba(180,66,54,0.95)",
+            "accentEnd": "rgba(40,72,50,0.88)"
+          },
+          {
+            "kicker": "LOYALTY STANDARD",
+            "title": "02. Shared Memory",
+            "body": "A symbol made once continues to live in the memory of a team or an individual. DEAHO preserves the intention and specifications of previous projects so the next request can continue the same story with consistency.",
+            "backgroundImage": "home_stats_bg.png",
+            "previewImage": "home_pillar_legacy.png",
+            "accentStart": "rgba(111,103,160,0.88)",
+            "accentEnd": "rgba(159,114,78,0.82)"
+          },
+          {
+            "kicker": "LOYALTY STANDARD",
+            "title": "03. Documented Care",
+            "body": "Questions after delivery and follow-up requests are part of the relationship. When checks and images are kept as a clear record, the next season or refinement request can move faster and more accurately.",
+            "backgroundImage": "chronicle_detail_01.png",
+            "previewImage": "chronicle_detail_01.png",
+            "accentStart": "rgba(54,80,110,0.9)",
+            "accentEnd": "rgba(47,83,64,0.86)"
+          }
+        ],
+        "cta": "DISCOVER MORE"
+      }
     },
     "credibility": {
       "hero": {
@@ -344,6 +388,78 @@
           "PARTNER 11",
           "PARTNER 12"
         ]
+      },
+      "copy": {
+        "heroLabel": "CREDIBILITY",
+        "heroTitle": "STANDARD",
+        "intro": "DEAHO credibility is not explained by experience alone. From design consultation to production, inspection, and delivery, every stage is managed directly so important group projects can be completed within clear standards and schedules.",
+        "imagePlaceholder": "legacy_credibility_hero.png",
+        "quoteTitle": "Credibility, Proven Through Standards",
+        "quoteBody": "Trust begins with standards.",
+        "discoverLead": "Discover more DEAHO projects",
+        "cta": "DISCOVER MORE",
+        "rows": [
+          {
+            "number": "01.",
+            "title": "38 years of craft",
+            "accent": "A standard that does not drift",
+            "paragraphs": [
+              "Since 1988, DEAHO has specialized in championship rings, commission rings, and group commemorative products for sports teams, military organizations, schools, institutions, and companies.",
+              "This experience is not only a matter of time. It is a record of solving real production variables such as event schedules, symbols, engraving, quantities, and delivery methods."
+            ],
+            "image": "legacy_achievement_01.png"
+          },
+          {
+            "number": "02.",
+            "title": "100% in-house process control",
+            "accent": "Managed directly from design to delivery",
+            "paragraphs": [
+              "DEAHO manages design, 3D planning, casting, finishing, stone setting, engraving, surface treatment, inspection, and packing under one production standard.",
+              "This reduces variables in quality, design intent, and schedule control, especially for group orders with many details to verify."
+            ],
+            "image": "legacy_achievement_02.png"
+          },
+          {
+            "number": "03.",
+            "title": "0% delivery incidents",
+            "accent": "Responsible through the confirmed schedule",
+            "paragraphs": [
+              "Projects tied to ceremonies and official events require reliable delivery as much as product quality.",
+              "DEAHO treats schedule management as part of production, planning confirmation, sizing, engraving, inspection, packing, and shipping around the client’s event date."
+            ],
+            "image": "legacy_achievement_03.png"
+          },
+          {
+            "number": "04.",
+            "title": "Group order management system",
+            "accent": "Names, sizes, and engraving tracked accurately",
+            "paragraphs": [
+              "Group production requires accurate handling of names, sizes, engraving, quantities, and packing formats for every recipient.",
+              "DEAHO organizes individual data from the production stage and checks it through final delivery."
+            ],
+            "image": "legacy_achievement_04.png"
+          },
+          {
+            "number": "05.",
+            "title": "Continuous R&D",
+            "accent": "Improving standards that build trust",
+            "paragraphs": [
+              "DEAHO’s research and development is focused on stable quality, accurate production, and better results across materials, casting, finishing, engraving, surface treatment, and setting.",
+              "Continuous improvement helps reduce error and strengthens the standard clients can trust."
+            ],
+            "image": "chronicle_detail_01.png"
+          },
+          {
+            "number": "06.",
+            "title": "Quality inspection standard",
+            "accent": "Checked beyond the visible surface",
+            "paragraphs": [
+              "Quality is not judged only by appearance. Surface finish, engraving clarity, setting stability, proportions, comfort, sizing, and package condition must all be checked.",
+              "Before delivery, DEAHO reviews the product details, function, and packaging so clients can receive the final result with confidence."
+            ],
+            "image": "chronicle_detail_02.png"
+          }
+        ]
       }
     },
     "achievement": {
@@ -384,6 +500,97 @@
           {
             "title": "Achievement 04",
             "image": "legacy_achievement_04.png"
+          }
+        ]
+      },
+      "copy": {
+        "heroLabel": "ACHIEVEMENTS",
+        "heroTitle": "RESULT",
+        "introLines": [
+          "DEAHO achievements are not simple production quantities.",
+          "They are records of leadership in championship and commission rings,",
+          "first domestic applications, and repeated projects that shaped",
+          "the standard for commemorative ring production."
+        ],
+        "imagePlaceholder": "Image area",
+        "quoteTitle": "Records that Became Standards",
+        "quoteBody": "The records DEAHO built became industry standards.",
+        "firstTitle": "FIRST RECORDS",
+        "firstHeading": "First records by DEAHO",
+        "marketLabel": "MARKET LEADERSHIP",
+        "marketTitle": "Dominant market share",
+        "marketIntro": "DEAHO market share is not only a number. It is the result of trust built over time. Products that commemorate important moments, such as championship rings and commission rings, are chosen only when design completion, production stability, delivery control, and inspection standards are all met.\nBy completing projects for many teams and institutions, DEAHO continues to build one of the most trusted production standards in Korea.",
+        "archiveLabel": "PROJECT ARCHIVE",
+        "archiveTitle": "Projects across many fields",
+        "discoverLead": "Discover more DEAHO projects",
+        "cta": "DISCOVER MORE",
+        "statBand": [
+          {
+            "value": "38",
+            "label": "YEARS",
+            "body": "A heritage company\nwith enduring craft"
+          },
+          {
+            "value": "95%",
+            "label": "CHAMPIONSHIP\nRING SHARE",
+            "body": "The most selected maker\nin Korea championship ring production"
+          },
+          {
+            "value": "90%",
+            "label": "COMMISSION\nRING SHARE",
+            "body": "Specialized records built\nin Korea commission ring field"
+          },
+          {
+            "value": "0%",
+            "label": "DELIVERY\nFAILURE",
+            "body": "An unmatched record\nwith no delivery failures"
+          },
+          {
+            "value": "100%",
+            "label": "END-TO-END",
+            "body": "Full-process responsibility\nfrom start to finish"
+          }
+        ],
+        "firstRecords": [
+          {
+            "title": "FIRST INITIAL ENGRAVING",
+            "body": "First domestic application of initial engraving",
+            "hoverText": "DEAHO introduced individual initial engraving as a first in Korea commemorative ring production.",
+            "image": "legacy_achievement_01.png"
+          },
+          {
+            "title": "FIRST ANTIQUE COATING",
+            "body": "First domestic application of antique black coating",
+            "hoverText": "DEAHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.",
+            "image": "legacy_achievement_02.png"
+          },
+          {
+            "title": "FIRST DESIGN APPROACH",
+            "body": "First domestic approach to interior ring design",
+            "hoverText": "DEAHO first expanded ring design inward, giving the interior surface its own meaning and story.",
+            "image": "legacy_achievement_03.png"
+          }
+        ],
+        "marketFeatures": [
+          {
+            "value": "95%",
+            "title": "CHAMPIONSHIP\nRING SHARE",
+            "accent": "The most selected production record in Korea championship ring market",
+            "paragraphs": [
+              "A championship moment happens only once, so the final object must hold both completion and symbolism.",
+              "Based on professional sports championship ring experience, DEAHO has completed the history and meaning of victory as one ring."
+            ],
+            "image": "legacy_achievement_02.png"
+          },
+          {
+            "value": "90%",
+            "title": "COMMISSIONING\nRING SHARE",
+            "accent": "Specialized production records built in Korea commission ring field",
+            "paragraphs": [
+              "A commission ring symbolizes both a personal beginning and an organization identity.",
+              "Through long-term commission ring production, DEAHO has accumulated accurate group order management, stable quality, and detailed engraving standards."
+            ],
+            "image": "legacy_achievement_03.png"
           }
         ]
       }
@@ -802,7 +1009,17 @@
       ],
       "subtitle": "Reinterpreting the structure of golf as a singular object.",
       "image": "golf/golf1.png",
-      "specLabel": "Configured bracelet"
+      "specLabel": "Configured bracelet",
+      "gallery": [
+        {
+          "image": "golf/퍼터.png",
+          "alt": "Putter golf bracelet"
+        },
+        {
+          "image": "golf/드라이버.png",
+          "alt": "Driver golf bracelet"
+        }
+      ]
     },
     "statement": {
       "titleLines": [
@@ -1111,8 +1328,10 @@
       "body": "And we are still creating now.",
       "question": "A piece or project worth remembering?",
       "primaryTitle": "NEW LEGACY\nRELEASED",
+      "primaryImage": "news_featured.png.png",
       "primaryCta": "Explore More",
       "secondaryTitle": "RECENT\nHIGHLIGHT",
+      "secondaryImage": "home_ring_01.png",
       "secondaryCta": "Explore More"
     },
     "latestNews": {
@@ -1122,7 +1341,41 @@
       "close": "Close",
       "label": "Latest news popup",
       "fallback": "Image pending",
-      "body": "Verified source material will replace this article body when it arrives. For now, this popup keeps DEAHO’s recent production rhythm and project context in place."
+      "body": "Verified source material will replace this article body when it arrives. For now, this popup keeps DEAHO’s recent production rhythm and project context in place.",
+      "cards": [
+        {
+          "id": "news-01",
+          "category": "making",
+          "categoryLabel": "Recent work",
+          "date": "2026.00.00",
+          "title": "LG Twins opening ceremony large ring model production",
+          "image": "news_card_01.png"
+        },
+        {
+          "id": "news-02",
+          "category": "story",
+          "categoryLabel": "Project stories",
+          "date": "2026.00.00",
+          "title": "Jeonbuk Hyundai football ring delivery completed",
+          "image": "news_card_02.png"
+        },
+        {
+          "id": "news-03",
+          "category": "press",
+          "categoryLabel": "Press / Features",
+          "date": "2026.00.00",
+          "title": "Red Force Valorant championship ring design",
+          "image": "news_card_03.png"
+        },
+        {
+          "id": "news-04",
+          "category": "partner",
+          "categoryLabel": "Collaborations",
+          "date": "2026.00.00",
+          "title": "LG Twins championship ring from design to delivery",
+          "image": "news_card_04.png"
+        }
+      ]
     },
     "partners": {
       "ariaLabel": "Collaboration and sponsorship brands",
@@ -1149,6 +1402,88 @@
           "KGC",
           "스카이워커스"
         ]
+      ],
+      "items": [
+        {
+          "label": "Korean Air Jumbos",
+          "logo": "team-logos/korean-air-jumbos.png",
+          "row": 0
+        },
+        {
+          "label": "Busan KCC Egis",
+          "logo": "team-logos/busan-kcc-egis.png",
+          "row": 0
+        },
+        {
+          "label": "KGC Ginseng",
+          "logo": "team-logos/kgc-ginseng-volleyball.png",
+          "row": 0
+        },
+        {
+          "label": "Doosan Bears",
+          "logo": "team-logos/doosan-bears.png",
+          "row": 0
+        },
+        {
+          "label": "Samsung Lions",
+          "logo": "team-logos/samsung-lions.png",
+          "row": 0
+        },
+        {
+          "label": "KT Wiz",
+          "logo": "team-logos/kt-wiz.png",
+          "row": 0
+        },
+        {
+          "label": "NC Dinos",
+          "logo": "team-logos/nc-dinos.png",
+          "row": 1
+        },
+        {
+          "label": "Pink Spiders",
+          "logo": "team-logos/heungkuk-life-pink-spiders.png",
+          "row": 1
+        },
+        {
+          "label": "GS Caltex",
+          "logo": "team-logos/gs-caltex-seoul-kixx.png",
+          "row": 1
+        },
+        {
+          "label": "SSG Landers",
+          "logo": "team-logos/ssg-landers.png",
+          "row": 1
+        },
+        {
+          "label": "Jeonbuk Hyundai",
+          "logo": "team-logos/jeonbuk-hyundai-motors.png",
+          "row": 1
+        },
+        {
+          "label": "Ulsan HD FC",
+          "logo": "team-logos/ulsan-hd-fc.png",
+          "row": 2
+        },
+        {
+          "label": "Cheongju KB Stars",
+          "logo": "team-logos/cheongju-kb-stars.png",
+          "row": 2
+        },
+        {
+          "label": "Hyundai Mobis",
+          "logo": "team-logos/ulsan-hyundai-mobis-phoebus.png",
+          "row": 2
+        },
+        {
+          "label": "Anyang KGC",
+          "logo": "team-logos/anyang-kgc.png",
+          "row": 2
+        },
+        {
+          "label": "Hyundai Capital Skywalkers",
+          "logo": "team-logos/hyundai-capital-skywalkers.png",
+          "row": 2
+        }
       ]
     }
   },
@@ -1240,6 +1575,7 @@
     "detail": {
       "back": "Back to news",
       "author": "DEAHO News",
+      "ogImagePath": "news_detail_hero.png",
       "lead": "Verified source material will replace this article body when available.",
       "paragraphs": [
         "For now, this bright article template keeps the project overview and production context in place.",
@@ -1297,6 +1633,158 @@
       "apply": "Apply",
       "close": "Close",
       "results": "Showing"
+    },
+    "appointment": {
+      "heroAlt": "DEAHO appointment ring collection",
+      "heroImage": "collection_ring1.png",
+      "intro": {
+        "title": "A ring of honor across generations",
+        "lines": [
+          "DEAHO has shaped countless appointment moments into rings.",
+          "Military symbols, class pride, and personal names are completed as one form.",
+          "Beyond one appointment, the ring remains as family history.",
+          "We create appointment moments remembered by parents and children together."
+        ]
+      },
+      "honor": {
+        "title": "Engraving honor in hand",
+        "image": "collection_ring2.png",
+        "lines": [
+          "An appointment ring commemorates the beginning of service as an officer.",
+          "Affiliation, class, and name preserve a moment of responsibility and pride."
+        ]
+      },
+      "keepsake": {
+        "title": "Beyond the ring, a keepsake to share",
+        "image": "collection_ring3.png",
+        "lines": [
+          "The meaning of appointment does not stay with the wearer alone.",
+          "DEAHO has designed pendants, commemorative jewelry, and related pieces",
+          "so family and loved ones can keep the moment together."
+        ]
+      },
+      "inside": {
+        "title": "Symbolism carried inside",
+        "lines": [
+          "We design not only the exterior, but also the private interior space only the wearer can see.",
+          "Through designs that engrave meaning inside appointment rings,",
+          "DEAHO continues to build a new standard."
+        ]
+      },
+      "thumbnails": [
+        {
+          "image": "cl1.png",
+          "width": 114,
+          "height": 129
+        },
+        {
+          "image": "cl2.png",
+          "width": 98,
+          "height": 124
+        },
+        {
+          "image": "cl3.png",
+          "width": 102,
+          "height": 119
+        },
+        {
+          "image": "cl4.png",
+          "width": 110,
+          "height": 116
+        }
+      ],
+      "timelineStart": "past",
+      "timelineEnd": "today",
+      "evolution": {
+        "title": "The evolution of appointment ring design",
+        "lines": [
+          "From traditional symbols to modern craftsmanship and custom planning.",
+          "DEAHO has steadily evolved appointment ring forms for each era."
+        ]
+      }
+    },
+    "bespoke": {
+      "period": "2022 - 2026",
+      "collectionTitle": "The collection",
+      "introTitle": "Bespoke archive",
+      "introBody": "A made-to-order record shaped from personal stories, symbols, and wearing details.",
+      "tabCorpus": "Scientific corpus",
+      "tabNotes": "Design notes",
+      "filter": "Filter",
+      "filterTitle": "Filter the creations",
+      "reset": "Reset",
+      "apply": "Apply",
+      "close": "Close",
+      "display": "Display",
+      "archive": "Archive",
+      "grid": "Grid",
+      "shuffle": "Shuffle the creations",
+      "withNotice": "Creation with notice",
+      "withoutNotice": "Creation without notice",
+      "filterSections": {
+        "notice": "Creation with notice",
+        "year": "Creation year",
+        "period": "Period",
+        "materials": "Materials",
+        "stones": "Stones",
+        "functions": "Functions"
+      },
+      "filterOptions": {
+        "notice": {
+          "yes": "With notice",
+          "no": "Without notice"
+        },
+        "year": {
+          "2023": "2023",
+          "2024": "2024",
+          "2025": "2025",
+          "2026": "2026"
+        },
+        "period": {
+          "contemporary": "Contemporary orders",
+          "archive": "Archive-inspired"
+        },
+        "materials": {
+          "gold": "Gold",
+          "silver": "Silver",
+          "mixed": "Mixed metal"
+        },
+        "stones": {
+          "diamond": "Diamond",
+          "color": "Color stone",
+          "none": "No stone"
+        },
+        "functions": {
+          "engraving": "Engraving",
+          "symbol": "Symbol work",
+          "comfort": "Comfort fit"
+        }
+      },
+      "archiveChapterPeriod": "2022 - 2026",
+      "archiveChapterTitle": "The bespoke brief",
+      "chapterEyebrow": "Made to order",
+      "chapterTitle": "One story, one structure",
+      "chapterBody": "Bespoke work starts by clarifying how the ring will be used and which details must remain legible over time.",
+      "featureEyebrow": "Bespoke records",
+      "featureTitle": "From briefing to final polish",
+      "featureBody": "Briefing notes, symbolic elements, material choices, and wearing comfort are kept in one stable production record.",
+      "process": [
+        {
+          "label": "01",
+          "title": "Brief",
+          "body": "Names, dates, symbols, and purpose are arranged first."
+        },
+        {
+          "label": "02",
+          "title": "Drawing",
+          "body": "Proportion and ornament are reviewed through sketches."
+        },
+        {
+          "label": "03",
+          "title": "Finish",
+          "body": "Polish, engraving, and wearing comfort are checked to the end."
+        }
+      ]
     }
   },
   "golfInquiry": {
@@ -1319,12 +1807,183 @@
     "terms": {
       "eyebrow": "LEGAL",
       "title": "Terms of Use",
-      "notice": "These Terms of Use will be published in their finalized form after legal review. The complete terms will appear on this page once confirmed."
+      "effective": "Effective date: [YYYY-MM-DD]",
+      "notice": "This document is a draft based on a common standard template. Before publication it must be finalized through legal review to match the company’s actual operations, and every [ ] placeholder must be replaced with confirmed information.",
+      "intro": "These Terms of Use set out the rights, obligations, and responsibilities between DAEHO (the “Company”) and users in relation to the use of the website operated by the Company (the “Site”).",
+      "sections": [
+        {
+          "heading": "Article 1 (Purpose)",
+          "body": [
+            "These Terms govern the conditions and procedures for using the Site and related services, and the rights, obligations, and responsibilities of the Company and users."
+          ]
+        },
+        {
+          "heading": "Article 2 (Definitions)",
+          "body": [
+            "1. “Site” means the website operated by the Company to provide product and brand information and to receive production and order inquiries.",
+            "2. “User” means any person who accesses the Site and uses the services provided by the Company under these Terms.",
+            "3. “Content” means all materials posted on the Site, including text, images, and video."
+          ]
+        },
+        {
+          "heading": "Article 3 (Posting and Amendment of Terms)",
+          "body": [
+            "1. The Company posts these Terms on the Site so that users can easily review them.",
+            "2. The Company may amend these Terms within the scope that does not violate applicable laws.",
+            "3. When amending these Terms, the Company will post the effective date and reason at least 7 days in advance, and at least 30 days in advance for amendments unfavorable to users."
+          ]
+        },
+        {
+          "heading": "Article 4 (Provision and Change of Services)",
+          "body": [
+            "1. The Company provides product and brand information, receipt of production and order inquiries, and other services determined by the Company.",
+            "2. The Company may change the content of the services and will announce the reason and content of any change on the Site."
+          ]
+        },
+        {
+          "heading": "Article 5 (Suspension of Services)",
+          "body": [
+            "The Company may temporarily suspend the services for unavoidable reasons such as system maintenance, communication failures, or force majeure, and may announce this after the fact where prior notice is not feasible."
+          ]
+        },
+        {
+          "heading": "Article 6 (Obligations of Users)",
+          "body": [
+            "Users must not engage in any of the following:",
+            "1. Stealing another person’s information or registering false information",
+            "2. Modifying information posted by the Company without authorization",
+            "3. Infringing the intellectual property rights of the Company or third parties",
+            "4. Acts that violate laws or public order and morals"
+          ]
+        },
+        {
+          "heading": "Article 7 (Copyright of Content)",
+          "body": [
+            "The copyright in all content posted on the Site belongs to the Company. Users may not reproduce, distribute, modify, transmit, or commercially use such content without the Company’s prior written consent."
+          ]
+        },
+        {
+          "heading": "Article 8 (Protection of Personal Information)",
+          "body": [
+            "The Company protects users’ personal information in accordance with applicable laws. Details of the collection, use, storage, and destruction of personal information are set out in a separate Privacy Policy."
+          ]
+        },
+        {
+          "heading": "Article 9 (Disclaimer)",
+          "body": [
+            "1. The Company is exempt from liability where it cannot provide the services due to force majeure or equivalent events.",
+            "2. Information posted on the Site is for reference only; the actual specifications and results of production or orders may vary based on individual consultation and agreement."
+          ]
+        },
+        {
+          "heading": "Article 10 (Dispute Resolution and Governing Law)",
+          "body": [
+            "These Terms are interpreted in accordance with the laws of the Republic of Korea, and any litigation arising between the Company and users will be filed with the competent court under the Civil Procedure Act."
+          ]
+        },
+        {
+          "heading": "Addendum",
+          "body": [
+            "These Terms take effect on [YYYY-MM-DD]."
+          ]
+        }
+      ]
     },
     "privacy": {
       "eyebrow": "LEGAL",
       "title": "Privacy Policy",
-      "notice": "The full Privacy Policy will be published on this page after legal review. It will cover the personal data collected, purposes of use, retention periods, third-party provision, destruction procedures, user rights, and the privacy officer, as required by Korean law."
+      "effective": "Effective date: [YYYY-MM-DD]",
+      "notice": "This document is a draft based on a common standard template. Before publication it must be finalized through legal review to match the company’s actual personal-data practices, and every [ ] placeholder must be replaced with confirmed information.",
+      "intro": "DAEHO (the “Company”) complies with the Personal Information Protection Act and other applicable laws, and establishes and discloses the following Privacy Policy to protect users’ personal information and to promptly handle related concerns.",
+      "sections": [
+        {
+          "heading": "Article 1 (Purposes of Processing)",
+          "body": [
+            "The Company processes personal information for the following purposes and does not use it for any purpose other than those stated:",
+            "1. Receiving and responding to production and order inquiries",
+            "2. Identity verification, contact, and consultation",
+            "3. Service provision and quality improvement"
+          ]
+        },
+        {
+          "heading": "Article 2 (Items of Personal Information Processed)",
+          "body": [
+            "1. When receiving inquiries: name, contact details (phone number, email), and inquiry content",
+            "2. Information generated and collected automatically during use: access IP, cookies, service usage records, and device information"
+          ]
+        },
+        {
+          "heading": "Article 3 (Processing and Retention Period)",
+          "body": [
+            "The Company processes and retains personal information within the retention period required by law or consented to by the user.",
+            "1. Inquiry records: retained for [ ] year(s) after the purpose is achieved, then destroyed",
+            "2. Where retention is required by law, information is kept for the applicable period (e.g., records on consumer complaints or dispute handling for 3 years under the Act on Consumer Protection in Electronic Commerce)."
+          ]
+        },
+        {
+          "heading": "Article 4 (Provision to Third Parties)",
+          "body": [
+            "As a rule, the Company does not provide users’ personal information to third parties. It may do so only with the user’s prior consent or where specifically required by law."
+          ]
+        },
+        {
+          "heading": "Article 5 (Outsourcing of Processing)",
+          "body": [
+            "Where necessary for smooth service provision, the Company may outsource personal-information processing. In such cases it discloses the trustee and the outsourced work in this Policy and supervises the trustee in accordance with applicable laws."
+          ]
+        },
+        {
+          "heading": "Article 6 (Rights of Data Subjects and How to Exercise Them)",
+          "body": [
+            "Users may at any time request access to, correction or deletion of, or suspension of processing of their personal information, and the Company will act without delay in accordance with applicable laws.",
+            "Rights may be exercised by contacting the Privacy Officer in writing, by phone, or by email, and the Company will act after verifying the requester’s identity."
+          ]
+        },
+        {
+          "heading": "Article 7 (Destruction of Personal Information)",
+          "body": [
+            "When the retention period expires or the purpose of processing is achieved, the Company destroys the personal information without delay. Electronic files are deleted by irrecoverable means, and paper documents are shredded or incinerated."
+          ]
+        },
+        {
+          "heading": "Article 8 (Measures to Ensure Security)",
+          "body": [
+            "The Company takes administrative, technical, and physical measures to ensure the security of personal information.",
+            "These include managing access privileges, operating access-control systems, encrypting personal information, and installing and reviewing security programs."
+          ]
+        },
+        {
+          "heading": "Article 9 (Cookies)",
+          "body": [
+            "The Company may use cookies to provide customized services.",
+            "Users may refuse the storage of cookies through their web browser settings; refusing cookies may limit the use of some services."
+          ]
+        },
+        {
+          "heading": "Article 10 (Privacy Officer)",
+          "body": [
+            "The Company designates a Privacy Officer who is overall responsible for personal-information processing, as follows:",
+            "· Privacy Officer: [Name] / [Title]",
+            "· Contact: [Phone], [Email]"
+          ]
+        },
+        {
+          "heading": "Article 11 (Remedies for Infringement)",
+          "body": [
+            "To obtain relief for personal-information infringement, users may apply to the following bodies for dispute resolution or consultation:",
+            "· Personal Information Dispute Mediation Committee (privacy.go.kr / 1833-6972)",
+            "· Privacy Infringement Report Center, KISA (privacy.kisa.or.kr / 118)",
+            "· Supreme Prosecutors’ Office, Cybercrime Investigation (spo.go.kr / 1301)",
+            "· National Police Agency, Cyber Bureau (ecrm.police.go.kr / 182)"
+          ]
+        },
+        {
+          "heading": "Article 12 (Changes to this Policy)",
+          "body": [
+            "This Policy applies from [YYYY-MM-DD]. Where content is added, deleted, or modified, the Company will announce the changes on the Site at least 7 days before they take effect."
+          ]
+        }
+      ]
     }
   }
 }

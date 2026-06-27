@@ -1,4 +1,5 @@
 import type {Metadata} from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {setRequestLocale} from 'next-intl/server';
 
@@ -8,7 +9,7 @@ import {HomeStatBand} from '@/components/home/home-stat-band';
 import {Reveal, RevealItem} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
-import {getHomeNewsCardsForSite} from '@/lib/cms/public-content';
+import {getHomeNewsCardsFromPage} from '@/lib/cms/public-content';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
@@ -29,10 +30,10 @@ export default async function HomePage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const messages = getLocaleMessages(locale);
+  const messages = await getLocaleMessages(locale);
   const content = messages.home;
   const homeUi = messages.homeUi;
-  const latestNews: HomeNewsPopupCard[] = getHomeNewsCardsForSite(locale);
+  const latestNews: HomeNewsPopupCard[] = getHomeNewsCardsFromPage(homeUi.latestNews.cards);
 
   return <HomeContent content={content} homeUi={homeUi} latestNews={latestNews} locale={locale} />;
 }
@@ -46,6 +47,12 @@ type HomeContentProps = {
 
 function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
   const {currentPulse, latestNews: latestNewsText, partners} = homeUi;
+  const partnerRows = getPartnerRows(partners);
+  const primaryPulseImage = currentPulse.primaryImage || 'news_featured.png.png';
+  const secondaryPulseImage =
+    currentPulse.secondaryImage && currentPulse.secondaryImage !== 'home_ring_01.png'
+      ? currentPulse.secondaryImage
+      : content.rings[0]?.image || currentPulse.secondaryImage || 'home_ring_01.png';
 
   return (
     <main className="min-h-screen bg-bg">
@@ -80,7 +87,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                   <div className="hover-zoom">
                     <div className="hover-zoom-media">
                       <SafeImage
-                        filename="news_featured.png.png"
+                        filename={primaryPulseImage}
                         alt={currentPulse.primaryTitle}
                         aspect="aspect-[2.05/1]"
                         variant="plain"
@@ -98,7 +105,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                 <div className="hover-zoom">
                   <div className="hover-zoom-media">
                     <SafeImage
-                      filename="home_ring_01.png"
+                      filename={secondaryPulseImage}
                       alt={currentPulse.secondaryTitle}
                       aspect="aspect-[2.05/1]"
                       variant="plain"
@@ -191,10 +198,24 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
 
       <section className="overflow-hidden bg-bg pb-section pt-[clamp(42px,6vw,90px)]">
         <div className="home-brand-marquee" aria-label={partners.ariaLabel}>
-          {partners.rows.map((row, rowIndex) => (
+          {partnerRows.map((row, rowIndex) => (
             <div className="home-brand-row" key={rowIndex}>
-              {[...row, ...row].map((brand, brandIndex) => (
-                <span key={`${brand}-${brandIndex}`}>{brand}</span>
+              {[...row, ...row].filter((brand) => brand.logo).map((brand, brandIndex) => (
+                <span
+                  aria-label={brand.label}
+                  className="home-brand-item"
+                  key={`${brand.label}-${brand.logo}-${brandIndex}`}
+                >
+                  {brand.logo ? (
+                    <Image
+                      src={`/images/${brand.logo}`}
+                      alt={brand.label}
+                      width={96}
+                      height={96}
+                      className="home-brand-logo"
+                    />
+                  ) : null}
+                </span>
               ))}
             </div>
           ))}
@@ -202,4 +223,30 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
       </section>
     </main>
   );
+}
+
+type HomePartnerContent = typeof koMessages.homeUi.partners;
+type HomePartnerItem = {
+  label: string;
+  logo?: string;
+  row?: number;
+};
+
+function getPartnerRows(partners: HomePartnerContent): HomePartnerItem[][] {
+  if ('items' in partners && Array.isArray(partners.items) && partners.items.length > 0) {
+    const rows = [[], [], []] as HomePartnerItem[][];
+
+    partners.items.forEach((item, index) => {
+      const rowIndex = Math.min(Math.max(Number(item.row ?? index % 3), 0), rows.length - 1);
+      rows[rowIndex].push({
+        label: item.label,
+        logo: item.logo,
+        row: rowIndex
+      });
+    });
+
+    return rows.filter((row) => row.length > 0);
+  }
+
+  return partners.rows.map((row) => row.map((label) => ({label})));
 }

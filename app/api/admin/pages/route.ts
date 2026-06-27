@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     return unauthorized;
   }
 
-  const pages = listPages();
+  const pages = await listPages();
   const pagesByKey = new Map(pages.map((page) => [page.pageKey, page]));
 
   return NextResponse.json({

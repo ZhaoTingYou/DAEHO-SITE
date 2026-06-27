@@ -8,5 +8,5 @@ export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const locale = getLocaleFromSearch(request);
-  return NextResponse.json({locale, items: listPublicCollections(locale)});
+  return NextResponse.json({locale, items: await listPublicCollections(locale)});
 }

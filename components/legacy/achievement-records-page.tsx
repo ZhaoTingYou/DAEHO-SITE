@@ -22,6 +22,10 @@ type AchievementContent = {
       image: string;
     }>;
   };
+  copy?: Partial<Omit<AchievementPageCopy, 'firstRecords' | 'marketFeatures'>> & {
+    firstRecords?: FirstRecordInput[];
+    marketFeatures?: MarketFeatureInput[];
+  };
 };
 
 type AchievementRecordsPageProps = {
@@ -32,8 +36,11 @@ type AchievementRecordsPageProps = {
 type FirstRecord = {
   title: string;
   body: string;
+  hoverText: string;
   image: string;
 };
+
+type FirstRecordInput = Partial<FirstRecord>;
 
 type MarketFeature = {
   value: string;
@@ -43,7 +50,32 @@ type MarketFeature = {
   image: string;
 };
 
-const pageCopy = {
+type MarketFeatureInput = Partial<Omit<MarketFeature, 'paragraphs'>> & {
+  paragraphs?: string[] | string;
+};
+
+type AchievementPageCopy = {
+  heroLabel: string;
+  heroTitle: string;
+  introLines: string[];
+  imagePlaceholder: string;
+  quoteTitle: string;
+  quoteBody: string;
+  firstTitle: string;
+  firstHeading: string;
+  marketLabel: string;
+  marketTitle: string;
+  marketIntro: string;
+  archiveLabel: string;
+  archiveTitle: string;
+  discoverLead: string;
+  cta: string;
+  statBand: HomeStatBandItem[];
+  firstRecords: FirstRecord[];
+  marketFeatures: MarketFeature[];
+};
+
+const defaultPageCopy = {
   ko: {
     heroLabel: 'ACHIEVEMENTS',
     heroTitle: 'RESULT',
@@ -97,16 +129,19 @@ const pageCopy = {
       {
         title: 'FIRST INITIAL ENGRAVING',
         body: '국내 최초 이니셜 조각 적용',
+        hoverText: '국내 기념반지 제작에서 개인 이니셜 조각을 적용한 첫 기록입니다.',
         image: 'legacy_achievement_01.png'
       },
       {
         title: 'FIRST ANTIQUE COATING',
         body: '국내 최초 엔티크 블랙 코팅 적용',
+        hoverText: '금속의 입체감과 문양의 깊이를 살리는 엔티크 블랙 코팅을 국내 최초로 적용했습니다.',
         image: 'legacy_achievement_02.png'
       },
       {
         title: 'FIRST DESIGN APPROACH',
         body: '국내 최초 반지 내부 디자인 적용',
+        hoverText: '반지 외부뿐 아니라 내부까지 의미를 담는 디자인 접근을 국내 최초로 시도했습니다.',
         image: 'legacy_achievement_03.png'
       }
     ],
@@ -186,16 +221,19 @@ const pageCopy = {
       {
         title: 'FIRST INITIAL ENGRAVING',
         body: 'First domestic application of initial engraving',
+        hoverText: 'DEAHO introduced individual initial engraving as a first in Korea commemorative ring production.',
         image: 'legacy_achievement_01.png'
       },
       {
         title: 'FIRST ANTIQUE COATING',
         body: 'First domestic application of antique black coating',
+        hoverText: 'DEAHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.',
         image: 'legacy_achievement_02.png'
       },
       {
         title: 'FIRST DESIGN APPROACH',
         body: 'First domestic approach to interior ring design',
+        hoverText: 'DEAHO first expanded ring design inward, giving the interior surface its own meaning and story.',
         image: 'legacy_achievement_03.png'
       }
     ],
@@ -222,38 +260,76 @@ const pageCopy = {
       }
     ]
   }
-} satisfies Record<Locale, {
-  heroLabel: string;
-  heroTitle: string;
-  introLines: string[];
-  imagePlaceholder: string;
-  quoteTitle: string;
-  quoteBody: string;
-  firstTitle: string;
-  firstHeading: string;
-  marketLabel: string;
-  marketTitle: string;
-  marketIntro: string;
-  archiveLabel: string;
-  archiveTitle: string;
-  discoverLead: string;
-  cta: string;
-  statBand: HomeStatBandItem[];
-  firstRecords: FirstRecord[];
-  marketFeatures: MarketFeature[];
-}>;
+} satisfies Record<Locale, AchievementPageCopy>;
+
+function resolveAchievementCopy(locale: Locale, content: AchievementContent): AchievementPageCopy {
+  const fallback = defaultPageCopy[locale];
+  const copy = content.copy ?? {};
+  const firstRecords = normalizeFirstRecords(copy.firstRecords);
+  const marketFeatures = normalizeMarketFeatures(copy.marketFeatures);
+
+  return {
+    ...fallback,
+    ...copy,
+    introLines: copy.introLines?.length ? copy.introLines : fallback.introLines,
+    statBand: copy.statBand?.length ? copy.statBand : fallback.statBand,
+    firstRecords: firstRecords.length > 0 ? firstRecords : fallback.firstRecords,
+    marketFeatures: marketFeatures.length > 0 ? marketFeatures : fallback.marketFeatures
+  };
+}
+
+function normalizeFirstRecords(records: FirstRecordInput[] | undefined): FirstRecord[] {
+  if (!Array.isArray(records)) {
+    return [];
+  }
+
+  return records
+    .map((record) => ({
+      title: record.title ?? '',
+      body: record.body ?? '',
+      hoverText: record.hoverText ?? record.body ?? '',
+      image: record.image ?? ''
+    }))
+    .filter((record) => record.title && record.image);
+}
+
+function normalizeMarketFeatures(features: MarketFeatureInput[] | undefined): MarketFeature[] {
+  if (!Array.isArray(features)) {
+    return [];
+  }
+
+  return features
+    .map((feature) => ({
+      value: feature.value ?? '',
+      title: feature.title ?? '',
+      accent: feature.accent ?? '',
+      paragraphs: normalizeParagraphs(feature.paragraphs),
+      image: feature.image ?? ''
+    }))
+    .filter((feature) => feature.title && feature.image);
+}
+
+function normalizeParagraphs(value: string[] | string | undefined): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((paragraph): paragraph is string => typeof paragraph === 'string' && paragraph.trim().length > 0);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
 
 export function AchievementRecordsPage({locale, content}: AchievementRecordsPageProps) {
-  const copy = pageCopy[locale];
+  const copy = resolveAchievementCopy(locale, content);
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
-  const archiveImages = [
-    ...(content.gallery?.items.map((item) => item.image) ?? []),
-    'news_card_01.png',
-    'home_ring_01.png',
-    'collection_ring_03.png'
-  ].slice(0, 7);
+  const archiveImages = (content.gallery?.items.map((item) => item.image).filter(Boolean) ?? []).slice(0, 7);
   const loopedArchiveImages = archiveImages.length > 1
     ? [...archiveImages, ...archiveImages]
     : archiveImages;
@@ -296,28 +372,53 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
             </h2>
           </Reveal>
 
-          <Reveal className="mt-[clamp(54px,6vw,78px)]">
+          <Reveal className="mt-[clamp(30px,4vw,46px)]">
             <DraggableScroll
               ariaLabel={copy.firstHeading}
               className="mx-auto flex w-full gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] lg:max-w-[1110px] lg:justify-center lg:px-0 [&::-webkit-scrollbar]:hidden"
             >
               {copy.firstRecords.map((record) => (
-                <article key={record.title} className="w-[min(72vw,330px)] shrink-0">
-                  <div className="relative aspect-[3/4] overflow-hidden bg-[#d8d8d8]">
-                    <Image
-                      src={`/images/${record.image}`}
-                      alt={record.title}
-                      fill
-                      sizes="(min-width: 1024px) 330px, 72vw"
-                      className="pointer-events-none object-cover"
-                    />
+                <article
+                  key={record.title}
+                  tabIndex={0}
+                  aria-label={`${record.title}: ${record.hoverText}`}
+                  className="achievement-record-card group flex w-[min(72vw,330px)] shrink-0 flex-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                >
+                  <div className="mb-6 flex min-h-[64px] flex-col justify-end text-center">
+                    <p className={`${bodyTextClass} text-[15px] leading-tight text-primary`}>
+                      {record.body}
+                    </p>
+                    <h3 className={`${englishTextClass} mt-2 whitespace-pre-line text-[15px] uppercase leading-[1.18] tracking-[0.04em] text-primary`}>
+                      {record.title}
+                    </h3>
                   </div>
-                  <p className={`${bodyTextClass} mt-6 text-[15px] leading-tight text-primary`}>
-                    {record.body}
-                  </p>
-                  <h3 className={`${englishTextClass} mt-2 whitespace-pre-line text-[15px] uppercase leading-[1.18] tracking-[0.04em] text-primary`}>
-                    {record.title}
-                  </h3>
+                  <div className="achievement-record-card__stage relative aspect-[3/4] [perspective:1200px]">
+                    <div className="achievement-record-card__inner relative h-full w-full transition-transform duration-700 ease-[var(--ease-expo)] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus:[transform:rotateY(180deg)] motion-reduce:transition-none">
+                      <div className="achievement-record-card__front absolute inset-0 overflow-hidden bg-[#d8d8d8] [backface-visibility:hidden]">
+                        <Image
+                          src={`/images/${record.image}`}
+                          alt={record.title}
+                          fill
+                          sizes="(min-width: 1024px) 330px, 72vw"
+                          className="pointer-events-none object-cover"
+                        />
+                      </div>
+                      <div className="achievement-record-card__back absolute inset-0 flex flex-col justify-between overflow-hidden bg-[#62302F] px-7 py-8 text-[#F4E6E1] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                        <p className={`${englishTextClass} text-[13px] uppercase leading-none tracking-[0.12em] text-[#D7A6A0]`}>
+                          {copy.firstTitle}
+                        </p>
+                        <div className="grid gap-4 text-center">
+                          <h3 className={`${englishTextClass} whitespace-pre-line text-[clamp(22px,2.1vw,31px)] uppercase leading-[1.04] tracking-[0.04em] text-white`}>
+                            {record.title}
+                          </h3>
+                          <p className={`${bodyTextClass} text-[clamp(15px,1.15vw,17px)] leading-[1.72] text-[#F4E6E1]`}>
+                            {record.hoverText}
+                          </p>
+                        </div>
+                        <span className="mx-auto h-px w-14 bg-[#D7A6A0]/70" aria-hidden="true" />
+                      </div>
+                    </div>
+                  </div>
                 </article>
               ))}
             </DraggableScroll>
@@ -436,7 +537,7 @@ function MarketImage({image, alt}: {image: string; alt: string}) {
         alt={alt}
         fill
         sizes="(min-width: 768px) 760px, 100vw"
-        className="object-cover opacity-0"
+        className="object-cover"
       />
     </div>
   );

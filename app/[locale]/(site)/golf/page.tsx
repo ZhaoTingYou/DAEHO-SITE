@@ -22,7 +22,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function GolfPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = getLocaleMessages(locale).golf as GolfConfiguratorContent;
+  const content = (await getLocaleMessages(locale)).golf as GolfConfiguratorContent;
   const filenames = collectGolfImages(content);
   const assets = Object.fromEntries(
     filenames.map((filename) => [filename, imageExists(filename)])
@@ -35,6 +35,7 @@ function collectGolfImages(content: GolfConfiguratorContent) {
   return Array.from(
     new Set([
       content.hero.image,
+      ...(content.hero.gallery ?? []).map((item) => item.image),
       content.statement.image,
       content.engraving.imagePrimary,
       content.engraving.imageDetail,

@@ -18,7 +18,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function LoyaltyPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = getLocaleMessages(locale).legacyPages.loyalty;
+  const content = (await getLocaleMessages(locale)).legacyPages.loyalty;
 
   return <LoyaltyCommitmentPage locale={locale} content={content} />;
 }

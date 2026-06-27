@@ -18,7 +18,21 @@ type ImportResult = {
 };
 
 export function CmsImportPanel({messages}: {messages: Record<string, string>}) {
-  const t = useCallback((key: string) => messages[key] ?? key, [messages]);
+  const t = useCallback(
+    (key: string, values?: Record<string, string | number>) => {
+      const template = messages[key] ?? key;
+
+      if (!values) {
+        return template;
+      }
+
+      return Object.entries(values).reduce(
+        (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+        template
+      );
+    },
+    [messages]
+  );
   const [file, setFile] = useState<File | null>(null);
   const [backupText, setBackupText] = useState('');
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -46,12 +60,12 @@ export function CmsImportPanel({messages}: {messages: Record<string, string>}) {
 
     try {
       const text = await file.text();
-      const nextResult = await submitImport(text, false);
+      const nextResult = await submitImport(text, false, t('import.requestFailed'));
       setBackupText(text);
       setResult(nextResult);
     } catch (importError) {
       setBackupText('');
-      setError(importError instanceof Error ? importError.message : 'Unable to preview import.');
+      setError(importError instanceof Error && importError.message ? importError.message : t('import.previewError'));
     } finally {
       setBusy('');
     }
@@ -72,10 +86,10 @@ export function CmsImportPanel({messages}: {messages: Record<string, string>}) {
     setError('');
 
     try {
-      const nextResult = await submitImport(backupText, true);
+      const nextResult = await submitImport(backupText, true, t('import.requestFailed'));
       setResult(nextResult);
     } catch (importError) {
-      setError(importError instanceof Error ? importError.message : 'Unable to replace CMS data.');
+      setError(importError instanceof Error && importError.message ? importError.message : t('import.replaceError'));
     } finally {
       setBusy('');
     }
@@ -133,11 +147,11 @@ export function CmsImportPanel({messages}: {messages: Record<string, string>}) {
                 {result.replaced ? t('import.completedTitle') : t('import.previewTitle')}
               </p>
               <p className="mt-1 font-mono text-xs text-[#647084]">
-                schema v{result.schemaVersion} / {result.exportedAt || t('import.unknownExportTime')}
+                {t('import.schema', {version: result.schemaVersion})} / {result.exportedAt || t('import.unknownExportTime')}
               </p>
             </div>
             <span className="rounded-full bg-[#eef2f6] px-3 py-1 font-numeric text-xs font-semibold text-[#344054]">
-              {result.totalRows} rows
+              {t('import.rows', {count: result.totalRows})}
             </span>
           </div>
           <div className="divide-y divide-[#e4e7ec] bg-white">
@@ -154,7 +168,7 @@ export function CmsImportPanel({messages}: {messages: Record<string, string>}) {
   );
 }
 
-async function submitImport(body: string, replace: boolean) {
+async function submitImport(body: string, replace: boolean, fallbackError: string) {
   const response = await fetch(`/api/admin/import${replace ? '?replace=1' : ''}`, {
     method: 'POST',
     headers: {
@@ -165,7 +179,7 @@ async function submitImport(body: string, replace: boolean) {
   const payload = (await response.json()) as ImportResult;
 
   if (!response.ok) {
-    throw new Error(payload.error || 'CMS import request failed.');
+    throw new Error(payload.error || fallbackError);
   }
 
   return payload;

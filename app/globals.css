@@ -351,6 +351,9 @@ select {
 .link-sweep {
   position: relative;
   display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
 }
 
 .ring-blueprint-layer {
@@ -480,6 +483,11 @@ select {
   color: var(--accent);
 }
 
+.link-sweep:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .link-sweep::after {
   position: absolute;
   right: 0;
@@ -503,6 +511,7 @@ select {
   --consult-fg: var(--accent);
   position: relative;
   display: inline-flex;
+  min-width: 44px;
   min-height: 44px;
   align-items: center;
   justify-content: center;
@@ -588,6 +597,8 @@ select {
 
 .home-feature-link {
   position: relative;
+  min-height: 44px;
+  align-items: center;
   padding-bottom: 9px;
   color: var(--accent);
 }
@@ -636,7 +647,7 @@ select {
 .home-brand-row {
   display: flex;
   width: max-content;
-  gap: clamp(34px, 5vw, 76px);
+  gap: clamp(42px, 5.8vw, 92px);
   animation: home-brand-marquee 42s linear infinite;
   will-change: transform;
 }
@@ -650,19 +661,26 @@ select {
   animation-duration: 58s;
 }
 
-.home-brand-row span {
+.home-brand-item {
   display: inline-flex;
-  min-width: clamp(112px, 11vw, 174px);
+  min-width: clamp(112px, 10vw, 176px);
+  align-items: center;
   justify-content: center;
-  font-family: var(--font-body);
-  font-size: clamp(14px, 1.05vw, 17px);
-  font-weight: 600;
-  letter-spacing: .04em;
-  color: color-mix(in srgb, var(--primary) 52%, transparent);
-  white-space: nowrap;
+  line-height: 0;
   transition:
-    color var(--dur-hover) var(--ease),
     transform var(--dur-hover) var(--ease);
+}
+
+.home-brand-logo {
+  width: clamp(58px, 4.6vw, 88px);
+  height: clamp(58px, 4.6vw, 88px);
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: grayscale(1);
+  opacity: .68;
+  transition:
+    filter var(--dur-hover) var(--ease),
+    opacity var(--dur-hover) var(--ease);
 }
 
 @media (hover: hover) {
@@ -670,9 +688,13 @@ select {
     animation-play-state: paused;
   }
 
-  .home-brand-row span:hover {
-    color: var(--primary);
+  .home-brand-item:hover {
     transform: translate3d(0, -2px, 0);
+  }
+
+  .home-brand-item:hover .home-brand-logo {
+    filter: grayscale(0);
+    opacity: .9;
   }
 }
 
@@ -799,9 +821,13 @@ select {
 
 .chronicle-year-nav button {
   position: relative;
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: flex-start;
   width: 100%;
   min-width: 0;
-  padding: 7px 0 7px 24px;
+  padding: 0 0 0 24px;
   color: rgba(16, 29, 48, .34);
   cursor: pointer;
   background: transparent;
@@ -1177,8 +1203,10 @@ select {
 .site-nav-link {
   position: relative;
   display: inline-flex;
+  min-width: 44px;
   align-items: center;
   min-height: 44px;
+  justify-content: center;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 300;
@@ -1606,6 +1634,37 @@ select {
     animation: none;
   }
 
+  .achievement-record-card {
+    width: min(82vw, 330px);
+  }
+
+  .achievement-record-card__stage {
+    height: auto;
+    aspect-ratio: auto;
+    perspective: none;
+  }
+
+  .achievement-record-card__inner {
+    display: grid;
+    height: auto;
+    gap: 0;
+    transform: none !important;
+    transform-style: flat;
+  }
+
+  .achievement-record-card__front,
+  .achievement-record-card__back {
+    position: relative;
+    inset: auto;
+    min-height: 0;
+    transform: none;
+    backface-visibility: visible;
+  }
+
+  .achievement-record-card__front {
+    aspect-ratio: 3 / 4;
+  }
+
   .golf-float-a,
   .golf-float-b,
   .golf-shadow,
@@ -1703,17 +1762,25 @@ select {
   }
 
   .chronicle-year-nav {
-    inset: auto auto 96px 12px;
+    inset: auto 12px calc(72px + env(safe-area-inset-bottom)) 12px;
     top: auto;
-    width: 104px;
-    gap: 8px;
-    padding: 12px 10px;
-    align-content: start;
+    display: flex;
+    width: auto;
+    gap: 6px;
+    align-content: normal;
+    overflow-x: auto;
+    padding: 8px;
     background:
       radial-gradient(ellipse at 100% 42%, rgba(255, 255, 255, .7), transparent 52%),
       linear-gradient(180deg, rgba(248, 246, 242, .7) 0%, rgba(251, 250, 247, .7) 48%, rgba(255, 255, 255, .7) 100%);
     border: 1px solid rgba(16, 29, 48, .08);
-    transform: translate3d(-8px, 0, 0);
+    transform: translate3d(0, 10px, 0);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .chronicle-year-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .chronicle-page.is-controls-visible .chronicle-year-nav {
@@ -1721,7 +1788,7 @@ select {
   }
 
   .chronicle-page.is-end-nav-visible .chronicle-year-nav {
-    transform: translate3d(-8px, 0, 0);
+    transform: translate3d(0, 10px, 0);
   }
 
   .chronicle-year-nav::before {
@@ -1730,32 +1797,35 @@ select {
   }
 
   .chronicle-year-nav button {
-    min-width: 74px;
-    padding: 6px 0 6px 18px;
+    display: inline-flex;
+    min-width: 66px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
     font-size: 15px;
     letter-spacing: .1em;
+    text-align: center;
   }
 
   .chronicle-year-nav button::before {
-    left: 1px;
-    width: 8px;
-    height: 8px;
+    display: none;
   }
 
   .chronicle-year-nav button:hover,
   .chronicle-year-nav button.is-active {
-    transform: translateX(2px);
+    transform: none;
   }
 
   .chronicle-progress {
     right: 22px;
-    bottom: 72px;
+    bottom: calc(52px + env(safe-area-inset-bottom));
     left: 22px;
   }
 
   .chronicle-end-nav {
     top: auto;
-    bottom: 108px;
+    bottom: calc(124px + env(safe-area-inset-bottom));
     right: 0;
     width: min(150px, calc(100vw - 22px));
     padding: 16px 26px 14px 14px;
@@ -1933,6 +2003,9 @@ select {
 
 .footer-group-title {
   display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 800;
@@ -1949,6 +2022,10 @@ a.footer-group-title:focus-visible {
 }
 
 .footer-link {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
@@ -1974,6 +2051,12 @@ a.footer-group-title:focus-visible {
 .footer-link--legal {
   font-size: 12px;
   letter-spacing: .06em;
+}
+
+@media (max-width: 1023px) {
+  .footer-link--muted {
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

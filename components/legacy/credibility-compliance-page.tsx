@@ -1,8 +1,10 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
+import {imageExists} from '@/lib/image-exists';
 import {withLocale} from '@/lib/site-map';
 
 type CredibilityContent = {
@@ -11,6 +13,9 @@ type CredibilityContent = {
     title: string;
     subtitle: string;
     image: string;
+  };
+  copy?: Partial<Omit<CredibilityPageCopy, 'rows'>> & {
+    rows?: CredibilityStandardRowInput[];
   };
 };
 
@@ -24,15 +29,42 @@ type StandardRow = {
   title: string;
   accent: string;
   paragraphs: string[];
+  image?: string;
 };
 
-const pageCopy = {
+type CredibilityStandardRowInput = Omit<StandardRow, 'paragraphs'> & {
+  paragraphs: string[] | string;
+};
+
+type CredibilityPageCopy = {
+  heroLabel: string;
+  heroTitle: string;
+  intro: string;
+  imagePlaceholder: string;
+  quoteTitle: string;
+  quoteBody: string;
+  discoverLead: string;
+  cta: string;
+  rows: StandardRow[];
+};
+
+const credibilityStandardImages = [
+  'legacy_achievement_01.png',
+  'legacy_achievement_02.png',
+  'legacy_achievement_03.png',
+  'legacy_achievement_04.png',
+  'chronicle_detail_01.png',
+  'chronicle_detail_02.png'
+] as const;
+const availableCredibilityStandardImages = credibilityStandardImages.filter((image) => imageExists(image));
+
+const defaultPageCopy = {
   ko: {
     heroLabel: 'CREDIBILITY',
     heroTitle: 'STANDARD',
     intro:
       '대호의 신뢰는 오랜 경험만으로 설명되지 않습니다. 디자인 상담부터 제작, 검수, 납품까지 전 과정을 직접 관리하며, 정해진 일정과 기준 안에서 결과물을 완성해왔습니다. 중요한 단체 제작을 맡길 수 있는 이유는 명확한 제작 체계에 있습니다.',
-    imagePlaceholder: '여기는 이미지',
+    imagePlaceholder: 'legacy_credibility_hero.png',
     quoteTitle: 'Credibility, Proven Through Standards',
     quoteBody: '신뢰는 기준에서 시작됩니다',
     discoverLead: '대호의 프로젝트 더 알아보기',
@@ -99,7 +131,7 @@ const pageCopy = {
     heroTitle: 'STANDARD',
     intro:
       'DEAHO credibility is not explained by experience alone. From design consultation to production, inspection, and delivery, every stage is managed directly so important group projects can be completed within clear standards and schedules.',
-    imagePlaceholder: 'Image area',
+    imagePlaceholder: 'legacy_credibility_hero.png',
     quoteTitle: 'Credibility, Proven Through Standards',
     quoteBody: 'Trust begins with standards.',
     discoverLead: 'Discover more DEAHO projects',
@@ -161,29 +193,88 @@ const pageCopy = {
       }
     ]
   }
-} satisfies Record<Locale, {
-  heroLabel: string;
-  heroTitle: string;
-  intro: string;
-  imagePlaceholder: string;
-  quoteTitle: string;
-  quoteBody: string;
-  discoverLead: string;
-  cta: string;
-  rows: StandardRow[];
-}>;
+} satisfies Record<Locale, CredibilityPageCopy>;
 
-export function CredibilityCompliancePage({locale}: CredibilityCompliancePageProps) {
-  const copy = pageCopy[locale];
+function resolveCredibilityCopy(locale: Locale, content: CredibilityContent): CredibilityPageCopy {
+  const fallback = defaultPageCopy[locale];
+  const copy = content.copy ?? {};
+  const rows = normalizeRows(copy.rows);
+  const fallbackRows = fallback.rows as StandardRow[];
+  const sourceRows: StandardRow[] = rows.length > 0 ? rows : fallbackRows;
+
+  return {
+    ...fallback,
+    ...copy,
+    rows: sourceRows.map((row, index) => ({
+      ...row,
+      image:
+        resolveCredibilityImage(row.image) ||
+        resolveCredibilityImage(fallbackRows[index]?.image) ||
+        availableCredibilityStandardImages[index % availableCredibilityStandardImages.length]
+    }))
+  };
+}
+
+function normalizeRows(rows: CredibilityStandardRowInput[] | undefined): StandardRow[] {
+  if (!Array.isArray(rows)) {
+    return [];
+  }
+
+  return rows
+    .map((row) => ({
+      number: row.number,
+      title: row.title,
+      accent: row.accent,
+      paragraphs: normalizeParagraphs(row.paragraphs),
+      image: resolveCredibilityImage(row.image)
+    }))
+    .filter((row) => row.title || row.paragraphs.length > 0);
+}
+
+function resolveCredibilityImage(image: string | undefined) {
+  return image && isImageFilename(image) && imageExists(image) ? image : undefined;
+}
+
+function normalizeParagraphs(value: string[] | string): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((paragraph): paragraph is string => typeof paragraph === 'string' && paragraph.trim().length > 0);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function isImageFilename(value: unknown): value is string {
+  return typeof value === 'string' && /\.(png|jpe?g|webp|gif|svg)$/i.test(value.trim());
+}
+
+export function CredibilityCompliancePage({locale, content}: CredibilityCompliancePageProps) {
+  const copy = resolveCredibilityCopy(locale, content);
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
+  const heroImage = isImageFilename(copy.imagePlaceholder)
+    ? copy.imagePlaceholder
+    : isImageFilename(content.hero.image)
+      ? content.hero.image
+      : undefined;
+  const heroPlaceholder = isImageFilename(copy.imagePlaceholder)
+    ? defaultPageCopy[locale].imagePlaceholder
+    : copy.imagePlaceholder;
 
   return (
     <main className="bg-white text-primary">
       <HeritageHero
         body={copy.intro}
-        imagePlaceholder={copy.imagePlaceholder}
+        image={heroImage}
+        imageAlt={content.hero.subtitle || copy.heroTitle}
+        imagePlaceholder={heroPlaceholder}
         label={copy.heroLabel}
         locale={locale}
         title={copy.heroTitle}
@@ -229,7 +320,7 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
                 </div>
               </div>
 
-              <div className="aspect-[4/3] w-full bg-[#d7d7d7]" aria-hidden="true" />
+              <CredibilityRowImage image={row.image} alt={row.title} />
             </Reveal>
           ))}
         </div>
@@ -249,5 +340,23 @@ export function CredibilityCompliancePage({locale}: CredibilityCompliancePagePro
         </Reveal>
       </section>
     </main>
+  );
+}
+
+function CredibilityRowImage({image, alt}: {image?: string; alt: string}) {
+  if (!image) {
+    return <div className="aspect-[4/3] w-full bg-[#d7d7d7]" aria-hidden="true" />;
+  }
+
+  return (
+    <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#d7d7d7]">
+      <Image
+        src={`/images/${image}`}
+        alt={alt}
+        fill
+        sizes="(min-width: 768px) 310px, 100vw"
+        className="origin-center scale-[1.32] object-cover object-center"
+      />
+    </div>
   );
 }

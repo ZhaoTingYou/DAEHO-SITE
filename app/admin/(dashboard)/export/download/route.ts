@@ -3,15 +3,16 @@ import type {NextRequest} from 'next/server';
 
 import {hasAdminSession} from '@/lib/cms/admin-session';
 import {getCmsExportFilename, getCmsExportSnapshot} from '@/lib/cms/export';
+import {getExternalUrl} from '@/lib/request-origin';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   if (!(await hasAdminSession())) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+    return NextResponse.redirect(getExternalUrl(request, '/admin/login'));
   }
 
-  const snapshot = getCmsExportSnapshot();
+  const snapshot = await getCmsExportSnapshot();
 
   return new NextResponse(JSON.stringify(snapshot, null, 2), {
     headers: {

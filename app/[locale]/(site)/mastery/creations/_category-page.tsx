@@ -23,7 +23,7 @@ export async function getCollectionCategoryMetadata({
   categoryId
 }: CategoryPageProps): Promise<Metadata> {
   const {locale} = await params;
-  const messages = getLocaleMessages(locale);
+  const messages = await getLocaleMessages(locale);
   const category = messages.specialtyPages.collection.gallery.filters.find((filter) => filter.id === categoryId);
 
   if (!category) {
@@ -41,14 +41,14 @@ export async function getCollectionCategoryMetadata({
 export async function CollectionCategoryPage({params, categoryId}: CategoryPageProps) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const messages = getLocaleMessages(locale);
+  const messages = await getLocaleMessages(locale);
   const content = messages.specialtyPages.collection;
   const text = messages.collectionUi;
   const filters = content.gallery.filters.map((filter) => ({
     ...filter,
     hasImage: Boolean(filter.image && imageExists(filter.image))
   }));
-  const items = getCollectionItemsForSite(locale);
+  const items = await getCollectionItemsForSite(locale);
 
   if (!filters.some((filter) => filter.id === categoryId)) {
     notFound();
@@ -65,6 +65,8 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
         allLabel={text.allCategories}
         countSuffix={text.countSuffix}
         finder={text.finder}
+        appointment={text.appointment}
+        bespoke={text.bespoke}
         locale={locale}
       />
     </main>

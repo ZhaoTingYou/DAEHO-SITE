@@ -4,6 +4,7 @@ import type {SpecialtyCollectionItem} from '@/components/specialty/specialty-col
 import type {Locale} from '@/i18n/routing';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
+import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 
 import {
   getPublicCollection,
@@ -24,62 +25,72 @@ export type PublicNewsDetail = {
   ogImagePath: string;
 };
 
-export function getNewsCardsForSite(locale: Locale): NewsCard[] {
-  const cmsItems = readCmsValue(() => listPublicNews(locale), []);
+export async function getNewsCardsForSite(locale: Locale): Promise<NewsCard[]> {
+  const cmsItems = await readCmsValue(() => listPublicNews(locale), []);
 
   if (cmsItems.length > 0) {
     return cmsItems.map((item) => ({
-      id: item.slug,
-      category: item.category,
-      categoryLabel: item.categoryLabel,
-      date: item.publishedAt,
-      title: item.title,
-      image: item.imagePath,
-      hasImage: imageExists(item.imagePath)
+      id: String(item.slug),
+      category: String(item.category),
+      categoryLabel: String(item.categoryLabel),
+      date: String(item.publishedAt),
+      title: String(item.title),
+      image: cmsImageName(item.imagePath),
+      hasImage: imageExists(cmsImageName(item.imagePath))
     }));
   }
 
-  return getLocaleMessages(locale).news.grid.cards.map((card) => ({
+  return (await getLocaleMessages(locale)).news.grid.cards.map((card) => ({
     ...card,
     hasImage: imageExists(card.image)
   }));
 }
 
-export function getHomeNewsCardsForSite(locale: Locale): HomeNewsPopupCard[] {
-  return getNewsCardsForSite(locale).slice(0, 4).map((card) => ({
+export async function getHomeNewsCardsForSite(locale: Locale): Promise<HomeNewsPopupCard[]> {
+  return (await getNewsCardsForSite(locale)).slice(0, 4).map((card) => ({
     ...card,
     hasImage: imageExists(card.image)
   }));
 }
 
-export function getNewsDetailForSite(locale: Locale, slug: string): PublicNewsDetail | null {
-  const text = getLocaleMessages(locale).newsUi.detail;
-  const cmsItem = readCmsValue(() => getPublicNews(slug, locale), null);
+export function getHomeNewsCardsFromPage(cards: Array<Omit<HomeNewsPopupCard, 'hasImage'>>): HomeNewsPopupCard[] {
+  return cards.slice(0, 4).map((card) => ({
+    ...card,
+    hasImage: imageExists(card.image)
+  }));
+}
+
+export async function getNewsDetailForSite(locale: Locale, slug: string): Promise<PublicNewsDetail | null> {
+  const text = (await getLocaleMessages(locale)).newsUi.detail;
+  const cmsItem = await readCmsValue(() => getPublicNews(slug, locale), null);
 
   if (cmsItem) {
     const body = normalizeNewsBody(cmsItem.body);
+    const image = cmsImageName(cmsItem.imagePath);
+    const ogImage = cmsImageName(cmsItem.ogImagePath || cmsItem.imagePath);
+
     return {
       card: {
-        id: cmsItem.slug,
-        category: cmsItem.category,
-        categoryLabel: cmsItem.categoryLabel,
-        date: cmsItem.publishedAt,
-        title: cmsItem.title,
-        image: cmsItem.imagePath,
-        hasImage: imageExists(cmsItem.imagePath)
+        id: String(cmsItem.slug),
+        category: String(cmsItem.category),
+        categoryLabel: String(cmsItem.categoryLabel),
+        date: String(cmsItem.publishedAt),
+        title: String(cmsItem.title),
+        image,
+        hasImage: imageExists(image)
       },
-      lead: body.lead || cmsItem.excerpt || text.lead,
+      lead: body.lead || String(cmsItem.excerpt ?? '') || text.lead,
       paragraphs: body.paragraphs.length > 0 ? body.paragraphs : text.paragraphs,
       quote: body.quote || text.quote,
-      tags: cmsItem.tags.length > 0 ? cmsItem.tags : text.tags,
+      tags: Array.isArray(cmsItem.tags) && cmsItem.tags.length > 0 ? cmsItem.tags.filter((tag): tag is string => typeof tag === 'string') : text.tags,
       ctaTitle: body.ctaTitle || text.ctaTitle,
-      seoTitle: cmsItem.seoTitle || cmsItem.title,
-      seoDescription: cmsItem.seoDescription || body.lead || cmsItem.excerpt || '',
-      ogImagePath: cmsItem.ogImagePath || cmsItem.imagePath
+      seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
+      seoDescription: String(cmsItem.seoDescription || body.lead || cmsItem.excerpt || ''),
+      ogImagePath: ogImage
     };
   }
 
-  const card = getLocaleMessages(locale).news.grid.cards.find((item) => item.id === slug);
+  const card = (await getLocaleMessages(locale)).news.grid.cards.find((item) => item.id === slug);
 
   if (!card) {
     return null;
@@ -97,63 +108,66 @@ export function getNewsDetailForSite(locale: Locale, slug: string): PublicNewsDe
     ctaTitle: text.ctaTitle,
     seoTitle: card.title,
     seoDescription: text.lead,
-    ogImagePath: 'news_detail_hero.png'
+    ogImagePath: text.ogImagePath || card.image
   };
 }
 
-export function getCollectionItemsForSite(locale: Locale): SpecialtyCollectionItem[] {
-  const cmsItems = readCmsValue(() => listPublicCollections(locale), []);
+export async function getCollectionItemsForSite(locale: Locale): Promise<SpecialtyCollectionItem[]> {
+  const cmsItems = await readCmsValue(() => listPublicCollections(locale), []);
 
   if (cmsItems.length > 0) {
     return cmsItems.map((item) => {
       const specs = normalizeCollectionSpecs(item.specs);
       return {
-        id: item.slug,
-        title: item.title,
-        caption: item.caption,
-        category: item.category,
-        categoryLabel: item.categoryLabel,
-        sportCategory: item.sportCategory || specs.sportCategory,
-        sportCategoryLabel: item.sportCategoryLabel,
+        id: String(item.slug),
+        title: String(item.title),
+        caption: String(item.caption),
+        category: String(item.category),
+        categoryLabel: String(item.categoryLabel),
+        sportCategory: String(item.sportCategory || specs.sportCategory),
+        sportCategoryLabel: String(item.sportCategoryLabel),
         year: specs.year,
-        image: item.imagePath,
-        hasImage: imageExists(item.imagePath)
+        image: cmsImageName(item.imagePath),
+        hasImage: imageExists(cmsImageName(item.imagePath))
       };
     });
   }
 
-  return getLocaleMessages(locale).specialtyPages.collection.gallery.items.map((item) => ({
+  return (await getLocaleMessages(locale)).specialtyPages.collection.gallery.items.map((item) => ({
     ...item,
     hasImage: imageExists(item.image)
   }));
 }
 
-export function getCollectionItemForSite(locale: Locale, slug: string) {
-  const cmsItem = readCmsValue(() => getPublicCollection(slug, locale), null);
+export async function getCollectionItemForSite(locale: Locale, slug: string) {
+  const cmsItem = await readCmsValue(() => getPublicCollection(slug, locale), null);
 
   if (cmsItem) {
     const specs = normalizeCollectionSpecs(cmsItem.specs);
+    const image = cmsImageName(cmsItem.imagePath);
+    const ogImage = cmsImageName(cmsItem.ogImagePath || cmsItem.imagePath);
+
     return {
-      id: cmsItem.slug,
-      title: cmsItem.title,
-      caption: cmsItem.caption,
-      story: cmsItem.story,
-      category: cmsItem.category,
-      categoryLabel: cmsItem.categoryLabel,
-      sportCategory: cmsItem.sportCategory || specs.sportCategory,
-      sportCategoryLabel: cmsItem.sportCategoryLabel,
+      id: String(cmsItem.slug),
+      title: String(cmsItem.title),
+      caption: String(cmsItem.caption),
+      story: String(cmsItem.story),
+      category: String(cmsItem.category),
+      categoryLabel: String(cmsItem.categoryLabel),
+      sportCategory: String(cmsItem.sportCategory || specs.sportCategory),
+      sportCategoryLabel: String(cmsItem.sportCategoryLabel),
       year: specs.year,
-      image: cmsItem.imagePath,
-      gallery: normalizeGallery(cmsItem.gallery, cmsItem.imagePath),
-      hasImage: imageExists(cmsItem.imagePath),
-      seoTitle: cmsItem.seoTitle || cmsItem.title,
-      seoDescription: cmsItem.seoDescription || cmsItem.caption,
-      ogImagePath: cmsItem.ogImagePath || cmsItem.imagePath,
+      image,
+      gallery: normalizeGallery(cmsItem.gallery, image),
+      hasImage: imageExists(image),
+      seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
+      seoDescription: String(cmsItem.seoDescription || cmsItem.caption || ''),
+      ogImagePath: ogImage,
       specs
     };
   }
 
-  const item = getLocaleMessages(locale).specialtyPages.collection.gallery.items.find((entry) => entry.id === slug);
+  const item = (await getLocaleMessages(locale)).specialtyPages.collection.gallery.items.find((entry) => entry.id === slug);
 
   if (!item) {
     return null;
@@ -219,17 +233,48 @@ function normalizeCollectionSpecs(value: unknown) {
 
 function normalizeGallery(value: unknown, fallbackImage: string) {
   const images = Array.isArray(value)
-    ? value.filter((image): image is string => typeof image === 'string' && image.length > 0)
+    ? value
+      .filter((image): image is string => typeof image === 'string' && image.length > 0)
+      .map(cmsImageName)
+      .filter(Boolean)
     : [];
 
   return images.length > 0 ? images : [fallbackImage].filter(Boolean);
 }
 
-function readCmsValue<T>(reader: () => T, fallback: T): T {
+function cmsImageName(value: unknown) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  let imagePath = value.trim().split(/[?#]/)[0]?.replace(/\\/g, '/') ?? '';
+
+  if (!imagePath) {
+    return '';
+  }
+
+  if (/^https?:\/\//i.test(imagePath)) {
+    try {
+      imagePath = new URL(imagePath).pathname;
+    } catch {
+      return '';
+    }
+  }
+
+  return imagePath
+    .replace(/^\/+/, '')
+    .replace(/^public\/images\//, '')
+    .replace(/^images\//, '')
+    .replace(/^uploads\//, '');
+}
+
+async function readCmsValue<T>(reader: () => Promise<T>, fallback: T): Promise<T> {
   try {
-    return reader();
+    return await reader();
   } catch (error) {
-    console.error('[cms] Falling back to static content because CMS read failed.', error);
+    if (!isNextDynamicServerError(error)) {
+      console.error('[cms] Falling back to static content because CMS read failed.', error);
+    }
     return fallback;
   }
 }

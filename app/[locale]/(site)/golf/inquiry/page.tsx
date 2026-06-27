@@ -24,7 +24,7 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
   const {locale} = await params;
   const query = await searchParams;
   setRequestLocale(locale);
-  const messages = getLocaleMessages(locale);
+  const messages = await getLocaleMessages(locale);
   const text = messages.golfInquiry;
   const golf = messages.golf;
   const selectedHead = golf.heads.items.find((item) => item.id === query.head) ?? golf.heads.items[0];

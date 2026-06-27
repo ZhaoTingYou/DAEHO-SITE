@@ -9,6 +9,7 @@ import {
   setObjectValueAtPath
 } from '@/lib/cms/page-catalog';
 import {listPages} from '@/lib/cms/repositories';
+import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 
@@ -19,14 +20,14 @@ const messagesByLocale: Record<Locale, LocaleMessages> = {
   en: enMessages
 };
 
-export function getLocaleMessages(locale: Locale): LocaleMessages {
+export async function getLocaleMessages(locale: Locale): Promise<LocaleMessages> {
   const baseMessages = cloneJson(messagesByLocale[locale] ?? koMessages);
 
   return applyCmsPageOverrides(baseMessages, locale);
 }
 
-function applyCmsPageOverrides(messages: LocaleMessages, locale: Locale) {
-  const pages = readCmsPages();
+async function applyCmsPageOverrides(messages: LocaleMessages, locale: Locale) {
+  const pages = await readCmsPages();
 
   if (pages.length === 0) {
     return messages;
@@ -59,11 +60,13 @@ function applyCmsPageOverrides(messages: LocaleMessages, locale: Locale) {
   return messages;
 }
 
-function readCmsPages() {
+async function readCmsPages() {
   try {
-    return listPages();
+    return await listPages();
   } catch (error) {
-    console.error('[cms] Falling back to static locale messages because CMS pages could not be read.', error);
+    if (!isNextDynamicServerError(error)) {
+      console.error('[cms] Falling back to static locale messages because CMS pages could not be read.', error);
+    }
     return [];
   }
 }

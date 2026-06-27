@@ -18,7 +18,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function AchievementPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = getLocaleMessages(locale).legacyPages.achievement;
+  const content = (await getLocaleMessages(locale)).legacyPages.achievement;
 
   return <AchievementRecordsPage locale={locale} content={content} />;
 }

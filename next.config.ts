@@ -4,7 +4,12 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
-  serverExternalPackages: ['better-sqlite3'],
+  output: 'standalone',
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '12mb'
+    }
+  },
   turbopack: {
     root: process.cwd()
   },

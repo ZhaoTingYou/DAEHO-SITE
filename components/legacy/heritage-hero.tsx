@@ -1,8 +1,12 @@
+import Image from 'next/image';
+
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 
 type HeritageHeroProps = {
   body?: string;
+  image?: string;
+  imageAlt?: string;
   imagePlaceholder: string;
   label: string;
   lines?: string[];
@@ -12,6 +16,8 @@ type HeritageHeroProps = {
 
 export function HeritageHero({
   body,
+  image,
+  imageAlt = '',
   imagePlaceholder,
   label,
   lines,
@@ -26,8 +32,22 @@ export function HeritageHero({
   const contentLines = lines?.length ? lines : body ? [body] : [];
 
   return (
-    <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#653433] px-container py-[clamp(118px,14vw,188px)]">
-      <Reveal className="w-full max-w-[680px] border border-white/18 bg-[#e5dddc] px-[clamp(30px,4.8vw,70px)] py-[clamp(54px,6vw,74px)] text-center text-[#111111] shadow-[0_28px_90px_rgba(22,10,10,0.10)]">
+    <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#653433] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[86svh] max-md:py-[clamp(104px,22vw,142px)]">
+      {image ? (
+        <>
+          <Image
+            src={`/images/${image}`}
+            alt={imageAlt}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-[#653433]/58" aria-hidden="true" />
+        </>
+      ) : null}
+
+      <Reveal className="relative w-full max-w-[680px] border border-white/18 bg-[#e5dddc] px-[clamp(30px,4.8vw,70px)] py-[clamp(54px,6vw,74px)] text-center text-[#111111] shadow-[0_28px_90px_rgba(22,10,10,0.10)]">
         <p className={`${englishTextClass} mb-[46px] text-[15px] uppercase leading-none tracking-[0.04em] text-accent`}>
           {label}
         </p>
@@ -42,9 +62,11 @@ export function HeritageHero({
           ))}
         </div>
       </Reveal>
-      <p className={`${bodyTextClass} absolute bottom-5 left-5 text-[15px] leading-none text-black`}>
-        {imagePlaceholder}
-      </p>
+      {!image && imagePlaceholder ? (
+        <p className={`${bodyTextClass} absolute bottom-5 left-5 text-[15px] leading-none text-black`}>
+          {imagePlaceholder}
+        </p>
+      ) : null}
     </section>
   );
 }

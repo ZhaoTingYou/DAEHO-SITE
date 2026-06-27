@@ -1,8 +1,7 @@
-import {existsSync} from 'node:fs';
-import path from 'node:path';
-
 import Image from 'next/image';
 
+import {imageExists} from '@/lib/image-exists';
+import {imageSrc} from '@/lib/image-src';
 import {PlaceholderImg} from './placeholder-img';
 
 type SafeImageProps = {
@@ -20,9 +19,7 @@ export function SafeImage({
   priority = false,
   variant = 'spotlight'
 }: SafeImageProps) {
-  const imagePath = path.join(process.cwd(), 'public', 'images', filename);
-
-  if (!existsSync(imagePath)) {
+  if (!imageExists(filename)) {
     return <PlaceholderImg filename={filename} aspect={aspect} />;
   }
 
@@ -34,7 +31,7 @@ export function SafeImage({
   return (
     <div className={`${aspect} ${frame} relative w-full overflow-hidden`}>
       <Image
-        src={`/images/${filename}`}
+        src={imageSrc(filename)}
         alt={alt}
         fill
         priority={priority}

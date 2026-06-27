@@ -8,7 +8,7 @@ import {LenisProvider} from '@/components/motion/lenis-provider';
 import {ReducedMotionProvider} from '@/components/motion/reduced-motion-provider';
 import {routing, type Locale} from '@/i18n/routing';
 import type {LocaleMessages} from '@/lib/locale-messages';
-import {metadataBase} from '@/lib/seo';
+import {metadataBase, previewNoindexRobots} from '@/lib/seo';
 
 type Props = {
   children: React.ReactNode;
@@ -32,6 +32,7 @@ export async function generateMetadata({params}: Omit<Props, 'children'>): Promi
     metadataBase,
     title: t('title'),
     description: t('description'),
+    robots: previewNoindexRobots(),
     alternates: {
       languages: {
         ko: '/ko',

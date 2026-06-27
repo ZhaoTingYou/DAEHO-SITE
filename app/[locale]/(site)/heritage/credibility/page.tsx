@@ -18,7 +18,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function CredibilityPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = getLocaleMessages(locale).legacyPages.credibility;
+  const content = (await getLocaleMessages(locale)).legacyPages.credibility;
 
   return <CredibilityCompliancePage locale={locale} content={content} />;
 }

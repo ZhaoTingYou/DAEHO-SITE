@@ -25,8 +25,8 @@ type FooterGroup = {
 
 const showFooterExternalLinks = false;
 
-export function SiteFooter({locale}: SiteFooterProps) {
-  const text = getLocaleMessages(locale).common;
+export async function SiteFooter({locale}: SiteFooterProps) {
+  const text = (await getLocaleMessages(locale)).common;
   const navLabels = text.navigation.items;
   const externalLabels = text.footer.externalSites;
   const {business, legal} = text.footer;
@@ -79,7 +79,7 @@ export function SiteFooter({locale}: SiteFooterProps) {
       <div className="mx-auto max-w-[1440px] px-container py-[clamp(56px,7vw,96px)]">
         <div className="grid gap-10 border-b border-hairline pb-12 lg:grid-cols-[minmax(260px,0.52fr)_minmax(0,0.48fr)] lg:items-start">
           <div className="space-y-4">
-            <Link href={withLocale(locale, '/')} className="font-heading text-[28px] font-semibold tracking-[0.18em] text-primary">
+            <Link href={withLocale(locale, '/')} className="inline-flex min-h-11 items-center font-heading text-[28px] font-semibold tracking-[0.18em] text-primary">
               DAEHO
             </Link>
             <p className="max-w-sm font-body text-[14px] leading-6 text-subtext">

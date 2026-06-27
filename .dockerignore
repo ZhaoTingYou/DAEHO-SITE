@@ -1,0 +1,9 @@
+.git
+.next
+artifacts
+backend/cms/target
+data
+node_modules
+npm-debug.log
+Dockerfile*
+docker-compose*.yml

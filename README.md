@@ -41,6 +41,8 @@ visual decisions.
 - Framer Motion
 - Lenis smooth scrolling
 - `next-intl`
+- Spring Boot CMS backend on Java 17
+- PostgreSQL + Flyway + Spring JDBC
 - Routes use `/ko` and `/en`
 
 ## Run
@@ -73,34 +75,41 @@ git diff --check
 
 ## CMS Operations
 
-The project includes a company-only CMS backend under `/admin` plus protected
-JSON APIs under `/api/admin/*`.
+The `/admin` UI remains in Next.js, but CMS data now lives in the Spring Boot
+service under `backend/cms`.
 
-Initialize or refresh the local SQLite database from `messages/*.json` and
-`public/images`:
-
-```bash
-npm run cms:init
-```
-
-Export a full JSON backup:
+Local Spring service:
 
 ```bash
-npm run cms:export
+cd backend/cms
+mvn spring-boot:run
 ```
 
-Import a JSON backup:
+Required local variables:
 
 ```bash
-npm run cms:import -- path/to/deaho-cms-export.json
-npm run cms:import -- path/to/deaho-cms-export.json --replace
+CMS_BACKEND_URL=http://localhost:8080
+CMS_BACKEND_API_KEY=replace-with-a-long-random-key
+CMS_ADMIN_API_KEY=replace-with-the-same-value-as-CMS_BACKEND_API_KEY
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/deaho_cms
+SPRING_DATASOURCE_USERNAME=deaho
+SPRING_DATASOURCE_PASSWORD=replace-with-a-strong-database-password
 ```
 
-Protected admin import API:
+Production-like local stack:
+
+```bash
+docker compose up --build
+```
+
+The default compose file exposes HTTP for local smoke tests. Put HTTPS
+termination in Nginx or an upstream load balancer before production launch.
+
+Protected import/export/status APIs are still exposed through Next as a BFF:
 
 ```bash
 curl -X POST \
-  -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \
+  -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \
   -H "Content-Type: application/json" \
   --data-binary @deaho-cms-export.json \
   http://localhost:3000/api/admin/import
@@ -110,42 +119,33 @@ The import API validates and previews by default. To replace CMS tables, call:
 
 ```bash
 curl -X POST \
-  -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \
+  -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \
   -H "Content-Type: application/json" \
   --data-binary @deaho-cms-export.json \
   "http://localhost:3000/api/admin/import?replace=1"
-```
 
-Admin API health/status:
-
-```bash
-curl -H "x-admin-api-key: $CMS_ADMIN_API_KEY" \
+curl -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \
   http://localhost:3000/api/admin/status
 ```
 
-The admin overview page also shows CMS health, including database path,
-persistence mode, total tracked rows, latest inquiry, latest email event, and
-email notification configuration.
+Legacy SQLite migration helpers are retained only for exporting existing data
+before the Spring cutover:
 
-Production note: SQLite must use persistent storage through `CMS_DB_PATH`.
-Without that variable on Vercel, the app falls back to `/tmp`, which keeps the
-public site online but does not persist CMS edits between serverless instances.
+```bash
+npm run cms:export
+```
 
 Inquiry flow:
 
-- Contact and Golf forms write to `cms_inquiries`.
+- Contact and Golf forms write to PostgreSQL through Spring.
 - Email notification attempts are recorded in `cms_email_events`.
-- Missing SMTP configuration does not block form submission; the email event is
-  recorded as `skipped`.
+- Missing SMTP configuration does not block form submission; Spring records the
+  email event as `skipped`.
 
 Latest verification before this README update:
 
-- `npm run lint` passed
-- `npm run build` passed
-- `git diff --check` passed
-- Local routes checked on `http://localhost:3001`
-- English pages were checked for Korean text leakage and passed for main and
-  detail routes
+- `npx tsc --noEmit` passed
+- `cd backend/cms && mvn test -q` passed
 
 ## Important Agent Rules
 

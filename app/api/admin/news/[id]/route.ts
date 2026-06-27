@@ -25,7 +25,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const item = getNews(id);
+  const item = await getNews(id);
 
   if (!item) {
     return NextResponse.json({error: 'News item not found'}, {status: 404});
@@ -54,7 +54,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const item = updateNews(id, parsed.data);
+  const item = await updateNews(id, parsed.data);
 
   if (!item) {
     return NextResponse.json({error: 'News item not found'}, {status: 404});
@@ -72,7 +72,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
   const {id} = await context.params;
 
-  if (!deleteNews(id)) {
+  if (!(await deleteNews(id))) {
     return NextResponse.json({error: 'News item not found'}, {status: 404});
   }
 

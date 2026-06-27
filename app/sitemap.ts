@@ -2,6 +2,7 @@ import type {MetadataRoute} from 'next';
 
 import {routing} from '@/i18n/routing';
 import {listPublicCollections, listPublicNews} from '@/lib/cms/repositories';
+import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {metadataBase} from '@/lib/seo';
 import koMessages from '@/messages/ko.json';
 
@@ -23,9 +24,9 @@ const staticPaths = [
   '/privacy'
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const cmsNews = readCmsValue(() => listPublicNews('ko'), []);
-  const cmsCollections = readCmsValue(() => listPublicCollections('ko'), []);
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const cmsNews = await readCmsValue(() => listPublicNews('ko'), []);
+  const cmsCollections = await readCmsValue(() => listPublicCollections('ko'), []);
   const detailPaths = [
     ...(cmsNews.length > 0
       ? cmsNews.map((card) => `/news/${card.slug}`)
@@ -50,11 +51,13 @@ function absoluteUrl(path: string) {
   return new URL(path, metadataBase).toString();
 }
 
-function readCmsValue<T>(reader: () => T, fallback: T): T {
+async function readCmsValue<T>(reader: () => Promise<T>, fallback: T): Promise<T> {
   try {
-    return reader();
+    return await reader();
   } catch (error) {
-    console.error('[cms] Falling back to static sitemap entries because CMS read failed.', error);
+    if (!isNextDynamicServerError(error)) {
+      console.error('[cms] Falling back to static sitemap entries because CMS read failed.', error);
+    }
     return fallback;
   }
 }

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     return unauthorized;
   }
 
-  return NextResponse.json(getCmsStatus(), {
+  return NextResponse.json(await getCmsStatus(), {
     headers: {
       'Cache-Control': 'no-store'
     }

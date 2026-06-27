@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const inquiry = getInquiry(id);
+  const inquiry = await getInquiry(id);
 
   if (!inquiry) {
     return NextResponse.json({error: 'Inquiry not found'}, {status: 404});
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   return NextResponse.json({
     inquiry,
-    emailEvents: listEmailEventsForInquiry(id)
+    emailEvents: await listEmailEventsForInquiry(id)
   });
 }
 
@@ -61,7 +61,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const inquiry = updateInquiryStatus(id, parsed.data);
+  const inquiry = await updateInquiryStatus(id, parsed.data);
 
   if (!inquiry) {
     return NextResponse.json({error: 'Inquiry not found'}, {status: 404});
@@ -69,6 +69,6 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
   return NextResponse.json({
     inquiry,
-    emailEvents: listEmailEventsForInquiry(id)
+    emailEvents: await listEmailEventsForInquiry(id)
   });
 }
