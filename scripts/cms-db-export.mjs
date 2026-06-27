@@ -33,7 +33,7 @@ if (useStdout) {
       process.cwd(),
       'artifacts',
       'cms-exports',
-      `deaho-cms-export-${exportedAt.replace(/[:.]/g, '-')}.json`
+      `daeho-cms-export-${exportedAt.replace(/[:.]/g, '-')}.json`
     );
 
   mkdirSync(path.dirname(outputPath), {recursive: true});

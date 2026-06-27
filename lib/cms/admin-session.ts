@@ -3,7 +3,7 @@ import {createHmac, timingSafeEqual} from 'node:crypto';
 import {cookies} from 'next/headers';
 import {redirect} from 'next/navigation';
 
-const adminSessionCookie = 'deaho_admin_session';
+const adminSessionCookie = 'daeho_admin_session';
 const sessionMaxAgeSeconds = 60 * 60 * 8;
 const loginAttemptWindowMs = 15 * 60 * 1000;
 const loginLockMs = 15 * 60 * 1000;
@@ -139,7 +139,7 @@ function getSessionSecret() {
     process.env.CMS_ADMIN_SESSION_SECRET ??
     process.env.CMS_ADMIN_API_KEY ??
     process.env.CMS_ADMIN_PASSWORD ??
-    (process.env.NODE_ENV !== 'production' ? 'deaho-local-admin-session' : '')
+    (process.env.NODE_ENV !== 'production' ? 'daeho-local-admin-session' : '')
   );
 }
 

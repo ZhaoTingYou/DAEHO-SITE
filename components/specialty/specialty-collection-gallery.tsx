@@ -1329,12 +1329,12 @@ function BespokeFilterDrawer({
     const previousOverflow = document.body.style.overflow;
 
     document.body.style.overflow = 'hidden';
-    window.dispatchEvent(new Event('deaho:lenis-stop'));
+    window.dispatchEvent(new Event('daeho:lenis-stop'));
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.dispatchEvent(new Event('deaho:lenis-start'));
+      window.dispatchEvent(new Event('daeho:lenis-start'));
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [close]);
@@ -2021,12 +2021,12 @@ function CollectionFilterDrawer({
     const previousOverflow = document.body.style.overflow;
 
     document.body.style.overflow = 'hidden';
-    window.dispatchEvent(new Event('deaho:lenis-stop'));
+    window.dispatchEvent(new Event('daeho:lenis-stop'));
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.dispatchEvent(new Event('deaho:lenis-start'));
+      window.dispatchEvent(new Event('daeho:lenis-start'));
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [close]);

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAEHO · 六页母题线框</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F8F6F2; --white:#FFFFFF; --primary:#101D30; --accent:#7A2230;
+    --text:#1A1A1A; --subtext:#666666; --hairline:rgba(16,29,48,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--primary);color:var(--text);font-family:'Inter',system-ui,sans-serif;padding:48px 24px 80px;-webkit-font-smoothing:antialiased}
+  .page-head{max-width:1080px;margin:0 auto 40px;color:var(--bg);text-align:center}
+  .page-head h1{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:44px;letter-spacing:.02em}
+  .page-head p{color:#AEB6C2;font-size:14px;margin-top:8px;line-height:1.6}
+  .legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:18px;font-size:12px;color:#AEB6C2}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.25)}
+  .grid{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+  .card{background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .card-top{display:flex;align-items:baseline;justify-content:space-between;padding:18px 22px 0}
+  .card-top .num{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--accent);font-weight:700;line-height:1}
+  .card-top .nm{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--primary)}
+  .card-top .motif{font-size:12px;color:var(--accent);letter-spacing:.08em;text-transform:uppercase}
+  .card-sub{padding:4px 22px 14px;font-size:12.5px;color:var(--subtext);line-height:1.6}
+  .frame{padding:0 22px 22px}
+  svg{display:block;width:100%;height:auto;border:1px solid var(--hairline);border-radius:8px;background:var(--white)}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;padding:0 22px 22px}
+  .tag{font-size:11px;color:var(--primary);border:1px solid var(--hairline);border-radius:999px;padding:4px 10px;background:#fff}
+  .tag b{color:var(--accent)}
+  .foot{max-width:1080px;margin:40px auto 0;color:#AEB6C2;font-size:12.5px;line-height:1.7;text-align:center}
+  /* SVG 文字/线条统一类 */
+  .t-serif{font-family:'Cormorant Garamond',serif}
+  .t-sans{font-family:'Inter',sans-serif}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>DAEHO — 六页核心母题 · 低保真线框</h1>
+  <p>统一的是「语言」(色/字/动效),不同的是「气质」。检验法:遮住文字也能一眼认出是哪一页。<br>以下为骨架示意,非最终视觉;灰块=图片/视频占位,蓝条=文字。</p>
+  <div class="legend">
+    <span><i class="sw" style="background:#F8F6F2"></i>象牙底 #F8F6F2</span>
+    <span><i class="sw" style="background:#FFFFFF"></i>纯白 #FFFFFF</span>
+    <span><i class="sw" style="background:#101D30"></i>海军蓝/墨 #101D30</span>
+    <span><i class="sw" style="background:#7A2230"></i>酒红点睛 #7A2230</span>
+    <span><i class="sw" style="background:#C9CDD3"></i>图片占位</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- ============ HEADER 顶栏规格 ============ -->
+  <div class="card">
+    <div class="card-top"><div><span class="nm">HEADER</span></div><div class="motif">两层 · 透明起步 · mega menu · 方向感知</div></div>
+    <div class="card-sub">第一行=logo(靠左)+ 语言 + 대호/OH/VULCAN 外链;第二行=主导航。hover LEGACY/SPECIALTY 出通栏 mega menu。下滚隐藏/上滚出现;hero 上透明反白,滚动后象牙底。</div>
+    <div class="frame">
+      <svg viewBox="0 0 900 560" role="img" aria-label="HEADER 线框">
+        <!-- 透明态(叠在 hero 上) -->
+        <text x="20" y="24" class="t-sans" font-size="11" fill="#7A2230" font-weight="600">① 透明态(初始,叠在 hero 视频上,文字反白)</text>
+        <rect x="20" y="32" width="860" height="120" rx="6" fill="#C9CDD3"/>
+        <!-- utility bar -->
+        <text x="40" y="62" class="t-serif" font-size="22" font-weight="700" fill="#fff">D A E H O</text>
+        <text x="640" y="60" class="t-sans" font-size="11" fill="#fff">KO / EN</text>
+        <line x1="698" y1="50" x2="698" y2="64" stroke="#fff" stroke-opacity=".5"/>
+        <text x="710" y="60" class="t-sans" font-size="11" fill="#fff" opacity=".75">대호  OH  VULCAN</text>
+        <rect x="790" y="46" width="70" height="22" rx="11" fill="none" stroke="#fff" stroke-width="1.4"/>
+        <text x="825" y="61" text-anchor="middle" class="t-sans" font-size="10" fill="#fff">CONTACT</text>
+        <line x1="40" y1="78" x2="860" y2="78" stroke="#fff" stroke-opacity=".25"/>
+        <!-- 主导航 -->
+        <g class="t-sans" font-size="12" fill="#fff" letter-spacing="1">
+          <text x="40" y="108">HOME</text>
+          <text x="110" y="108">CHRONICLE</text>
+          <text x="215" y="108">LEGACY ▾</text>
+          <text x="310" y="108">SPECIALTY ▾</text>
+          <text x="420" y="108">NEWS</text>
+          <text x="480" y="108">GOLF</text>
+        </g>
+        <rect x="40" y="116" width="40" height="2" fill="#7A2230"/>
+
+        <!-- 象牙态 + mega menu 展开 -->
+        <text x="20" y="190" class="t-sans" font-size="11" fill="#7A2230" font-weight="600">② 象牙态(滚动后,海军蓝字)+ hover SPECIALTY 弹出通栏 mega menu</text>
+        <rect x="20" y="200" width="860" height="60" rx="6" fill="#F8F6F2" stroke="rgba(16,29,48,.15)"/>
+        <text x="40" y="226" class="t-serif" font-size="20" font-weight="700" fill="#101D30">D A E H O</text>
+        <text x="640" y="224" class="t-sans" font-size="11" fill="#101D30">KO / EN</text>
+        <text x="710" y="224" class="t-sans" font-size="11" fill="#666">대호  OH  VULCAN</text>
+        <rect x="790" y="210" width="70" height="22" rx="11" fill="none" stroke="#7A2230" stroke-width="1.4"/>
+        <text x="825" y="225" text-anchor="middle" class="t-sans" font-size="10" fill="#7A2230">CONTACT</text>
+        <g class="t-sans" font-size="12" fill="#101D30" letter-spacing="1">
+          <text x="40" y="250">HOME</text>
+          <text x="110" y="250">CHRONICLE</text>
+          <text x="215" y="250">LEGACY</text>
+          <text x="310" y="250" fill="#7A2230">SPECIALTY ▾</text>
+          <text x="420" y="250">NEWS</text>
+          <text x="480" y="250">GOLF</text>
+        </g>
+        <!-- mega menu 满宽面板 -->
+        <rect x="20" y="262" width="860" height="120" rx="0" fill="#fff" stroke="rgba(16,29,48,.12)"/>
+        <rect x="20" y="262" width="860" height="3" fill="#7A2230"/>
+        <text x="60" y="300" class="t-sans" font-size="14" font-weight="600" fill="#101D30">TECHNIQUE</text>
+        <text x="60" y="320" class="t-sans" font-size="11" fill="#666">공정 · 7단계의 정성(7 步制作流程)</text>
+        <text x="60" y="350" class="t-sans" font-size="14" font-weight="600" fill="#101D30">COLLECTION</text>
+        <text x="60" y="370" class="t-sans" font-size="11" fill="#666">작품 · 완성된 결과물(作品集画廊)</text>
+        <rect x="650" y="285" width="190" height="80" rx="4" fill="#C9CDD3"/>
+        <text x="745" y="328" text-anchor="middle" class="t-sans" font-size="10" fill="#666">板块预览缩略(可选)</text>
+
+        <!-- 方向感知 -->
+        <text x="20" y="430" class="t-sans" font-size="11" fill="#7A2230" font-weight="600">③ 方向感知滚动</text>
+        <rect x="40" y="442" width="360" height="40" rx="6" fill="#F8F6F2" stroke="rgba(16,29,48,.15)"/>
+        <text x="60" y="467" class="t-sans" font-size="11" fill="#101D30">↓ 下滚:顶栏向上滑出隐藏</text>
+        <rect x="440" y="442" width="360" height="40" rx="6" fill="#F8F6F2" stroke="rgba(16,29,48,.15)"/>
+        <text x="460" y="467" class="t-sans" font-size="11" fill="#101D30">↑ 上滚:立刻滑回出现(最顶部恒显示)</text>
+        <text x="40" y="520" class="t-sans" font-size="10" fill="#666">hover 主项或面板都保持打开,移出延迟 150ms 再关;隐藏时 mega menu 一并关闭。</text>
+      </svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><b>第一行:</b> logo 靠左 + 语言 + 대호/OH/VULCAN + <b style="color:#7A2230">CONTACT</b></span>
+      <span class="tag"><b>第二行:</b> 主导航</span>
+      <span class="tag"><b>mega menu</b>(LEGACY/SPECIALTY)</span>
+      <span class="tag">透明↔象牙</span>
+      <span class="tag">下滚藏/上滚现</span>
+    </div>
+  </div>
+
+
+  <!-- ============ HOME ============ -->
+  <div class="card">
+    <div class="card-top"><div><span class="nm">HOME</span></div><div class="motif">母题《幕启 · 影院银幕》</div></div>
+    <div class="card-sub">整屏循环视频当幕布 → 横向产品陈列 → 数字带 → 四篇章满幅门户卡。居中、留白最大、仪式感。一眼像旗舰店开场。</div>
+    <div class="frame">
+      <svg viewBox="0 0 900 560" role="img" aria-label="HOME 线框">
+        <!-- 视频银幕 hero -->
+        <rect x="0" y="0" width="900" height="300" fill="#C9CDD3"/>
+        <!-- 播放标记 -->
+        <circle cx="450" cy="120" r="26" fill="none" stroke="#101D30" stroke-width="2"/>
+        <path d="M442 108 L442 132 L462 120 Z" fill="#101D30"/>
+        <text x="450" y="160" text-anchor="middle" class="t-sans" font-size="11" fill="#101D30">BACKGROUND VIDEO (自动/静音/循环)</text>
+        <!-- 片名式巨标题 -->
+        <text x="450" y="215" text-anchor="middle" class="t-serif" font-size="46" font-weight="700" fill="#101D30">38 YEARS OF CHAMPIONS</text>
+        <rect x="360" y="232" width="180" height="7" rx="3" fill="#101D30" opacity=".5"/>
+        <!-- 下滑指示 -->
+        <line x1="450" y1="268" x2="450" y2="286" stroke="#7A2230" stroke-width="2"/>
+        <path d="M444 280 L450 288 L456 280" fill="none" stroke="#7A2230" stroke-width="2"/>
+        <!-- 横向产品陈列 -->
+        <text x="40" y="338" class="t-sans" font-size="11" fill="#666" letter-spacing="2">SIGNATURE WORKS · 대표작</text>
+        <g fill="#C9CDD3">
+          <rect x="40" y="350" width="180" height="120" rx="4"/>
+          <rect x="250" y="350" width="180" height="120" rx="4"/>
+          <rect x="460" y="350" width="180" height="120" rx="4"/>
+          <rect x="670" y="350" width="190" height="120" rx="4"/>
+        </g>
+        <!-- 数字带 -->
+        <text x="150" y="520" text-anchor="middle" class="t-serif" font-size="34" font-weight="700" fill="#101D30">1988</text>
+        <text x="450" y="520" text-anchor="middle" class="t-serif" font-size="34" font-weight="700" fill="#101D30">38</text>
+        <text x="750" y="520" text-anchor="middle" class="t-serif" font-size="34" font-weight="700" fill="#101D30">200,000+</text>
+        <text x="450" y="498" text-anchor="middle" class="t-sans" font-size="10" fill="#666">— 数字带 STAT ROW —</text>
+      </svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><b>母题元件:</b> 视频银幕</span>
+      <span class="tag">片名式居中巨衬线</span>
+      <span class="tag">下滑指示</span>
+      <span class="tag">四篇章门户卡(下接)</span>
+    </div>
+  </div>
+
+  <!-- ============ CHRONICLE ============ -->
+  <div class="card">
+    <div class="card-top"><div><span class="nm">CHRONICLE</span></div><div class="motif">母题《档案 · 时间轴》</div></div>
+    <div class="card-sub">一条贯通到底的竖轴,档案卡片左右交错挂在轴上;超大年份做锚点 + FIRST 红章 + 老照片显影。线性、考据、有重量。</div>
+    <div class="frame">
+      <svg viewBox="0 0 900 560" role="img" aria-label="CHRONICLE 线框">
+        <text x="40" y="46" class="t-sans" font-size="11" fill="#7A2230" letter-spacing="2">EST. 1988</text>
+        <text x="40" y="78" class="t-serif" font-size="30" font-weight="700" fill="#101D30">THE CHRONICLE · 역사의 기록물</text>
+        <!-- 竖轴(偏左) -->
+        <line x1="300" y1="110" x2="300" y2="540" stroke="#101D30" stroke-width="2"/>
+        <!-- 节点 + 年份 + 卡片 左右交错 -->
+        <!-- 1988 右 -->
+        <circle cx="300" cy="150" r="6" fill="#7A2230"/>
+        <text x="250" y="156" text-anchor="end" class="t-serif" font-size="30" font-weight="700" fill="#101D30">1988</text>
+        <rect x="330" y="125" width="300" height="80" rx="4" fill="#C9CDD3"/>
+        <rect x="330" y="125" width="120" height="80" rx="4" fill="#B9BEC6"/>
+        <!-- 19XX 左 + FIRST 章 -->
+        <circle cx="300" cy="265" r="6" fill="#7A2230"/>
+        <text x="350" y="271" class="t-serif" font-size="30" font-weight="700" fill="#101D30">19XX</text>
+        <rect x="60" y="240" width="210" height="70" rx="4" fill="#C9CDD3"/>
+        <rect x="60" y="240" width="60" height="22" rx="3" fill="#7A2230"/>
+        <text x="90" y="255" text-anchor="middle" class="t-sans" font-size="10" fill="#fff" font-weight="600">FIRST</text>
+        <!-- 20XX 右 -->
+        <circle cx="300" cy="380" r="6" fill="#7A2230"/>
+        <text x="250" y="386" text-anchor="end" class="t-serif" font-size="30" font-weight="700" fill="#101D30">20XX</text>
+        <rect x="330" y="355" width="300" height="80" rx="4" fill="#C9CDD3"/>
+        <!-- Today 左 -->
+        <circle cx="300" cy="490" r="6" fill="#101D30"/>
+        <text x="350" y="496" class="t-serif" font-size="22" font-weight="600" fill="#101D30">Today</text>
+        <rect x="90" y="468" width="180" height="60" rx="4" fill="#C9CDD3"/>
+        <text x="700" y="500" class="t-sans" font-size="10" fill="#666">← 竖轴随滚动「自我绘制」</text>
+      </svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><b>母题元件:</b> 贯通竖轴</span>
+      <span class="tag">超大年份锚点</span>
+      <span class="tag"><b>FIRST 红章</b></span>
+      <span class="tag">左右交错档案卡</span>
+    </div>
+  </div>
+
+  <!-- ============ LEGACY ============ -->
+  <div class="card">
+    <div class="card-top"><div><span class="nm">LEGACY</span></div><div class="motif">母题《碑文 · 巨数字》</div></div>
+    <div class="card-sub">大片留白里居中一句箴言 + 独占整屏的巨大数字。碑文式超大行距,几乎不分栏。克制、庄重、最慢。一眼像纪念厅。</div>
+    <div class="frame">
+      <svg viewBox="0 0 900 560" role="img" aria-label="LEGACY 线框">
+        <!-- 居中哲学句 -->
+        <text x="450" y="120" text-anchor="middle" class="t-serif" font-size="30" font-weight="600" fill="#101D30">THE MEANING, IN FORM</text>
+        <text x="450" y="180" text-anchor="middle" class="t-serif" font-size="22" fill="#1A1A1A">우리는 금속을 만들지 않습니다.</text>
+        <text x="450" y="214" text-anchor="middle" class="t-serif" font-size="22" fill="#1A1A1A">순간을 영원으로 만듭니다.</text>
+        <text x="450" y="244" text-anchor="middle" class="t-sans" font-size="10" fill="#7A2230">↑ 逐行「光扫」揭示</text>
+        <!-- 分隔留白 -->
+        <line x1="410" y1="280" x2="490" y2="280" stroke="#7A2230" stroke-width="1.5"/>
+        <!-- 满屏巨数字 StatRow -->
+        <text x="200" y="430" text-anchor="middle" class="t-serif" font-size="92" font-weight="700" fill="#101D30">38</text>
+        <text x="200" y="460" text-anchor="middle" class="t-sans" font-size="11" fill="#666">년의 업력</text>
+        <text x="640" y="430" text-anchor="middle" class="t-serif" font-size="72" font-weight="700" fill="#101D30">200,000+</text>
+        <text x="640" y="460" text-anchor="middle" class="t-sans" font-size="11" fill="#666">제작된 반지</text>
+        <text x="450" y="520" text-anchor="middle" class="t-sans" font-size="10" fill="#666">— 巨数字独占整屏 · 超大留白 —</text>
+      </svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><b>母题元件:</b> 碑文式居中箴言</span>
+      <span class="tag">海报级巨数字</span>
+      <span class="tag">超大留白/行距</span>
+      <span class="tag">光扫揭示</span>
+    </div>
+  </div>
+
+  <!-- ============ SPECIALTY ============ -->
+  <div class="card">
+    <div class="card-top"><div><span class="nm">SPECIALTY</span></div><div class="motif">母题《工序 · 解剖图》</div></div>
+    <div class="card-sub">左侧粘住的工序轴 + 右侧极致微距;半透明巨步骤号 01–07 压在图侧,等宽技术标签。精密、推进、信息密。一眼像工艺白皮书。</div>
+    <div class="frame">
+      <svg viewBox="0 0 900 560" role="img" aria-label="SPECIALTY 线框">
+        <!-- 左粘工序轴 -->
+        <rect x="0" y="0" width="300" height="560" fill="#F2EFEA"/>
+        <line x1="300" y1="0" x2="300" y2="560" stroke="#101D30" stroke-width="1" opacity=".3"/>
+        <text x="40" y="60" class="t-serif" font-size="24" font-weight="600" fill="#101D30">THE</text>
+        <text x="40" y="90" class="t-serif" font-size="24" font-weight="600" fill="#101D30">DIFFERENCE</text>
+        <!-- 步骤列表(当前高亮) -->
+        <text x="40" y="180" class="t-sans" font-size="12" fill="#7A2230" font-weight="600">04 / STONE SETTING ●</text>
+        <text x="40" y="210" class="t-sans" font-size="11" fill="#666">01 DESIGN SKETCH</text>
+        <text x="40" y="232" class="t-sans" font-size="11" fill="#666">02 3D MODELING</text>
+        <text x="40" y="254" class="t-sans" font-size="11" fill="#666">03 CASTING</text>
+        <text x="40" y="276" class="t-sans" font-size="11" fill="#666">05 POLISHING</text>
+        <text x="40" y="298" class="t-sans" font-size="11" fill="#666">06 PACKAGING · 07 DELIVERY</text>
+        <text x="40" y="520" class="t-sans" font-size="10" fill="#666">← 左轴「粘住」,右图随滚动推进</text>
+        <!-- 右侧微距大图 -->
+        <rect x="330" y="40" width="530" height="400" rx="6" fill="#C9CDD3"/>
+        <!-- 半透明巨步骤号 -->
+        <text x="600" y="320" text-anchor="middle" class="t-serif" font-size="240" font-weight="700" fill="#101D30" opacity=".10">04</text>
+        <!-- 标注线 -->
+        <line x1="560" y1="200" x2="700" y2="160" stroke="#101D30" stroke-width="1"/>
+        <circle cx="560" cy="200" r="3" fill="#7A2230"/>
+        <text x="705" y="163" class="t-sans" font-size="10" fill="#101D30">디테일 각인</text>
+        <!-- 微距三连 -->
+        <rect x="330" y="460" width="168" height="80" rx="4" fill="#C9CDD3"/>
+        <rect x="511" y="460" width="168" height="80" rx="4" fill="#C9CDD3"/>
+        <rect x="692" y="460" width="168" height="80" rx="4" fill="#C9CDD3"/>
+        <text x="595" y="505" text-anchor="middle" class="t-sans" font-size="10" fill="#666">微距三连(刻字/雕刻/抛光)</text>
+      </svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><b>母题元件:</b> 左粘工序轴</span>
+      <span class="tag"><b>半透明巨步骤号 01–07</b></span>
+      <span class="tag">极致微距 + 标注线</span>
+      <span class="tag">钉屏推进</span>
+    </div>
+  </div>
+
+  <!-- ============ NEWS ============ -->
+  <div class="card">
+    <div class="card-top"><div><span class="nm">NEWS</span></div><div class="motif">母题《刊物 · 报头网格》</div></div>
+    <div class="card-sub">报头大字 NEWS + 横贯规则线 + 滚动快讯条;每卡带栏目标签+日期;密集网格、可筛选。最轻快、最当下。<b>遮字也明显是「新闻/刊物版」。</b></div>
+    <div class="frame">
+      <svg viewBox="0 0 900 560" role="img" aria-label="NEWS 线框">
+        <!-- 报头 masthead -->
+        <text x="40" y="62" class="t-serif" font-size="48" font-weight="700" fill="#101D30">NEWS</text>
+        <text x="858" y="40" text-anchor="end" class="t-sans" font-size="11" fill="#666">DAEHO JOURNAL · 발행 2026</text>
+        <text x="858" y="58" text-anchor="end" class="t-sans" font-size="11" fill="#666">VOL. 38</text>
+        <!-- 规则线 -->
+        <line x1="40" y1="78" x2="860" y2="78" stroke="#101D30" stroke-width="2"/>
+        <!-- ticker 滚动快讯条 -->
+        <rect x="40" y="86" width="820" height="22" fill="#F2EFEA"/>
+        <text x="50" y="101" class="t-sans" font-size="10" fill="#101D30">▸ 우승 팀 반지 COMING SOON   ▸ 두산 레플리카 화제   ▸ 신규 협업 발표   ▸ …(ticker 横向滚动)</text>
+        <!-- 筛选 chips -->
+        <g class="t-sans" font-size="10">
+          <rect x="40" y="120" width="48" height="22" rx="11" fill="#101D30"/><text x="64" y="135" text-anchor="middle" fill="#fff">ALL</text>
+          <rect x="96" y="120" width="70" height="22" rx="11" fill="#fff" stroke="#101D30" stroke-opacity=".25"/><text x="131" y="135" text-anchor="middle" fill="#101D30">제작 사례</text>
+          <rect x="174" y="120" width="56" height="22" rx="11" fill="#fff" stroke="#101D30" stroke-opacity=".25"/><text x="202" y="135" text-anchor="middle" fill="#101D30">언론</text>
+          <rect x="238" y="120" width="56" height="22" rx="11" fill="#fff" stroke="#101D30" stroke-opacity=".25"/><text x="266" y="135" text-anchor="middle" fill="#101D30">협업</text>
+        </g>
+        <!-- 头条 -->
+        <rect x="40" y="158" width="500" height="180" rx="4" fill="#C9CDD3"/>
+        <rect x="56" y="300" width="44" height="16" rx="2" fill="#7A2230"/><text x="78" y="312" text-anchor="middle" class="t-sans" font-size="9" fill="#fff">TOP</text>
+        <text x="110" y="312" class="t-sans" font-size="10" fill="#101D30">최근 제작 · 2026.05.03</text>
+        <!-- 右栏卡 -->
+        <g>
+          <rect x="560" y="158" width="300" height="84" rx="4" fill="#C9CDD3"/>
+          <rect x="560" y="254" width="300" height="84" rx="4" fill="#C9CDD3"/>
+        </g>
+        <!-- 下排网格卡(带标签+日期) -->
+        <g>
+          <rect x="40" y="360" width="258" height="120" rx="4" fill="#C9CDD3"/>
+          <rect x="311" y="360" width="258" height="120" rx="4" fill="#C9CDD3"/>
+          <rect x="582" y="360" width="278" height="120" rx="4" fill="#C9CDD3"/>
+        </g>
+        <g class="t-sans" font-size="9" fill="#7A2230">
+          <text x="40" y="498">협업 · 2026.04</text>
+          <text x="311" y="498">언론 · 2026.03</text>
+          <text x="582" y="498">지식 · 2026.02</text>
+        </g>
+        <text x="450" y="528" text-anchor="middle" class="t-sans" font-size="10" fill="#666">— 报刊式密网格 · 栏目标签 + 日期 —</text>
+      </svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><b>母题元件:</b> 报头 NEWS + 规则线</span>
+      <span class="tag"><b>滚动 ticker</b></span>
+      <span class="tag">栏目标签 + 日期</span>
+      <span class="tag">筛选 chips · 密网格</span>
+    </div>
+  </div>
+
+  <!-- ============ GOLF ============ -->
+  <div class="card">
+    <div class="card-top"><div><span class="nm">GOLF</span></div><div class="motif">母题《配置 · 产品台》</div></div>
+    <div class="card-sub">悬浮产品 + 选项面板,像可上手把玩的定制台:杆头/杆色选择器卡组 + 刻字规格示意线 + 不对称叠压实拍。互动、玩味、聚焦单品。</div>
+    <div class="frame">
+      <svg viewBox="0 0 900 560" role="img" aria-label="GOLF 线框">
+        <text x="450" y="46" text-anchor="middle" class="t-sans" font-size="11" fill="#666" letter-spacing="2">PREMIUM CUSTOMIZED GOLF BRACELET</text>
+        <!-- 悬浮产品 + 长投影 -->
+        <ellipse cx="450" cy="190" rx="190" ry="14" fill="#C9CDD3" opacity=".5"/>
+        <path d="M300 120 Q450 100 600 150" stroke="#101D30" stroke-width="10" fill="none" stroke-linecap="round" opacity=".55"/>
+        <rect x="585" y="135" width="34" height="22" rx="5" fill="#101D30" opacity=".55"/>
+        <text x="450" y="230" text-anchor="middle" class="t-serif" font-size="30" font-weight="700" fill="#101D30">FORM OF THE GAME</text>
+        <!-- 选择器:杆头 -->
+        <text x="40" y="276" class="t-sans" font-size="11" fill="#666" letter-spacing="2">CLUB HEAD</text>
+        <g>
+          <rect x="40" y="286" width="120" height="90" rx="6" fill="#fff" stroke="#7A2230" stroke-width="2"/>
+          <rect x="176" y="286" width="120" height="90" rx="6" fill="#fff" stroke="#101D30" stroke-opacity=".2"/>
+          <rect x="312" y="286" width="120" height="90" rx="6" fill="#fff" stroke="#101D30" stroke-opacity=".2"/>
+          <rect x="448" y="286" width="120" height="90" rx="6" fill="#fff" stroke="#101D30" stroke-opacity=".2"/>
+        </g>
+        <text x="100" y="395" text-anchor="middle" class="t-sans" font-size="9" fill="#7A2230">● IRON(选中)</text>
+        <text x="236" y="395" text-anchor="middle" class="t-sans" font-size="9" fill="#666">PUTTER</text>
+        <text x="372" y="395" text-anchor="middle" class="t-sans" font-size="9" fill="#666">WOOD</text>
+        <text x="508" y="395" text-anchor="middle" class="t-sans" font-size="9" fill="#666">BALL</text>
+        <!-- 杆色 -->
+        <text x="40" y="436" class="t-sans" font-size="11" fill="#666" letter-spacing="2">SHAFT COLOR</text>
+        <circle cx="56" cy="462" r="12" fill="#1A1A1A"/><circle cx="92" cy="462" r="12" fill="#fff" stroke="#ccc"/><circle cx="128" cy="462" r="12" fill="#7A2230"/><circle cx="164" cy="462" r="12" fill="#101D30"/>
+        <!-- 右:刻字规格示意 + 叠压实拍 -->
+        <rect x="600" y="286" width="260" height="170" rx="6" fill="#C9CDD3"/>
+        <rect x="560" y="380" width="180" height="90" rx="6" fill="#B9BEC6"/>
+        <line x1="575" y1="410" x2="725" y2="410" stroke="#101D30" stroke-width="1"/>
+        <line x1="575" y1="426" x2="690" y2="426" stroke="#101D30" stroke-width="1" opacity=".6"/>
+        <text x="575" y="402" class="t-sans" font-size="9" fill="#101D30">刻字预览 JUDY KIM 2026.05.03</text>
+        <text x="730" y="500" text-anchor="end" class="t-sans" font-size="10" fill="#666">规格示意细线 + 不对称叠压实拍 →</text>
+      </svg>
+    </div>
+    <div class="tags">
+      <span class="tag"><b>母题元件:</b> 悬浮产品 + 长投影</span>
+      <span class="tag"><b>杆头/杆色选择器卡组</b></span>
+      <span class="tag">刻字规格示意线</span>
+      <span class="tag">不对称叠压实拍</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">
+  口诀:<b style="color:#fff">HOME 银幕 · CHRONICLE 时间轴 · LEGACY 碑文 · SPECIALTY 解剖图 · NEWS 报头 · GOLF 配置台</b>。六个母题互不串门。<br>
+  线框对应《DAEHO_设计书》§1.6 骨架 + §1.7 母题;灰块为图片/视频占位,真实视觉以生图 prompt + 真实摄影替换。
+</div>
+
+</body>
+</html>

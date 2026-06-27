@@ -27,7 +27,7 @@ export function getCmsDbPath() {
   }
 
   if (process.env.VERCEL) {
-    return path.join(tmpdir(), 'deaho-cms.sqlite');
+    return path.join(tmpdir(), 'daeho-cms.sqlite');
   }
 
   return path.join(process.cwd(), 'data', 'cms.sqlite');

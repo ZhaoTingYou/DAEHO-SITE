@@ -1,29 +1,29 @@
-# DEAHO Official Site
+# DAEHO Official Site
 
-DEAHO official website built from the documents in `projectdoc/`. This README is
+DAEHO official website built from the documents in `projectdoc/`. This README is
 also a handoff note for Claude Code or any future coding agent.
 
 The project has moved to:
 
 ```bash
-/Users/tingyouzhao/Desktop/daeho/deaho官网方案
+/Users/tingyouzhao/Desktop/daeho/daeho官网方案
 ```
 
 Remote repository:
 
 ```bash
-https://github.com/ZhaoTingYou/DEAHO-SITE
+https://github.com/ZhaoTingYou/DAEHO-SITE
 ```
 
 ## Source Documents
 
 Read these first before making design or behavior changes:
 
-- `projectdoc/DEAHO_Codex构建指令.md`
-- `projectdoc/DEAHO_设计书.md`
-- `projectdoc/DEAHO_动画实现要点.md`
-- `projectdoc/DEAHO_生图Prompt.md`
-- `projectdoc/DEAHO_母题线框.html`
+- `projectdoc/DAEHO_Codex构建指令.md`
+- `projectdoc/DAEHO_设计书.md`
+- `projectdoc/DAEHO_动画实现要点.md`
+- `projectdoc/DAEHO_生图Prompt.md`
+- `projectdoc/DAEHO_母题线框.html`
 
 The user has revised these documents several times. Treat the latest local files
 as the source of truth. Earlier implementation decisions should be adjusted when
@@ -91,8 +91,8 @@ Required local variables:
 CMS_BACKEND_URL=http://localhost:8080
 CMS_BACKEND_API_KEY=replace-with-a-long-random-key
 CMS_ADMIN_API_KEY=replace-with-the-same-value-as-CMS_BACKEND_API_KEY
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/deaho_cms
-SPRING_DATASOURCE_USERNAME=deaho
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/daeho_cms
+SPRING_DATASOURCE_USERNAME=daeho
 SPRING_DATASOURCE_PASSWORD=replace-with-a-strong-database-password
 ```
 
@@ -111,7 +111,7 @@ Protected import/export/status APIs are still exposed through Next as a BFF:
 curl -X POST \
   -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \
   -H "Content-Type: application/json" \
-  --data-binary @deaho-cms-export.json \
+  --data-binary @daeho-cms-export.json \
   http://localhost:3000/api/admin/import
 ```
 
@@ -121,7 +121,7 @@ The import API validates and previews by default. To replace CMS tables, call:
 curl -X POST \
   -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \
   -H "Content-Type: application/json" \
-  --data-binary @deaho-cms-export.json \
+  --data-binary @daeho-cms-export.json \
   "http://localhost:3000/api/admin/import?replace=1"
 
 curl -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \
@@ -618,7 +618,7 @@ npm run build
 git diff --check
 git status --short
 git add .
-git commit -m "Document DEAHO handoff state"
+git commit -m "Document DAEHO handoff state"
 git push origin main
 ```
 

@@ -82,12 +82,12 @@ export default async function AdminExportPage() {
           <CodeBlock>{`curl -X POST \\
   -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \\
   -H "Content-Type: application/json" \\
-  --data-binary @deaho-cms-export.json \\
+  --data-binary @daeho-cms-export.json \\
   http://localhost:3000/api/admin/import`}</CodeBlock>
           <CodeBlock>{`curl -X POST \\
   -H "x-admin-api-key: $CMS_BACKEND_API_KEY" \\
   -H "Content-Type: application/json" \\
-  --data-binary @deaho-cms-export.json \\
+  --data-binary @daeho-cms-export.json \\
   "http://localhost:3000/api/admin/import?replace=1"`}</CodeBlock>
         </div>
       </Panel>

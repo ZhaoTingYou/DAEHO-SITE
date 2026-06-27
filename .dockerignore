@@ -2,7 +2,8 @@
 .next
 artifacts
 backend/cms/target
-data
+data/*
+!data/cms-preview.json
 node_modules
 npm-debug.log
 Dockerfile*

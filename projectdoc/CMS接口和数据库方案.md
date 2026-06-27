@@ -1,4 +1,4 @@
-# DEAHO CMS 接口和数据库方案
+# DAEHO CMS 接口和数据库方案
 
 ## 当前定位
 
@@ -43,26 +43,26 @@ npm run cms:export
 默认输出到：
 
 ```text
-artifacts/cms-exports/deaho-cms-export-{timestamp}.json
+artifacts/cms-exports/daeho-cms-export-{timestamp}.json
 ```
 
 也可以输出到 stdout 或指定路径：
 
 ```bash
 npm run cms:export -- --stdout
-npm run cms:export -- --output=/absolute/path/deaho-cms-export.json
+npm run cms:export -- --output=/absolute/path/daeho-cms-export.json
 ```
 
 恢复 CMS 数据备份：
 
 ```bash
-npm run cms:import -- /absolute/path/deaho-cms-export.json
+npm run cms:import -- /absolute/path/daeho-cms-export.json
 ```
 
 默认只做 dry-run，会校验文件结构并显示每张表的导入行数，不会修改数据库。确认后再执行覆盖恢复：
 
 ```bash
-npm run cms:import -- /absolute/path/deaho-cms-export.json --replace
+npm run cms:import -- /absolute/path/daeho-cms-export.json --replace
 ```
 
 `--replace` 会清空并重写所有 CMS 表；如果目标数据库已经存在，脚本会先自动生成：
@@ -74,7 +74,7 @@ data/cms.sqlite.pre-import-{timestamp}.bak
 如需跳过自动备份：
 
 ```bash
-npm run cms:import -- /absolute/path/deaho-cms-export.json --replace --no-backup
+npm run cms:import -- /absolute/path/daeho-cms-export.json --replace --no-backup
 ```
 
 ## 环境变量

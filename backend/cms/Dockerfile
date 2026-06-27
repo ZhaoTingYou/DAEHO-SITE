@@ -12,7 +12,7 @@ WORKDIR /app
 ENV JAVA_OPTS=""
 
 RUN mkdir -p /data/uploads
-COPY --from=build /workspace/target/deaho-cms-*.jar /app/app.jar
+COPY --from=build /workspace/target/daeho-cms-*.jar /app/app.jar
 
 EXPOSE 8080
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]

@@ -40,7 +40,7 @@ pnpm-debug.log*
 .claude/
 
 # prompt file is intentionally kept local per project instructions
-/projectdoc/DEAHO_生图Prompt.md
+/projectdoc/DAEHO_生图Prompt.md
 
 # typescript
 *.tsbuildinfo

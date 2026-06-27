@@ -7,7 +7,7 @@ type Guard = ReturnType<typeof createInquiryProtectionGuard>;
 type InquiryProtectionInput = Parameters<Guard['check']>[0];
 
 const globalInquiryProtection = globalThis as typeof globalThis & {
-  __deahoInquiryProtectionGuard?: Guard;
+  __daehoInquiryProtectionGuard?: Guard;
 };
 
 export function rejectUnsafeInquiry(input: InquiryProtectionInput) {
@@ -30,6 +30,6 @@ export function rejectUnsafeInquiry(input: InquiryProtectionInput) {
 }
 
 function getInquiryProtectionGuard() {
-  globalInquiryProtection.__deahoInquiryProtectionGuard ??= createInquiryProtectionGuard(getInquiryProtectionConfigFromEnv());
-  return globalInquiryProtection.__deahoInquiryProtectionGuard;
+  globalInquiryProtection.__daehoInquiryProtectionGuard ??= createInquiryProtectionGuard(getInquiryProtectionConfigFromEnv());
+  return globalInquiryProtection.__daehoInquiryProtectionGuard;
 }

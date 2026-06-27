@@ -32,5 +32,5 @@ export function getCmsExportCounts(snapshot: CmsExportSnapshot) {
 }
 
 export function getCmsExportFilename(exportedAt = new Date().toISOString()) {
-  return `deaho-cms-export-${exportedAt.replace(/[:.]/g, '-')}.json`;
+  return `daeho-cms-export-${exportedAt.replace(/[:.]/g, '-')}.json`;
 }

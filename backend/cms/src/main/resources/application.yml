@@ -4,11 +4,11 @@ server:
 
 spring:
   application:
-    name: deaho-cms
+    name: daeho-cms
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/deaho_cms}
-    username: ${SPRING_DATASOURCE_USERNAME:deaho}
-    password: ${SPRING_DATASOURCE_PASSWORD:deaho}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/daeho_cms}
+    username: ${SPRING_DATASOURCE_USERNAME:daeho}
+    password: ${SPRING_DATASOURCE_PASSWORD:daeho}
   flyway:
     enabled: true
   servlet:

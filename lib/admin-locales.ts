@@ -1,4 +1,4 @@
-export const adminLocaleCookieName = 'deaho_admin_locale';
+export const adminLocaleCookieName = 'daeho_admin_locale';
 export const adminLocales = ['zh', 'ko', 'en'] as const;
 export type AdminLocale = (typeof adminLocales)[number];
 

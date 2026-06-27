@@ -1,0 +1,956 @@
+package com.daeho.cms.repository;
+
+import com.daeho.cms.service.JsonSupport;
+import com.daeho.cms.service.RequestValidation;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+@Repository
+public class CmsRepository {
+  public static final List<String> EXPORT_TABLES = List.of(
+      "cms_pages",
+      "cms_news",
+      "cms_news_translations",
+      "cms_collections",
+      "cms_collection_translations",
+      "cms_media",
+      "cms_inquiries",
+      "cms_email_events"
+  );
+  private static final List<String> DELETE_TABLES = reverseExportTables();
+  private static final Set<String> JSON_COLUMNS = Set.of(
+      "content_ko", "content_en", "seo_ko", "seo_en", "body_json", "tags_json",
+      "gallery_json", "specs_json", "configuration_json"
+  );
+  private static final Set<String> BOOLEAN_COLUMNS = Set.of("is_featured", "is_visible");
+  private static final Set<String> TIMESTAMPTZ_COLUMNS = Set.of("created_at", "updated_at");
+  private static final Set<String> LEGACY_PAGE_COLUMNS = Set.of("content_zh", "seo_zh");
+  private static final Set<String> LEGACY_MEDIA_COLUMNS = Set.of("alt_zh");
+
+  private final JdbcTemplate jdbc;
+  private final JsonSupport json;
+  private final RequestValidation validation;
+
+  public CmsRepository(JdbcTemplate jdbc, JsonSupport json, RequestValidation validation) {
+    this.jdbc = jdbc;
+    this.json = json;
+    this.validation = validation;
+  }
+
+  private static List<String> reverseExportTables() {
+    var tables = new ArrayList<>(EXPORT_TABLES);
+    java.util.Collections.reverse(tables);
+    return List.copyOf(tables);
+  }
+
+  public List<Map<String, Object>> listPages() {
+    return jdbc.query("SELECT * FROM cms_pages ORDER BY sort_order ASC, page_key ASC", this::mapPage);
+  }
+
+  public Map<String, Object> getPage(String pageKey) {
+    return jdbc.query("SELECT * FROM cms_pages WHERE page_key = ?", this::mapPage, pageKey)
+        .stream()
+        .findFirst()
+        .orElse(null);
+  }
+
+  @Transactional
+  public Map<String, Object> upsertPage(String pageKey, Map<String, Object> payload) {
+    var existing = getPage(pageKey);
+    var content = validation.objectValue(payload.get("content"));
+    var seo = validation.objectValue(payload.get("seo"));
+    var existingContent = existing == null ? Map.<String, Object>of() : validation.objectValue(existing.get("content"));
+    var existingSeo = existing == null ? Map.<String, Object>of() : validation.objectValue(existing.get("seo"));
+
+    jdbc.update("""
+        INSERT INTO cms_pages (
+          page_key, section, sort_order, content_ko, content_en, seo_ko, seo_en, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE(?::timestamptz, now()), now())
+        ON CONFLICT(page_key) DO UPDATE SET
+          section = excluded.section,
+          sort_order = excluded.sort_order,
+          content_ko = excluded.content_ko,
+          content_en = excluded.content_en,
+          seo_ko = excluded.seo_ko,
+          seo_en = excluded.seo_en,
+          updated_at = now()
+        """,
+        pageKey,
+        validation.stringValue(payload.get("section")),
+        validation.intValue(payload.get("sortOrder"), 0),
+        json.jsonb(content.getOrDefault("ko", validation.objectValue(existingContent.get("ko")))),
+        json.jsonb(content.getOrDefault("en", validation.objectValue(existingContent.get("en")))),
+        json.jsonb(seo.getOrDefault("ko", validation.objectValue(existingSeo.get("ko")))),
+        json.jsonb(seo.getOrDefault("en", validation.objectValue(existingSeo.get("en")))),
+        existing == null ? null : existing.get("createdAt")
+    );
+    return getPage(pageKey);
+  }
+
+  public List<Map<String, Object>> listNews() {
+    return jdbc.query(
+        "SELECT * FROM cms_news ORDER BY sort_order ASC, published_at DESC, created_at DESC",
+        (rs, rowNum) -> mapNews(rs, getNewsTranslations(rs.getString("id")))
+    );
+  }
+
+  public List<Map<String, Object>> listPublicNews(String locale) {
+    return jdbc.query("""
+        SELECT n.*, t.locale, t.title, t.category_label, t.excerpt, t.body_json, t.tags_json,
+          t.seo_title, t.seo_description, t.og_image_path
+        FROM cms_news n
+        JOIN cms_news_translations t ON t.news_id = n.id AND t.locale = ?
+        WHERE n.is_visible = true
+        ORDER BY n.sort_order ASC, n.published_at DESC, n.created_at DESC
+        """, this::mapPublicNews, locale);
+  }
+
+  public Map<String, Object> getNews(String idOrSlug) {
+    return jdbc.query(
+        "SELECT * FROM cms_news WHERE id = ? OR slug = ?",
+        (rs, rowNum) -> mapNews(rs, getNewsTranslations(rs.getString("id"))),
+        idOrSlug,
+        idOrSlug
+    ).stream().findFirst().orElse(null);
+  }
+
+  public Map<String, Object> getPublicNews(String slug, String locale) {
+    return jdbc.query("""
+        SELECT n.*, t.locale, t.title, t.category_label, t.excerpt, t.body_json, t.tags_json,
+          t.seo_title, t.seo_description, t.og_image_path
+        FROM cms_news n
+        JOIN cms_news_translations t ON t.news_id = n.id AND t.locale = ?
+        WHERE n.slug = ? AND n.is_visible = true
+        """, this::mapPublicNews, locale, slug).stream().findFirst().orElse(null);
+  }
+
+  @Transactional
+  public Map<String, Object> createNews(Map<String, Object> payload) {
+    var id = UUID.randomUUID().toString();
+    var slug = firstNonBlank(payload.get("slug"), id);
+    jdbc.update("""
+        INSERT INTO cms_news (
+          id, slug, category, image_path, published_at, is_featured, is_visible,
+          sort_order, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+        """,
+        id,
+        slug,
+        validation.stringValue(payload.get("category")),
+        validation.stringValue(payload.get("imagePath")),
+        validation.stringValue(payload.get("publishedAt")),
+        validation.booleanValue(payload.get("isFeatured"), false),
+        validation.booleanValue(payload.get("isVisible"), true),
+        validation.intValue(payload.get("sortOrder"), 0)
+    );
+    upsertNewsTranslations(id, payload);
+    return getNews(id);
+  }
+
+  @Transactional
+  public Map<String, Object> updateNews(String idOrSlug, Map<String, Object> payload) {
+    var existing = getNews(idOrSlug);
+    if (existing == null) {
+      return null;
+    }
+    jdbc.update("""
+        UPDATE cms_news SET
+          slug = ?,
+          category = ?,
+          image_path = ?,
+          published_at = ?,
+          is_featured = ?,
+          is_visible = ?,
+          sort_order = ?,
+          updated_at = now()
+        WHERE id = ?
+        """,
+        firstNonBlank(payload.get("slug"), existing.get("slug")),
+        validation.stringValue(payload.get("category")),
+        validation.stringValue(payload.get("imagePath")),
+        validation.stringValue(payload.get("publishedAt")),
+        validation.booleanValue(payload.get("isFeatured"), false),
+        validation.booleanValue(payload.get("isVisible"), true),
+        validation.intValue(payload.get("sortOrder"), 0),
+        existing.get("id")
+    );
+    upsertNewsTranslations(existing.get("id").toString(), payload);
+    return getNews(existing.get("id").toString());
+  }
+
+  @Transactional
+  public boolean deleteNews(String idOrSlug) {
+    var existing = getNews(idOrSlug);
+    if (existing == null) {
+      return false;
+    }
+    jdbc.update("DELETE FROM cms_news WHERE id = ?", existing.get("id"));
+    return true;
+  }
+
+  public List<Map<String, Object>> listCollections() {
+    return jdbc.query(
+        "SELECT * FROM cms_collections ORDER BY sort_order ASC, created_at DESC",
+        (rs, rowNum) -> mapCollection(rs, getCollectionTranslations(rs.getString("id")))
+    );
+  }
+
+  public List<Map<String, Object>> listPublicCollections(String locale) {
+    return jdbc.query("""
+        SELECT c.*, t.locale, t.title, t.caption, t.story, t.category_label, t.sport_category_label,
+          t.seo_title, t.seo_description, t.og_image_path
+        FROM cms_collections c
+        JOIN cms_collection_translations t ON t.collection_id = c.id AND t.locale = ?
+        WHERE c.is_visible = true
+        ORDER BY c.sort_order ASC, c.created_at DESC
+        """, this::mapPublicCollection, locale);
+  }
+
+  public Map<String, Object> getCollection(String idOrSlug) {
+    return jdbc.query(
+        "SELECT * FROM cms_collections WHERE id = ? OR slug = ?",
+        (rs, rowNum) -> mapCollection(rs, getCollectionTranslations(rs.getString("id"))),
+        idOrSlug,
+        idOrSlug
+    ).stream().findFirst().orElse(null);
+  }
+
+  public Map<String, Object> getPublicCollection(String slug, String locale) {
+    return jdbc.query("""
+        SELECT c.*, t.locale, t.title, t.caption, t.story, t.category_label, t.sport_category_label,
+          t.seo_title, t.seo_description, t.og_image_path
+        FROM cms_collections c
+        JOIN cms_collection_translations t ON t.collection_id = c.id AND t.locale = ?
+        WHERE c.slug = ? AND c.is_visible = true
+        """, this::mapPublicCollection, locale, slug).stream().findFirst().orElse(null);
+  }
+
+  @Transactional
+  public Map<String, Object> createCollection(Map<String, Object> payload) {
+    var id = UUID.randomUUID().toString();
+    var slug = firstNonBlank(payload.get("slug"), id);
+    jdbc.update("""
+        INSERT INTO cms_collections (
+          id, slug, category, sport_category, image_path, gallery_json, specs_json,
+          is_visible, sort_order, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+        """,
+        id,
+        slug,
+        validation.stringValue(payload.get("category")),
+        validation.stringValue(payload.get("sportCategory")),
+        validation.stringValue(payload.get("imagePath")),
+        json.jsonb(payload.getOrDefault("gallery", List.of())),
+        json.jsonb(payload.getOrDefault("specs", Map.of())),
+        validation.booleanValue(payload.get("isVisible"), true),
+        validation.intValue(payload.get("sortOrder"), 0)
+    );
+    upsertCollectionTranslations(id, payload);
+    return getCollection(id);
+  }
+
+  @Transactional
+  public Map<String, Object> updateCollection(String idOrSlug, Map<String, Object> payload) {
+    var existing = getCollection(idOrSlug);
+    if (existing == null) {
+      return null;
+    }
+    jdbc.update("""
+        UPDATE cms_collections SET
+          slug = ?,
+          category = ?,
+          sport_category = ?,
+          image_path = ?,
+          gallery_json = ?,
+          specs_json = ?,
+          is_visible = ?,
+          sort_order = ?,
+          updated_at = now()
+        WHERE id = ?
+        """,
+        firstNonBlank(payload.get("slug"), existing.get("slug")),
+        validation.stringValue(payload.get("category")),
+        validation.stringValue(payload.get("sportCategory")),
+        validation.stringValue(payload.get("imagePath")),
+        json.jsonb(payload.getOrDefault("gallery", List.of())),
+        json.jsonb(payload.getOrDefault("specs", Map.of())),
+        validation.booleanValue(payload.get("isVisible"), true),
+        validation.intValue(payload.get("sortOrder"), 0),
+        existing.get("id")
+    );
+    upsertCollectionTranslations(existing.get("id").toString(), payload);
+    return getCollection(existing.get("id").toString());
+  }
+
+  @Transactional
+  public boolean deleteCollection(String idOrSlug) {
+    var existing = getCollection(idOrSlug);
+    if (existing == null) {
+      return false;
+    }
+    jdbc.update("DELETE FROM cms_collections WHERE id = ?", existing.get("id"));
+    return true;
+  }
+
+  @Transactional
+  public Map<String, Object> createContactInquiry(Map<String, Object> payload, Map<String, String> requestMeta) {
+    return createInquiry(Map.ofEntries(
+        Map.entry("source", "contact"),
+        Map.entry("locale", validation.stringValue(payload.get("locale"))),
+        Map.entry("name", validation.stringValue(payload.get("name"))),
+        Map.entry("contact", validation.stringValue(payload.get("contact"))),
+        Map.entry("organization", validation.stringValue(payload.get("organization"))),
+        Map.entry("inquiryType", validation.stringValue(payload.get("type"))),
+        Map.entry("team", ""),
+        Map.entry("dueDate", ""),
+        Map.entry("useCase", ""),
+        Map.entry("message", validation.stringValue(payload.get("message"))),
+        Map.entry("pagePath", validation.stringValue(payload.get("pagePath"))),
+        Map.entry("configuration", Map.of()),
+        Map.entry("userAgent", requestMeta.getOrDefault("userAgent", "")),
+        Map.entry("ipAddress", requestMeta.getOrDefault("ipAddress", ""))
+    ));
+  }
+
+  @Transactional
+  public Map<String, Object> createGolfInquiry(Map<String, Object> payload, Map<String, String> requestMeta) {
+    var quantity = payload.get("quantity");
+    var values = new LinkedHashMap<String, Object>();
+    values.put("source", "golf");
+    values.put("locale", validation.stringValue(payload.get("locale")));
+    values.put("name", validation.stringValue(payload.get("name")));
+    values.put("contact", validation.stringValue(payload.get("contact")));
+    values.put("organization", "");
+    values.put("inquiryType", "");
+    values.put("team", validation.stringValue(payload.get("team")));
+    values.put("quantity", quantity);
+    values.put("dueDate", validation.stringValue(payload.get("due")));
+    values.put("useCase", validation.stringValue(payload.get("use")));
+    values.put("message", validation.stringValue(payload.get("message")));
+    values.put("pagePath", validation.stringValue(payload.get("pagePath")));
+    values.put("configuration", Map.of(
+        "selectedHead", validation.stringValue(payload.get("selectedHead")),
+        "selectedShaft", validation.stringValue(payload.get("selectedShaft")),
+        "engravingSample", validation.stringValue(payload.get("engravingSample"))
+    ));
+    values.put("userAgent", requestMeta.getOrDefault("userAgent", ""));
+    values.put("ipAddress", requestMeta.getOrDefault("ipAddress", ""));
+    return createInquiry(values);
+  }
+
+  public List<Map<String, Object>> listInquiries(String status, String source) {
+    var clauses = new ArrayList<String>();
+    var values = new ArrayList<Object>();
+    if (status != null && !status.isBlank()) {
+      clauses.add("status = ?");
+      values.add(status);
+    }
+    if (source != null && !source.isBlank()) {
+      clauses.add("source = ?");
+      values.add(source);
+    }
+    var where = clauses.isEmpty() ? "" : " WHERE " + String.join(" AND ", clauses);
+    return jdbc.query(
+        "SELECT * FROM cms_inquiries" + where + " ORDER BY created_at DESC",
+        this::mapInquiry,
+        values.toArray()
+    );
+  }
+
+  public Map<String, Object> getInquiry(String id) {
+    return jdbc.query("SELECT * FROM cms_inquiries WHERE id = ?", this::mapInquiry, id)
+        .stream()
+        .findFirst()
+        .orElse(null);
+  }
+
+  public List<Map<String, Object>> listEmailEventsForInquiry(String inquiryId) {
+    return jdbc.query(
+        "SELECT * FROM cms_email_events WHERE inquiry_id = ? ORDER BY created_at DESC",
+        this::mapEmailEvent,
+        inquiryId
+    );
+  }
+
+  @Transactional
+  public Map<String, Object> updateInquiryStatus(String id, Map<String, Object> payload) {
+    jdbc.update(
+        "UPDATE cms_inquiries SET status = ?, updated_at = now() WHERE id = ?",
+        validation.stringValue(payload.get("status")),
+        id
+    );
+    return getInquiry(id);
+  }
+
+  @Transactional
+  public String createEmailEvent(Map<String, Object> event) {
+    var id = UUID.randomUUID().toString();
+    jdbc.update("""
+        INSERT INTO cms_email_events (
+          id, inquiry_id, event_type, recipient, subject, status,
+          provider_message_id, error_message, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, now())
+        """,
+        id,
+        event.get("inquiryId"),
+        firstNonBlank(event.get("eventType"), "inquiry_notification"),
+        validation.stringValue(event.get("recipient")),
+        validation.stringValue(event.get("subject")),
+        validation.stringValue(event.get("status")),
+        validation.stringValue(event.get("providerMessageId")),
+        validation.stringValue(event.get("errorMessage"))
+    );
+    return id;
+  }
+
+  public List<Map<String, Object>> listMedia() {
+    return jdbc.query("SELECT * FROM cms_media ORDER BY created_at DESC", this::mapMedia);
+  }
+
+  public Map<String, Object> getMedia(String id) {
+    return jdbc.query("SELECT * FROM cms_media WHERE id = ?", this::mapMedia, id)
+        .stream()
+        .findFirst()
+        .orElse(null);
+  }
+
+  @Transactional
+  public Map<String, Object> createMedia(Map<String, Object> payload) {
+    var id = UUID.randomUUID().toString();
+    jdbc.update("""
+        INSERT INTO cms_media (
+          id, filename, path, url, mime_type, size_bytes, alt_ko, alt_en,
+          storage_provider, storage_key, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+        ON CONFLICT(path) DO UPDATE SET
+          filename = excluded.filename,
+          url = excluded.url,
+          mime_type = excluded.mime_type,
+          size_bytes = excluded.size_bytes,
+          alt_ko = CASE WHEN excluded.alt_ko = '' THEN cms_media.alt_ko ELSE excluded.alt_ko END,
+          alt_en = CASE WHEN excluded.alt_en = '' THEN cms_media.alt_en ELSE excluded.alt_en END,
+          storage_provider = excluded.storage_provider,
+          storage_key = excluded.storage_key,
+          updated_at = now()
+        """,
+        id,
+        validation.stringValue(payload.get("filename")),
+        validation.stringValue(payload.get("path")),
+        validation.stringValue(payload.get("url")),
+        validation.stringValue(payload.get("mimeType")),
+        validation.longValue(payload.get("sizeBytes"), 0),
+        validation.stringValue(payload.get("altKo")),
+        validation.stringValue(payload.get("altEn")),
+        firstNonBlank(payload.get("storageProvider"), "local"),
+        validation.stringValue(payload.get("storageKey"))
+    );
+    return jdbc.query("SELECT * FROM cms_media WHERE path = ?", this::mapMedia, payload.get("path"))
+        .stream()
+        .findFirst()
+        .orElse(null);
+  }
+
+  @Transactional
+  public Map<String, Object> updateMedia(String id, Map<String, Object> payload) {
+    jdbc.update(
+        "UPDATE cms_media SET alt_ko = ?, alt_en = ?, updated_at = now() WHERE id = ?",
+        validation.stringValue(payload.get("altKo")),
+        validation.stringValue(payload.get("altEn")),
+        id
+    );
+    return getMedia(id);
+  }
+
+  @Transactional
+  public boolean deleteMedia(String id) {
+    var existing = getMedia(id);
+    if (existing == null) {
+      return false;
+    }
+    jdbc.update("DELETE FROM cms_media WHERE id = ?", id);
+    return true;
+  }
+
+  public Map<String, Object> exportSnapshot() {
+    var tables = new LinkedHashMap<String, Object>();
+    for (var table : EXPORT_TABLES) {
+      tables.put(table, exportRows(table));
+    }
+    return Map.of(
+        "exportedAt", java.time.Instant.now().toString(),
+        "schemaVersion", 1,
+        "tables", tables
+    );
+  }
+
+  public List<Map<String, Object>> exportCounts(Map<String, Object> snapshot) {
+    var tables = validation.objectValue(snapshot.get("tables"));
+    return EXPORT_TABLES.stream()
+        .map(table -> orderedMap("table", table, "count", importableExportRows(table, tables.get(table)).size()))
+        .toList();
+  }
+
+  @Transactional
+  public void replaceFromSnapshot(Map<String, Object> snapshot) {
+    var tables = validation.objectValue(snapshot.get("tables"));
+    for (var table : DELETE_TABLES) {
+      jdbc.update("DELETE FROM " + table);
+    }
+    for (var table : EXPORT_TABLES) {
+      for (var row : importableExportRows(table, tables.get(table))) {
+        insertExportRow(table, row);
+      }
+    }
+  }
+
+  public List<Map<String, Object>> tableCounts() {
+    return EXPORT_TABLES.stream().map(table -> orderedMap(
+        "table", table,
+        "count", jdbc.queryForObject("SELECT COUNT(*) FROM " + table, Long.class)
+    )).toList();
+  }
+
+  public List<Map<String, Object>> mediaProviders() {
+    return jdbc.query("""
+        SELECT storage_provider, COUNT(*) AS count
+        FROM cms_media
+        GROUP BY storage_provider
+        ORDER BY count DESC, storage_provider ASC
+        """, (rs, rowNum) -> Map.of(
+        "provider", firstNonBlank(rs.getString("storage_provider"), "unknown"),
+        "count", rs.getLong("count")
+    ));
+  }
+
+  public String latestCreatedAt(String table) {
+    return jdbc.query(
+        "SELECT created_at FROM " + table + " ORDER BY created_at DESC LIMIT 1",
+        (rs, rowNum) -> instantString(rs, "created_at")
+    ).stream().findFirst().orElse("");
+  }
+
+  private Map<String, Object> createInquiry(Map<String, Object> payload) {
+    var id = UUID.randomUUID().toString();
+    jdbc.update("""
+        INSERT INTO cms_inquiries (
+          id, source, status, locale, name, contact, organization, inquiry_type,
+          team, quantity, due_date, use_case, message, configuration_json,
+          page_path, user_agent, ip_address, created_at, updated_at
+        ) VALUES (?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+        """,
+        id,
+        payload.get("source"),
+        payload.get("locale"),
+        payload.get("name"),
+        payload.get("contact"),
+        payload.get("organization"),
+        payload.get("inquiryType"),
+        payload.get("team"),
+        payload.get("quantity"),
+        payload.get("dueDate"),
+        payload.get("useCase"),
+        payload.get("message"),
+        json.jsonb(payload.get("configuration")),
+        payload.get("pagePath"),
+        payload.get("userAgent"),
+        payload.get("ipAddress")
+    );
+    return getInquiry(id);
+  }
+
+  @SuppressWarnings("unchecked")
+  private void upsertNewsTranslations(String newsId, Map<String, Object> payload) {
+    var translations = validation.objectValue(payload.get("translations"));
+    for (var locale : RequestValidation.LOCALES) {
+      var translation = validation.objectValue(translations.get(locale));
+      if (translation.isEmpty()) {
+        continue;
+      }
+      jdbc.update("""
+          INSERT INTO cms_news_translations (
+            news_id, locale, title, category_label, excerpt, body_json, tags_json,
+            seo_title, seo_description, og_image_path, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+          ON CONFLICT(news_id, locale) DO UPDATE SET
+            title = excluded.title,
+            category_label = excluded.category_label,
+            excerpt = excluded.excerpt,
+            body_json = excluded.body_json,
+            tags_json = excluded.tags_json,
+            seo_title = excluded.seo_title,
+            seo_description = excluded.seo_description,
+            og_image_path = excluded.og_image_path,
+            updated_at = now()
+          """,
+          newsId,
+          locale,
+          validation.stringValue(translation.get("title")),
+          validation.stringValue(translation.get("categoryLabel")),
+          validation.stringValue(translation.get("excerpt")),
+          json.jsonb(translation.getOrDefault("body", Map.of())),
+          json.jsonb(translation.getOrDefault("tags", List.of())),
+          validation.stringValue(translation.get("seoTitle")),
+          validation.stringValue(translation.get("seoDescription")),
+          validation.stringValue(translation.get("ogImagePath"))
+      );
+    }
+  }
+
+  private Map<String, Object> getNewsTranslations(String newsId) {
+    var rows = jdbc.query(
+        "SELECT * FROM cms_news_translations WHERE news_id = ?",
+        (rs, rowNum) -> Map.entry(rs.getString("locale"), mapNewsTranslation(rs)),
+        newsId
+    );
+    var translations = new LinkedHashMap<String, Object>();
+    for (var row : rows) {
+      translations.put(row.getKey(), row.getValue());
+    }
+    return translations;
+  }
+
+  private void upsertCollectionTranslations(String collectionId, Map<String, Object> payload) {
+    var translations = validation.objectValue(payload.get("translations"));
+    for (var locale : RequestValidation.LOCALES) {
+      var translation = validation.objectValue(translations.get(locale));
+      if (translation.isEmpty()) {
+        continue;
+      }
+      jdbc.update("""
+          INSERT INTO cms_collection_translations (
+            collection_id, locale, title, caption, story, category_label, sport_category_label,
+            seo_title, seo_description, og_image_path, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+          ON CONFLICT(collection_id, locale) DO UPDATE SET
+            title = excluded.title,
+            caption = excluded.caption,
+            story = excluded.story,
+            category_label = excluded.category_label,
+            sport_category_label = excluded.sport_category_label,
+            seo_title = excluded.seo_title,
+            seo_description = excluded.seo_description,
+            og_image_path = excluded.og_image_path,
+            updated_at = now()
+          """,
+          collectionId,
+          locale,
+          validation.stringValue(translation.get("title")),
+          validation.stringValue(translation.get("caption")),
+          validation.stringValue(translation.get("story")),
+          validation.stringValue(translation.get("categoryLabel")),
+          validation.stringValue(translation.get("sportCategoryLabel")),
+          validation.stringValue(translation.get("seoTitle")),
+          validation.stringValue(translation.get("seoDescription")),
+          validation.stringValue(translation.get("ogImagePath"))
+      );
+    }
+  }
+
+  private Map<String, Object> getCollectionTranslations(String collectionId) {
+    var rows = jdbc.query(
+        "SELECT * FROM cms_collection_translations WHERE collection_id = ?",
+        (rs, rowNum) -> Map.entry(rs.getString("locale"), mapCollectionTranslation(rs)),
+        collectionId
+    );
+    var translations = new LinkedHashMap<String, Object>();
+    for (var row : rows) {
+      translations.put(row.getKey(), row.getValue());
+    }
+    return translations;
+  }
+
+  private List<Map<String, Object>> exportRows(String table) {
+    return jdbc.query("SELECT * FROM " + table, exportRowMapper(table));
+  }
+
+  private List<Map<String, Object>> importableExportRows(String table, Object rows) {
+    return validation.arrayValue(rows).stream()
+        .map(validation::objectValue)
+        .filter(row -> !isUnsupportedLegacyLocaleRow(table, row))
+        .toList();
+  }
+
+  private boolean isUnsupportedLegacyLocaleRow(String table, Map<String, Object> row) {
+    if (!table.equals("cms_news_translations") && !table.equals("cms_collection_translations")) {
+      return false;
+    }
+    return !RequestValidation.LOCALES.contains(validation.stringValue(row.get("locale")));
+  }
+
+  private RowMapper<Map<String, Object>> exportRowMapper(String table) {
+    return (rs, rowNum) -> {
+      var meta = rs.getMetaData();
+      var row = new LinkedHashMap<String, Object>();
+      for (var index = 1; index <= meta.getColumnCount(); index += 1) {
+        var column = meta.getColumnName(index);
+        if ((table.equals("cms_pages") && LEGACY_PAGE_COLUMNS.contains(column))
+            || (table.equals("cms_media") && LEGACY_MEDIA_COLUMNS.contains(column))) {
+          continue;
+        }
+        if (JSON_COLUMNS.contains(column)) {
+          row.put(column, json.exportJsonString(rs.getString(column), defaultJsonFallback(column)));
+        } else if (BOOLEAN_COLUMNS.contains(column)) {
+          row.put(column, rs.getBoolean(column) ? 1 : 0);
+        } else if (TIMESTAMPTZ_COLUMNS.contains(column)) {
+          row.put(column, instantString(rs, column));
+        } else {
+          row.put(column, rs.getObject(index));
+        }
+      }
+      return row;
+    };
+  }
+
+  private void insertExportRow(String table, Map<String, Object> row) {
+    var tableColumns = tableColumns(table);
+    var ignoredColumns = ignoredLegacyColumns(table);
+    var unknown = row.keySet().stream()
+        .filter(column -> !tableColumns.contains(column) && !ignoredColumns.contains(column))
+        .toList();
+    if (!unknown.isEmpty()) {
+      throw new IllegalArgumentException("Cannot import " + table + ": unknown columns " + String.join(", ", unknown));
+    }
+    var columns = row.keySet().stream().filter(tableColumns::contains).toList();
+    if (columns.isEmpty()) {
+      return;
+    }
+    var placeholders = columns.stream().map(this::placeholderForColumn).toList();
+    var values = columns.stream().map(column -> importValue(column, row.get(column))).toArray();
+    jdbc.update(
+        "INSERT INTO " + table + " (" + String.join(", ", columns) + ") VALUES (" + String.join(", ", placeholders) + ")",
+        values
+    );
+  }
+
+  private List<String> tableColumns(String table) {
+    return jdbc.queryForList("""
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = current_schema() AND table_name = ?
+        ORDER BY ordinal_position
+        """, String.class, table);
+  }
+
+  private String placeholderForColumn(String column) {
+    if (TIMESTAMPTZ_COLUMNS.contains(column)) {
+      return "?::timestamptz";
+    }
+    return "?";
+  }
+
+  private Object importValue(String column, Object value) {
+    if (JSON_COLUMNS.contains(column)) {
+      return json.jsonbFromExportValue(value, defaultJsonFallback(column));
+    }
+    if (BOOLEAN_COLUMNS.contains(column)) {
+      return validation.booleanValue(value, false);
+    }
+    return value;
+  }
+
+  private Set<String> ignoredLegacyColumns(String table) {
+    if (table.equals("cms_pages")) {
+      return LEGACY_PAGE_COLUMNS;
+    }
+    if (table.equals("cms_media")) {
+      return LEGACY_MEDIA_COLUMNS;
+    }
+    return Set.of();
+  }
+
+  private Object defaultJsonFallback(String column) {
+    return column.equals("tags_json") || column.equals("gallery_json") ? List.of() : Map.of();
+  }
+
+  private Map<String, Object> mapPage(ResultSet rs, int rowNum) throws SQLException {
+    return orderedMap(
+        "pageKey", rs.getString("page_key"),
+        "section", rs.getString("section"),
+        "sortOrder", rs.getInt("sort_order"),
+        "content", Map.of(
+            "ko", json.objectOrEmpty(rs.getString("content_ko")),
+            "en", json.objectOrEmpty(rs.getString("content_en"))
+        ),
+        "seo", Map.of(
+            "ko", json.objectOrEmpty(rs.getString("seo_ko")),
+            "en", json.objectOrEmpty(rs.getString("seo_en"))
+        ),
+        "createdAt", instantString(rs, "created_at"),
+        "updatedAt", instantString(rs, "updated_at")
+    );
+  }
+
+  private Map<String, Object> mapNews(ResultSet rs, Map<String, Object> translations) throws SQLException {
+    return orderedMap(
+        "id", rs.getString("id"),
+        "slug", rs.getString("slug"),
+        "category", rs.getString("category"),
+        "imagePath", rs.getString("image_path"),
+        "publishedAt", rs.getString("published_at"),
+        "isFeatured", rs.getBoolean("is_featured"),
+        "isVisible", rs.getBoolean("is_visible"),
+        "sortOrder", rs.getInt("sort_order"),
+        "translations", translations,
+        "createdAt", instantString(rs, "created_at"),
+        "updatedAt", instantString(rs, "updated_at")
+    );
+  }
+
+  private Map<String, Object> mapNewsTranslation(ResultSet rs) throws SQLException {
+    return orderedMap(
+        "title", rs.getString("title"),
+        "categoryLabel", rs.getString("category_label"),
+        "excerpt", rs.getString("excerpt"),
+        "body", json.objectOrEmpty(rs.getString("body_json")),
+        "tags", json.arrayOrEmpty(rs.getString("tags_json")),
+        "seoTitle", rs.getString("seo_title"),
+        "seoDescription", rs.getString("seo_description"),
+        "ogImagePath", rs.getString("og_image_path")
+    );
+  }
+
+  private Map<String, Object> mapPublicNews(ResultSet rs, int rowNum) throws SQLException {
+    var item = orderedMap(
+        "id", rs.getString("id"),
+        "slug", rs.getString("slug"),
+        "category", rs.getString("category"),
+        "imagePath", rs.getString("image_path"),
+        "publishedAt", rs.getString("published_at"),
+        "isFeatured", rs.getBoolean("is_featured"),
+        "sortOrder", rs.getInt("sort_order"),
+        "locale", rs.getString("locale")
+    );
+    item.putAll(mapNewsTranslation(rs));
+    return item;
+  }
+
+  private Map<String, Object> mapCollection(ResultSet rs, Map<String, Object> translations) throws SQLException {
+    return orderedMap(
+        "id", rs.getString("id"),
+        "slug", rs.getString("slug"),
+        "category", rs.getString("category"),
+        "sportCategory", rs.getString("sport_category"),
+        "imagePath", rs.getString("image_path"),
+        "gallery", json.arrayOrEmpty(rs.getString("gallery_json")),
+        "specs", json.objectOrEmpty(rs.getString("specs_json")),
+        "isVisible", rs.getBoolean("is_visible"),
+        "sortOrder", rs.getInt("sort_order"),
+        "translations", translations,
+        "createdAt", instantString(rs, "created_at"),
+        "updatedAt", instantString(rs, "updated_at")
+    );
+  }
+
+  private Map<String, Object> mapCollectionTranslation(ResultSet rs) throws SQLException {
+    return orderedMap(
+        "title", rs.getString("title"),
+        "caption", rs.getString("caption"),
+        "story", rs.getString("story"),
+        "categoryLabel", rs.getString("category_label"),
+        "sportCategoryLabel", rs.getString("sport_category_label"),
+        "seoTitle", rs.getString("seo_title"),
+        "seoDescription", rs.getString("seo_description"),
+        "ogImagePath", rs.getString("og_image_path")
+    );
+  }
+
+  private Map<String, Object> mapPublicCollection(ResultSet rs, int rowNum) throws SQLException {
+    var item = orderedMap(
+        "id", rs.getString("id"),
+        "slug", rs.getString("slug"),
+        "category", rs.getString("category"),
+        "sportCategory", rs.getString("sport_category"),
+        "imagePath", rs.getString("image_path"),
+        "gallery", json.arrayOrEmpty(rs.getString("gallery_json")),
+        "specs", json.objectOrEmpty(rs.getString("specs_json")),
+        "sortOrder", rs.getInt("sort_order"),
+        "locale", rs.getString("locale")
+    );
+    item.putAll(mapCollectionTranslation(rs));
+    return item;
+  }
+
+  private Map<String, Object> mapInquiry(ResultSet rs, int rowNum) throws SQLException {
+    return orderedMap(
+        "id", rs.getString("id"),
+        "source", rs.getString("source"),
+        "status", rs.getString("status"),
+        "locale", rs.getString("locale"),
+        "name", rs.getString("name"),
+        "contact", rs.getString("contact"),
+        "organization", rs.getString("organization"),
+        "inquiryType", rs.getString("inquiry_type"),
+        "team", rs.getString("team"),
+        "quantity", rs.getObject("quantity"),
+        "dueDate", rs.getString("due_date"),
+        "useCase", rs.getString("use_case"),
+        "message", rs.getString("message"),
+        "configuration", json.objectOrEmpty(rs.getString("configuration_json")),
+        "pagePath", rs.getString("page_path"),
+        "userAgent", rs.getString("user_agent"),
+        "ipAddress", rs.getString("ip_address"),
+        "createdAt", instantString(rs, "created_at"),
+        "updatedAt", instantString(rs, "updated_at")
+    );
+  }
+
+  private Map<String, Object> mapEmailEvent(ResultSet rs, int rowNum) throws SQLException {
+    return orderedMap(
+        "id", rs.getString("id"),
+        "inquiryId", rs.getString("inquiry_id"),
+        "eventType", rs.getString("event_type"),
+        "recipient", rs.getString("recipient"),
+        "subject", rs.getString("subject"),
+        "status", rs.getString("status"),
+        "providerMessageId", rs.getString("provider_message_id"),
+        "errorMessage", rs.getString("error_message"),
+        "createdAt", instantString(rs, "created_at")
+    );
+  }
+
+  private Map<String, Object> mapMedia(ResultSet rs, int rowNum) throws SQLException {
+    return orderedMap(
+        "id", rs.getString("id"),
+        "filename", rs.getString("filename"),
+        "path", rs.getString("path"),
+        "url", rs.getString("url"),
+        "mimeType", rs.getString("mime_type"),
+        "sizeBytes", rs.getLong("size_bytes"),
+        "altKo", rs.getString("alt_ko"),
+        "altEn", rs.getString("alt_en"),
+        "storageProvider", rs.getString("storage_provider"),
+        "storageKey", rs.getString("storage_key"),
+        "createdAt", instantString(rs, "created_at"),
+        "updatedAt", instantString(rs, "updated_at")
+    );
+  }
+
+  private String instantString(ResultSet rs, String column) throws SQLException {
+    var value = rs.getObject(column, OffsetDateTime.class);
+    return value == null ? "" : value.toInstant().toString();
+  }
+
+  private String firstNonBlank(Object value, Object fallback) {
+    var text = validation.stringValue(value);
+    return text.isBlank() ? validation.stringValue(fallback) : text;
+  }
+
+  private Map<String, Object> orderedMap(Object... values) {
+    var map = new LinkedHashMap<String, Object>();
+    for (var index = 0; index < values.length; index += 2) {
+      map.put((String) values[index], values[index + 1]);
+    }
+    return map;
+  }
+}

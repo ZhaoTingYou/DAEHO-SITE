@@ -66,8 +66,8 @@ function timestampForFilename(value) {
 
 function printUsage() {
   console.log(`Usage:
-  npm run cms:import -- /absolute/path/deaho-cms-export.json
-  npm run cms:import -- /absolute/path/deaho-cms-export.json --replace
+  npm run cms:import -- /absolute/path/daeho-cms-export.json
+  npm run cms:import -- /absolute/path/daeho-cms-export.json --replace
 
 Options:
   --replace     Replace all CMS tables with the import file.

@@ -32,12 +32,12 @@ export function LenisProvider({children}: {children: ReactNode}) {
     };
 
     frame = requestAnimationFrame(raf);
-    window.addEventListener('deaho:lenis-stop', stopLenis);
-    window.addEventListener('deaho:lenis-start', startLenis);
+    window.addEventListener('daeho:lenis-stop', stopLenis);
+    window.addEventListener('daeho:lenis-start', startLenis);
 
     return () => {
-      window.removeEventListener('deaho:lenis-stop', stopLenis);
-      window.removeEventListener('deaho:lenis-start', startLenis);
+      window.removeEventListener('daeho:lenis-stop', stopLenis);
+      window.removeEventListener('daeho:lenis-start', startLenis);
       cancelAnimationFrame(frame);
       lenis.destroy();
     };

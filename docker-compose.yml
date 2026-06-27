@@ -3,8 +3,8 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-deaho_cms}
-      POSTGRES_USER: ${POSTGRES_USER:-deaho}
+      POSTGRES_DB: ${POSTGRES_DB:-daeho_cms}
+      POSTGRES_USER: ${POSTGRES_USER:-daeho}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -19,8 +19,8 @@ services:
       context: ./backend/cms
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-deaho_cms}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-deaho}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-daeho_cms}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-daeho}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
       CMS_ADMIN_API_KEY: ${CMS_BACKEND_API_KEY:-replace-with-a-long-random-key}
       CMS_UPLOAD_DIR: /data/uploads
@@ -70,8 +70,8 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-deaho_cms}
-      POSTGRES_USER: ${POSTGRES_USER:-deaho}
+      POSTGRES_DB: ${POSTGRES_DB:-daeho_cms}
+      POSTGRES_USER: ${POSTGRES_USER:-daeho}
       PGPASSWORD: ${POSTGRES_PASSWORD:-change-me}
       BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
     volumes:

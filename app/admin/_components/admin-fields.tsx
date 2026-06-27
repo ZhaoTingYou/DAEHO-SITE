@@ -10,7 +10,7 @@ import {
   type ReactNode
 } from 'react';
 
-const imageUploadSyncEventName = 'deaho-admin-image-upload-sync';
+const imageUploadSyncEventName = 'daeho-admin-image-upload-sync';
 
 type ImageUploadSyncDetail = {
   syncKey: string;

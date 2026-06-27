@@ -13,7 +13,7 @@ while true; do
     --username="${POSTGRES_USER}" \
     --dbname="${POSTGRES_DB}" \
     --format=custom \
-    --file="${target}/deaho_cms.dump"
+    --file="${target}/daeho_cms.dump"
 
   tar -czf "${target}/uploads.tar.gz" -C /data uploads
   echo "Backup written to ${target}"

@@ -11,8 +11,8 @@
     <relativePath />
   </parent>
 
-  <groupId>com.deaho</groupId>
-  <artifactId>deaho-cms</artifactId>
+  <groupId>com.daeho</groupId>
+  <artifactId>daeho-cms</artifactId>
   <version>0.1.0</version>
   <name>DAEHO CMS</name>
   <description>Spring Boot CMS backend for the DAEHO official site.</description>
