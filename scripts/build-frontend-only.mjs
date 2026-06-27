@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 const root = process.cwd();
 const backupRoot = path.join(root, '.frontend-only-build-backup');
 const disabledPaths = [
+  'proxy.ts',
   'app/admin',
   'app/api',
   'app/images',
@@ -21,6 +22,40 @@ const forceDynamicFiles = [
   'app/[locale]/(site)/news/page.tsx',
   'app/[locale]/(site)/news/[slug]/page.tsx'
 ];
+const staticPreviewPatches = [
+  {
+    file: 'app/robots.ts',
+    replacements: [
+      [
+        "import type {MetadataRoute} from 'next';\n",
+        "import type {MetadataRoute} from 'next';\n\nexport const dynamic = 'force-static';\n"
+      ]
+    ]
+  },
+  {
+    file: 'app/[locale]/(site)/contact/page.tsx',
+    replacements: [
+      [
+        'export default async function ContactPage({params, searchParams}: Props) {',
+        'export default async function ContactPage({params}: Props) {'
+      ],
+      ['  const query = await searchParams;\n', '  const query = {} as {type?: string};\n']
+    ]
+  },
+  {
+    file: 'app/[locale]/(site)/golf/inquiry/page.tsx',
+    replacements: [
+      [
+        'export default async function GolfInquiryPage({params, searchParams}: Props) {',
+        'export default async function GolfInquiryPage({params}: Props) {'
+      ],
+      [
+        '  const query = await searchParams;\n',
+        '  const query = {} as {head?: string; shaft?: string; engraving?: string};\n'
+      ]
+    ]
+  }
+];
 
 const originalFiles = new Map();
 
@@ -28,6 +63,7 @@ try {
   prepareBackupRoot();
   disableBackendRoutes();
   stripForceDynamicMarkers();
+  applyStaticPreviewPatches();
 
   const result = spawnSync('npx', ['next', 'build'], {
     cwd: root,
@@ -77,11 +113,30 @@ function stripForceDynamicMarkers() {
 
     const source = readFileSync(filePath, 'utf8');
     originalFiles.set(filePath, source);
-    writeFileSync(
-      filePath,
-      source.replace(/\nexport const dynamic = 'force-dynamic';\n/g, '\n'),
-      'utf8'
-    );
+    const nextSource = relativePath === 'app/sitemap.ts'
+      ? source.replace("export const dynamic = 'force-dynamic';", "export const dynamic = 'force-static';")
+      : source.replace(/\nexport const dynamic = 'force-dynamic';\n/g, '\n');
+
+    writeFileSync(filePath, nextSource, 'utf8');
+  }
+}
+
+function applyStaticPreviewPatches() {
+  for (const patch of staticPreviewPatches) {
+    const filePath = path.join(root, patch.file);
+
+    if (!existsSync(filePath)) {
+      continue;
+    }
+
+    let source = originalFiles.get(filePath) ?? readFileSync(filePath, 'utf8');
+    originalFiles.set(filePath, source);
+
+    for (const [from, to] of patch.replacements) {
+      source = source.replace(from, to);
+    }
+
+    writeFileSync(filePath, source, 'utf8');
   }
 }
 

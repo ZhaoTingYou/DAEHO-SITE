@@ -1,10 +1,17 @@
 import type {NextConfig} from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
+const isFrontendOnlyBuild = process.env.DEAHO_FRONTEND_ONLY === 'true';
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
-  output: 'standalone',
+  output: isFrontendOnlyBuild ? 'export' : 'standalone',
+  images: isFrontendOnlyBuild
+    ? {
+      unoptimized: true
+    }
+    : undefined,
   experimental: {
     serverActions: {
       bodySizeLimit: '12mb'
@@ -14,6 +21,10 @@ const nextConfig: NextConfig = {
     root: process.cwd()
   },
   async redirects() {
+    if (isFrontendOnlyBuild) {
+      return [];
+    }
+
     return [
       {source: '/:locale(ko|en)/chronicle', destination: '/:locale/archive', permanent: true},
       {source: '/:locale(ko|en)/legacy', destination: '/:locale/heritage/loyalty', permanent: true},
