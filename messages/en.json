@@ -1939,95 +1939,129 @@
     "privacy": {
       "eyebrow": "LEGAL",
       "title": "Privacy Policy",
-      "effective": "Effective date: [YYYY-MM-DD]",
-      "notice": "This document is a draft based on a common standard template. Before publication it must be finalized through legal review to match the company’s actual personal-data practices, and every [ ] placeholder must be replaced with confirmed information.",
-      "intro": "DAEHO (the “Company”) complies with the Personal Information Protection Act and other applicable laws, and establishes and discloses the following Privacy Policy to protect users’ personal information and to promptly handle related concerns.",
+      "effective": "Effective date: 2026-06-27",
+      "notice": "DAEHO does not currently provide member registration, shopping cart, or online payment services through the official website. This Policy is based on personal information processed when users browse brand and product information, submit Contact or Golf Inquiry forms, and receive consultation responses.",
+      "intro": "DAEHO (the “Company”) complies with the Personal Information Protection Act of Korea and other applicable laws. The Company establishes and discloses this Privacy Policy to protect users’ personal information safely. The Company processes only the personal information necessary for the stated purposes and does not use it for unrelated purposes.",
       "sections": [
         {
-          "heading": "Article 1 (Purposes of Processing)",
+          "heading": "Article 1 (Purposes of Processing Personal Information)",
           "body": [
-            "The Company processes personal information for the following purposes and does not use it for any purpose other than those stated:",
-            "1. Receiving and responding to production and order inquiries",
-            "2. Identity verification, contact, and consultation",
-            "3. Service provision and quality improvement"
+            "The Company processes personal information for the following purposes. The Company does not use processed personal information for purposes other than those stated below, and where the purpose changes, the Company will take necessary measures in accordance with applicable law.",
+            "1. Receiving, confirming, and responding to product and brand inquiries",
+            "2. Consulting on commemorative rings, championship rings, appointment rings, bespoke products, and golf-related products, including quotations, schedules, quantities, and specifications",
+            "3. Reviewing materials requested or provided by users, managing consultation history, and responding to disputes or errors",
+            "4. Securing website stability, preventing misuse, conducting security checks, and improving service quality",
+            "5. Complying with legal obligations and protecting rights"
           ]
         },
         {
           "heading": "Article 2 (Items of Personal Information Processed)",
           "body": [
-            "1. When receiving inquiries: name, contact details (phone number, email), and inquiry content",
-            "2. Information generated and collected automatically during use: access IP, cookies, service usage records, and device information"
+            "The Company may process the following personal information in connection with use of the Site:",
+            "1. Contact inquiries: name, company or organization, contact details (phone number, email address, or other reachable contact information), inquiry type, inquiry message, page language, and submission path",
+            "2. Golf Inquiry submissions: name, organization or team, contact details, quantity, preferred due date, intended use, configuration or selected options, inquiry message, page language, and submission path",
+            "3. Information that may be automatically generated during service use and security management: IP address, User-Agent, access date and time, request path, browser and device information, cookies, or similar technology data",
+            "4. Information voluntarily included by users in inquiry content: logos, emblems, organization names, event names, award records, personal names, images, and reference materials necessary for production consultation",
+            "The Company does not request resident registration numbers, payment card information, account passwords, sensitive information, or other information unnecessary for website consultation. Users should avoid including unnecessary sensitive information in inquiry content."
           ]
         },
         {
           "heading": "Article 3 (Processing and Retention Period)",
           "body": [
-            "The Company processes and retains personal information within the retention period required by law or consented to by the user.",
-            "1. Inquiry records: retained for [ ] year(s) after the purpose is achieved, then destroyed",
-            "2. Where retention is required by law, information is kept for the applicable period (e.g., records on consumer complaints or dispute handling for 3 years under the Act on Consumer Protection in Electronic Commerce)."
+            "The Company destroys personal information without delay when the processing purpose has been achieved. However, the Company may retain information for the following periods where necessary to confirm consultation history, respond to disputes, or comply with legal obligations.",
+            "1. Inquiry and consultation records: 3 years from completion of inquiry handling or the last contact date",
+            "2. Consultation records that lead to production, order, or contract: for the period necessary for contract performance, settlement, defect or dispute response, and any period required by applicable law",
+            "3. Access logs and security records: up to 3 months from collection. However, records may be retained for the necessary period where required for security incident investigation, dispute response, or legal preservation.",
+            "4. Records required to be retained under applicable law: for the period specified by the relevant law"
           ]
         },
         {
           "heading": "Article 4 (Provision to Third Parties)",
           "body": [
-            "As a rule, the Company does not provide users’ personal information to third parties. It may do so only with the user’s prior consent or where specifically required by law."
+            "As a rule, the Company does not provide users’ personal information to external parties. However, the Company may provide personal information to the extent necessary in the following cases:",
+            "1. Where the user has given prior consent",
+            "2. Where there is a special provision in law or a lawful request from an authorized agency such as an investigative authority or court",
+            "3. Where third-party provision is necessary for product production, inspection, delivery, shipping, or collaboration, and the Company has informed the user of the necessary details and obtained consent"
           ]
         },
         {
-          "heading": "Article 5 (Outsourcing of Processing)",
+          "heading": "Article 5 (Outsourcing of Personal Information Processing)",
           "body": [
-            "Where necessary for smooth service provision, the Company may outsource personal-information processing. In such cases it discloses the trustee and the outsourced work in this Policy and supervises the trustee in accordance with applicable laws."
+            "The Company may outsource personal information processing to external service providers to the extent necessary for smooth Site operation and inquiry response.",
+            "Outsourced work may include website and CMS operation, server hosting, data backup, security and DNS management, email sending, and inquiry notification processing.",
+            "The Company manages and supervises processors through relevant contracts or terms so that they process personal information safely. When actual processors and outsourced work are confirmed, the Company will disclose them through this Policy or separate notice on the Site."
           ]
         },
         {
-          "heading": "Article 6 (Rights of Data Subjects and How to Exercise Them)",
+          "heading": "Article 6 (Overseas Transfer of Personal Information)",
           "body": [
-            "Users may at any time request access to, correction or deletion of, or suspension of processing of their personal information, and the Company will act without delay in accordance with applicable laws.",
-            "Rights may be exercised by contacting the Privacy Officer in writing, by phone, or by email, and the Company will act after verifying the requester’s identity."
+            "Some services, including Site operation, server hosting, security management, email sending, and backup, may be processed through infrastructure provided by overseas service providers.",
+            "Where personal information is transferred overseas, the Company will confirm the recipient, country, transferred items, purpose of transfer, retention and use period, and implement necessary protective measures in accordance with applicable law.",
+            "When specific details of overseas transfer are confirmed, the Company will provide notice through this Policy or separate notice."
           ]
         },
         {
-          "heading": "Article 7 (Destruction of Personal Information)",
+          "heading": "Article 7 (Rights of Data Subjects and Legal Representatives)",
           "body": [
-            "When the retention period expires or the purpose of processing is achieved, the Company destroys the personal information without delay. Electronic files are deleted by irrecoverable means, and paper documents are shredded or incinerated."
+            "Users may request access to, correction of, deletion of, suspension of processing of, or withdrawal of consent regarding their personal information at any time.",
+            "Rights may be exercised through the Contact page or contact details announced by the Company, and the Company will act without delay in accordance with applicable law after verifying the requester’s identity.",
+            "Where a user requests correction of errors in personal information, the Company will not use or provide that personal information until the correction is completed.",
+            "Where processing of personal information of a child under 14 is necessary, the Company will follow procedures required by applicable law, including confirmation of consent from a legal representative."
           ]
         },
         {
-          "heading": "Article 8 (Measures to Ensure Security)",
+          "heading": "Article 8 (Destruction of Personal Information)",
           "body": [
-            "The Company takes administrative, technical, and physical measures to ensure the security of personal information.",
-            "These include managing access privileges, operating access-control systems, encrypting personal information, and installing and reviewing security programs."
+            "The Company destroys personal information without delay when the retention period expires or the processing purpose has been achieved.",
+            "Electronic files are deleted by secure methods so that they cannot be restored or reproduced, and paper documents are shredded or incinerated.",
+            "Personal information that must be retained under other laws is separated into a separate database or storage location."
           ]
         },
         {
-          "heading": "Article 9 (Cookies)",
+          "heading": "Article 9 (Measures to Ensure Security)",
           "body": [
-            "The Company may use cookies to provide customized services.",
-            "Users may refuse the storage of cookies through their web browser settings; refusing cookies may limit the use of some services."
+            "The Company takes administrative, technical, and physical measures to ensure the security of personal information, including:",
+            "1. Restricting and managing access rights to personal information",
+            "2. Access-control measures such as administrator authentication, password protection, and session protection",
+            "3. Encryption in transit (HTTPS) and management of server and database access",
+            "4. Technical protection measures such as security updates, log review, and backup management",
+            "5. Minimizing personnel who handle personal information and operating internal management procedures"
           ]
         },
         {
-          "heading": "Article 10 (Privacy Officer)",
+          "heading": "Article 10 (Cookies and Similar Technologies)",
           "body": [
-            "The Company designates a Privacy Officer who is overall responsible for personal-information processing, as follows:",
-            "· Privacy Officer: [Name] / [Title]",
-            "· Contact: [Phone], [Email]"
+            "The Company may use cookies or similar technologies for stable Site operation, language or session maintenance, security, and improved usability.",
+            "Users may refuse or delete cookies through browser settings. However, restricting cookies may affect the smooth use of some functions.",
+            "If the Company uses visit statistics, advertising, or analytics tools in the future, the Company will provide notice of the purpose and opt-out method through this Policy or separate notice."
           ]
         },
         {
-          "heading": "Article 11 (Remedies for Infringement)",
+          "heading": "Article 11 (Privacy Officer)",
           "body": [
-            "To obtain relief for personal-information infringement, users may apply to the following bodies for dispute resolution or consultation:",
-            "· Personal Information Dispute Mediation Committee (privacy.go.kr / 1833-6972)",
-            "· Privacy Infringement Report Center, KISA (privacy.kisa.or.kr / 118)",
-            "· Supreme Prosecutors’ Office, Cybercrime Investigation (spo.go.kr / 1301)",
-            "· National Police Agency, Cyber Bureau (ecrm.police.go.kr / 182)"
+            "The Company designates a Privacy Officer to oversee personal information processing and handle privacy-related inquiries and complaints.",
+            "· Privacy Officer: DAEHO privacy contact",
+            "· Responsibilities: Handling website inquiries and privacy-related requests",
+            "· Contact method: the Contact page of the Site or the email/contact information announced in the Footer",
+            "When the specific name, title, email address, and phone number are confirmed, the Company will reflect them in this Policy or in the Footer business information."
           ]
         },
         {
-          "heading": "Article 12 (Changes to this Policy)",
+          "heading": "Article 12 (Remedies for Infringement)",
           "body": [
-            "This Policy applies from [YYYY-MM-DD]. Where content is added, deleted, or modified, the Company will announce the changes on the Site at least 7 days before they take effect."
+            "Users may contact the following institutions for reports or consultation regarding personal information infringement:",
+            "1. Personal Information Dispute Mediation Committee: privacy.go.kr / 1833-6972",
+            "2. Privacy Infringement Report Center: privacy.kisa.or.kr / 118",
+            "3. Supreme Prosecutors’ Office Cybercrime Investigation: spo.go.kr / 1301",
+            "4. National Police Agency Cybercrime Report System: ecrm.police.go.kr / 182"
+          ]
+        },
+        {
+          "heading": "Article 13 (Changes to this Privacy Policy)",
+          "body": [
+            "The Company may amend this Policy due to changes in laws, service content, or personal information processing methods.",
+            "Where there are material changes, the Company will post the effective date, changed content, and reasons on the Site.",
+            "This Privacy Policy is effective from June 27, 2026."
           ]
         }
       ]

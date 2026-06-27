@@ -691,7 +691,10 @@
     "fields": [
       {"path": "eyebrow", "label": "眉标"},
       {"path": "title", "label": "标题"},
-      {"path": "notice", "label": "正文", "type": "textarea", "rows": 8}
+      {"path": "effective", "label": "生效日期"},
+      {"path": "notice", "label": "页面提示", "type": "textarea", "rows": 6},
+      {"path": "intro", "label": "引言", "type": "textarea", "rows": 5},
+      {"path": "sections", "label": "隐私政策章节", "type": "json"}
     ]
   },
   {
