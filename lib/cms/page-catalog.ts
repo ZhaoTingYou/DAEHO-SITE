@@ -9,6 +9,7 @@ export type PageArrayItemFieldDefinition = {
   type?: PageFieldType;
   rows?: number;
   placeholder?: string;
+  fallbackPath?: string;
 };
 
 export type PageFieldDefinition = {
@@ -141,7 +142,9 @@ export function getEditableLeavesForPageGroup(
 
   for (const field of fields) {
     const value = getObjectValueAtPath(content, field.path);
-    const fieldLeaves = getEditableLeaves(value, field.path);
+    const fieldLeaves = Array.isArray(value) && field.itemFields?.length
+      ? getEditableArrayItemFieldLeaves(value, field.path, field.itemFields)
+      : getEditableLeaves(value, field.path);
 
     for (const leaf of fieldLeaves) {
       if (seenPaths.has(leaf.path)) {
@@ -157,6 +160,66 @@ export function getEditableLeavesForPageGroup(
   }
 
   return leaves;
+}
+
+function getEditableArrayItemFieldLeaves(
+  items: unknown[],
+  path: string,
+  itemFields: PageArrayItemFieldDefinition[]
+) {
+  const leaves: EditableLeaf[] = [];
+
+  items.forEach((item, index) => {
+    const itemObject = isPlainObject(item) ? item : {};
+
+    for (const itemField of itemFields) {
+      const fieldPath = joinPath(joinPath(path, String(index)), itemField.path);
+      const value = getArrayItemFieldValue(itemObject, itemField);
+
+      leaves.push({
+        path: fieldPath,
+        value,
+        valueType: getEditableLeafValueType(value),
+        isImage: itemField.type === 'image' || isImageEditableField(fieldPath, value)
+      });
+    }
+  });
+
+  return leaves;
+}
+
+function getArrayItemFieldValue(item: Record<string, unknown>, itemField: PageArrayItemFieldDefinition) {
+  const value = getObjectValueAtPath(item, itemField.path);
+
+  if (value !== undefined) {
+    return value;
+  }
+
+  if (itemField.fallbackPath) {
+    const fallback = getObjectValueAtPath(item, itemField.fallbackPath);
+
+    if (fallback !== undefined) {
+      return fallback;
+    }
+  }
+
+  return '';
+}
+
+function getEditableLeafValueType(value: unknown): EditableLeaf['valueType'] {
+  if (typeof value === 'number') {
+    return 'number';
+  }
+
+  if (typeof value === 'boolean') {
+    return 'boolean';
+  }
+
+  if (value == null || value === '') {
+    return 'empty';
+  }
+
+  return 'string';
 }
 
 export function getEditableLeafCountForPageGroup(

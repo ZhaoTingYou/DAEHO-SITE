@@ -23,6 +23,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-daeho}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
       CMS_ADMIN_API_KEY: ${CMS_BACKEND_API_KEY:-replace-with-a-long-random-key}
+      CMS_ADMIN_PASSWORD: ${CMS_ADMIN_PASSWORD:-replace-with-a-strong-password}
       CMS_UPLOAD_DIR: /data/uploads
       CMS_PUBLIC_UPLOAD_BASE_URL: /uploads
       CMS_NOTIFY_TO: ${CMS_NOTIFY_TO:-}
@@ -33,7 +34,7 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
     volumes:
-      - cms_uploads:/data/uploads
+      - ./public/images:/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,6 +53,8 @@ services:
       CMS_ADMIN_PASSWORD: ${CMS_ADMIN_PASSWORD:-replace-with-a-strong-password}
       CMS_ADMIN_SESSION_SECRET: ${CMS_ADMIN_SESSION_SECRET:-replace-with-a-long-random-session-secret}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
+    volumes:
+      - ./public/images:/app/public/images:ro
     depends_on:
       - cms-api
 
@@ -76,7 +79,7 @@ services:
       BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
     volumes:
       - ./docker/backup/run-backup.sh:/backup/run-backup.sh:ro
-      - cms_uploads:/data/uploads:ro
+      - ./public/images:/data/uploads:ro
       - backups:/backups
     entrypoint: ["/bin/sh", "/backup/run-backup.sh"]
     depends_on:
@@ -85,5 +88,4 @@ services:
 
 volumes:
   postgres_data:
-  cms_uploads:
   backups:

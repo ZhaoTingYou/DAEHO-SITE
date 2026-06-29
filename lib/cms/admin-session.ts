@@ -1,7 +1,9 @@
-import {createHmac, timingSafeEqual} from 'node:crypto';
+import {createHash, createHmac, timingSafeEqual} from 'node:crypto';
 
 import {cookies} from 'next/headers';
 import {redirect} from 'next/navigation';
+
+import {getStoredAdminPasswordStatus, verifyStoredAdminPassword} from './admin-password';
 
 const adminSessionCookie = 'daeho_admin_session';
 const sessionMaxAgeSeconds = 60 * 60 * 8;
@@ -34,12 +36,13 @@ export async function hasAdminSession() {
   return verifySessionValue(value);
 }
 
-export async function createAdminSession() {
+export async function createAdminSession(passwordVersion = getLocalPasswordVersion()) {
   const cookieStore = await cookies();
   const issuedAt = Date.now().toString();
-  const signature = signValue(issuedAt);
+  const versionToken = encodeSessionPart(passwordVersion);
+  const signature = signValue(`${issuedAt}.${versionToken}`);
 
-  cookieStore.set(adminSessionCookie, `${issuedAt}.${signature}`, {
+  cookieStore.set(adminSessionCookie, `${issuedAt}.${versionToken}.${signature}`, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
@@ -51,6 +54,19 @@ export async function createAdminSession() {
 export async function clearAdminSession() {
   const cookieStore = await cookies();
   cookieStore.delete(adminSessionCookie);
+}
+
+export async function verifyAdminPassword(password: string) {
+  try {
+    const verification = await verifyStoredAdminPassword(password);
+    return {valid: verification.valid, version: verification.version};
+  } catch {
+    if (!canUseLocalAdminPasswordFallback()) {
+      return {valid: false, version: 'backend-unavailable'};
+    }
+
+    return {valid: validateAdminPassword(password), version: getLocalPasswordVersion()};
+  }
 }
 
 export function validateAdminPassword(password: string) {
@@ -114,10 +130,10 @@ export function getAdminPasswordHint() {
   return '';
 }
 
-function verifySessionValue(value: string) {
-  const [issuedAt, signature] = value.split('.');
+async function verifySessionValue(value: string) {
+  const [issuedAt, versionToken, signature] = value.split('.');
 
-  if (!issuedAt || !signature || !constantTimeEqual(signature, signValue(issuedAt))) {
+  if (!issuedAt || !versionToken || !signature || !constantTimeEqual(signature, signValue(`${issuedAt}.${versionToken}`))) {
     return false;
   }
 
@@ -127,7 +143,14 @@ function verifySessionValue(value: string) {
     return false;
   }
 
-  return Date.now() - issuedAtMs <= sessionMaxAgeSeconds * 1000;
+  if (Date.now() - issuedAtMs > sessionMaxAgeSeconds * 1000) {
+    return false;
+  }
+
+  const sessionVersion = decodeSessionPart(versionToken);
+  const currentVersion = await getCurrentPasswordVersion();
+
+  return Boolean(sessionVersion) && constantTimeEqual(sessionVersion, currentVersion);
 }
 
 function signValue(value: string) {
@@ -149,6 +172,39 @@ function getAdminPassword() {
     process.env.CMS_ADMIN_API_KEY ??
     (process.env.NODE_ENV !== 'production' ? 'admin' : '')
   );
+}
+
+async function getCurrentPasswordVersion() {
+  try {
+    const status = await getStoredAdminPasswordStatus();
+    return status.version;
+  } catch {
+    if (!canUseLocalAdminPasswordFallback()) {
+      return 'backend-unavailable';
+    }
+
+    return getLocalPasswordVersion();
+  }
+}
+
+function getLocalPasswordVersion() {
+  return `local:${createHash('sha256').update(getAdminPassword()).digest('hex')}`;
+}
+
+function canUseLocalAdminPasswordFallback() {
+  return process.env.CMS_PREVIEW_STATIC === 'true' || !process.env.CMS_BACKEND_URL;
+}
+
+function encodeSessionPart(value: string) {
+  return Buffer.from(value, 'utf8').toString('base64url');
+}
+
+function decodeSessionPart(value: string) {
+  try {
+    return Buffer.from(value, 'base64url').toString('utf8');
+  } catch {
+    return '';
+  }
 }
 
 function cleanupLoginAttempts(now: number) {

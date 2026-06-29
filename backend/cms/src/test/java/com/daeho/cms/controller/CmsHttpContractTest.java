@@ -22,6 +22,7 @@ import com.daeho.cms.config.CmsProperties;
 import com.daeho.cms.error.ApiExceptionHandler;
 import com.daeho.cms.repository.CmsRepository;
 import com.daeho.cms.security.AdminAuth;
+import com.daeho.cms.service.AdminPasswordService;
 import com.daeho.cms.service.CmsSnapshotService;
 import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.EmailNotificationService;
@@ -63,11 +64,12 @@ class CmsHttpContractTest {
         "",
         false,
         Path.of("/tmp/uploads"),
-        "/uploads"
+        "/uploads",
+        ""
     ));
     var validation = new RequestValidation();
     mvc = MockMvcBuilders.standaloneSetup(
-            new AdminCmsController(auth, repository, validation, mediaStorage, email, snapshots, status),
+            new AdminCmsController(auth, repository, validation, mediaStorage, email, snapshots, status, mock(AdminPasswordService.class)),
             new PublicCmsController(repository, validation),
             new PublicInquiryController(repository, validation, email)
         )

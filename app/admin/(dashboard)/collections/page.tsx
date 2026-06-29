@@ -5,6 +5,7 @@ import {listCollections} from '@/lib/cms/repositories';
 
 import {deleteCollectionAction} from '../../actions';
 import {DangerButton} from '../../_components/admin-fields';
+import {AdminActionAlert} from '../../_components/admin-feedback';
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
 
 type CollectionTranslation = {
@@ -13,8 +14,13 @@ type CollectionTranslation = {
   sportCategoryLabel?: string;
 };
 
-export default async function AdminCollectionsPage() {
+type Props = {
+  searchParams?: Promise<Record<string, string | undefined>>;
+};
+
+export default async function AdminCollectionsPage({searchParams}: Props) {
   const {t} = await getAdminI18n();
+  const query = await searchParams;
   const items = await listCollections();
 
   return (
@@ -28,6 +34,8 @@ export default async function AdminCollectionsPage() {
           </Link>
         }
       />
+
+      <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={t('cmsAlert.fallback')} />
 
       {items.length === 0 ? (
         <EmptyState title={t('collection.noItemsTitle')} body={t('collection.noItemsBody')} />

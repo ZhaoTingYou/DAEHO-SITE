@@ -13,7 +13,8 @@ const navItems = [
   {href: '/admin/media', labelKey: 'nav.media'},
   {href: '/admin/footer', labelKey: 'nav.footer'},
   {href: '/admin/pages', labelKey: 'nav.pages'},
-  {href: '/admin/export', labelKey: 'nav.export'}
+  {href: '/admin/export', labelKey: 'nav.export'},
+  {href: '/admin/account', labelKey: 'nav.account'}
 ];
 
 export function AdminShell({

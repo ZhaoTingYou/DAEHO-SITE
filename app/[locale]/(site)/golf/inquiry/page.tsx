@@ -1,11 +1,13 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {setRequestLocale} from 'next-intl/server';
+import {notFound} from 'next/navigation';
 
 import {GolfInquiryForm} from '@/components/forms/golf-inquiry-form';
 import {Reveal} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
+import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
@@ -17,6 +19,11 @@ type Props = {
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
+
+  if (!(await isGolfEnabledForSite())) {
+    notFound();
+  }
+
   return getPageMetadata(locale, 'golfInquiry');
 }
 
@@ -24,6 +31,11 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
   const {locale} = await params;
   const query = await searchParams;
   setRequestLocale(locale);
+
+  if (!(await isGolfEnabledForSite())) {
+    notFound();
+  }
+
   const messages = await getLocaleMessages(locale);
   const text = messages.golfInquiry;
   const golf = messages.golf;

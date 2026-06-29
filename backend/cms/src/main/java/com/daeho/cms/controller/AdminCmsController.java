@@ -3,6 +3,7 @@ package com.daeho.cms.controller;
 import com.daeho.cms.error.ValidationFailedException;
 import com.daeho.cms.repository.CmsRepository;
 import com.daeho.cms.security.AdminAuth;
+import com.daeho.cms.service.AdminPasswordService;
 import com.daeho.cms.service.CmsSnapshotService;
 import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.EmailNotificationService;
@@ -41,6 +42,7 @@ public class AdminCmsController {
   private final EmailNotificationService email;
   private final CmsSnapshotService snapshots;
   private final CmsStatusService status;
+  private final AdminPasswordService passwords;
 
   public AdminCmsController(
       AdminAuth auth,
@@ -49,7 +51,8 @@ public class AdminCmsController {
       MediaStorageService mediaStorage,
       EmailNotificationService email,
       CmsSnapshotService snapshots,
-      CmsStatusService status
+      CmsStatusService status,
+      AdminPasswordService passwords
   ) {
     this.auth = auth;
     this.repository = repository;
@@ -58,6 +61,35 @@ public class AdminCmsController {
     this.email = email;
     this.snapshots = snapshots;
     this.status = status;
+    this.passwords = passwords;
+  }
+
+  @GetMapping("/auth/status")
+  public Map<String, Object> authStatus(HttpServletRequest request) {
+    auth.requireAdmin(request);
+    var status = passwords.status();
+    return Map.of("configured", status.configured(), "version", status.version());
+  }
+
+  @PostMapping("/auth/verify-password")
+  public Map<String, Object> verifyPassword(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+    auth.requireAdmin(request);
+    var verification = passwords.verify(validation.stringValue(body.get("password")));
+    return Map.of(
+        "valid", verification.valid(),
+        "configured", verification.configured(),
+        "version", verification.version()
+    );
+  }
+
+  @PostMapping("/auth/change-password")
+  public Map<String, Object> changePassword(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+    auth.requireAdmin(request);
+    var status = passwords.changePassword(
+        validation.stringValue(body.get("currentPassword")),
+        body.get("newPassword") == null ? "" : body.get("newPassword").toString()
+    );
+    return Map.of("ok", true, "configured", status.configured(), "version", status.version());
   }
 
   @GetMapping("/pages")

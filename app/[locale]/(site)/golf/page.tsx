@@ -1,5 +1,6 @@
 import type {Metadata} from 'next';
 import {setRequestLocale} from 'next-intl/server';
+import {notFound} from 'next/navigation';
 
 import {
   GolfConfigurator,
@@ -7,6 +8,7 @@ import {
 } from '@/components/golf/golf-configurator';
 import type {Locale} from '@/i18n/routing';
 import {imageExists} from '@/lib/image-exists';
+import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 
@@ -16,13 +18,24 @@ type Props = {
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
+
+  if (!(await isGolfEnabledForSite())) {
+    notFound();
+  }
+
   return getPageMetadata(locale, 'golf');
 }
 
 export default async function GolfPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = (await getLocaleMessages(locale)).golf as GolfConfiguratorContent;
+
+  if (!(await isGolfEnabledForSite())) {
+    notFound();
+  }
+
+  const messages = await getLocaleMessages(locale);
+  const content = messages.golf as GolfConfiguratorContent;
   const filenames = collectGolfImages(content);
   const assets = Object.fromEntries(
     filenames.map((filename) => [filename, imageExists(filename)])

@@ -6,14 +6,20 @@ import {listNews} from '@/lib/cms/repositories';
 import {deleteNewsAction} from '../../actions';
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
 import {DangerButton} from '../../_components/admin-fields';
+import {AdminActionAlert} from '../../_components/admin-feedback';
 
 type NewsTranslation = {
   title?: string;
   categoryLabel?: string;
 };
 
-export default async function AdminNewsPage() {
+type Props = {
+  searchParams?: Promise<Record<string, string | undefined>>;
+};
+
+export default async function AdminNewsPage({searchParams}: Props) {
   const {t} = await getAdminI18n();
+  const query = await searchParams;
   const items = await listNews();
 
   return (
@@ -27,6 +33,8 @@ export default async function AdminNewsPage() {
           </Link>
         }
       />
+
+      <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={t('cmsAlert.fallback')} />
 
       {items.length === 0 ? (
         <EmptyState title={t('news.noItemsTitle')} body={t('news.noItemsBody')} />

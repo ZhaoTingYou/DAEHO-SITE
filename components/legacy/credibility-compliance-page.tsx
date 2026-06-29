@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import {HeritageHero} from '@/components/legacy/heritage-hero';
+import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/components/legacy/heritage-hero-image';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {imageExists} from '@/lib/image-exists';
@@ -259,14 +260,7 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
-  const heroImage = isImageFilename(copy.imagePlaceholder)
-    ? copy.imagePlaceholder
-    : isImageFilename(content.hero.image)
-      ? content.hero.image
-      : undefined;
-  const heroPlaceholder = isImageFilename(copy.imagePlaceholder)
-    ? defaultPageCopy[locale].imagePlaceholder
-    : copy.imagePlaceholder;
+  const heroImage = resolveHeritageHeroImage(content.hero.image, copy.imagePlaceholder);
 
   return (
     <main className="bg-white text-primary">
@@ -274,9 +268,8 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
         body={copy.intro}
         image={heroImage}
         imageAlt={content.hero.subtitle || copy.heroTitle}
-        imagePlaceholder={heroPlaceholder}
+        imagePlaceholder={resolveHeritageHeroPlaceholder(copy.imagePlaceholder)}
         label={copy.heroLabel}
-        locale={locale}
         title={copy.heroTitle}
       />
 

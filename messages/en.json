@@ -553,20 +553,20 @@
         ],
         "firstRecords": [
           {
-            "title": "FIRST INITIAL ENGRAVING",
-            "body": "First domestic application of initial engraving",
+            "frontTitle": "First domestic application of initial engraving",
+            "backTitle": "FIRST INITIAL ENGRAVING",
             "hoverText": "DAEHO introduced individual initial engraving as a first in Korea commemorative ring production.",
             "image": "legacy_achievement_01.png"
           },
           {
-            "title": "FIRST ANTIQUE COATING",
-            "body": "First domestic application of antique black coating",
+            "frontTitle": "First domestic application of antique black coating",
+            "backTitle": "FIRST ANTIQUE COATING",
             "hoverText": "DAEHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.",
             "image": "legacy_achievement_02.png"
           },
           {
-            "title": "FIRST DESIGN APPROACH",
-            "body": "First domestic approach to interior ring design",
+            "frontTitle": "First domestic approach to interior ring design",
+            "backTitle": "FIRST DESIGN APPROACH",
             "hoverText": "DAEHO first expanded ring design inward, giving the interior surface its own meaning and story.",
             "image": "legacy_achievement_03.png"
           }
@@ -1195,6 +1195,9 @@
   },
   "common": {
     "skipLink": "Skip to main content",
+    "features": {
+      "golfEnabled": false
+    },
     "navigation": {
       "primaryLabel": "Primary navigation",
       "mobileLabel": "Mobile navigation",
@@ -1251,6 +1254,14 @@
         "oh": "OH",
         "vulcan": "VULCAN"
       },
+      "socialLinks": {
+        "instagram": "https://instagram.com/",
+        "youtube": "https://youtube.com/",
+        "facebook": "https://facebook.com/",
+        "kakao": "https://pf.kakao.com/",
+        "twitter": "https://twitter.com/",
+        "blog": "https://blog.naver.com/"
+      },
       "collectionCategoryLinks": [
         {
           "label": "Championship Rings",
@@ -1270,40 +1281,44 @@
         "heading": "Business information",
         "items": [
           {
-            "label": "Company",
-            "value": "DAEHO"
+            "label": "Consultation/order phone",
+            "value": "02-765-2737"
+          },
+          {
+            "label": "Consultation/order email",
+            "value": "dhofficial1988@gmail.com"
+          },
+          {
+            "label": "CS hours",
+            "value": "10:00~18:00 | Closed weekends and public holidays"
+          },
+          {
+            "label": "Company name",
+            "value": "DAEHO Briano Co., Ltd."
           },
           {
             "label": "Representative",
-            "value": "Pending"
+            "value": "Kim Chung-il"
+          },
+          {
+            "label": "Business address",
+            "value": "3F, 19-15, Yulgok-ro 22na-gil, Jongno-gu, Seoul 03139, Republic of Korea"
+          },
+          {
+            "label": "Main phone",
+            "value": "02-765-2737"
           },
           {
             "label": "Business registration no.",
-            "value": "000-00-00000"
+            "value": "101-86-47224"
           },
           {
             "label": "Mail-order license no.",
-            "value": "Pending"
-          },
-          {
-            "label": "Address",
-            "value": "Pending"
-          },
-          {
-            "label": "Customer center",
-            "value": "Pending"
-          },
-          {
-            "label": "Email",
-            "value": "Pending"
+            "value": "2009-Seoul Jongno-0556 [Business information check]"
           },
           {
             "label": "Privacy officer",
-            "value": "Pending"
-          },
-          {
-            "label": "Hosting provider",
-            "value": "Pending"
+            "value": "Kim Jung-hee"
           }
         ]
       },
@@ -1311,7 +1326,7 @@
         "heading": "Terms & policies",
         "terms": "Terms of Use",
         "privacy": "Privacy Policy",
-        "rights": "All rights reserved."
+        "rights": "Copyright © Briano. All Rights Reserved."
       }
     }
   },
@@ -1381,26 +1396,26 @@
       "ariaLabel": "Collaboration and sponsorship brands",
       "rows": [
         [
-          "대한항공 점보스",
-          "KCC",
-          "인삼공사",
-          "두산베어스",
-          "삼성 라이온즈",
-          "KT위즈"
+          "Korean Air Jumbos",
+          "Busan KCC Egis",
+          "KGC Ginseng",
+          "Doosan Bears",
+          "Samsung Lions",
+          "KT Wiz"
         ],
         [
-          "NC다이노스",
-          "핑크스파이더스",
-          "GS칼텍스",
-          "SSG랜더스",
-          "전북현대"
+          "NC Dinos",
+          "Pink Spiders",
+          "GS Caltex Seoul KIXX",
+          "SSG Landers",
+          "Jeonbuk Hyundai Motors"
         ],
         [
-          "울산현대",
-          "KB스타즈",
-          "현대모비스",
-          "KGC",
-          "스카이워커스"
+          "Ulsan HD FC",
+          "Cheongju KB Stars",
+          "Ulsan Hyundai Mobis Phoebus",
+          "Anyang KGC",
+          "Hyundai Capital Skywalkers"
         ]
       ],
       "items": [
@@ -1445,7 +1460,7 @@
           "row": 1
         },
         {
-          "label": "GS Caltex",
+          "label": "GS Caltex Seoul KIXX",
           "logo": "team-logos/gs-caltex-seoul-kixx.png",
           "row": 1
         },
@@ -1455,7 +1470,7 @@
           "row": 1
         },
         {
-          "label": "Jeonbuk Hyundai",
+          "label": "Jeonbuk Hyundai Motors",
           "logo": "team-logos/jeonbuk-hyundai-motors.png",
           "row": 1
         },
@@ -1470,7 +1485,7 @@
           "row": 2
         },
         {
-          "label": "Hyundai Mobis",
+          "label": "Ulsan Hyundai Mobis Phoebus",
           "logo": "team-logos/ulsan-hyundai-mobis-phoebus.png",
           "row": 2
         },
@@ -1768,6 +1783,36 @@
       "featureEyebrow": "Bespoke records",
       "featureTitle": "From briefing to final polish",
       "featureBody": "Briefing notes, symbolic elements, material choices, and wearing comfort are kept in one stable production record.",
+      "items": [
+        {
+          "id": "ring-03",
+          "title": "Collection 03",
+          "caption": "A reserved slot for bespoke ring material.",
+          "categoryLabel": "Bespoke",
+          "image": "collection_ring_03.png"
+        },
+        {
+          "id": "ring-06",
+          "title": "Collection 06",
+          "caption": "A reserved slot for bespoke structure.",
+          "categoryLabel": "Bespoke",
+          "image": "collection_ring_06.png"
+        },
+        {
+          "id": "ring-08",
+          "title": "Collection 08",
+          "caption": "A reserved slot for fit and meaning.",
+          "categoryLabel": "Bespoke",
+          "image": "collection_ring_08.png"
+        },
+        {
+          "id": "ring-11",
+          "title": "Collection 11",
+          "caption": "A reserved slot for bespoke production details.",
+          "categoryLabel": "Bespoke",
+          "image": "collection_ring_11.png"
+        }
+      ],
       "process": [
         {
           "label": "01",

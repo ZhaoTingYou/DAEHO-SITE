@@ -6,6 +6,7 @@ import {SiteFooter} from '@/components/site/site-footer';
 import {SiteCursor} from '@/components/site/site-cursor';
 import {SiteHeader} from '@/components/site/site-header';
 import {routing, type Locale} from '@/i18n/routing';
+import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 
 type Props = {
   children: React.ReactNode;
@@ -20,14 +21,15 @@ export default async function SiteLayout({children, params}: Props) {
   }
 
   setRequestLocale(locale);
+  const golfEnabled = await isGolfEnabledForSite();
 
   return (
     <>
       <SiteCursor />
       <div className="site-cursor-scope">
-        <SiteHeader locale={locale as Locale} />
+        <SiteHeader locale={locale as Locale} golfEnabled={golfEnabled} />
         {children}
-        <SiteFooter locale={locale as Locale} />
+        <SiteFooter locale={locale as Locale} golfEnabled={golfEnabled} />
       </div>
     </>
   );

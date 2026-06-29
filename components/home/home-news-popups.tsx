@@ -4,6 +4,8 @@ import {AnimatePresence, motion} from 'framer-motion';
 import Image from 'next/image';
 import {useEffect, useId, useRef, useState} from 'react';
 
+import {imageSrc} from '@/lib/image-src';
+
 export type HomeNewsPopupCard = {
   id: string;
   category: string;
@@ -12,6 +14,7 @@ export type HomeNewsPopupCard = {
   title: string;
   image: string;
   hasImage: boolean;
+  body?: string;
 };
 
 type HomeNewsPopupsProps = {
@@ -31,7 +34,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
   const [modalImageRatio, setModalImageRatio] = useState<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
-  const bodyPages = splitModalBody(text.body);
+  const bodyPages = splitModalBody(activeCard?.body ?? text.body);
   const activeBodyPage = bodyPages[bodyPage] ?? bodyPages[0] ?? '';
 
   useEffect(() => {
@@ -232,7 +235,7 @@ function NewsImage({
       }`}
     >
       <Image
-        src={`/images/${card.image}`}
+        src={imageSrc(card.image)}
         alt={`${card.categoryLabel} ${card.title}`}
         fill
         priority={priority}

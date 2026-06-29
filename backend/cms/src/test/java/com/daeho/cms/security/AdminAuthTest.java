@@ -18,7 +18,8 @@ class AdminAuthTest {
       "",
       false,
       Path.of("/tmp/uploads"),
-      "/uploads"
+      "/uploads",
+      ""
   ));
 
   @Test

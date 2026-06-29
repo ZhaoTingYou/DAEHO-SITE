@@ -5,6 +5,7 @@ import {
   type LoyaltyFeatureSlide
 } from '@/components/legacy/loyalty-feature-carousel';
 import {HeritageHero} from '@/components/legacy/heritage-hero';
+import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/components/legacy/heritage-hero-image';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {imageExists} from '@/lib/image-exists';
@@ -167,14 +168,16 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
+  const heroImage = resolveHeritageHeroImage(content.hero.image, copy.imagePlaceholder);
 
   return (
     <main className="bg-white text-primary">
       <HeritageHero
-        imagePlaceholder={copy.imagePlaceholder}
+        image={heroImage}
+        imageAlt={content.hero.subtitle || copy.heroTitle}
+        imagePlaceholder={resolveHeritageHeroPlaceholder(copy.imagePlaceholder)}
         label={copy.heroLabel}
         lines={copy.introLines}
-        locale={locale}
         title={copy.heroTitle}
       />
 

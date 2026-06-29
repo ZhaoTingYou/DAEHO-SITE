@@ -553,20 +553,20 @@
         ],
         "firstRecords": [
           {
-            "title": "FIRST INITIAL ENGRAVING",
-            "body": "국내 최초 이니셜 조각 적용",
+            "frontTitle": "국내 최초 이니셜 조각 적용",
+            "backTitle": "FIRST INITIAL ENGRAVING",
             "hoverText": "국내 기념반지 제작에서 개인 이니셜 조각을 적용한 첫 기록입니다.",
             "image": "legacy_achievement_01.png"
           },
           {
-            "title": "FIRST ANTIQUE COATING",
-            "body": "국내 최초 엔티크 블랙 코팅 적용",
+            "frontTitle": "국내 최초 엔티크 블랙 코팅 적용",
+            "backTitle": "FIRST ANTIQUE COATING",
             "hoverText": "금속의 입체감과 문양의 깊이를 살리는 엔티크 블랙 코팅을 국내 최초로 적용했습니다.",
             "image": "legacy_achievement_02.png"
           },
           {
-            "title": "FIRST DESIGN APPROACH",
-            "body": "국내 최초 반지 내부 디자인 적용",
+            "frontTitle": "국내 최초 반지 내부 디자인 적용",
+            "backTitle": "FIRST DESIGN APPROACH",
             "hoverText": "반지 외부뿐 아니라 내부까지 의미를 담는 디자인 접근을 국내 최초로 시도했습니다.",
             "image": "legacy_achievement_03.png"
           }
@@ -1195,6 +1195,9 @@
   },
   "common": {
     "skipLink": "본문으로 건너뛰기",
+    "features": {
+      "golfEnabled": false
+    },
     "navigation": {
       "primaryLabel": "주요 내비게이션",
       "mobileLabel": "모바일 내비게이션",
@@ -1251,6 +1254,14 @@
         "oh": "OH",
         "vulcan": "VULCAN"
       },
+      "socialLinks": {
+        "instagram": "https://instagram.com/",
+        "youtube": "https://youtube.com/",
+        "facebook": "https://facebook.com/",
+        "kakao": "https://pf.kakao.com/",
+        "twitter": "https://twitter.com/",
+        "blog": "https://blog.naver.com/"
+      },
       "collectionCategoryLinks": [
         {
           "label": "우승반지",
@@ -1270,40 +1281,44 @@
         "heading": "사업자 정보",
         "items": [
           {
-            "label": "상호",
-            "value": "대호 (DAEHO)"
+            "label": "상담/주문 전화",
+            "value": "02-765-2737"
           },
           {
-            "label": "대표자",
-            "value": "준비 중"
+            "label": "상담/주문 이메일",
+            "value": "dhofficial1988@gmail.com"
           },
           {
-            "label": "사업자등록번호",
-            "value": "000-00-00000"
+            "label": "CS운영시간",
+            "value": "10:00~18:00 | 주말, 공휴일 휴무"
           },
           {
-            "label": "통신판매업신고번호",
-            "value": "준비 중"
+            "label": "상호명",
+            "value": "(주)대호 브리아노"
           },
           {
-            "label": "주소",
-            "value": "준비 중"
+            "label": "대표자명",
+            "value": "김충일"
           },
           {
-            "label": "고객센터",
-            "value": "준비 중"
+            "label": "사업장 주소",
+            "value": "03139 서울 종로구 율곡로 22나길 19-15 3층"
           },
           {
-            "label": "이메일",
-            "value": "준비 중"
+            "label": "대표 전화",
+            "value": "02-765-2737"
+          },
+          {
+            "label": "사업자 등록번호",
+            "value": "101-86-47224"
+          },
+          {
+            "label": "통신판매업 신고번호",
+            "value": "2009-서울종로-0556호 [사업자정보확인]"
           },
           {
             "label": "개인정보보호책임자",
-            "value": "준비 중"
-          },
-          {
-            "label": "호스팅 제공자",
-            "value": "준비 중"
+            "value": "김정희"
           }
         ]
       },
@@ -1311,7 +1326,7 @@
         "heading": "약관 및 정책",
         "terms": "이용약관",
         "privacy": "개인정보처리방침",
-        "rights": "All rights reserved."
+        "rights": "Copyright © 브리아노. All Rights Reserved."
       }
     }
   },
@@ -1768,6 +1783,36 @@
       "featureEyebrow": "Bespoke records",
       "featureTitle": "From briefing to final polish",
       "featureBody": "상담 내용, 상징 요소, 소재 선택, 착용감 확인까지 같은 기준으로 남겨 다음 제작에서도 흐름이 이어지도록 관리합니다.",
+      "items": [
+        {
+          "id": "ring-03",
+          "title": "Collection 03",
+          "caption": "주문 제작 반지 자료가 들어갈 자리입니다.",
+          "categoryLabel": "주문제작",
+          "image": "collection_ring_03.png"
+        },
+        {
+          "id": "ring-06",
+          "title": "Collection 06",
+          "caption": "맞춤 제작 구조를 보여줄 자리입니다.",
+          "categoryLabel": "주문제작",
+          "image": "collection_ring_06.png"
+        },
+        {
+          "id": "ring-08",
+          "title": "Collection 08",
+          "caption": "의미와 착용감을 함께 보여줄 자리입니다.",
+          "categoryLabel": "주문제작",
+          "image": "collection_ring_08.png"
+        },
+        {
+          "id": "ring-11",
+          "title": "Collection 11",
+          "caption": "주문 제작 디테일을 보여줄 자료 자리입니다.",
+          "categoryLabel": "주문제작",
+          "image": "collection_ring_11.png"
+        }
+      ],
       "process": [
         {
           "label": "01",

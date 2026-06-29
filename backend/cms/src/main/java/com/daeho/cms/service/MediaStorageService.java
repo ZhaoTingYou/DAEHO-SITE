@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class MediaStorageService {
-  public static final long MAX_IMAGE_UPLOAD_BYTES = 10L * 1024L * 1024L;
+  public static final long MAX_IMAGE_UPLOAD_BYTES = 20L * 1024L * 1024L;
   private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
       "image/gif",
       "image/jpeg",
@@ -55,6 +55,7 @@ public class MediaStorageService {
     var filename = publicFilename(file.getOriginalFilename(), preferredFilename);
     var uploadRoot = properties.uploadDir().toAbsolutePath().normalize();
     Files.createDirectories(uploadRoot);
+    filename = uniqueFilename(uploadRoot, filename);
     var target = uploadRoot.resolve(filename).normalize();
     if (!target.startsWith(uploadRoot)) {
       throw new IOException("Invalid upload filename.");
@@ -110,6 +111,24 @@ public class MediaStorageService {
       return baseName + originalExtension;
     }
     return (baseName.isBlank() ? "asset" : baseName) + "-" + UUID.randomUUID().toString().substring(0, 8) + originalExtension;
+  }
+
+  private String uniqueFilename(Path uploadRoot, String filename) {
+    if (!Files.exists(uploadRoot.resolve(filename).normalize())) {
+      return filename;
+    }
+
+    var extension = extension(filename);
+    var baseName = filename.substring(0, filename.length() - extension.length()).replaceAll("-$", "");
+
+    for (var index = 0; index < 10; index++) {
+      var candidate = baseName + "-" + UUID.randomUUID().toString().substring(0, 8) + extension;
+      if (!Files.exists(uploadRoot.resolve(candidate).normalize())) {
+        return candidate;
+      }
+    }
+
+    return baseName + "-" + UUID.randomUUID() + extension;
   }
 
   private String extension(String filename) {

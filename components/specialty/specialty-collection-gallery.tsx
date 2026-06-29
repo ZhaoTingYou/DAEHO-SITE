@@ -8,6 +8,7 @@ import {AnimatePresence, motion, useScroll, useTransform, type MotionValue} from
 import {EmptyState} from '@/components/empty-state';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import type {Locale} from '@/i18n/routing';
+import {mergeBespokeItems, type BespokeCollectionItemOverride} from '@/lib/cms/bespoke-items';
 import {imageSrc} from '@/lib/image-src';
 
 export type SpecialtyCollectionFilter = {
@@ -461,6 +462,7 @@ type BespokeViewCopy = {
   featureEyebrow: string;
   featureTitle: string;
   featureBody: string;
+  items?: BespokeCollectionItemOverride[];
   process: Array<{label: string; title: string; body: string}>;
 };
 
@@ -803,6 +805,7 @@ function resolveBespokeViewCopy(locale: Locale, customCopy?: Partial<BespokeView
       stones: {...fallback.filterOptions.stones, ...customCopy?.filterOptions?.stones},
       functions: {...fallback.filterOptions.functions, ...customCopy?.filterOptions?.functions}
     },
+    items: customCopy?.items?.length ? customCopy.items : fallback.items,
     process: customCopy?.process?.length ? customCopy.process : fallback.process
   };
 }
@@ -839,11 +842,12 @@ function BespokeCreationsView({
     functions: []
   });
   const copy = resolveBespokeViewCopy(locale, bespoke);
-  const filterSections = useMemo(() => buildBespokeFilterSections(items, copy), [items, copy]);
+  const displayItems = useMemo(() => mergeBespokeItems(items, copy.items, locale), [items, copy.items, locale]);
+  const filterSections = useMemo(() => buildBespokeFilterSections(displayItems, copy), [displayItems, copy]);
   const activeFilterCount = Object.values(selectedFilters).reduce((sum, values) => sum + values.length, 0);
   const filteredItems = useMemo(
-    () => items.filter((item, index) => bespokeItemMatchesFilters(item, index, selectedFilters)),
-    [items, selectedFilters]
+    () => displayItems.filter((item, index) => bespokeItemMatchesFilters(item, index, selectedFilters)),
+    [displayItems, selectedFilters]
   );
   const orderedItems = useMemo(
     () => {
@@ -925,7 +929,7 @@ function BespokeCreationsView({
 
       </section>
 
-      {items.length === 0 || filteredItems.length === 0 ? (
+      {displayItems.length === 0 || filteredItems.length === 0 ? (
         <div className="mx-auto max-w-[1180px] px-container pb-section">
           <EmptyState title={empty.title} body={empty.body} />
         </div>
@@ -1078,7 +1082,7 @@ function BespokeCanvasItem({
       >
         {item.hasImage ? (
           <Image
-            src={`/images/${item.image}`}
+            src={imageSrc(item.image)}
             alt={`${item.title} ${item.caption}`}
             fill
             sizes="(min-width: 1280px) 18vw, (min-width: 768px) 24vw, 42vw"
@@ -1238,7 +1242,7 @@ function BespokeCreationCard({
         {item.hasImage ? (
           <div className="hover-zoom-media absolute inset-0">
             <Image
-              src={`/images/${item.image}`}
+              src={imageSrc(item.image)}
               alt={`${item.title} ${item.caption}`}
               fill
               sizes={sizes}

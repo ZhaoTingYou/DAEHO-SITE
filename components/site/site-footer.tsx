@@ -10,6 +10,7 @@ import {ExternalSiteLink} from './external-site-link';
 
 type SiteFooterProps = {
   locale: Locale;
+  golfEnabled: boolean;
 };
 
 type FooterLink = {
@@ -24,14 +25,27 @@ type FooterGroup = {
 };
 
 const showFooterExternalLinks = false;
+const socialLinkItems = [
+  {key: 'instagram', label: 'Instagram'},
+  {key: 'youtube', label: 'YouTube'},
+  {key: 'facebook', label: 'Facebook'},
+  {key: 'kakao', label: 'Kakao'},
+  {key: 'twitter', label: 'Twitter'},
+  {key: 'blog', label: 'Blog'}
+] as const;
+type SocialLinkKey = (typeof socialLinkItems)[number]['key'];
 
-export async function SiteFooter({locale}: SiteFooterProps) {
+export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
   const text = (await getLocaleMessages(locale)).common;
   const navLabels = text.navigation.items;
   const externalLabels = text.footer.externalSites;
   const {business, legal} = text.footer;
   const contactLabel = text.navigation.contactCta;
   const collectionCategoryLinks = text.footer.collectionCategoryLinks ?? [];
+  const socialLinks = text.footer.socialLinks ?? {};
+  const visibleSocialLinks = socialLinkItems
+    .map((item) => ({...item, href: socialLinks[item.key] ?? ''}))
+    .filter((item) => item.href.trim().length > 0);
   const footerGroups: FooterGroup[] = [
     {
       heading: navLabels.chronicle,
@@ -59,13 +73,15 @@ export async function SiteFooter({locale}: SiteFooterProps) {
       href: '/news',
       links: []
     },
-    {
-      heading: navLabels.golf,
-      href: '/golf',
-      links: [
-        {label: text.footer.golfInquiry, href: '/golf/inquiry'}
-      ]
-    },
+    ...(golfEnabled ? [
+      {
+        heading: navLabels.golf,
+        href: '/golf',
+        links: [
+          {label: text.footer.golfInquiry, href: '/golf/inquiry'}
+        ]
+      }
+    ] : []),
     {
       heading: contactLabel,
       href: '/contact',
@@ -73,6 +89,7 @@ export async function SiteFooter({locale}: SiteFooterProps) {
     }
   ];
   const year = new Date().getFullYear();
+  const rightsText = formatFooterRights(legal.rights, year);
 
   return (
     <footer className="relative z-20 border-t border-hairline bg-white text-primary">
@@ -88,6 +105,19 @@ export async function SiteFooter({locale}: SiteFooterProps) {
           </div>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:border-l lg:border-hairline lg:pl-16">
+            {visibleSocialLinks.length > 0 ? (
+              <div>
+                <p className="footer-label">SNS</p>
+                <div className="footer-social-grid">
+                  {visibleSocialLinks.map((item) => (
+                    <ExternalSiteLink key={item.key} label={item.label} href={item.href} className="footer-link footer-link--social footer-link--social-icon">
+                      <SocialIcon name={item.key} />
+                    </ExternalSiteLink>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             {showFooterExternalLinks ? (
               <div>
                 <p className="footer-label">{text.footer.otherSites}</p>
@@ -99,7 +129,7 @@ export async function SiteFooter({locale}: SiteFooterProps) {
               </div>
             ) : null}
 
-            <div className={showFooterExternalLinks ? '' : 'sm:col-start-2'}>
+            <div className={showFooterExternalLinks || visibleSocialLinks.length > 0 ? '' : 'sm:col-start-2'}>
               <p className="footer-label">{text.footer.locale}</p>
               <div className="mt-5 flex gap-5">
                 {locales.map((targetLocale) => (
@@ -114,7 +144,7 @@ export async function SiteFooter({locale}: SiteFooterProps) {
 
         <nav
           aria-label={text.footer.navigation}
-          className="grid gap-x-10 gap-y-12 pt-[clamp(42px,5vw,72px)] sm:grid-cols-2 lg:grid-cols-6"
+          className={`grid gap-x-10 gap-y-12 pt-[clamp(42px,5vw,72px)] sm:grid-cols-2 ${golfEnabled ? 'lg:grid-cols-6' : 'lg:grid-cols-5'}`}
         >
           {footerGroups.map((group) => (
             <div key={group.heading} className="min-w-0">
@@ -127,7 +157,7 @@ export async function SiteFooter({locale}: SiteFooterProps) {
               )}
 
               {group.links.length > 0 ? (
-                <div className="mt-5 grid gap-3">
+                <div className="footer-subnav grid">
                   {group.links.map((item) => (
                     <Link key={item.href} href={withLocale(locale, item.href)} className="footer-link footer-link--muted">
                       {item.label}
@@ -144,7 +174,7 @@ export async function SiteFooter({locale}: SiteFooterProps) {
         <div className="mx-auto max-w-[1440px]">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="font-body text-[12px] leading-6 text-subtext">
-              © {year} DAEHO. {legal.rights}
+              {rightsText}
             </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <Link href={withLocale(locale, '/terms')} className="footer-link footer-link--legal">
@@ -171,4 +201,60 @@ export async function SiteFooter({locale}: SiteFooterProps) {
       </div>
     </footer>
   );
+}
+
+function formatFooterRights(rights: string, year: number) {
+  const trimmedRights = rights.trim();
+
+  if (/copyright|©/i.test(trimmedRights)) {
+    return trimmedRights;
+  }
+
+  return `© ${year} DAEHO. ${trimmedRights}`;
+}
+
+function SocialIcon({name}: {name: SocialLinkKey}) {
+  switch (name) {
+    case 'instagram':
+      return (
+        <svg className="footer-social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" />
+        </svg>
+      );
+    case 'youtube':
+      return (
+        <svg className="footer-social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M21 8.2c-.2-1.3-1-2.2-2.3-2.4C16.8 5.5 12 5.5 12 5.5s-4.8 0-6.7.3C4 6 3.2 6.9 3 8.2a32 32 0 0 0 0 7.6c.2 1.3 1 2.2 2.3 2.4 1.9.3 6.7.3 6.7.3s4.8 0 6.7-.3c1.3-.2 2.1-1.1 2.3-2.4a32 32 0 0 0 0-7.6Z" fill="currentColor" />
+          <path d="M10.2 15.3V8.7l5.7 3.3-5.7 3.3Z" fill="white" />
+        </svg>
+      );
+    case 'facebook':
+      return (
+        <svg className="footer-social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M15 8h2.7V4.2A21 21 0 0 0 14.1 4c-3.6 0-5.8 2.1-5.8 5.9V12H5v4.2h3.3V22h4.5v-5.8h3.5l.7-4.2h-4.2V10.3C12.8 8.9 13.3 8 15 8Z" fill="currentColor" />
+        </svg>
+      );
+    case 'kakao':
+      return (
+        <svg className="footer-social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 4C7 4 3 7.2 3 11.1c0 2.5 1.7 4.7 4.2 5.9l-.6 2.9 3.2-1.9c.7.1 1.5.2 2.2.2 5 0 9-3.2 9-7.1S17 4 12 4Z" fill="currentColor" />
+          <path d="M8.9 14.8V8h1.7v2.6L13.2 8h2.1l-2.9 3 3.1 3.8h-2.2l-2.7-3.3v3.3H8.9Z" fill="white" />
+        </svg>
+      );
+    case 'twitter':
+      return (
+        <svg className="footer-social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M4.6 4h4.6l3.6 5 4.5-5H21l-6.5 7.3L21.5 20h-4.6l-4.3-5.9L7.3 20H3.5l7.3-8.1L4.6 4Zm2.9 1.8 10.4 12.4h.8L8.4 5.8h-.9Z" fill="currentColor" />
+        </svg>
+      );
+    case 'blog':
+      return (
+        <svg className="footer-social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="currentColor" />
+          <path d="M7.8 16.3V7.7h2.3l4 5.1V7.7h2.1v8.6h-2.1l-4.1-5.2v5.2H7.8Z" fill="white" />
+        </svg>
+      );
+  }
 }

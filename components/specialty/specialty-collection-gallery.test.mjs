@@ -76,6 +76,37 @@ test('collection stage artwork is exposed through CMS content fields', () => {
   }
 });
 
+test('bespoke category page exposes editable CMS images for its visible works', () => {
+  const bespokePage = pageCatalog.find((page) => page.pageKey === 'mastery-creations-bespoke');
+  assert.ok(bespokePage, 'Bespoke category should have its own CMS page entry');
+
+  const field = bespokePage.fields.find((entry) => entry.groupKey === 'bespoke' && entry.path === 'items');
+  assert.ok(field, 'Bespoke page should expose editable item images');
+  assert.notEqual(field.type, 'json', 'Bespoke works should use structured array fields, not a large JSON textarea');
+  assert.ok(field.itemFields.some((entry) => entry.path === 'image' && entry.type === 'image'));
+
+  assert.ok(
+    source.includes('mergeBespokeItems(items, copy.items, locale)'),
+    'Bespoke page should merge CMS item image overrides and appended items before rendering'
+  );
+});
+
+test('bespoke shuffle uses the merged CMS item pool and repeats only when there are fewer images than slots', () => {
+  assert.ok(
+    source.includes('const displayItems = useMemo(() => mergeBespokeItems(items, copy.items, locale)'),
+    'Bespoke display items should include CMS-added works before filtering and shuffling'
+  );
+  assert.ok(
+    source.includes('const filteredItems = useMemo(') && source.includes('displayItems.filter'),
+    'Bespoke filtering should operate on the merged CMS display pool'
+  );
+  assert.ok(
+    source.includes('const canvasItems = bespokeCanvasPlacements.map((placement, index) => ({') &&
+      source.includes('item: items[index % items.length]'),
+    'Canvas should fill all slots, reusing items only when the pool is smaller than the placement count'
+  );
+});
+
 test('collection stage product artwork uses the original transparent PNG proportions', () => {
   assert.ok(
     source.includes("{background: 'bg1.jpg', product: 'c1.png', productWidth: 1672, productHeight: 941"),

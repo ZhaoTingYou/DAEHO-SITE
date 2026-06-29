@@ -2,10 +2,14 @@ import createMiddleware from 'next-intl/middleware';
 import {NextResponse, type NextRequest} from 'next/server';
 
 import {routing} from '@/i18n/routing';
+import {isGolfEnabled} from '@/lib/golf-visibility-core';
 
 const intlMiddleware = createMiddleware(routing);
+const golfVisibilityCacheMs = 5_000;
 
-export default function proxy(request: NextRequest) {
+let golfVisibilityCache: {enabled: boolean; expiresAt: number} | null = null;
+
+export default async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/admin')) {
     return NextResponse.next();
   }
@@ -14,9 +18,78 @@ export default function proxy(request: NextRequest) {
     return NextResponse.rewrite(new URL('/ko/styleguide-internal', request.url));
   }
 
+  if (isGolfRequestPath(request.nextUrl.pathname) && !(await isGolfEnabledForProxy())) {
+    return new NextResponse('Not found', {
+      status: 404,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8'
+      }
+    });
+  }
+
   return intlMiddleware(request);
 }
 
 export const config = {
   matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)']
 };
+
+export function isGolfRequestPath(pathname: string) {
+  const segments = pathname.split('/').filter(Boolean);
+  const firstSegment = segments[0];
+  const golfSegmentIndex = firstSegment === 'ko' || firstSegment === 'en' ? 1 : 0;
+
+  return segments[golfSegmentIndex] === 'golf';
+}
+
+async function isGolfEnabledForProxy() {
+  if (process.env.DAEHO_GOLF_ENABLED === 'true') {
+    return true;
+  }
+
+  const now = Date.now();
+
+  if (golfVisibilityCache && golfVisibilityCache.expiresAt > now) {
+    return golfVisibilityCache.enabled;
+  }
+
+  const enabled = await readGolfEnabledFromCms();
+  golfVisibilityCache = {
+    enabled,
+    expiresAt: now + golfVisibilityCacheMs
+  };
+
+  return enabled;
+}
+
+async function readGolfEnabledFromCms() {
+  const baseUrl = process.env.CMS_BACKEND_URL?.replace(/\/+$/, '');
+
+  if (!baseUrl) {
+    return false;
+  }
+
+  try {
+    const pages = await Promise.all(['ko', 'en'].map((locale) => fetchGolfCommonPage(baseUrl, locale)));
+
+    return pages.some((page) => isGolfEnabled(page));
+  } catch {
+    return false;
+  }
+}
+
+async function fetchGolfCommonPage(baseUrl: string, locale: string) {
+  const response = await fetch(`${baseUrl}/api/cms/pages/common?locale=${locale}`, {
+    cache: 'no-store',
+    headers: {
+      accept: 'application/json'
+    },
+    signal: AbortSignal.timeout(1_200)
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.json();
+}

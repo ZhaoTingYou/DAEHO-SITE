@@ -7,8 +7,11 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type CSSProperties,
   type ReactNode
 } from 'react';
+
+import type {PageArrayItemFieldDefinition} from '@/lib/cms/page-catalog';
 
 const imageUploadSyncEventName = 'daeho-admin-image-upload-sync';
 
@@ -316,6 +319,7 @@ export function ImageUploadField({
 
   const handleMediaSelect = (item: MediaLibraryItem) => {
     releaseObjectUrl();
+    const nextPreviewUrl = item.url || imageSrc(item.filename);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -325,7 +329,6 @@ export function ImageUploadField({
       filenameInputRef.current.value = item.filename;
     }
 
-    const nextPreviewUrl = item.url || imageSrc(item.filename);
     setSelectedPreviewUrl(nextPreviewUrl);
     setSelectedFileName(item.filename);
     setSelectionSource('media');
@@ -364,7 +367,7 @@ export function ImageUploadField({
                 aria-label={label}
                 role="img"
                 className="h-full w-full bg-cover bg-center"
-                style={{backgroundImage: `url("${previewUrl}")`}}
+                style={mediaPreviewBackground(previewUrl)}
               />
             ) : (
               <div className="grid h-full place-items-center text-xs font-semibold text-[#98a2b3]">{emptyLabel}</div>
@@ -425,7 +428,7 @@ export function ImageUploadField({
                       >
                         <span
                           className="block aspect-square rounded bg-[#eef2f6] bg-cover bg-center"
-                          style={{backgroundImage: `url("${item.url || imageSrc(item.filename)}")`}}
+                          style={mediaPreviewBackground(item.url || imageSrc(item.filename))}
                         />
                         <span className="line-clamp-2 break-all px-1 pb-1 text-[10px] font-medium leading-3 text-[#647084] group-hover:text-[#7a2230]">
                           {item.filename}
@@ -453,12 +456,183 @@ export function ImageUploadField({
   );
 }
 
+export function AppendableArrayItemsField({
+  path,
+  startIndex,
+  locale,
+  groupKey,
+  itemFields,
+  mediaItems,
+  title,
+  hint,
+  addButtonLabel,
+  removeButtonLabel,
+  uploadLabel,
+  uploadHint,
+  emptyLabel,
+  changedLabel,
+  selectedLabel,
+  syncedLabel,
+  mediaSelectLabel,
+  mediaLibraryTitle,
+  mediaEmptyLabel,
+  mediaSelectedLabel
+}: {
+  path: string;
+  startIndex: number;
+  locale: string;
+  groupKey: string;
+  itemFields: PageArrayItemFieldDefinition[];
+  mediaItems: MediaLibraryItem[];
+  title: string;
+  hint: string;
+  addButtonLabel: string;
+  removeButtonLabel: string;
+  uploadLabel: string;
+  uploadHint: string;
+  emptyLabel: string;
+  changedLabel: string;
+  selectedLabel: string;
+  syncedLabel: string;
+  mediaSelectLabel: string;
+  mediaLibraryTitle: string;
+  mediaEmptyLabel: string;
+  mediaSelectedLabel: string;
+}) {
+  const [rows, setRows] = useState([0]);
+
+  const addRow = () => {
+    setRows((current) => [...current, Math.max(...current) + 1]);
+  };
+
+  const removeRow = (row: number) => {
+    setRows((current) => current.length > 1 ? current.filter((item) => item !== row) : current);
+  };
+
+  return (
+    <section className="grid gap-4 rounded-md border border-dashed border-[#cbd3df] bg-[#fbfcfe] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h4 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">
+            {title}
+          </h4>
+          <p className="mt-1 text-xs font-medium leading-5 text-[#98a2b3]">
+            {hint}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={addRow}
+          className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054] transition hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]"
+        >
+          {addButtonLabel}
+        </button>
+      </div>
+      <div className="grid gap-4">
+        {rows.map((row, rowIndex) => {
+          const itemIndex = startIndex + rowIndex;
+
+          return (
+            <div key={row} className="grid gap-4 rounded-md border border-[#eef2f6] bg-white p-3">
+              {rows.length > 1 ? (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => removeRow(row)}
+                    className="min-h-9 rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-xs font-semibold text-[#b42318] transition hover:bg-[#fee4e2]"
+                  >
+                    {removeButtonLabel}
+                  </button>
+                </div>
+              ) : null}
+              {itemFields.map((field) => {
+                const fieldPath = `${path}.${itemIndex}.${field.path}`;
+                const name = contentFieldName(locale, groupKey, fieldPath);
+
+                if (field.type === 'image') {
+                  return (
+                    <ImageUploadField
+                      key={field.path}
+                      label={field.label}
+                      name={name}
+                      uploadName={contentImageFieldName(locale, groupKey, fieldPath)}
+                      defaultValue=""
+                      placeholder={field.placeholder ?? 'image-name.png'}
+                      uploadLabel={uploadLabel}
+                      uploadHint={uploadHint}
+                      emptyLabel={emptyLabel}
+                      changedLabel={changedLabel}
+                      selectedLabel={selectedLabel}
+                      syncedLabel={syncedLabel}
+                      mediaItems={mediaItems}
+                      mediaSelectLabel={mediaSelectLabel}
+                      mediaLibraryTitle={mediaLibraryTitle}
+                      mediaEmptyLabel={mediaEmptyLabel}
+                      mediaSelectedLabel={mediaSelectedLabel}
+                      syncKey={`page-content:${groupKey}:${fieldPath}`}
+                    />
+                  );
+                }
+
+                if (field.type === 'textarea') {
+                  return <TextAreaField key={field.path} label={field.label} name={name} defaultValue="" rows={field.rows ?? 3} />;
+                }
+
+                return <TextField key={field.path} label={field.label} name={name} defaultValue="" placeholder={field.placeholder} />;
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function imageSrc(value: string) {
-  if (value.startsWith('/')) {
-    return value;
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return '';
   }
 
-  return `/images/${value}`;
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('/uploads/')) {
+    return `/images/${trimmed.slice('/uploads/'.length)}`;
+  }
+
+  if (trimmed.startsWith('/')) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('uploads/')) {
+    return `/images/${trimmed.slice('uploads/'.length)}`;
+  }
+
+  return `/images/${trimmed}`;
+}
+
+function mediaPreviewBackground(imageUrl: string): CSSProperties {
+  const checkerboard = [
+    'linear-gradient(45deg, #d9dee7 25%, transparent 25%)',
+    'linear-gradient(-45deg, #d9dee7 25%, transparent 25%)',
+    'linear-gradient(45deg, transparent 75%, #d9dee7 75%)',
+    'linear-gradient(-45deg, transparent 75%, #d9dee7 75%)'
+  ].join(', ');
+
+  return {
+    backgroundColor: '#eef2f6',
+    backgroundImage: `url("${cssUrl(imageUrl)}"), ${checkerboard}`,
+    backgroundPosition: 'center, 0 0, 0 6px, 6px -6px, -6px 0',
+    backgroundRepeat: 'no-repeat, repeat, repeat, repeat, repeat',
+    backgroundSize: 'cover, 12px 12px, 12px 12px, 12px 12px, 12px 12px'
+  };
+}
+
+function cssUrl(value: string) {
+  return value.replace(/["\\\n\r\f]/g, '\\$&');
 }
 
 function formatTemplate(template: string, filename: string) {
@@ -476,4 +650,12 @@ function suggestedUploadFilename(filename: string) {
     .slice(0, 60);
 
   return `${baseName || 'asset'}${extension}`;
+}
+
+function contentFieldName(locale: string, groupKey: string, path: string) {
+  return `contentField.${locale}.${groupKey}.${path}`;
+}
+
+function contentImageFieldName(locale: string, groupKey: string, path: string) {
+  return `contentImage.${locale}.${groupKey}.${path}`;
 }

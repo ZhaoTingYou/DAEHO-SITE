@@ -36,8 +36,7 @@
       {"groupKey": "homeUi", "path": "latestNews.close", "label": "最近消息关闭按钮"},
       {"groupKey": "homeUi", "path": "latestNews.label", "label": "最近消息弹窗标签"},
       {"groupKey": "homeUi", "path": "latestNews.fallback", "label": "最近消息无图提示"},
-      {"groupKey": "homeUi", "path": "latestNews.body", "label": "最近消息弹窗正文", "type": "textarea", "rows": 4},
-      {"groupKey": "homeUi", "path": "latestNews.cards", "label": "最近消息卡片", "type": "json"},
+      {"groupKey": "homeUi", "path": "latestNews.body", "label": "最近消息默认弹窗正文（News 正文为空时使用）", "type": "textarea", "rows": 4},
       {"groupKey": "homeUi", "path": "partners.ariaLabel", "label": "合作品牌辅助标签"},
       {
         "groupKey": "homeUi",
@@ -96,7 +95,7 @@
       {"path": "copy.heroLabel", "label": "Hero 标签"},
       {"path": "copy.heroTitle", "label": "Hero 标题"},
       {"path": "copy.introLines", "label": "Hero 文案", "type": "json"},
-      {"path": "copy.imagePlaceholder", "label": "Hero 图片占位文案"},
+      {"path": "hero.image", "label": "Hero 背景图片", "type": "image"},
       {"path": "copy.quoteTitle", "label": "Quote 英文标题"},
       {"path": "copy.quoteBody", "label": "Quote 正文"},
       {
@@ -129,7 +128,7 @@
       {"path": "copy.heroLabel", "label": "Hero 标签"},
       {"path": "copy.heroTitle", "label": "Hero 标题"},
       {"path": "copy.intro", "label": "Hero 正文", "type": "textarea", "rows": 4},
-      {"path": "copy.imagePlaceholder", "label": "Hero 图片", "type": "image"},
+      {"path": "hero.image", "label": "Hero 背景图片", "type": "image"},
       {"path": "copy.quoteTitle", "label": "Quote 英文标题"},
       {"path": "copy.quoteBody", "label": "Quote 正文"},
       {
@@ -160,7 +159,7 @@
       {"path": "copy.heroLabel", "label": "Hero 标签"},
       {"path": "copy.heroTitle", "label": "Hero 标题"},
       {"path": "copy.introLines", "label": "Hero 文案", "type": "json"},
-      {"path": "copy.imagePlaceholder", "label": "Hero 图片占位文案"},
+      {"path": "hero.image", "label": "Hero 背景图片", "type": "image"},
       {"path": "copy.quoteTitle", "label": "Quote 英文标题"},
       {"path": "copy.quoteBody", "label": "Quote 正文"},
       {
@@ -180,9 +179,9 @@
         "label": "FIRST RECORDS 卡片",
         "type": "json",
         "itemFields": [
-          {"path": "title", "label": "英文标题"},
-          {"path": "body", "label": "正文", "type": "textarea", "rows": 2},
-          {"path": "hoverText", "label": "翻面显示文字", "type": "textarea", "rows": 4},
+          {"path": "frontTitle", "label": "卡片正面标题", "fallbackPath": "body"},
+          {"path": "backTitle", "label": "卡片翻面标题", "fallbackPath": "title"},
+          {"path": "hoverText", "label": "卡片翻面内容", "type": "textarea", "rows": 4},
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },
@@ -441,6 +440,18 @@
       {"groupKey": "bespoke", "path": "featureEyebrow", "label": "Feature 眉标"},
       {"groupKey": "bespoke", "path": "featureTitle", "label": "Feature 标题"},
       {"groupKey": "bespoke", "path": "featureBody", "label": "Feature 正文", "type": "textarea", "rows": 3},
+      {
+        "groupKey": "bespoke",
+        "path": "items",
+        "label": "Bespoke 作品图片",
+        "itemFields": [
+          {"path": "id", "label": "作品 ID"},
+          {"path": "title", "label": "标题"},
+          {"path": "caption", "label": "说明", "type": "textarea", "rows": 3},
+          {"path": "categoryLabel", "label": "分类显示名"},
+          {"path": "image", "label": "图片", "type": "image"}
+        ]
+      },
       {
         "groupKey": "bespoke",
         "path": "process",
@@ -713,6 +724,7 @@
       {"key": "notFound", "title": "404 页面文案", "sourcePath": "notFound"}
     ],
     "fields": [
+      {"groupKey": "main", "path": "features.golfEnabled", "label": "启用 Golf 页面和入口", "labels": {"ko": "Golf 페이지와 메뉴 표시", "en": "Enable Golf page and navigation"}},
       {"path": "footer.tagline", "label": "品牌标语", "labels": {"ko": "브랜드 문구", "en": "Brand tagline"}, "type": "textarea", "rows": 2},
       {"path": "footer.navigation", "label": "Footer 导航辅助文案", "labels": {"ko": "푸터 내비게이션 접근성 라벨", "en": "Footer navigation aria label"}},
       {"path": "footer.locale", "label": "语言区标题", "labels": {"ko": "언어 영역 제목", "en": "Language section title"}},
@@ -725,28 +737,37 @@
       {"path": "footer.legal.rights", "label": "版权声明", "labels": {"ko": "저작권 문구", "en": "Rights notice"}},
 
       {"path": "footer.business.heading", "label": "企业信息标题", "labels": {"ko": "사업자 정보 제목", "en": "Business information heading"}},
-      {"path": "footer.business.items.0.label", "label": "企业信息 1 标签：公司名", "labels": {"ko": "사업자 정보 1 라벨: 상호", "en": "Business item 1 label: Company"}},
-      {"path": "footer.business.items.0.value", "label": "企业信息 1 内容：公司名", "labels": {"ko": "사업자 정보 1 내용: 상호", "en": "Business item 1 value: Company"}},
-      {"path": "footer.business.items.1.label", "label": "企业信息 2 标签：代表", "labels": {"ko": "사업자 정보 2 라벨: 대표자", "en": "Business item 2 label: Representative"}},
-      {"path": "footer.business.items.1.value", "label": "企业信息 2 内容：代表", "labels": {"ko": "사업자 정보 2 내용: 대표자", "en": "Business item 2 value: Representative"}},
-      {"path": "footer.business.items.2.label", "label": "企业信息 3 标签：营业执照号", "labels": {"ko": "사업자 정보 3 라벨: 사업자등록번호", "en": "Business item 3 label: Registration no."}},
-      {"path": "footer.business.items.2.value", "label": "企业信息 3 内容：营业执照号", "labels": {"ko": "사업자 정보 3 내용: 사업자등록번호", "en": "Business item 3 value: Registration no."}},
-      {"path": "footer.business.items.3.label", "label": "企业信息 4 标签：通信销售申报号", "labels": {"ko": "사업자 정보 4 라벨: 통신판매업신고번호", "en": "Business item 4 label: Mail-order license"}},
-      {"path": "footer.business.items.3.value", "label": "企业信息 4 内容：通信销售申报号", "labels": {"ko": "사업자 정보 4 내용: 통신판매업신고번호", "en": "Business item 4 value: Mail-order license"}},
-      {"path": "footer.business.items.4.label", "label": "企业信息 5 标签：地址", "labels": {"ko": "사업자 정보 5 라벨: 주소", "en": "Business item 5 label: Address"}},
-      {"path": "footer.business.items.4.value", "label": "企业信息 5 内容：地址", "labels": {"ko": "사업자 정보 5 내용: 주소", "en": "Business item 5 value: Address"}},
-      {"path": "footer.business.items.5.label", "label": "企业信息 6 标签：客服", "labels": {"ko": "사업자 정보 6 라벨: 고객센터", "en": "Business item 6 label: Customer center"}},
-      {"path": "footer.business.items.5.value", "label": "企业信息 6 内容：客服", "labels": {"ko": "사업자 정보 6 내용: 고객센터", "en": "Business item 6 value: Customer center"}},
-      {"path": "footer.business.items.6.label", "label": "企业信息 7 标签：邮箱", "labels": {"ko": "사업자 정보 7 라벨: 이메일", "en": "Business item 7 label: Email"}},
-      {"path": "footer.business.items.6.value", "label": "企业信息 7 内容：邮箱", "labels": {"ko": "사업자 정보 7 내용: 이메일", "en": "Business item 7 value: Email"}},
-      {"path": "footer.business.items.7.label", "label": "企业信息 8 标签：隐私负责人", "labels": {"ko": "사업자 정보 8 라벨: 개인정보보호책임자", "en": "Business item 8 label: Privacy officer"}},
-      {"path": "footer.business.items.7.value", "label": "企业信息 8 内容：隐私负责人", "labels": {"ko": "사업자 정보 8 내용: 개인정보보호책임자", "en": "Business item 8 value: Privacy officer"}},
-      {"path": "footer.business.items.8.label", "label": "企业信息 9 标签：托管服务商", "labels": {"ko": "사업자 정보 9 라벨: 호스팅 제공자", "en": "Business item 9 label: Hosting provider"}},
-      {"path": "footer.business.items.8.value", "label": "企业信息 9 内容：托管服务商", "labels": {"ko": "사업자 정보 9 내용: 호스팅 제공자", "en": "Business item 9 value: Hosting provider"}},
+      {"path": "footer.business.items.0.label", "label": "企业信息 1 标签：咨询/订单电话", "labels": {"ko": "사업자 정보 1 라벨: 상담/주문 전화", "en": "Business item 1 label: Consultation/order phone"}},
+      {"path": "footer.business.items.0.value", "label": "企业信息 1 内容：咨询/订单电话", "labels": {"ko": "사업자 정보 1 내용: 상담/주문 전화", "en": "Business item 1 value: Consultation/order phone"}},
+      {"path": "footer.business.items.1.label", "label": "企业信息 2 标签：咨询/订单邮箱", "labels": {"ko": "사업자 정보 2 라벨: 상담/주문 이메일", "en": "Business item 2 label: Consultation/order email"}},
+      {"path": "footer.business.items.1.value", "label": "企业信息 2 内容：咨询/订单邮箱", "labels": {"ko": "사업자 정보 2 내용: 상담/주문 이메일", "en": "Business item 2 value: Consultation/order email"}},
+      {"path": "footer.business.items.2.label", "label": "企业信息 3 标签：CS运营时间", "labels": {"ko": "사업자 정보 3 라벨: CS운영시간", "en": "Business item 3 label: CS hours"}},
+      {"path": "footer.business.items.2.value", "label": "企业信息 3 内容：CS运营时间", "labels": {"ko": "사업자 정보 3 내용: CS운영시간", "en": "Business item 3 value: CS hours"}},
+      {"path": "footer.business.items.3.label", "label": "企业信息 4 标签：公司名", "labels": {"ko": "사업자 정보 4 라벨: 상호명", "en": "Business item 4 label: Company name"}},
+      {"path": "footer.business.items.3.value", "label": "企业信息 4 内容：公司名", "labels": {"ko": "사업자 정보 4 내용: 상호명", "en": "Business item 4 value: Company name"}},
+      {"path": "footer.business.items.4.label", "label": "企业信息 5 标签：代表", "labels": {"ko": "사업자 정보 5 라벨: 대표자명", "en": "Business item 5 label: Representative"}},
+      {"path": "footer.business.items.4.value", "label": "企业信息 5 内容：代表", "labels": {"ko": "사업자 정보 5 내용: 대표자명", "en": "Business item 5 value: Representative"}},
+      {"path": "footer.business.items.5.label", "label": "企业信息 6 标签：地址", "labels": {"ko": "사업자 정보 6 라벨: 사업장 주소", "en": "Business item 6 label: Business address"}},
+      {"path": "footer.business.items.5.value", "label": "企业信息 6 内容：地址", "labels": {"ko": "사업자 정보 6 내용: 사업장 주소", "en": "Business item 6 value: Business address"}},
+      {"path": "footer.business.items.6.label", "label": "企业信息 7 标签：代表电话", "labels": {"ko": "사업자 정보 7 라벨: 대표 전화", "en": "Business item 7 label: Main phone"}},
+      {"path": "footer.business.items.6.value", "label": "企业信息 7 内容：代表电话", "labels": {"ko": "사업자 정보 7 내용: 대표 전화", "en": "Business item 7 value: Main phone"}},
+      {"path": "footer.business.items.7.label", "label": "企业信息 8 标签：营业执照号", "labels": {"ko": "사업자 정보 8 라벨: 사업자 등록번호", "en": "Business item 8 label: Registration no."}},
+      {"path": "footer.business.items.7.value", "label": "企业信息 8 内容：营业执照号", "labels": {"ko": "사업자 정보 8 내용: 사업자 등록번호", "en": "Business item 8 value: Registration no."}},
+      {"path": "footer.business.items.8.label", "label": "企业信息 9 标签：通信销售申报号", "labels": {"ko": "사업자 정보 9 라벨: 통신판매업 신고번호", "en": "Business item 9 label: Mail-order license"}},
+      {"path": "footer.business.items.8.value", "label": "企业信息 9 内容：通信销售申报号", "labels": {"ko": "사업자 정보 9 내용: 통신판매업 신고번호", "en": "Business item 9 value: Mail-order license"}},
+      {"path": "footer.business.items.9.label", "label": "企业信息 10 标签：隐私负责人", "labels": {"ko": "사업자 정보 10 라벨: 개인정보보호책임자", "en": "Business item 10 label: Privacy officer"}},
+      {"path": "footer.business.items.9.value", "label": "企业信息 10 内容：隐私负责人", "labels": {"ko": "사업자 정보 10 내용: 개인정보보호책임자", "en": "Business item 10 value: Privacy officer"}},
 
       {"path": "footer.collectionCategoryLinks.0.label", "label": "作品分类 1：冠军戒指", "labels": {"ko": "작품 분류 1: 우승반지", "en": "Collection category 1: Championship"}},
       {"path": "footer.collectionCategoryLinks.1.label", "label": "作品分类 2：任命戒指", "labels": {"ko": "작품 분류 2: 임관반지", "en": "Collection category 2: Appointment"}},
       {"path": "footer.collectionCategoryLinks.2.label", "label": "作品分类 3：定制产品", "labels": {"ko": "작품 분류 3: 주문제작", "en": "Collection category 3: Bespoke"}},
+
+      {"path": "footer.socialLinks.instagram", "label": "SNS 链接：Instagram", "labels": {"ko": "SNS 링크: Instagram", "en": "SNS link: Instagram"}},
+      {"path": "footer.socialLinks.youtube", "label": "SNS 链接：YouTube", "labels": {"ko": "SNS 링크: YouTube", "en": "SNS link: YouTube"}},
+      {"path": "footer.socialLinks.facebook", "label": "SNS 链接：Facebook", "labels": {"ko": "SNS 링크: Facebook", "en": "SNS link: Facebook"}},
+      {"path": "footer.socialLinks.kakao", "label": "SNS 链接：Kakao", "labels": {"ko": "SNS 링크: Kakao", "en": "SNS link: Kakao"}},
+      {"path": "footer.socialLinks.twitter", "label": "SNS 链接：Twitter", "labels": {"ko": "SNS 링크: Twitter", "en": "SNS link: Twitter"}},
+      {"path": "footer.socialLinks.blog", "label": "SNS 链接：Naver Blog", "labels": {"ko": "SNS 링크: Naver Blog", "en": "SNS link: Naver Blog"}},
 
       {"path": "footer.externalSites.daeho", "label": "相关站点：DAEHO", "labels": {"ko": "관련 사이트: DAEHO", "en": "Related site: DAEHO"}},
       {"path": "footer.externalSites.oh", "label": "相关站点：OH", "labels": {"ko": "관련 사이트: OH", "en": "Related site: OH"}},

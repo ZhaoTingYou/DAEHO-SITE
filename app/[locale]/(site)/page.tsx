@@ -1,3 +1,4 @@
+import type {CSSProperties} from 'react';
 import type {Metadata} from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,7 +10,7 @@ import {HomeStatBand} from '@/components/home/home-stat-band';
 import {Reveal, RevealItem} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
-import {getHomeNewsCardsFromPage} from '@/lib/cms/public-content';
+import {getHomeNewsCardsForSite} from '@/lib/cms/public-content';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
@@ -33,7 +34,7 @@ export default async function HomePage({params}: Props) {
   const messages = await getLocaleMessages(locale);
   const content = messages.home;
   const homeUi = messages.homeUi;
-  const latestNews: HomeNewsPopupCard[] = getHomeNewsCardsFromPage(homeUi.latestNews.cards);
+  const latestNews: HomeNewsPopupCard[] = await getHomeNewsCardsForSite(locale);
 
   return <HomeContent content={content} homeUi={homeUi} latestNews={latestNews} locale={locale} />;
 }
@@ -44,6 +45,12 @@ type HomeContentProps = {
   latestNews: HomeNewsPopupCard[];
   locale: Locale;
 };
+
+type HomeBrandRowStyle = CSSProperties & {
+  '--home-brand-marquee-duration': string;
+};
+
+const homeBrandSecondsPerLogo = 7;
 
 function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
   const {currentPulse, latestNews: latestNewsText, partners} = homeUi;
@@ -198,27 +205,34 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
 
       <section className="overflow-hidden bg-bg pb-section pt-[clamp(42px,6vw,90px)]">
         <div className="home-brand-marquee" aria-label={partners.ariaLabel}>
-          {partnerRows.map((row, rowIndex) => (
-            <div className="home-brand-row" key={rowIndex}>
-              {[...row, ...row].filter((brand) => brand.logo).map((brand, brandIndex) => (
-                <span
-                  aria-label={brand.label}
-                  className="home-brand-item"
-                  key={`${brand.label}-${brand.logo}-${brandIndex}`}
-                >
-                  {brand.logo ? (
-                    <Image
-                      src={`/images/${brand.logo}`}
-                      alt={brand.label}
-                      width={96}
-                      height={96}
-                      className="home-brand-logo"
-                    />
-                  ) : null}
-                </span>
-              ))}
-            </div>
-          ))}
+          {partnerRows.map((row, rowIndex) => {
+            const rowWithLogos = row.filter((brand) => brand.logo);
+            const rowStyle: HomeBrandRowStyle = {
+              '--home-brand-marquee-duration': `${Math.max(rowWithLogos.length, 1) * homeBrandSecondsPerLogo}s`
+            };
+
+            return (
+              <div className="home-brand-row" key={rowIndex} style={rowStyle}>
+                {[...rowWithLogos, ...rowWithLogos].map((brand, brandIndex) => (
+                  <span
+                    aria-label={brand.label}
+                    className="home-brand-item"
+                    key={`${brand.label}-${brand.logo}-${brandIndex}`}
+                  >
+                    {brand.logo ? (
+                      <Image
+                        src={`/images/${brand.logo}`}
+                        alt={brand.label}
+                        width={96}
+                        height={96}
+                        className="home-brand-logo"
+                      />
+                    ) : null}
+                  </span>
+                ))}
+              </div>
+            );
+          })}
         </div>
       </section>
     </main>

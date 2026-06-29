@@ -3,6 +3,7 @@
 import path from 'node:path';
 
 import {revalidatePath} from 'next/cache';
+import {isRedirectError} from 'next/dist/client/components/redirect-error';
 import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
 
@@ -13,8 +14,13 @@ import {
   createAdminSession,
   isAdminLoginRateLimited,
   recordFailedAdminLogin,
-  validateAdminPassword
+  verifyAdminPassword
 } from '@/lib/cms/admin-session';
+import {
+  changeStoredAdminPassword,
+  isCmsBackendPasswordError
+} from '@/lib/cms/admin-password';
+import {appendAdminActionError} from '@/lib/cms/admin-action-error';
 import {
   createCollection,
   createNews,
@@ -72,19 +78,49 @@ export async function loginAction(formData: FormData) {
     redirect('/admin/login?error=rate');
   }
 
-  if (!validateAdminPassword(password)) {
+  const verification = await verifyAdminPassword(password);
+
+  if (!verification.valid) {
     recordFailedAdminLogin(attemptKey);
     redirect('/admin/login?error=1');
   }
 
   clearAdminLoginFailures(attemptKey);
-  await createAdminSession();
+  await createAdminSession(verification.version);
   redirect('/admin');
 }
 
 export async function logoutAction() {
   await clearAdminSession();
   redirect('/admin/login');
+}
+
+export async function changeAdminPasswordAction(formData: FormData) {
+  await assertAdminSession();
+
+  const currentPassword = stringFromForm(formData, 'currentPassword');
+  const newPassword = rawStringFromForm(formData, 'newPassword');
+  const confirmPassword = rawStringFromForm(formData, 'confirmPassword');
+  let redirectTo = '/admin/login?status=password-updated';
+
+  if (newPassword !== confirmPassword) {
+    redirect('/admin/account?error=mismatch');
+  }
+
+  try {
+    await changeStoredAdminPassword(currentPassword, newPassword);
+    await clearAdminSession();
+  } catch (error) {
+    if (isCmsBackendPasswordError(error, 401)) {
+      redirectTo = '/admin/account?error=current';
+    } else if (isCmsBackendPasswordError(error, 400)) {
+      redirectTo = '/admin/account?error=weak';
+    } else {
+      redirectTo = '/admin/account?error=server';
+    }
+  }
+
+  redirect(redirectTo);
 }
 
 export async function updateInquiryStatusAction(formData: FormData) {
@@ -122,93 +158,111 @@ export async function saveNewsAction(formData: FormData) {
   await assertAdminSession();
 
   const id = stringFromForm(formData, 'id');
-  const previousImages = collectImageFilenames(id ? await getNews(id) : null);
   const editorPath = `/admin/news/${id || 'new'}`;
-  const imagePath = await readUploadedImageOrText(formData, 'imagePath', 'imageUpload', 'ko', editorPath);
-  const payload = newsPayloadSchema.parse({
-    slug: stringFromForm(formData, 'slug'),
-    category: stringFromForm(formData, 'category'),
-    imagePath,
-    publishedAt: stringFromForm(formData, 'publishedAt'),
-    isFeatured: formData.get('isFeatured') === 'on',
-    isVisible: formData.get('isVisible') !== 'off',
-    sortOrder: stringFromForm(formData, 'sortOrder') || '0',
-    translations: {
-      ko: await readNewsTranslation(formData, 'ko', editorPath),
-      en: await readNewsTranslation(formData, 'en', editorPath)
-    }
-  });
 
-  const savedItem = id ? await updateNews(id, payload) : await createNews(payload);
-  const nextEditorPath = savedItem?.id ? `/admin/news/${savedItem.id}` : editorPath;
-  await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
+  try {
+    const previousImages = collectImageFilenames(id ? await getNews(id) : null);
+    const imagePath = await readUploadedImageOrText(formData, 'imagePath', 'imageUpload', 'ko', editorPath);
+    const payload = newsPayloadSchema.parse({
+      slug: stringFromForm(formData, 'slug'),
+      category: stringFromForm(formData, 'category'),
+      imagePath,
+      publishedAt: stringFromForm(formData, 'publishedAt'),
+      isFeatured: formData.get('isFeatured') === 'on',
+      isVisible: formData.get('isVisible') !== 'off',
+      sortOrder: stringFromForm(formData, 'sortOrder') || '0',
+      translations: {
+        ko: await readNewsTranslation(formData, 'ko', editorPath),
+        en: await readNewsTranslation(formData, 'en', editorPath)
+      }
+    });
 
-  revalidatePath('/admin/news');
-  revalidatePath(nextEditorPath);
-  redirect(nextEditorPath);
+    const savedItem = id ? await updateNews(id, payload) : await createNews(payload);
+    const nextEditorPath = savedItem?.id ? `/admin/news/${savedItem.id}` : editorPath;
+    await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
+
+    revalidatePath('/admin/news');
+    revalidatePath(nextEditorPath);
+    redirect(nextEditorPath);
+  } catch (error) {
+    redirectWithAdminActionError(editorPath, error);
+  }
 }
 
 export async function deleteNewsAction(formData: FormData) {
   await assertAdminSession();
 
-  const id = stringFromForm(formData, 'id');
-  const previousImages = collectImageFilenames(id ? await getNews(id) : null);
+  try {
+    const id = stringFromForm(formData, 'id');
+    const previousImages = collectImageFilenames(id ? await getNews(id) : null);
 
-  if (id) {
-    await deleteNews(id);
-    await cleanupUnreferencedPublicImages(previousImages);
+    if (id) {
+      await deleteNews(id);
+      await cleanupUnreferencedPublicImages(previousImages);
+    }
+
+    revalidatePath('/admin/news');
+  } catch (error) {
+    redirectWithAdminActionError('/admin/news', error);
   }
-
-  revalidatePath('/admin/news');
 }
 
 export async function saveCollectionAction(formData: FormData) {
   await assertAdminSession();
 
   const id = stringFromForm(formData, 'id');
-  const previousImages = collectImageFilenames(id ? await getCollection(id) : null);
   const editorPath = `/admin/collections/${id || 'new'}`;
-  const imagePath = await readUploadedImageOrText(formData, 'imagePath', 'imageUpload', 'ko', editorPath);
-  const gallery = await readGalleryImages(formData, imagePath, editorPath);
-  const payload = collectionPayloadSchema.parse({
-    slug: stringFromForm(formData, 'slug'),
-    category: stringFromForm(formData, 'category'),
-    sportCategory: stringFromForm(formData, 'sportCategory'),
-    imagePath,
-    gallery,
-    specs: {
-      year: stringFromForm(formData, 'specs.year'),
-      sportCategory: stringFromForm(formData, 'specs.sportCategory')
-    },
-    isVisible: formData.get('isVisible') !== 'off',
-    sortOrder: stringFromForm(formData, 'sortOrder') || '0',
-    translations: {
-      ko: await readCollectionTranslation(formData, 'ko', editorPath),
-      en: await readCollectionTranslation(formData, 'en', editorPath)
-    }
-  });
 
-  const savedItem = id ? await updateCollection(id, payload) : await createCollection(payload);
-  const nextEditorPath = savedItem?.id ? `/admin/collections/${savedItem.id}` : editorPath;
-  await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
+  try {
+    const previousImages = collectImageFilenames(id ? await getCollection(id) : null);
+    const imagePath = await readUploadedImageOrText(formData, 'imagePath', 'imageUpload', 'ko', editorPath);
+    const gallery = await readGalleryImages(formData, imagePath, editorPath);
+    const payload = collectionPayloadSchema.parse({
+      slug: stringFromForm(formData, 'slug'),
+      category: stringFromForm(formData, 'category'),
+      sportCategory: stringFromForm(formData, 'sportCategory'),
+      imagePath,
+      gallery,
+      specs: {
+        year: stringFromForm(formData, 'specs.year'),
+        sportCategory: stringFromForm(formData, 'specs.sportCategory')
+      },
+      isVisible: formData.get('isVisible') !== 'off',
+      sortOrder: stringFromForm(formData, 'sortOrder') || '0',
+      translations: {
+        ko: await readCollectionTranslation(formData, 'ko', editorPath),
+        en: await readCollectionTranslation(formData, 'en', editorPath)
+      }
+    });
 
-  revalidatePath('/admin/collections');
-  revalidatePath(nextEditorPath);
-  redirect(nextEditorPath);
+    const savedItem = id ? await updateCollection(id, payload) : await createCollection(payload);
+    const nextEditorPath = savedItem?.id ? `/admin/collections/${savedItem.id}` : editorPath;
+    await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
+
+    revalidatePath('/admin/collections');
+    revalidatePath(nextEditorPath);
+    redirect(nextEditorPath);
+  } catch (error) {
+    redirectWithAdminActionError(editorPath, error);
+  }
 }
 
 export async function deleteCollectionAction(formData: FormData) {
   await assertAdminSession();
 
-  const id = stringFromForm(formData, 'id');
-  const previousImages = collectImageFilenames(id ? await getCollection(id) : null);
+  try {
+    const id = stringFromForm(formData, 'id');
+    const previousImages = collectImageFilenames(id ? await getCollection(id) : null);
 
-  if (id) {
-    await deleteCollection(id);
-    await cleanupUnreferencedPublicImages(previousImages);
+    if (id) {
+      await deleteCollection(id);
+      await cleanupUnreferencedPublicImages(previousImages);
+    }
+
+    revalidatePath('/admin/collections');
+  } catch (error) {
+    redirectWithAdminActionError('/admin/collections', error);
   }
-
-  revalidatePath('/admin/collections');
 }
 
 export async function savePageAction(formData: FormData) {
@@ -218,93 +272,110 @@ export async function savePageAction(formData: FormData) {
   const definition = getManagedPageDefinition(pageKey);
   const pageEditorPath = `/admin/pages/${encodeURIComponent(pageKey)}`;
   const returnTo = safeAdminReturnPath(stringFromForm(formData, 'returnTo')) ?? pageEditorPath;
-  const previousImages = collectImageFilenames(pageKey ? await getPage(pageKey) : null);
-  const sharedContentImages = await readSharedPageContentImageUploads(formData, pageEditorPath);
-  const sharedSeoImages = await readSharedPageSeoImageUploads(formData, pageEditorPath);
-  const payload = pagePayloadSchema.parse({
-    section: stringFromForm(formData, 'section') || definition?.section || 'site',
-    sortOrder: stringFromForm(formData, 'sortOrder') || definition?.sortOrder || '0',
-    content: {
-      ko: await readPageLocaleContent(formData, 'ko', pageEditorPath, definition, sharedContentImages),
-      en: await readPageLocaleContent(formData, 'en', pageEditorPath, definition, sharedContentImages)
-    },
-    seo: {
-      ko: await readPageLocaleSeo(formData, 'ko', pageEditorPath, sharedSeoImages),
-      en: await readPageLocaleSeo(formData, 'en', pageEditorPath, sharedSeoImages)
+
+  try {
+    const previousImages = collectImageFilenames(pageKey ? await getPage(pageKey) : null);
+    const sharedContentImages = await readSharedPageContentImageUploads(formData, returnTo);
+    const sharedSeoImages = await readSharedPageSeoImageUploads(formData, returnTo);
+    const payload = pagePayloadSchema.parse({
+      section: stringFromForm(formData, 'section') || definition?.section || 'site',
+      sortOrder: stringFromForm(formData, 'sortOrder') || definition?.sortOrder || '0',
+      content: {
+        ko: await readPageLocaleContent(formData, 'ko', returnTo, definition, sharedContentImages),
+        en: await readPageLocaleContent(formData, 'en', returnTo, definition, sharedContentImages)
+      },
+      seo: {
+        ko: await readPageLocaleSeo(formData, 'ko', returnTo, sharedSeoImages),
+        en: await readPageLocaleSeo(formData, 'en', returnTo, sharedSeoImages)
+      }
+    });
+
+    if (pageKey) {
+      const savedPage = await upsertPage(pageKey, payload);
+      await cleanupRemovedImages(previousImages, collectImageFilenames(savedPage));
     }
-  });
 
-  if (pageKey) {
-    const savedPage = await upsertPage(pageKey, payload);
-    await cleanupRemovedImages(previousImages, collectImageFilenames(savedPage));
-  }
+    revalidatePath('/admin/pages');
+    revalidatePath(`/admin/pages/${pageKey}`);
+    revalidatePath(returnTo);
 
-  revalidatePath('/admin/pages');
-  revalidatePath(`/admin/pages/${pageKey}`);
-  revalidatePath(returnTo);
-
-  if (pageKey === 'common') {
-    revalidateManagedPublicPaths();
-  } else if (definition?.href) {
-    for (const locale of locales) {
-      revalidatePath(`/${locale}${definition.href === '/' ? '' : definition.href}`);
+    if (pageKey === 'common') {
+      revalidateManagedPublicPaths();
+    } else if (definition?.href) {
+      for (const locale of locales) {
+        revalidatePath(`/${locale}${definition.href === '/' ? '' : definition.href}`);
+      }
     }
-  }
 
-  redirect(returnTo);
+    redirect(returnTo);
+  } catch (error) {
+    redirectWithAdminActionError(returnTo, error);
+  }
 }
 
 export async function uploadMediaAction(formData: FormData) {
   await assertAdminSession();
 
-  const file = formData.get('file');
+  try {
+    const file = formData.get('file');
 
-  if (!(file instanceof File) || file.size === 0) {
-    redirect('/admin/media?error=file');
+    if (!(file instanceof File) || file.size === 0) {
+      redirect('/admin/media?error=file');
+    }
+
+    if (!isAllowedImageUpload(file)) {
+      redirect('/admin/media?error=file');
+    }
+
+    await savePublicImage(file, {
+      altKo: stringFromForm(formData, 'altKo'),
+      altEn: stringFromForm(formData, 'altEn')
+    }, stringFromForm(formData, 'filename'));
+
+    revalidatePath('/admin/media');
+    redirect('/admin/media');
+  } catch (error) {
+    redirectWithAdminActionError('/admin/media', error);
   }
-
-  if (!isAllowedImageUpload(file)) {
-    redirect('/admin/media?error=file');
-  }
-
-  await savePublicImage(file, {
-    altKo: stringFromForm(formData, 'altKo'),
-    altEn: stringFromForm(formData, 'altEn')
-  }, stringFromForm(formData, 'filename'));
-
-  revalidatePath('/admin/media');
-  redirect('/admin/media');
 }
 
 export async function updateMediaAction(formData: FormData) {
   await assertAdminSession();
 
-  const id = stringFromForm(formData, 'id');
-  const parsed = mediaUpdateSchema.safeParse({
-    altKo: stringFromForm(formData, 'altKo'),
-    altEn: stringFromForm(formData, 'altEn')
-  });
+  try {
+    const id = stringFromForm(formData, 'id');
+    const parsed = mediaUpdateSchema.safeParse({
+      altKo: stringFromForm(formData, 'altKo'),
+      altEn: stringFromForm(formData, 'altEn')
+    });
 
-  if (id && parsed.success) {
-    await updateMedia(id, parsed.data);
+    if (id && parsed.success) {
+      await updateMedia(id, parsed.data);
+    }
+
+    revalidatePath('/admin/media');
+  } catch (error) {
+    redirectWithAdminActionError('/admin/media', error);
   }
-
-  revalidatePath('/admin/media');
 }
 
 export async function deleteMediaAction(formData: FormData) {
   await assertAdminSession();
 
-  const id = stringFromForm(formData, 'id');
-  const media = id ? await getMedia(id) : null;
-  const previousImages = collectImageFilenames(media);
+  try {
+    const id = stringFromForm(formData, 'id');
+    const media = id ? await getMedia(id) : null;
+    const previousImages = collectImageFilenames(media);
 
-  if (id) {
-    await deleteMedia(id);
-    await cleanupUnreferencedPublicImages(previousImages, {allowUnregistered: true});
+    if (id) {
+      await deleteMedia(id);
+      await cleanupUnreferencedPublicImages(previousImages, {allowUnregistered: true});
+    }
+
+    revalidatePath('/admin/media');
+  } catch (error) {
+    redirectWithAdminActionError('/admin/media', error);
   }
-
-  revalidatePath('/admin/media');
 }
 
 async function readNewsTranslation(formData: FormData, locale: Locale, editorPath: string) {
@@ -709,12 +780,25 @@ function stringFromForm(formData: FormData, key: string) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function rawStringFromForm(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === 'string' ? value : '';
+}
+
 function safeAdminReturnPath(value: string) {
   if (!value || (value !== '/admin' && !value.startsWith('/admin/')) || value.startsWith('//') || value.includes('://')) {
     return null;
   }
 
   return value;
+}
+
+function redirectWithAdminActionError(pathValue: string, error: unknown): never {
+  if (isRedirectError(error)) {
+    throw error;
+  }
+
+  redirect(appendAdminActionError(pathValue, error));
 }
 
 function revalidateManagedPublicPaths() {

@@ -8,11 +8,12 @@ import {
   updateMediaAction,
   uploadMediaAction
 } from '../../actions';
+import {AdminActionAlert} from '../../_components/admin-feedback';
 import {SubmitButton, TextField} from '../../_components/admin-fields';
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
 
 type Props = {
-  searchParams?: Promise<{error?: string}>;
+  searchParams?: Promise<Record<string, string | undefined>>;
 };
 
 export default async function AdminMediaPage({searchParams}: Props) {
@@ -44,8 +45,9 @@ export default async function AdminMediaPage({searchParams}: Props) {
           <TextField label={t('media.altEn')} name="altEn" />
           <SubmitButton>{t('common.upload')}</SubmitButton>
         </form>
-        {query?.error === 'file' ? <p className="mt-3 text-sm font-semibold text-[#b42318]">{t('media.chooseFile')}</p> : null}
       </Panel>
+
+      <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={query?.error === 'file' ? t('media.chooseFile') : t('cmsAlert.fallback')} />
 
       {items.length === 0 ? (
         <EmptyState title={t('media.noItemsTitle')} body={t('media.noItemsBody')} />

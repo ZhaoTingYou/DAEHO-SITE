@@ -2,6 +2,7 @@ import type {HomeNewsPopupCard} from '@/components/home/home-news-popups';
 import type {NewsCard} from '@/components/news/news-journal-grid';
 import type {SpecialtyCollectionItem} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
+import {mergeBespokeItems, type BespokeCollectionItemOverride} from '@/lib/cms/bespoke-items';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
@@ -25,19 +26,28 @@ export type PublicNewsDetail = {
   ogImagePath: string;
 };
 
+type NewsPageCardOverride = {
+  id: string;
+  image: string;
+};
+
 export async function getNewsCardsForSite(locale: Locale): Promise<NewsCard[]> {
   const cmsItems = await readCmsValue(() => listPublicNews(locale), []);
+  const overrides = await getNewsPageCardOverrides(locale);
 
   if (cmsItems.length > 0) {
-    return cmsItems.map((item) => ({
-      id: String(item.slug),
-      category: String(item.category),
-      categoryLabel: String(item.categoryLabel),
-      date: String(item.publishedAt),
-      title: String(item.title),
-      image: cmsImageName(item.imagePath),
-      hasImage: imageExists(cmsImageName(item.imagePath))
-    }));
+    return cmsItems.map((item) => {
+      const id = String(item.slug);
+
+      return applyNewsCardImageOverride({
+        id,
+        category: String(item.category),
+        categoryLabel: String(item.categoryLabel),
+        date: String(item.publishedAt),
+        title: String(item.title),
+        image: cmsImageName(item.imagePath)
+      }, overrides.get(id));
+    });
   }
 
   return (await getLocaleMessages(locale)).news.grid.cards.map((card) => ({
@@ -47,14 +57,28 @@ export async function getNewsCardsForSite(locale: Locale): Promise<NewsCard[]> {
 }
 
 export async function getHomeNewsCardsForSite(locale: Locale): Promise<HomeNewsPopupCard[]> {
-  return (await getNewsCardsForSite(locale)).slice(0, 4).map((card) => ({
-    ...card,
-    hasImage: imageExists(card.image)
-  }));
-}
+  const cmsItems = await readCmsValue(() => listPublicNews(locale), []);
+  const overrides = await getNewsPageCardOverrides(locale);
 
-export function getHomeNewsCardsFromPage(cards: Array<Omit<HomeNewsPopupCard, 'hasImage'>>): HomeNewsPopupCard[] {
-  return cards.slice(0, 4).map((card) => ({
+  if (cmsItems.length > 0) {
+    return cmsItems.slice(0, 4).map((item) => {
+      const id = String(item.slug);
+      const image = cmsImageName(item.imagePath);
+      const body = normalizeNewsBody(item.body);
+
+      return applyNewsCardImageOverride({
+        id,
+        category: String(item.category),
+        categoryLabel: String(item.categoryLabel),
+        date: String(item.publishedAt),
+        title: String(item.title),
+        image,
+        body: getNewsPopupBody(item, body)
+      }, overrides.get(id));
+    });
+  }
+
+  return (await getLocaleMessages(locale)).news.grid.cards.slice(0, 4).map((card) => ({
     ...card,
     hasImage: imageExists(card.image)
   }));
@@ -114,29 +138,30 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
 
 export async function getCollectionItemsForSite(locale: Locale): Promise<SpecialtyCollectionItem[]> {
   const cmsItems = await readCmsValue(() => listPublicCollections(locale), []);
+  const messages = await getLocaleMessages(locale);
+  const bespokeItems = messages.collectionUi?.bespoke?.items as BespokeCollectionItemOverride[] | undefined;
+  const baseItems = cmsItems.length > 0
+    ? cmsItems.map((item) => {
+        const specs = normalizeCollectionSpecs(item.specs);
+        return {
+          id: String(item.slug),
+          title: String(item.title),
+          caption: String(item.caption),
+          category: String(item.category),
+          categoryLabel: String(item.categoryLabel),
+          sportCategory: String(item.sportCategory || specs.sportCategory),
+          sportCategoryLabel: String(item.sportCategoryLabel),
+          year: specs.year,
+          image: cmsImageName(item.imagePath),
+          hasImage: imageExists(cmsImageName(item.imagePath))
+        };
+      })
+    : messages.specialtyPages.collection.gallery.items.map((item) => ({
+        ...item,
+        hasImage: imageExists(item.image)
+      }));
 
-  if (cmsItems.length > 0) {
-    return cmsItems.map((item) => {
-      const specs = normalizeCollectionSpecs(item.specs);
-      return {
-        id: String(item.slug),
-        title: String(item.title),
-        caption: String(item.caption),
-        category: String(item.category),
-        categoryLabel: String(item.categoryLabel),
-        sportCategory: String(item.sportCategory || specs.sportCategory),
-        sportCategoryLabel: String(item.sportCategoryLabel),
-        year: specs.year,
-        image: cmsImageName(item.imagePath),
-        hasImage: imageExists(cmsImageName(item.imagePath))
-      };
-    });
-  }
-
-  return (await getLocaleMessages(locale)).specialtyPages.collection.gallery.items.map((item) => ({
-    ...item,
-    hasImage: imageExists(item.image)
-  }));
+  return mergeBespokeItems(baseItems, bespokeItems, locale);
 }
 
 export async function getCollectionItemForSite(locale: Locale, slug: string) {
@@ -167,7 +192,7 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
     };
   }
 
-  const item = (await getLocaleMessages(locale)).specialtyPages.collection.gallery.items.find((entry) => entry.id === slug);
+  const item = (await getCollectionItemsForSite(locale)).find((entry) => entry.id === slug);
 
   if (!item) {
     return null;
@@ -214,6 +239,53 @@ function normalizeNewsBody(value: unknown) {
     quote: typeof body.quote === 'string' ? body.quote : '',
     ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : ''
   };
+}
+
+async function getNewsPageCardOverrides(locale: Locale) {
+  const cards = (await getLocaleMessages(locale)).news.grid.cards;
+
+  return new Map(
+    cards
+      .map((card): [string, NewsPageCardOverride] | null => {
+        const id = typeof card.id === 'string' ? card.id : '';
+        const image = cmsImageName(card.image);
+
+        if (!id || !image) {
+          return null;
+        }
+
+        return [id, {id, image}];
+      })
+      .filter((entry): entry is [string, NewsPageCardOverride] => entry !== null)
+  );
+}
+
+function applyNewsCardImageOverride<T extends {image: string}>(card: T, override?: NewsPageCardOverride) {
+  const image = cmsImageName(override?.image) || cmsImageName(card.image);
+
+  return {
+    ...card,
+    image,
+    hasImage: imageExists(image)
+  };
+}
+
+function getNewsPopupBody(item: Record<string, unknown>, body: ReturnType<typeof normalizeNewsBody>) {
+  const bodyText = [body.lead, ...body.paragraphs]
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .join('\n\n');
+
+  if (bodyText) {
+    return bodyText;
+  }
+
+  const fallback = firstString(item.excerpt, item.seoDescription);
+  return fallback.trim();
+}
+
+function firstString(...values: unknown[]) {
+  return values.find((value): value is string => typeof value === 'string' && value.trim().length > 0) ?? '';
 }
 
 function normalizeCollectionSpecs(value: unknown) {

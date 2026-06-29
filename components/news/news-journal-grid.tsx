@@ -6,6 +6,7 @@ import {useMemo, useState} from 'react';
 
 import {EmptyState} from '@/components/empty-state';
 import type {Locale} from '@/i18n/routing';
+import {imageSrc} from '@/lib/image-src';
 
 export type NewsFilter = {
   id: string;
@@ -114,7 +115,7 @@ function NewsCardImage({card}: {card: NewsCard}) {
   if (!card.hasImage) {
     return (
       <div
-        className="flex aspect-[4/3] w-full items-center justify-center break-all border border-hairline bg-bg p-5 text-center [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-5 tracking-normal text-subtext"
+        className="flex aspect-[3/4] w-full items-center justify-center break-all border border-hairline bg-bg p-5 text-center [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-5 tracking-normal text-subtext"
         role="img"
         aria-label={card.image}
       >
@@ -124,9 +125,9 @@ function NewsCardImage({card}: {card: NewsCard}) {
   }
 
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden bg-bg">
+    <div className="relative aspect-[3/4] w-full overflow-hidden bg-bg">
       <Image
-        src={`/images/${card.image}`}
+        src={imageSrc(card.image)}
         alt={`${card.categoryLabel} ${card.title}`}
         fill
         sizes="(min-width: 1280px) 420px, (min-width: 768px) 50vw, 100vw"

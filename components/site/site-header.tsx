@@ -16,6 +16,7 @@ import {ExternalSiteLink} from './external-site-link';
 
 type SiteHeaderProps = {
   locale: Locale;
+  golfEnabled: boolean;
 };
 
 type MegaMenuKey = 'legacy' | 'specialty';
@@ -46,7 +47,7 @@ const instantItemVariants = {
 
 const showExternalHeaderLinks = false;
 
-export function SiteHeader({locale}: SiteHeaderProps) {
+export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
   const navText = useTranslations('common.navigation');
   const footerText = useTranslations('common.footer');
   const externalText = useTranslations('common.footer.externalSites');
@@ -89,14 +90,12 @@ export function SiteHeader({locale}: SiteHeaderProps) {
     {
       eyebrow: string;
       title: string;
-      motif: string;
       descriptions: Record<string, string>;
     }
   > = {
     legacy: {
       eyebrow: navText('mega.legacy.eyebrow'),
       title: navText('mega.legacy.title'),
-      motif: navText('mega.legacy.motif'),
       descriptions: {
         loyalty: navText('mega.legacy.descriptions.loyalty'),
         credibility: navText('mega.legacy.descriptions.credibility'),
@@ -106,7 +105,6 @@ export function SiteHeader({locale}: SiteHeaderProps) {
     specialty: {
       eyebrow: navText('mega.specialty.eyebrow'),
       title: navText('mega.specialty.title'),
-      motif: navText('mega.specialty.motif'),
       descriptions: {
         technique: navText('mega.specialty.descriptions.technique'),
         collection: navText('mega.specialty.descriptions.collection')
@@ -247,7 +245,11 @@ export function SiteHeader({locale}: SiteHeaderProps) {
     };
   }, []);
 
-  const currentMegaItem = openMenu ? navItems.find((item) => item.id === openMenu) : undefined;
+  const visibleNavItems = useMemo(
+    () => navItems.filter((item) => golfEnabled || item.id !== 'golf'),
+    [golfEnabled]
+  );
+  const currentMegaItem = openMenu ? visibleNavItems.find((item) => item.id === openMenu) : undefined;
   const currentMegaDetails = openMenu ? megaMenuDetails[openMenu] : null;
   const isHeaderInteractive = isHeaderHovered || hasHeaderFocus;
   const isGolf = relativePath === '/golf';
@@ -325,7 +327,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
             variants={navVariants}
             className="flex items-center justify-center gap-6 xl:gap-8"
           >
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const megaKey = isMegaMenuKey(item.id) ? item.id : null;
               const hasMega = megaKey !== null;
               const active = isActivePath(relativePath, item.href);
@@ -366,8 +368,8 @@ export function SiteHeader({locale}: SiteHeaderProps) {
             })}
           </motion.nav>
 
-          <div className="flex items-center justify-end gap-5 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
-            <div className="flex items-center gap-3" aria-label={navText('languageSwitcherLabel')}>
+          <div className="flex items-center justify-end gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
+            <div className="flex items-center gap-1" aria-label={navText('languageSwitcherLabel')}>
               {languageLinks.map((item, index) => (
                 <span key={item.locale} className="contents">
                   {index > 0 ? (
@@ -377,7 +379,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
                   ) : null}
                   <Link
                     href={item.href}
-                    className={`site-nav-link no-underline ${
+                    className={`site-nav-link site-header-language-link no-underline ${
                       locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-60'
                     }`}
                     aria-current={locale === item.locale ? 'page' : undefined}
@@ -493,7 +495,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
               transition={{duration: prefersReducedMotion ? 0 : 0.28, ease: [0.22, 0.61, 0.36, 1]}}
             />
 
-            <div className="mx-auto grid max-w-[1440px] grid-cols-[0.8fr_1.7fr_0.7fr] gap-10 px-container py-9">
+            <div className="mx-auto grid max-w-[1440px] grid-cols-[0.8fr_minmax(0,1.7fr)] gap-10 px-container py-9">
               <div>
                 {currentMegaDetails.eyebrow ? (
                   <p
@@ -540,11 +542,6 @@ export function SiteHeader({locale}: SiteHeaderProps) {
                 ))}
               </motion.div>
 
-              <div className="flex items-center justify-end">
-                <div className="grid h-28 w-36 place-items-center border border-hairline bg-white/80 px-5 text-right font-numeric text-[22px] font-semibold leading-none text-primary/35 shadow-[0_16px_45px_rgba(16,29,48,.08)]">
-                  {currentMegaDetails.motif}
-                </div>
-              </div>
             </div>
           </motion.div>
         ) : null}
@@ -569,7 +566,7 @@ export function SiteHeader({locale}: SiteHeaderProps) {
               }}
               className="space-y-4"
             >
-              {navItems.map((item) => {
+              {visibleNavItems.map((item) => {
                 const hasChildren = Boolean(item.children?.length);
                 const isExpanded = expanded[item.id];
                 const details = isMegaMenuKey(item.id) ? megaMenuDetails[item.id] : null;

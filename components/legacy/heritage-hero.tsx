@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 import {Reveal} from '@/components/motion/reveal';
-import type {Locale} from '@/i18n/routing';
+import {imageSrc} from '@/lib/image-src';
 
 type HeritageHeroProps = {
   body?: string;
@@ -10,7 +10,6 @@ type HeritageHeroProps = {
   imagePlaceholder: string;
   label: string;
   lines?: string[];
-  locale: Locale;
   title: string;
 };
 
@@ -21,29 +20,24 @@ export function HeritageHero({
   imagePlaceholder,
   label,
   lines,
-  locale,
   title
 }: HeritageHeroProps) {
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
-  const bodyTextClass =
-    locale === 'ko'
-      ? "[font-family:'MaruBuri',serif] font-semibold"
-      : englishTextClass;
+  const bodyTextClass = "[font-family:'Pretendard',sans-serif] font-normal";
   const contentLines = lines?.length ? lines : body ? [body] : [];
 
   return (
-    <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#653433] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[86svh] max-md:py-[clamp(104px,22vw,142px)]">
+    <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#f4f1ee] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[86svh] max-md:py-[clamp(104px,22vw,142px)]">
       {image ? (
         <>
           <Image
-            src={`/images/${image}`}
+            src={imageSrc(image)}
             alt={imageAlt}
             fill
             priority
             sizes="100vw"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-[#653433]/58" aria-hidden="true" />
         </>
       ) : null}
 
@@ -56,7 +50,7 @@ export function HeritageHero({
         </h1>
         <div className="mx-auto max-w-[560px] space-y-1">
           {contentLines.map((line) => (
-            <p key={line} className={`${bodyTextClass} text-[15px] leading-[1.8] tracking-[-0.01em] text-[#111111]`}>
+            <p key={line} className={`${bodyTextClass} text-[15px] leading-[1.8] tracking-normal text-[#111111]`}>
               {line}
             </p>
           ))}

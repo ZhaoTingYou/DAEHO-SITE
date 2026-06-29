@@ -3,7 +3,9 @@ import Link from 'next/link';
 
 import {DraggableScroll} from '@/components/draggable-scroll';
 import type {HomeStatBandItem} from '@/components/home/home-stat-band';
+import {AchievementRecordCard, type AchievementFirstRecord} from '@/components/legacy/achievement-record-card';
 import {AchievementPentagonStats} from '@/components/legacy/achievement-pentagon-stats';
+import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/components/legacy/heritage-hero-image';
 import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
@@ -33,14 +35,12 @@ type AchievementRecordsPageProps = {
   content: AchievementContent;
 };
 
-type FirstRecord = {
-  title: string;
-  body: string;
-  hoverText: string;
-  image: string;
-};
+type FirstRecord = AchievementFirstRecord;
 
-type FirstRecordInput = Partial<FirstRecord>;
+type FirstRecordInput = Partial<FirstRecord> & {
+  title?: string;
+  body?: string;
+};
 
 type MarketFeature = {
   value: string;
@@ -127,20 +127,20 @@ const defaultPageCopy = {
     ],
     firstRecords: [
       {
-        title: 'FIRST INITIAL ENGRAVING',
-        body: '국내 최초 이니셜 조각 적용',
+        frontTitle: '국내 최초 이니셜 조각 적용',
+        backTitle: 'FIRST INITIAL ENGRAVING',
         hoverText: '국내 기념반지 제작에서 개인 이니셜 조각을 적용한 첫 기록입니다.',
         image: 'legacy_achievement_01.png'
       },
       {
-        title: 'FIRST ANTIQUE COATING',
-        body: '국내 최초 엔티크 블랙 코팅 적용',
+        frontTitle: '국내 최초 엔티크 블랙 코팅 적용',
+        backTitle: 'FIRST ANTIQUE COATING',
         hoverText: '금속의 입체감과 문양의 깊이를 살리는 엔티크 블랙 코팅을 국내 최초로 적용했습니다.',
         image: 'legacy_achievement_02.png'
       },
       {
-        title: 'FIRST DESIGN APPROACH',
-        body: '국내 최초 반지 내부 디자인 적용',
+        frontTitle: '국내 최초 반지 내부 디자인 적용',
+        backTitle: 'FIRST DESIGN APPROACH',
         hoverText: '반지 외부뿐 아니라 내부까지 의미를 담는 디자인 접근을 국내 최초로 시도했습니다.',
         image: 'legacy_achievement_03.png'
       }
@@ -219,20 +219,20 @@ const defaultPageCopy = {
     ],
     firstRecords: [
       {
-        title: 'FIRST INITIAL ENGRAVING',
-        body: 'First domestic application of initial engraving',
+        frontTitle: 'First domestic application of initial engraving',
+        backTitle: 'FIRST INITIAL ENGRAVING',
         hoverText: 'DAEHO introduced individual initial engraving as a first in Korea commemorative ring production.',
         image: 'legacy_achievement_01.png'
       },
       {
-        title: 'FIRST ANTIQUE COATING',
-        body: 'First domestic application of antique black coating',
+        frontTitle: 'First domestic application of antique black coating',
+        backTitle: 'FIRST ANTIQUE COATING',
         hoverText: 'DAEHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.',
         image: 'legacy_achievement_02.png'
       },
       {
-        title: 'FIRST DESIGN APPROACH',
-        body: 'First domestic approach to interior ring design',
+        frontTitle: 'First domestic approach to interior ring design',
+        backTitle: 'FIRST DESIGN APPROACH',
         hoverText: 'DAEHO first expanded ring design inward, giving the interior surface its own meaning and story.',
         image: 'legacy_achievement_03.png'
       }
@@ -265,7 +265,7 @@ const defaultPageCopy = {
 function resolveAchievementCopy(locale: Locale, content: AchievementContent): AchievementPageCopy {
   const fallback = defaultPageCopy[locale];
   const copy = content.copy ?? {};
-  const firstRecords = normalizeFirstRecords(copy.firstRecords);
+  const firstRecords = normalizeFirstRecords(copy.firstRecords, fallback.firstRecords);
   const marketFeatures = normalizeMarketFeatures(copy.marketFeatures);
 
   return {
@@ -278,19 +278,30 @@ function resolveAchievementCopy(locale: Locale, content: AchievementContent): Ac
   };
 }
 
-function normalizeFirstRecords(records: FirstRecordInput[] | undefined): FirstRecord[] {
+function normalizeFirstRecords(records: FirstRecordInput[] | undefined, fallbackRecords: FirstRecord[] = []): FirstRecord[] {
   if (!Array.isArray(records)) {
     return [];
   }
 
+  const fallbackByBackTitle = new Map(fallbackRecords.map((record) => [record.backTitle, record]));
+
   return records
-    .map((record) => ({
-      title: record.title ?? '',
-      body: record.body ?? '',
-      hoverText: record.hoverText ?? record.body ?? '',
-      image: record.image ?? ''
-    }))
-    .filter((record) => record.title && record.image);
+    .map((record) => {
+      const frontTitle = record.frontTitle ?? record.body ?? '';
+      const backTitle = record.backTitle ?? record.title ?? '';
+      const fallback = fallbackByBackTitle.get(backTitle);
+      const hoverText = typeof record.hoverText === 'string' && record.hoverText.trim()
+        ? record.hoverText
+        : fallback?.hoverText ?? '';
+
+      return {
+        frontTitle,
+        backTitle,
+        hoverText,
+        image: record.image ?? ''
+      };
+    })
+    .filter((record) => record.frontTitle && record.image);
 }
 
 function normalizeMarketFeatures(features: MarketFeatureInput[] | undefined): MarketFeature[] {
@@ -333,14 +344,16 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
   const loopedArchiveImages = archiveImages.length > 1
     ? [...archiveImages, ...archiveImages]
     : archiveImages;
+  const heroImage = resolveHeritageHeroImage(content.hero.image, copy.imagePlaceholder);
 
   return (
     <main className="bg-white text-primary">
       <HeritageHero
-        imagePlaceholder={copy.imagePlaceholder}
+        image={heroImage}
+        imageAlt={content.hero.subtitle || copy.heroTitle}
+        imagePlaceholder={resolveHeritageHeroPlaceholder(copy.imagePlaceholder)}
         label={copy.heroLabel}
         lines={copy.introLines}
-        locale={locale}
         title={copy.heroTitle}
       />
 
@@ -378,48 +391,14 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
               className="mx-auto flex w-full gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] lg:max-w-[1110px] lg:justify-center lg:px-0 [&::-webkit-scrollbar]:hidden"
             >
               {copy.firstRecords.map((record) => (
-                <article
-                  key={record.title}
-                  tabIndex={0}
-                  aria-label={`${record.title}: ${record.hoverText}`}
-                  className="achievement-record-card group flex w-[min(72vw,330px)] shrink-0 flex-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-                >
-                  <div className="mb-6 flex min-h-[64px] flex-col justify-end text-center">
-                    <p className={`${bodyTextClass} text-[15px] leading-tight text-primary`}>
-                      {record.body}
-                    </p>
-                    <h3 className={`${englishTextClass} mt-2 whitespace-pre-line text-[15px] uppercase leading-[1.18] tracking-[0.04em] text-primary`}>
-                      {record.title}
-                    </h3>
-                  </div>
-                  <div className="achievement-record-card__stage relative aspect-[3/4] [perspective:1200px]">
-                    <div className="achievement-record-card__inner relative h-full w-full transition-transform duration-700 ease-[var(--ease-expo)] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus:[transform:rotateY(180deg)] motion-reduce:transition-none">
-                      <div className="achievement-record-card__front absolute inset-0 overflow-hidden bg-[#d8d8d8] [backface-visibility:hidden]">
-                        <Image
-                          src={`/images/${record.image}`}
-                          alt={record.title}
-                          fill
-                          sizes="(min-width: 1024px) 330px, 72vw"
-                          className="pointer-events-none object-cover"
-                        />
-                      </div>
-                      <div className="achievement-record-card__back absolute inset-0 flex flex-col justify-between overflow-hidden bg-[#62302F] px-7 py-8 text-[#F4E6E1] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                        <p className={`${englishTextClass} text-[13px] uppercase leading-none tracking-[0.12em] text-[#D7A6A0]`}>
-                          {copy.firstTitle}
-                        </p>
-                        <div className="grid gap-4 text-center">
-                          <h3 className={`${englishTextClass} whitespace-pre-line text-[clamp(22px,2.1vw,31px)] uppercase leading-[1.04] tracking-[0.04em] text-white`}>
-                            {record.title}
-                          </h3>
-                          <p className={`${bodyTextClass} text-[clamp(15px,1.15vw,17px)] leading-[1.72] text-[#F4E6E1]`}>
-                            {record.hoverText}
-                          </p>
-                        </div>
-                        <span className="mx-auto h-px w-14 bg-[#D7A6A0]/70" aria-hidden="true" />
-                      </div>
-                    </div>
-                  </div>
-                </article>
+                <AchievementRecordCard
+                  key={`${record.frontTitle}-${record.image}`}
+                  record={record}
+                  locale={locale}
+                  firstTitle={copy.firstTitle}
+                  bodyTextClass={bodyTextClass}
+                  englishTextClass={englishTextClass}
+                />
               ))}
             </DraggableScroll>
           </Reveal>

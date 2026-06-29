@@ -3,13 +3,14 @@ import {notFound} from 'next/navigation';
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {getNews, listMedia} from '@/lib/cms/repositories';
 
+import {AdminActionAlert} from '../../../_components/admin-feedback';
 import {PageHeader} from '../../../_components/admin-shell';
 import {NewsForm} from '../../../_components/news-form';
 import type {MediaLibraryItem} from '../../../_components/admin-fields';
 
 type Props = {
   params: Promise<{id: string}>;
-  searchParams?: Promise<{error?: string}>;
+  searchParams?: Promise<Record<string, string | undefined>>;
 };
 
 export default async function AdminNewsEditPage({params, searchParams}: Props) {
@@ -29,11 +30,7 @@ export default async function AdminNewsEditPage({params, searchParams}: Props) {
         title={item ? t('news.editTitle') : t('news.newTitle')}
         description={t('news.editDescription')}
       />
-      {query?.error === 'file' ? (
-        <div className="mb-5 rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-4 py-3 text-sm font-semibold text-[#b42318]">
-          {t('page.uploadError')}
-        </div>
-      ) : null}
+      <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={query?.error === 'file' ? t('page.uploadError') : t('cmsAlert.fallback')} />
       <NewsForm item={item ?? undefined} mediaItems={mediaItems} messages={messages} />
     </>
   );

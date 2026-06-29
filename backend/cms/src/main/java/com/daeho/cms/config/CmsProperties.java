@@ -10,7 +10,8 @@ public record CmsProperties(
     String smtpFrom,
     boolean smtpSecure,
     Path uploadDir,
-    String publicUploadBaseUrl
+    String publicUploadBaseUrl,
+    String adminPassword
 ) {
   public String normalizedUploadBaseUrl() {
     if (publicUploadBaseUrl == null || publicUploadBaseUrl.isBlank()) {

@@ -19,7 +19,8 @@ import {getPage} from '@/lib/cms/repositories';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {localeFieldSuffixes, locales, type Locale} from '@/lib/locales';
 
-import {SubmitButton, TextAreaField, TextField} from '../../_components/admin-fields';
+import {AdminActionAlert} from '../../_components/admin-feedback';
+import {CheckboxField, SubmitButton, TextAreaField, TextField} from '../../_components/admin-fields';
 import {PageHeader, Panel} from '../../_components/admin-shell';
 
 type FooterLocaleData = {
@@ -41,6 +42,12 @@ const mainGroupKey = 'main';
 const footerReturnPath = '/admin/footer';
 
 const footerFieldSections: FooterFieldSection[] = [
+  {
+    titleKey: 'footer.sectionVisibility',
+    paths: [
+      'features.golfEnabled'
+    ]
+  },
   {
     titleKey: 'footer.sectionBrand',
     paths: [
@@ -81,7 +88,9 @@ const footerFieldSections: FooterFieldSection[] = [
       'footer.business.items.7.label',
       'footer.business.items.7.value',
       'footer.business.items.8.label',
-      'footer.business.items.8.value'
+      'footer.business.items.8.value',
+      'footer.business.items.9.label',
+      'footer.business.items.9.value'
     ]
   },
   {
@@ -90,6 +99,17 @@ const footerFieldSections: FooterFieldSection[] = [
       'footer.collectionCategoryLinks.0.label',
       'footer.collectionCategoryLinks.1.label',
       'footer.collectionCategoryLinks.2.label'
+    ]
+  },
+  {
+    titleKey: 'footer.sectionSocial',
+    paths: [
+      'footer.socialLinks.instagram',
+      'footer.socialLinks.youtube',
+      'footer.socialLinks.facebook',
+      'footer.socialLinks.kakao',
+      'footer.socialLinks.twitter',
+      'footer.socialLinks.blog'
     ]
   },
   {
@@ -119,8 +139,13 @@ const footerFieldSections: FooterFieldSection[] = [
   }
 ];
 
-export default async function AdminFooterPage() {
+type AdminFooterPageProps = {
+  searchParams?: Promise<Record<string, string | undefined>>;
+};
+
+export default async function AdminFooterPage({searchParams}: AdminFooterPageProps) {
   const {locale: adminLocale, messages, t} = await getAdminI18n();
+  const query = await searchParams;
   const definition = getManagedPageDefinition(commonPageKey);
   const row = await getPage(commonPageKey);
 
@@ -150,6 +175,8 @@ export default async function AdminFooterPage() {
           </div>
         }
       />
+
+      <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={query?.error === 'file' ? t('page.uploadError') : t('cmsAlert.fallback')} />
 
       <form action={savePageAction} className="grid gap-6 pb-24">
         <input type="hidden" name="pageKey" value={commonPageKey} />
@@ -264,6 +291,10 @@ function FooterField({
 
   if (field.type === 'textarea') {
     return <TextAreaField label={label} name={name} defaultValue={text} rows={field.rows ?? 3} />;
+  }
+
+  if (typeof value === 'boolean') {
+    return <CheckboxField label={label} name={name} defaultChecked={value} />;
   }
 
   return <TextField label={label} name={name} defaultValue={text} />;

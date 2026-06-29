@@ -31,12 +31,13 @@ import {getLocaleMessages} from '@/lib/locale-messages';
 import {localeFieldSuffixes, locales, type Locale} from '@/lib/locales';
 
 import {savePageAction} from '../../../actions';
-import {ImageUploadField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
+import {AdminActionAlert} from '../../../_components/admin-feedback';
+import {AppendableArrayItemsField, ImageUploadField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
 import {PageHeader, Panel} from '../../../_components/admin-shell';
 
 type Props = {
   params: Promise<{pageKey: string}>;
-  searchParams?: Promise<{error?: string}>;
+  searchParams?: Promise<Record<string, string | undefined>>;
 };
 
 type PageLocaleData = {
@@ -104,11 +105,7 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
         }
       />
 
-      {query?.error === 'file' ? (
-        <div className="mb-5 rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-4 py-3 text-sm font-semibold text-[#b42318]">
-          {t('page.uploadError')}
-        </div>
-      ) : null}
+      <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={query?.error === 'file' ? t('page.uploadError') : t('cmsAlert.fallback')} />
 
       <form action={savePageAction} className="grid gap-6 pb-24">
         <input type="hidden" name="pageKey" value={page.pageKey} />
@@ -403,7 +400,7 @@ function EditableArray({
         <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{label}</h3>
         <p className="mt-2 text-sm text-[#98a2b3]">{createAdminTranslator(context.messages)('page.emptySection')}</p>
         {itemFields?.length ? (
-          <AppendArrayItemFields path={path} index={0} context={context} itemFields={itemFields} />
+          <AppendArrayItems path={path} startIndex={0} context={context} itemFields={itemFields} />
         ) : null}
       </section>
     );
@@ -423,84 +420,144 @@ function EditableArray({
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#98a2b3]">
               {itemTitle(item, index, context.adminLocale)}
             </p>
-            <EditableNode
-              path={`${path}.${index}`}
-              label={labelForPath(`${path}.${index}`, item, context.adminLocale)}
-              value={item}
-              context={context}
-              depth={depth + 1}
-            />
+            {itemFields?.length ? (
+              <EditableArrayItemFields
+                path={`${path}.${index}`}
+                value={item}
+                context={context}
+                itemFields={itemFields}
+              />
+            ) : (
+              <EditableNode
+                path={`${path}.${index}`}
+                label={labelForPath(`${path}.${index}`, item, context.adminLocale)}
+                value={item}
+                context={context}
+                depth={depth + 1}
+              />
+            )}
           </div>
         ))}
       </div>
       {itemFields?.length ? (
-        <AppendArrayItemFields path={path} index={value.length} context={context} itemFields={itemFields} />
+        <AppendArrayItems path={path} startIndex={value.length} context={context} itemFields={itemFields} />
       ) : null}
     </section>
   );
 }
 
-function AppendArrayItemFields({
+function EditableArrayItemFields({
   path,
-  index,
+  value,
   context,
   itemFields
 }: {
   path: string;
-  index: number;
+  value: unknown;
+  context: RenderContext;
+  itemFields: PageArrayItemFieldDefinition[];
+}) {
+  const item = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+  const t = createAdminTranslator(context.messages);
+
+  return (
+    <div className="grid gap-4">
+      {itemFields.map((field) => {
+        const fieldPath = `${path}.${field.path}`;
+        const fieldValue = arrayItemFieldValue(item, field);
+        const name = contentFieldName(context.locale, context.groupKey, fieldPath);
+
+        if (field.type === 'image') {
+          return (
+            <ImageUploadField
+              key={field.path}
+              label={field.label}
+              name={name}
+              uploadName={contentImageFieldName(context.locale, context.groupKey, fieldPath)}
+              defaultValue={stringValue(fieldValue)}
+              placeholder={field.placeholder ?? 'image-name.png'}
+              uploadLabel={t('page.uploadLocalImage')}
+              uploadHint={t('page.uploadLocalImageHint')}
+              emptyLabel={t('common.noImage')}
+              changedLabel={t('common.changed')}
+              selectedLabel={t('common.imageSelected')}
+              syncedLabel={t('common.imageSynced')}
+              mediaItems={context.mediaItems}
+              mediaSelectLabel={t('media.selectFromLibrary')}
+              mediaLibraryTitle={t('media.libraryTitle')}
+              mediaEmptyLabel={t('media.libraryEmpty')}
+              mediaSelectedLabel={t('media.selectedExisting')}
+              syncKey={`page-content:${context.groupKey}:${fieldPath}`}
+            />
+          );
+        }
+
+        if (field.type === 'textarea') {
+          return (
+            <TextAreaField
+              key={field.path}
+              label={field.label}
+              name={name}
+              defaultValue={stringValue(fieldValue)}
+              rows={field.rows ?? textareaRows(stringValue(fieldValue))}
+            />
+          );
+        }
+
+        if (typeof fieldValue === 'number') {
+          return <TextField key={field.path} label={field.label} name={name} type="number" defaultValue={fieldValue} />;
+        }
+
+        return (
+          <TextField
+            key={field.path}
+            label={field.label}
+            name={name}
+            defaultValue={stringValue(fieldValue)}
+            placeholder={field.placeholder}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function AppendArrayItems({
+  path,
+  startIndex,
+  context,
+  itemFields
+}: {
+  path: string;
+  startIndex: number;
   context: RenderContext;
   itemFields: PageArrayItemFieldDefinition[];
 }) {
   const t = createAdminTranslator(context.messages);
 
   return (
-    <section className="grid gap-4 rounded-md border border-dashed border-[#cbd3df] bg-[#fbfcfe] p-4">
-      <div>
-        <h4 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">
-          {appendItemTitle(context.adminLocale)}
-        </h4>
-        <p className="mt-1 text-xs font-medium leading-5 text-[#98a2b3]">
-          {appendItemHint(context.adminLocale)}
-        </p>
-      </div>
-      <div className="grid gap-4">
-        {itemFields.map((field) => {
-          const fieldPath = `${path}.${index}.${field.path}`;
-          const name = contentFieldName(context.locale, context.groupKey, fieldPath);
-
-          if (field.type === 'image') {
-            return (
-              <ImageUploadField
-                key={field.path}
-                label={field.label}
-                name={name}
-                uploadName={contentImageFieldName(context.locale, context.groupKey, fieldPath)}
-                defaultValue=""
-                placeholder={field.placeholder ?? 'image-name.png'}
-                uploadLabel={t('page.uploadLocalImage')}
-                uploadHint={t('page.uploadLocalImageHint')}
-                emptyLabel={t('common.noImage')}
-                changedLabel={t('common.changed')}
-                selectedLabel={t('common.imageSelected')}
-                syncedLabel={t('common.imageSynced')}
-                mediaItems={context.mediaItems}
-                mediaSelectLabel={t('media.selectFromLibrary')}
-                mediaLibraryTitle={t('media.libraryTitle')}
-                mediaEmptyLabel={t('media.libraryEmpty')}
-                mediaSelectedLabel={t('media.selectedExisting')}
-                syncKey={`page-content:${context.groupKey}:${fieldPath}`}
-              />
-            );
-          }
-
-          if (field.type === 'textarea') {
-            return <TextAreaField key={field.path} label={field.label} name={name} defaultValue="" rows={field.rows ?? 3} />;
-          }
-
-          return <TextField key={field.path} label={field.label} name={name} defaultValue="" />;
-        })}
-      </div>
-    </section>
+    <AppendableArrayItemsField
+      path={path}
+      startIndex={startIndex}
+      locale={context.locale}
+      groupKey={context.groupKey}
+      itemFields={itemFields}
+      mediaItems={context.mediaItems}
+      title={appendItemTitle(context.adminLocale)}
+      hint={appendItemHint(context.adminLocale)}
+      addButtonLabel={appendItemButtonLabel(context.adminLocale)}
+      removeButtonLabel={removeItemButtonLabel(context.adminLocale)}
+      uploadLabel={t('page.uploadLocalImage')}
+      uploadHint={t('page.uploadLocalImageHint')}
+      emptyLabel={t('common.noImage')}
+      changedLabel={t('common.changed')}
+      selectedLabel={t('common.imageSelected')}
+      syncedLabel={t('common.imageSynced')}
+      mediaSelectLabel={t('media.selectFromLibrary')}
+      mediaLibraryTitle={t('media.libraryTitle')}
+      mediaEmptyLabel={t('media.libraryEmpty')}
+      mediaSelectedLabel={t('media.selectedExisting')}
+    />
   );
 }
 
@@ -711,10 +768,20 @@ function labelForPath(path: string, value: unknown, adminLocale: AdminLocale) {
 
 function itemTitle(value: unknown, index: number, adminLocale: AdminLocale) {
   const item = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
-  const title = item ? stringValue(item.title || item.label || item.question || item.year || item.id) : '';
+  const title = item ? stringValue(item.frontTitle || item.backTitle || item.title || item.label || item.question || item.year || item.id) : '';
   const prefix = adminLocale === 'ko' ? '항목' : adminLocale === 'en' ? 'Item' : '项目';
 
   return title ? `${prefix} ${index + 1} - ${title}` : `${prefix} ${index + 1}`;
+}
+
+function arrayItemFieldValue(item: Record<string, unknown>, field: PageArrayItemFieldDefinition) {
+  const value = getObjectValueAtPath(item, field.path);
+
+  if (value !== undefined) {
+    return value;
+  }
+
+  return field.fallbackPath ? getObjectValueAtPath(item, field.fallbackPath) : '';
 }
 
 function appendItemTitle(adminLocale: AdminLocale) {
@@ -739,6 +806,30 @@ function appendItemHint(adminLocale: AdminLocale) {
   }
 
   return '留空则不会新增。';
+}
+
+function appendItemButtonLabel(adminLocale: AdminLocale) {
+  if (adminLocale === 'ko') {
+    return '사진 카드 추가';
+  }
+
+  if (adminLocale === 'en') {
+    return 'Add image card';
+  }
+
+  return '添加图片卡片';
+}
+
+function removeItemButtonLabel(adminLocale: AdminLocale) {
+  if (adminLocale === 'ko') {
+    return '삭제';
+  }
+
+  if (adminLocale === 'en') {
+    return 'Remove';
+  }
+
+  return '删除';
 }
 
 const pageFieldLabels: Record<AdminLocale, Record<string, string>> = {

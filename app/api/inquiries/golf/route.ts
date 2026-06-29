@@ -11,6 +11,7 @@ import {
 import {rejectUnsafeInquiry} from '@/lib/cms/inquiry-protection';
 import {createGolfInquiry} from '@/lib/cms/repositories';
 import {golfInquirySchema} from '@/lib/cms/validation';
+import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 
 export const runtime = 'nodejs';
 
@@ -25,6 +26,10 @@ export async function POST(request: NextRequest) {
 
   if (!parsed.success) {
     return validationError(parsed.error);
+  }
+
+  if (!(await isGolfEnabledForSite())) {
+    return NextResponse.json({error: 'Not found'}, {status: 404});
   }
 
   const requestMeta = getRequestMeta(request);

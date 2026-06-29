@@ -2,13 +2,14 @@ import type {MetadataRoute} from 'next';
 
 import {routing} from '@/i18n/routing';
 import {listPublicCollections, listPublicNews} from '@/lib/cms/repositories';
+import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {metadataBase} from '@/lib/seo';
 import koMessages from '@/messages/ko.json';
 
 export const dynamic = 'force-dynamic';
 
-const staticPaths = [
+const baseStaticPaths = [
   '/',
   '/archive',
   '/heritage/loyalty',
@@ -17,8 +18,6 @@ const staticPaths = [
   '/mastery/making',
   '/mastery/creations',
   '/news',
-  '/golf',
-  '/golf/inquiry',
   '/contact',
   '/terms',
   '/privacy'
@@ -27,6 +26,11 @@ const staticPaths = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const cmsNews = await readCmsValue(() => listPublicNews('ko'), []);
   const cmsCollections = await readCmsValue(() => listPublicCollections('ko'), []);
+  const golfEnabled = await isGolfEnabledForSite();
+  const staticPaths = [
+    ...baseStaticPaths,
+    ...(golfEnabled ? ['/golf', '/golf/inquiry'] : [])
+  ];
   const detailPaths = [
     ...(cmsNews.length > 0
       ? cmsNews.map((card) => `/news/${card.slug}`)

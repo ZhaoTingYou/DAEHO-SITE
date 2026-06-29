@@ -7,7 +7,7 @@ import {loginAction} from '../../actions';
 import {AdminLanguageSwitcher} from '../../_components/admin-language-switcher';
 
 type Props = {
-  searchParams?: Promise<{error?: string}>;
+  searchParams?: Promise<{error?: string; status?: string}>;
 };
 
 export default async function AdminLoginPage({searchParams}: Props) {
@@ -40,6 +40,11 @@ export default async function AdminLoginPage({searchParams}: Props) {
           {query?.error ? (
             <p className="rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 py-2 text-sm font-semibold text-[#b42318]">
               {t('login.error')}
+            </p>
+          ) : null}
+          {query?.status === 'password-updated' ? (
+            <p className="rounded-md border border-[#abefc6] bg-[#ecfdf3] px-3 py-2 text-sm font-semibold text-[#027a48]">
+              {t('login.passwordUpdated')}
             </p>
           ) : null}
           {hint ? <p className="text-xs font-semibold text-[#647084]">{hint}</p> : null}

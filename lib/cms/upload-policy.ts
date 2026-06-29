@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-export const maxImageUploadBytes = 10 * 1024 * 1024;
+export const maxImageUploadBytes = 20 * 1024 * 1024;
 export const maxMultipartImageRequestBytes = maxImageUploadBytes + 1024 * 1024;
 
 export const allowedImageMimeTypes = new Set([

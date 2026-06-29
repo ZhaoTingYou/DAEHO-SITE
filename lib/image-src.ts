@@ -5,12 +5,20 @@ export function imageSrc(value: string) {
     return '';
   }
 
-  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('/')) {
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('/uploads/')) {
+    return `/images/${trimmed.slice('/uploads/'.length)}`;
+  }
+
+  if (trimmed.startsWith('/')) {
     return trimmed;
   }
 
   if (trimmed.startsWith('uploads/')) {
-    return `/${trimmed}`;
+    return `/images/${trimmed.slice('uploads/'.length)}`;
   }
 
   return `/images/${trimmed}`;
