@@ -363,7 +363,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
           <AchievementPentagonStats items={copy.statBand} locale={locale} />
         </section>
 
-        <section className="bg-[#f4efe6] py-[clamp(108px,12vw,176px)]">
+        <section className="bg-[#f4efe6] py-20 md:py-[clamp(108px,12vw,176px)]">
           <Reveal className="mx-auto max-w-[760px] px-container text-center text-primary">
             <div className="mx-auto mb-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
             <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
@@ -376,7 +376,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
           </Reveal>
         </section>
 
-        <section className="overflow-hidden bg-bg py-[clamp(104px,11vw,164px)]">
+        <section className="overflow-hidden bg-bg py-20 md:py-[clamp(104px,11vw,164px)]">
           <Reveal className="px-container text-center">
             <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
               {copy.firstTitle}
@@ -394,9 +394,9 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
                 bodyTextClass={bodyTextClass}
               />
             </div>
-            <DraggableScroll
-              ariaLabel={copy.firstHeading}
-              className="mx-auto flex w-full gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] md:hidden [&::-webkit-scrollbar]:hidden"
+            <div
+              aria-label={copy.firstHeading}
+              className="achievement-record-mobile-list mx-auto grid w-full max-w-[480px] gap-9 px-container md:hidden"
             >
               {copy.firstRecords.map((record, index) => (
                 <AchievementRecordCard
@@ -408,7 +408,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
                   bodyTextClass={bodyTextClass}
                 />
               ))}
-            </DraggableScroll>
+            </div>
           </Reveal>
         </section>
 

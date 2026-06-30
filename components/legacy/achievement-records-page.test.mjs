@@ -5,6 +5,7 @@ import test from 'node:test';
 const source = readFileSync(new URL('./achievement-records-page.tsx', import.meta.url), 'utf8');
 const cardSourceUrl = new URL('./achievement-record-card.tsx', import.meta.url);
 const cardSource = existsSync(cardSourceUrl) ? readFileSync(cardSourceUrl, 'utf8') : '';
+const pentagonSource = readFileSync(new URL('./achievement-pentagon-stats.tsx', import.meta.url), 'utf8');
 const renderSource = `${source}\n${cardSource}`;
 const pageCatalogSource = readFileSync(new URL('../../lib/cms/page-catalog.ts', import.meta.url), 'utf8');
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
@@ -111,4 +112,37 @@ test('achievement expanded desktop panel closes with an exit animation without l
   assert.ok(!cardSource.includes('scale-x-[0.985]'), 'closed panels must not shrink before disappearing');
   assert.ok(!cardSource.includes('translate-y-3 scale-x'), 'closed panels must not move or shrink before disappearing');
   assert.ok(!cardSource.includes('[transform:scaleX(0.32)]'), 'closed panels must not leave a wide red scaled edge');
+});
+
+test('achievement mobile first records use a vertical page-scrolling list', () => {
+  const firstRecordsSection = source.match(
+    /<section className="overflow-hidden bg-bg[\s\S]*?<section className="bg-\[#f4efe6\]/
+  )?.[0] ?? '';
+
+  assert.ok(
+    firstRecordsSection.includes('achievement-record-mobile-list'),
+    'mobile first records should render as a named vertical list'
+  );
+  assert.doesNotMatch(
+    firstRecordsSection,
+    /<DraggableScroll[\s\S]*?copy\.firstRecords[\s\S]*?<\/DraggableScroll>/,
+    'mobile first records must not use a horizontal drag surface that blocks vertical touch scrolling'
+  );
+  assert.ok(
+    cardSource.includes('w-full md:w-[min(72vw,330px)]'),
+    'mobile record cards should fill the vertical list width before desktop sizing applies'
+  );
+});
+
+test('achievement mobile stat section hides the pentagon diagram', () => {
+  const mobileStatsBlock = pentagonSource.match(
+    /<Reveal className="md:hidden">[\s\S]*?<\/Reveal>/
+  )?.[0] ?? '';
+
+  assert.ok(mobileStatsBlock.includes('items.map'), 'mobile stats should still show the five stat items');
+  assert.doesNotMatch(
+    mobileStatsBlock,
+    /<PentagonDiagram/,
+    'the pentagon diagram should be desktop-only because it is too dense on mobile'
+  );
 });

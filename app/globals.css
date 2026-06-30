@@ -1634,7 +1634,7 @@ select {
   }
 
   .achievement-record-card {
-    width: min(82vw, 330px);
+    width: 100%;
   }
 
   .achievement-record-card__stage {

@@ -135,25 +135,14 @@ export function AchievementPentagonStats({
       </Reveal>
 
       <Reveal className="md:hidden">
-        <AnimatedStatScope className="grid gap-8 text-center">
-          <div className="relative mx-auto aspect-square w-full max-w-[360px]">
-            <PentagonDiagram
-              activeIndex={activeIndex}
-              centerCaption={centerCaption}
-              compact
-              items={items}
-              onActivate={activate}
-              onClear={clear}
-              onToggle={toggle}
-            />
-          </div>
-          <div className="grid gap-8 sm:grid-cols-2">
+        <AnimatedStatScope className="grid gap-6 text-center">
+          <div className="grid gap-5 sm:grid-cols-2">
             {items.map((item, index) => (
               <AchievementPentagonStat
                 key={`${item.value}-${item.label}`}
                 activeIndex={activeIndex}
                 bodyTextClass={bodyTextClass}
-                className="relative"
+                className="relative rounded-[2px] border border-[#F4E6E1]/18 px-5 py-6"
                 englishTextClass={englishTextClass}
                 index={index}
                 item={item}

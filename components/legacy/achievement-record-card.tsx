@@ -201,7 +201,7 @@ export function AchievementRecordCard({
       tabIndex={0}
       aria-label={`${record.frontTitle}: ${record.hoverText || record.backTitle}`}
       data-record-index={index}
-      className="achievement-record-card group relative z-0 flex w-[min(72vw,330px)] shrink-0 flex-col focus-within:z-30 hover:z-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+      className="achievement-record-card group relative z-0 flex w-full md:w-[min(72vw,330px)] md:shrink-0 flex-col focus-within:z-30 hover:z-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
     >
       <div className="mb-5 flex min-h-[34px] flex-col justify-end text-center">
         <p className={`${bodyTextClass} text-[15px] leading-tight text-primary`}>
