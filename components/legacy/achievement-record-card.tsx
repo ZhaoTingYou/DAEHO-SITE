@@ -5,6 +5,7 @@ import type {CSSProperties, Dispatch, PointerEvent as ReactPointerEvent, SetStat
 import {useEffect, useMemo, useRef, useState} from 'react';
 
 import type {Locale} from '@/i18n/routing';
+import {imageSrc} from '@/lib/image-src';
 
 export type AchievementFirstRecord = {
   frontTitle: string;
@@ -134,7 +135,7 @@ export function AchievementRecordDeck({
             <div className="achievement-record-card__stage relative aspect-[3/4] overflow-hidden">
               <div className="achievement-record-card__front relative h-full overflow-hidden bg-[#d8d8d8]">
                 <Image
-                  src={`/images/${record.image}`}
+                  src={imageSrc(record.image)}
                   alt={record.frontTitle}
                   fill
                   sizes="(min-width: 1024px) 330px, 30vw"
@@ -210,7 +211,7 @@ export function AchievementRecordCard({
       <div className="achievement-record-card__stage relative aspect-[3/4] overflow-visible">
         <div className="achievement-record-card__front relative h-full overflow-hidden bg-[#d8d8d8]">
           <Image
-            src={`/images/${record.image}`}
+            src={imageSrc(record.image)}
             alt={record.frontTitle}
             fill
             sizes="(min-width: 1024px) 330px, 72vw"

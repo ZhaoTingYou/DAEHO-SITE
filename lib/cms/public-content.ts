@@ -333,18 +333,14 @@ function cmsImageName(value: unknown) {
     return '';
   }
 
-  let imagePath = value.trim().split(/[?#]/)[0]?.replace(/\\/g, '/') ?? '';
+  const imagePath = value.trim().split(/[?#]/)[0]?.replace(/\\/g, '/') ?? '';
 
   if (!imagePath) {
     return '';
   }
 
   if (/^https?:\/\//i.test(imagePath)) {
-    try {
-      imagePath = new URL(imagePath).pathname;
-    } catch {
-      return '';
-    }
+    return imagePath;
   }
 
   return imagePath

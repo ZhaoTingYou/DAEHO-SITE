@@ -4,6 +4,8 @@ import Image from 'next/image';
 import {useState} from 'react';
 import {AnimatePresence, motion} from 'framer-motion';
 
+import {imageSrc} from '@/lib/image-src';
+
 type DetailImage = {
   filename: string;
   alt: string;
@@ -73,7 +75,7 @@ function GalleryImage({image, aspect, sizes}: {image?: DetailImage; aspect: stri
   return (
     <div className={`${aspect} relative w-full overflow-hidden bg-bg`}>
       <Image
-        src={`/images/${image.filename}`}
+        src={imageSrc(image.filename)}
         alt={image.alt}
         fill
         sizes={sizes}

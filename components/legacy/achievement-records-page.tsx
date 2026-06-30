@@ -9,6 +9,7 @@ import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/compon
 import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
+import {imageSrc} from '@/lib/image-src';
 import {withLocale} from '@/lib/site-map';
 
 type AchievementContent = {
@@ -484,7 +485,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
                     className="relative aspect-[3/4] w-[min(46vw,300px)] shrink-0 overflow-hidden bg-[#d8d8d8]"
                   >
                     <Image
-                      src={`/images/${image}`}
+                      src={imageSrc(image)}
                       alt={isDuplicate ? '' : `${copy.archiveTitle} ${imageIndex + 1}`}
                       fill
                       sizes="(min-width: 1024px) 300px, 46vw"
@@ -519,7 +520,7 @@ function MarketImage({image, alt}: {image: string; alt: string}) {
   return (
     <div className="relative aspect-[1.45/1] w-full overflow-hidden bg-white">
       <Image
-        src={`/images/${image}`}
+        src={imageSrc(image)}
         alt={alt}
         fill
         sizes="(min-width: 768px) 760px, 100vw"

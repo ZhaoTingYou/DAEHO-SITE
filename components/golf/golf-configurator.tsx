@@ -8,6 +8,7 @@ import {motion} from 'framer-motion';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
+import {imageSrc} from '@/lib/image-src';
 
 type GolfImageRef = {
   image: string;
@@ -538,7 +539,7 @@ function GolfImage({
 
   return (
     <Image
-      src={`/images/${filename}`}
+      src={imageSrc(filename)}
       alt={alt}
       fill
       unoptimized

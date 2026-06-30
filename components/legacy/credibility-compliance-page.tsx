@@ -5,6 +5,7 @@ import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/components/legacy/heritage-hero-image';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
+import {imageSrc} from '@/lib/image-src';
 import {imageExists} from '@/lib/image-exists';
 import {withLocale} from '@/lib/site-map';
 
@@ -344,7 +345,7 @@ function CredibilityRowImage({image, alt}: {image?: string; alt: string}) {
   return (
     <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#d7d7d7]">
       <Image
-        src={`/images/${image}`}
+        src={imageSrc(image)}
         alt={alt}
         fill
         sizes="(min-width: 768px) 310px, 100vw"

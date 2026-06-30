@@ -4,6 +4,7 @@ import Image from 'next/image';
 import {motion} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import {imageSrc} from '@/lib/image-src';
 
 export type SpecialtyDetailItem = {
   number?: string;
@@ -69,7 +70,7 @@ function DetailImage({item}: {item: SpecialtyDetailItem}) {
   return (
     <div className="relative aspect-square w-full overflow-hidden bg-bg">
       <Image
-        src={`/images/${item.image}`}
+        src={imageSrc(item.image)}
         alt={item.title}
         fill
         sizes="(min-width: 1024px) 420px, 100vw"

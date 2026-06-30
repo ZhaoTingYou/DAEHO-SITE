@@ -5,6 +5,7 @@ import {useRef} from 'react';
 import {motion, useScroll, useTransform, type MotionValue} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import {imageSrc} from '@/lib/image-src';
 
 export type SpecialtyProcessStep = {
   number: string;
@@ -97,7 +98,7 @@ function ProcessMedia({
     <div className="relative aspect-square w-full overflow-hidden border border-primary/10 bg-bg">
       <motion.div className="absolute inset-0 will-change-transform" style={{y: parallax, scale: 1.14}}>
         <Image
-          src={`/images/${step.image}`}
+          src={imageSrc(step.image)}
           alt={`${step.number} ${step.title}`}
           fill
           sizes="(min-width: 1024px) 560px, 100vw"

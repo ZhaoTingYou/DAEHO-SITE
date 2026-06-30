@@ -5,6 +5,7 @@ import {AnimatePresence, motion, useScroll, useSpring, useTransform, type Motion
 import {useRef, useState} from 'react';
 
 import {PlaceholderImg} from '@/components/placeholder-img';
+import {imageSrc} from '@/lib/image-src';
 
 type ChronicleMilestone = {
   year: string;
@@ -243,7 +244,7 @@ function TimelineImage({filename, alt}: {filename: string; alt: string}) {
   return (
     <div className="relative aspect-[3/2] w-full overflow-hidden bg-white">
       <Image
-        src={`/images/${filename}`}
+        src={imageSrc(filename)}
         alt={alt}
         fill
         sizes="(min-width: 1024px) 520px, 100vw"

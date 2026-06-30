@@ -7,6 +7,7 @@ import {AnimatePresence, motion, type Transition} from 'framer-motion';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {PlaceholderImg} from '@/components/placeholder-img';
 import type {Locale} from '@/i18n/routing';
+import {imageSrc} from '@/lib/image-src';
 
 export type LoyaltyFeatureSlide = {
   kicker: string;
@@ -219,7 +220,7 @@ function LoyaltyCarouselImage({
 
   return (
     <Image
-      src={`/images/${filename}`}
+      src={imageSrc(filename)}
       alt={alt}
       fill
       loading={loading}

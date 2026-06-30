@@ -1688,7 +1688,7 @@ function AppointmentCollectionView({
 
         <AppointmentReveal className="mt-[clamp(56px,7.2vw,78px)] flex flex-col items-center">
           <Image
-            src={`/images/${copy.heroImage}`}
+            src={imageSrc(copy.heroImage)}
             alt={copy.heroAlt}
             width={473}
             height={414}
@@ -1705,7 +1705,7 @@ function AppointmentCollectionView({
 
         <AppointmentReveal className="mt-[clamp(58px,8vw,84px)] flex w-full justify-center">
           <Image
-            src={`/images/${copy.honor.image}`}
+            src={imageSrc(copy.honor.image)}
             alt={copy.honor.title}
             width={413}
             height={593}
@@ -1721,7 +1721,7 @@ function AppointmentCollectionView({
 
         <AppointmentReveal className="mt-[clamp(62px,9vw,96px)] flex w-full justify-center">
           <Image
-            src={`/images/${copy.keepsake.image}`}
+            src={imageSrc(copy.keepsake.image)}
             alt={copy.keepsake.title}
             width={288}
             height={300}
@@ -1743,7 +1743,7 @@ function AppointmentCollectionView({
                 className="flex h-[clamp(76px,15.6vw,214px)] w-[clamp(76px,15.6vw,214px)] shrink-0 items-center justify-center rounded-full bg-[#E8E8E8]"
               >
                 <Image
-                  src={`/images/${thumb.image}`}
+                  src={imageSrc(thumb.image)}
                   alt=""
                   width={thumb.width ?? 110}
                   height={thumb.height ?? 120}
@@ -2388,7 +2388,7 @@ function StageImage({
   return (
     <motion.div className="absolute inset-x-0 -inset-y-10 will-change-transform" style={{y, scale}}>
       <Image
-        src={`/images/${artwork.background}`}
+        src={imageSrc(artwork.background)}
         alt=""
         fill
         sizes="100vw"
@@ -2404,7 +2404,7 @@ function StageImage({
         }`}
       >
         <Image
-          src={`/images/${artwork.product}`}
+          src={imageSrc(artwork.product)}
           alt={productAlt}
           width={artwork.productWidth}
           height={artwork.productHeight}
@@ -2444,7 +2444,7 @@ function CollectionImage({
     <div className={`${aspect} hover-zoom relative w-full overflow-hidden bg-bg`}>
       <div className="hover-zoom-media absolute inset-0">
         <Image
-          src={`/images/${item.image}`}
+          src={imageSrc(item.image)}
           alt={`${item.title} ${item.caption}`}
           fill
           sizes={sizes}

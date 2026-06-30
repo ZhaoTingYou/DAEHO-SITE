@@ -245,7 +245,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                   >
                     {brand.logo ? (
                       <Image
-                        src={`/images/${brand.logo}`}
+                        src={imageSrc(brand.logo)}
                         alt={brand.label}
                         width={96}
                         height={96}
