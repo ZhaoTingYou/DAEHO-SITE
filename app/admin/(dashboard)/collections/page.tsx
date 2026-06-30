@@ -121,7 +121,7 @@ export default async function AdminCollectionsPage({searchParams}: Props) {
                       <th className="px-4 py-3">{t('collection.sport')}</th>
                       <th className="px-4 py-3">{t('common.image')}</th>
                       <th className="px-4 py-3">{t('common.status')}</th>
-                      <th className="px-4 py-3 text-right">{t('common.actions')}</th>
+                      <th className="w-[176px] px-5 py-3 text-center">{t('common.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e4e7ec]">
@@ -164,9 +164,9 @@ export default async function AdminCollectionsPage({searchParams}: Props) {
                               {item.isVisible ? t('common.visible') : t('common.hidden')}
                             </span>
                           </td>
-                          <td className="px-4 py-4">
-                            <div className="flex justify-end gap-2">
-                              <Link href={`/admin/collections/${item.id}`} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">
+                          <td className="px-5 py-4">
+                            <div className="flex min-w-[144px] justify-end gap-3">
+                              <Link href={`/admin/collections/${item.id}`} className="inline-flex min-h-11 w-16 items-center justify-center whitespace-nowrap rounded-md border border-[#cbd3df] px-3 text-sm font-semibold leading-none text-[#344054] hover:bg-[#f8fafc]">
                                 {t('common.edit')}
                               </Link>
                               <form action={deleteCollectionAction}>

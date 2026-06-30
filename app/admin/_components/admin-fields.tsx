@@ -162,7 +162,7 @@ export function SecondaryLink({href, children}: {href: string; children: ReactNo
 
 export function DangerButton({children}: {children: ReactNode}) {
   return (
-    <button className="min-h-9 rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-sm font-semibold text-[#b42318] transition hover:bg-[#fee4e2]">
+    <button className="inline-flex min-h-11 w-16 items-center justify-center whitespace-nowrap rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-sm font-semibold leading-none text-[#b42318] transition hover:bg-[#fee4e2]">
       {children}
     </button>
   );
