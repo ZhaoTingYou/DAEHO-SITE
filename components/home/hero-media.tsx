@@ -6,6 +6,8 @@ import {motion, useScroll, useTransform} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {PlaceholderImg} from '@/components/placeholder-img';
+import {imageSrc} from '@/lib/image-src';
+import {resolveVideoSource} from '@/lib/video-src';
 
 type HeroMediaProps = {
   poster: string;
@@ -64,9 +66,12 @@ export function HeroMedia({
     return () => mediaQuery.removeEventListener('change', updatePointer);
   }, []);
 
+  const resolvedPoster = imageSrc(poster);
+  const resolvedVideoPoster = videoPoster ? imageSrc(videoPoster) : undefined;
+  const resolvedVideoSrc = resolveVideoSource(videoSrc);
+  const resolvedWebmSrc = resolveVideoSource(webmSrc);
   const shouldRenderVideo =
-    Boolean(videoSrc || webmSrc) && !prefersReducedMotion && !saveData && !videoFailed;
-  const resolvedVideoPoster = videoPoster ? `/images/${videoPoster}` : undefined;
+    Boolean(resolvedVideoSrc || resolvedWebmSrc) && !prefersReducedMotion && !saveData && !videoFailed;
   const shouldAnimate = !prefersReducedMotion && !coarsePointer && !saveData;
 
   useEffect(() => {
@@ -143,12 +148,12 @@ export function HeroMedia({
               className="h-full w-full object-cover"
               onError={() => setVideoFailed(true)}
             >
-              {webmSrc ? <source src={webmSrc} type="video/webm" /> : null}
-              {videoSrc ? <source src={videoSrc} type="video/mp4" /> : null}
+              {resolvedWebmSrc ? <source src={resolvedWebmSrc} type="video/webm" /> : null}
+              {resolvedVideoSrc ? <source src={resolvedVideoSrc} type="video/mp4" /> : null}
             </video>
           ) : (
             <Image
-              src={`/images/${poster}`}
+              src={resolvedPoster}
               alt=""
               fill
               priority={priority}

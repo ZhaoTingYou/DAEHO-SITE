@@ -7,7 +7,15 @@
     "eyebrow": "CUSTOM JEWELRY · SYMBOLIC OBJECTS · DESIGN CONSULTING",
     "title": "브랜드의 이야기를,\n오래 남는 상징으로 설계합니다",
     "subtitle": "WE DESIGN SYMBOLS THAT LAST",
-    "image": "home_hero.png",
+    "image": "home hero.png",
+    "videoSrc": "home.mp4",
+    "videoPoster": "home_video_poster.jpg",
+    "webmSrc": "",
+    "videoSection": {
+      "src": "home2.mp4",
+      "poster": "home2_video_poster.jpg",
+      "ariaLabel": "대호 제작 영상"
+    },
     "signature": {
       "eyebrow": "대표 프로젝트",
       "title": "기억되어야 할 순간을 설계합니다.",

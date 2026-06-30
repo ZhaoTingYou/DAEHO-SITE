@@ -7,7 +7,15 @@
     "eyebrow": "CUSTOM JEWELRY · SYMBOLIC OBJECTS · DESIGN CONSULTING",
     "title": "WE DESIGN SYMBOLS THAT LAST",
     "subtitle": "We design brand stories\ninto lasting symbols.",
-    "image": "home_hero.png",
+    "image": "home hero.png",
+    "videoSrc": "home.mp4",
+    "videoPoster": "home_video_poster.jpg",
+    "webmSrc": "",
+    "videoSection": {
+      "src": "home2.mp4",
+      "poster": "home2_video_poster.jpg",
+      "ariaLabel": "DAEHO production video"
+    },
     "signature": {
       "eyebrow": "SIGNATURE PROJECTS",
       "title": "Designing moments meant to be remembered",

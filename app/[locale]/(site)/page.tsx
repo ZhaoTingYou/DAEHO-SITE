@@ -11,9 +11,11 @@ import {Reveal, RevealItem} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
 import {getHomeNewsCardsForSite} from '@/lib/cms/public-content';
+import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
+import {resolveVideoSource} from '@/lib/video-src';
 import koMessages from '@/messages/ko.json';
 
 type Props = {
@@ -67,7 +69,10 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
         eyebrow={content.eyebrow}
         title={content.title}
         subtitle={content.subtitle}
-        poster="home hero.png"
+        poster={content.image || 'home hero.png'}
+        videoSrc={content.videoSrc || 'home.mp4'}
+        videoPoster={content.videoPoster || content.image || 'home hero.png'}
+        webmSrc={content.webmSrc || undefined}
         locale={locale}
       />
 
@@ -193,13 +198,15 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
           <div className="overflow-hidden bg-primary shadow-[0_26px_90px_rgba(16,29,48,0.10)]">
             <video
               className="block aspect-video w-full object-cover"
-              src="/videos/home2.mp4"
-              poster="/images/home2_video_poster.jpg"
+              src={homeVideoSrc(content.videoSection?.src, 'home2.mp4')}
+              poster={imageSrc(content.videoSection?.poster || 'home2_video_poster.jpg')}
               controls
               loop
               playsInline
               preload="metadata"
-              aria-label={locale === 'ko' ? '대호 제작 영상' : 'DAEHO production video'}
+              aria-label={
+                content.videoSection?.ariaLabel || (locale === 'ko' ? '대호 제작 영상' : 'DAEHO production video')
+              }
             />
           </div>
         </Reveal>
@@ -280,4 +287,8 @@ function getPartnerRows(partners: HomePartnerContent): HomePartnerItem[][] {
   }
 
   return partners.rows.map((row) => row.map((label) => ({label})));
+}
+
+function homeVideoSrc(value: string | undefined, fallback: string) {
+  return resolveVideoSource(value) || resolveVideoSource(fallback);
 }
