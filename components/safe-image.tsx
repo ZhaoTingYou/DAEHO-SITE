@@ -9,6 +9,7 @@ type SafeImageProps = {
   alt: string;
   aspect?: string;
   priority?: boolean;
+  sizes?: string;
   variant?: 'spotlight' | 'plain';
 };
 
@@ -17,6 +18,7 @@ export function SafeImage({
   alt,
   aspect = 'aspect-[4/3]',
   priority = false,
+  sizes = '(min-width: 1024px) 520px, 100vw',
   variant = 'spotlight'
 }: SafeImageProps) {
   if (!imageExists(filename)) {
@@ -35,7 +37,7 @@ export function SafeImage({
         alt={alt}
         fill
         priority={priority}
-        sizes="(min-width: 1024px) 520px, 100vw"
+        sizes={sizes}
         className="object-cover"
       />
     </div>

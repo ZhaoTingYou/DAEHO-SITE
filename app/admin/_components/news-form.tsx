@@ -13,6 +13,11 @@ import {
   TextField
 } from './admin-fields';
 import {Panel} from './admin-shell';
+import {
+  NewsBlocksEditor,
+  type NewsBodyBlock,
+  type NewsBlocksEditorLabels
+} from './news-blocks-editor';
 
 type NewsItem = {
   id: string;
@@ -115,6 +120,7 @@ function TranslationPanel({
   translation: NewsTranslation;
 }) {
   const t = createAdminTranslator(messages);
+  const body = newsBody(translation.body);
 
   return (
     <Panel className="p-5">
@@ -126,10 +132,16 @@ function TranslationPanel({
         <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required />
         <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
         <TextAreaField label={t('form.excerpt')} name={`${locale}.excerpt`} defaultValue={translation.excerpt} rows={3} />
-        <TextAreaField label={t('form.lead')} name={`${locale}.body.lead`} defaultValue={newsBody(translation.body).lead} rows={3} />
-        <TextAreaField label={t('form.paragraphs')} name={`${locale}.body.paragraphs`} defaultValue={newsBody(translation.body).paragraphs.join('\n\n')} rows={8} />
-        <TextAreaField label={t('form.quote')} name={`${locale}.body.quote`} defaultValue={newsBody(translation.body).quote} rows={3} />
-        <TextField label={t('form.ctaTitle')} name={`${locale}.body.ctaTitle`} defaultValue={newsBody(translation.body).ctaTitle} />
+        <TextAreaField label={t('form.lead')} name={`${locale}.body.lead`} defaultValue={body.lead} rows={3} />
+        <TextAreaField label={t('form.paragraphs')} name={`${locale}.body.paragraphs`} defaultValue={body.paragraphs.join('\n\n')} rows={8} />
+        <TextAreaField label={t('form.quote')} name={`${locale}.body.quote`} defaultValue={body.quote} rows={3} />
+        <TextField label={t('form.ctaTitle')} name={`${locale}.body.ctaTitle`} defaultValue={body.ctaTitle} />
+        <NewsBlocksEditor
+          locale={locale}
+          blocks={body.blocks}
+          mediaItems={mediaItems}
+          labels={newsBlocksEditorLabels(t)}
+        />
         <TextField label={t('form.tags')} name={`${locale}.tags`} defaultValue={(translation.tags ?? []).join(', ')} placeholder="tag 1, tag 2" />
         <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
         <TextAreaField label={t('form.seoDescription')} name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
@@ -163,6 +175,7 @@ function newsBody(value: unknown) {
     return {
       lead: '',
       paragraphs: [],
+      blocks: [],
       quote: '',
       ctaTitle: ''
     };
@@ -175,7 +188,85 @@ function newsBody(value: unknown) {
     paragraphs: Array.isArray(body.paragraphs)
       ? body.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === 'string')
       : [],
+    blocks: normalizeNewsBlocks(body.blocks),
     quote: typeof body.quote === 'string' ? body.quote : '',
     ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : ''
+  };
+}
+
+function normalizeNewsBlocks(value: unknown): NewsBodyBlock[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
+      const block = item as Record<string, unknown>;
+      const title = stringValue(block.title);
+      const body = stringValue(block.body);
+      const image = stringValue(block.image);
+
+      if (!title && !body && !image) {
+        return null;
+      }
+
+      return {
+        type: block.type === 'imageFull' || block.type === 'imageText' || block.type === 'quote' ? block.type : 'text',
+        title,
+        body,
+        image,
+        layout: block.layout === 'imageRight' ? 'imageRight' : 'imageLeft',
+        width: block.width === 'narrow' || block.width === 'wide' ? block.width : 'standard',
+        spacing: block.spacing === 'compact' || block.spacing === 'loose' ? block.spacing : 'default'
+      };
+    })
+    .filter((block): block is NewsBodyBlock => block !== null);
+}
+
+function stringValue(value: unknown) {
+  return typeof value === 'string' ? value : '';
+}
+
+function newsBlocksEditorLabels(t: ReturnType<typeof createAdminTranslator>): NewsBlocksEditorLabels {
+  return {
+    title: t('newsBlocks.title'),
+    hint: t('newsBlocks.hint'),
+    addBlock: t('newsBlocks.add'),
+    removeBlock: t('newsBlocks.remove'),
+    moveUp: t('newsBlocks.up'),
+    moveDown: t('newsBlocks.down'),
+    type: t('newsBlocks.type'),
+    blockTitle: t('newsBlocks.blockTitle'),
+    body: t('newsBlocks.body'),
+    image: t('newsBlocks.image'),
+    layout: t('newsBlocks.layout'),
+    width: t('newsBlocks.width'),
+    spacing: t('newsBlocks.spacing'),
+    empty: t('newsBlocks.empty'),
+    typeText: t('newsBlocks.typeText'),
+    typeImageFull: t('newsBlocks.typeImageFull'),
+    typeImageText: t('newsBlocks.typeImageText'),
+    typeQuote: t('newsBlocks.typeQuote'),
+    layoutImageLeft: t('newsBlocks.layoutImageLeft'),
+    layoutImageRight: t('newsBlocks.layoutImageRight'),
+    widthNarrow: t('newsBlocks.widthNarrow'),
+    widthStandard: t('newsBlocks.widthStandard'),
+    widthWide: t('newsBlocks.widthWide'),
+    spacingCompact: t('newsBlocks.spacingCompact'),
+    spacingDefault: t('newsBlocks.spacingDefault'),
+    spacingLoose: t('newsBlocks.spacingLoose'),
+    uploadLabel: t('page.uploadLocalImage'),
+    uploadHint: t('page.uploadLocalImageHint'),
+    emptyImageLabel: t('common.noImage'),
+    changedLabel: t('common.changed'),
+    selectedLabel: t('common.imageSelected'),
+    mediaSelectLabel: t('media.selectFromLibrary'),
+    mediaLibraryTitle: t('media.libraryTitle'),
+    mediaEmptyLabel: t('media.libraryEmpty'),
+    mediaSelectedLabel: t('media.selectedExisting')
   };
 }

@@ -287,23 +287,6 @@
           {"path": "product", "label": "展示产品 PNG", "type": "image"}
         ]
       },
-      {
-        "groupKey": "main",
-        "path": "gallery.items",
-        "label": "默认作品项目",
-        "type": "json",
-        "itemFields": [
-          {"path": "id", "label": "作品 ID"},
-          {"path": "title", "label": "标题"},
-          {"path": "caption", "label": "说明", "type": "textarea", "rows": 3},
-          {"path": "category", "label": "分类 ID"},
-          {"path": "categoryLabel", "label": "分类显示名"},
-          {"path": "sportCategory", "label": "运动分类 ID"},
-          {"path": "sportCategoryLabel", "label": "运动分类显示名"},
-          {"path": "year", "label": "年份"},
-          {"path": "image", "label": "图片", "type": "image"}
-        ]
-      },
       {"groupKey": "collectionUi", "path": "chooseLabel", "label": "选择按钮文案"},
       {"groupKey": "collectionUi", "path": "countSuffix", "label": "数量后缀"},
       {"groupKey": "collectionUi", "path": "view", "label": "查看按钮文案"},
@@ -442,18 +425,6 @@
       {"groupKey": "bespoke", "path": "featureBody", "label": "Feature 正文", "type": "textarea", "rows": 3},
       {
         "groupKey": "bespoke",
-        "path": "items",
-        "label": "Bespoke 作品图片",
-        "itemFields": [
-          {"path": "id", "label": "作品 ID"},
-          {"path": "title", "label": "标题"},
-          {"path": "caption", "label": "说明", "type": "textarea", "rows": 3},
-          {"path": "categoryLabel", "label": "分类显示名"},
-          {"path": "image", "label": "图片", "type": "image"}
-        ]
-      },
-      {
-        "groupKey": "bespoke",
         "path": "process",
         "label": "制作流程",
         "type": "json",
@@ -494,20 +465,6 @@
         "itemFields": [
           {"path": "id", "label": "分类 ID"},
           {"path": "label", "label": "分类名称"}
-        ]
-      },
-      {
-        "groupKey": "main",
-        "path": "grid.cards",
-        "label": "默认新闻卡片",
-        "type": "json",
-        "itemFields": [
-          {"path": "id", "label": "新闻 ID"},
-          {"path": "category", "label": "分类 ID"},
-          {"path": "categoryLabel", "label": "分类显示名"},
-          {"path": "date", "label": "日期"},
-          {"path": "title", "label": "标题"},
-          {"path": "image", "label": "图片", "type": "image"}
         ]
       },
       {"groupKey": "newsUi", "path": "filtersLabel", "label": "筛选辅助标签"},

@@ -8,7 +8,6 @@ import {AnimatePresence, motion, useScroll, useTransform, type MotionValue} from
 import {EmptyState} from '@/components/empty-state';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import type {Locale} from '@/i18n/routing';
-import {mergeBespokeItems, type BespokeCollectionItemOverride} from '@/lib/cms/bespoke-items';
 import {imageSrc} from '@/lib/image-src';
 
 export type SpecialtyCollectionFilter = {
@@ -462,7 +461,6 @@ type BespokeViewCopy = {
   featureEyebrow: string;
   featureTitle: string;
   featureBody: string;
-  items?: BespokeCollectionItemOverride[];
   process: Array<{label: string; title: string; body: string}>;
 };
 
@@ -805,7 +803,6 @@ function resolveBespokeViewCopy(locale: Locale, customCopy?: Partial<BespokeView
       stones: {...fallback.filterOptions.stones, ...customCopy?.filterOptions?.stones},
       functions: {...fallback.filterOptions.functions, ...customCopy?.filterOptions?.functions}
     },
-    items: customCopy?.items?.length ? customCopy.items : fallback.items,
     process: customCopy?.process?.length ? customCopy.process : fallback.process
   };
 }
@@ -842,7 +839,7 @@ function BespokeCreationsView({
     functions: []
   });
   const copy = resolveBespokeViewCopy(locale, bespoke);
-  const displayItems = useMemo(() => mergeBespokeItems(items, copy.items, locale), [items, copy.items, locale]);
+  const displayItems = useMemo(() => items, [items]);
   const filterSections = useMemo(() => buildBespokeFilterSections(displayItems, copy), [displayItems, copy]);
   const activeFilterCount = Object.values(selectedFilters).reduce((sum, values) => sum + values.length, 0);
   const filteredItems = useMemo(

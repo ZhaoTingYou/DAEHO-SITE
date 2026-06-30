@@ -161,7 +161,8 @@ export async function saveNewsAction(formData: FormData) {
   const editorPath = `/admin/news/${id || 'new'}`;
 
   try {
-    const previousImages = collectImageFilenames(id ? await getNews(id) : null);
+    const previousNews = id ? await getNews(id) : null;
+    const previousImages = collectImageFilenames(previousNews);
     const imagePath = await readUploadedImageOrText(formData, 'imagePath', 'imageUpload', 'ko', editorPath);
     const payload = newsPayloadSchema.parse({
       slug: stringFromForm(formData, 'slug'),
@@ -183,6 +184,7 @@ export async function saveNewsAction(formData: FormData) {
 
     revalidatePath('/admin/news');
     revalidatePath(nextEditorPath);
+    revalidatePublicNewsPaths(previousNews, savedItem);
     redirect(nextEditorPath);
   } catch (error) {
     redirectWithAdminActionError(editorPath, error);
@@ -386,6 +388,7 @@ async function readNewsTranslation(formData: FormData, locale: Locale, editorPat
     body: {
       lead: stringFromForm(formData, `${locale}.body.lead`),
       paragraphs: parseParagraphs(stringFromForm(formData, `${locale}.body.paragraphs`)),
+      blocks: await readNewsBlocks(formData, locale, editorPath),
       quote: stringFromForm(formData, `${locale}.body.quote`),
       ctaTitle: stringFromForm(formData, `${locale}.body.ctaTitle`)
     },
@@ -394,6 +397,92 @@ async function readNewsTranslation(formData: FormData, locale: Locale, editorPat
     seoDescription: stringFromForm(formData, `${locale}.seoDescription`),
     ogImagePath: await readUploadedImageOrText(formData, `${locale}.ogImagePath`, `${locale}.ogImageUpload`, locale, editorPath)
   };
+}
+
+async function readNewsBlocks(formData: FormData, locale: Locale, editorPath: string) {
+  const indexes = new Set<number>();
+  const prefix = `${locale}.body.blocks.`;
+
+  for (const key of formData.keys()) {
+    if (!key.startsWith(prefix)) {
+      continue;
+    }
+
+    const index = Number(key.slice(prefix.length).split('.')[0]);
+
+    if (Number.isInteger(index) && index >= 0) {
+      indexes.add(index);
+    }
+  }
+
+  const blocks = [];
+
+  for (const index of Array.from(indexes).sort((a, b) => a - b)) {
+    const blockPrefix = `${prefix}${index}`;
+    const type = newsBlockType(stringFromForm(formData, `${blockPrefix}.type`));
+    const title = stringFromForm(formData, `${blockPrefix}.title`);
+    const body = stringFromForm(formData, `${blockPrefix}.body`);
+    const image = await readUploadedImageOrText(
+      formData,
+      `${blockPrefix}.image`,
+      `${blockPrefix}.imageUpload`,
+      locale,
+      editorPath
+    );
+
+    if (!title && !body && !image) {
+      continue;
+    }
+
+    blocks.push({
+      type,
+      title,
+      body,
+      image,
+      layout: newsBlockLayout(stringFromForm(formData, `${blockPrefix}.layout`)),
+      width: newsBlockWidth(stringFromForm(formData, `${blockPrefix}.width`)),
+      spacing: newsBlockSpacing(stringFromForm(formData, `${blockPrefix}.spacing`))
+    });
+  }
+
+  return blocks;
+}
+
+function newsBlockType(value: string) {
+  return value === 'imageFull' || value === 'imageText' || value === 'quote' ? value : 'text';
+}
+
+function newsBlockLayout(value: string) {
+  return value === 'imageRight' ? 'imageRight' : 'imageLeft';
+}
+
+function newsBlockWidth(value: string) {
+  return value === 'narrow' || value === 'wide' ? value : 'standard';
+}
+
+function newsBlockSpacing(value: string) {
+  return value === 'compact' || value === 'loose' ? value : 'default';
+}
+
+function revalidatePublicNewsPaths(previousNews: unknown, nextNews: unknown) {
+  const slugs = new Set([newsItemSlug(previousNews), newsItemSlug(nextNews)].filter(isString));
+
+  for (const locale of locales) {
+    revalidatePath(`/${locale}/news`);
+
+    for (const slug of slugs) {
+      revalidatePath(`/${locale}/news/${slug}`);
+    }
+  }
+}
+
+function newsItemSlug(value: unknown) {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const slug = (value as {slug?: unknown}).slug;
+  return typeof slug === 'string' && slug.trim() ? slug.trim() : null;
 }
 
 async function readCollectionTranslation(formData: FormData, locale: Locale, editorPath: string) {

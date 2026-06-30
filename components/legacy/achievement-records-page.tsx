@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import {DraggableScroll} from '@/components/draggable-scroll';
 import type {HomeStatBandItem} from '@/components/home/home-stat-band';
-import {AchievementRecordCard, type AchievementFirstRecord} from '@/components/legacy/achievement-record-card';
+import {AchievementRecordCard, AchievementRecordDeck, type AchievementFirstRecord} from '@/components/legacy/achievement-record-card';
 import {AchievementPentagonStats} from '@/components/legacy/achievement-pentagon-stats';
 import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/components/legacy/heritage-hero-image';
 import {HeritageHero} from '@/components/legacy/heritage-hero';
@@ -386,18 +386,25 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
           </Reveal>
 
           <Reveal className="mt-[clamp(30px,4vw,46px)]">
+            <div className="mx-auto hidden w-full max-w-[1110px] px-container md:block lg:px-0">
+              <AchievementRecordDeck
+                records={copy.firstRecords}
+                locale={locale}
+                bodyTextClass={bodyTextClass}
+              />
+            </div>
             <DraggableScroll
               ariaLabel={copy.firstHeading}
-              className="mx-auto flex w-full gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] lg:max-w-[1110px] lg:justify-center lg:px-0 [&::-webkit-scrollbar]:hidden"
+              className="mx-auto flex w-full gap-6 overflow-x-auto px-container pb-4 text-center [scrollbar-width:none] [touch-action:pan-x] md:hidden [&::-webkit-scrollbar]:hidden"
             >
-              {copy.firstRecords.map((record) => (
+              {copy.firstRecords.map((record, index) => (
                 <AchievementRecordCard
                   key={`${record.frontTitle}-${record.image}`}
                   record={record}
                   locale={locale}
-                  firstTitle={copy.firstTitle}
+                  index={index}
+                  recordCount={copy.firstRecords.length}
                   bodyTextClass={bodyTextClass}
-                  englishTextClass={englishTextClass}
                 />
               ))}
             </DraggableScroll>

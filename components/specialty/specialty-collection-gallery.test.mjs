@@ -7,6 +7,9 @@ const globals = readFileSync(new URL('../../app/globals.css', import.meta.url), 
 const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
 const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
+const publicContentSource = readFileSync(new URL('../../lib/cms/public-content.ts', import.meta.url), 'utf8');
+const adminCollectionsSource = readFileSync(new URL('../../app/admin/(dashboard)/collections/page.tsx', import.meta.url), 'utf8');
+const collectionFormSource = readFileSync(new URL('../../app/admin/_components/collection-form.tsx', import.meta.url), 'utf8');
 const bespokeViewSource = source.slice(
   source.indexOf('function BespokeCreationsView('),
   source.indexOf('const bespokeCanvasPlacements')
@@ -76,29 +79,82 @@ test('collection stage artwork is exposed through CMS content fields', () => {
   }
 });
 
-test('bespoke category page exposes editable CMS images for its visible works', () => {
+test('creations products are managed only through Collections admin', () => {
+  const creationsPage = pageCatalog.find((page) => page.pageKey === 'mastery-creations');
+  assert.ok(creationsPage, 'Creations landing page should have its own CMS page entry');
+  assert.equal(
+    creationsPage.fields.some((entry) => entry.groupKey === 'main' && entry.path === 'gallery.items'),
+    false,
+    'Creations products should not be edited from /admin/pages/mastery-creations'
+  );
+
   const bespokePage = pageCatalog.find((page) => page.pageKey === 'mastery-creations-bespoke');
   assert.ok(bespokePage, 'Bespoke category should have its own CMS page entry');
 
-  const field = bespokePage.fields.find((entry) => entry.groupKey === 'bespoke' && entry.path === 'items');
-  assert.ok(field, 'Bespoke page should expose editable item images');
-  assert.notEqual(field.type, 'json', 'Bespoke works should use structured array fields, not a large JSON textarea');
-  assert.ok(field.itemFields.some((entry) => entry.path === 'image' && entry.type === 'image'));
+  assert.equal(
+    bespokePage.fields.some((entry) => entry.groupKey === 'bespoke' && entry.path === 'items'),
+    false,
+    'Bespoke product images should not be edited from /admin/pages/mastery-creations-bespoke'
+  );
 
-  assert.ok(
-    source.includes('mergeBespokeItems(items, copy.items, locale)'),
-    'Bespoke page should merge CMS item image overrides and appended items before rendering'
+  assert.equal(
+    source.includes('mergeBespokeItems'),
+    false,
+    'Bespoke view should render the Collection item pool without Page-level product overrides'
+  );
+  assert.equal(
+    publicContentSource.includes('mergeBespokeItems'),
+    false,
+    'Public Creations source should not merge Page-level bespoke product overrides'
   );
 });
 
-test('bespoke shuffle uses the merged CMS item pool and repeats only when there are fewer images than slots', () => {
+test('collections admin list exposes product thumbnails and query filters', () => {
   assert.ok(
-    source.includes('const displayItems = useMemo(() => mergeBespokeItems(items, copy.items, locale)'),
-    'Bespoke display items should include CMS-added works before filtering and shuffling'
+    adminCollectionsSource.includes('collection-search-form'),
+    'Collections admin should render a dedicated search/filter form'
+  );
+  assert.ok(
+    adminCollectionsSource.includes('name="q"') &&
+      adminCollectionsSource.includes('name="category"') &&
+      adminCollectionsSource.includes('name="status"'),
+    'Collections admin should expose search, category, and status query controls'
+  );
+  assert.ok(
+    adminCollectionsSource.includes('collection-thumbnail') &&
+      adminCollectionsSource.includes('imageSrc(item.imagePath)'),
+    'Collections admin rows should render visual product thumbnails'
+  );
+  assert.ok(
+    adminCollectionsSource.includes("'champion'") &&
+      adminCollectionsSource.includes("'appointment'") &&
+      adminCollectionsSource.includes("'bespoke'"),
+    'Collections admin filters should use the three public Creations categories'
+  );
+});
+
+test('collection edit form uses a fixed category dropdown', () => {
+  assert.ok(
+    collectionFormSource.includes('SelectField') &&
+      collectionFormSource.includes('collectionCategoryOptions') &&
+      collectionFormSource.includes('name="category"'),
+    'Collection category should be edited through a fixed dropdown'
+  );
+  assert.equal(
+    collectionFormSource.includes('placeholder="champion"'),
+    false,
+    'Collection category should no longer be a free text field'
+  );
+});
+
+test('bespoke shuffle uses the Collection item pool and repeats only when there are fewer images than slots', () => {
+  assert.ok(
+    source.includes('const displayItems = useMemo(() => items, [items])'),
+    'Bespoke display items should come directly from Collection CMS records'
   );
   assert.ok(
     source.includes('const filteredItems = useMemo(') && source.includes('displayItems.filter'),
-    'Bespoke filtering should operate on the merged CMS display pool'
+    'Bespoke filtering should operate on the Collection display pool'
   );
   assert.ok(
     source.includes('const canvasItems = bespokeCanvasPlacements.map((placement, index) => ({') &&

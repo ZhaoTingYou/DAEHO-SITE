@@ -8,6 +8,7 @@ import {
   ImageUploadField,
   type MediaLibraryItem,
   SecondaryLink,
+  SelectField,
   SubmitButton,
   TextAreaField,
   TextField
@@ -58,7 +59,7 @@ export function CollectionForm({
       <Panel className="p-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="ring-01" />
-          <TextField label={t('form.category')} name="category" defaultValue={item?.category} required placeholder="champion" />
+          <SelectField label={t('form.category')} name="category" defaultValue={normalizeCollectionCategory(item?.category)} options={collectionCategoryOptions(t)} />
           <TextField label={t('form.sportCategory')} name="sportCategory" defaultValue={item?.sportCategory} placeholder="baseball" />
           <TextField label={t('common.sortOrder')} name="sortOrder" type="number" defaultValue={item?.sortOrder ?? 0} />
           <CheckboxField label={t('form.visible')} name="isVisible" defaultChecked={item?.isVisible ?? true} />
@@ -184,6 +185,22 @@ function TranslationPanel({
 
 function getTranslation(item: CollectionItem | undefined, locale: Locale) {
   return (item?.translations[locale] ?? {}) as CollectionTranslation;
+}
+
+const collectionCategoryValues = ['champion', 'appointment', 'bespoke'] as const;
+
+function collectionCategoryOptions(t: (key: string) => string) {
+  return [
+    {value: 'champion', label: t('collection.categoryChampion')},
+    {value: 'appointment', label: t('collection.categoryAppointment')},
+    {value: 'bespoke', label: t('collection.categoryBespoke')}
+  ];
+}
+
+function normalizeCollectionCategory(value?: string) {
+  return collectionCategoryValues.includes(value as typeof collectionCategoryValues[number])
+    ? value
+    : 'champion';
 }
 
 function normalizeGallery(value: unknown, fallbackImage?: string) {

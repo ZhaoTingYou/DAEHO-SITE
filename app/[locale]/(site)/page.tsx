@@ -188,6 +188,23 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
         <HomeStatBand items={content.statBand} locale={locale} />
       </section>
 
+      <section className="home-video-section bg-bg px-container py-[clamp(74px,8vw,126px)]">
+        <Reveal className="mx-auto max-w-[1320px]">
+          <div className="overflow-hidden bg-primary shadow-[0_26px_90px_rgba(16,29,48,0.10)]">
+            <video
+              className="block aspect-video w-full object-cover"
+              src="/videos/home2.mp4"
+              poster="/images/home2_video_poster.jpg"
+              controls
+              loop
+              playsInline
+              preload="metadata"
+              aria-label={locale === 'ko' ? '대호 제작 영상' : 'DAEHO production video'}
+            />
+          </div>
+        </Reveal>
+      </section>
+
       <section className="bg-bg pb-[clamp(104px,10vw,156px)] pt-[clamp(72px,7vw,110px)]">
         <div className="mx-auto max-w-[1240px] space-y-[clamp(32px,4vw,52px)] px-container">
           <Reveal className="border-t border-primary/20 pt-[clamp(26px,3vw,42px)]">

@@ -2,7 +2,6 @@ import type {HomeNewsPopupCard} from '@/components/home/home-news-popups';
 import type {NewsCard} from '@/components/news/news-journal-grid';
 import type {SpecialtyCollectionItem} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
-import {mergeBespokeItems, type BespokeCollectionItemOverride} from '@/lib/cms/bespoke-items';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
@@ -18,6 +17,7 @@ export type PublicNewsDetail = {
   card: NewsCard;
   lead: string;
   paragraphs: string[];
+  blocks: NewsBodyBlock[];
   quote: string;
   tags: string[];
   ctaTitle: string;
@@ -26,28 +26,21 @@ export type PublicNewsDetail = {
   ogImagePath: string;
 };
 
-type NewsPageCardOverride = {
-  id: string;
+export type NewsBodyBlock = {
+  type: 'text' | 'imageFull' | 'imageText' | 'quote';
+  title: string;
+  body: string;
   image: string;
+  layout: 'imageLeft' | 'imageRight';
+  width: 'narrow' | 'standard' | 'wide';
+  spacing: 'compact' | 'default' | 'loose';
 };
 
 export async function getNewsCardsForSite(locale: Locale): Promise<NewsCard[]> {
   const cmsItems = await readCmsValue(() => listPublicNews(locale), []);
-  const overrides = await getNewsPageCardOverrides(locale);
 
   if (cmsItems.length > 0) {
-    return cmsItems.map((item) => {
-      const id = String(item.slug);
-
-      return applyNewsCardImageOverride({
-        id,
-        category: String(item.category),
-        categoryLabel: String(item.categoryLabel),
-        date: String(item.publishedAt),
-        title: String(item.title),
-        image: cmsImageName(item.imagePath)
-      }, overrides.get(id));
-    });
+    return cmsItems.map((item) => toNewsCard(item));
   }
 
   return (await getLocaleMessages(locale)).news.grid.cards.map((card) => ({
@@ -58,23 +51,15 @@ export async function getNewsCardsForSite(locale: Locale): Promise<NewsCard[]> {
 
 export async function getHomeNewsCardsForSite(locale: Locale): Promise<HomeNewsPopupCard[]> {
   const cmsItems = await readCmsValue(() => listPublicNews(locale), []);
-  const overrides = await getNewsPageCardOverrides(locale);
 
   if (cmsItems.length > 0) {
     return cmsItems.slice(0, 4).map((item) => {
-      const id = String(item.slug);
-      const image = cmsImageName(item.imagePath);
       const body = normalizeNewsBody(item.body);
 
-      return applyNewsCardImageOverride({
-        id,
-        category: String(item.category),
-        categoryLabel: String(item.categoryLabel),
-        date: String(item.publishedAt),
-        title: String(item.title),
-        image,
+      return {
+        ...toNewsCard(item),
         body: getNewsPopupBody(item, body)
-      }, overrides.get(id));
+      };
     });
   }
 
@@ -90,27 +75,19 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
 
   if (cmsItem) {
     const body = normalizeNewsBody(cmsItem.body);
-    const image = cmsImageName(cmsItem.imagePath);
-    const ogImage = cmsImageName(cmsItem.ogImagePath || cmsItem.imagePath);
+    const card = toNewsCard(cmsItem);
 
     return {
-      card: {
-        id: String(cmsItem.slug),
-        category: String(cmsItem.category),
-        categoryLabel: String(cmsItem.categoryLabel),
-        date: String(cmsItem.publishedAt),
-        title: String(cmsItem.title),
-        image,
-        hasImage: imageExists(image)
-      },
+      card,
       lead: body.lead || String(cmsItem.excerpt ?? '') || text.lead,
       paragraphs: body.paragraphs.length > 0 ? body.paragraphs : text.paragraphs,
+      blocks: body.blocks,
       quote: body.quote || text.quote,
       tags: Array.isArray(cmsItem.tags) && cmsItem.tags.length > 0 ? cmsItem.tags.filter((tag): tag is string => typeof tag === 'string') : text.tags,
       ctaTitle: body.ctaTitle || text.ctaTitle,
       seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
       seoDescription: String(cmsItem.seoDescription || body.lead || cmsItem.excerpt || ''),
-      ogImagePath: ogImage
+      ogImagePath: cmsImageName(cmsItem.ogImagePath || card.image)
     };
   }
 
@@ -127,20 +104,21 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
     },
     lead: text.lead,
     paragraphs: text.paragraphs,
+    blocks: [],
     quote: text.quote,
     tags: text.tags,
     ctaTitle: text.ctaTitle,
     seoTitle: card.title,
     seoDescription: text.lead,
-    ogImagePath: text.ogImagePath || card.image
+    ogImagePath: card.image
   };
 }
 
 export async function getCollectionItemsForSite(locale: Locale): Promise<SpecialtyCollectionItem[]> {
   const cmsItems = await readCmsValue(() => listPublicCollections(locale), []);
   const messages = await getLocaleMessages(locale);
-  const bespokeItems = messages.collectionUi?.bespoke?.items as BespokeCollectionItemOverride[] | undefined;
-  const baseItems = cmsItems.length > 0
+
+  return cmsItems.length > 0
     ? cmsItems.map((item) => {
         const specs = normalizeCollectionSpecs(item.specs);
         return {
@@ -160,8 +138,6 @@ export async function getCollectionItemsForSite(locale: Locale): Promise<Special
         ...item,
         hasImage: imageExists(item.image)
       }));
-
-  return mergeBespokeItems(baseItems, bespokeItems, locale);
 }
 
 export async function getCollectionItemForSite(locale: Locale, slug: string) {
@@ -225,6 +201,7 @@ function normalizeNewsBody(value: unknown) {
     return {
       lead: '',
       paragraphs: [],
+      blocks: [],
       quote: '',
       ctaTitle: ''
     };
@@ -236,42 +213,15 @@ function normalizeNewsBody(value: unknown) {
     paragraphs: Array.isArray(body.paragraphs)
       ? body.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === 'string')
       : [],
+    blocks: normalizeNewsBlocks(body.blocks),
     quote: typeof body.quote === 'string' ? body.quote : '',
     ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : ''
   };
 }
 
-async function getNewsPageCardOverrides(locale: Locale) {
-  const cards = (await getLocaleMessages(locale)).news.grid.cards;
-
-  return new Map(
-    cards
-      .map((card): [string, NewsPageCardOverride] | null => {
-        const id = typeof card.id === 'string' ? card.id : '';
-        const image = cmsImageName(card.image);
-
-        if (!id || !image) {
-          return null;
-        }
-
-        return [id, {id, image}];
-      })
-      .filter((entry): entry is [string, NewsPageCardOverride] => entry !== null)
-  );
-}
-
-function applyNewsCardImageOverride<T extends {image: string}>(card: T, override?: NewsPageCardOverride) {
-  const image = cmsImageName(override?.image) || cmsImageName(card.image);
-
-  return {
-    ...card,
-    image,
-    hasImage: imageExists(image)
-  };
-}
-
 function getNewsPopupBody(item: Record<string, unknown>, body: ReturnType<typeof normalizeNewsBody>) {
-  const bodyText = [body.lead, ...body.paragraphs]
+  const blockText = body.blocks.flatMap((block) => [block.title, block.body]);
+  const bodyText = [body.lead, ...body.paragraphs, ...blockText]
     .map((entry) => entry.trim())
     .filter(Boolean)
     .join('\n\n');
@@ -286,6 +236,70 @@ function getNewsPopupBody(item: Record<string, unknown>, body: ReturnType<typeof
 
 function firstString(...values: unknown[]) {
   return values.find((value): value is string => typeof value === 'string' && value.trim().length > 0) ?? '';
+}
+
+function toNewsCard(item: Record<string, unknown>): NewsCard {
+  const image = cmsImageName(item.imagePath);
+
+  return {
+    id: String(item.slug),
+    category: String(item.category),
+    categoryLabel: String(item.categoryLabel),
+    date: String(item.publishedAt),
+    title: String(item.title),
+    image,
+    hasImage: imageExists(image)
+  };
+}
+
+function normalizeNewsBlocks(value: unknown): NewsBodyBlock[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
+      const block = item as Record<string, unknown>;
+      const type = newsBlockType(block.type);
+      const title = firstString(block.title);
+      const body = firstString(block.body);
+      const image = cmsImageName(block.image);
+
+      if (!title && !body && !image) {
+        return null;
+      }
+
+      return {
+        type,
+        title,
+        body,
+        image,
+        layout: newsBlockLayout(block.layout),
+        width: newsBlockWidth(block.width),
+        spacing: newsBlockSpacing(block.spacing)
+      };
+    })
+    .filter((block): block is NewsBodyBlock => block !== null);
+}
+
+function newsBlockType(value: unknown): NewsBodyBlock['type'] {
+  return value === 'imageFull' || value === 'imageText' || value === 'quote' ? value : 'text';
+}
+
+function newsBlockLayout(value: unknown): NewsBodyBlock['layout'] {
+  return value === 'imageRight' ? 'imageRight' : 'imageLeft';
+}
+
+function newsBlockWidth(value: unknown): NewsBodyBlock['width'] {
+  return value === 'narrow' || value === 'wide' ? value : 'standard';
+}
+
+function newsBlockSpacing(value: unknown): NewsBodyBlock['spacing'] {
+  return value === 'compact' || value === 'loose' ? value : 'default';
 }
 
 function normalizeCollectionSpecs(value: unknown) {
