@@ -8,7 +8,6 @@ import {
   uploadMediaAction
 } from '../../actions';
 import {AdminActionAlert} from '../../_components/admin-feedback';
-import {SubmitButton, TextField} from '../../_components/admin-fields';
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
 
 type Props = {
@@ -28,21 +27,25 @@ export default async function AdminMediaPage({searchParams}: Props) {
       />
 
       <Panel className="mb-6 p-5">
-        <form action={uploadMediaAction} className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:items-end">
-          <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+        <form action={uploadMediaAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
+          <label className="grid min-w-0 gap-1.5 text-sm font-semibold text-[#344054]">
             <span>{t('media.file')}</span>
             <input
               name="file"
               type="file"
               accept="image/*"
               required
-              className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm"
+              className="min-h-10 w-full min-w-0 rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm"
             />
           </label>
-          <TextField label={t('media.filename')} name="filename" placeholder="hero-ring.png" />
-          <TextField label={t('media.altKo')} name="altKo" />
-          <TextField label={t('media.altEn')} name="altEn" />
-          <SubmitButton>{t('common.upload')}</SubmitButton>
+          <MediaUploadTextField label={t('media.filename')} name="filename" placeholder="hero-ring.png" />
+          <MediaUploadTextField label={t('media.altKo')} name="altKo" />
+          <MediaUploadTextField label={t('media.altEn')} name="altEn" />
+          <div className="md:col-span-2 xl:col-span-1">
+            <button className="admin-on-dark min-h-10 w-full whitespace-nowrap rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]">
+              {t('common.upload')}
+            </button>
+          </div>
         </form>
       </Panel>
 
@@ -102,6 +105,27 @@ export default async function AdminMediaPage({searchParams}: Props) {
         </div>
       )}
     </>
+  );
+}
+
+function MediaUploadTextField({
+  label,
+  name,
+  placeholder
+}: {
+  label: string;
+  name: string;
+  placeholder?: string;
+}) {
+  return (
+    <label className="grid min-w-0 gap-1.5 text-sm font-semibold text-[#344054]">
+      <span>{label}</span>
+      <input
+        name={name}
+        placeholder={placeholder}
+        className="min-h-10 w-full min-w-0 rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
+      />
+    </label>
   );
 }
 

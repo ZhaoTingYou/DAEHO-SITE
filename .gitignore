@@ -27,6 +27,7 @@ pnpm-debug.log*
 
 # local verification artifacts
 /artifacts
+/backups
 /mobile-screenshots
 /data/*.sqlite
 /data/*.sqlite-*

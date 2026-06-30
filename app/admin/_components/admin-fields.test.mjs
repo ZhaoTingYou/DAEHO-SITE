@@ -7,13 +7,15 @@ const source = readFileSync(new URL('./admin-fields.tsx', import.meta.url), 'utf
 test('image upload previews and media library thumbnails use the shared preview background helper', () => {
   assert.match(source, /function mediaPreviewBackground/);
   assert.match(source, /style=\{mediaPreviewBackground\(previewUrl\)\}/);
-  assert.match(source, /style=\{mediaPreviewBackground\(item\.url \|\| imageSrc\(item\.filename\)\)\}/);
+  assert.match(source, /style=\{mediaPreviewBackground\(mediaPreviewUrl\(item\)\)\}/);
 });
 
-test('media library selection saves only the media filename for public image fields', () => {
+test('media library selection stores remote object URLs when media lives in object storage', () => {
   assert.doesNotMatch(source, /const selectedMediaValue = mediaValue\(item\)/);
-  assert.match(source, /filenameInputRef\.current\.value = item\.filename/);
-  assert.match(source, /filename: item\.filename/);
+  assert.match(source, /const nextFieldValue = mediaFieldValue\(item\)/);
+  assert.match(source, /filenameInputRef\.current\.value = nextFieldValue/);
+  assert.match(source, /filename: nextFieldValue/);
+  assert.match(source, /function mediaFieldValue\(item: MediaLibraryItem\)/);
 });
 
 test('appendable CMS arrays expose a client-side add button for multiple new image cards', () => {

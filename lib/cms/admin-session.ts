@@ -45,7 +45,7 @@ export async function createAdminSession(passwordVersion = getLocalPasswordVersi
   cookieStore.set(adminSessionCookie, `${issuedAt}.${versionToken}.${signature}`, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: shouldUseSecureAdminCookie(),
     path: '/admin',
     maxAge: sessionMaxAgeSeconds
   });
@@ -193,6 +193,43 @@ function getLocalPasswordVersion() {
 
 function canUseLocalAdminPasswordFallback() {
   return process.env.CMS_PREVIEW_STATIC === 'true' || !process.env.CMS_BACKEND_URL;
+}
+
+function shouldUseSecureAdminCookie() {
+  const configured = process.env.CMS_ADMIN_COOKIE_SECURE?.trim().toLowerCase();
+
+  if (configured === 'true') {
+    return true;
+  }
+
+  if (configured === 'false') {
+    return false;
+  }
+
+  if (isLocalHttpSiteUrl(process.env.NEXT_PUBLIC_SITE_URL)) {
+    return false;
+  }
+
+  return process.env.NODE_ENV === 'production';
+}
+
+function isLocalHttpSiteUrl(value?: string) {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === 'http:' &&
+      (url.hostname === 'localhost' ||
+        url.hostname === '127.0.0.1' ||
+        url.hostname === '[::1]' ||
+        url.hostname === '::1')
+    );
+  } catch {
+    return false;
+  }
 }
 
 function encodeSessionPart(value: string) {

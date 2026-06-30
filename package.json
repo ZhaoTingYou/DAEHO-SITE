@@ -12,7 +12,9 @@
     "cms:init": "node scripts/cms-db-init.mjs",
     "cms:export": "node scripts/cms-db-export.mjs",
     "cms:preview-export": "node scripts/cms-db-export.mjs --output=data/cms-preview.json",
-    "cms:import": "node scripts/cms-db-import.mjs"
+    "cms:import": "node scripts/cms-db-import.mjs",
+    "cms:media:migrate-s3": "node scripts/migrate-media-to-s3.mjs",
+    "cms:media:migrate-s3:apply": "node scripts/migrate-media-to-s3.mjs --apply --prune-unused"
   },
   "dependencies": {
     "better-sqlite3": "^12.10.1",
