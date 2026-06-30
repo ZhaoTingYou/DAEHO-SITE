@@ -24,10 +24,12 @@ public class MediaStorageService {
 
   private final CmsProperties properties;
   private final CmsRepository repository;
+  private final MediaObjectStorage objectStorage;
 
-  public MediaStorageService(CmsProperties properties, CmsRepository repository) {
+  public MediaStorageService(CmsProperties properties, CmsRepository repository, MediaObjectStorage objectStorage) {
     this.properties = properties;
     this.repository = repository;
+    this.objectStorage = objectStorage;
   }
 
   public String uploadError(MultipartFile file) {
@@ -53,6 +55,10 @@ public class MediaStorageService {
       String altEn
   ) throws IOException {
     var filename = publicFilename(file.getOriginalFilename(), preferredFilename);
+    if (properties.usesS3Storage()) {
+      return storeInObjectStorage(file, filename, altKo, altEn);
+    }
+
     var uploadRoot = properties.uploadDir().toAbsolutePath().normalize();
     Files.createDirectories(uploadRoot);
     filename = uniqueFilename(uploadRoot, filename);
@@ -76,7 +82,16 @@ public class MediaStorageService {
   }
 
   public void deleteStoredFile(Map<String, Object> media) throws IOException {
-    if (!"local".equals(text(media.get("storageProvider")))) {
+    var storageProvider = text(media.get("storageProvider"));
+    if ("s3".equalsIgnoreCase(storageProvider)) {
+      var storageKey = text(media.get("storageKey"));
+      if (!storageKey.isBlank()) {
+        objectStorage.deleteObject(storageKey);
+      }
+      return;
+    }
+
+    if (!"local".equals(storageProvider)) {
       return;
     }
 
@@ -92,6 +107,28 @@ public class MediaStorageService {
     }
 
     Files.deleteIfExists(target);
+  }
+
+  private Map<String, Object> storeInObjectStorage(
+      MultipartFile file,
+      String filename,
+      String altKo,
+      String altEn
+  ) throws IOException {
+    filename = uniqueObjectKey(filename);
+    objectStorage.putPublicObject(filename, file);
+
+    return repository.createMedia(Map.of(
+        "filename", filename,
+        "path", filename,
+        "url", properties.normalizedS3PublicBaseUrl() + "/" + filename,
+        "mimeType", file.getContentType() == null ? "" : file.getContentType(),
+        "sizeBytes", file.getSize(),
+        "altKo", text(altKo),
+        "altEn", text(altEn),
+        "storageProvider", "s3",
+        "storageKey", filename
+    ));
   }
 
   private String publicFilename(String originalName, String preferredFilename) {
@@ -124,6 +161,24 @@ public class MediaStorageService {
     for (var index = 0; index < 10; index++) {
       var candidate = baseName + "-" + UUID.randomUUID().toString().substring(0, 8) + extension;
       if (!Files.exists(uploadRoot.resolve(candidate).normalize())) {
+        return candidate;
+      }
+    }
+
+    return baseName + "-" + UUID.randomUUID() + extension;
+  }
+
+  private String uniqueObjectKey(String filename) throws IOException {
+    if (!objectStorage.exists(filename)) {
+      return filename;
+    }
+
+    var extension = extension(filename);
+    var baseName = filename.substring(0, filename.length() - extension.length()).replaceAll("-$", "");
+
+    for (var index = 0; index < 10; index++) {
+      var candidate = baseName + "-" + UUID.randomUUID().toString().substring(0, 8) + extension;
+      if (!objectStorage.exists(candidate)) {
         return candidate;
       }
     }

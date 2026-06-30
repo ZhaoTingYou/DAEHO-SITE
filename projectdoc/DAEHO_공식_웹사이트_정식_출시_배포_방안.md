@@ -1,6 +1,6 @@
 # DAEHO 공식 웹사이트 정식 출시 배포 방안
 
-업데이트일: 2026-06-27
+업데이트일: 2026-06-30
 
 본 문서는 DAEHO 공식 웹사이트의 정식 출시를 준비하기 위한 배포 방안입니다. 회사 의사결정자, 구매 담당자, 운영 담당자, 기술 담당자가 함께 볼 수 있도록 작성했습니다. 비기술 담당자는 “준비해야 할 계정”과 “권장 구매 항목”을 통해 무엇을 준비해야 하는지 확인할 수 있고, 기술 담당자는 “배포 절차”와 “검수 체크리스트”에 따라 정식 배포를 진행할 수 있습니다.
 
@@ -16,13 +16,14 @@
 | 이메일 | NAVER WORKS Standard부터 시작 |
 | SSL | Let's Encrypt 무료 인증서 |
 | 배포 방식 | Docker Compose |
-| 백업 | 매일 PostgreSQL dump + uploads 압축 파일 생성, 이후 S3 또는 Lightsail Object Storage로 외부 백업 추가 |
+| 미디어 저장소 | AWS Lightsail Object Storage, bucket: `daeho-prod-media`, region: Seoul / `ap-northeast-2` |
+| 백업 | 매일 PostgreSQL dump + Lightsail snapshot, 미디어 파일은 Object Storage에 보관 |
 
 ## 권장 아키텍처
 
 정식 출시에는 다음 구성을 권장합니다.
 
-Cloudflare DNS + AWS Lightsail + Docker Compose + Nginx HTTPS + Next.js + Spring Boot CMS + PostgreSQL + uploads + backup
+Cloudflare DNS + AWS Lightsail + Docker Compose + Nginx HTTPS + Next.js + Spring Boot CMS + PostgreSQL + Lightsail Object Storage + backup
 
 구성 설명:
 
@@ -30,12 +31,12 @@ Cloudflare DNS + AWS Lightsail + Docker Compose + Nginx HTTPS + Next.js + Spring
 2. 도메인 DNS는 Cloudflare에서 관리합니다.
 3. Cloudflare는 트래픽을 AWS Lightsail Static IP로 연결합니다.
 4. Lightsail 서버에서 Docker Compose를 실행합니다.
-5. Nginx는 HTTPS, reverse proxy, `/uploads` 정적 파일 접근을 담당합니다.
+5. Nginx는 HTTPS와 reverse proxy를 담당하며, 로컬 `/uploads`는 호환/예비 경로로만 사용합니다.
 6. Next.js는 공식 웹사이트 페이지, `/admin` CMS 관리자 UI, BFF API를 담당합니다.
 7. Spring Boot CMS는 CMS 데이터, 공개 콘텐츠 API, 문의, 미디어 업로드, import/export, 상태 점검을 담당합니다.
 8. PostgreSQL은 CMS 데이터를 저장합니다.
-9. uploads 볼륨은 CMS에서 업로드한 이미지를 저장합니다.
-10. backup 컨테이너는 매일 데이터베이스 dump와 uploads 압축 파일을 생성합니다.
+9. Lightsail Object Storage는 CMS에서 업로드한 이미지를 저장하며, 공개 이미지 주소는 `https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com/...`를 사용합니다.
+10. backup 컨테이너는 매일 데이터베이스 dump를 생성하고, Lightsail snapshot은 서버 단위 복구에 사용합니다.
 
 ## Amazon Lightsail은 어떤 사양을 선택해야 하는가
 
@@ -158,7 +159,8 @@ Let's Encrypt 무료 SSL 인증서를 사용합니다. Nginx와 Certbot 또는 a
 | Cloudflare DNS | Free | KRW 0 | KRW 0 | 1단계에서는 충분 |
 | Let's Encrypt SSL | 무료 | KRW 0 | KRW 0 | 자동 갱신 설정 필요 |
 | NAVER WORKS | Standard | KRW 8,500/명/월 또는 연간 계약 시 약 KRW 7,000/명/월 | 인원 수에 따라 다름 | 기업 이메일이 필요할 때 권장 |
-| 외부 백업 | 이후 S3 또는 Lightsail Object Storage | USD 1-5부터 | USD 12-60부터 | 1단계는 서버 내 매일 백업, 정식 운영은 외부 백업 권장 |
+| 미디어 Object Storage | Lightsail Object Storage 100GB | AWS Lightsail 화면의 실제 가격 기준 | 실제 사용량 기준 | CMS 업로드 이미지를 서버 로컬이 아닌 Object Storage에 저장 |
+| 외부 아카이브 | 이후 S3 Glacier 또는 별도 보관소 | USD 1-5부터 | USD 12-60부터 | 더 엄격한 재해복구가 필요할 때 추가 |
 
 권장 출시 예산:
 
@@ -260,6 +262,13 @@ SPRING_DATASOURCE_PASSWORD=<strong-db-password>
 
 CMS_UPLOAD_DIR=/data/uploads
 CMS_PUBLIC_UPLOAD_BASE_URL=/uploads
+CMS_STORAGE_PROVIDER=s3
+CMS_S3_BUCKET=daeho-prod-media
+CMS_S3_REGION=ap-northeast-2
+CMS_S3_ENDPOINT=
+CMS_S3_PUBLIC_BASE_URL=https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com
+CMS_S3_ACCESS_KEY_ID=<lightsail-storage-access-key>
+CMS_S3_SECRET_ACCESS_KEY=<lightsail-storage-secret-key>
 
 CMS_NOTIFY_TO=contact@<회사도메인>.co.kr
 SMTP_FROM=contact@<회사도메인>.co.kr
@@ -296,7 +305,8 @@ npm run cms:export
 2. 뉴스가 존재합니다.
 3. 작품 컬렉션이 존재합니다.
 4. 미디어가 125개 또는 최신 개수와 일치합니다.
-5. `/uploads/...` 이미지가 접근 가능합니다.
+5. 새로 업로드한 이미지는 Lightsail Object Storage에 저장됩니다.
+6. `https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com/...` 이미지가 접근 가능합니다.
 
 ### 7. Docker Compose 실행
 
@@ -333,7 +343,7 @@ curl -I http://localhost/api/admin/status
 1. `https://www.<회사도메인>.co.kr/ko`
 2. `https://www.<회사도메인>.co.kr/en`
 3. `https://www.<회사도메인>.co.kr/admin`
-4. `https://www.<회사도메인>.co.kr/uploads/...`
+4. `https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com/...`
 5. `https://www.<회사도메인>.co.kr/sitemap.xml`
 6. `https://www.<회사도메인>.co.kr/robots.txt`
 
@@ -453,8 +463,9 @@ Naver에서 특히 중요한 점:
 - [ ] 관리자에서 JPG, PNG, WebP 업로드 가능.
 - [ ] SVG는 거부됨.
 - [ ] 단일 이미지 파일이 20MB를 초과하면 거부됨.
-- [ ] 업로드 후 `/uploads/...`로 접근 가능.
+- [ ] 업로드 후 Object Storage URL로 접근 가능.
 - [ ] 컨테이너 재시작 후에도 이미지가 유지됨.
+- [ ] `CMS_S3_ACCESS_KEY_ID`와 `CMS_S3_SECRET_ACCESS_KEY`가 GitHub에 커밋되지 않음.
 
 ### 문의 메일
 
@@ -469,11 +480,11 @@ Naver에서 특히 중요한 점:
 ### 백업
 
 - [ ] 매일 PostgreSQL dump 생성.
-- [ ] 매일 uploads 압축 파일 생성.
+- [ ] CMS 업로드 이미지는 Lightsail Object Storage에 저장.
 - [ ] 백업 파일명에 날짜 포함.
 - [ ] 최근 7-14일 백업 보관.
 - [ ] 복구 절차를 최소 1회 무작위로 확인.
-- [ ] 이후 S3 또는 Lightsail Object Storage 외부 백업 추가.
+- [ ] 필요 시 S3 Glacier 또는 별도 외부 아카이브 추가.
 
 ### 검색 엔진 크롤링
 

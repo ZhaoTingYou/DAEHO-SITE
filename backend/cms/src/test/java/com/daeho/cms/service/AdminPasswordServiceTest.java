@@ -82,7 +82,7 @@ class AdminPasswordServiceTest {
   private AdminPasswordService serviceWithStore(MemoryAdminPasswordStore store, String bootstrapPassword) {
     return new AdminPasswordService(
         store,
-        new CmsProperties("admin-key", "", "", false, Path.of("."), "/uploads", bootstrapPassword)
+        new CmsProperties("admin-key", "", "", false, Path.of("."), "/uploads", bootstrapPassword, "local", "", "", "", "", "", "")
     );
   }
 

@@ -2,16 +2,22 @@ import type {NextConfig} from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const isFrontendOnlyBuild = process.env.DAEHO_FRONTEND_ONLY === 'true';
+const s3ImageHostname = imageHostname(process.env.CMS_S3_PUBLIC_BASE_URL)
+  ?? 'daeho-prod-media.s3.ap-northeast-2.amazonaws.com';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   output: isFrontendOnlyBuild ? 'export' : 'standalone',
-  images: isFrontendOnlyBuild
-    ? {
-      unoptimized: true
-    }
-    : undefined,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: s3ImageHostname
+      }
+    ],
+    ...(isFrontendOnlyBuild ? {unoptimized: true} : {})
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '64mb'
@@ -47,3 +53,15 @@ const nextConfig: NextConfig = {
 const withNextIntl = createNextIntlPlugin();
 
 export default withNextIntl(nextConfig);
+
+function imageHostname(value?: string) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return new URL(value).hostname || null;
+  } catch {
+    return null;
+  }
+}

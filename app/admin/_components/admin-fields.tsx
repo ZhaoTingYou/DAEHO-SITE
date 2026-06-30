@@ -20,6 +20,7 @@ type ImageUploadSyncDetail = {
   source: string;
   file?: File;
   filename: string;
+  displayName?: string;
   previewUrl?: string;
 };
 
@@ -263,7 +264,7 @@ export function ImageUploadField({
         setSelectedPreviewUrl(detail.previewUrl ?? imageSrc(detail.filename));
       }
 
-      setSelectedFileName(detail.filename);
+      setSelectedFileName(detail.displayName ?? detail.filename);
       setSelectionSource('synced');
     };
 
@@ -319,14 +320,15 @@ export function ImageUploadField({
 
   const handleMediaSelect = (item: MediaLibraryItem) => {
     releaseObjectUrl();
-    const nextPreviewUrl = item.url || imageSrc(item.filename);
+    const nextPreviewUrl = mediaPreviewUrl(item);
+    const nextFieldValue = mediaFieldValue(item);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
 
     if (filenameInputRef.current) {
-      filenameInputRef.current.value = item.filename;
+      filenameInputRef.current.value = nextFieldValue;
     }
 
     setSelectedPreviewUrl(nextPreviewUrl);
@@ -340,7 +342,8 @@ export function ImageUploadField({
           detail: {
             syncKey,
             source: uploadName,
-            filename: item.filename,
+            filename: nextFieldValue,
+            displayName: item.filename,
             previewUrl: nextPreviewUrl
           }
         })
@@ -428,7 +431,7 @@ export function ImageUploadField({
                       >
                         <span
                           className="block aspect-square rounded bg-[#eef2f6] bg-cover bg-center"
-                          style={mediaPreviewBackground(item.url || imageSrc(item.filename))}
+                          style={mediaPreviewBackground(mediaPreviewUrl(item))}
                         />
                         <span className="line-clamp-2 break-all px-1 pb-1 text-[10px] font-medium leading-3 text-[#647084] group-hover:text-[#7a2230]">
                           {item.filename}
@@ -612,6 +615,16 @@ function imageSrc(value: string) {
   }
 
   return `/images/${trimmed}`;
+}
+
+function mediaFieldValue(item: MediaLibraryItem) {
+  const itemUrl = item.url.trim();
+  return /^https?:\/\//i.test(itemUrl) ? itemUrl : item.filename;
+}
+
+function mediaPreviewUrl(item: MediaLibraryItem) {
+  const itemUrl = item.url.trim();
+  return /^https?:\/\//i.test(itemUrl) ? itemUrl : imageSrc(item.filename);
 }
 
 function mediaPreviewBackground(imageUrl: string): CSSProperties {

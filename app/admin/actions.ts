@@ -806,7 +806,7 @@ async function saveSharedPageImage(file: File, pageEditorPath: string, preferred
     altEn: alt
   }, preferredFilename);
 
-  return media.filename;
+  return mediaImageFieldValue(media);
 }
 
 function parseContentImageFormKey(formKey: string) {
@@ -849,7 +849,7 @@ async function readUploadedImageFilename(
     altEn: locale === 'en' ? createImageAltFromFilename(file.name) : ''
   }, preferredFilenameKey ? stringFromForm(formData, preferredFilenameKey) : '');
 
-  return media.filename;
+  return mediaImageFieldValue(media);
 }
 
 async function readUploadedImageOrText(
@@ -1071,6 +1071,11 @@ async function savePublicImage(file: File, alt: {altKo?: string; altEn?: string}
     altKo: alt.altKo ?? '',
     altEn: alt.altEn ?? ''
   });
+}
+
+function mediaImageFieldValue(media: {filename: string; url?: string}) {
+  const url = media.url?.trim() ?? '';
+  return /^https?:\/\//i.test(url) ? url : media.filename;
 }
 
 function createImageAltFromFilename(filename: string) {

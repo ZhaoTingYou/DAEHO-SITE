@@ -1,7 +1,6 @@
-import Image from 'next/image';
-
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {listMedia} from '@/lib/cms/repositories';
+import {imageSrc} from '@/lib/image-src';
 
 import {
   deleteMediaAction,
@@ -56,8 +55,13 @@ export default async function AdminMediaPage({searchParams}: Props) {
           {items.map((item) => (
             <Panel key={item.id} className="overflow-hidden">
               <div className="relative aspect-[4/3] bg-[#eef2f6]">
-                {item.url.startsWith('/') ? (
-                  <Image src={item.url} alt={item.altKo || item.altEn || item.filename} fill sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw" className="object-cover" />
+                {item.url ? (
+                  <span
+                    aria-label={item.altKo || item.altEn || item.filename}
+                    role="img"
+                    className="block h-full w-full bg-cover bg-center"
+                    style={{backgroundImage: `url("${cssUrl(mediaPreviewUrl(item))}")`}}
+                  />
                 ) : null}
               </div>
               <div className="space-y-2 p-4">
@@ -111,4 +115,13 @@ function formatBytes(bytes: number) {
   }
 
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function cssUrl(value: string) {
+  return value.replace(/["\\\n\r\f]/g, '\\$&');
+}
+
+function mediaPreviewUrl(item: {filename: string; url: string}) {
+  const itemUrl = item.url.trim();
+  return /^https?:\/\//i.test(itemUrl) ? itemUrl : imageSrc(item.filename);
 }

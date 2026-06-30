@@ -65,6 +65,13 @@ class CmsHttpContractTest {
         false,
         Path.of("/tmp/uploads"),
         "/uploads",
+        "",
+        "local",
+        "",
+        "",
+        "",
+        "",
+        "",
         ""
     ));
     var validation = new RequestValidation();

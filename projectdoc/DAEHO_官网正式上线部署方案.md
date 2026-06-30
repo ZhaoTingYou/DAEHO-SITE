@@ -1,6 +1,6 @@
 # DAEHO 官网正式上线部署方案
 
-更新日期：2026-06-27
+更新日期：2026-06-30
 
 本文档用于 DAEHO 官网正式上线准备。目标读者包括公司决策人员、采购人员和负责部署的技术人员。非技术人员可以根据“需要准备的账号”和“推荐购买”确认要买什么；技术人员可以根据“部署流程”和“验收清单”执行上线。
 
@@ -16,13 +16,14 @@
 | 邮箱 | NAVER WORKS Standard 起步 |
 | SSL | Let's Encrypt 免费证书 |
 | 部署方式 | Docker Compose |
-| 备份 | 每日 PostgreSQL dump + uploads 压缩包，后续加 S3 或 Lightsail Object Storage 异地备份 |
+| 媒体存储 | AWS Lightsail Object Storage，bucket: `daeho-prod-media`，region: Seoul / `ap-northeast-2` |
+| 备份 | 每日 PostgreSQL dump + Lightsail snapshot；对象存储保留媒体文件，后续可增加异地归档 |
 
 ## 推荐架构
 
 正式上线推荐使用：
 
-Cloudflare DNS + AWS Lightsail + Docker Compose + Nginx HTTPS + Next.js + Spring Boot CMS + PostgreSQL + uploads + backup
+Cloudflare DNS + AWS Lightsail + Docker Compose + Nginx HTTPS + Next.js + Spring Boot CMS + PostgreSQL + Lightsail Object Storage + backup
 
 架构说明：
 
@@ -30,12 +31,12 @@ Cloudflare DNS + AWS Lightsail + Docker Compose + Nginx HTTPS + Next.js + Spring
 2. 域名 DNS 托管在 Cloudflare。
 3. Cloudflare 将流量解析到 AWS Lightsail 静态 IP。
 4. Lightsail 上运行 Docker Compose。
-5. Nginx 负责 HTTPS、反向代理和 `/uploads` 静态文件访问。
+5. Nginx 负责 HTTPS 和反向代理；本地 `/uploads` 仅作为兼容/回退路径。
 6. Next.js 提供官网页面、`/admin` CMS 后台 UI 和 BFF API。
 7. Spring Boot CMS 负责 CMS 数据、公开内容 API、询盘、媒体上传、导入导出和状态检查。
 8. PostgreSQL 保存 CMS 数据。
-9. uploads 卷保存后台上传图片。
-10. backup 容器每天生成数据库 dump 和 uploads 压缩包。
+9. Lightsail Object Storage 保存后台上传图片，公开图片地址使用 `https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com/...`。
+10. backup 容器每天生成数据库 dump；Lightsail snapshot 负责服务器级恢复。
 
 ## Amazon Lightsail 应该选择什么型号
 
@@ -158,7 +159,8 @@ AWS Lightsail 4GB RAM / 2 vCPU / 80GB SSD / 4TB transfer，Linux/Unix，public I
 | Cloudflare DNS | Free | KRW 0 | KRW 0 | 第一阶段足够 |
 | Let's Encrypt SSL | 免费 | KRW 0 | KRW 0 | 需要自动续期 |
 | NAVER WORKS | Standard | KRW 8,500/人/月，或年约 KRW 7,000/人/月 | 视人数而定 | 需要企业邮箱时推荐 |
-| 异地备份 | 后续 S3 或 Lightsail Object Storage | USD 1-5 起 | USD 12-60 起 | 第一阶段可先每日本机备份，正式建议加异地 |
+| 媒体对象存储 | Lightsail Object Storage 100GB | 以 AWS Lightsail 页面实际价格为准 | 以实际使用量计费 | 保存 CMS 上传图片，避免图片只存在服务器本地 |
+| 异地归档 | 后续 S3 Glacier 或其他归档 | USD 1-5 起 | USD 12-60 起 | 需要更严格灾备时再增加 |
 
 推荐上线预算：
 
@@ -260,6 +262,13 @@ SPRING_DATASOURCE_PASSWORD=<strong-db-password>
 
 CMS_UPLOAD_DIR=/data/uploads
 CMS_PUBLIC_UPLOAD_BASE_URL=/uploads
+CMS_STORAGE_PROVIDER=s3
+CMS_S3_BUCKET=daeho-prod-media
+CMS_S3_REGION=ap-northeast-2
+CMS_S3_ENDPOINT=
+CMS_S3_PUBLIC_BASE_URL=https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com
+CMS_S3_ACCESS_KEY_ID=<lightsail-storage-access-key>
+CMS_S3_SECRET_ACCESS_KEY=<lightsail-storage-secret-key>
 
 CMS_NOTIFY_TO=contact@<公司域名>.co.kr
 SMTP_FROM=contact@<公司域名>.co.kr
@@ -296,7 +305,8 @@ npm run cms:export
 2. 新闻存在。
 3. 作品集合存在。
 4. 媒体 125 条或最新数量一致。
-5. `/uploads/...` 图片能访问。
+5. 新上传图片保存到 Lightsail Object Storage。
+6. `https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com/...` 图片能访问。
 
 ### 7. 启动 Docker Compose
 
@@ -333,7 +343,7 @@ curl -I http://localhost/api/admin/status
 1. `https://www.<公司域名>.co.kr/ko`
 2. `https://www.<公司域名>.co.kr/en`
 3. `https://www.<公司域名>.co.kr/admin`
-4. `https://www.<公司域名>.co.kr/uploads/...`
+4. `https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com/...`
 5. `https://www.<公司域名>.co.kr/sitemap.xml`
 6. `https://www.<公司域名>.co.kr/robots.txt`
 
@@ -453,8 +463,9 @@ Naver 特别注意：
 - [ ] 后台能上传 JPG、PNG、WebP。
 - [ ] SVG 被拒绝。
 - [ ] 超过 20MB 的单张图片文件被拒绝。
-- [ ] 上传后 `/uploads/...` 可以访问。
+- [ ] 上传后对象存储 URL 可以访问。
 - [ ] 重启容器后图片仍存在。
+- [ ] `CMS_S3_ACCESS_KEY_ID` 和 `CMS_S3_SECRET_ACCESS_KEY` 没有提交到 GitHub。
 
 ### 询盘邮件
 
@@ -469,11 +480,11 @@ Naver 特别注意：
 ### 备份
 
 - [ ] 每天生成 PostgreSQL dump。
-- [ ] 每天生成 uploads 压缩包。
+- [ ] CMS 上传图片保存到 Lightsail Object Storage。
 - [ ] 备份文件名包含日期。
 - [ ] 至少保留最近 7-14 天备份。
 - [ ] 随机抽查一次恢复流程。
-- [ ] 后续增加 S3 或 Lightsail Object Storage 异地备份。
+- [ ] 后续按需要增加 S3 Glacier 或其他异地归档。
 
 ### 搜索引擎抓取
 
