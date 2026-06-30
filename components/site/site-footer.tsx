@@ -93,8 +93,8 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
 
   return (
     <footer className="relative z-20 border-t border-hairline bg-white text-primary">
-      <div className="mx-auto max-w-[1440px] px-container py-[clamp(56px,7vw,96px)]">
-        <div className="grid gap-10 border-b border-hairline pb-12 lg:grid-cols-[minmax(260px,0.52fr)_minmax(0,0.48fr)] lg:items-start">
+      <div className="mx-auto max-w-[1440px] px-container py-12 md:py-[clamp(56px,7vw,96px)]">
+        <div className="grid gap-8 border-b border-hairline pb-8 md:gap-10 md:pb-12 lg:grid-cols-[minmax(260px,0.52fr)_minmax(0,0.48fr)] lg:items-start">
           <div className="space-y-4">
             <Link href={withLocale(locale, '/')} className="inline-flex min-h-11 items-center font-heading text-[28px] font-semibold tracking-[0.18em] text-primary">
               DAEHO
@@ -144,7 +144,7 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
 
         <nav
           aria-label={text.footer.navigation}
-          className={`grid gap-x-10 gap-y-12 pt-[clamp(42px,5vw,72px)] sm:grid-cols-2 ${golfEnabled ? 'lg:grid-cols-6' : 'lg:grid-cols-5'}`}
+          className={`grid grid-cols-2 gap-x-8 gap-y-7 pt-8 sm:grid-cols-3 md:gap-x-10 md:gap-y-10 md:pt-[clamp(42px,5vw,72px)] ${golfEnabled ? 'lg:grid-cols-6' : 'lg:grid-cols-5'}`}
         >
           {footerGroups.map((group) => (
             <div key={group.heading} className="min-w-0">
@@ -170,7 +170,7 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
         </nav>
       </div>
 
-      <div className="bg-white px-container py-8">
+      <div className="bg-white px-container py-6 md:py-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="font-body text-[12px] leading-6 text-subtext">

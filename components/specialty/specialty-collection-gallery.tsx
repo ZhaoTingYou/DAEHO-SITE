@@ -924,6 +924,13 @@ function BespokeCreationsView({
           ) : null}
         </AnimatePresence>
 
+        <div className="flex justify-center border-b border-primary/15 py-5 lg:hidden">
+          <BespokeFloatingNav
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+            floating={false}
+          />
+        </div>
       </section>
 
       {displayItems.length === 0 || filteredItems.length === 0 ? (
@@ -1120,13 +1127,19 @@ function BespokeCanvasChapterCard({copy}: {copy: BespokeViewCopy}) {
 
 function BespokeFloatingNav({
   displayMode,
-  setDisplayMode
+  setDisplayMode,
+  floating = true
 }: {
   displayMode: BespokeDisplayMode;
   setDisplayMode: (mode: BespokeDisplayMode) => void;
+  floating?: boolean;
 }) {
+  const shellClassName = floating
+    ? 'fixed bottom-[calc(1.2rem+env(safe-area-inset-bottom))] left-1/2 z-[55] hidden min-h-[58px] -translate-x-1/2 items-center bg-white/95 px-4 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary shadow-[0_14px_34px_rgba(16,29,48,.15)] backdrop-blur lg:flex'
+    : 'flex min-h-[56px] w-fit items-center bg-white/95 px-3 font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-primary shadow-[0_12px_28px_rgba(16,29,48,.12)]';
+
   return (
-    <div className="fixed bottom-[calc(1.2rem+env(safe-area-inset-bottom))] left-1/2 z-[55] flex min-h-[58px] -translate-x-1/2 items-center bg-white/95 px-4 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-primary shadow-[0_14px_34px_rgba(16,29,48,.15)] backdrop-blur">
+    <div className={shellClassName}>
       <button
         type="button"
         onClick={() => setDisplayMode('archive')}
@@ -1885,6 +1898,15 @@ function CollectionFinderView({
                 {activeLabel}
               </h2>
             </div>
+            <button
+              type="button"
+              onClick={() => setFinderOpen(true)}
+              className="inline-flex min-h-12 items-center gap-3 rounded-full bg-accent px-7 font-body text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_14px_34px_rgba(122,34,48,.2)] transition duration-hover ease-brand hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent lg:hidden"
+              aria-expanded={finderOpen}
+            >
+              <SlidersIcon />
+              <span>{labels.filterButton}</span>
+            </button>
           </div>
         </div>
 
@@ -1906,7 +1928,7 @@ function CollectionFinderView({
       <button
         type="button"
         onClick={() => setFinderOpen(true)}
-        className="fixed bottom-[calc(2rem+env(safe-area-inset-bottom))] left-1/2 z-[70] inline-flex min-h-12 -translate-x-1/2 items-center gap-3 rounded-full bg-accent px-7 font-body text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_18px_45px_rgba(122,34,48,.24)] transition duration-hover ease-brand hover:bg-primary hover:shadow-[0_20px_52px_rgba(16,29,48,.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+        className="fixed bottom-[calc(2rem+env(safe-area-inset-bottom))] left-1/2 z-[70] hidden min-h-12 -translate-x-1/2 items-center gap-3 rounded-full bg-accent px-7 font-body text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_18px_45px_rgba(122,34,48,.24)] transition duration-hover ease-brand hover:bg-primary hover:shadow-[0_20px_52px_rgba(16,29,48,.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent lg:inline-flex"
         aria-expanded={finderOpen}
       >
         <SlidersIcon />

@@ -142,7 +142,7 @@ async function getPageSeo(locale: Locale, pageKey: PageKey): Promise<PageSeo> {
       return {
         path: '/news',
         title: messages.news.masthead.title,
-        description: messages.news.masthead.body
+        description: messages.news.featured.body
       };
     case 'golf':
       return {
