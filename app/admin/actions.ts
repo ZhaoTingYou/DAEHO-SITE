@@ -101,7 +101,6 @@ export async function changeAdminPasswordAction(formData: FormData) {
   const currentPassword = stringFromForm(formData, 'currentPassword');
   const newPassword = rawStringFromForm(formData, 'newPassword');
   const confirmPassword = rawStringFromForm(formData, 'confirmPassword');
-  let redirectTo = '/admin/login?status=password-updated';
 
   if (newPassword !== confirmPassword) {
     redirect('/admin/account?error=mismatch');
@@ -109,18 +108,22 @@ export async function changeAdminPasswordAction(formData: FormData) {
 
   try {
     await changeStoredAdminPassword(currentPassword, newPassword);
-    await clearAdminSession();
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
     if (isCmsBackendPasswordError(error, 401)) {
-      redirectTo = '/admin/account?error=current';
+      redirect('/admin/account?error=current');
     } else if (isCmsBackendPasswordError(error, 400)) {
-      redirectTo = '/admin/account?error=weak';
+      redirect('/admin/account?error=weak');
     } else {
-      redirectTo = '/admin/account?error=server';
+      redirect('/admin/account?error=server');
     }
   }
 
-  redirect(redirectTo);
+  await clearAdminSession();
+  redirect('/admin/login?status=password-updated');
 }
 
 export async function updateInquiryStatusAction(formData: FormData) {
