@@ -264,16 +264,16 @@ function AchievementRecordPanelContent({
   bodyTextClass: string;
 }) {
   return (
-    <>
-      <div className="flex min-h-0 flex-1 items-center justify-center px-[clamp(44px,14%,58px)] py-4 text-center">
-        <div className="grid w-full max-w-[430px]">
+    <div className="achievement-record-card__panel-content row-span-3 row-start-1 flex h-full min-h-0 flex-col items-center justify-center px-[clamp(44px,14%,58px)] py-4 text-center">
+      <div className="grid w-full max-w-[430px] gap-6">
+        <div>
           <p className={`${bodyTextClass} whitespace-pre-line text-[clamp(15px,1.15vw,17px)] leading-[1.72] text-[#F4E6E1]`}>
             {currentPage}
           </p>
         </div>
+        <span className="mx-auto h-px w-14 bg-[#D7A6A0]/70" aria-hidden="true" />
       </div>
-      <span className="mx-auto h-px w-14 bg-[#D7A6A0]/70" aria-hidden="true" />
-    </>
+    </div>
   );
 }
 

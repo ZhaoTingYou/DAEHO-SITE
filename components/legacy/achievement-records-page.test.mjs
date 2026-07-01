@@ -85,6 +85,10 @@ test('achievement first record card back copy stays centered between arrow gutte
     'expanded panel should reserve top, centered content, and bottom rows'
   );
   assert.ok(
+    cardSource.includes('achievement-record-card__panel-content row-span-3 row-start-1 flex h-full min-h-0 flex-col items-center justify-center'),
+    'expanded copy block should span the full panel grid before centering its content'
+  );
+  assert.ok(
     cardSource.includes('items-center justify-center px-[clamp(44px,14%,58px)]'),
     'expanded copy should be centered inside symmetrical arrow gutters'
   );
