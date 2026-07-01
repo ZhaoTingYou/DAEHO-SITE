@@ -296,7 +296,7 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
                 index < copy.rows.length - 1 ? 'border-b border-[#b65c55]/45' : ''
               }`}
             >
-              <div className="max-w-[620px]">
+              <div className="max-w-[658px]">
                 <h2 className="[font-family:'MaruBuri',serif] text-[clamp(27px,2.5vw,32px)] font-semibold leading-[1.22] tracking-normal text-primary">
                   <span>{row.number}</span>
                   {' '}
