@@ -6,6 +6,7 @@ import {redirect} from 'next/navigation';
 import {getStoredAdminPasswordStatus, verifyStoredAdminPassword} from './admin-password';
 
 const adminSessionCookie = 'daeho_admin_session';
+const adminSessionCookiePath = '/admin';
 const sessionMaxAgeSeconds = 60 * 60 * 8;
 const loginAttemptWindowMs = 15 * 60 * 1000;
 const loginLockMs = 15 * 60 * 1000;
@@ -46,14 +47,21 @@ export async function createAdminSession(passwordVersion = getLocalPasswordVersi
     httpOnly: true,
     sameSite: 'lax',
     secure: shouldUseSecureAdminCookie(),
-    path: '/admin',
+    path: adminSessionCookiePath,
     maxAge: sessionMaxAgeSeconds
   });
 }
 
 export async function clearAdminSession() {
   const cookieStore = await cookies();
-  cookieStore.delete(adminSessionCookie);
+  cookieStore.set(adminSessionCookie, '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: shouldUseSecureAdminCookie(),
+    path: adminSessionCookiePath,
+    maxAge: 0,
+    expires: new Date(0)
+  });
 }
 
 export async function verifyAdminPassword(password: string) {
