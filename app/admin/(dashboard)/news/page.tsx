@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {listNews} from '@/lib/cms/repositories';
+import {imageSrc} from '@/lib/image-src';
 
 import {deleteNewsAction} from '../../actions';
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
@@ -41,7 +42,7 @@ export default async function AdminNewsPage({searchParams}: Props) {
       ) : (
         <Panel className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
               <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
                 <tr>
                   <th className="px-4 py-3">{t('news.article')}</th>
@@ -55,6 +56,7 @@ export default async function AdminNewsPage({searchParams}: Props) {
               <tbody className="divide-y divide-[#e4e7ec]">
                 {items.map((item) => {
                   const ko = (item.translations.ko ?? {}) as NewsTranslation;
+                  const previewSrc = imageSrc(item.imagePath);
                   return (
                     <tr key={item.id} className="align-middle">
                       <td className="px-4 py-4">
@@ -65,7 +67,23 @@ export default async function AdminNewsPage({searchParams}: Props) {
                         <p className="font-semibold text-[#344054]">{item.category}</p>
                         <p className="mt-1 text-xs text-[#647084]">{ko.categoryLabel}</p>
                       </td>
-                      <td className="px-4 py-4 font-numeric text-xs text-[#647084]">{item.imagePath}</td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="news-thumbnail h-16 w-16 shrink-0 rounded-md border border-[#e4e7ec] bg-[#f8fafc] bg-cover bg-center"
+                            style={previewSrc ? {backgroundImage: `url("${cssUrl(previewSrc)}")`} : undefined}
+                            aria-label={ko.title || item.slug}
+                            role={previewSrc ? 'img' : undefined}
+                          >
+                            {previewSrc ? null : (
+                              <span className="flex h-full items-center justify-center px-2 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-[#98a2b3]">
+                                {t('common.noImage')}
+                              </span>
+                            )}
+                          </div>
+                          <p className="max-w-[280px] break-all font-numeric text-xs leading-5 text-[#647084]">{item.imagePath || '-'}</p>
+                        </div>
+                      </td>
                       <td className="px-4 py-4 font-numeric text-xs text-[#647084]">{item.publishedAt}</td>
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-2">
@@ -94,6 +112,10 @@ export default async function AdminNewsPage({searchParams}: Props) {
       )}
     </>
   );
+}
+
+function cssUrl(value: string) {
+  return value.replace(/["\\\n\r\f]/g, '\\$&');
 }
 
 function Badge({children, tone}: {children: React.ReactNode; tone: 'green' | 'gray' | 'red'}) {
