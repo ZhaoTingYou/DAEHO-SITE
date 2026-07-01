@@ -325,8 +325,7 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     effective: '生效日期',
     intro: '引言',
     sections: '章节',
-    heading: '章节标题',
-    hoverText: '翻面显示文字'
+    heading: '章节标题'
   },
   ko: {
     hero: '히어로',
@@ -419,8 +418,7 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     effective: '시행일',
     intro: '도입 문구',
     sections: '조항',
-    heading: '조항 제목',
-    hoverText: '뒤집힘 표시 문구'
+    heading: '조항 제목'
   },
   en: {
     hero: 'Hero',
@@ -513,8 +511,7 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     effective: 'Effective date',
     intro: 'Intro',
     sections: 'Sections',
-    heading: 'Section heading',
-    hoverText: 'Flip-side copy'
+    heading: 'Section heading'
   }
 };
 

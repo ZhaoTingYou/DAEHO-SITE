@@ -561,21 +561,12 @@
         ],
         "firstRecords": [
           {
-            "frontTitle": "국내 최초 이니셜 조각 적용",
-            "backTitle": "FIRST INITIAL ENGRAVING",
-            "hoverText": "국내 기념반지 제작에서 개인 이니셜 조각을 적용한 첫 기록입니다.",
             "image": "legacy_achievement_01.png"
           },
           {
-            "frontTitle": "국내 최초 엔티크 블랙 코팅 적용",
-            "backTitle": "FIRST ANTIQUE COATING",
-            "hoverText": "금속의 입체감과 문양의 깊이를 살리는 엔티크 블랙 코팅을 국내 최초로 적용했습니다.",
             "image": "legacy_achievement_02.png"
           },
           {
-            "frontTitle": "국내 최초 반지 내부 디자인 적용",
-            "backTitle": "FIRST DESIGN APPROACH",
-            "hoverText": "반지 외부뿐 아니라 내부까지 의미를 담는 디자인 접근을 국내 최초로 시도했습니다.",
             "image": "legacy_achievement_03.png"
           }
         ],

@@ -561,21 +561,12 @@
         ],
         "firstRecords": [
           {
-            "frontTitle": "First domestic application of initial engraving",
-            "backTitle": "FIRST INITIAL ENGRAVING",
-            "hoverText": "DAEHO introduced individual initial engraving as a first in Korea commemorative ring production.",
             "image": "legacy_achievement_01.png"
           },
           {
-            "frontTitle": "First domestic application of antique black coating",
-            "backTitle": "FIRST ANTIQUE COATING",
-            "hoverText": "DAEHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.",
             "image": "legacy_achievement_02.png"
           },
           {
-            "frontTitle": "First domestic approach to interior ring design",
-            "backTitle": "FIRST DESIGN APPROACH",
-            "hoverText": "DAEHO first expanded ring design inward, giving the interior surface its own meaning and story.",
             "image": "legacy_achievement_03.png"
           }
         ],

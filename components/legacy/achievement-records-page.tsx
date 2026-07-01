@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import {DraggableScroll} from '@/components/draggable-scroll';
 import type {HomeStatBandItem} from '@/components/home/home-stat-band';
-import {AchievementRecordCard, AchievementRecordDeck, type AchievementFirstRecord} from '@/components/legacy/achievement-record-card';
+import {AchievementRecordGallery, type AchievementFirstRecord} from '@/components/legacy/achievement-record-card';
 import {AchievementPentagonStats} from '@/components/legacy/achievement-pentagon-stats';
 import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/components/legacy/heritage-hero-image';
 import {HeritageHero} from '@/components/legacy/heritage-hero';
@@ -38,10 +38,7 @@ type AchievementRecordsPageProps = {
 
 type FirstRecord = AchievementFirstRecord;
 
-type FirstRecordInput = Partial<FirstRecord> & {
-  title?: string;
-  body?: string;
-};
+type FirstRecordInput = Partial<FirstRecord>;
 
 type MarketFeature = {
   value: string;
@@ -128,21 +125,12 @@ const defaultPageCopy = {
     ],
     firstRecords: [
       {
-        frontTitle: '국내 최초 이니셜 조각 적용',
-        backTitle: 'FIRST INITIAL ENGRAVING',
-        hoverText: '국내 기념반지 제작에서 개인 이니셜 조각을 적용한 첫 기록입니다.',
         image: 'legacy_achievement_01.png'
       },
       {
-        frontTitle: '국내 최초 엔티크 블랙 코팅 적용',
-        backTitle: 'FIRST ANTIQUE COATING',
-        hoverText: '금속의 입체감과 문양의 깊이를 살리는 엔티크 블랙 코팅을 국내 최초로 적용했습니다.',
         image: 'legacy_achievement_02.png'
       },
       {
-        frontTitle: '국내 최초 반지 내부 디자인 적용',
-        backTitle: 'FIRST DESIGN APPROACH',
-        hoverText: '반지 외부뿐 아니라 내부까지 의미를 담는 디자인 접근을 국내 최초로 시도했습니다.',
         image: 'legacy_achievement_03.png'
       }
     ],
@@ -220,21 +208,12 @@ const defaultPageCopy = {
     ],
     firstRecords: [
       {
-        frontTitle: 'First domestic application of initial engraving',
-        backTitle: 'FIRST INITIAL ENGRAVING',
-        hoverText: 'DAEHO introduced individual initial engraving as a first in Korea commemorative ring production.',
         image: 'legacy_achievement_01.png'
       },
       {
-        frontTitle: 'First domestic application of antique black coating',
-        backTitle: 'FIRST ANTIQUE COATING',
-        hoverText: 'DAEHO first applied antique black coating domestically to emphasize dimensional detail and pattern depth.',
         image: 'legacy_achievement_02.png'
       },
       {
-        frontTitle: 'First domestic approach to interior ring design',
-        backTitle: 'FIRST DESIGN APPROACH',
-        hoverText: 'DAEHO first expanded ring design inward, giving the interior surface its own meaning and story.',
         image: 'legacy_achievement_03.png'
       }
     ],
@@ -284,25 +263,11 @@ function normalizeFirstRecords(records: FirstRecordInput[] | undefined, fallback
     return [];
   }
 
-  const fallbackByBackTitle = new Map(fallbackRecords.map((record) => [record.backTitle, record]));
-
   return records
-    .map((record) => {
-      const frontTitle = record.frontTitle ?? record.body ?? '';
-      const backTitle = record.backTitle ?? record.title ?? '';
-      const fallback = fallbackByBackTitle.get(backTitle);
-      const hoverText = typeof record.hoverText === 'string' && record.hoverText.trim()
-        ? record.hoverText
-        : fallback?.hoverText ?? '';
-
-      return {
-        frontTitle,
-        backTitle,
-        hoverText,
-        image: record.image ?? ''
-      };
-    })
-    .filter((record) => record.frontTitle && record.image);
+    .map((record, index) => ({
+      image: record.image || fallbackRecords[index]?.image || ''
+    }))
+    .filter((record) => record.image);
 }
 
 function normalizeMarketFeatures(features: MarketFeatureInput[] | undefined): MarketFeature[] {
@@ -377,39 +342,21 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
         </section>
 
         <section className="overflow-hidden bg-bg py-20 md:py-[clamp(104px,11vw,164px)]">
-          <Reveal className="px-container text-center">
+          <div className="px-container text-center">
             <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
               {copy.firstTitle}
             </p>
             <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
               {copy.firstHeading}
             </h2>
-          </Reveal>
+          </div>
 
-          <Reveal className="mt-[clamp(30px,4vw,46px)]">
-            <div className="mx-auto hidden w-full max-w-[1110px] px-container md:block lg:px-0">
-              <AchievementRecordDeck
-                records={copy.firstRecords}
-                locale={locale}
-                bodyTextClass={bodyTextClass}
-              />
-            </div>
-            <div
-              aria-label={copy.firstHeading}
-              className="achievement-record-mobile-list mx-auto grid w-full max-w-[480px] gap-9 px-container md:hidden"
-            >
-              {copy.firstRecords.map((record, index) => (
-                <AchievementRecordCard
-                  key={`${record.frontTitle}-${record.image}`}
-                  record={record}
-                  locale={locale}
-                  index={index}
-                  recordCount={copy.firstRecords.length}
-                  bodyTextClass={bodyTextClass}
-                />
-              ))}
-            </div>
-          </Reveal>
+          <div className="mt-[clamp(30px,4vw,46px)]" aria-label={copy.firstHeading}>
+            <AchievementRecordGallery
+              records={copy.firstRecords}
+              imageAltPrefix={copy.firstHeading}
+            />
+          </div>
         </section>
 
         <section className="bg-[#f4efe6] px-container py-[clamp(116px,12vw,182px)]">

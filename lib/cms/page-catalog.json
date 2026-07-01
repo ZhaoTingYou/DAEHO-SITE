@@ -186,9 +186,6 @@
         "label": "FIRST RECORDS 卡片",
         "type": "json",
         "itemFields": [
-          {"path": "frontTitle", "label": "卡片正面标题", "fallbackPath": "body"},
-          {"path": "backTitle", "label": "卡片翻面标题", "fallbackPath": "title"},
-          {"path": "hoverText", "label": "卡片翻面内容", "type": "textarea", "rows": 4},
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },

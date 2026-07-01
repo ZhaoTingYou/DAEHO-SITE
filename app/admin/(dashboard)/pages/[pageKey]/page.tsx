@@ -418,7 +418,7 @@ function EditableArray({
         {value.map((item, index) => (
           <div key={`${path}.${index}`} className="grid gap-4 rounded-md border border-[#eef2f6] bg-[#fbfcfe] p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#98a2b3]">
-              {itemTitle(item, index, context.adminLocale)}
+              {itemTitle(item, index, context.adminLocale, itemFields)}
             </p>
             {itemFields?.length ? (
               <EditableArrayItemFields
@@ -766,7 +766,18 @@ function labelForPath(path: string, value: unknown, adminLocale: AdminLocale) {
   return getLocalizedPathLabel(segment, adminLocale);
 }
 
-function itemTitle(value: unknown, index: number, adminLocale: AdminLocale) {
+function itemTitle(
+  value: unknown,
+  index: number,
+  adminLocale: AdminLocale,
+  itemFields?: PageArrayItemFieldDefinition[]
+) {
+  if (itemFields?.length === 1 && itemFields[0]?.path === 'image') {
+    const imagePrefix = adminLocale === 'ko' ? '이미지' : adminLocale === 'en' ? 'Image' : '图片';
+
+    return `${imagePrefix} ${index + 1}`;
+  }
+
   const item = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
   const title = item ? stringValue(item.frontTitle || item.backTitle || item.title || item.label || item.question || item.year || item.id) : '';
   const prefix = adminLocale === 'ko' ? '항목' : adminLocale === 'en' ? 'Item' : '项目';
