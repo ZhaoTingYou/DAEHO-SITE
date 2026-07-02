@@ -6,6 +6,7 @@ import {notFound} from 'next/navigation';
 import '@/app/globals.css';
 import {LenisProvider} from '@/components/motion/lenis-provider';
 import {ReducedMotionProvider} from '@/components/motion/reduced-motion-provider';
+import {SiteStructuredData} from '@/components/site/site-structured-data';
 import {routing, type Locale} from '@/i18n/routing';
 import type {LocaleMessages} from '@/lib/locale-messages';
 import {metadataBase, previewNoindexRobots} from '@/lib/seo';
@@ -66,6 +67,7 @@ export default async function LocaleLayout({children, params}: Props) {
   return (
     <html lang={locale} className={localeClass}>
       <body className="bg-bg text-text font-body">
+        <SiteStructuredData />
         <a href="#main-content" className="skip-link">
           {messages.common.skipLink}
         </a>
