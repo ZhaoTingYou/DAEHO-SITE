@@ -24,3 +24,18 @@ test('appendable CMS arrays expose a client-side add button for multiple new ima
   assert.match(source, /type="button"[\s\S]*\{addButtonLabel\}/);
   assert.match(source, /contentImageFieldName\(locale, groupKey, fieldPath\)/);
 });
+
+test('text editors expose only approved brand fonts and alignment controls', () => {
+  assert.match(source, /value: 'maruburi-semibold'/);
+  assert.match(source, /label: 'MaruBuri SemiBold'/);
+  assert.match(source, /fontFamily: '"MaruBuri", serif'/);
+  assert.match(source, /fontWeight: 600/);
+  assert.match(source, /value: 'cormorant-garamond-700'/);
+  assert.match(source, /label: 'Cormorant Garamond 700'/);
+  assert.match(source, /fontFamily: '"Cormorant Garamond", serif'/);
+  assert.match(source, /fontWeight: 700/);
+  assert.match(source, /const textEditorAlignments: Array<\{value: TextEditorAlign; label: string\}> = \[/);
+  assert.match(source, /\{value: 'left', label: 'L'\}/);
+  assert.match(source, /\{value: 'center', label: 'C'\}/);
+  assert.match(source, /\{value: 'right', label: 'R'\}/);
+});

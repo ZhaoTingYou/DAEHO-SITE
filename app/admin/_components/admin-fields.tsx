@@ -30,6 +30,32 @@ export type MediaLibraryItem = {
   alt?: string;
 };
 
+type TextEditorFont = 'maruburi-semibold' | 'cormorant-garamond-700';
+type TextEditorAlign = 'left' | 'center' | 'right';
+
+const textEditorFonts: Array<{
+  value: TextEditorFont;
+  label: string;
+  style: CSSProperties;
+}> = [
+  {
+    value: 'maruburi-semibold',
+    label: 'MaruBuri SemiBold',
+    style: {fontFamily: '"MaruBuri", serif', fontWeight: 600}
+  },
+  {
+    value: 'cormorant-garamond-700',
+    label: 'Cormorant Garamond 700',
+    style: {fontFamily: '"Cormorant Garamond", serif', fontWeight: 700}
+  }
+];
+
+const textEditorAlignments: Array<{value: TextEditorAlign; label: string}> = [
+  {value: 'left', label: 'L'},
+  {value: 'center', label: 'C'},
+  {value: 'right', label: 'R'}
+];
+
 export function TextField({
   label,
   name,
@@ -45,18 +71,32 @@ export function TextField({
   required?: boolean;
   placeholder?: string;
 }) {
+  const [font, setFont] = useState<TextEditorFont>(() => defaultTextEditorFont(defaultValue));
+  const [align, setAlign] = useState<TextEditorAlign>('left');
+  const editableStyle = textEditorStyle(font, align);
+  const hasTextControls = type === 'text';
+
   return (
-    <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-      <span>{label}</span>
+    <div className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+      <TextEditorLabel
+        label={label}
+        enabled={hasTextControls}
+        font={font}
+        align={align}
+        onFontChange={setFont}
+        onAlignChange={setAlign}
+      />
       <input
         name={name}
         type={type}
+        aria-label={label}
         required={required}
         defaultValue={defaultValue}
         placeholder={placeholder}
+        style={hasTextControls ? editableStyle : undefined}
         className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
       />
-    </label>
+    </div>
   );
 }
 
@@ -75,19 +115,107 @@ export function TextAreaField({
   required?: boolean;
   placeholder?: string;
 }) {
+  const [font, setFont] = useState<TextEditorFont>(() => defaultTextEditorFont(defaultValue));
+  const [align, setAlign] = useState<TextEditorAlign>('left');
+  const editableStyle = textEditorStyle(font, align);
+
   return (
-    <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-      <span>{label}</span>
+    <div className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+      <TextEditorLabel
+        label={label}
+        enabled
+        font={font}
+        align={align}
+        onFontChange={setFont}
+        onAlignChange={setAlign}
+      />
       <textarea
         name={name}
         rows={rows}
+        aria-label={label}
         required={required}
         defaultValue={defaultValue}
         placeholder={placeholder}
+        style={editableStyle}
         className="rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm leading-6 text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
       />
-    </label>
+    </div>
   );
+}
+
+function TextEditorLabel({
+  label,
+  enabled,
+  font,
+  align,
+  onFontChange,
+  onAlignChange
+}: {
+  label: string;
+  enabled: boolean;
+  font: TextEditorFont;
+  align: TextEditorAlign;
+  onFontChange: (font: TextEditorFont) => void;
+  onAlignChange: (align: TextEditorAlign) => void;
+}) {
+  if (!enabled) {
+    return <span>{label}</span>;
+  }
+
+  return (
+    <span className="grid gap-2">
+      <span>{label}</span>
+      <span className="flex flex-wrap items-center gap-2 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-1.5">
+        <select
+          aria-label={`${label} font`}
+          value={font}
+          onChange={(event) => onFontChange(event.target.value as TextEditorFont)}
+          className="min-h-8 rounded border border-[#cbd3df] bg-white px-2 text-xs font-semibold text-[#344054] outline-none focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
+        >
+          {textEditorFonts.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <span className="inline-flex overflow-hidden rounded border border-[#cbd3df] bg-white">
+          {textEditorAlignments.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              aria-label={`${label} align ${option.value}`}
+              aria-pressed={align === option.value}
+              onClick={() => onAlignChange(option.value)}
+              className={`min-h-8 min-w-8 px-2 text-xs font-semibold transition ${
+                align === option.value ? 'bg-[#7a2230] text-white' : 'text-[#344054] hover:bg-[#f2f4f7]'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </span>
+      </span>
+    </span>
+  );
+}
+
+function textEditorStyle(font: TextEditorFont, align: TextEditorAlign): CSSProperties {
+  const fontStyle = textEditorFonts.find((option) => option.value === font)?.style ?? textEditorFonts[0].style;
+
+  return {
+    ...fontStyle,
+    textAlign: align
+  };
+}
+
+function defaultTextEditorFont(value: string | number | undefined): TextEditorFont {
+  const text = String(value ?? '');
+
+  if (/[A-Za-z]/.test(text) && !/[가-힣]/.test(text)) {
+    return 'cormorant-garamond-700';
+  }
+
+  return 'maruburi-semibold';
 }
 
 export function SelectField({
