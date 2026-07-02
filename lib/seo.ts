@@ -47,6 +47,17 @@ const cmsPageKeyByPageKey: Record<PageKey, string> = {
 
 export const metadataBase = getMetadataBase();
 
+const homeSeoByLocale: Record<Locale, Omit<PageSeo, 'path'>> = {
+  ko: {
+    title: '주식회사 대호 | 우승반지 제작 전문',
+    description: '주식회사 대호는 1988년부터 우승반지, 임관반지, 단체 기념반지와 맞춤 주얼리를 제작해 온 한국의 상징물 제작사입니다.'
+  },
+  en: {
+    title: 'Korean Championship Ring Maker',
+    description: 'DAEHO is a Korean maker of championship rings, commission rings, commemorative rings, and bespoke symbolic jewelry since 1988.'
+  }
+};
+
 export async function getPageMetadata(locale: Locale, pageKey: PageKey): Promise<Metadata> {
   const page = await getPageSeo(locale, pageKey);
   const override = await getCmsPageSeoOverride(locale, cmsPageKeyByPageKey[pageKey]);
@@ -133,7 +144,7 @@ export function getDetailMetadata(
       title,
       description,
       url: withLocale(locale, path),
-      siteName: 'DAEHO',
+      siteName: locale === 'ko' ? '주식회사 대호' : 'DAEHO',
       locale: locale === 'ko' ? 'ko_KR' : 'en_US',
       type: 'website',
       images: [
@@ -159,8 +170,8 @@ async function getPageSeo(locale: Locale, pageKey: PageKey): Promise<PageSeo> {
     case 'home':
       return {
         path: '/',
-        title: messages.home.title,
-        description: messages.home.subtitle
+        title: homeSeoByLocale[locale].title,
+        description: homeSeoByLocale[locale].description
       };
     case 'chronicle':
       return {

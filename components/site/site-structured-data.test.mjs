@@ -11,8 +11,11 @@ test('site structured data declares preferred Google site name and organization 
   assert.match(structuredDataSource, /const siteAlternateNames = \['DAEHO', '대호', '대호반지', '\(주\)대호 브리아노'\]/);
   assert.match(structuredDataSource, /name: siteName/);
   assert.match(structuredDataSource, /alternateName: siteAlternateNames/);
-  assert.match(structuredDataSource, /'@type': 'Organization'/);
+  assert.match(structuredDataSource, /'@type': \['Organization', 'LocalBusiness', 'JewelryStore'\]/);
   assert.match(structuredDataSource, /legalName: '\(주\)대호 브리아노'/);
+  assert.match(structuredDataSource, /knowsAbout: \[/);
+  assert.match(structuredDataSource, /'우승반지 제작'/);
+  assert.match(structuredDataSource, /'임관반지 제작'/);
   assert.match(structuredDataSource, /telephone: '\+82-2-765-2737'/);
   assert.match(structuredDataSource, /postalCode: '03139'/);
   assert.ok(structuredDataSource.includes("logo: absoluteSiteUrl('/images/logo.png')"));

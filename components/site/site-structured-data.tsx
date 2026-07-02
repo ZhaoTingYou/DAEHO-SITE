@@ -17,7 +17,7 @@ export function SiteStructuredData() {
         alternateName: siteAlternateNames
       },
       {
-        '@type': 'Organization',
+        '@type': ['Organization', 'LocalBusiness', 'JewelryStore'],
         '@id': absoluteSiteUrl('/#organization'),
         name: siteName,
         legalName: '(주)대호 브리아노',
@@ -29,6 +29,15 @@ export function SiteStructuredData() {
         email: 'dhofficial1988@gmail.com',
         telephone: '+82-2-765-2737',
         taxID: '101-86-47224',
+        priceRange: '$$',
+        areaServed: ['KR'],
+        knowsAbout: [
+          '우승반지 제작',
+          '임관반지 제작',
+          '챔피언십 링',
+          '단체 기념반지',
+          '맞춤 주얼리 제작'
+        ],
         address: {
           '@type': 'PostalAddress',
           addressCountry: 'KR',
