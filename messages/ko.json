@@ -25,17 +25,17 @@
       "projects": [
         {
           "title": "우승반지",
-          "caption": "CHAMPIONSHIP\nRINGS",
+          "caption": "우승반지 제작",
           "image": "c1.png"
         },
         {
           "title": "임관반지",
-          "caption": "COMMISSION\nRINGS",
+          "caption": "임관반지 제작",
           "image": "c2.png"
         },
         {
           "title": "주문제작",
-          "caption": "CUSTOM\nPRODUCTS",
+          "caption": "단체 맞춤 제작",
           "image": "c3.png"
         }
       ]
