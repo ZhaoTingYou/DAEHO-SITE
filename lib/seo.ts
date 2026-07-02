@@ -49,8 +49,9 @@ export const metadataBase = getMetadataBase();
 
 const homeSeoByLocale: Record<Locale, Omit<PageSeo, 'path'>> = {
   ko: {
-    title: '대호 | 우승반지 제작 전문',
-    description: '대호는 1988년부터 우승반지, 임관반지, 단체 기념반지와 맞춤 주얼리를 제작해 온 한국의 상징물 제작사입니다.'
+    title: '대호 우승반지 제작 전문',
+    description:
+      '대호 우승반지 제작은 1988년부터 이어 온 맞춤 반지 제작 경험을 바탕으로 프로스포츠 구단, 학교, 단체의 챔피언십 링과 기념반지를 완성합니다.'
   },
   en: {
     title: 'Korean Championship Ring Maker',
