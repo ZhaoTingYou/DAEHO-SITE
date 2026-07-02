@@ -46,43 +46,6 @@ const cmsPageKeyByPageKey: Record<PageKey, string> = {
 
 export const metadataBase = getMetadataBase();
 
-const seoKeywordsByLocale: Record<Locale, string[]> = {
-  ko: [
-    'DAEHO',
-    '대호',
-    '우승반지 제작',
-    '우승반지',
-    '챔피언십 링',
-    '스포츠 우승반지',
-    '야구 우승반지',
-    '임관반지',
-    '단체 맞춤 반지',
-    '단체 기념반지',
-    '맞춤 반지',
-    '주문제작 반지',
-    '맞춤 주얼리',
-    '프로스포츠 구단',
-    '학교 단체 기념품'
-  ],
-  en: [
-    'DAEHO',
-    '대호',
-    'championship ring production',
-    'championship rings',
-    'championship ring maker',
-    'sports championship rings',
-    'baseball championship rings',
-    'appointment rings',
-    'commission rings',
-    'custom group rings',
-    'commemorative rings',
-    'bespoke rings',
-    'custom jewelry',
-    'professional sports teams',
-    'school and organization rings'
-  ]
-};
-
 const pathByPageKey: Record<PageKey, string> = {
   home: '/',
   chronicle: '/archive',
@@ -284,12 +247,10 @@ export function getDetailMetadata(
 ): Metadata {
   const title = formatMetadataTitle(locale, pageTitle);
   const brandedDescription = formatMetadataDescription(locale, description);
-  const keywords = seoKeywordsByLocale[locale];
 
   return {
     title,
     description: brandedDescription,
-    keywords,
     robots: previewNoindexRobots(),
     alternates: {
       canonical: withLocale(locale, path),
