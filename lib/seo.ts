@@ -1,7 +1,10 @@
 import type {Metadata} from 'next';
 
 import type {Locale} from '@/i18n/routing';
+import {getPage} from '@/lib/cms/repositories';
+import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
+import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 
 type PageKey =
   | 'home'
@@ -22,11 +25,68 @@ type PageSeo = {
   description: string;
 };
 
+type SeoOverride = {
+  title: string;
+  description: string;
+  image: string;
+};
+
+const cmsPageKeyByPageKey: Record<PageKey, string> = {
+  home: 'home',
+  chronicle: 'archive',
+  loyalty: 'heritage-loyalty',
+  credibility: 'heritage-credibility',
+  achievement: 'heritage-achievement',
+  technique: 'mastery-making',
+  collection: 'mastery-creations',
+  news: 'news',
+  golf: 'golf',
+  contact: 'contact',
+  golfInquiry: 'golf-inquiry'
+};
+
 export const metadataBase = getMetadataBase();
 
 export async function getPageMetadata(locale: Locale, pageKey: PageKey): Promise<Metadata> {
   const page = await getPageSeo(locale, pageKey);
-  return getDetailMetadata(locale, page.path, page.title, page.description);
+  const override = await getCmsPageSeoOverride(locale, cmsPageKeyByPageKey[pageKey]);
+
+  return getDetailMetadata(
+    locale,
+    page.path,
+    override.title || page.title,
+    override.description || page.description,
+    override.image || undefined
+  );
+}
+
+export async function getCmsPageSeoOverride(locale: Locale, cmsPageKey: string): Promise<SeoOverride> {
+  if (!cmsPageKey) {
+    return emptySeoOverride();
+  }
+
+  try {
+    const page = await getPage(cmsPageKey);
+    const seo = page?.seo?.[locale];
+
+    if (!seo || typeof seo !== 'object') {
+      return emptySeoOverride();
+    }
+
+    const fields = seo as Record<string, unknown>;
+    const image = stringValue(fields.ogImagePath);
+
+    return {
+      title: stringValue(fields.title),
+      description: stringValue(fields.description),
+      image: image ? imageSrc(image) : ''
+    };
+  } catch (error) {
+    if (!isNextDynamicServerError(error)) {
+      console.error(`[seo] Falling back to page copy because CMS SEO could not be read for ${cmsPageKey}.`, error);
+    }
+    return emptySeoOverride();
+  }
 }
 
 export function isPreviewNoindexEnabled() {
@@ -178,4 +238,16 @@ function getMetadataBase() {
   const normalizedUrl = siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`;
 
   return new URL(normalizedUrl);
+}
+
+function emptySeoOverride(): SeoOverride {
+  return {
+    title: '',
+    description: '',
+    image: ''
+  };
+}
+
+function stringValue(value: unknown) {
+  return typeof value === 'string' ? value.trim() : '';
 }

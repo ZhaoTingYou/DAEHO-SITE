@@ -7,7 +7,7 @@ import type {Locale} from '@/i18n/routing';
 import {getCollectionItemsForSite} from '@/lib/cms/public-content';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
-import {getDetailMetadata} from '@/lib/seo';
+import {getCmsPageSeoOverride, getDetailMetadata} from '@/lib/seo';
 
 export type CollectionCategoryId = 'champion' | 'appointment' | 'bespoke';
 
@@ -30,11 +30,14 @@ export async function getCollectionCategoryMetadata({
     return getDetailMetadata(locale, '/mastery/creations', 'COLLECTION', '');
   }
 
+  const seo = await getCmsPageSeoOverride(locale, `mastery-creations-${categoryId}`);
+
   return getDetailMetadata(
     locale,
     `/mastery/creations/${categoryId}`,
-    category.label,
-    category.description ?? ''
+    seo.title || category.label,
+    seo.description || category.description || '',
+    seo.image || undefined
   );
 }
 
