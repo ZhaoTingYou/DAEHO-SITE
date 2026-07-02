@@ -4,6 +4,7 @@ import test from 'node:test';
 
 const proxySource = readFileSync(new URL('./proxy.ts', import.meta.url), 'utf8');
 const localeLayoutSource = readFileSync(new URL('./app/[locale]/layout.tsx', import.meta.url), 'utf8');
+const routingSource = readFileSync(new URL('./i18n/routing.ts', import.meta.url), 'utf8');
 const seoSource = readFileSync(new URL('./lib/seo.ts', import.meta.url), 'utf8');
 
 test('root path permanently redirects to the Korean canonical home page', () => {
@@ -15,6 +16,7 @@ test('root path permanently redirects to the Korean canonical home page', () => 
 test('hreflang x-default consistently points to Korean canonical pages', () => {
   assert.match(localeLayoutSource, /'x-default': '\/ko'/);
   assert.match(seoSource, /'x-default': withLocale\('ko', path\)/);
+  assert.match(routingSource, /alternateLinks:\s*false/);
   assert.doesNotMatch(seoSource, /'x-default': path/);
   assert.doesNotMatch(localeLayoutSource, /'x-default': '\/'/);
 });
