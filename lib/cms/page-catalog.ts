@@ -1,6 +1,12 @@
 import pageCatalogData from './page-catalog.json';
 
-export type PageFieldType = 'text' | 'textarea' | 'image' | 'stringList' | 'json';
+export type PageFieldType = 'text' | 'textarea' | 'image' | 'select' | 'stringList' | 'json';
+
+export type PageFieldOption = {
+  label: string;
+  value: string;
+  labels?: Record<string, string>;
+};
 
 export type PageArrayItemFieldDefinition = {
   path: string;
@@ -10,6 +16,7 @@ export type PageArrayItemFieldDefinition = {
   rows?: number;
   placeholder?: string;
   fallbackPath?: string;
+  options?: PageFieldOption[];
 };
 
 export type PageFieldDefinition = {
@@ -21,6 +28,7 @@ export type PageFieldDefinition = {
   rows?: number;
   placeholder?: string;
   itemFields?: PageArrayItemFieldDefinition[];
+  options?: PageFieldOption[];
 };
 
 export type PageContentGroupDefinition = {

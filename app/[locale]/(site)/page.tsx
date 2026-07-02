@@ -62,6 +62,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
     currentPulse.secondaryImage && currentPulse.secondaryImage !== 'home_ring_01.png'
       ? currentPulse.secondaryImage
       : content.rings[0]?.image || currentPulse.secondaryImage || 'home_ring_01.png';
+  const heroMediaMode = content.mediaMode === 'image' ? 'image' : 'video';
 
   return (
     <main className="min-h-screen bg-bg">
@@ -70,9 +71,9 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
         title={content.title}
         subtitle={content.subtitle}
         poster={content.image || 'home hero.png'}
-        videoSrc={content.videoSrc || 'home.mp4'}
+        videoSrc={heroMediaMode === 'video' ? content.videoSrc || 'home.mp4' : undefined}
         videoPoster={content.videoPoster || content.image || 'home hero.png'}
-        webmSrc={content.webmSrc || undefined}
+        webmSrc={heroMediaMode === 'video' ? content.webmSrc || undefined : undefined}
         locale={locale}
       />
 

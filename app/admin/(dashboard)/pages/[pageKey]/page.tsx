@@ -16,13 +16,15 @@ import {
   isImageEditableField,
   type PageArrayItemFieldDefinition,
   type PageDefinition,
-  type PageFieldDefinition
+  type PageFieldDefinition,
+  type PageFieldOption
 } from '@/lib/cms/page-catalog';
 import {
   getLocalizedArrayItemFields,
   getLocalizedContentGroupTitle,
   getLocalizedPageDescription,
   getLocalizedPageFieldLabel,
+  getLocalizedPageFieldOptions,
   getLocalizedPageTitle,
   getLocalizedPathLabel
 } from '@/lib/cms/page-catalog-i18n';
@@ -32,7 +34,7 @@ import {localeFieldSuffixes, locales, type Locale} from '@/lib/locales';
 
 import {savePageAction} from '../../../actions';
 import {AdminActionAlert} from '../../../_components/admin-feedback';
-import {AppendableArrayItemsField, ImageUploadField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
+import {AppendableArrayItemsField, ImageUploadField, SelectField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
 import {PageHeader, Panel} from '../../../_components/admin-shell';
 
 type Props = {
@@ -273,6 +275,7 @@ function ContentGroupEditor({
                 depth={0}
                 forceImage={field.type === 'image'}
                 itemFields={getLocalizedArrayItemFields(field.itemFields, context.adminLocale)}
+                options={getLocalizedPageFieldOptions(field, context.adminLocale)}
                 rows={field.rows}
               />
             ))
@@ -292,6 +295,7 @@ function EditableNode({
   depth,
   forceImage = false,
   itemFields,
+  options,
   rows
 }: {
   path: string;
@@ -301,6 +305,7 @@ function EditableNode({
   depth: number;
   forceImage?: boolean;
   itemFields?: PageArrayItemFieldDefinition[];
+  options?: PageFieldOption[];
   rows?: number;
 }) {
   if (hiddenKeys.has(lastPathSegment(path))) {
@@ -315,7 +320,7 @@ function EditableNode({
     return <EditableGroup path={path} label={label} value={value as Record<string, unknown>} context={context} depth={depth} />;
   }
 
-  return <EditableLeaf path={path} label={label} value={value} context={context} forceImage={forceImage} rows={rows} />;
+  return <EditableLeaf path={path} label={label} value={value} context={context} forceImage={forceImage} options={options} rows={rows} />;
 }
 
 function EditableGroup({
@@ -504,6 +509,18 @@ function EditableArrayItemFields({
           );
         }
 
+        if (field.type === 'select' && field.options?.length) {
+          return (
+            <SelectField
+              key={field.path}
+              label={field.label}
+              name={name}
+              defaultValue={stringValue(fieldValue)}
+              options={field.options}
+            />
+          );
+        }
+
         if (typeof fieldValue === 'number') {
           return <TextField key={field.path} label={field.label} name={name} type="number" defaultValue={fieldValue} />;
         }
@@ -567,6 +584,7 @@ function EditableLeaf({
   value,
   context,
   forceImage = false,
+  options,
   rows
 }: {
   path: string;
@@ -574,6 +592,7 @@ function EditableLeaf({
   value: unknown;
   context: RenderContext;
   forceImage?: boolean;
+  options?: PageFieldOption[];
   rows?: number;
 }) {
   const name = contentFieldName(context.locale, context.groupKey, path);
@@ -622,6 +641,10 @@ function EditableLeaf({
   }
 
   const text = stringValue(value);
+
+  if (options?.length) {
+    return <SelectField label={label} name={name} defaultValue={text} options={options} />;
+  }
 
   if (rows || shouldUseTextarea(path, text)) {
     return <TextAreaField label={label} name={name} defaultValue={text} rows={rows ?? textareaRows(text)} />;

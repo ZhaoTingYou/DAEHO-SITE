@@ -4,7 +4,8 @@ import type {
   PageArrayItemFieldDefinition,
   PageContentGroupDefinition,
   PageDefinition,
-  PageFieldDefinition
+  PageFieldDefinition,
+  PageFieldOption
 } from './page-catalog';
 
 type PageMetadata = {
@@ -578,7 +579,26 @@ export function getLocalizedArrayItemFields(
 
   return itemFields.map((field) => ({
     ...field,
-    label: field.labels?.[adminLocale] ?? getLocalizedPathLabel(field.path, adminLocale)
+    label: field.labels?.[adminLocale] ?? getLocalizedPathLabel(field.path, adminLocale),
+    options: getLocalizedPageFieldOptions(field, adminLocale)
+  }));
+}
+
+export function getLocalizedPageFieldOptions(
+  field: Pick<PageFieldDefinition | PageArrayItemFieldDefinition, 'options'>,
+  adminLocale: AdminLocale
+): PageFieldOption[] | undefined {
+  if (!field.options) {
+    return undefined;
+  }
+
+  if (adminLocale === 'zh') {
+    return field.options;
+  }
+
+  return field.options.map((option) => ({
+    ...option,
+    label: option.labels?.[adminLocale] ?? option.label
   }));
 }
 

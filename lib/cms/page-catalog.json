@@ -15,6 +15,16 @@
       {"groupKey": "main", "path": "eyebrow", "label": "Hero 眉标"},
       {"groupKey": "main", "path": "title", "label": "Hero 标题", "type": "textarea", "rows": 3},
       {"groupKey": "main", "path": "subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {
+        "groupKey": "main",
+        "path": "mediaMode",
+        "label": "Hero 媒体类型",
+        "type": "select",
+        "options": [
+          {"value": "image", "label": "图片", "labels": {"ko": "이미지", "en": "Image"}},
+          {"value": "video", "label": "视频", "labels": {"ko": "영상", "en": "Video"}}
+        ]
+      },
       {"groupKey": "main", "path": "image", "label": "Hero 视频封面/兜底图片", "type": "image"},
       {"groupKey": "main", "path": "videoSrc", "label": "Hero MP4 视频文件名"},
       {"groupKey": "main", "path": "videoPoster", "label": "Hero 视频封面", "type": "image"},
