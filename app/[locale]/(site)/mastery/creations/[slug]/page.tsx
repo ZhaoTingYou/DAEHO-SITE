@@ -67,6 +67,7 @@ export default async function CollectionDetailPage({params}: Props) {
 
   const text = messages.collectionUi.detail;
   const galleryImages = item.gallery.length > 0 ? item.gallery : [item.image, ...detailImages];
+  const detailStripImages = item.detailImages.length > 0 ? item.detailImages : galleryImages.slice(1, 4);
   const images = galleryImages.map((filename) => ({
     filename,
     alt: `${item.title} ${item.caption}`,
@@ -135,8 +136,8 @@ export default async function CollectionDetailPage({params}: Props) {
             </h2>
           </Reveal>
           <div className="grid gap-6 md:grid-cols-3 md:gap-8">
-            {galleryImages.slice(1, 4).map((filename) => (
-              <Reveal key={filename}>
+            {detailStripImages.map((filename, index) => (
+              <Reveal key={`${filename}-${index}`}>
                 <div className="hover-zoom">
                   <div className="hover-zoom-media">
                     <SafeImage filename={filename} alt={text.detailStrip} aspect="aspect-square" variant="plain" />

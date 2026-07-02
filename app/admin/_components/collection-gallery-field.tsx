@@ -20,6 +20,10 @@ export function CollectionGalleryField({
   imageLabelTemplate,
   addButtonLabel,
   removeButtonLabel,
+  namePrefix = 'gallery',
+  uploadPrefix = 'galleryUpload',
+  minImages = minCollectionGalleryImages,
+  maxImages = maxCollectionGalleryImages,
   uploadLabel,
   uploadHint,
   emptyLabel,
@@ -37,6 +41,10 @@ export function CollectionGalleryField({
   imageLabelTemplate: string;
   addButtonLabel: string;
   removeButtonLabel: string;
+  namePrefix?: string;
+  uploadPrefix?: string;
+  minImages?: number;
+  maxImages?: number;
   uploadLabel: string;
   uploadHint: string;
   emptyLabel: string;
@@ -47,13 +55,13 @@ export function CollectionGalleryField({
   mediaEmptyLabel: string;
   mediaSelectedLabel: string;
 }) {
-  const [rows, setRows] = useState<GalleryRow[]>(() => initialGalleryRows(gallery));
-  const canAdd = rows.length < maxCollectionGalleryImages;
-  const canRemove = rows.length > minCollectionGalleryImages;
+  const [rows, setRows] = useState<GalleryRow[]>(() => initialGalleryRows(gallery, minImages, maxImages));
+  const canAdd = rows.length < maxImages;
+  const canRemove = rows.length > minImages;
 
   const addRow = () => {
     setRows((current) => {
-      if (current.length >= maxCollectionGalleryImages) {
+      if (current.length >= maxImages) {
         return current;
       }
 
@@ -64,7 +72,7 @@ export function CollectionGalleryField({
 
   const removeRow = (rowId: number) => {
     setRows((current) =>
-      current.length > minCollectionGalleryImages
+      current.length > minImages
         ? current.filter((row) => row.id !== rowId)
         : current
     );
@@ -103,8 +111,8 @@ export function CollectionGalleryField({
             ) : null}
             <ImageUploadField
               label={formatGalleryLabel(imageLabelTemplate, index + 1)}
-              name={`gallery.${index}`}
-              uploadName={`galleryUpload.${index}`}
+              name={`${namePrefix}.${index}`}
+              uploadName={`${uploadPrefix}.${index}`}
               defaultValue={row.image}
               uploadLabel={uploadLabel}
               uploadHint={uploadHint}
@@ -124,11 +132,12 @@ export function CollectionGalleryField({
   );
 }
 
-function initialGalleryRows(gallery: string[]) {
+function initialGalleryRows(gallery: string[], minImages: number, maxImages: number) {
   const images = gallery
     .filter((image) => image.trim().length > 0)
-    .slice(0, maxCollectionGalleryImages);
-  const initialImages = images.length > 0 ? images : [''];
+    .slice(0, maxImages);
+  const emptyRows = Array.from({length: Math.max(0, minImages)}, () => '');
+  const initialImages = images.length > 0 ? images : emptyRows;
 
   return initialImages.map((image, index) => ({id: index, image}));
 }

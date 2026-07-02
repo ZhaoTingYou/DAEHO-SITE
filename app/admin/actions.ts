@@ -71,6 +71,7 @@ import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 
 const maxCollectionGalleryImages = 6;
+const maxCollectionDetailImages = 3;
 
 export async function loginAction(formData: FormData) {
   const password = stringFromForm(formData, 'password');
@@ -232,7 +233,8 @@ export async function saveCollectionAction(formData: FormData) {
       gallery,
       specs: {
         year: stringFromForm(formData, 'specs.year'),
-        sportCategory: stringFromForm(formData, 'specs.sportCategory')
+        sportCategory: stringFromForm(formData, 'specs.sportCategory'),
+        detailImages: await readDetailGalleryImages(formData, editorPath)
       },
       isVisible: formData.get('isVisible') !== 'off',
       sortOrder: stringFromForm(formData, 'sortOrder') || '0',
@@ -523,11 +525,39 @@ async function readGalleryImages(formData: FormData, fallbackImage: string, edit
   return images.length > 0 ? images : [fallbackImage].filter(Boolean);
 }
 
+async function readDetailGalleryImages(formData: FormData, editorPath: string) {
+  const images: string[] = [];
+
+  for (const index of collectionDetailGalleryIndexes(formData).slice(0, maxCollectionDetailImages)) {
+    const image = await readUploadedImageOrText(
+      formData,
+      `detailGallery.${index}`,
+      `detailGalleryUpload.${index}`,
+      'ko',
+      editorPath
+    );
+
+    if (image) {
+      images.push(image);
+    }
+  }
+
+  return images;
+}
+
 function collectionGalleryIndexes(formData: FormData) {
+  return collectionImageIndexes(formData, /^gallery(?:Upload)?\.(\d+)$/);
+}
+
+function collectionDetailGalleryIndexes(formData: FormData) {
+  return collectionImageIndexes(formData, /^detailGallery(?:Upload)?\.(\d+)$/);
+}
+
+function collectionImageIndexes(formData: FormData, pattern: RegExp) {
   const indexes = new Set<number>();
 
   for (const key of formData.keys()) {
-    const match = key.match(/^gallery(?:Upload)?\.(\d+)$/);
+    const match = key.match(pattern);
     const index = match ? Number(match[1]) : NaN;
 
     if (Number.isInteger(index) && index >= 0) {

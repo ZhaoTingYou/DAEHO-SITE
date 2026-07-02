@@ -106,6 +106,27 @@ export function CollectionForm({
           mediaEmptyLabel={t('media.libraryEmpty')}
           mediaSelectedLabel={t('media.selectedExisting')}
         />
+        <CollectionGalleryField
+          gallery={specs.detailImages}
+          mediaItems={mediaItems}
+          title={t('form.detailGallery')}
+          hint={t('form.detailGalleryHint')}
+          imageLabelTemplate={t('form.detailGalleryImage', {count: '{count}'})}
+          addButtonLabel={t('form.detailGalleryAdd')}
+          removeButtonLabel={t('form.detailGalleryRemove')}
+          namePrefix="detailGallery"
+          uploadPrefix="detailGalleryUpload"
+          maxImages={3}
+          uploadLabel={t('page.uploadLocalImage')}
+          uploadHint={t('page.uploadLocalImageHint')}
+          emptyLabel={t('common.noImage')}
+          changedLabel={t('common.changed')}
+          selectedLabel={t('common.imageSelected')}
+          mediaSelectLabel={t('media.selectFromLibrary')}
+          mediaLibraryTitle={t('media.libraryTitle')}
+          mediaEmptyLabel={t('media.libraryEmpty')}
+          mediaSelectedLabel={t('media.selectedExisting')}
+        />
       </Panel>
 
       <div className="grid gap-6 xl:grid-cols-2">
@@ -210,7 +231,8 @@ function normalizeSpecs(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {
       year: '',
-      sportCategory: ''
+      sportCategory: '',
+      detailImages: []
     };
   }
 
@@ -218,6 +240,13 @@ function normalizeSpecs(value: unknown) {
 
   return {
     year: typeof specs.year === 'string' ? specs.year : '',
-    sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : ''
+    sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : '',
+    detailImages: normalizeSpecImages(specs.detailImages)
   };
+}
+
+function normalizeSpecImages(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((image): image is string => typeof image === 'string' && image.trim().length > 0)
+    : [];
 }

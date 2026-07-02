@@ -171,6 +171,21 @@ test('collection edit form uses a fixed category dropdown', () => {
   );
 });
 
+test('collection detail strip uses dedicated CMS detail images before gallery fallback', () => {
+  assert.ok(
+    publicContentSource.includes('detailImages: normalizeCollectionDetailImages'),
+    'public collection records should expose detail strip images from CMS specs'
+  );
+  assert.ok(
+    detailPageSource.includes('const detailStripImages = item.detailImages.length > 0 ? item.detailImages : galleryImages.slice(1, 4)'),
+    'detail page should prefer dedicated detail images and only fall back to gallery images'
+  );
+  assert.ok(
+    detailPageSource.includes('detailStripImages.map'),
+    'detail strip should render from the dedicated image list'
+  );
+});
+
 test('bespoke shuffle uses the Collection item pool and repeats only when there are fewer images than slots', () => {
   assert.ok(
     source.includes('const displayItems = useMemo(() => items, [items])'),

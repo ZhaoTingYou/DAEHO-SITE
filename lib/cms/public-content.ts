@@ -147,6 +147,7 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
     const specs = normalizeCollectionSpecs(cmsItem.specs);
     const image = cmsImageName(cmsItem.imagePath);
     const ogImage = cmsImageName(cmsItem.ogImagePath || cmsItem.imagePath);
+    const gallery = normalizeGallery(cmsItem.gallery, image);
 
     return {
       id: String(cmsItem.slug),
@@ -159,7 +160,8 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
       sportCategoryLabel: String(cmsItem.sportCategoryLabel),
       year: specs.year,
       image,
-      gallery: normalizeGallery(cmsItem.gallery, image),
+      gallery,
+      detailImages: normalizeCollectionDetailImages(specs.detailImages),
       hasImage: imageExists(image),
       seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
       seoDescription: String(cmsItem.seoDescription || cmsItem.caption || ''),
@@ -185,6 +187,7 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
       'collection_detail_04.png',
       'collection_detail_05.png'
     ],
+    detailImages: [],
     hasImage: imageExists(item.image),
     seoTitle: item.title,
     seoDescription: item.caption,
@@ -306,26 +309,36 @@ function normalizeCollectionSpecs(value: unknown) {
   if (!value || typeof value !== 'object') {
     return {
       year: '',
-      sportCategory: ''
+      sportCategory: '',
+      detailImages: []
     };
   }
 
   const specs = value as Record<string, unknown>;
   return {
     year: typeof specs.year === 'string' ? specs.year : '',
-    sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : ''
+    sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : '',
+    detailImages: normalizeCollectionDetailImages(specs.detailImages)
   };
 }
 
+function normalizeCollectionDetailImages(value: unknown) {
+  return normalizeCollectionImageArray(value).slice(0, 3);
+}
+
 function normalizeGallery(value: unknown, fallbackImage: string) {
-  const images = Array.isArray(value)
+  const images = normalizeCollectionImageArray(value);
+
+  return images.length > 0 ? images : [fallbackImage].filter(Boolean);
+}
+
+function normalizeCollectionImageArray(value: unknown) {
+  return Array.isArray(value)
     ? value
       .filter((image): image is string => typeof image === 'string' && image.length > 0)
       .map(cmsImageName)
       .filter(Boolean)
     : [];
-
-  return images.length > 0 ? images : [fallbackImage].filter(Boolean);
 }
 
 function cmsImageName(value: unknown) {
