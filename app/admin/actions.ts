@@ -70,6 +70,8 @@ import {locales, type Locale} from '@/lib/locales';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 
+const maxCollectionGalleryImages = 6;
+
 export async function loginAction(formData: FormData) {
   const password = stringFromForm(formData, 'password');
   const attemptKey = await getAdminLoginAttemptKey();
@@ -504,7 +506,7 @@ async function readCollectionTranslation(formData: FormData, locale: Locale, edi
 async function readGalleryImages(formData: FormData, fallbackImage: string, editorPath: string) {
   const images: string[] = [];
 
-  for (let index = 0; index < 6; index += 1) {
+  for (const index of collectionGalleryIndexes(formData).slice(0, maxCollectionGalleryImages)) {
     const image = await readUploadedImageOrText(
       formData,
       `gallery.${index}`,
@@ -519,6 +521,21 @@ async function readGalleryImages(formData: FormData, fallbackImage: string, edit
   }
 
   return images.length > 0 ? images : [fallbackImage].filter(Boolean);
+}
+
+function collectionGalleryIndexes(formData: FormData) {
+  const indexes = new Set<number>();
+
+  for (const key of formData.keys()) {
+    const match = key.match(/^gallery(?:Upload)?\.(\d+)$/);
+    const index = match ? Number(match[1]) : NaN;
+
+    if (Number.isInteger(index) && index >= 0) {
+      indexes.add(index);
+    }
+  }
+
+  return [...indexes].sort((left, right) => left - right);
 }
 
 type SharedImageUploads = Map<string, string>;

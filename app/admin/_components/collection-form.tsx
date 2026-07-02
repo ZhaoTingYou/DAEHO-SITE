@@ -14,6 +14,7 @@ import {
   TextField
 } from './admin-fields';
 import {Panel} from './admin-shell';
+import {CollectionGalleryField} from './collection-gallery-field';
 
 type CollectionItem = {
   id: string;
@@ -87,30 +88,24 @@ export function CollectionForm({
             <TextField label={t('form.sportCategory')} name="specs.sportCategory" defaultValue={specs.sportCategory} />
           </div>
         </div>
-        <div className="mt-4 grid gap-3 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4">
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.gallery')}</p>
-          <div className="grid gap-3 md:grid-cols-2">
-            {Array.from({length: 6}).map((_, index) => (
-              <ImageUploadField
-                key={index}
-                label={t('form.galleryImage', {count: index + 1})}
-                name={`gallery.${index}`}
-                uploadName={`galleryUpload.${index}`}
-                defaultValue={gallery[index] ?? ''}
-                uploadLabel={t('page.uploadLocalImage')}
-                uploadHint={t('page.uploadLocalImageHint')}
-                emptyLabel={t('common.noImage')}
-                changedLabel={t('common.changed')}
-                selectedLabel={t('common.imageSelected')}
-                mediaItems={mediaItems}
-                mediaSelectLabel={t('media.selectFromLibrary')}
-                mediaLibraryTitle={t('media.libraryTitle')}
-                mediaEmptyLabel={t('media.libraryEmpty')}
-                mediaSelectedLabel={t('media.selectedExisting')}
-              />
-            ))}
-          </div>
-        </div>
+        <CollectionGalleryField
+          gallery={gallery}
+          mediaItems={mediaItems}
+          title={t('form.gallery')}
+          hint={t('form.galleryHint')}
+          imageLabelTemplate={t('form.galleryImage', {count: '{count}'})}
+          addButtonLabel={t('form.galleryAdd')}
+          removeButtonLabel={t('form.galleryRemove')}
+          uploadLabel={t('page.uploadLocalImage')}
+          uploadHint={t('page.uploadLocalImageHint')}
+          emptyLabel={t('common.noImage')}
+          changedLabel={t('common.changed')}
+          selectedLabel={t('common.imageSelected')}
+          mediaSelectLabel={t('media.selectFromLibrary')}
+          mediaLibraryTitle={t('media.libraryTitle')}
+          mediaEmptyLabel={t('media.libraryEmpty')}
+          mediaSelectedLabel={t('media.selectedExisting')}
+        />
       </Panel>
 
       <div className="grid gap-6 xl:grid-cols-2">
