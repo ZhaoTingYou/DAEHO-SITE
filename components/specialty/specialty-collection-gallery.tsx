@@ -1894,9 +1894,12 @@ function CollectionFinderView({
           </Link>
           <div className="mx-auto max-w-3xl space-y-7 text-center">
             <div className="space-y-4">
-              <h2 className="font-heading text-[clamp(32px,4.2vw,54px)] font-semibold leading-none text-primary">
+              <h1 className="font-heading text-[clamp(32px,4.2vw,54px)] font-semibold leading-none text-primary">
                 {activeLabel}
-              </h2>
+              </h1>
+              <p className="mx-auto max-w-[620px] font-body text-[14px] leading-7 text-primary/66 md:text-[15px]">
+                {labels.body}
+              </p>
             </div>
             <button
               type="button"

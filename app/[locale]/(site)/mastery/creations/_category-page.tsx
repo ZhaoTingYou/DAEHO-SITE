@@ -5,6 +5,7 @@ import {notFound} from 'next/navigation';
 import {SpecialtyCollectionCategory} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
 import {getCollectionItemsForSite} from '@/lib/cms/public-content';
+import {getCollectionCategorySeoFallback} from '@/lib/collection-category-seo';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getCmsPageSeoOverride, getDetailMetadata} from '@/lib/seo';
@@ -31,12 +32,13 @@ export async function getCollectionCategoryMetadata({
   }
 
   const seo = await getCmsPageSeoOverride(locale, `mastery-creations-${categoryId}`);
+  const fallbackSeo = getCollectionCategorySeoFallback(locale, categoryId, category);
 
   return getDetailMetadata(
     locale,
     `/mastery/creations/${categoryId}`,
-    seo.title || category.label,
-    seo.description || category.description || '',
+    seo.title || fallbackSeo.title,
+    seo.description || fallbackSeo.description,
     seo.image || undefined
   );
 }

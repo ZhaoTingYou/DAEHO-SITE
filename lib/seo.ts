@@ -3,7 +3,6 @@ import type {Metadata} from 'next';
 import type {Locale} from '@/i18n/routing';
 import {getPage} from '@/lib/cms/repositories';
 import {imageSrc} from '@/lib/image-src';
-import {getLocaleMessages} from '@/lib/locale-messages';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 
 type PageKey =
@@ -47,15 +46,134 @@ const cmsPageKeyByPageKey: Record<PageKey, string> = {
 
 export const metadataBase = getMetadataBase();
 
-const homeSeoByLocale: Record<Locale, Omit<PageSeo, 'path'>> = {
+const pathByPageKey: Record<PageKey, string> = {
+  home: '/',
+  chronicle: '/archive',
+  loyalty: '/heritage/loyalty',
+  credibility: '/heritage/credibility',
+  achievement: '/heritage/achievement',
+  technique: '/mastery/making',
+  collection: '/mastery/creations',
+  news: '/news',
+  golf: '/golf',
+  contact: '/contact',
+  golfInquiry: '/golf/inquiry'
+};
+
+const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>> = {
   ko: {
-    title: '대호 우승반지 제작 전문',
-    description:
-      '대호 우승반지 제작은 1988년부터 이어 온 맞춤 반지 제작 경험을 바탕으로 프로스포츠 구단, 학교, 단체의 챔피언십 링과 기념반지를 완성합니다.'
+    home: {
+      title: '대호 우승반지 제작 전문',
+      description:
+        '대호 우승반지 제작은 1988년부터 이어 온 맞춤 반지 제작 경험을 바탕으로 프로스포츠 구단, 학교, 단체의 챔피언십 링과 기념반지를 완성합니다.'
+    },
+    chronicle: {
+      title: '대호 1988년 우승반지 제작 아카이브',
+      description:
+        '1988년부터 이어진 대호의 우승반지, 임관반지, 단체 기념반지 제작 기록과 한국 시장에서 쌓은 납품 경험을 정리합니다.'
+    },
+    loyalty: {
+      title: '대호 제작 신의와 장기 고객 관계',
+      description:
+        '대호는 반복 의뢰와 장기 고객 관계를 바탕으로 우승반지, 임관반지, 단체 기념 제품 제작의 신의를 쌓아왔습니다.'
+    },
+    credibility: {
+      title: '대호 맞춤 반지 제작 신뢰 기준',
+      description:
+        '대호는 디자인, 3D 설계, 세공, 각인, 검수, 포장까지 자체 기준으로 관리해 단체 주문과 맞춤 반지 제작의 신뢰를 높입니다.'
+    },
+    achievement: {
+      title: '대호 우승반지 제작 실적과 기록',
+      description:
+        '프로스포츠 구단과 단체 프로젝트에서 쌓은 대호의 챔피언십 링, 임관반지, 기념반지 제작 실적과 시장 기록을 확인합니다.'
+    },
+    technique: {
+      title: '우승반지 제작 공정과 맞춤 세공',
+      description:
+        '대호는 1988년부터 축적한 우승반지 제작 경험을 바탕으로 디자인 상담, 3D 모델링, 주조, 세공, 각인, 검수까지 관리합니다.'
+    },
+    collection: {
+      title: '대호 우승반지·임관반지·주문제작 컬렉션',
+      description:
+        '대호의 우승반지, 임관반지, 주문제작 반지 사례를 카테고리별로 살펴보고 프로스포츠 구단, 학교, 단체 맞춤 제작 방향을 확인하세요.'
+    },
+    news: {
+      title: '대호 뉴스와 우승반지 제작 사례',
+      description:
+        '대호의 최근 제작 사례, 프로젝트 스토리, 언론/피처, 협업 소식을 통해 우승반지와 맞춤 반지 제작 현장을 전합니다.'
+    },
+    golf: {
+      title: '대호 맞춤 골프 팔찌 제작',
+      description:
+        '대호는 골프 클럽 형태와 개인 각인을 반영한 맞춤 골프 팔찌를 상담 기반으로 제작해 라운드의 기록과 선물을 오브젝트로 남깁니다.'
+    },
+    contact: {
+      title: '대호 우승반지 제작 문의',
+      description:
+        '우승반지, 임관반지, 단체 기념반지, 맞춤 주얼리 제작 상담을 위해 프로젝트 목적, 수량, 일정, 참고 자료를 보내주세요.'
+    },
+    golfInquiry: {
+      title: '대호 골프 팔찌 상담 신청',
+      description:
+        '맞춤 골프 팔찌 제작을 위한 구성, 수량, 희망 일정, 각인 정보를 보내면 대호가 상담과 제작 가능 여부를 확인합니다.'
+    }
   },
   en: {
-    title: 'Korean Championship Ring Maker',
-    description: 'DAEHO is a Korean maker of championship rings, commission rings, commemorative rings, and bespoke symbolic jewelry since 1988.'
+    home: {
+      title: 'Korean Championship Ring Maker',
+      description:
+        'DAEHO is a Korean maker of championship rings, commission rings, commemorative rings, and bespoke symbolic jewelry since 1988.'
+    },
+    chronicle: {
+      title: 'DAEHO Ring Archive Since 1988',
+      description:
+        'Explore DAEHO records in championship rings, appointment rings, group commemorative rings, and delivery experience since 1988.'
+    },
+    loyalty: {
+      title: 'DAEHO Long-Term Trust in Ring Production',
+      description:
+        'DAEHO builds long-term client relationships through repeat championship ring, appointment ring, and group commemorative projects.'
+    },
+    credibility: {
+      title: 'DAEHO Custom Ring Production Standards',
+      description:
+        'DAEHO manages design, 3D planning, craft, engraving, inspection, and packing to support reliable group and custom ring production.'
+    },
+    achievement: {
+      title: 'DAEHO Championship Ring Records',
+      description:
+        'Review DAEHO achievements in championship rings, appointment rings, commemorative ring projects, and professional sports production.'
+    },
+    technique: {
+      title: 'Championship Ring Production Process',
+      description:
+        'DAEHO manages championship ring production from consultation, 3D modeling, casting, craft, engraving, and inspection based on experience since 1988.'
+    },
+    collection: {
+      title: 'DAEHO Championship, Appointment, and Bespoke Rings',
+      description:
+        'Browse DAEHO championship rings, appointment rings, and bespoke ring examples for professional sports teams, schools, and organizations.'
+    },
+    news: {
+      title: 'DAEHO News and Ring Production Stories',
+      description:
+        'Read DAEHO production stories, project updates, press features, and collaborations around championship rings and custom commemorative work.'
+    },
+    golf: {
+      title: 'DAEHO Custom Golf Bracelet Production',
+      description:
+        'DAEHO creates custom golf bracelets shaped from golf club forms, personal engraving, and consultation-based production details.'
+    },
+    contact: {
+      title: 'Contact DAEHO for Custom Ring Production',
+      description:
+        'Send project goals, quantity, schedule, and reference materials for championship rings, appointment rings, group commemorative rings, or bespoke jewelry.'
+    },
+    golfInquiry: {
+      title: 'DAEHO Golf Bracelet Inquiry',
+      description:
+        'Share configuration, quantity, schedule, and engraving details for a DAEHO custom golf bracelet consultation.'
+    }
   }
 };
 
@@ -165,76 +283,13 @@ export function getDetailMetadata(
 }
 
 async function getPageSeo(locale: Locale, pageKey: PageKey): Promise<PageSeo> {
-  const messages = await getLocaleMessages(locale);
+  const seo = defaultSeoByLocale[locale][pageKey];
 
-  switch (pageKey) {
-    case 'home':
-      return {
-        path: '/',
-        title: homeSeoByLocale[locale].title,
-        description: homeSeoByLocale[locale].description
-      };
-    case 'chronicle':
-      return {
-        path: '/archive',
-        title: messages.chronicle.hero.title,
-        description: messages.chronicle.hero.subtitle
-      };
-    case 'loyalty':
-      return {
-        path: '/heritage/loyalty',
-        title: messages.legacyPages.loyalty.hero.title,
-        description: messages.legacyPages.loyalty.hero.subtitle
-      };
-    case 'credibility':
-      return {
-        path: '/heritage/credibility',
-        title: messages.legacyPages.credibility.hero.title,
-        description: messages.legacyPages.credibility.hero.subtitle
-      };
-    case 'achievement':
-      return {
-        path: '/heritage/achievement',
-        title: messages.legacyPages.achievement.hero.title,
-        description: messages.legacyPages.achievement.hero.subtitle
-      };
-    case 'technique':
-      return {
-        path: '/mastery/making',
-        title: messages.specialtyPages.technique.hero.title,
-        description: messages.specialtyPages.technique.hero.subtitle
-      };
-    case 'collection':
-      return {
-        path: '/mastery/creations',
-        title: messages.specialtyPages.collection.hero.title,
-        description: messages.specialtyPages.collection.hero.subtitle
-      };
-    case 'news':
-      return {
-        path: '/news',
-        title: messages.news.masthead.title,
-        description: messages.news.featured.body
-      };
-    case 'golf':
-      return {
-        path: '/golf',
-        title: messages.golf.hero.titleLines.join(' '),
-        description: messages.golf.hero.subtitle
-      };
-    case 'contact':
-      return {
-        path: '/contact',
-        title: messages.contact.hero.eyebrow,
-        description: messages.contact.hero.body
-      };
-    case 'golfInquiry':
-      return {
-        path: '/golf/inquiry',
-        title: messages.golfInquiry.hero.eyebrow,
-        description: messages.golfInquiry.hero.body
-      };
-  }
+  return {
+    path: pathByPageKey[pageKey],
+    title: seo.title,
+    description: seo.description
+  };
 }
 
 function withLocale(locale: Locale, path: string) {
