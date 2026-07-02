@@ -38,7 +38,7 @@ export async function generateMetadata({params}: Omit<Props, 'children'>): Promi
       languages: {
         ko: '/ko',
         en: '/en',
-        'x-default': '/'
+        'x-default': '/ko'
       }
     },
     icons: {

@@ -14,6 +14,14 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (request.nextUrl.pathname === '/') {
+    const defaultLocaleUrl = new URL('/ko', request.url);
+    defaultLocaleUrl.search = request.nextUrl.search;
+    const response = NextResponse.redirect(defaultLocaleUrl, 308);
+    response.cookies.set('NEXT_LOCALE', 'ko', {path: '/', sameSite: 'lax'});
+    return response;
+  }
+
   if (request.nextUrl.pathname === '/__styleguide') {
     return NextResponse.rewrite(new URL('/ko/styleguide-internal', request.url));
   }

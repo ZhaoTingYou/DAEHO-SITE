@@ -126,7 +126,7 @@ export function getDetailMetadata(
       languages: {
         ko: withLocale('ko', path),
         en: withLocale('en', path),
-        'x-default': path
+        'x-default': withLocale('ko', path)
       }
     },
     openGraph: {
