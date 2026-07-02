@@ -49,8 +49,8 @@ export const metadataBase = getMetadataBase();
 
 const homeSeoByLocale: Record<Locale, Omit<PageSeo, 'path'>> = {
   ko: {
-    title: '주식회사 대호 | 우승반지 제작 전문',
-    description: '주식회사 대호는 1988년부터 우승반지, 임관반지, 단체 기념반지와 맞춤 주얼리를 제작해 온 한국의 상징물 제작사입니다.'
+    title: '대호 | 우승반지 제작 전문',
+    description: '대호는 1988년부터 우승반지, 임관반지, 단체 기념반지와 맞춤 주얼리를 제작해 온 한국의 상징물 제작사입니다.'
   },
   en: {
     title: 'Korean Championship Ring Maker',
@@ -144,7 +144,7 @@ export function getDetailMetadata(
       title,
       description,
       url: withLocale(locale, path),
-      siteName: locale === 'ko' ? '주식회사 대호' : 'DAEHO',
+      siteName: locale === 'ko' ? '대호' : 'DAEHO',
       locale: locale === 'ko' ? 'ko_KR' : 'en_US',
       type: 'website',
       images: [

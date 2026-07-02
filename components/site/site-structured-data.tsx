@@ -1,7 +1,7 @@
 import {metadataBase} from '@/lib/seo';
 
-const siteName = '주식회사 대호';
-const siteAlternateNames = ['DAEHO', '대호', '대호반지', '(주)대호 브리아노'];
+const siteName = '대호';
+const siteAlternateNames = ['DAEHO', '대호반지'];
 const organizationDescription =
   '대호는 우승반지, 임관반지, 단체 기념반지와 맞춤 주얼리를 제작하는 한국의 상징물 제작사입니다.';
 
@@ -20,8 +20,7 @@ export function SiteStructuredData() {
         '@type': ['Organization', 'LocalBusiness', 'JewelryStore'],
         '@id': absoluteSiteUrl('/#organization'),
         name: siteName,
-        legalName: '(주)대호 브리아노',
-        alternateName: ['DAEHO', '대호', '대호반지'],
+        alternateName: siteAlternateNames,
         description: organizationDescription,
         url: absoluteSiteUrl('/'),
         logo: absoluteSiteUrl('/images/logo.png'),

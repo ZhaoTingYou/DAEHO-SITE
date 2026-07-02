@@ -7,12 +7,12 @@ const localeLayoutSource = readFileSync(new URL('../../app/[locale]/layout.tsx',
 
 test('site structured data declares preferred Google site name and organization identity', () => {
   assert.match(structuredDataSource, /'@type': 'WebSite'/);
-  assert.match(structuredDataSource, /const siteName = '주식회사 대호'/);
-  assert.match(structuredDataSource, /const siteAlternateNames = \['DAEHO', '대호', '대호반지', '\(주\)대호 브리아노'\]/);
+  assert.match(structuredDataSource, /const siteName = '대호'/);
+  assert.match(structuredDataSource, /const siteAlternateNames = \['DAEHO', '대호반지'\]/);
   assert.match(structuredDataSource, /name: siteName/);
   assert.match(structuredDataSource, /alternateName: siteAlternateNames/);
   assert.match(structuredDataSource, /'@type': \['Organization', 'LocalBusiness', 'JewelryStore'\]/);
-  assert.match(structuredDataSource, /legalName: '\(주\)대호 브리아노'/);
+  assert.doesNotMatch(structuredDataSource, /주식회사 대호/);
   assert.match(structuredDataSource, /knowsAbout: \[/);
   assert.match(structuredDataSource, /'우승반지 제작'/);
   assert.match(structuredDataSource, /'임관반지 제작'/);
