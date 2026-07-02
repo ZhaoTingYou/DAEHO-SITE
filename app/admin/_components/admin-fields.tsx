@@ -30,8 +30,9 @@ export type MediaLibraryItem = {
   alt?: string;
 };
 
-type TextEditorFont = 'maruburi-semibold' | 'cormorant-garamond-700';
-type TextEditorAlign = 'left' | 'center' | 'right';
+export type TextEditorFont = 'maruburi-semibold' | 'cormorant-garamond-700';
+export type TextEditorAlign = 'left' | 'center' | 'right';
+export type TextEditorLocale = 'ko' | 'en';
 
 const textEditorFonts: Array<{
   value: TextEditorFont;
@@ -62,7 +63,10 @@ export function TextField({
   defaultValue,
   type = 'text',
   required = false,
-  placeholder
+  placeholder,
+  editorFont,
+  editorAlign,
+  editorLocale
 }: {
   label: string;
   name: string;
@@ -70,9 +74,12 @@ export function TextField({
   type?: string;
   required?: boolean;
   placeholder?: string;
+  editorFont?: TextEditorFont;
+  editorAlign?: TextEditorAlign;
+  editorLocale?: TextEditorLocale;
 }) {
-  const [font, setFont] = useState<TextEditorFont>(() => defaultTextEditorFont(defaultValue));
-  const [align, setAlign] = useState<TextEditorAlign>('left');
+  const [font, setFont] = useState<TextEditorFont>(() => normalizeTextEditorFont(editorFont, defaultTextEditorFont(defaultValue, editorLocale)));
+  const [align, setAlign] = useState<TextEditorAlign>(() => normalizeTextEditorAlign(editorAlign));
   const editableStyle = textEditorStyle(font, align);
   const hasTextControls = type === 'text';
 
@@ -106,7 +113,10 @@ export function TextAreaField({
   defaultValue,
   rows = 4,
   required = false,
-  placeholder
+  placeholder,
+  editorFont,
+  editorAlign,
+  editorLocale
 }: {
   label: string;
   name: string;
@@ -114,9 +124,12 @@ export function TextAreaField({
   rows?: number;
   required?: boolean;
   placeholder?: string;
+  editorFont?: TextEditorFont;
+  editorAlign?: TextEditorAlign;
+  editorLocale?: TextEditorLocale;
 }) {
-  const [font, setFont] = useState<TextEditorFont>(() => defaultTextEditorFont(defaultValue));
-  const [align, setAlign] = useState<TextEditorAlign>('left');
+  const [font, setFont] = useState<TextEditorFont>(() => normalizeTextEditorFont(editorFont, defaultTextEditorFont(defaultValue, editorLocale)));
+  const [align, setAlign] = useState<TextEditorAlign>(() => normalizeTextEditorAlign(editorAlign));
   const editableStyle = textEditorStyle(font, align);
 
   return (
@@ -208,7 +221,23 @@ function textEditorStyle(font: TextEditorFont, align: TextEditorAlign): CSSPrope
   };
 }
 
-function defaultTextEditorFont(value: string | number | undefined): TextEditorFont {
+function normalizeTextEditorFont(value: TextEditorFont | undefined, fallback: TextEditorFont): TextEditorFont {
+  return value && textEditorFonts.some((option) => option.value === value) ? value : fallback;
+}
+
+function normalizeTextEditorAlign(value: TextEditorAlign | undefined): TextEditorAlign {
+  return value && textEditorAlignments.some((option) => option.value === value) ? value : 'left';
+}
+
+function defaultTextEditorFont(value: string | number | undefined, locale?: TextEditorLocale): TextEditorFont {
+  if (locale === 'ko') {
+    return 'maruburi-semibold';
+  }
+
+  if (locale === 'en') {
+    return 'cormorant-garamond-700';
+  }
+
   const text = String(value ?? '');
 
   if (/[A-Za-z]/.test(text) && !/[가-힣]/.test(text)) {
@@ -706,10 +735,32 @@ export function AppendableArrayItemsField({
                 }
 
                 if (field.type === 'textarea') {
-                  return <TextAreaField key={field.path} label={field.label} name={name} defaultValue="" rows={field.rows ?? 3} />;
+                  return (
+                    <TextAreaField
+                      key={field.path}
+                      label={field.label}
+                      name={name}
+                      defaultValue=""
+                      rows={field.rows ?? 3}
+                      editorFont={field.editor?.font}
+                      editorAlign={field.editor?.align}
+                      editorLocale={locale === 'ko' || locale === 'en' ? locale : undefined}
+                    />
+                  );
                 }
 
-                return <TextField key={field.path} label={field.label} name={name} defaultValue="" placeholder={field.placeholder} />;
+                return (
+                  <TextField
+                    key={field.path}
+                    label={field.label}
+                    name={name}
+                    defaultValue=""
+                    placeholder={field.placeholder}
+                    editorFont={field.editor?.font}
+                    editorAlign={field.editor?.align}
+                    editorLocale={locale === 'ko' || locale === 'en' ? locale : undefined}
+                  />
+                );
               })}
             </div>
           );

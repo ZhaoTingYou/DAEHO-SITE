@@ -12,9 +12,9 @@
       {"key": "homeUi", "title": "首页弹窗、按钮和辅助文案", "sourcePath": "homeUi"}
     ],
     "fields": [
-      {"groupKey": "main", "path": "eyebrow", "label": "Hero 眉标"},
-      {"groupKey": "main", "path": "title", "label": "Hero 标题", "type": "textarea", "rows": 3},
-      {"groupKey": "main", "path": "subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"groupKey": "main", "path": "eyebrow", "label": "Hero 眉标", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "title", "label": "Hero 标题", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {
         "groupKey": "main",
         "path": "mediaMode",
@@ -35,14 +35,14 @@
       {"groupKey": "homeUi", "path": "currentPulse.secondaryTitle", "label": "下方展示标题", "type": "textarea", "rows": 2},
       {"groupKey": "homeUi", "path": "currentPulse.secondaryImage", "label": "下方展示图片", "type": "image"},
       {"groupKey": "homeUi", "path": "currentPulse.secondaryCta", "label": "下方展示按钮"},
-      {"groupKey": "main", "path": "signature.eyebrow", "label": "代表项目标题"},
-      {"groupKey": "main", "path": "signature.title", "label": "代表项目副标题"},
-      {"groupKey": "main", "path": "signature.body", "label": "代表项目正文", "type": "textarea", "rows": 3},
-      {"groupKey": "main", "path": "signature.projects.0.title", "label": "代表项目 1 标题"},
+      {"groupKey": "main", "path": "signature.eyebrow", "label": "代表项目标题", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "signature.title", "label": "代表项目副标题", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "signature.body", "label": "代表项目正文", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "signature.projects.0.title", "label": "代表项目 1 标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.projects.0.image", "label": "代表项目 1 图片", "type": "image"},
-      {"groupKey": "main", "path": "signature.projects.1.title", "label": "代表项目 2 标题"},
+      {"groupKey": "main", "path": "signature.projects.1.title", "label": "代表项目 2 标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.projects.1.image", "label": "代表项目 2 图片", "type": "image"},
-      {"groupKey": "main", "path": "signature.projects.2.title", "label": "代表项目 3 标题"},
+      {"groupKey": "main", "path": "signature.projects.2.title", "label": "代表项目 3 标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.projects.2.image", "label": "代表项目 3 图片", "type": "image"},
       {"groupKey": "main", "path": "statBand", "label": "首页数字带", "type": "json"},
       {"groupKey": "main", "path": "videoSection.src", "label": "首页视频模块 MP4 文件名"},
@@ -109,12 +109,12 @@
     "href": "/heritage/loyalty",
     "sourcePath": "legacyPages.loyalty",
     "fields": [
-      {"path": "copy.heroLabel", "label": "Hero 标签"},
-      {"path": "copy.heroTitle", "label": "Hero 标题"},
+      {"path": "copy.heroLabel", "label": "Hero 标签", "editor": {"align": "center"}},
+      {"path": "copy.heroTitle", "label": "Hero 标题", "editor": {"align": "center"}},
       {"path": "copy.introLines", "label": "Hero 文案", "type": "json"},
       {"path": "hero.image", "label": "Hero 背景图片", "type": "image"},
-      {"path": "copy.quoteTitle", "label": "Quote 英文标题"},
-      {"path": "copy.quoteBody", "label": "Quote 正文"},
+      {"path": "copy.quoteTitle", "label": "Quote 英文标题", "editor": {"align": "center"}},
+      {"path": "copy.quoteBody", "label": "Quote 正文", "editor": {"align": "center"}},
       {
         "path": "copy.featureSlides",
         "label": "Loyalty 轮播内容",
@@ -129,7 +129,7 @@
           {"path": "accentEnd", "label": "渐变结束颜色"}
         ]
       },
-      {"path": "copy.discoverLead", "label": "底部标题"},
+      {"path": "copy.discoverLead", "label": "底部标题", "editor": {"align": "center"}},
       {"path": "copy.cta", "label": "底部按钮"}
     ]
   },
@@ -142,12 +142,12 @@
     "href": "/heritage/credibility",
     "sourcePath": "legacyPages.credibility",
     "fields": [
-      {"path": "copy.heroLabel", "label": "Hero 标签"},
-      {"path": "copy.heroTitle", "label": "Hero 标题"},
+      {"path": "copy.heroLabel", "label": "Hero 标签", "editor": {"align": "center"}},
+      {"path": "copy.heroTitle", "label": "Hero 标题", "editor": {"align": "center"}},
       {"path": "copy.intro", "label": "Hero 正文", "type": "textarea", "rows": 4},
       {"path": "hero.image", "label": "Hero 背景图片", "type": "image"},
-      {"path": "copy.quoteTitle", "label": "Quote 英文标题"},
-      {"path": "copy.quoteBody", "label": "Quote 正文"},
+      {"path": "copy.quoteTitle", "label": "Quote 英文标题", "editor": {"align": "center"}},
+      {"path": "copy.quoteBody", "label": "Quote 正文", "editor": {"align": "center"}},
       {
         "path": "copy.rows",
         "label": "Credibility 标准列表",
@@ -160,7 +160,7 @@
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },
-      {"path": "copy.discoverLead", "label": "底部标题"},
+      {"path": "copy.discoverLead", "label": "底部标题", "editor": {"align": "center"}},
       {"path": "copy.cta", "label": "底部按钮"}
     ]
   },
@@ -173,12 +173,12 @@
     "href": "/heritage/achievement",
     "sourcePath": "legacyPages.achievement",
     "fields": [
-      {"path": "copy.heroLabel", "label": "Hero 标签"},
-      {"path": "copy.heroTitle", "label": "Hero 标题"},
+      {"path": "copy.heroLabel", "label": "Hero 标签", "editor": {"align": "center"}},
+      {"path": "copy.heroTitle", "label": "Hero 标题", "editor": {"align": "center"}},
       {"path": "copy.introLines", "label": "Hero 文案", "type": "json"},
       {"path": "hero.image", "label": "Hero 背景图片", "type": "image"},
-      {"path": "copy.quoteTitle", "label": "Quote 英文标题"},
-      {"path": "copy.quoteBody", "label": "Quote 正文"},
+      {"path": "copy.quoteTitle", "label": "Quote 英文标题", "editor": {"align": "center"}},
+      {"path": "copy.quoteBody", "label": "Quote 正文", "editor": {"align": "center"}},
       {
         "path": "copy.statBand",
         "label": "红色数字五边形",
@@ -189,8 +189,8 @@
           {"path": "body", "label": "说明", "type": "textarea", "rows": 3}
         ]
       },
-      {"path": "copy.firstTitle", "label": "FIRST RECORDS 小标题"},
-      {"path": "copy.firstHeading", "label": "FIRST RECORDS 标题"},
+      {"path": "copy.firstTitle", "label": "FIRST RECORDS 小标题", "editor": {"align": "center"}},
+      {"path": "copy.firstHeading", "label": "FIRST RECORDS 标题", "editor": {"align": "center"}},
       {
         "path": "copy.firstRecords",
         "label": "FIRST RECORDS 卡片",
@@ -199,8 +199,8 @@
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },
-      {"path": "copy.marketLabel", "label": "市场占比小标题"},
-      {"path": "copy.marketTitle", "label": "市场占比标题"},
+      {"path": "copy.marketLabel", "label": "市场占比小标题", "editor": {"align": "center"}},
+      {"path": "copy.marketTitle", "label": "市场占比标题", "editor": {"align": "center"}},
       {"path": "copy.marketIntro", "label": "市场占比正文", "type": "textarea", "rows": 5},
       {
         "path": "copy.marketFeatures",
@@ -214,8 +214,8 @@
           {"path": "image", "label": "左右白色图片框图片", "type": "image"}
         ]
       },
-      {"path": "copy.archiveLabel", "label": "项目 Archive 小标题"},
-      {"path": "copy.archiveTitle", "label": "项目 Archive 标题"},
+      {"path": "copy.archiveLabel", "label": "项目 Archive 小标题", "editor": {"align": "center"}},
+      {"path": "copy.archiveTitle", "label": "项目 Archive 标题", "editor": {"align": "center"}},
       {
         "path": "gallery.items",
         "label": "项目 Archive 图片",
@@ -225,7 +225,7 @@
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },
-      {"path": "copy.discoverLead", "label": "底部标题"},
+      {"path": "copy.discoverLead", "label": "底部标题", "editor": {"align": "center"}},
       {"path": "copy.cta", "label": "底部按钮"}
     ]
   },
@@ -238,11 +238,11 @@
     "href": "/mastery/making",
     "sourcePath": "specialtyPages.technique",
     "fields": [
-      {"path": "hero.title", "label": "Hero 标题"},
-      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.title", "label": "Hero 标题", "editor": {"align": "center"}},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {"path": "hero.image", "label": "Hero 图片", "type": "image"},
-      {"path": "process.eyebrow", "label": "流程眉标"},
-      {"path": "process.title", "label": "流程标题"},
+      {"path": "process.eyebrow", "label": "流程眉标", "editor": {"align": "center"}},
+      {"path": "process.title", "label": "流程标题", "editor": {"align": "center"}},
       {
         "path": "process.steps",
         "label": "七步流程",
@@ -255,9 +255,9 @@
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },
-      {"path": "details.eyebrow", "label": "细节眉标"},
-      {"path": "details.title", "label": "细节标题"},
-      {"path": "details.body", "label": "细节正文", "type": "textarea", "rows": 3},
+      {"path": "details.eyebrow", "label": "细节眉标", "editor": {"align": "center"}},
+      {"path": "details.title", "label": "细节标题", "editor": {"align": "center"}},
+      {"path": "details.body", "label": "细节正文", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {
         "path": "details.items",
         "label": "细节卡片",
@@ -285,8 +285,8 @@
       {"key": "collectionUi", "title": "作品列表、筛选和详情页共用文案", "sourcePath": "collectionUi"}
     ],
     "fields": [
-      {"groupKey": "main", "path": "hero.title", "label": "Hero 标题"},
-      {"groupKey": "main", "path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"groupKey": "main", "path": "hero.title", "label": "Hero 标题", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {
         "groupKey": "main",
         "path": "gallery.filters",
@@ -463,8 +463,8 @@
       {"key": "newsUi", "title": "News 筛选、分享和详情页共用文案", "sourcePath": "newsUi"}
     ],
     "fields": [
-      {"groupKey": "main", "path": "masthead.title", "label": "页头标题"},
-      {"groupKey": "main", "path": "masthead.body", "label": "页头说明", "type": "textarea", "rows": 3},
+      {"groupKey": "main", "path": "masthead.title", "label": "页头标题", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "masthead.body", "label": "页头说明", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {"groupKey": "main", "path": "featured.eyebrow", "label": "主推标签"},
       {"groupKey": "main", "path": "featured.category", "label": "主推分类"},
       {"groupKey": "main", "path": "featured.date", "label": "主推日期"},
@@ -507,9 +507,9 @@
     "href": "/golf",
     "sourcePath": "golf",
     "fields": [
-      {"path": "hero.eyebrow", "label": "Hero 眉标"},
-      {"path": "hero.titleLines", "label": "Hero 标题行", "type": "stringList", "rows": 3},
-      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3},
+      {"path": "hero.eyebrow", "label": "Hero 眉标", "editor": {"align": "center"}},
+      {"path": "hero.titleLines", "label": "Hero 标题行", "type": "stringList", "rows": 3, "editor": {"align": "center"}},
+      {"path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {"path": "hero.image", "label": "Hero 图片", "type": "image"},
       {"path": "hero.specLabel", "label": "Hero 规格标签"},
       {
@@ -521,12 +521,12 @@
           {"path": "alt", "label": "图片说明"}
         ]
       },
-      {"path": "statement.body", "label": "Statement 说明", "type": "textarea", "rows": 3},
-      {"path": "statement.titleLines", "label": "Statement 标题行", "type": "stringList", "rows": 3},
+      {"path": "statement.body", "label": "Statement 说明", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
+      {"path": "statement.titleLines", "label": "Statement 标题行", "type": "stringList", "rows": 3, "editor": {"align": "center"}},
       {"path": "statement.image", "label": "Statement 图片", "type": "image"},
-      {"path": "heads.eyebrow", "label": "Head 眉标"},
-      {"path": "heads.title", "label": "Head 标题"},
-      {"path": "heads.subtitle", "label": "Head 副标题", "type": "textarea", "rows": 2},
+      {"path": "heads.eyebrow", "label": "Head 眉标", "editor": {"align": "center"}},
+      {"path": "heads.title", "label": "Head 标题", "editor": {"align": "center"}},
+      {"path": "heads.subtitle", "label": "Head 副标题", "type": "textarea", "rows": 2, "editor": {"align": "center"}},
       {
         "path": "heads.items",
         "label": "Club head 选项",
@@ -539,9 +539,9 @@
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },
-      {"path": "shafts.eyebrow", "label": "Shaft 眉标"},
-      {"path": "shafts.title", "label": "Shaft 标题"},
-      {"path": "shafts.subtitle", "label": "Shaft 副标题", "type": "textarea", "rows": 2},
+      {"path": "shafts.eyebrow", "label": "Shaft 眉标", "editor": {"align": "center"}},
+      {"path": "shafts.title", "label": "Shaft 标题", "editor": {"align": "center"}},
+      {"path": "shafts.subtitle", "label": "Shaft 副标题", "type": "textarea", "rows": 2, "editor": {"align": "center"}},
       {
         "path": "shafts.items",
         "label": "Shaft 选项",
@@ -553,15 +553,15 @@
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },
-      {"path": "engraving.eyebrow", "label": "Engraving 眉标"},
-      {"path": "engraving.title", "label": "Engraving 标题"},
-      {"path": "engraving.body", "label": "Engraving 正文", "type": "textarea", "rows": 3},
+      {"path": "engraving.eyebrow", "label": "Engraving 眉标", "editor": {"align": "center"}},
+      {"path": "engraving.title", "label": "Engraving 标题", "editor": {"align": "center"}},
+      {"path": "engraving.body", "label": "Engraving 正文", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {"path": "engraving.imagePrimary", "label": "Engraving 主图", "type": "image"},
       {"path": "engraving.imageDetail", "label": "Engraving 细节图", "type": "image"},
       {"path": "engraving.specs", "label": "Engraving 规格项", "type": "stringList"},
-      {"path": "lifestyle.eyebrow", "label": "Lifestyle 眉标"},
-      {"path": "lifestyle.title", "label": "Lifestyle 标题"},
-      {"path": "lifestyle.body", "label": "Lifestyle 正文", "type": "textarea", "rows": 3},
+      {"path": "lifestyle.eyebrow", "label": "Lifestyle 眉标", "editor": {"align": "center"}},
+      {"path": "lifestyle.title", "label": "Lifestyle 标题", "editor": {"align": "center"}},
+      {"path": "lifestyle.body", "label": "Lifestyle 正文", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {"path": "lifestyle.imageBox", "label": "Lifestyle 盒子图片", "type": "image"},
       {"path": "lifestyle.imageLifestyle", "label": "Lifestyle 图片", "type": "image"},
       {"path": "lifestyle.closing", "label": "Lifestyle 结尾文案"},
@@ -571,15 +571,15 @@
       {"path": "labels.shaftGroup", "label": "Shaft 选项辅助标签"},
       {"path": "labels.inquiryCta", "label": "配置询问按钮"},
       {"path": "labels.requestEstimate", "label": "底部询价按钮"},
-      {"path": "labels.quoteText", "label": "黑底引用文案"},
-      {"path": "labels.braceletTitle", "label": "设计区标题"},
-      {"path": "labels.braceletBody", "label": "设计区正文", "type": "textarea", "rows": 2},
-      {"path": "labels.shaftTitle", "label": "Shaft 区标题"},
+      {"path": "labels.quoteText", "label": "黑底引用文案", "editor": {"align": "center"}},
+      {"path": "labels.braceletTitle", "label": "设计区标题", "editor": {"align": "center"}},
+      {"path": "labels.braceletBody", "label": "设计区正文", "type": "textarea", "rows": 2, "editor": {"align": "center"}},
+      {"path": "labels.shaftTitle", "label": "Shaft 区标题", "editor": {"align": "center"}},
       {"path": "labels.previousShaft", "label": "上一张辅助标签"},
       {"path": "labels.nextShaft", "label": "下一张辅助标签"},
       {"path": "labels.styleOptions", "label": "样式选项", "type": "stringList"},
       {"path": "process.packageImageLabel", "label": "流程包装图占位文案"},
-      {"path": "process.title", "label": "流程标题"},
+      {"path": "process.title", "label": "流程标题", "editor": {"align": "center"}},
       {"path": "process.steps", "label": "流程步骤", "type": "json"}
     ]
   },
@@ -596,10 +596,10 @@
       {"key": "form", "title": "Golf 咨询表单字段和提交提示", "sourcePath": "forms.golfInquiry"}
     ],
     "fields": [
-      {"groupKey": "main", "path": "hero.eyebrow", "label": "Hero 眉标"},
-      {"groupKey": "main", "path": "hero.title", "label": "Hero 标题"},
-      {"groupKey": "main", "path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4},
-      {"groupKey": "main", "path": "summary", "label": "摘要标题"},
+      {"groupKey": "main", "path": "hero.eyebrow", "label": "Hero 眉标", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "hero.title", "label": "Hero 标题", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4, "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "summary", "label": "摘要标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "head", "label": "Head 标签"},
       {"groupKey": "main", "path": "shaft", "label": "Shaft 标签"},
       {"groupKey": "main", "path": "engraving", "label": "刻字标签"},
@@ -629,10 +629,10 @@
       {"key": "form", "title": "Contact 表单字段、选项和提交提示", "sourcePath": "forms.contact"}
     ],
     "fields": [
-      {"groupKey": "main", "path": "hero.eyebrow", "label": "Hero 眉标"},
-      {"groupKey": "main", "path": "hero.title", "label": "Hero 标题"},
-      {"groupKey": "main", "path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4},
-      {"groupKey": "main", "path": "faqTitle", "label": "FAQ 标题"},
+      {"groupKey": "main", "path": "hero.eyebrow", "label": "Hero 眉标", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "hero.title", "label": "Hero 标题", "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4, "editor": {"align": "center"}},
+      {"groupKey": "main", "path": "faqTitle", "label": "FAQ 标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "faqs", "label": "FAQ 列表", "type": "json"},
       {"groupKey": "form", "path": "name", "label": "姓名标签"},
       {"groupKey": "form", "path": "organization", "label": "公司/团队标签"},

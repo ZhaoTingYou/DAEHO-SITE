@@ -16,6 +16,7 @@ import {
   isImageEditableField,
   type PageArrayItemFieldDefinition,
   type PageDefinition,
+  type PageFieldEditorSettings,
   type PageFieldDefinition,
   type PageFieldOption
 } from '@/lib/cms/page-catalog';
@@ -277,6 +278,8 @@ function ContentGroupEditor({
                 itemFields={getLocalizedArrayItemFields(field.itemFields, context.adminLocale)}
                 options={getLocalizedPageFieldOptions(field, context.adminLocale)}
                 rows={field.rows}
+                editorFont={field.editor?.font}
+                editorAlign={field.editor?.align}
               />
             ))
           : entries.map(([key, value]) => (
@@ -296,7 +299,9 @@ function EditableNode({
   forceImage = false,
   itemFields,
   options,
-  rows
+  rows,
+  editorFont,
+  editorAlign
 }: {
   path: string;
   label: string;
@@ -307,20 +312,44 @@ function EditableNode({
   itemFields?: PageArrayItemFieldDefinition[];
   options?: PageFieldOption[];
   rows?: number;
+  editorFont?: PageFieldEditorSettings['font'];
+  editorAlign?: PageFieldEditorSettings['align'];
 }) {
   if (hiddenKeys.has(lastPathSegment(path))) {
     return <input type="hidden" name={contentFieldName(context.locale, context.groupKey, path)} value={stringValue(value)} />;
   }
 
   if (Array.isArray(value)) {
-    return <EditableArray path={path} label={label} value={value} context={context} depth={depth} itemFields={itemFields} />;
+    return (
+      <EditableArray
+        path={path}
+        label={label}
+        value={value}
+        context={context}
+        depth={depth}
+        itemFields={itemFields}
+        editorFont={editorFont}
+        editorAlign={editorAlign}
+      />
+    );
   }
 
   if (value && typeof value === 'object') {
     return <EditableGroup path={path} label={label} value={value as Record<string, unknown>} context={context} depth={depth} />;
   }
 
-  return <EditableLeaf path={path} label={label} value={value} context={context} forceImage={forceImage} options={options} rows={rows} />;
+  return (
+    <EditableLeaf
+      path={path}
+      label={label}
+      value={value}
+      context={context}
+      forceImage={forceImage}
+      options={options}
+      rows={rows}
+      editor={{font: editorFont, align: editorAlign}}
+    />
+  );
 }
 
 function EditableGroup({
@@ -390,7 +419,9 @@ function EditableArray({
   value,
   context,
   depth,
-  itemFields
+  itemFields,
+  editorFont,
+  editorAlign
 }: {
   path: string;
   label: string;
@@ -398,6 +429,8 @@ function EditableArray({
   context: RenderContext;
   depth: number;
   itemFields?: PageArrayItemFieldDefinition[];
+  editorFont?: PageFieldEditorSettings['font'];
+  editorAlign?: PageFieldEditorSettings['align'];
 }) {
   if (value.length === 0) {
     return (
@@ -439,6 +472,8 @@ function EditableArray({
                 value={item}
                 context={context}
                 depth={depth + 1}
+                editorFont={editorFont}
+                editorAlign={editorAlign}
               />
             )}
           </div>
@@ -505,6 +540,9 @@ function EditableArrayItemFields({
               name={name}
               defaultValue={stringValue(fieldValue)}
               rows={field.rows ?? textareaRows(stringValue(fieldValue))}
+              editorFont={field.editor?.font}
+              editorAlign={field.editor?.align}
+              editorLocale={context.locale}
             />
           );
         }
@@ -532,6 +570,9 @@ function EditableArrayItemFields({
             name={name}
             defaultValue={stringValue(fieldValue)}
             placeholder={field.placeholder}
+            editorFont={field.editor?.font}
+            editorAlign={field.editor?.align}
+            editorLocale={context.locale}
           />
         );
       })}
@@ -585,7 +626,8 @@ function EditableLeaf({
   context,
   forceImage = false,
   options,
-  rows
+  rows,
+  editor
 }: {
   path: string;
   label: string;
@@ -594,6 +636,7 @@ function EditableLeaf({
   forceImage?: boolean;
   options?: PageFieldOption[];
   rows?: number;
+  editor?: PageFieldEditorSettings;
 }) {
   const name = contentFieldName(context.locale, context.groupKey, path);
   const t = createAdminTranslator(context.messages);
@@ -647,10 +690,29 @@ function EditableLeaf({
   }
 
   if (rows || shouldUseTextarea(path, text)) {
-    return <TextAreaField label={label} name={name} defaultValue={text} rows={rows ?? textareaRows(text)} />;
+    return (
+      <TextAreaField
+        label={label}
+        name={name}
+        defaultValue={text}
+        rows={rows ?? textareaRows(text)}
+        editorFont={editor?.font}
+        editorAlign={editor?.align}
+        editorLocale={context.locale}
+      />
+    );
   }
 
-  return <TextField label={label} name={name} defaultValue={text} />;
+  return (
+    <TextField
+      label={label}
+      name={name}
+      defaultValue={text}
+      editorFont={editor?.font}
+      editorAlign={editor?.align}
+      editorLocale={context.locale}
+    />
+  );
 }
 
 function ReadOnlyMeta({label, value}: {label: string; value: string}) {
