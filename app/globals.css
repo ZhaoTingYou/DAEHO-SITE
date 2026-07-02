@@ -1869,6 +1869,7 @@ select {
 }
 
 .site-nav-link.no-underline::after,
+.link-sweep.no-underline::after,
 .site-nav-link[aria-disabled="true"]::after {
   display: none;
 }

@@ -4,6 +4,10 @@ import test from 'node:test';
 
 const source = readFileSync(new URL('./specialty-collection-gallery.tsx', import.meta.url), 'utf8');
 const globals = readFileSync(new URL('../../app/globals.css', import.meta.url), 'utf8');
+const detailPageSource = readFileSync(
+  new URL('../../app/[locale]/(site)/mastery/creations/[slug]/page.tsx', import.meta.url),
+  'utf8'
+);
 const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
 const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
@@ -33,6 +37,26 @@ test('bespoke toolbar does not render the active category label beside the filte
     bespokeViewSource.includes('href={backHref}') && bespokeViewSource.includes('{allLabel}'),
     'BespokeCreationsView should render the all categories return link'
   );
+});
+
+test('creations subpage back arrows do not render the link sweep underline', () => {
+  assert.ok(
+    globals.includes('.link-sweep.no-underline::after') && globals.includes('display: none'),
+    'global link sweep underline should be disabled by the no-underline modifier'
+  );
+
+  const collectionBackArrows = Array.from(
+    source.matchAll(/className="([^"]*link-sweep[^"]*)"[\s\S]*?<span aria-hidden="true">←<\/span>/g),
+    ([, className]) => className
+  );
+
+  assert.equal(collectionBackArrows.length, 4, 'category views should expose four back arrow links');
+  for (const className of collectionBackArrows) {
+    assert.ok(className.includes('no-underline'), `back arrow should opt out of underline: ${className}`);
+  }
+
+  const detailBackArrow = detailPageSource.match(/className="([^"]*link-sweep[^"]*)"[\s\S]*?<span aria-hidden="true">←<\/span>/)?.[1] ?? '';
+  assert.ok(detailBackArrow.includes('no-underline'), 'detail page back arrow should opt out of underline');
 });
 
 test('collection stage cards declare separate background and product artwork in order', () => {

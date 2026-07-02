@@ -88,7 +88,7 @@ export default async function CollectionDetailPage({params}: Props) {
           <Link
             href={withLocale(locale, '/mastery/creations')}
             aria-label={text.back}
-            className="link-sweep font-body text-[20px] font-semibold leading-none text-primary"
+            className="link-sweep no-underline font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
           >
             <span aria-hidden="true">←</span>
           </Link>

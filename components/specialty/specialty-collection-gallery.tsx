@@ -877,7 +877,7 @@ function BespokeCreationsView({
           <Link
             href={backHref}
             aria-label={allLabel}
-            className="link-sweep !absolute left-0 top-[clamp(28px,3.5vw,48px)] font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+            className="link-sweep no-underline !absolute left-0 top-[clamp(28px,3.5vw,48px)] font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           >
             <span aria-hidden="true">←</span>
           </Link>
@@ -1622,7 +1622,7 @@ function CollectionGridView({
       <Link
         href={backHref}
         aria-label={allLabel}
-        className="link-sweep !absolute left-container top-0 font-body text-[20px] font-semibold leading-none text-primary"
+        className="link-sweep no-underline !absolute left-container top-0 font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
       >
         <span aria-hidden="true">←</span>
       </Link>
@@ -1679,7 +1679,7 @@ function AppointmentCollectionView({
           <Link
             href={backHref}
             aria-label={allLabel}
-            className="link-sweep !absolute left-0 top-[clamp(28px,4vw,56px)] font-body text-[20px] font-semibold leading-none text-primary"
+            className="link-sweep no-underline !absolute left-0 top-[clamp(28px,4vw,56px)] font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
           >
             <span aria-hidden="true">←</span>
           </Link>
@@ -1888,7 +1888,7 @@ function CollectionFinderView({
           <Link
             href={backHref}
             aria-label={allLabel}
-            className="link-sweep !absolute left-0 top-[clamp(28px,4vw,56px)] font-body text-[20px] font-semibold leading-none text-primary"
+            className="link-sweep no-underline !absolute left-0 top-[clamp(28px,4vw,56px)] font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
           >
             <span aria-hidden="true">←</span>
           </Link>
