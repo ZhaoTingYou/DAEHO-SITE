@@ -65,7 +65,7 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
     home: {
       title: '대호 우승반지 제작 전문',
       description:
-        '대호 우승반지 제작은 1988년부터 이어 온 맞춤 반지 제작 경험을 바탕으로 프로스포츠 구단, 학교, 단체의 챔피언십 링과 기념반지를 완성합니다.'
+        '대호는 1988년부터 프로스포츠 구단, 학교, 단체의 우승반지와 기념반지를 맞춤 제작합니다.'
     },
     chronicle: {
       title: '대호 1988년 우승반지 제작 아카이브',
@@ -332,17 +332,20 @@ function formatMetadataTitle(locale: Locale, pageTitle: string) {
 function formatMetadataDescription(locale: Locale, description: string) {
   const fallbackDescription =
     locale === 'ko'
-      ? '대호(DAEHO)는 임관반지, 우승반지, 단체 맞춤 반지를 전문으로 제작합니다.'
+      ? '대호(DAEHO)는 우승반지, 임관반지, 단체 맞춤 반지를 전문으로 제작합니다.'
       : 'DAEHO (대호) creates championship rings, appointment rings, and custom group rings.';
   let nextDescription = description.trim() || fallbackDescription;
 
   if (locale === 'ko') {
-    if (!nextDescription.includes('대호')) {
-      nextDescription = `대호는 ${nextDescription}`;
-    }
+    const hasKoreanBrand = nextDescription.includes('대호');
+    const hasLatinBrand = /\bDAEHO\b/i.test(nextDescription);
 
-    if (!/\bDAEHO\b/i.test(nextDescription)) {
-      nextDescription = appendSentence(nextDescription, 'DAEHO 공식 사이트에서 확인하세요.');
+    if (!hasKoreanBrand && !hasLatinBrand) {
+      nextDescription = `대호(DAEHO)는 ${nextDescription}`;
+    } else if (!hasKoreanBrand) {
+      nextDescription = `대호 ${nextDescription}`;
+    } else if (!hasLatinBrand) {
+      nextDescription = nextDescription.replace('대호', '대호(DAEHO)');
     }
 
     return nextDescription;
