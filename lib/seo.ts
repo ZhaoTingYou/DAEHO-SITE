@@ -46,6 +46,43 @@ const cmsPageKeyByPageKey: Record<PageKey, string> = {
 
 export const metadataBase = getMetadataBase();
 
+const seoKeywordsByLocale: Record<Locale, string[]> = {
+  ko: [
+    'DAEHO',
+    '대호',
+    '우승반지 제작',
+    '우승반지',
+    '챔피언십 링',
+    '스포츠 우승반지',
+    '야구 우승반지',
+    '임관반지',
+    '단체 맞춤 반지',
+    '단체 기념반지',
+    '맞춤 반지',
+    '주문제작 반지',
+    '맞춤 주얼리',
+    '프로스포츠 구단',
+    '학교 단체 기념품'
+  ],
+  en: [
+    'DAEHO',
+    '대호',
+    'championship ring production',
+    'championship rings',
+    'championship ring maker',
+    'sports championship rings',
+    'baseball championship rings',
+    'appointment rings',
+    'commission rings',
+    'custom group rings',
+    'commemorative rings',
+    'bespoke rings',
+    'custom jewelry',
+    'professional sports teams',
+    'school and organization rings'
+  ]
+};
+
 const pathByPageKey: Record<PageKey, string> = {
   home: '/',
   chronicle: '/archive',
@@ -245,11 +282,14 @@ export function getDetailMetadata(
   description: string,
   image = '/images/home_hero.png'
 ): Metadata {
-  const title = `${pageTitle} | DAEHO`;
+  const title = formatMetadataTitle(locale, pageTitle);
+  const brandedDescription = formatMetadataDescription(locale, description);
+  const keywords = seoKeywordsByLocale[locale];
 
   return {
     title,
-    description,
+    description: brandedDescription,
+    keywords,
     robots: previewNoindexRobots(),
     alternates: {
       canonical: withLocale(locale, path),
@@ -261,7 +301,7 @@ export function getDetailMetadata(
     },
     openGraph: {
       title,
-      description,
+      description: brandedDescription,
       url: withLocale(locale, path),
       siteName: locale === 'ko' ? '대호' : 'DAEHO',
       locale: locale === 'ko' ? 'ko_KR' : 'en_US',
@@ -276,7 +316,7 @@ export function getDetailMetadata(
     twitter: {
       card: 'summary_large_image',
       title,
-      description,
+      description: brandedDescription,
       images: [image]
     }
   };
@@ -317,4 +357,50 @@ function emptySeoOverride(): SeoOverride {
 
 function stringValue(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function formatMetadataTitle(locale: Locale, pageTitle: string) {
+  const fallbackTitle = locale === 'ko' ? '대호' : 'DAEHO';
+  const trimmedTitle = pageTitle.trim() || fallbackTitle;
+  const titleWithKoreanBrand =
+    locale === 'ko' && !trimmedTitle.includes('대호') ? `대호 | ${trimmedTitle}` : trimmedTitle;
+
+  return /\bDAEHO\b/i.test(titleWithKoreanBrand) ? titleWithKoreanBrand : `${titleWithKoreanBrand} | DAEHO`;
+}
+
+function formatMetadataDescription(locale: Locale, description: string) {
+  const fallbackDescription =
+    locale === 'ko'
+      ? '대호(DAEHO)는 임관반지, 우승반지, 단체 맞춤 반지를 전문으로 제작합니다.'
+      : 'DAEHO (대호) creates championship rings, appointment rings, and custom group rings.';
+  let nextDescription = description.trim() || fallbackDescription;
+
+  if (locale === 'ko') {
+    if (!nextDescription.includes('대호')) {
+      nextDescription = `대호는 ${nextDescription}`;
+    }
+
+    if (!/\bDAEHO\b/i.test(nextDescription)) {
+      nextDescription = appendSentence(nextDescription, 'DAEHO 공식 사이트에서 확인하세요.');
+    }
+
+    return nextDescription;
+  }
+
+  if (!/\bDAEHO\b/i.test(nextDescription)) {
+    nextDescription = `DAEHO ${nextDescription}`;
+  }
+
+  if (!nextDescription.includes('대호')) {
+    nextDescription = appendSentence(nextDescription, 'Korean brand name: 대호.');
+  }
+
+  return nextDescription;
+}
+
+function appendSentence(value: string, sentence: string) {
+  const trimmedValue = value.trim();
+  const separator = /[.!?。]$/.test(trimmedValue) ? ' ' : '. ';
+
+  return `${trimmedValue}${separator}${sentence}`;
 }
