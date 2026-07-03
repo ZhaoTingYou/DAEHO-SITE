@@ -4,10 +4,10 @@ import test from 'node:test';
 
 const source = readFileSync(new URL('./credibility-compliance-page.tsx', import.meta.url), 'utf8');
 
-test('credibility standard rows keep the copy-to-image distance at four fifths of the previous spacing', () => {
+test('credibility standard rows keep the copy-to-image distance at half of the previous spacing', () => {
   assert.match(
     source,
-    /<div className="max-w-\[658px\]">/,
-    'standard row copy width should reduce the visible copy-to-image gap from 190px to 152px'
+    /<div className="max-w-\[734px\]">/,
+    'standard row copy width should reduce the visible copy-to-image gap from 152px to 76px'
   );
 });
