@@ -68,7 +68,7 @@ export default async function NewsPage({params}: Props) {
                 <h2 className={`${titleTextClass} mt-[18px] text-[clamp(30px,3.2vw,44px)] leading-[1.18] text-primary`}>
                   {content.featured.title}
                 </h2>
-                <p className={`${bodyTextClass} mt-[18px] max-w-2xl text-[15px] leading-[1.86] text-text`}>
+                <p className={`${bodyTextClass} mt-[18px] max-w-2xl whitespace-pre-line text-[15px] leading-[1.86] text-text`}>
                   {content.featured.body}
                 </p>
               </div>

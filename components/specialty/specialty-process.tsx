@@ -69,7 +69,7 @@ function ProcessChapter({step}: {step: SpecialtyProcessStep}) {
             </span>
           ))}
         </h2>
-        <p className="mt-[22px] font-body text-[15px] leading-[1.9] text-text">{step.body}</p>
+        <p className="mt-[22px] whitespace-pre-line font-body text-[15px] leading-[1.9] text-text">{step.body}</p>
       </motion.div>
     </section>
   );

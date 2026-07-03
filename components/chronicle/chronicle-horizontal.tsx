@@ -473,7 +473,7 @@ export function ChronicleHorizontal({
                       <span className="chronicle-copy-kicker">{slide.label}</span>
                       <span className="chronicle-copy-year" aria-hidden="true">{slide.year}</span>
                       <h1>{slide.title}</h1>
-                      <p>{slide.desc}</p>
+                      <p className="whitespace-pre-line">{slide.desc}</p>
                     </div>
                     <div className="chronicle-image-frame">
                       <Image

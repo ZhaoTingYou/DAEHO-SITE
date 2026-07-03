@@ -144,7 +144,7 @@ function MilestoneEntry({
             <h3 className="font-heading text-[clamp(24px,2.4vw,34px)] font-semibold leading-tight text-primary">
               {item.title}
             </h3>
-            <p className="font-body text-[14px] leading-7 text-text">{item.body}</p>
+            <p className="whitespace-pre-line font-body text-[14px] leading-7 text-text">{item.body}</p>
             <button
               type="button"
               aria-expanded={isExpanded}
@@ -171,7 +171,7 @@ function MilestoneEntry({
                         <p className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
                           {text.title} · {item.year}
                         </p>
-                        <p className="mt-3 font-body text-[14px] leading-7 text-text">{item.body}</p>
+                        <p className="mt-3 whitespace-pre-line font-body text-[14px] leading-7 text-text">{item.body}</p>
                         <p className="mt-3 font-body text-[15px] leading-6 text-subtext">{text.next}</p>
                         <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-hairline pt-4 font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-subtext">
                           {previousYear ? (

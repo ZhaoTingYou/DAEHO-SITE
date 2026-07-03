@@ -29,7 +29,7 @@ export function MediaText({
         <h3 className="font-heading text-[clamp(24px,2.4vw,34px)] font-semibold leading-tight text-primary">
           {title}
         </h3>
-        <p className="font-body text-[14px] leading-7 text-text">{body}</p>
+        <p className="whitespace-pre-line font-body text-[14px] leading-7 text-text">{body}</p>
         <span className="link-sweep font-body text-sm font-semibold uppercase tracking-[0.12em]">
           Explore
         </span>

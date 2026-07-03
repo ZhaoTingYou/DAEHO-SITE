@@ -44,7 +44,7 @@ export function SpecialtyDetailTriplet({items}: SpecialtyDetailTripletProps) {
                 {item.title}
               </h3>
               {item.body ? (
-                <p className="font-body text-[15px] leading-6 text-text">{item.body}</p>
+                <p className="whitespace-pre-line font-body text-[15px] leading-6 text-text">{item.body}</p>
               ) : null}
             </div>
           </motion.article>

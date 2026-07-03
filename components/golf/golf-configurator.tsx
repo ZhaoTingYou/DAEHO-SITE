@@ -263,7 +263,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             <h2 className="font-heading text-[clamp(20px,2vw,27px)] font-semibold leading-tight text-primary">
               {content.heads.title}
             </h2>
-            <p className="font-body text-[18px] leading-[1.3] text-primary/60">
+            <p className="whitespace-pre-line font-body text-[18px] leading-[1.3] text-primary/60">
               {content.heads.subtitle}
             </p>
           </Reveal>
@@ -304,7 +304,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               <p className="font-heading text-[clamp(18px,2vw,26px)] font-semibold text-primary">
                 {labels.braceletTitle}
               </p>
-              <p className="font-body text-[18px] leading-[1.3] text-primary/55">
+              <p className="whitespace-pre-line font-body text-[18px] leading-[1.3] text-primary/55">
                 {labels.braceletBody}
               </p>
             </Reveal>
@@ -364,7 +364,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
 
           <div className="relative left-1/2 w-screen -translate-x-1/2 bg-black pb-[clamp(129px,15vw,240px)]">
             <Reveal className="relative mx-auto grid max-w-[980px] gap-10 px-container py-[clamp(82px,11vw,150px)] md:min-h-[clamp(1080px,82vw,1400px)]">
-              <p className="relative z-20 text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:left-1/2 md:top-[8%] md:-translate-x-1/2">
+              <p className="relative z-20 whitespace-pre-line text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:left-1/2 md:top-[8%] md:-translate-x-1/2">
                 “{labels.quoteText}”
               </p>
 
@@ -377,12 +377,12 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                   }`}
                 >
                   {engravingLeadLines.map((line) => (
-                    <span key={line} className="block md:whitespace-nowrap">
+                    <span key={line} className="block whitespace-pre-line">
                       {line}
                     </span>
                   ))}
                 </h2>
-                <p className="font-body text-[clamp(14px,1.35vw,20px)] leading-[1.35] text-white/82 md:whitespace-nowrap">
+                <p className="whitespace-pre-line font-body text-[clamp(14px,1.35vw,20px)] leading-[1.35] text-white/82">
                   {engravingRecordLine}
                 </p>
               </div>
@@ -405,7 +405,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                 />
               </div>
 
-              <p className="relative z-20 text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:bottom-[17%] md:right-[8%] md:w-[37%] md:whitespace-nowrap">
+              <p className="relative z-20 whitespace-pre-line text-center font-heading text-[clamp(18px,1.7vw,24px)] font-semibold leading-tight text-white md:absolute md:bottom-[17%] md:right-[8%] md:w-[37%]">
                 “{labels.quoteText}”
               </p>
             </Reveal>

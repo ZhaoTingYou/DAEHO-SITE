@@ -55,7 +55,7 @@ export default async function ContactPage({params, searchParams}: Props) {
                 <summary className="cursor-pointer font-body text-base font-semibold text-primary">
                   {item.question}
                 </summary>
-                <p className="mt-4 font-body text-sm leading-7 text-subtext">{item.answer}</p>
+                <p className="mt-4 whitespace-pre-line font-body text-sm leading-7 text-subtext">{item.answer}</p>
               </details>
             ))}
           </Reveal>

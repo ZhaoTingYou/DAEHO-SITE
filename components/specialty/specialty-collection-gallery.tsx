@@ -263,7 +263,7 @@ function MobileCollectionCard({
             <h2 className="font-heading text-[clamp(31px,9vw,42px)] font-semibold leading-[0.98] text-primary">
               {category.label}
             </h2>
-            <p className="max-w-[24rem] font-body text-[14px] leading-[1.75] text-primary/66">
+            <p className="max-w-[24rem] whitespace-pre-line font-body text-[14px] leading-[1.75] text-primary/66">
               {copy}
             </p>
           </div>
@@ -1278,7 +1278,7 @@ function BespokeCreationCard({
           <p className="font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">
             {item.categoryLabel}
           </p>
-          <p className="font-body text-[15px] leading-6 text-subtext">{item.caption}</p>
+          <p className="whitespace-pre-line font-body text-[15px] leading-6 text-subtext">{item.caption}</p>
         </div>
         <p className="font-numeric text-[12px] font-semibold tracking-[0.12em] text-primary/45">
           {String(index + 1).padStart(2, '0')}
@@ -1821,7 +1821,7 @@ function AppointmentTextBlock({
       </h2>
       <div className="mt-[clamp(28px,3.5vw,42px)] space-y-[2px] [font-family:'Pretendard',sans-serif] text-[clamp(12px,1.08vw,16px)] font-normal leading-[1.72] tracking-normal text-[#111111]">
         {lines.map((line) => (
-          <p key={line}>{line}</p>
+          <p key={line} className="whitespace-pre-line">{line}</p>
         ))}
       </div>
     </div>
@@ -1897,7 +1897,7 @@ function CollectionFinderView({
               <h1 className="font-heading text-[clamp(32px,4.2vw,54px)] font-semibold leading-none text-primary">
                 {activeLabel}
               </h1>
-              <p className="mx-auto max-w-[620px] font-body text-[14px] leading-7 text-primary/66 md:text-[15px]">
+              <p className="mx-auto max-w-[620px] whitespace-pre-line font-body text-[14px] leading-7 text-primary/66 md:text-[15px]">
                 {labels.body}
               </p>
             </div>
@@ -2003,7 +2003,7 @@ function CollectionProductGrid({
               <p className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
                 {item.categoryLabel}
               </p>
-              <p className="font-body text-[12px] leading-6 text-subtext">{item.caption}</p>
+              <p className="whitespace-pre-line font-body text-[12px] leading-6 text-subtext">{item.caption}</p>
               {finder ? (
                 <p className="font-numeric text-[11px] uppercase tracking-[0.12em] text-subtext">
                   {[item.sportCategoryLabel, item.year].filter(Boolean).join(' / ')}
@@ -2374,7 +2374,7 @@ function CollectionStagePanel({
           }`}
         >
           <div className="space-y-3">
-            <p className="font-body text-[clamp(16px,1.02vw,21px)] font-normal uppercase leading-[1.3] tracking-[0.08em] text-on-navy/78">
+            <p className="whitespace-pre-line font-body text-[clamp(16px,1.02vw,21px)] font-normal uppercase leading-[1.3] tracking-[0.08em] text-on-navy/78">
               {description}
             </p>
             <h2 className="font-heading text-[clamp(34px,2.15vw,46px)] font-normal uppercase leading-[1.08] tracking-[0.04em] text-on-navy">

@@ -280,7 +280,7 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
           <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
             {copy.quoteTitle}
           </p>
-          <p className={`${bodyTextClass} mt-[14px] text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
+          <p className={`${bodyTextClass} mt-[14px] whitespace-pre-line text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
             {copy.quoteBody}
           </p>
           <div className="mx-auto mt-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
@@ -302,12 +302,12 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
                   {' '}
                   <span>{row.title}</span>
                 </h2>
-                <p className="mt-[10px] [font-family:'Pretendard',sans-serif] text-[clamp(18px,1.55vw,20px)] font-normal leading-[1.35] text-accent">
+                <p className="mt-[10px] whitespace-pre-line [font-family:'Pretendard',sans-serif] text-[clamp(18px,1.55vw,20px)] font-normal leading-[1.35] text-accent">
                   {row.accent}
                 </p>
                 <div className="mt-[18px] space-y-[14px]">
                   {row.paragraphs.map((paragraph) => (
-                    <p key={paragraph} className="[font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-[1.82] text-[#111827]">
+                    <p key={paragraph} className="whitespace-pre-line [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-[1.82] text-[#111827]">
                       {paragraph}
                     </p>
                   ))}
@@ -322,7 +322,7 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
 
       <section className="relative z-10 bg-white py-[clamp(104px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
+          <p className="whitespace-pre-line [font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
             {copy.discoverLead}
           </p>
           <Link

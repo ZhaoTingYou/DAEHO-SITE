@@ -11,7 +11,7 @@ const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.
 test('heritage hero body copy uses Pretendard across all heritage pages', () => {
   assert.ok(source.includes('const bodyTextClass = "[font-family:\'Pretendard\',sans-serif] font-normal"'));
   assert.ok(!source.includes("const bodyTextClass =\n    locale === 'ko'"));
-  assert.ok(source.includes('className={`${bodyTextClass} text-[15px] leading-[1.8] tracking-normal'));
+  assert.ok(source.includes('className={`${bodyTextClass} whitespace-pre-line text-[15px] leading-[1.8] tracking-normal'));
 });
 
 test('heritage hero backgrounds are editable through CMS hero image fields', () => {
@@ -38,4 +38,15 @@ test('heritage hero backgrounds are editable through CMS hero image fields', () 
 test('heritage hero images render without the previous red tint overlay', () => {
   assert.ok(!source.includes('bg-[#653433]/58'));
   assert.ok(!source.includes('absolute inset-0 bg-[#653433]'));
+});
+
+test('credibility CMS textarea rows preserve manual line breaks on the public page', () => {
+  assert.match(
+    credibilitySource,
+    /className="whitespace-pre-line \[font-family:'Pretendard',sans-serif\] text-\[15px\] font-normal leading-\[1\.82\] text-\[#111827\]"/
+  );
+  assert.match(
+    credibilitySource,
+    /className="mt-\[10px\] whitespace-pre-line \[font-family:'Pretendard',sans-serif\]/
+  );
 });

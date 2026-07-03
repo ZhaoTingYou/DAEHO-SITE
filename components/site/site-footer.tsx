@@ -99,7 +99,7 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
             <Link href={withLocale(locale, '/')} className="inline-flex min-h-11 items-center font-heading text-[28px] font-semibold tracking-[0.18em] text-primary">
               DAEHO
             </Link>
-            <p className="max-w-sm font-body text-[14px] leading-6 text-subtext">
+            <p className="max-w-sm whitespace-pre-line font-body text-[14px] leading-6 text-subtext">
               {text.footer.tagline}
             </p>
           </div>

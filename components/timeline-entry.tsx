@@ -27,7 +27,7 @@ export function TimelineEntry({
           </span>
         ) : null}
         <h3 className="font-heading text-2xl font-semibold text-primary">{title}</h3>
-        <p className="font-body text-sm leading-6 text-subtext">{body}</p>
+        <p className="whitespace-pre-line font-body text-sm leading-6 text-subtext">{body}</p>
       </div>
       <SafeImage filename={image} alt={title} aspect="aspect-[3/2]" />
     </article>

@@ -187,7 +187,7 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
           <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
             {copy.quoteTitle}
           </p>
-          <p className={`${bodyTextClass} mt-[14px] text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
+          <p className={`${bodyTextClass} mt-[14px] whitespace-pre-line text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
             {copy.quoteBody}
           </p>
           <div className="mx-auto mt-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
@@ -200,7 +200,7 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
 
       <section className="relative z-10 bg-white py-[clamp(104px,11vw,168px)]">
         <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
+          <p className="whitespace-pre-line [font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
             {copy.discoverLead}
           </p>
           <Link

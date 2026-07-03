@@ -45,7 +45,7 @@ export default async function TechniquePage({params}: Props) {
             <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </h1>
-            <p className="mx-auto max-w-xl font-heading text-[15px] font-semibold leading-[1.85] text-primary">
+            <p className="mx-auto max-w-xl whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary">
               {content.hero.subtitle}
             </p>
           </ScrollText>

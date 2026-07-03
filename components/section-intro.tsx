@@ -37,7 +37,7 @@ export function SectionIntro({
         {eyebrow}
       </p>
       <h2 className={titleClass}>{title}</h2>
-      {children ? <div className="font-body text-[15px] leading-[1.85] text-text">{children}</div> : null}
+      {children ? <div className="whitespace-pre-line font-body text-[15px] leading-[1.85] text-text">{children}</div> : null}
     </div>
   );
 }

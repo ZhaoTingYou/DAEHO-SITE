@@ -30,13 +30,13 @@ export function LegalDocument({content}: {content: LegalDocumentContent}) {
           ) : null}
 
           {content.notice ? (
-            <p className="mt-8 border-l-2 border-accent bg-white px-5 py-4 font-body text-[13px] leading-7 text-subtext [word-break:keep-all]">
+            <p className="mt-8 whitespace-pre-line border-l-2 border-accent bg-white px-5 py-4 font-body text-[13px] leading-7 text-subtext [word-break:keep-all]">
               {content.notice}
             </p>
           ) : null}
 
           {content.intro ? (
-            <p className="mt-10 font-body text-[14px] leading-[1.9] text-text [word-break:keep-all]">
+            <p className="mt-10 whitespace-pre-line font-body text-[14px] leading-[1.9] text-text [word-break:keep-all]">
               {content.intro}
             </p>
           ) : null}
@@ -51,7 +51,7 @@ export function LegalDocument({content}: {content: LegalDocumentContent}) {
                   {section.body.map((line, index) => (
                     <p
                       key={index}
-                      className="font-body text-[14px] leading-[1.9] text-text [word-break:keep-all]"
+                      className="whitespace-pre-line font-body text-[14px] leading-[1.9] text-text [word-break:keep-all]"
                     >
                       {line}
                     </p>

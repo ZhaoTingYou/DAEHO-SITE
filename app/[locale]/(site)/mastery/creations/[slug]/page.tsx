@@ -106,7 +106,7 @@ export default async function CollectionDetailPage({params}: Props) {
                   <h1 className="font-heading text-[clamp(24px,2.8vw,36px)] font-semibold leading-[1.15] text-primary">
                     {item.title}
                   </h1>
-                  <p className="font-body text-[14px] leading-7 text-text">{item.caption}</p>
+                  <p className="whitespace-pre-line font-body text-[14px] leading-7 text-text">{item.caption}</p>
                 </div>
                 <div className="space-y-1">
                   {specs.map(([label, value]) => (
@@ -120,7 +120,7 @@ export default async function CollectionDetailPage({params}: Props) {
                   <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.2em] text-accent">
                     {text.story}
                   </p>
-                  <p className="font-body text-[14px] leading-7 text-text">{item.story || item.caption}</p>
+                  <p className="whitespace-pre-line font-body text-[14px] leading-7 text-text">{item.story || item.caption}</p>
                 </div>
               </aside>
             </Reveal>

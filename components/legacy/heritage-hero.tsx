@@ -50,7 +50,7 @@ export function HeritageHero({
         </h1>
         <div className="mx-auto max-w-[560px] space-y-1">
           {contentLines.map((line) => (
-            <p key={line} className={`${bodyTextClass} text-[15px] leading-[1.8] tracking-normal text-[#111111]`}>
+            <p key={line} className={`${bodyTextClass} whitespace-pre-line text-[15px] leading-[1.8] tracking-normal text-[#111111]`}>
               {line}
             </p>
           ))}

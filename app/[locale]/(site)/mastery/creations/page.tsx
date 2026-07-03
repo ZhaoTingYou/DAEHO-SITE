@@ -48,7 +48,7 @@ export default async function CollectionPage({params}: Props) {
               <p aria-hidden="true" className="[font-family:'Cormorant_Garamond',serif] text-[clamp(54px,17vw,76px)] font-bold uppercase leading-[0.82] tracking-[0.02em] text-primary">
                 {content.hero.title}
               </p>
-              <p className="max-w-[28rem] font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
+              <p className="max-w-[28rem] whitespace-pre-line font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
                 {content.hero.subtitle}
               </p>
             </ScrollText>
@@ -82,7 +82,7 @@ export default async function CollectionPage({params}: Props) {
             <p aria-hidden="true" className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </p>
-            <p className="mx-auto max-w-xl font-heading text-[15px] font-semibold leading-[1.85] text-primary">
+            <p className="mx-auto max-w-xl whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary">
               {content.hero.subtitle}
             </p>
           </ScrollText>

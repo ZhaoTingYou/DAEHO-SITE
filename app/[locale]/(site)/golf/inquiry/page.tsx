@@ -55,7 +55,7 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
             <h1 className="font-heading text-[clamp(34px,5.8vw,68px)] font-semibold leading-none text-primary">
               {text.hero.title}
             </h1>
-            <p className="max-w-2xl font-body text-body leading-[1.75] text-text">{text.hero.body}</p>
+            <p className="max-w-2xl whitespace-pre-line font-body text-body leading-[1.75] text-text">{text.hero.body}</p>
             <Link href={withLocale(locale, '/golf')} className="link-sweep inline-flex font-body text-sm font-semibold uppercase tracking-[0.12em]">
               {text.edit}
             </Link>

@@ -18,7 +18,7 @@ export function Hero({eyebrow, title, subtitle, image, imageAlt}: HeroProps) {
         <h1 className="max-w-5xl font-heading text-hero font-bold leading-none tracking-normal text-primary">
           {title}
         </h1>
-        <p className="max-w-2xl font-body text-body text-text">{subtitle}</p>
+        <p className="max-w-2xl whitespace-pre-line font-body text-body text-text">{subtitle}</p>
       </div>
       <SafeImage filename={image} alt={imageAlt} aspect="aspect-square" priority />
     </section>

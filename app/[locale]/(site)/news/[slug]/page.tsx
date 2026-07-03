@@ -150,12 +150,12 @@ function NewsLegacyBody({paragraphs, quote}: {paragraphs: string[]; quote: strin
     <>
       {paragraphs.map((paragraph) => (
         <Reveal key={paragraph}>
-          <p className="font-body text-[15px] leading-8 text-text md:text-[16px] md:leading-9">{paragraph}</p>
+          <p className="whitespace-pre-line font-body text-[15px] leading-8 text-text md:text-[16px] md:leading-9">{paragraph}</p>
         </Reveal>
       ))}
       {quote ? (
         <Reveal>
-          <blockquote className="border-y border-accent/40 py-8 font-heading text-[clamp(24px,3.2vw,36px)] font-semibold leading-tight text-primary">
+          <blockquote className="whitespace-pre-line border-y border-accent/40 py-8 font-heading text-[clamp(24px,3.2vw,36px)] font-semibold leading-tight text-primary">
             {quote}
           </blockquote>
         </Reveal>
@@ -225,7 +225,7 @@ function NewsDetailBlock({block}: {block: NewsBodyBlock}) {
 
   if (block.type === 'quote') {
     return (
-      <blockquote className={`${newsBlockWidthClass(block.width)} border-y border-accent/40 py-8 font-heading text-[clamp(24px,3.2vw,36px)] font-semibold leading-tight text-primary`}>
+      <blockquote className={`${newsBlockWidthClass(block.width)} whitespace-pre-line border-y border-accent/40 py-8 font-heading text-[clamp(24px,3.2vw,36px)] font-semibold leading-tight text-primary`}>
         {block.body || block.title}
       </blockquote>
     );
@@ -253,7 +253,7 @@ function NewsBlockCopy({block, align}: {block: NewsBodyBlock; align: 'left' | 'c
       {block.body ? (
         <div className="space-y-4">
           {block.body.split(/\n\s*\n|\n/).filter(Boolean).map((paragraph) => (
-            <p key={paragraph} className="font-body text-[15px] leading-8 text-text md:text-[16px] md:leading-9">
+            <p key={paragraph} className="whitespace-pre-line font-body text-[15px] leading-8 text-text md:text-[16px] md:leading-9">
               {paragraph}
             </p>
           ))}
