@@ -9,6 +9,9 @@ import koMessages from '@/messages/ko.json';
 
 export const dynamic = 'force-dynamic';
 
+type SitemapEntry = MetadataRoute.Sitemap[number];
+type ChangeFrequency = NonNullable<SitemapEntry['changeFrequency']>;
+
 const baseStaticPaths = [
   '/',
   '/archive',
@@ -45,13 +48,75 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
 
   return [...staticPaths, ...detailPaths].flatMap((path) =>
-    routing.locales.map((locale) => ({
-      url: absoluteUrl(`/${locale}${path === '/' ? '' : path}`),
-      lastModified,
-      changeFrequency: path === '/' ? 'weekly' : 'monthly',
-      priority: path === '/' ? 1 : 0.7
-    }))
+    routing.locales.map((locale) => createSitemapEntry(locale, path, lastModified))
   );
+}
+
+function createSitemapEntry(locale: string, path: string, lastModified: Date): SitemapEntry {
+  return {
+    url: localizedAbsoluteUrl(locale, path),
+    lastModified,
+    changeFrequency: changeFrequencyForPath(path),
+    priority: priorityForPath(path),
+    alternates: {
+      languages: {
+        ko: localizedAbsoluteUrl('ko', path),
+        en: localizedAbsoluteUrl('en', path),
+        'x-default': localizedAbsoluteUrl('ko', path)
+      }
+    }
+  };
+}
+
+function localizedAbsoluteUrl(locale: string, path: string) {
+  return absoluteUrl(`/${locale}${path === '/' ? '' : path}`);
+}
+
+function changeFrequencyForPath(path: string): ChangeFrequency {
+  if (path === '/' || path === '/news' || path.startsWith('/news/')) {
+    return 'weekly';
+  }
+
+  if (path === '/terms' || path === '/privacy') {
+    return 'yearly';
+  }
+
+  return 'monthly';
+}
+
+function priorityForPath(path: string) {
+  if (path === '/') {
+    return 1;
+  }
+
+  const priorityByPath: Record<string, number> = {
+    '/mastery/creations/champion': 0.95,
+    '/mastery/creations': 0.92,
+    '/mastery/making': 0.9,
+    '/contact': 0.88,
+    '/heritage/achievement': 0.86,
+    '/heritage/credibility': 0.84,
+    '/archive': 0.8,
+    '/news': 0.76
+  };
+
+  if (priorityByPath[path] !== undefined) {
+    return priorityByPath[path];
+  }
+
+  if (path.startsWith('/mastery/creations/')) {
+    return 0.74;
+  }
+
+  if (path.startsWith('/news/')) {
+    return 0.64;
+  }
+
+  if (path === '/terms' || path === '/privacy') {
+    return 0.3;
+  }
+
+  return 0.7;
 }
 
 function absoluteUrl(path: string) {
