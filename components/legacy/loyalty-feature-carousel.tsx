@@ -57,7 +57,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
   }
 
   return (
-    <div className="relative mx-auto min-h-[clamp(520px,62vw,760px)] max-w-[1500px] overflow-hidden bg-[#a95d50]">
+    <div className="relative mx-auto min-h-[clamp(520px,62vw,760px)] max-w-[1500px] overflow-hidden bg-white">
       <motion.div
         className="absolute inset-y-0 left-0 flex"
         style={{width: `${slides.length * 100}%`}}
@@ -71,24 +71,19 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
             <div
               key={`${slide.title}-${visualImage}`}
               className="relative h-full overflow-hidden"
-              style={{
-                width: `${100 / slides.length}%`,
-                background: `linear-gradient(115deg, ${slide.accentStart}, ${slide.accentEnd})`
-              }}
+              style={{width: `${100 / slides.length}%`}}
             >
               <LoyaltyCarouselImage
                 filename={visualImage}
                 alt={imageAlt}
                 loading={index === current.index ? 'eager' : 'lazy'}
                 sizes="100vw"
-                className="object-cover opacity-62 mix-blend-luminosity"
+                className="object-cover"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(180,66,54,0.28),rgba(176,82,66,0.12)_42%,rgba(40,72,50,0.26)_100%)]" />
             </div>
           );
         })}
       </motion.div>
-      <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(circle_at_22%_24%,rgba(255,232,205,0.55),transparent_26%),radial-gradient(circle_at_62%_12%,rgba(255,236,210,0.42),transparent_30%),linear-gradient(150deg,transparent_0%,rgba(77,27,23,0.4)_78%)]" />
 
       <SidePreview
         direction={current.direction}
