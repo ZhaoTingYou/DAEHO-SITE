@@ -124,7 +124,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
           animate={{opacity: 1, x: 0}}
           exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0, x: current.direction * -28}}
           transition={contentTransition}
-          className="absolute left-1/2 top-1/2 z-10 w-[min(78vw,760px)] -translate-x-1/2 -translate-y-1/2 bg-white px-8 py-12 text-center shadow-[0_24px_80px_rgba(56,33,28,0.16)] md:px-16 md:py-16"
+          className="absolute left-1/2 top-1/2 z-10 flex min-h-[360px] w-[min(78vw,760px)] -translate-x-1/2 -translate-y-1/2 flex-col justify-center bg-white px-8 py-12 text-center shadow-[0_24px_80px_rgba(56,33,28,0.16)] md:min-h-[clamp(440px,32vw,520px)] md:px-16 md:py-16"
         >
           {activeSlide.kicker ? (
             <p className={`${englishTextClass} text-[14px] uppercase leading-[19px] tracking-[0.2em] text-subtext`}>
