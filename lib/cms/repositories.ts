@@ -428,7 +428,8 @@ export async function deleteMedia(id: string) {
   return Boolean(response?.ok);
 }
 
-export async function createEmailEvent(_payload?: unknown) {
+export async function createEmailEvent(payload?: unknown) {
+  void payload;
   return '';
 }
 
