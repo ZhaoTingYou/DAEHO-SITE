@@ -132,10 +132,6 @@ function TranslationPanel({
         <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required />
         <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
         <TextAreaField label={t('form.excerpt')} name={`${locale}.excerpt`} defaultValue={translation.excerpt} rows={3} />
-        <TextAreaField label={t('form.lead')} name={`${locale}.body.lead`} defaultValue={body.lead} rows={3} />
-        <TextAreaField label={t('form.paragraphs')} name={`${locale}.body.paragraphs`} defaultValue={body.paragraphs.join('\n\n')} rows={8} />
-        <TextAreaField label={t('form.quote')} name={`${locale}.body.quote`} defaultValue={body.quote} rows={3} />
-        <TextField label={t('form.ctaTitle')} name={`${locale}.body.ctaTitle`} defaultValue={body.ctaTitle} />
         <NewsBlocksEditor
           locale={locale}
           blocks={body.blocks}

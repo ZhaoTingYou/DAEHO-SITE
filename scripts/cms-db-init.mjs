@@ -122,29 +122,22 @@ function seedNews() {
       index === 0 ? 1 : 0,
       index
     );
-    seedNewsTranslation(translationStatement, id, 'ko', card, ko.newsUi?.detail);
-    seedNewsTranslation(translationStatement, id, 'en', enCard, en.newsUi?.detail);
+    seedNewsTranslation(translationStatement, id, 'ko', card);
+    seedNewsTranslation(translationStatement, id, 'en', enCard);
   });
 }
 
-function seedNewsTranslation(statement, id, locale, card, detail) {
-  const body = {
-    lead: detail?.lead ?? '',
-    paragraphs: detail?.paragraphs ?? [],
-    quote: detail?.quote ?? '',
-    ctaTitle: detail?.ctaTitle ?? ''
-  };
-
+function seedNewsTranslation(statement, id, locale, card) {
   statement.run(
     id,
     locale,
     card.title ?? id,
     card.categoryLabel ?? '',
     card.body ?? '',
-    JSON.stringify(body),
-    JSON.stringify(detail?.tags ?? []),
+    JSON.stringify({blocks: []}),
+    JSON.stringify([]),
     card.title ?? '',
-    detail?.lead ?? '',
+    '',
     'news_detail_hero.png'
   );
 }

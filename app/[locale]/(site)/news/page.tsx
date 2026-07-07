@@ -29,7 +29,6 @@ export default async function NewsPage({params}: Props) {
   const cards: NewsCard[] = await getNewsCardsForSite(locale);
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const titleTextClass = locale === 'ko' ? "[font-family:'MaruBuri',serif] font-semibold" : englishTextClass;
-  const bodyTextClass = "[font-family:'Pretendard',sans-serif] font-normal";
 
   return (
     <main className="bg-white text-text">
@@ -68,9 +67,6 @@ export default async function NewsPage({params}: Props) {
                 <h2 className={`${titleTextClass} mt-[18px] text-[clamp(30px,3.2vw,44px)] leading-[1.18] text-primary`}>
                   {content.featured.title}
                 </h2>
-                <p className={`${bodyTextClass} mt-[18px] max-w-2xl whitespace-pre-line text-[15px] leading-[1.86] text-text`}>
-                  {content.featured.body}
-                </p>
               </div>
               <div className="h-px w-full bg-hairline" aria-hidden="true" />
             </div>

@@ -56,7 +56,17 @@ export default async function NewsDetailPage({params}: Props) {
 
   const text = messages.newsUi.detail;
   const card = detail.card;
-  const related = (await getNewsCardsForSite(locale)).filter((item) => item.id !== slug).slice(0, 3);
+  const newsCards = await getNewsCardsForSite(locale);
+  const currentIndex = newsCards.findIndex((item) => item.id === slug);
+  const previousNews = currentIndex > 0 ? newsCards[currentIndex - 1] : null;
+  const nextNews = currentIndex >= 0 && currentIndex < newsCards.length - 1 ? newsCards[currentIndex + 1] : null;
+  const adjacentNews = [
+    previousNews ? {direction: 'previous', label: text.previous, item: previousNews} : null,
+    nextNews ? {direction: 'next', label: text.next, item: nextNews} : null
+  ].filter((item): item is {direction: 'previous' | 'next'; label: string; item: typeof card} => Boolean(item));
+  const hasBlocks = detail.blocks.length > 0;
+  const hasTags = hasBlocks && detail.tags.length > 0;
+  const hasCta = hasBlocks && detail.ctaTitle.trim().length > 0;
 
   return (
     <main className="bg-bg text-text">
@@ -78,63 +88,57 @@ export default async function NewsDetailPage({params}: Props) {
           </div>
         </section>
 
-        <section className="px-container py-[clamp(56px,8vw,112px)]">
-          <div className="mx-auto max-w-[1440px]">
-            <div className={detail.blocks.length > 0 ? 'space-y-0' : 'mx-auto max-w-[760px] space-y-8'}>
-              {detail.blocks.length > 0 ? (
+        {hasBlocks ? (
+          <section className="px-container py-[clamp(56px,8vw,112px)]">
+            <div className="mx-auto max-w-[1440px]">
+              <div className="space-y-0">
                 <NewsDetailBlocks blocks={detail.blocks} />
-              ) : (
-                <NewsLegacyBody paragraphs={detail.paragraphs} quote={detail.quote} />
-              )}
-              <Reveal className="mx-auto mt-[clamp(32px,5vw,72px)] flex max-w-[760px] flex-wrap items-center gap-3 border-t border-primary/10 pt-8">
-                {detail.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="border border-hairline bg-white px-4 py-2 font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-subtext"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                <ShareLinkButton copy={messages.newsUi.share} />
-              </Reveal>
-              <Reveal className="mx-auto mt-8 max-w-[760px] border-y border-primary/15 py-8">
-                <p className="font-heading text-[clamp(28px,3.8vw,42px)] font-semibold leading-tight text-primary">{detail.ctaTitle}</p>
-                <Link
-                  href={withLocale(locale, `/contact?type=other&source=news&item=${slug}`)}
-                  className="link-sweep mt-6 inline-flex min-h-11 items-center font-body text-sm font-semibold uppercase tracking-[0.12em]"
-                >
-                  {text.cta}
-                </Link>
-              </Reveal>
+                {hasTags ? (
+                  <Reveal className="mx-auto mt-[clamp(32px,5vw,72px)] flex max-w-[760px] flex-wrap items-center gap-3 border-t border-primary/10 pt-8">
+                    {detail.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="border border-hairline bg-white px-4 py-2 font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-subtext"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    <ShareLinkButton copy={messages.newsUi.share} />
+                  </Reveal>
+                ) : null}
+                {hasCta ? (
+                  <Reveal className="mx-auto mt-8 max-w-[760px] border-y border-primary/15 py-8">
+                    <p className="font-heading text-[clamp(28px,3.8vw,42px)] font-semibold leading-tight text-primary">{detail.ctaTitle}</p>
+                    <Link
+                      href={withLocale(locale, `/contact?type=other&source=news&item=${slug}`)}
+                      className="link-sweep mt-6 inline-flex min-h-11 items-center font-body text-sm font-semibold uppercase tracking-[0.12em]"
+                    >
+                      {text.cta}
+                    </Link>
+                  </Reveal>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
       </article>
 
-      {related.length > 0 ? (
+      {adjacentNews.length > 0 ? (
         <section className="border-t border-primary/10 bg-bg px-container py-[clamp(56px,8vw,104px)]">
-          <div className="mx-auto max-w-[1440px] space-y-8">
-            <Reveal>
-              <h2 className="font-heading text-[clamp(30px,4.4vw,54px)] font-semibold leading-none text-primary">
-                {text.related}
-              </h2>
-            </Reveal>
-            <div className="grid gap-8 md:grid-cols-3">
-              {related.map((item) => (
+          <div className="mx-auto max-w-[1120px]">
+            <div className={adjacentNews.length > 1 ? 'grid gap-px bg-primary/10 md:grid-cols-2' : 'grid gap-px bg-primary/10'}>
+              {adjacentNews.map(({direction, label, item}) => (
                 <Link
                   key={item.id}
                   href={withLocale(locale, `/news/${item.id}`)}
-                  className="group block border-t border-primary/15 pt-5 transition duration-hover ease-brand hover:border-accent"
+                  className={`group block bg-bg p-7 transition duration-hover ease-brand hover:bg-muted/40 md:p-9 ${
+                    direction === 'next' ? 'text-left md:text-right' : 'text-left'
+                  }`}
                 >
-                  <SafeImage filename={item.image} alt={item.title} aspect="aspect-[3/4]" variant="plain" />
-                  <div className="space-y-3 pt-5">
-                    <p className="font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
-                      {item.categoryLabel}
-                    </p>
-                    <h3 className="font-heading text-[22px] font-semibold leading-tight text-primary transition duration-hover ease-brand group-hover:text-accent">
-                      {item.title}
-                    </h3>
-                  </div>
+                  <p className="font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-subtext">{label}</p>
+                  <h2 className="mt-4 font-heading text-[clamp(24px,3vw,34px)] font-semibold leading-tight text-primary transition duration-hover ease-brand group-hover:text-accent">
+                    {item.title}
+                  </h2>
                 </Link>
               ))}
             </div>
@@ -142,25 +146,6 @@ export default async function NewsDetailPage({params}: Props) {
         </section>
       ) : null}
     </main>
-  );
-}
-
-function NewsLegacyBody({paragraphs, quote}: {paragraphs: string[]; quote: string}) {
-  return (
-    <>
-      {paragraphs.map((paragraph) => (
-        <Reveal key={paragraph}>
-          <p className="whitespace-pre-line font-body text-[15px] leading-8 text-text md:text-[16px] md:leading-9">{paragraph}</p>
-        </Reveal>
-      ))}
-      {quote ? (
-        <Reveal>
-          <blockquote className="whitespace-pre-line border-y border-accent/40 py-8 font-heading text-[clamp(24px,3.2vw,36px)] font-semibold leading-tight text-primary">
-            {quote}
-          </blockquote>
-        </Reveal>
-      ) : null}
-    </>
   );
 }
 

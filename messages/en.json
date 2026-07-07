@@ -915,7 +915,7 @@
       "category": "TOP STORY",
       "date": "2026.00.00",
       "title": "The next record from DAEHO begins here.",
-      "body": "New projects, workshop scenes, and collaboration notes will be arranged here first when verified materials arrive.",
+      "body": "",
       "image": "news_featured.png.png"
     },
     "grid": {
@@ -1356,7 +1356,7 @@
       "close": "Close",
       "label": "Latest news popup",
       "fallback": "Image pending",
-      "body": "Verified source material will replace this article body when it arrives. For now, this popup keeps DAEHO’s recent production rhythm and project context in place.",
+      "body": "",
       "cards": [
         {
           "id": "news-01",
@@ -1591,19 +1591,14 @@
       "back": "Back to news",
       "author": "DAEHO News",
       "ogImagePath": "news_detail_hero.png",
-      "lead": "Verified source material will replace this article body when available.",
-      "paragraphs": [
-        "For now, this bright article template keeps the project overview and production context in place.",
-        "Images, dates, sources, and exact figures will be updated only after verification.",
-        "The page keeps the rule-line masthead and narrow editorial measure of DAEHO news."
-      ],
-      "quote": "The principle of shaping victorious moments into permanence continues inside the article page.",
-      "tags": [
-        "DAEHO NEWS",
-        "COMING SOON"
-      ],
-      "ctaTitle": "Curious about this project?",
+      "lead": "",
+      "paragraphs": [],
+      "quote": "",
+      "tags": [],
+      "ctaTitle": "",
       "cta": "Contact us",
+      "previous": "Previous story",
+      "next": "Next story",
       "related": "Next stories"
     }
   },

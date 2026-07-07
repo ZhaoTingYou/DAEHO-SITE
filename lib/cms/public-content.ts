@@ -15,10 +15,7 @@ import {
 
 export type PublicNewsDetail = {
   card: NewsCard;
-  lead: string;
-  paragraphs: string[];
   blocks: NewsBodyBlock[];
-  quote: string;
   tags: string[];
   ctaTitle: string;
   seoTitle: string;
@@ -53,14 +50,10 @@ export async function getHomeNewsCardsForSite(locale: Locale): Promise<HomeNewsP
   const cmsItems = await readCmsValue(() => listPublicNews(locale), []);
 
   if (cmsItems.length > 0) {
-    return cmsItems.slice(0, 4).map((item) => {
-      const body = normalizeNewsBody(item.body);
-
-      return {
-        ...toNewsCard(item),
-        body: getNewsPopupBody(item, body)
-      };
-    });
+    return cmsItems.slice(0, 4).map((item) => ({
+      ...toNewsCard(item),
+      body: ''
+    }));
   }
 
   return (await getLocaleMessages(locale)).news.grid.cards.slice(0, 4).map((card) => ({
@@ -79,12 +72,9 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
 
     return {
       card,
-      lead: body.lead || String(cmsItem.excerpt ?? '') || text.lead,
-      paragraphs: body.paragraphs.length > 0 ? body.paragraphs : text.paragraphs,
       blocks: body.blocks,
-      quote: body.quote || text.quote,
       tags: Array.isArray(cmsItem.tags) && cmsItem.tags.length > 0 ? cmsItem.tags.filter((tag): tag is string => typeof tag === 'string') : text.tags,
-      ctaTitle: body.ctaTitle || text.ctaTitle,
+      ctaTitle: body.ctaTitle,
       seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
       seoDescription: String(cmsItem.seoDescription || body.lead || cmsItem.excerpt || ''),
       ogImagePath: cmsImageName(cmsItem.ogImagePath || card.image)
@@ -102,14 +92,11 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
       ...card,
       hasImage: imageExists(card.image)
     },
-    lead: text.lead,
-    paragraphs: text.paragraphs,
     blocks: [],
-    quote: text.quote,
-    tags: text.tags,
-    ctaTitle: text.ctaTitle,
+    tags: [],
+    ctaTitle: '',
     seoTitle: card.title,
-    seoDescription: text.lead,
+    seoDescription: card.title,
     ogImagePath: card.image
   };
 }
@@ -220,21 +207,6 @@ function normalizeNewsBody(value: unknown) {
     quote: typeof body.quote === 'string' ? body.quote : '',
     ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : ''
   };
-}
-
-function getNewsPopupBody(item: Record<string, unknown>, body: ReturnType<typeof normalizeNewsBody>) {
-  const blockText = body.blocks.flatMap((block) => [block.title, block.body]);
-  const bodyText = [body.lead, ...body.paragraphs, ...blockText]
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .join('\n\n');
-
-  if (bodyText) {
-    return bodyText;
-  }
-
-  const fallback = firstString(item.excerpt, item.seoDescription);
-  return fallback.trim();
 }
 
 function firstString(...values: unknown[]) {

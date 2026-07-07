@@ -30,13 +30,9 @@ type HomeNewsPopupsProps = {
 
 export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
   const [activeCard, setActiveCard] = useState<HomeNewsPopupCard | null>(null);
-  const [bodyPage, setBodyPage] = useState(0);
   const [modalImageRatio, setModalImageRatio] = useState<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
-  const bodyPages = splitModalBody(activeCard?.body ?? text.body);
-  const activeBodyPage = bodyPages[bodyPage] ?? bodyPages[0] ?? '';
-  const activeBodyParagraphs = splitBodyParagraphs(activeBodyPage);
 
   useEffect(() => {
     if (!activeCard) {
@@ -69,7 +65,6 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
             key={card.id}
             type="button"
             onClick={() => {
-              setBodyPage(0);
               setModalImageRatio(null);
               setActiveCard(card);
             }}
@@ -159,38 +154,6 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                     {activeCard.title}
                   </h3>
                 </div>
-                <div className="space-y-[clamp(18px,2.4vw,28px)]">
-                  <div className="space-y-[clamp(5px,0.55vw,8px)]">
-                    {activeBodyParagraphs.map((paragraph, index) => (
-                      <p key={`${paragraph}-${index}`} className="whitespace-pre-line font-body text-[15px] leading-[1.55] text-text">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                  {bodyPages.length > 1 ? (
-                    <div className="flex items-center gap-3 font-body text-[13px] font-semibold leading-none text-primary">
-                      <button
-                        type="button"
-                        onClick={() => setBodyPage((current) => Math.max(current - 1, 0))}
-                        disabled={bodyPage === 0}
-                        aria-label="Previous page"
-                        className="grid h-11 w-11 place-items-center border border-primary/25 text-[18px] transition duration-hover ease-brand hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30"
-                      >
-                        <span aria-hidden="true">‹</span>
-                      </button>
-                      <span>{bodyPage + 1} / {bodyPages.length}</span>
-                      <button
-                        type="button"
-                        onClick={() => setBodyPage((current) => Math.min(current + 1, bodyPages.length - 1))}
-                        disabled={bodyPage >= bodyPages.length - 1}
-                        aria-label="Next page"
-                        className="grid h-11 w-11 place-items-center border border-primary/25 text-[18px] transition duration-hover ease-brand hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30"
-                      >
-                        <span aria-hidden="true">›</span>
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
               </div>
             </motion.article>
           </motion.div>
@@ -252,47 +215,4 @@ function NewsImage({
       />
     </div>
   );
-}
-
-function splitModalBody(body: string) {
-  const normalized = body.trim();
-  const maxLength = 185;
-
-  if (!normalized || normalized.length <= maxLength) {
-    return normalized ? [normalized] : [];
-  }
-
-  const sentences = normalized.match(/[^.!?。！？]+[.!?。！？]?/g) ?? [normalized];
-  const pages: string[] = [];
-  let current = '';
-
-  for (const sentence of sentences.map((item) => item.trim()).filter(Boolean)) {
-    if (!current) {
-      current = sentence;
-      continue;
-    }
-
-    if (`${current} ${sentence}`.length > maxLength) {
-      pages.push(current);
-      current = sentence;
-      continue;
-    }
-
-    current = `${current} ${sentence}`;
-  }
-
-  if (current) {
-    pages.push(current);
-  }
-
-  return pages.length > 0 ? pages : [normalized];
-}
-
-function splitBodyParagraphs(body: string) {
-  const paragraphs = body
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
-
-  return paragraphs.length > 0 ? paragraphs : body ? [body] : [];
 }
