@@ -189,7 +189,7 @@ function MobileCollectionIndex({
   viewLabel: string;
 }) {
   return (
-    <div className="lg:hidden bg-[#F8F4ED] px-container pb-[calc(92px+env(safe-area-inset-bottom))]">
+    <div className="bg-white px-container pb-[calc(92px+env(safe-area-inset-bottom))] lg:hidden">
       <div className="mx-auto max-w-[520px] border-t border-primary/15">
         {categories.map((category, index) => (
           <MobileCollectionCard
@@ -871,7 +871,7 @@ function BespokeCreationsView({
   };
 
   return (
-    <div className="bg-[#F8F6F2] text-primary">
+    <div className="bg-white text-primary">
       <section className="mx-auto max-w-[1580px] px-container">
         <div className="relative border-b border-primary/15 py-[clamp(74px,8vw,128px)] text-center">
           <Link
@@ -949,7 +949,7 @@ function BespokeCreationsView({
               displayMode={displayMode}
             />
           ) : (
-            <div className="bg-[#F8F6F2] px-container py-[clamp(54px,7vw,96px)]">
+            <div className="bg-white px-container py-[clamp(54px,7vw,96px)]">
               <BespokeCreationGrid
                 items={displayedItems}
                 locale={locale}
@@ -1012,7 +1012,7 @@ function BespokeCreationCanvas({
   }));
 
   return (
-    <div className="relative overflow-hidden bg-[#F8F6F2]">
+    <div className="relative overflow-hidden bg-white">
       <div className="sticky top-[96px] z-20 flex justify-center pt-4">
         <button
           type="button"
@@ -1375,7 +1375,7 @@ function BespokeFilterDrawer({
         aria-label={copy.close}
       />
       <motion.aside
-        className="absolute left-0 top-0 flex h-dvh w-full max-w-[520px] flex-col bg-[#F8F6F2] shadow-[28px_0_90px_rgba(16,29,48,.2)]"
+        className="absolute left-0 top-0 flex h-dvh w-full max-w-[520px] flex-col bg-white shadow-[28px_0_90px_rgba(16,29,48,.2)]"
         initial={{x: '-100%'}}
         animate={{x: 0}}
         exit={{x: '-100%'}}
@@ -1882,7 +1882,7 @@ function CollectionFinderView({
   };
 
   return (
-    <div className="relative bg-[#F8F6F2] pb-[calc(112px+env(safe-area-inset-bottom))]">
+    <div className="relative bg-white pb-[calc(112px+env(safe-area-inset-bottom))]">
       <div className="mx-auto max-w-[1480px] px-container">
         <div className="relative border-b border-hairline pb-[clamp(63px,7.5vw,114px)] pt-[clamp(28px,4vw,56px)]">
           <Link

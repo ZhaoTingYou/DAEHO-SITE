@@ -60,7 +60,7 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
   }
 
   return (
-    <main className="bg-[#F8F6F2] pb-[clamp(84px,9vw,132px)] pt-28 text-text">
+    <main className="bg-white pb-[clamp(84px,9vw,132px)] pt-28 text-text">
       <SpecialtyCollectionCategory
         categoryId={categoryId}
         filters={filters}

@@ -703,7 +703,7 @@ select {
   --chronicle-end-nav-width: clamp(140px, 12vw, 190px);
   min-height: 100vh;
   color: var(--chronicle-day-text);
-  background: linear-gradient(180deg, var(--bg) 0%, #fbfaf7 42%, var(--bg) 68%, #fff 100%);
+  background: var(--bg);
   font-family: var(--font-body);
   isolation: isolate;
 }
@@ -741,7 +741,7 @@ select {
   background:
     radial-gradient(ellipse at 78% 42%, rgba(255, 255, 255, .92), transparent 34%),
     radial-gradient(ellipse at 46% 104%, rgba(122, 34, 48, .07), transparent 24%),
-    linear-gradient(180deg, var(--bg) 0%, #fbfaf7 48%, #fff 100%);
+    var(--bg);
 }
 
 .chronicle-bg-year {
@@ -783,7 +783,7 @@ select {
   visibility: hidden;
   background:
     radial-gradient(ellipse at 100% 42%, rgba(255, 255, 255, .7), transparent 42%),
-    linear-gradient(180deg, rgba(248, 246, 242, .7) 0%, rgba(251, 250, 247, .7) 48%, rgba(255, 255, 255, .7) 100%);
+    rgba(255, 255, 255, .7);
   opacity: 0;
   transform: translate3d(-16px, 0, 0);
   transition:
@@ -1042,7 +1042,7 @@ select {
   cursor: pointer;
   pointer-events: none;
   visibility: hidden;
-  background: rgba(248, 246, 242, .7);
+  background: rgba(255, 255, 255, .7);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-left: 1px solid rgba(16, 29, 48, .1);
@@ -1067,7 +1067,7 @@ select {
 }
 
 .chronicle-end-nav:hover {
-  background: rgba(248, 246, 242, .78);
+  background: rgba(255, 255, 255, .78);
   box-shadow: -28px 0 78px rgba(16, 29, 48, .11);
 }
 
@@ -1771,7 +1771,7 @@ select {
     padding: 8px;
     background:
       radial-gradient(ellipse at 100% 42%, rgba(255, 255, 255, .7), transparent 52%),
-      linear-gradient(180deg, rgba(248, 246, 242, .7) 0%, rgba(251, 250, 247, .7) 48%, rgba(255, 255, 255, .7) 100%);
+      rgba(255, 255, 255, .7);
     border: 1px solid rgba(16, 29, 48, .08);
     transform: translate3d(0, 10px, 0);
     -webkit-overflow-scrolling: touch;
@@ -1828,7 +1828,7 @@ select {
     right: 0;
     width: min(150px, calc(100vw - 22px));
     padding: 16px 26px 14px 14px;
-    background: rgba(248, 246, 242, .7);
+    background: rgba(255, 255, 255, .7);
     border: 1px solid rgba(16, 29, 48, .1);
     border-right: 0;
     box-shadow: -18px 18px 48px rgba(16, 29, 48, .08);

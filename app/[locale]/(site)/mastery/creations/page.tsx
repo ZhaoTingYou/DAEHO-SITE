@@ -35,7 +35,7 @@ export default async function CollectionPage({params}: Props) {
 
   return (
     <main className="bg-bg text-text">
-      <section className="relative overflow-hidden bg-[#F8F4ED] pt-[calc(86px+env(safe-area-inset-top))] md:bg-bg md:pt-28">
+      <section className="relative overflow-hidden bg-white pt-[calc(86px+env(safe-area-inset-top))] md:bg-bg md:pt-28">
         <h1 className="sr-only">
           {content.hero.title}
         </h1>
@@ -63,9 +63,9 @@ export default async function CollectionPage({params}: Props) {
                   priority
                   className="object-cover object-[63%_center]"
                 />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,244,237,0)_52%,rgba(248,244,237,.88)_100%)]" aria-hidden="true" />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0)_52%,rgba(255,255,255,.88)_100%)]" aria-hidden="true" />
               </div>
-              <figcaption className="grid grid-cols-3 divide-x divide-primary/15 border-t border-primary/15 bg-[#F8F4ED]">
+              <figcaption className="grid grid-cols-3 divide-x divide-primary/15 border-t border-primary/15 bg-white">
                 {filters.map((filter, index) => (
                   <span key={filter.id} className="min-h-14 px-3 py-3 font-body text-[10px] font-semibold uppercase leading-[1.35] tracking-[0.12em] text-primary/68">
                     <span className="block font-numeric text-[10px] text-accent/80">{String(index + 1).padStart(2, '0')}</span>

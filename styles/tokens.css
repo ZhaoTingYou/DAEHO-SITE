@@ -1,12 +1,12 @@
 :root {
-  --bg: #F8F6F2;
+  --bg: #FFFFFF;
   --white: #FFFFFF;
   --primary: #101D30;
   --accent: #7A2230;
   --text: #1A1A1A;
   --subtext: #666666;
   --hairline: rgba(16, 29, 48, .14);
-  --on-navy: #F8F6F2;
+  --on-navy: #FFFFFF;
 
   --ease: cubic-bezier(.22, .61, .36, 1);
   --ease-expo: cubic-bezier(.16, 1, .3, 1);

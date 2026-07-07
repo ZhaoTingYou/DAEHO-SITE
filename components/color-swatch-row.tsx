@@ -5,7 +5,7 @@ type Swatch = {
 };
 
 const swatches: Swatch[] = [
-  {name: 'bg', value: '#F8F6F2', className: 'bg-bg'},
+  {name: 'bg', value: '#FFFFFF', className: 'bg-bg'},
   {name: 'white', value: '#FFFFFF', className: 'bg-white'},
   {name: 'primary', value: '#101D30', className: 'bg-primary'},
   {name: 'accent', value: '#7A2230', className: 'bg-accent'}

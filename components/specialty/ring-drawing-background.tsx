@@ -1,6 +1,6 @@
 export function RingDrawingBackground() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#F8F6F2]" aria-hidden="true">
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-white" aria-hidden="true">
       <div className="ring-blueprint-layer absolute inset-[-7%] will-change-transform">
         <svg
           className="ring-blueprint-svg h-full w-full"
@@ -24,9 +24,9 @@ export function RingDrawingBackground() {
               <stop offset="1" stopColor="#7A2230" stopOpacity="0.08" />
             </linearGradient>
             <radialGradient id="making-paper-light" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(720 164) rotate(90) scale(560 740)">
-              <stop stopColor="#F8F6F2" stopOpacity="0.92" />
-              <stop offset="0.42" stopColor="#F8F6F2" stopOpacity="0.58" />
-              <stop offset="1" stopColor="#F8F6F2" stopOpacity="0" />
+              <stop stopColor="#FFFFFF" stopOpacity="0.92" />
+              <stop offset="0.42" stopColor="#FFFFFF" stopOpacity="0.58" />
+              <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
             </radialGradient>
           </defs>
 
@@ -121,7 +121,7 @@ export function RingDrawingBackground() {
         </svg>
       </div>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_14%,rgba(248,246,242,0.86),transparent_36%),linear-gradient(180deg,rgba(248,246,242,0.24),rgba(248,246,242,0.76))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_14%,rgba(255,255,255,0.86),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.24),rgba(255,255,255,0.76))]" />
     </div>
   );
 }

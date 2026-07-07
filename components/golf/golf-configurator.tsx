@@ -178,7 +178,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   };
 
   return (
-    <main className="bg-white text-[#f8f6f2]">
+    <main className="bg-white text-white">
       <section className="relative overflow-hidden bg-black pt-28">
         <div className="mx-auto max-w-[1240px] px-container pb-0">
           <motion.p

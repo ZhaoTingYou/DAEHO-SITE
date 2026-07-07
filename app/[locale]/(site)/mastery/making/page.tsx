@@ -61,7 +61,7 @@ export default async function TechniquePage({params}: Props) {
         </div>
       </section>
 
-      <section className="relative z-10 bg-[#f8f6f2] py-[clamp(86px,9vw,132px)]">
+      <section className="relative z-10 bg-white py-[clamp(86px,9vw,132px)]">
         <div className="mx-auto max-w-[1120px] px-container">
           <ScrollText className="border-l border-accent/45 py-[6px] pl-[clamp(28px,3.6vw,48px)] text-left">
             <p className="font-body text-[10px] font-semibold uppercase leading-none tracking-[0.34em] text-text/45">
