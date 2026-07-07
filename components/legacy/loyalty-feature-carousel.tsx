@@ -80,6 +80,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
                 sizes="100vw"
                 className="object-cover"
               />
+              <div className="pointer-events-none absolute inset-0 bg-white/[0.18]" />
             </div>
           );
         })}
