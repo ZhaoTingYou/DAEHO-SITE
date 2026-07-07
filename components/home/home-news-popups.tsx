@@ -36,6 +36,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
   const titleId = useId();
   const bodyPages = splitModalBody(activeCard?.body ?? text.body);
   const activeBodyPage = bodyPages[bodyPage] ?? bodyPages[0] ?? '';
+  const activeBodyParagraphs = splitBodyParagraphs(activeBodyPage);
 
   useEffect(() => {
     if (!activeCard) {
@@ -144,7 +145,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                 }}
               />
 
-              <div className="flex min-h-0 flex-col justify-center gap-[clamp(24px,3vw,42px)] px-2 py-8 md:h-full md:px-0 md:py-[clamp(34px,4vw,58px)]">
+              <div className="flex min-h-0 flex-col justify-center gap-[clamp(12px,1.5vw,21px)] px-2 py-8 md:h-full md:px-0 md:py-[clamp(34px,4vw,58px)]">
                 <div className="space-y-[clamp(14px,1.8vw,22px)]">
                   <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[15px] font-medium uppercase tracking-[0.08em] text-subtext">
                     <span className="text-accent">{activeCard.categoryLabel}</span>
@@ -159,9 +160,13 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                   </h3>
                 </div>
                 <div className="space-y-[clamp(18px,2.4vw,28px)]">
-                  <p className="whitespace-pre-line font-body text-[15px] leading-[1.85] text-text">
-                    {activeBodyPage}
-                  </p>
+                  <div className="space-y-[clamp(5px,0.55vw,8px)]">
+                    {activeBodyParagraphs.map((paragraph, index) => (
+                      <p key={`${paragraph}-${index}`} className="whitespace-pre-line font-body text-[15px] leading-[1.55] text-text">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
                   {bodyPages.length > 1 ? (
                     <div className="flex items-center gap-3 font-body text-[13px] font-semibold leading-none text-primary">
                       <button
@@ -281,4 +286,13 @@ function splitModalBody(body: string) {
   }
 
   return pages.length > 0 ? pages : [normalized];
+}
+
+function splitBodyParagraphs(body: string) {
+  const paragraphs = body
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  return paragraphs.length > 0 ? paragraphs : body ? [body] : [];
 }
