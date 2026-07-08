@@ -60,6 +60,7 @@ services:
       CMS_ADMIN_PASSWORD: ${CMS_ADMIN_PASSWORD:-replace-with-a-strong-password}
       CMS_ADMIN_COOKIE_SECURE: ${CMS_ADMIN_COOKIE_SECURE:-}
       CMS_ADMIN_SESSION_SECRET: ${CMS_ADMIN_SESSION_SECRET:-replace-with-a-long-random-session-secret}
+      ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
     volumes:
       - ./public/images:/app/public/images:ro

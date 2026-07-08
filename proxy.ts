@@ -2,6 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import {NextResponse, type NextRequest} from 'next/server';
 
 import {routing} from '@/i18n/routing';
+import {isAdminIpAllowed, isAdminProtectedPath} from '@/lib/cms/admin-ip-allowlist';
 import {isGolfEnabled} from '@/lib/golf-visibility-core';
 
 const intlMiddleware = createMiddleware(routing);
@@ -10,7 +11,11 @@ const golfVisibilityCacheMs = 5_000;
 let golfVisibilityCache: {enabled: boolean; expiresAt: number} | null = null;
 
 export default async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  if (isAdminProtectedPath(request.nextUrl.pathname)) {
+    if (!isAdminIpAllowed(request.headers)) {
+      return notFoundResponse();
+    }
+
     return NextResponse.next();
   }
 
@@ -27,19 +32,14 @@ export default async function proxy(request: NextRequest) {
   }
 
   if (isGolfRequestPath(request.nextUrl.pathname) && !(await isGolfEnabledForProxy())) {
-    return new NextResponse('Not found', {
-      status: 404,
-      headers: {
-        'content-type': 'text/plain; charset=utf-8'
-      }
-    });
+    return notFoundResponse();
   }
 
   return intlMiddleware(request);
 }
 
 export const config = {
-  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)']
+  matcher: ['/api/admin/:path*', '/((?!api|trpc|_next|_vercel|.*\\..*).*)']
 };
 
 export function isGolfRequestPath(pathname: string) {
@@ -100,4 +100,13 @@ async function fetchGolfCommonPage(baseUrl: string, locale: string) {
   }
 
   return response.json();
+}
+
+function notFoundResponse() {
+  return new NextResponse('Not found', {
+    status: 404,
+    headers: {
+      'content-type': 'text/plain; charset=utf-8'
+    }
+  });
 }
