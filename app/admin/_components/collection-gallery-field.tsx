@@ -26,6 +26,7 @@ export function CollectionGalleryField({
   maxImages = maxCollectionGalleryImages,
   uploadLabel,
   uploadHint,
+  imageGuide,
   emptyLabel,
   changedLabel,
   selectedLabel,
@@ -47,6 +48,7 @@ export function CollectionGalleryField({
   maxImages?: number;
   uploadLabel: string;
   uploadHint: string;
+  imageGuide?: string;
   emptyLabel: string;
   changedLabel: string;
   selectedLabel: string;
@@ -116,6 +118,7 @@ export function CollectionGalleryField({
               defaultValue={row.image}
               uploadLabel={uploadLabel}
               uploadHint={uploadHint}
+              imageGuide={imageGuide}
               emptyLabel={emptyLabel}
               changedLabel={changedLabel}
               selectedLabel={selectedLabel}

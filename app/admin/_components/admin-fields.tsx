@@ -337,6 +337,7 @@ export function ImageUploadField({
   changedLabel = '已更改',
   selectedLabel = '已选择 {filename}，保存后生效。',
   syncedLabel = '已同步选择 {filename}，保存后韩英版本会一起更新。',
+  imageGuide,
   mediaItems = [],
   mediaSelectLabel = '媒体库',
   mediaLibraryTitle = '选择已上传图片',
@@ -356,6 +357,7 @@ export function ImageUploadField({
   changedLabel?: string;
   selectedLabel?: string;
   syncedLabel?: string;
+  imageGuide?: string;
   mediaItems?: MediaLibraryItem[];
   mediaSelectLabel?: string;
   mediaLibraryTitle?: string;
@@ -514,7 +516,12 @@ export function ImageUploadField({
 
   return (
     <div className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-      <span>{label}</span>
+      <span className="grid gap-1">
+        <span>{label}</span>
+        {imageGuide ? (
+          <span className="text-xs font-medium leading-5 text-[#7a2230]">{imageGuide}</span>
+        ) : null}
+      </span>
       <div className={`grid gap-3 ${preview ? 'md:grid-cols-[112px_minmax(0,1fr)]' : ''}`}>
         {preview ? (
           <div
@@ -633,6 +640,7 @@ export function AppendableArrayItemsField({
   changedLabel,
   selectedLabel,
   syncedLabel,
+  imageGuides = {},
   mediaSelectLabel,
   mediaLibraryTitle,
   mediaEmptyLabel,
@@ -654,6 +662,7 @@ export function AppendableArrayItemsField({
   changedLabel: string;
   selectedLabel: string;
   syncedLabel: string;
+  imageGuides?: Record<string, string>;
   mediaSelectLabel: string;
   mediaLibraryTitle: string;
   mediaEmptyLabel: string;
@@ -724,6 +733,7 @@ export function AppendableArrayItemsField({
                       changedLabel={changedLabel}
                       selectedLabel={selectedLabel}
                       syncedLabel={syncedLabel}
+                      imageGuide={imageGuides[field.path]}
                       mediaItems={mediaItems}
                       mediaSelectLabel={mediaSelectLabel}
                       mediaLibraryTitle={mediaLibraryTitle}

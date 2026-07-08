@@ -73,6 +73,7 @@ export function CollectionForm({
             defaultValue={item?.imagePath}
             uploadLabel={t('page.uploadLocalImage')}
             uploadHint={t('page.uploadLocalImageHint')}
+            imageGuide={t('imageGuide.collectionCover')}
             emptyLabel={t('common.noImage')}
             changedLabel={t('common.changed')}
             selectedLabel={t('common.imageSelected')}
@@ -98,6 +99,7 @@ export function CollectionForm({
           removeButtonLabel={t('form.galleryRemove')}
           uploadLabel={t('page.uploadLocalImage')}
           uploadHint={t('page.uploadLocalImageHint')}
+          imageGuide={t('imageGuide.collectionGallery')}
           emptyLabel={t('common.noImage')}
           changedLabel={t('common.changed')}
           selectedLabel={t('common.imageSelected')}
@@ -119,6 +121,7 @@ export function CollectionForm({
           maxImages={3}
           uploadLabel={t('page.uploadLocalImage')}
           uploadHint={t('page.uploadLocalImageHint')}
+          imageGuide={t('imageGuide.collectionDetailGallery')}
           emptyLabel={t('common.noImage')}
           changedLabel={t('common.changed')}
           selectedLabel={t('common.imageSelected')}
@@ -185,6 +188,7 @@ function TranslationPanel({
           defaultValue={translation.ogImagePath}
           uploadLabel={t('page.uploadLocalImage')}
           uploadHint={t('page.uploadLocalImageHint')}
+          imageGuide={t('imageGuide.seo')}
           emptyLabel={t('common.noImage')}
           changedLabel={t('common.changed')}
           selectedLabel={t('common.imageSelected')}

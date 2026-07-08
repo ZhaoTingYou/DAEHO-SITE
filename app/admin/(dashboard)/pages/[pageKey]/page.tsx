@@ -29,6 +29,7 @@ import {
   getLocalizedPageTitle,
   getLocalizedPathLabel
 } from '@/lib/cms/page-catalog-i18n';
+import {getAdminImageGuide, getPageImageGuide} from '@/lib/cms/image-guides';
 import {getPage, listMedia} from '@/lib/cms/repositories';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {localeFieldSuffixes, locales, type Locale} from '@/lib/locales';
@@ -57,6 +58,7 @@ type PageLocaleContentGroup = {
 };
 
 type RenderContext = {
+  pageKey: string;
   adminLocale: AdminLocale;
   locale: Locale;
   groupKey: string;
@@ -197,7 +199,7 @@ function PageLocalePanel({
 
       <div className="grid gap-5">
         {groups.map((group) => {
-          const context = {adminLocale, locale, groupKey: group.key, mediaItems, messages};
+          const context = {pageKey: definition?.pageKey ?? '', adminLocale, locale, groupKey: group.key, mediaItems, messages};
           const fields = definition ? getPageFieldDefinitionsForGroup(definition, group.key, group.content) : null;
 
           return (
@@ -225,6 +227,7 @@ function PageLocalePanel({
             mediaLibraryTitle={t('media.libraryTitle')}
             mediaEmptyLabel={t('media.libraryEmpty')}
             mediaSelectedLabel={t('media.selectedExisting')}
+            imageGuide={getPageSeoImageGuide(adminLocale)}
             syncKey="page-seo:ogImagePath"
           />
         </section>
@@ -522,6 +525,12 @@ function EditableArrayItemFields({
               changedLabel={t('common.changed')}
               selectedLabel={t('common.imageSelected')}
               syncedLabel={t('common.imageSynced')}
+              imageGuide={getPageImageGuide({
+                pageKey: context.pageKey,
+                groupKey: context.groupKey,
+                path: fieldPath,
+                locale: context.adminLocale
+              })}
               mediaItems={context.mediaItems}
               mediaSelectLabel={t('media.selectFromLibrary')}
               mediaLibraryTitle={t('media.libraryTitle')}
@@ -601,6 +610,19 @@ function AppendArrayItems({
       groupKey={context.groupKey}
       itemFields={itemFields}
       mediaItems={context.mediaItems}
+      imageGuides={Object.fromEntries(
+        itemFields
+          .filter((field) => field.type === 'image')
+          .map((field) => [
+            field.path,
+            getPageImageGuide({
+              pageKey: context.pageKey,
+              groupKey: context.groupKey,
+              path: `${path}.0.${field.path}`,
+              locale: context.adminLocale
+            })
+          ])
+      )}
       title={appendItemTitle(context.adminLocale)}
       hint={appendItemHint(context.adminLocale)}
       addButtonLabel={appendItemButtonLabel(context.adminLocale)}
@@ -655,6 +677,12 @@ function EditableLeaf({
         changedLabel={t('common.changed')}
         selectedLabel={t('common.imageSelected')}
         syncedLabel={t('common.imageSynced')}
+        imageGuide={getPageImageGuide({
+          pageKey: context.pageKey,
+          groupKey: context.groupKey,
+          path,
+          locale: context.adminLocale
+        })}
         mediaItems={context.mediaItems}
         mediaSelectLabel={t('media.selectFromLibrary')}
         mediaLibraryTitle={t('media.libraryTitle')}
@@ -724,6 +752,10 @@ function ReadOnlyMeta({label, value}: {label: string; value: string}) {
       </span>
     </div>
   );
+}
+
+function getPageSeoImageGuide(adminLocale: AdminLocale) {
+  return getAdminImageGuide('seo', adminLocale);
 }
 
 function getPageLocaleData(

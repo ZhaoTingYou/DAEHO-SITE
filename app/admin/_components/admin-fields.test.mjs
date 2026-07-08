@@ -5,12 +5,52 @@ import test from 'node:test';
 const source = readFileSync(new URL('./admin-fields.tsx', import.meta.url), 'utf8');
 const pageEditorSource = readFileSync(new URL('../(dashboard)/pages/[pageKey]/page.tsx', import.meta.url), 'utf8');
 const pageCatalogSource = readFileSync(new URL('../../../lib/cms/page-catalog.ts', import.meta.url), 'utf8');
+const imageGuidesSource = readFileSync(new URL('../../../lib/cms/image-guides.ts', import.meta.url), 'utf8');
 const pageCatalog = JSON.parse(readFileSync(new URL('../../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
 
 test('image upload previews and media library thumbnails use the shared preview background helper', () => {
   assert.match(source, /function mediaPreviewBackground/);
   assert.match(source, /style=\{mediaPreviewBackground\(previewUrl\)\}/);
   assert.match(source, /style=\{mediaPreviewBackground\(mediaPreviewUrl\(item\)\)\}/);
+});
+
+test('CMS image upload fields show per-position ratio and size guidance', () => {
+  assert.match(source, /imageGuide\?: string/);
+  assert.match(source, /\{imageGuide \? \(/);
+  assert.match(pageEditorSource, /getPageImageGuide/);
+  assert.match(pageEditorSource, /imageGuide=\{getPageImageGuide\(/);
+  assert.match(pageEditorSource, /imageGuides=\{Object\.fromEntries/);
+  assert.match(pageEditorSource, /getAdminImageGuide\('seo', adminLocale\)/);
+});
+
+test('every managed page image field has a CMS image guide mapping', () => {
+  const missing = [];
+
+  for (const page of pageCatalog) {
+    for (const field of page.fields) {
+      const groupKey = field.groupKey ?? 'main';
+
+      if (field.type === 'image') {
+        const key = `${page.pageKey}|${groupKey}|${normalizeGuidePath(field.path)}`;
+        if (!imageGuidesSource.includes(`'${key}'`)) {
+          missing.push(key);
+        }
+      }
+
+      for (const itemField of field.itemFields ?? []) {
+        if (itemField.type !== 'image') {
+          continue;
+        }
+
+        const key = `${page.pageKey}|${groupKey}|${normalizeGuidePath(`${field.path}.0.${itemField.path}`)}`;
+        if (!imageGuidesSource.includes(`'${key}'`)) {
+          missing.push(key);
+        }
+      }
+    }
+  }
+
+  assert.deepEqual(missing, []);
 });
 
 test('media library selection stores remote object URLs when media lives in object storage', () => {
@@ -66,4 +106,8 @@ test('known centered page positions are declared as centered editor fields', () 
 function findField(pageKey, groupKey, path) {
   const page = pageCatalog.find((entry) => entry.pageKey === pageKey);
   return page?.fields.find((field) => (field.groupKey ?? 'main') === groupKey && field.path === path);
+}
+
+function normalizeGuidePath(path) {
+  return path.replace(/\.\d+(?=\.|$)/g, '.*');
 }

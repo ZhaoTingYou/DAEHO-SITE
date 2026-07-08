@@ -48,6 +48,15 @@ test('collection form exposes a separate editable detail image strip', () => {
   assert.ok(collectionFormSource.includes('maxImages={3}'), 'detail image strip should be capped to the three public strip slots');
 });
 
+test('collection image fields show ratio and size guidance', () => {
+  assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.collectionCover'\)\}/);
+  assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.collectionGallery'\)\}/);
+  assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.collectionDetailGallery'\)\}/);
+  assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.seo'\)\}/);
+  assert.match(galleryFieldSource, /imageGuide\?: string/);
+  assert.match(galleryFieldSource, /imageGuide=\{imageGuide\}/);
+});
+
 test('collection gallery save reads submitted rows and caps them at six images', () => {
   const readGallerySource = extractFunction(actionsSource, 'readGalleryImages');
 

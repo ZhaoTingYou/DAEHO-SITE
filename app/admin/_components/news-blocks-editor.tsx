@@ -50,6 +50,7 @@ export type NewsBlocksEditorLabels = {
   spacingLoose: string;
   uploadLabel: string;
   uploadHint: string;
+  imageGuide: string;
   emptyImageLabel: string;
   changedLabel: string;
   selectedLabel: string;
@@ -240,6 +241,7 @@ export function NewsBlocksEditor({locale, blocks, mediaItems, labels}: NewsBlock
                 defaultValue={block.image}
                 uploadLabel={labels.uploadLabel}
                 uploadHint={labels.uploadHint}
+                imageGuide={labels.imageGuide}
                 emptyLabel={labels.emptyImageLabel}
                 changedLabel={labels.changedLabel}
                 selectedLabel={labels.selectedLabel}

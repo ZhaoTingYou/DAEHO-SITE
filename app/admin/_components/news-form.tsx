@@ -74,6 +74,7 @@ export function NewsForm({
             defaultValue={item?.imagePath}
             uploadLabel={t('page.uploadLocalImage')}
             uploadHint={t('page.uploadLocalImageHint')}
+            imageGuide={t('imageGuide.newsCover')}
             emptyLabel={t('common.noImage')}
             changedLabel={t('common.changed')}
             selectedLabel={t('common.imageSelected')}
@@ -148,6 +149,7 @@ function TranslationPanel({
           defaultValue={translation.ogImagePath}
           uploadLabel={t('page.uploadLocalImage')}
           uploadHint={t('page.uploadLocalImageHint')}
+          imageGuide={t('imageGuide.seo')}
           emptyLabel={t('common.noImage')}
           changedLabel={t('common.changed')}
           selectedLabel={t('common.imageSelected')}
@@ -257,6 +259,7 @@ function newsBlocksEditorLabels(t: ReturnType<typeof createAdminTranslator>): Ne
     spacingLoose: t('newsBlocks.spacingLoose'),
     uploadLabel: t('page.uploadLocalImage'),
     uploadHint: t('page.uploadLocalImageHint'),
+    imageGuide: t('imageGuide.newsBlock'),
     emptyImageLabel: t('common.noImage'),
     changedLabel: t('common.changed'),
     selectedLabel: t('common.imageSelected'),
