@@ -25,7 +25,8 @@ export const navItems: NavItem[] = [
     label: 'MASTERY',
     href: '/mastery',
     children: [
-      {id: 'technique', label: 'MAKING', href: '/mastery/making'},
+      {id: 'technique', label: 'TECHNIQUE', href: '/mastery/technique'},
+      {id: 'making', label: 'MAKING', href: '/mastery/making'},
       {id: 'collection', label: 'CREATIONS', href: '/mastery/creations'}
     ]
   },

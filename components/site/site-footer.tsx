@@ -63,7 +63,8 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
     {
       heading: navLabels.specialty,
       links: [
-        {label: navLabels.technique, href: '/mastery/making'},
+        {label: navLabels.technique, href: '/mastery/technique'},
+        {label: navLabels.making, href: '/mastery/making'},
         {label: navLabels.collection, href: '/mastery/creations'},
         ...collectionCategoryLinks
       ]

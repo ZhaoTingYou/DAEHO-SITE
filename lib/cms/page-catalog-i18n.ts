@@ -35,6 +35,10 @@ const pageMetadataLabels: Record<Exclude<AdminLocale, 'zh'>, Record<string, Page
       title: 'Heritage / Achievement',
       description: '성과 페이지의 Hero, 지표와 수상 갤러리를 관리합니다.'
     },
+    'mastery-technique': {
+      title: 'Mastery / Technique',
+      description: '기술 기록 페이지의 Hero, 기술 카드, 기준 설명과 증빙 매트릭스를 관리합니다.'
+    },
     'mastery-making': {
       title: 'Mastery / Making',
       description: '제작 공정 페이지의 Hero, 7단계 프로세스와 디테일 콘텐츠를 관리합니다.'
@@ -104,6 +108,10 @@ const pageMetadataLabels: Record<Exclude<AdminLocale, 'zh'>, Record<string, Page
     'heritage-achievement': {
       title: 'Heritage / Achievement',
       description: 'Manage the Achievement page hero, metrics, and award gallery.'
+    },
+    'mastery-technique': {
+      title: 'Mastery / Technique',
+      description: 'Manage the Technique page hero, technical records, standards, and evidence matrix.'
     },
     'mastery-making': {
       title: 'Mastery / Making',
@@ -187,6 +195,7 @@ const contentGroupLabels: Record<Exclude<AdminLocale, 'zh'>, Record<string, stri
     'home:homeUi': '홈 팝업, 버튼 및 보조 문구',
     'archive:main': 'Archive 주요 콘텐츠',
     'archive:chronicleUi': 'Archive 가로 탐색 및 마지막 버튼',
+    'mastery-technique:main': 'Technique 기술 기록 콘텐츠',
     'mastery-creations:main': 'Creations 주요 콘텐츠',
     'mastery-creations:collectionUi': '작품 목록, 필터 및 상세 공통 문구',
     'mastery-creations-champion:main': 'Champion 분류 카드',
@@ -212,6 +221,7 @@ const contentGroupLabels: Record<Exclude<AdminLocale, 'zh'>, Record<string, stri
     'home:homeUi': 'Home popups, buttons, and helper copy',
     'archive:main': 'Archive main content',
     'archive:chronicleUi': 'Archive horizontal browsing and end button',
+    'mastery-technique:main': 'Technique technical record content',
     'mastery-creations:main': 'Creations main content',
     'mastery-creations:collectionUi': 'Collection list, filters, and detail copy',
     'mastery-creations-champion:main': 'Champion category card',
@@ -271,6 +281,15 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     statement: '说明',
     gallery: '图库',
     branches: '分支入口',
+    records: '技术记录',
+    standards: '技术标准',
+    evidence: '证据矩阵',
+    rows: '行',
+    scope: '适用范围',
+    status: '状态',
+    proof: '证明状态',
+    makingLabel: 'Making 按钮',
+    creationsLabel: 'Creations 按钮',
     details: '细节',
     closing: '结尾区块',
     process: '流程',
@@ -364,6 +383,15 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     statement: '설명',
     gallery: '갤러리',
     branches: '분기 링크',
+    records: '기술 기록',
+    standards: '기술 기준',
+    evidence: '증빙 매트릭스',
+    rows: '행',
+    scope: '적용 범위',
+    status: '상태',
+    proof: '증빙 상태',
+    makingLabel: 'Making 버튼',
+    creationsLabel: 'Creations 버튼',
     details: '상세',
     closing: '마무리 섹션',
     process: '프로세스',
@@ -457,6 +485,15 @@ const pathSegmentLabels: Record<AdminLocale, Record<string, string>> = {
     statement: 'Statement',
     gallery: 'Gallery',
     branches: 'Branch links',
+    records: 'Technical records',
+    standards: 'Technical standards',
+    evidence: 'Evidence matrix',
+    rows: 'Rows',
+    scope: 'Scope',
+    status: 'Status',
+    proof: 'Proof status',
+    makingLabel: 'Making button',
+    creationsLabel: 'Creations button',
     details: 'Details',
     closing: 'Closing section',
     process: 'Process',

@@ -12,6 +12,7 @@ type PageKey =
   | 'credibility'
   | 'achievement'
   | 'technique'
+  | 'techniqueRecords'
   | 'collection'
   | 'news'
   | 'golf'
@@ -37,6 +38,7 @@ const cmsPageKeyByPageKey: Record<PageKey, string> = {
   credibility: 'heritage-credibility',
   achievement: 'heritage-achievement',
   technique: 'mastery-making',
+  techniqueRecords: 'mastery-technique',
   collection: 'mastery-creations',
   news: 'news',
   golf: 'golf',
@@ -53,6 +55,7 @@ const pathByPageKey: Record<PageKey, string> = {
   credibility: '/heritage/credibility',
   achievement: '/heritage/achievement',
   technique: '/mastery/making',
+  techniqueRecords: '/mastery/technique',
   collection: '/mastery/creations',
   news: '/news',
   golf: '/golf',
@@ -91,6 +94,11 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
       title: '우승반지 제작 공정과 맞춤 세공',
       description:
         '대호는 1988년부터 축적한 우승반지 제작 경험을 바탕으로 디자인 상담, 3D 모델링, 주조, 세공, 각인, 검수까지 관리합니다.'
+    },
+    techniqueRecords: {
+      title: '대호 기술 기록과 맞춤 반지 세공 기준',
+      description:
+        '대호의 맞춤 반지 제작 기술, 세공 기준, 표면 처리, 구조 설계와 향후 검증 자료를 정리하는 기술 기록 페이지입니다.'
     },
     collection: {
       title: '대호 우승반지·임관반지·주문제작 컬렉션',
@@ -148,6 +156,11 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
       title: 'Championship Ring Production Process',
       description:
         'DAEHO manages championship ring production from consultation, 3D modeling, casting, craft, engraving, and inspection based on experience since 1988.'
+    },
+    techniqueRecords: {
+      title: 'DAEHO Technical Records and Craft Standards',
+      description:
+        'A technical record page for DAEHO custom ring craft standards, surface treatment, structure planning, and future verification materials.'
     },
     collection: {
       title: 'DAEHO Championship, Appointment, and Bespoke Rings',

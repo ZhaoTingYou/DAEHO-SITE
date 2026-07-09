@@ -179,6 +179,10 @@ const pageGuideKeys: Record<string, string> = {
   'heritage-achievement|main|copy.marketFeatures.*.image': 'marketWide',
   'heritage-achievement|main|gallery.items.*.image': 'portrait',
 
+  'mastery-technique|main|hero.image': 'ultrawide',
+  'mastery-technique|main|records.items.*.image': 'portrait',
+  'mastery-technique|main|standards.items.*.image': 'square',
+
   'mastery-making|main|hero.image': 'ultrawide',
   'mastery-making|main|process.steps.*.image': 'square',
   'mastery-making|main|details.items.*.image': 'square',

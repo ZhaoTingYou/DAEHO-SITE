@@ -133,7 +133,7 @@
           "title": "MASTERY",
           "caption": "그래서 우리가 최고다",
           "image": "home_pillar_specialty.png",
-          "href": "/mastery/making"
+          "href": "/mastery/technique"
         },
         {
           "title": "NEWS",
@@ -610,11 +610,11 @@
       "items": [
         {
           "eyebrow": "TECHNIQUE",
-          "title": "공정",
-          "body": "스케치에서 전달까지, 한 작품이 완성되는 일곱 단계를 밝은 공방의 구조로 보여줍니다.",
+          "title": "기술 기록",
+          "body": "한국 시장에서 처음 시도했거나 대호 방식으로 구현해온 기술을 확인 자료와 함께 정리할 기술 기록지입니다.",
           "image": "specialty_card_technique.png",
-          "href": "/mastery/making",
-          "cta": "공정 보기"
+          "href": "/mastery/technique",
+          "cta": "기술 기록 보기"
         },
         {
           "eyebrow": "COLLECTION",
@@ -650,10 +650,105 @@
     },
     "closing": {
       "title": "제작의 모든 단계가 작품의 이유가 됩니다.",
-      "cta": "공정 보기"
+      "cta": "기술 기록 보기"
     }
   },
   "specialtyPages": {
+    "techniqueRecords": {
+      "hero": {
+        "eyebrow": "TECHNICAL RECORD",
+        "title": "TECHNIQUE",
+        "body": "대호가 한국 시장에서 처음 시도했거나 대호만의 방식으로 구현해온 기술 기록을 정리하는 페이지입니다. 현재 문구는 확인 전 임시 문안이며, 실제 기술명과 증빙 자료가 도착하면 교체됩니다.",
+        "image": "specialty_technique_hero.png"
+      },
+      "records": {
+        "eyebrow": "TECHNICAL RECORDS",
+        "title": "기록으로 바뀔 기술의 자리",
+        "items": [
+          {
+            "number": "01",
+            "title": "국내 최초 적용 기술 후보",
+            "scope": "도입 연도와 적용 프로젝트 확인 예정",
+            "status": "확인 예정",
+            "body": "도입 연도와 적용 프로젝트가 확인되면 실제 기술명과 적용 범위로 교체됩니다.",
+            "image": "specialty_process_1_sketch.png"
+          },
+          {
+            "number": "02",
+            "title": "대호 전용 구현 기술 후보",
+            "scope": "구현 가능 범위와 검증 자료 확인 예정",
+            "status": "확인 예정",
+            "body": "현재 대호가 안정적으로 구현 가능한 범위를 확인한 뒤 공개 문구로 정리합니다.",
+            "image": "specialty_process_2_modeling.png"
+          },
+          {
+            "number": "03",
+            "title": "구조 설계와 내부 디테일",
+            "scope": "외부 구조, 내부 공간, 착용자 전용 요소",
+            "status": "확인 예정",
+            "body": "외부 장식뿐 아니라 착용자만 볼 수 있는 내부 공간까지 설계 기준으로 관리합니다.",
+            "image": "specialty_card_technique.png"
+          }
+        ]
+      },
+      "standards": {
+        "eyebrow": "CRAFT STANDARDS",
+        "title": "기술을 완성도로 바꾸는 기준",
+        "items": [
+          {
+            "title": "정밀 조각",
+            "body": "문양과 문자 깊이를 조율해 빛 안에서도 읽히는 선명도를 기준으로 삼습니다.",
+            "image": "specialty_detail_01.png"
+          },
+          {
+            "title": "표면 처리",
+            "body": "금속의 색, 질감, 반사 방향을 제품 목적에 맞춰 정리합니다.",
+            "image": "specialty_detail_02.png"
+          },
+          {
+            "title": "입체 구조",
+            "body": "상징 요소가 장식으로만 보이지 않도록 높이, 층, 착용감을 함께 검토합니다.",
+            "image": "specialty_detail_03.png"
+          },
+          {
+            "title": "검수 기준",
+            "body": "각인, 표면, 세팅, 패키지 상태를 납품 전 기준에 맞춰 다시 확인합니다.",
+            "image": "specialty_bespoke.png"
+          }
+        ]
+      },
+      "evidence": {
+        "eyebrow": "EVIDENCE MATRIX",
+        "title": "공개 전 확인해야 할 기술 기록",
+        "rows": [
+          {
+            "label": "도입 연도",
+            "value": "확인 후 입력",
+            "proof": "기록 준비 중"
+          },
+          {
+            "label": "적용 프로젝트",
+            "value": "실제 사례 확인 후 입력",
+            "proof": "기록 준비 중"
+          },
+          {
+            "label": "기술 범위",
+            "value": "제작 가능 범위 정리 예정",
+            "proof": "기록 준비 중"
+          },
+          {
+            "label": "검증 자료",
+            "value": "사진, 도면, 프로젝트 자료 확인 예정",
+            "proof": "기록 준비 중"
+          }
+        ]
+      },
+      "cta": {
+        "title": "기술 기록은 제작 공정과 완성된 작품으로 이어집니다.",
+        "makingLabel": "제작 공정 보기",
+        "creationsLabel": "완성 작품 보기"
+      }
+    },
     "technique": {
       "hero": {
         "eyebrow": "",
@@ -1217,7 +1312,8 @@
         "credibility": "CREDIBILITY",
         "achievement": "ACHIEVEMENT",
         "specialty": "MASTERY",
-        "technique": "MAKING",
+        "technique": "TECHNIQUE",
+        "making": "MAKING",
         "collection": "CREATIONS",
         "news": "NEWS",
         "golf": "GOLF"
@@ -1238,7 +1334,8 @@
           "title": "정밀한이 만드는 차이",
           "motif": "01-07",
           "descriptions": {
-            "technique": "공정 · 7단계의 정성",
+            "technique": "기술 · 확인 예정 기록",
+            "making": "공정 · 7단계의 정성",
             "collection": "작품 · 완성된 결과물"
           }
         }

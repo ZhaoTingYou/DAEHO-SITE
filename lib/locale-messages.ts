@@ -21,9 +21,39 @@ const messagesByLocale: Record<Locale, LocaleMessages> = {
 };
 
 export async function getLocaleMessages(locale: Locale): Promise<LocaleMessages> {
-  const baseMessages = cloneJson(messagesByLocale[locale] ?? koMessages);
+  const staticMessages = messagesByLocale[locale] ?? koMessages;
+  const baseMessages = cloneJson(staticMessages);
 
-  return applyCmsPageOverrides(baseMessages, locale);
+  return normalizeMasteryNavigationCopy(await applyCmsPageOverrides(baseMessages, locale), staticMessages);
+}
+
+export function normalizeMasteryNavigationCopy(messages: LocaleMessages, staticMessages: LocaleMessages): LocaleMessages {
+  const items = messages.common.navigation.items;
+  const staticItems = staticMessages.common.navigation.items;
+  const descriptions = messages.common.navigation.mega.specialty.descriptions;
+  const staticDescriptions = staticMessages.common.navigation.mega.specialty.descriptions;
+
+  if (!items.making) {
+    items.making = staticItems.making;
+  }
+
+  if (!items.technique || items.technique === items.making) {
+    items.technique = staticItems.technique;
+  }
+
+  if (!descriptions.making) {
+    descriptions.making = staticDescriptions.making;
+  }
+
+  if (
+    !descriptions.technique ||
+    descriptions.technique === descriptions.making ||
+    descriptions.technique === 'Technique · Seven careful stages'
+  ) {
+    descriptions.technique = staticDescriptions.technique;
+  }
+
+  return messages;
 }
 
 async function applyCmsPageOverrides(messages: LocaleMessages, locale: Locale) {

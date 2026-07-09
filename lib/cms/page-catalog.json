@@ -230,6 +230,63 @@
     ]
   },
   {
+    "pageKey": "mastery-technique",
+    "title": "Mastery / Technique",
+    "description": "管理技术记录页面的 Hero、技术记录卡、标准说明和证据矩阵。",
+    "section": "Mastery",
+    "sortOrder": 39,
+    "href": "/mastery/technique",
+    "sourcePath": "specialtyPages.techniqueRecords",
+    "fields": [
+      {"path": "hero.eyebrow", "label": "Hero 眉标", "editor": {"align": "center"}},
+      {"path": "hero.title", "label": "Hero 标题", "editor": {"align": "center"}},
+      {"path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4, "editor": {"align": "center"}},
+      {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "records.eyebrow", "label": "技术记录眉标", "editor": {"align": "center"}},
+      {"path": "records.title", "label": "技术记录标题", "editor": {"align": "center"}},
+      {
+        "path": "records.items",
+        "label": "技术记录卡",
+        "type": "json",
+        "itemFields": [
+          {"path": "number", "label": "编号"},
+          {"path": "title", "label": "技术名"},
+          {"path": "scope", "label": "适用范围"},
+          {"path": "status", "label": "证据状态"},
+          {"path": "body", "label": "说明", "type": "textarea", "rows": 3},
+          {"path": "image", "label": "图片", "type": "image"}
+        ]
+      },
+      {"path": "standards.eyebrow", "label": "技术标准眉标", "editor": {"align": "center"}},
+      {"path": "standards.title", "label": "技术标准标题", "editor": {"align": "center"}},
+      {
+        "path": "standards.items",
+        "label": "技术标准",
+        "type": "json",
+        "itemFields": [
+          {"path": "title", "label": "标题"},
+          {"path": "body", "label": "正文", "type": "textarea", "rows": 3},
+          {"path": "image", "label": "图片", "type": "image"}
+        ]
+      },
+      {"path": "evidence.eyebrow", "label": "证据区眉标", "editor": {"align": "center"}},
+      {"path": "evidence.title", "label": "证据区标题", "editor": {"align": "center"}},
+      {
+        "path": "evidence.rows",
+        "label": "证据矩阵",
+        "type": "json",
+        "itemFields": [
+          {"path": "label", "label": "标签"},
+          {"path": "value", "label": "内容"},
+          {"path": "proof", "label": "证明状态"}
+        ]
+      },
+      {"path": "cta.title", "label": "CTA 标题", "editor": {"align": "center"}},
+      {"path": "cta.makingLabel", "label": "Making 按钮"},
+      {"path": "cta.creationsLabel", "label": "Creations 按钮"}
+    ]
+  },
+  {
     "pageKey": "mastery-making",
     "title": "Mastery / Making",
     "description": "管理制作工艺页面的 Hero、七步流程和细节说明。",
@@ -751,7 +808,8 @@
       {"path": "navigation.items.credibility", "label": "导航：CREDIBILITY", "labels": {"ko": "내비게이션: CREDIBILITY", "en": "Navigation: CREDIBILITY"}},
       {"path": "navigation.items.achievement", "label": "导航：ACHIEVEMENT", "labels": {"ko": "내비게이션: ACHIEVEMENT", "en": "Navigation: ACHIEVEMENT"}},
       {"path": "navigation.items.specialty", "label": "导航：MASTERY", "labels": {"ko": "내비게이션: MASTERY", "en": "Navigation: MASTERY"}},
-      {"path": "navigation.items.technique", "label": "导航：MAKING", "labels": {"ko": "내비게이션: MAKING", "en": "Navigation: MAKING"}},
+      {"path": "navigation.items.technique", "label": "导航：TECHNIQUE", "labels": {"ko": "내비게이션: TECHNIQUE", "en": "Navigation: TECHNIQUE"}},
+      {"path": "navigation.items.making", "label": "导航：MAKING", "labels": {"ko": "내비게이션: MAKING", "en": "Navigation: MAKING"}},
       {"path": "navigation.items.collection", "label": "导航：CREATIONS", "labels": {"ko": "내비게이션: CREATIONS", "en": "Navigation: CREATIONS"}},
       {"path": "navigation.items.news", "label": "导航：NEWS", "labels": {"ko": "내비게이션: NEWS", "en": "Navigation: NEWS"}},
       {"path": "navigation.items.golf", "label": "导航：GOLF", "labels": {"ko": "내비게이션: GOLF", "en": "Navigation: GOLF"}},

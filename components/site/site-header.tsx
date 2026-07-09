@@ -107,6 +107,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
       title: navText('mega.specialty.title'),
       descriptions: {
         technique: navText('mega.specialty.descriptions.technique'),
+        making: navText('mega.specialty.descriptions.making'),
         collection: navText('mega.specialty.descriptions.collection')
       }
     }

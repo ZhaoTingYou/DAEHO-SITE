@@ -133,7 +133,7 @@
           "title": "MASTERY",
           "caption": "That is why we are the best",
           "image": "home_pillar_specialty.png",
-          "href": "/mastery/making"
+          "href": "/mastery/technique"
         },
         {
           "title": "NEWS",
@@ -610,11 +610,11 @@
       "items": [
         {
           "eyebrow": "TECHNIQUE",
-          "title": "Technique",
-          "body": "From sketch to delivery, seven steps reveal how a single work is completed in the light of the workshop.",
+          "title": "Technical record",
+          "body": "A record page prepared for technologies DAEHO first attempted in the Korean market or implemented through its own method, with verification materials to follow.",
           "image": "specialty_card_technique.png",
-          "href": "/mastery/making",
-          "cta": "View technique"
+          "href": "/mastery/technique",
+          "cta": "View technical record"
         },
         {
           "eyebrow": "COLLECTION",
@@ -650,10 +650,105 @@
     },
     "closing": {
       "title": "Every step of the process becomes the reason for the work.",
-      "cta": "View technique"
+      "cta": "View technical record"
     }
   },
   "specialtyPages": {
+    "techniqueRecords": {
+      "hero": {
+        "eyebrow": "TECHNICAL RECORD",
+        "title": "TECHNIQUE",
+        "body": "This page is prepared to organize technologies DAEHO first attempted in the Korean market or implemented through its own method. The current copy is temporary before verification and will be replaced when confirmed technology names and evidence arrive.",
+        "image": "specialty_technique_hero.png"
+      },
+      "records": {
+        "eyebrow": "TECHNICAL RECORDS",
+        "title": "Positions reserved for verified technologies",
+        "items": [
+          {
+            "number": "01",
+            "title": "First-in-market technology candidate",
+            "scope": "Year and applied project to be confirmed",
+            "status": "To be confirmed",
+            "body": "Once the introduction year and applied project are verified, this will be replaced with the actual technology name and scope.",
+            "image": "specialty_process_1_sketch.png"
+          },
+          {
+            "number": "02",
+            "title": "DAEHO implementation candidate",
+            "scope": "Capability range and verification material to be confirmed",
+            "status": "To be confirmed",
+            "body": "The public copy will be finalized after the stable implementation range and supporting material are reviewed.",
+            "image": "specialty_process_2_modeling.png"
+          },
+          {
+            "number": "03",
+            "title": "Structure and interior detail",
+            "scope": "Exterior structure, interior space, and wearer-only elements",
+            "status": "To be confirmed",
+            "body": "DAEHO designs not only the exterior form, but also the private interior space visible only to the wearer.",
+            "image": "specialty_card_technique.png"
+          }
+        ]
+      },
+      "standards": {
+        "eyebrow": "CRAFT STANDARDS",
+        "title": "Standards that turn technique into completion",
+        "items": [
+          {
+            "title": "Precision engraving",
+            "body": "Pattern and letter depth are tuned so lines remain legible in changing light.",
+            "image": "specialty_detail_01.png"
+          },
+          {
+            "title": "Surface treatment",
+            "body": "Metal color, texture, and reflection direction are arranged around the purpose of the piece.",
+            "image": "specialty_detail_02.png"
+          },
+          {
+            "title": "Dimensional structure",
+            "body": "Height, layering, symbolism, and wearing feel are reviewed together so details are structural, not only decorative.",
+            "image": "specialty_detail_03.png"
+          },
+          {
+            "title": "Inspection standards",
+            "body": "Engraving, surface, setting, and package condition are checked again before delivery.",
+            "image": "specialty_bespoke.png"
+          }
+        ]
+      },
+      "evidence": {
+        "eyebrow": "EVIDENCE MATRIX",
+        "title": "Technical records to verify before publication",
+        "rows": [
+          {
+            "label": "Introduction year",
+            "value": "To be entered after verification",
+            "proof": "Record pending"
+          },
+          {
+            "label": "Applied project",
+            "value": "To be entered after case review",
+            "proof": "Record pending"
+          },
+          {
+            "label": "Technology scope",
+            "value": "Production range to be organized",
+            "proof": "Record pending"
+          },
+          {
+            "label": "Verification material",
+            "value": "Photos, drawings, and project material to be checked",
+            "proof": "Record pending"
+          }
+        ]
+      },
+      "cta": {
+        "title": "Technical records connect to the making process and completed works.",
+        "makingLabel": "View making process",
+        "creationsLabel": "View completed works"
+      }
+    },
     "technique": {
       "hero": {
         "eyebrow": "",
@@ -1217,7 +1312,8 @@
         "credibility": "CREDIBILITY",
         "achievement": "ACHIEVEMENT",
         "specialty": "MASTERY",
-        "technique": "MAKING",
+        "technique": "TECHNIQUE",
+        "making": "MAKING",
         "collection": "CREATIONS",
         "news": "NEWS",
         "golf": "GOLF"
@@ -1238,7 +1334,8 @@
           "title": "The difference made by precision",
           "motif": "01-07",
           "descriptions": {
-            "technique": "Technique · Seven careful stages",
+            "technique": "Technique · Records to verify",
+            "making": "Making · Seven careful stages",
             "collection": "Collection · Completed works"
           }
         }

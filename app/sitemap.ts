@@ -18,6 +18,7 @@ const baseStaticPaths = [
   '/heritage/loyalty',
   '/heritage/credibility',
   '/heritage/achievement',
+  '/mastery/technique',
   '/mastery/making',
   '/mastery/creations',
   '/mastery/creations/champion',
@@ -92,6 +93,7 @@ function priorityForPath(path: string) {
   const priorityByPath: Record<string, number> = {
     '/mastery/creations/champion': 0.95,
     '/mastery/creations': 0.92,
+    '/mastery/technique': 0.91,
     '/mastery/making': 0.9,
     '/contact': 0.88,
     '/heritage/achievement': 0.86,
