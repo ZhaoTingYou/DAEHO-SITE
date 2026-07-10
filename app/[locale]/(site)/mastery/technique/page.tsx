@@ -6,6 +6,7 @@ import {Reveal} from '@/components/motion/reveal';
 import {ScrollText} from '@/components/motion/scroll-text';
 import {SafeImage} from '@/components/safe-image';
 import {RingDrawingBackground} from '@/components/specialty/ring-drawing-background';
+import {TechniqueRecordsSection} from '@/components/specialty/technique-records-section';
 import type {Locale} from '@/i18n/routing';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
@@ -13,15 +14,6 @@ import {withLocale} from '@/lib/site-map';
 
 type Props = {
   params: Promise<{locale: Locale}>;
-};
-
-type TechniqueRecordItem = {
-  number: string;
-  title: string;
-  scope: string;
-  status: string;
-  body: string;
-  image: string;
 };
 
 type TechniqueStandardItem = {
@@ -77,25 +69,11 @@ export default async function TechniqueRecordPage({params}: Props) {
         </div>
       </section>
 
-      <section className="relative z-10 border-y border-primary/10 bg-white/88 py-[clamp(72px,8vw,118px)]">
-        <div className="mx-auto max-w-[1180px] px-container">
-          <ScrollText className="grid gap-[clamp(30px,4vw,56px)] lg:grid-cols-[minmax(220px,0.34fr)_minmax(0,0.66fr)]">
-            <div className="lg:sticky lg:top-32 lg:self-start">
-              <p className="font-body text-[11px] font-semibold uppercase leading-none tracking-[0.3em] text-accent">
-                {content.records.eyebrow}
-              </p>
-              <h2 className="mt-5 font-heading text-[clamp(26px,2.7vw,38px)] font-semibold leading-[1.2] text-primary">
-                {content.records.title}
-              </h2>
-            </div>
-            <div className="grid gap-5 md:grid-cols-3">
-              {content.records.items.map((item) => (
-                <TechniqueRecordCard key={item.number} item={item} />
-              ))}
-            </div>
-          </ScrollText>
-        </div>
-      </section>
+      <TechniqueRecordsSection
+        eyebrow={content.records.eyebrow}
+        title={content.records.title}
+        records={content.records.items}
+      />
 
       <section className="relative z-10 bg-white py-[clamp(82px,9vw,136px)]">
         <div className="mx-auto max-w-[1120px] px-container">
@@ -162,33 +140,6 @@ export default async function TechniqueRecordPage({params}: Props) {
         </div>
       </section>
     </main>
-  );
-}
-
-function TechniqueRecordCard({item}: {item: TechniqueRecordItem}) {
-  return (
-    <article className="border border-primary/12 bg-white p-3 shadow-[0_18px_70px_rgba(16,29,48,.06)]">
-      <SafeImage filename={item.image} alt={item.title} aspect="aspect-[4/5]" variant="plain" sizes="(min-width: 1024px) 320px, 100vw" />
-      <div className="space-y-4 px-2 pb-5 pt-6">
-        <div className="flex items-start justify-between gap-4">
-          <p className="font-body text-[13px] font-semibold uppercase leading-none tracking-[0.2em] text-accent">
-            {item.number}
-          </p>
-          <p className="border border-primary/14 px-2 py-1 font-body text-[10px] font-semibold uppercase leading-none tracking-[0.14em] text-subtext">
-            {item.status}
-          </p>
-        </div>
-        <h3 className="font-heading text-[clamp(19px,1.7vw,23px)] font-semibold leading-[1.28] text-primary">
-          {item.title}
-        </h3>
-        <p className="font-body text-[12px] font-semibold uppercase leading-5 tracking-[0.12em] text-primary/60">
-          {item.scope}
-        </p>
-        <p className="whitespace-pre-line font-body text-[15px] leading-7 text-text">
-          {item.body}
-        </p>
-      </div>
-    </article>
   );
 }
 
