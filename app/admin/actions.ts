@@ -66,6 +66,8 @@ import {
   setObjectValueAtPath,
   type PageDefinition,
 } from '@/lib/cms/page-catalog';
+import type {TechniqueLocaleRecord} from '@/lib/cms/technique-records-core.mjs';
+import {normalizeSubmittedTechniqueRecords} from '@/lib/cms/technique-records-submit-core.mjs';
 import {locales, type Locale} from '@/lib/locales';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
@@ -286,12 +288,27 @@ export async function savePageAction(formData: FormData) {
     const previousImages = collectImageFilenames(pageKey ? await getPage(pageKey) : null);
     const sharedContentImages = await readSharedPageContentImageUploads(formData, returnTo);
     const sharedSeoImages = await readSharedPageSeoImageUploads(formData, returnTo);
+    const contentKo = await readPageLocaleContent(formData, 'ko', returnTo, definition, sharedContentImages);
+    const contentEn = await readPageLocaleContent(formData, 'en', returnTo, definition, sharedContentImages);
+
+    if (pageKey === 'mastery-technique') {
+      const normalizedRecords = normalizeSubmittedTechniqueRecords({
+        koItems: techniqueLocaleRecords(getObjectValueAtPath(contentKo, 'records.items')),
+        enItems: techniqueLocaleRecords(getObjectValueAtPath(contentEn, 'records.items')),
+        submittedIds: stringFromForm(formData, 'techniqueRecords.ids'),
+        submittedLength: stringFromForm(formData, 'techniqueRecords.length')
+      });
+
+      setObjectValueAtPath(contentKo, 'records.items', normalizedRecords.ko);
+      setObjectValueAtPath(contentEn, 'records.items', normalizedRecords.en);
+    }
+
     const payload = pagePayloadSchema.parse({
       section: stringFromForm(formData, 'section') || definition?.section || 'site',
       sortOrder: stringFromForm(formData, 'sortOrder') || definition?.sortOrder || '0',
       content: {
-        ko: await readPageLocaleContent(formData, 'ko', returnTo, definition, sharedContentImages),
-        en: await readPageLocaleContent(formData, 'en', returnTo, definition, sharedContentImages)
+        ko: contentKo,
+        en: contentEn
       },
       seo: {
         ko: await readPageLocaleSeo(formData, 'ko', returnTo, sharedSeoImages),
@@ -320,6 +337,10 @@ export async function savePageAction(formData: FormData) {
   } catch (error) {
     redirectWithAdminActionError(returnTo, error);
   }
+}
+
+function techniqueLocaleRecords(value: unknown) {
+  return Array.isArray(value) ? value as TechniqueLocaleRecord[] : [];
 }
 
 export async function uploadMediaAction(formData: FormData) {
