@@ -31,6 +31,10 @@ import {
 } from '@/lib/cms/page-catalog-i18n';
 import {getAdminImageGuide, getPageImageGuide} from '@/lib/cms/image-guides';
 import {getPage, listMedia} from '@/lib/cms/repositories';
+import {
+  pairTechniqueRecords,
+  type TechniqueLocaleRecord
+} from '@/lib/cms/technique-records-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {localeFieldSuffixes, locales, type Locale} from '@/lib/locales';
 
@@ -38,6 +42,7 @@ import {savePageAction} from '../../../actions';
 import {AdminActionAlert} from '../../../_components/admin-feedback';
 import {AppendableArrayItemsField, ImageUploadField, SelectField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
 import {PageHeader, Panel} from '../../../_components/admin-shell';
+import {TechniqueRecordsEditor} from '../../../_components/technique-records-editor';
 
 type Props = {
   params: Promise<{pageKey: string}>;
@@ -90,6 +95,13 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
   };
   const localeData = locales.map((locale) => getPageLocaleData(locale, definition, row, localeMessages[locale], adminLocale));
   const title = definition ? getLocalizedPageTitle(definition, adminLocale) : page.pageKey;
+  const techniqueEditor = pageKey === 'mastery-technique';
+  const techniqueDrafts = techniqueEditor
+    ? pairTechniqueRecords(
+        techniqueRecordItems(localeData, 'ko'),
+        techniqueRecordItems(localeData, 'en')
+      )
+    : [];
 
   return (
     <>
@@ -133,6 +145,46 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
           ) : null}
         </Panel>
 
+        {techniqueEditor ? (
+          <TechniqueRecordsEditor
+            drafts={techniqueDrafts}
+            mediaItems={mediaItems}
+            imageGuide={getPageImageGuide({
+              pageKey,
+              groupKey: 'main',
+              path: 'records.items.0.image',
+              locale: adminLocale
+            })}
+            labels={{
+              title: t('techniqueRecords.title'),
+              hint: t('techniqueRecords.hint'),
+              add: t('techniqueRecords.add'),
+              moveUp: t('techniqueRecords.moveUp'),
+              moveDown: t('techniqueRecords.moveDown'),
+              delete: t('techniqueRecords.delete'),
+              confirmDelete: t('techniqueRecords.confirmDelete'),
+              sharedImage: t('techniqueRecords.sharedImage'),
+              ko: t('techniqueRecords.ko'),
+              en: t('techniqueRecords.en'),
+              minimumOne: t('techniqueRecords.minimumOne'),
+              fieldTitle: t('techniqueRecords.fieldTitle'),
+              fieldScope: t('techniqueRecords.fieldScope'),
+              fieldStatus: t('techniqueRecords.fieldStatus'),
+              fieldBody: t('techniqueRecords.fieldBody'),
+              uploadLabel: t('page.uploadLocalImage'),
+              uploadHint: t('page.uploadLocalImageHint'),
+              emptyImageLabel: t('common.noImage'),
+              changedLabel: t('common.changed'),
+              selectedLabel: t('common.imageSelected'),
+              syncedLabel: t('common.imageSynced'),
+              mediaSelectLabel: t('media.selectFromLibrary'),
+              mediaLibraryTitle: t('media.libraryTitle'),
+              mediaEmptyLabel: t('media.libraryEmpty'),
+              mediaSelectedLabel: t('media.selectedExisting')
+            }}
+          />
+        ) : null}
+
         <div className="grid gap-6 xl:grid-cols-2">
           {localeData.map((data) => (
             <PageLocalePanel
@@ -144,6 +196,7 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
               adminLocale={adminLocale}
               mediaItems={mediaItems}
               messages={messages}
+              excludedFieldPaths={techniqueEditor ? ['records.items'] : []}
             />
           ))}
         </div>
@@ -173,7 +226,8 @@ function PageLocalePanel({
   definition,
   adminLocale,
   mediaItems,
-  messages
+  messages,
+  excludedFieldPaths
 }: {
   locale: Locale;
   groups: PageLocaleContentGroup[];
@@ -182,6 +236,7 @@ function PageLocalePanel({
   adminLocale: AdminLocale;
   mediaItems: MediaLibraryItem[];
   messages: Record<string, string>;
+  excludedFieldPaths: string[];
 }) {
   const suffix = localeFieldSuffixes[locale];
   const t = createAdminTranslator(messages);
@@ -200,7 +255,10 @@ function PageLocalePanel({
       <div className="grid gap-5">
         {groups.map((group) => {
           const context = {pageKey: definition?.pageKey ?? '', adminLocale, locale, groupKey: group.key, mediaItems, messages};
-          const fields = definition ? getPageFieldDefinitionsForGroup(definition, group.key, group.content) : null;
+          const fields = definition
+            ? getPageFieldDefinitionsForGroup(definition, group.key, group.content)
+                .filter((field) => !excludedFieldPaths.includes(field.path))
+            : null;
 
           return (
             <ContentGroupEditor key={group.key} group={group} context={context} fields={fields} definition={definition} />
@@ -234,6 +292,14 @@ function PageLocalePanel({
       </div>
     </Panel>
   );
+}
+
+function techniqueRecordItems(localeData: PageLocaleData[], locale: Locale) {
+  const data = localeData.find((item) => item.locale === locale);
+  const group = data?.groups.find((item) => item.key === 'main');
+  const records = getObjectValueAtPath(group?.content ?? {}, 'records.items');
+
+  return Array.isArray(records) ? records as TechniqueLocaleRecord[] : [];
 }
 
 function ContentGroupEditor({

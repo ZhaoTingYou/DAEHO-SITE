@@ -83,7 +83,7 @@ test('Technique page has CMS, SEO, sitemap, and image guide entries', () => {
   assert.match(sitemapSource, /'\/mastery\/technique'/);
   assert.match(sitemapSource, /'\/mastery\/technique': 0\.91/);
   assert.match(imageGuidesSource, /'mastery-technique\|main\|hero\.image': 'ultrawide'/);
-  assert.match(imageGuidesSource, /'mastery-technique\|main\|records\.items\.\*\.image': 'portrait'/);
+  assert.match(imageGuidesSource, /'mastery-technique\|main\|records\.items\.\*\.image': 'techniqueRecord'/);
   assert.match(imageGuidesSource, /'mastery-technique\|main\|standards\.items\.\*\.image': 'square'/);
 });
 

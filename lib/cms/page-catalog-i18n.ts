@@ -37,7 +37,7 @@ const pageMetadataLabels: Record<Exclude<AdminLocale, 'zh'>, Record<string, Page
     },
     'mastery-technique': {
       title: 'Mastery / Technique',
-      description: '기술 기록 페이지의 Hero, 기술 카드, 기준 설명과 증빙 매트릭스를 관리합니다.'
+      description: '기술 기록 페이지의 Hero, 기술 기록 아카이브, 기준 설명과 증빙 매트릭스를 관리합니다.'
     },
     'mastery-making': {
       title: 'Mastery / Making',

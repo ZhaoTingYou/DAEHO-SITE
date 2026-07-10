@@ -232,7 +232,7 @@
   {
     "pageKey": "mastery-technique",
     "title": "Mastery / Technique",
-    "description": "管理技术记录页面的 Hero、技术记录卡、标准说明和证据矩阵。",
+    "description": "管理技术记录页面的 Hero、技术记录档案、标准说明和证据矩阵。",
     "section": "Mastery",
     "sortOrder": 39,
     "href": "/mastery/technique",
@@ -246,7 +246,11 @@
       {"path": "records.title", "label": "技术记录标题", "editor": {"align": "center"}},
       {
         "path": "records.items",
-        "label": "技术记录卡",
+        "label": "技术记录档案",
+        "labels": {
+          "ko": "기술 기록 아카이브",
+          "en": "Technical record archive"
+        },
         "type": "json",
         "itemFields": [
           {"path": "number", "label": "编号"},

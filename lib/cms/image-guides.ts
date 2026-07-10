@@ -54,6 +54,11 @@ const guideSpecs = {
     ko: '세로형 object-cover 이미지입니다. 피사체가 상하 가장자리에 붙지 않게 해주세요.',
     en: 'Portrait object-cover image. Keep the subject away from top and bottom edges.'
   }),
+  techniqueRecord: spec('4:3', '1600 x 1200', {
+    zh: '横向技术档案图，object-cover；主体放在中央安全区，四周保留裁切空间。',
+    ko: '가로형 기술 기록 이미지입니다. 피사체는 중앙 안전 영역에 두고 가장자리에 여백을 남기세요.',
+    en: 'Landscape technical record image. Keep the subject inside the center safe area with crop room around it.'
+  }),
   wide43: spec('4:3', '1600 x 1200', {
     zh: '4:3 横图，object-cover；主体居中。',
     ko: '4:3 가로 이미지입니다. object-cover로 중앙 피사체를 권장합니다.',
@@ -180,7 +185,7 @@ const pageGuideKeys: Record<string, string> = {
   'heritage-achievement|main|gallery.items.*.image': 'portrait',
 
   'mastery-technique|main|hero.image': 'ultrawide',
-  'mastery-technique|main|records.items.*.image': 'portrait',
+  'mastery-technique|main|records.items.*.image': 'techniqueRecord',
   'mastery-technique|main|standards.items.*.image': 'square',
 
   'mastery-making|main|hero.image': 'ultrawide',
