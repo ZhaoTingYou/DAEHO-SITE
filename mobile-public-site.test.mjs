@@ -16,6 +16,7 @@ const loyaltyPage = readFileSync(new URL('./components/legacy/loyalty-commitment
 const credibilityPage = readFileSync(new URL('./components/legacy/credibility-compliance-page.tsx', import.meta.url), 'utf8');
 const achievementPage = readFileSync(new URL('./components/legacy/achievement-records-page.tsx', import.meta.url), 'utf8');
 const specialtyProcessSource = readFileSync(new URL('./components/specialty/specialty-process.tsx', import.meta.url), 'utf8');
+const creationsPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/creations/page.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
   assert.match(globals, /@import "\.\.\/styles\/mobile\.css"/);
@@ -104,4 +105,9 @@ test('Making mobile process uses readable fixed body copy and 4:3 media', () => 
   assert.match(specialtyProcessSource, /mobile-making-step/);
   assert.match(specialtyProcessSource, /mobile-copy/);
   assert.match(specialtyProcessSource, /max-md:aspect-\[4\/3\]/);
+});
+
+test('Creations mobile masthead cannot clip the display title', () => {
+  assert.match(creationsPageSource, /mobile-display/);
+  assert.doesNotMatch(creationsPageSource, /whitespace-nowrap[^\n]+CREATIONS/);
 });

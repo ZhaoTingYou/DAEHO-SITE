@@ -189,7 +189,7 @@ function MobileCollectionIndex({
   viewLabel: string;
 }) {
   return (
-    <div className="bg-white px-container pb-[calc(92px+env(safe-area-inset-bottom))] lg:hidden">
+    <div className="bg-white px-[var(--mobile-page-gutter)] pb-[calc(92px+env(safe-area-inset-bottom))] lg:hidden">
       <div className="mx-auto max-w-[520px] border-t border-primary/15">
         {categories.map((category, index) => (
           <MobileCollectionCard
@@ -226,7 +226,7 @@ function MobileCollectionCard({
   return (
     <Link
       href={href}
-      className="group block border-b border-primary/15 py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+      className="mobile-collection-card group block border-b border-primary/15 py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
     >
       <div className="flex min-h-11 items-center justify-between gap-4 font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/50">
         <span className="font-numeric text-accent/85">{String(index + 1).padStart(2, '0')}</span>
@@ -234,12 +234,12 @@ function MobileCollectionCard({
       </div>
 
       <div className="mt-4 grid gap-5">
-        <div className="relative aspect-[1.08] overflow-hidden border border-primary/10 bg-primary">
+        <div className="relative aspect-[4/5] overflow-hidden border border-primary/10 bg-primary">
           <Image
             src={imageSrc(artwork.background)}
             alt=""
             fill
-            sizes="(min-width: 768px) 520px, calc(100vw - 48px)"
+            sizes="(min-width: 768px) 520px, calc(100vw - 40px)"
             className="object-cover object-center opacity-95 transition duration-700 ease-brand group-hover:scale-[1.035]"
             priority={index === 0}
           />
@@ -251,7 +251,7 @@ function MobileCollectionCard({
               alt={`${category.label} ${copy}`}
               width={artwork.productWidth}
               height={artwork.productHeight}
-              sizes="(min-width: 768px) 520px, calc(100vw - 48px)"
+              sizes="(min-width: 768px) 520px, calc(100vw - 40px)"
               className={`h-auto max-h-full object-contain drop-shadow-[0_24px_42px_rgba(0,0,0,.42)] transition duration-700 ease-brand group-hover:scale-[1.035] ${getMobileCollectionProductClass(category.id)}`}
               priority={index === 0}
             />
@@ -260,14 +260,14 @@ function MobileCollectionCard({
 
         <div className="grid grid-cols-[1fr_auto] items-end gap-5">
           <div className="space-y-3">
-            <h2 className="font-heading text-[clamp(31px,9vw,42px)] font-semibold leading-[0.98] text-primary">
+            <h2 className="break-words font-heading text-[32px] font-semibold leading-[1.05] text-primary">
               {category.label}
             </h2>
-            <p className="max-w-[24rem] whitespace-pre-line font-body text-[14px] leading-[1.75] text-primary/66">
+            <p className="mobile-copy line-clamp-2 max-w-[24rem] whitespace-pre-line font-body text-primary/66">
               {copy}
             </p>
           </div>
-          <span className="grid h-11 w-11 place-items-center border border-primary/18 text-[18px] leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent" aria-hidden="true">
+          <span className="mobile-tap-target grid h-11 w-11 place-items-center border border-primary/18 text-[18px] leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent" aria-hidden="true">
             →
           </span>
         </div>
@@ -1618,11 +1618,11 @@ function CollectionGridView({
   locale: Locale;
 }) {
   return (
-    <div className="relative mx-auto max-w-[1280px] px-container">
+    <div className="relative mx-auto max-w-[1280px] px-[var(--mobile-page-gutter)] md:px-container">
       <Link
         href={backHref}
         aria-label={allLabel}
-        className="link-sweep no-underline !absolute left-container top-0 font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
+        className="mobile-tap-target link-sweep no-underline !absolute left-[var(--mobile-page-gutter)] top-0 inline-flex items-center justify-center font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent md:left-container"
       >
         <span aria-hidden="true">←</span>
       </Link>
@@ -1673,19 +1673,19 @@ function AppointmentCollectionView({
   const copy = resolveAppointmentShowcaseCopy(locale, appointment);
 
   return (
-    <div className="-mb-[clamp(84px,9vw,132px)] -mt-28 overflow-x-hidden bg-white pb-[clamp(220px,26vw,340px)] pt-28 text-primary">
-      <div className="mx-auto max-w-[1480px] px-container">
-        <div className="relative border-b border-hairline pb-[clamp(63px,7.5vw,114px)] pt-[clamp(28px,4vw,56px)]">
+    <div className="-mb-[clamp(84px,9vw,132px)] mt-0 overflow-x-hidden bg-white pb-24 pt-0 text-primary md:-mt-28 md:pb-[clamp(220px,26vw,340px)] md:pt-28">
+      <div className="mx-auto max-w-[1480px] px-[var(--mobile-page-gutter)] md:px-container">
+        <div className="relative border-b border-hairline pb-10 pt-6 md:pb-[clamp(63px,7.5vw,114px)] md:pt-[clamp(28px,4vw,56px)]">
           <Link
             href={backHref}
             aria-label={allLabel}
-            className="link-sweep no-underline !absolute left-0 top-[clamp(28px,4vw,56px)] font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
+            className="mobile-tap-target link-sweep no-underline !absolute left-0 top-6 inline-flex items-center justify-center font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent md:top-[clamp(28px,4vw,56px)]"
           >
             <span aria-hidden="true">←</span>
           </Link>
           <div className="mx-auto max-w-3xl space-y-7 text-center">
             <div className="space-y-4">
-              <h1 className="font-heading text-[clamp(32px,4.2vw,54px)] font-semibold leading-none text-primary">
+              <h1 className="break-words font-heading text-[32px] font-semibold leading-[1.08] text-primary md:text-[clamp(32px,4.2vw,54px)] md:leading-none">
                 {activeLabel}
               </h1>
             </div>
@@ -1695,7 +1695,7 @@ function AppointmentCollectionView({
 
       <section
         aria-label={filterLabel}
-        className="mx-auto flex w-full flex-col items-center px-[clamp(22px,5vw,42px)] pt-[clamp(76px,8vw,118px)] text-center lg:w-[60vw] lg:max-w-[980px]"
+        className="mx-auto flex w-full flex-col items-center px-[var(--mobile-page-gutter)] pt-16 text-center md:px-[clamp(22px,5vw,42px)] md:pt-[clamp(76px,8vw,118px)] lg:w-[60vw] lg:max-w-[980px]"
       >
         <AppointmentTextBlock title={copy.intro.title} lines={copy.intro.lines} />
 
@@ -1713,7 +1713,7 @@ function AppointmentCollectionView({
         <AppointmentTextBlock
           title={copy.honor.title}
           lines={copy.honor.lines}
-          className="mt-[clamp(86px,13vw,144px)]"
+          className="mt-20 md:mt-[clamp(86px,13vw,144px)]"
         />
 
         <AppointmentReveal className="mt-[clamp(58px,8vw,84px)] flex w-full justify-center">
@@ -1729,7 +1729,7 @@ function AppointmentCollectionView({
         <AppointmentTextBlock
           title={copy.keepsake.title}
           lines={copy.keepsake.lines}
-          className="mt-[clamp(104px,15vw,168px)]"
+          className="mt-20 md:mt-[clamp(104px,15vw,168px)]"
         />
 
         <AppointmentReveal className="mt-[clamp(62px,9vw,96px)] flex w-full justify-center">
@@ -1745,7 +1745,7 @@ function AppointmentCollectionView({
         <AppointmentTextBlock
           title={copy.inside.title}
           lines={copy.inside.lines}
-          className="mt-[clamp(92px,13vw,150px)]"
+          className="mt-20 md:mt-[clamp(92px,13vw,150px)]"
         />
 
         <AppointmentReveal className="mt-[clamp(74px,10vw,112px)] box-border flex w-screen max-w-[1180px] flex-col items-center px-[clamp(24px,3vw,48px)]">
@@ -1778,7 +1778,7 @@ function AppointmentCollectionView({
         <AppointmentTextBlock
           title={copy.evolution.title}
           lines={copy.evolution.lines}
-          className="mt-[clamp(118px,15vw,170px)]"
+          className="mt-20 md:mt-[clamp(118px,15vw,170px)]"
         />
       </section>
     </div>
@@ -1816,10 +1816,10 @@ function AppointmentTextBlock({
 }) {
   return (
     <div className={`mx-auto w-full max-w-[720px] ${className ?? ''}`}>
-      <h2 className="[font-family:'MaruBuri',serif] text-[clamp(20px,1.95vw,30px)] font-normal leading-[1.35] tracking-normal text-primary">
+      <h2 className="break-words [font-family:'MaruBuri',serif] text-[24px] font-normal leading-[1.35] tracking-normal text-primary md:text-[clamp(20px,1.95vw,30px)]">
         {title}
       </h2>
-      <div className="mt-[clamp(28px,3.5vw,42px)] space-y-[2px] [font-family:'Pretendard',sans-serif] text-[clamp(12px,1.08vw,16px)] font-normal leading-[1.72] tracking-normal text-[#111111]">
+      <div className="mobile-copy mt-6 space-y-[2px] [font-family:'Pretendard',sans-serif] font-normal tracking-normal text-[#111111] md:mt-[clamp(28px,3.5vw,42px)] md:text-[clamp(12px,1.08vw,16px)] md:leading-[1.72]">
         {lines.map((line) => (
           <p key={line} className="whitespace-pre-line">{line}</p>
         ))}
@@ -1973,7 +1973,7 @@ function CollectionProductGrid({
   return (
     <div
       aria-label={filterLabel}
-      className={`grid grid-cols-2 gap-x-[clamp(18px,2.4vw,40px)] gap-y-[clamp(42px,5vw,76px)] pt-[clamp(32px,4vw,64px)] ${columns}`}
+      className={`grid grid-cols-1 gap-x-[clamp(18px,2.4vw,40px)] gap-y-12 pt-8 sm:grid-cols-2 sm:gap-y-[clamp(42px,5vw,76px)] sm:pt-[clamp(32px,4vw,64px)] ${columns}`}
     >
       {items.map((item, index) => (
         <motion.article
@@ -1993,8 +1993,8 @@ function CollectionProductGrid({
           >
             <CollectionImage
               item={item}
-              aspect="aspect-square"
-              sizes={finder ? '(min-width: 1280px) 280px, (min-width: 768px) 38vw, 50vw' : '(min-width: 1024px) 340px, 50vw'}
+              aspect="aspect-[4/5] sm:aspect-square"
+              sizes={finder ? '(min-width: 1280px) 280px, (min-width: 768px) 38vw, 100vw' : '(min-width: 1024px) 340px, 100vw'}
             />
             <div className={finder ? 'space-y-1 px-1 pt-4' : 'space-y-1.5 px-1 pt-5'}>
               <h3 className="font-heading text-[clamp(15px,1.3vw,18px)] font-semibold leading-snug text-primary">
@@ -2003,7 +2003,7 @@ function CollectionProductGrid({
               <p className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
                 {item.categoryLabel}
               </p>
-              <p className="whitespace-pre-line font-body text-[12px] leading-6 text-subtext">{item.caption}</p>
+              <p className="mobile-copy whitespace-pre-line font-body text-subtext md:text-[12px] md:leading-6">{item.caption}</p>
               {finder ? (
                 <p className="font-numeric text-[11px] uppercase tracking-[0.12em] text-subtext">
                   {[item.sportCategoryLabel, item.year].filter(Boolean).join(' / ')}

@@ -11,7 +11,7 @@ export type ProductGridItem = {
 
 export function ProductGrid({items}: {items: ProductGridItem[]}) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item) => (
         <Link
           key={item.title}
@@ -23,14 +23,14 @@ export function ProductGrid({items}: {items: ProductGridItem[]}) {
               <SafeImage
                 filename={item.image}
                 alt={item.caption}
-                aspect="aspect-square"
+                aspect="aspect-[4/5] sm:aspect-square"
                 variant="plain"
               />
             </div>
           </div>
           <div className="mt-5 space-y-2">
             <h3 className="font-heading text-xl font-semibold text-primary">{item.title}</h3>
-            <p className="whitespace-pre-line font-body text-sm leading-6 text-subtext">{item.caption}</p>
+            <p className="mobile-copy whitespace-pre-line font-body text-subtext md:text-sm md:leading-6">{item.caption}</p>
           </div>
         </Link>
       ))}

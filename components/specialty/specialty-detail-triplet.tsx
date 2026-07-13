@@ -44,7 +44,7 @@ export function SpecialtyDetailTriplet({items}: SpecialtyDetailTripletProps) {
                 {item.title}
               </h3>
               {item.body ? (
-                <p className="whitespace-pre-line font-body text-[15px] leading-6 text-text">{item.body}</p>
+                <p className="mobile-copy whitespace-pre-line font-body text-text md:text-[15px] md:leading-6">{item.body}</p>
               ) : null}
             </div>
           </motion.article>
@@ -58,7 +58,7 @@ function DetailImage({item}: {item: SpecialtyDetailItem}) {
   if (!item.hasImage) {
     return (
       <div
-        className="flex aspect-square w-full items-center justify-center break-all border border-hairline bg-bg p-4 text-center font-body text-[15px] font-semibold leading-5 tracking-[0.04em] text-subtext"
+        className="flex aspect-[4/3] w-full items-center justify-center break-all border border-hairline bg-bg p-4 text-center font-body text-[16px] font-semibold leading-6 tracking-[0.04em] text-subtext md:aspect-square md:text-[15px] md:leading-5"
         role="img"
         aria-label={item.image}
       >
@@ -68,7 +68,7 @@ function DetailImage({item}: {item: SpecialtyDetailItem}) {
   }
 
   return (
-    <div className="relative aspect-square w-full overflow-hidden bg-bg">
+    <div className="relative aspect-[4/3] w-full overflow-hidden bg-bg md:aspect-square">
       <Image
         src={imageSrc(item.image)}
         alt={item.title}

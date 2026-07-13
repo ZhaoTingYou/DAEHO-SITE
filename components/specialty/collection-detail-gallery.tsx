@@ -20,6 +20,9 @@ type CollectionDetailGalleryProps = {
 export function CollectionDetailGallery({images, thumbnailLabel}: CollectionDetailGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selected = images[selectedIndex] ?? images[0];
+  const canNavigate = images.length > 1;
+  const selectPrevious = () => setSelectedIndex((index) => (index - 1 + images.length) % images.length);
+  const selectNext = () => setSelectedIndex((index) => (index + 1) % images.length);
 
   return (
     <div className="space-y-4">
@@ -35,6 +38,16 @@ export function CollectionDetailGallery({images, thumbnailLabel}: CollectionDeta
             <GalleryImage image={selected} aspect="aspect-[4/5] lg:aspect-square" sizes="(min-width: 1024px) 720px, 100vw" />
           </motion.div>
         </AnimatePresence>
+        {canNavigate ? (
+          <div className="absolute inset-x-3 bottom-3 flex items-center justify-between">
+            <button type="button" onClick={selectPrevious} className="mobile-tap-target grid h-11 w-11 place-items-center bg-white/90 text-[20px] text-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="Previous image">
+              <span aria-hidden="true">←</span>
+            </button>
+            <button type="button" onClick={selectNext} className="mobile-tap-target grid h-11 w-11 place-items-center bg-white/90 text-[20px] text-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="Next image">
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        ) : null}
       </div>
       <div className="grid grid-cols-5 gap-3" aria-label={thumbnailLabel}>
         {images.map((image, index) => {
@@ -46,7 +59,7 @@ export function CollectionDetailGallery({images, thumbnailLabel}: CollectionDeta
               type="button"
               aria-pressed={isSelected}
               onClick={() => setSelectedIndex(index)}
-              className={`min-h-11 overflow-hidden border bg-white p-1 transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              className={`mobile-tap-target min-h-11 overflow-hidden border bg-white p-1 transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                 isSelected ? 'border-accent' : 'border-hairline hover:border-primary/40'
               }`}
             >

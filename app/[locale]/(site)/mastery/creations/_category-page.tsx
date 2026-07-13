@@ -1,4 +1,5 @@
 import type {Metadata} from 'next';
+import Link from 'next/link';
 import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
@@ -60,7 +61,19 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
   }
 
   return (
-    <main className="bg-white pb-[clamp(84px,9vw,132px)] pt-28 text-text">
+    <main className="mobile-page-shell bg-white pb-[clamp(84px,9vw,132px)] pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+20px)] text-text md:pt-28">
+      <nav aria-label={text.filtersLabel} className="mx-auto flex max-w-[1480px] gap-2 overflow-x-auto border-y border-hairline px-[var(--mobile-page-gutter)] py-2 md:hidden">
+        {filters.map((filter) => (
+          <Link
+            key={filter.id}
+            href={`/${locale}/mastery/creations/${filter.id}`}
+            className={`mobile-tap-target inline-flex shrink-0 items-center px-3 font-body text-[11px] font-semibold uppercase tracking-[0.14em] ${filter.id === categoryId ? 'text-accent' : 'text-primary/65'}`}
+            aria-current={filter.id === categoryId ? 'page' : undefined}
+          >
+            {filter.label}
+          </Link>
+        ))}
+      </nav>
       <SpecialtyCollectionCategory
         categoryId={categoryId}
         filters={filters}

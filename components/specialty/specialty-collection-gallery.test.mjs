@@ -8,6 +8,7 @@ const detailPageSource = readFileSync(
   new URL('../../app/[locale]/(site)/mastery/creations/[slug]/page.tsx', import.meta.url),
   'utf8'
 );
+const detailGallerySource = readFileSync(new URL('./collection-detail-gallery.tsx', import.meta.url), 'utf8');
 const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
 const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
@@ -101,6 +102,19 @@ test('collection stage artwork is exposed through CMS content fields', () => {
     assert.ok(fieldPaths.includes('background'), `${page.pageKey} should expose a background image field`);
     assert.ok(fieldPaths.includes('product'), `${page.pageKey} should expose a product PNG field`);
   }
+});
+
+test('collection mobile cards preserve stable product media and tap targets', () => {
+  assert.match(source, /mobile-collection-card/);
+  assert.match(source, /mobile-tap-target/);
+  assert.match(source, /aspect-\[4\/5\]/);
+});
+
+test('collection detail gallery keeps reachable working previous and next controls', () => {
+  assert.match(detailGallerySource, /const selectPrevious/);
+  assert.match(detailGallerySource, /const selectNext/);
+  assert.match(detailGallerySource, /onClick=\{selectPrevious\} className="mobile-tap-target/);
+  assert.match(detailGallerySource, /onClick=\{selectNext\} className="mobile-tap-target/);
 });
 
 test('creations products are managed only through Collections admin', () => {
