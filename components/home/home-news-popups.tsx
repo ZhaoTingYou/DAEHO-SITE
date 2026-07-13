@@ -68,23 +68,23 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
               setModalImageRatio(null);
               setActiveCard(card);
             }}
-            className="group grid h-full cursor-pointer grid-rows-[auto_1fr] bg-transparent text-left transition duration-hover ease-brand hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+            className="mobile-home-news-row group grid grid-cols-[112px_minmax(0,1fr)] gap-4 border-t border-primary/15 py-5 text-left transition duration-hover ease-brand hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:h-full md:grid-cols-none md:grid-rows-[auto_1fr] md:gap-0 md:border-t-0 md:py-0"
           >
             <div className="hover-zoom">
               <div className="hover-zoom-media">
                 <NewsImage card={card} />
               </div>
             </div>
-            <div className="grid min-h-[176px] grid-rows-[auto_1fr_auto] gap-4 py-4">
-              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[15px] font-medium uppercase tracking-[0.08em] text-subtext">
+            <div className="grid min-h-0 grid-rows-[auto_1fr_auto] gap-2 py-0 md:min-h-[176px] md:gap-4 md:py-4">
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[12px] font-medium uppercase tracking-[0.08em] text-subtext md:text-[15px]">
                 <span className="text-accent">{card.categoryLabel}</span>
                 <span className="h-3 w-px bg-hairline" aria-hidden="true" />
                 <span>{card.date}</span>
               </p>
-              <h3 className="font-heading text-[clamp(20px,1.55vw,25px)] font-semibold leading-[1.2] text-primary">
+              <h3 className="font-heading text-[20px] font-semibold leading-[1.2] text-primary md:text-[clamp(20px,1.55vw,25px)]">
                 {card.title}
               </h3>
-              <span className="w-fit border-b border-primary/30 pb-1 [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent">
+              <span className="hidden w-fit border-b border-primary/30 pb-1 [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent md:block">
                 {text.open}
               </span>
             </div>
@@ -198,7 +198,7 @@ function NewsImage({
   return (
     <div
       style={frameStyle}
-      className={`relative w-full overflow-hidden bg-bg ${
+        className={`home-news-image relative w-full overflow-hidden bg-bg ${
         fillFrame ? 'aspect-square max-h-[calc(100dvh-136px)]' : 'aspect-[3/4]'
       }`}
     >

@@ -6,6 +6,9 @@ const globals = readFileSync(new URL('./app/globals.css', import.meta.url), 'utf
 const mobile = readFileSync(new URL('./styles/mobile.css', import.meta.url), 'utf8');
 const header = readFileSync(new URL('./components/site/site-header.tsx', import.meta.url), 'utf8');
 const footer = readFileSync(new URL('./components/site/site-footer.tsx', import.meta.url), 'utf8');
+const homeHero = readFileSync(new URL('./components/home/home-hero.tsx', import.meta.url), 'utf8');
+const homeNews = readFileSync(new URL('./components/home/home-news-popups.tsx', import.meta.url), 'utf8');
+const chronicle = readFileSync(new URL('./components/chronicle/chronicle-horizontal.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
   assert.match(globals, /@import "\.\.\/styles\/mobile\.css"/);
@@ -28,4 +31,14 @@ test('public mobile shell uses a compact safe-area header and scrollable menu', 
   assert.doesNotMatch(footer, /px-container pt-16 pb-12/);
   assert.match(mobile, /\.mobile-site-footer \{[\s\S]*padding-bottom: calc\(32px \+ env\(safe-area-inset-bottom\)\);/);
   assert.doesNotMatch(mobile, /\.mobile-site-footer \{[\s\S]*padding-top:/);
+});
+
+test('Home mobile hero wraps copy and uses a controlled viewport height', () => {
+  assert.match(homeHero, /min-h-\[80svh\]/);
+  assert.doesNotMatch(homeHero, /className="block max-w-full overflow-visible whitespace-nowrap"/);
+  assert.match(homeNews, /mobile-home-news-row/);
+});
+
+test('Archive uses a dedicated linear mobile timeline', () => {
+  assert.match(chronicle, /<ChronicleMobile/);
 });

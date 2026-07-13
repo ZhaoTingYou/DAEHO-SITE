@@ -65,7 +65,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
   const heroMediaMode = content.mediaMode === 'image' ? 'image' : 'video';
 
   return (
-    <main className="min-h-screen bg-bg">
+    <main className="mobile-page-shell min-h-screen bg-bg">
       <HomeHero
         eyebrow={content.eyebrow}
         title={content.title}
@@ -77,11 +77,11 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
         locale={locale}
       />
 
-      <section className="bg-bg py-[clamp(110px,10vw,164px)]">
-        <div className="mx-auto max-w-[1240px] space-y-[clamp(30px,3.2vw,46px)] px-container">
+      <section className="bg-bg py-[var(--mobile-section-space)] md:py-[clamp(110px,10vw,164px)]">
+        <div className="mx-auto max-w-[1240px] space-y-[var(--mobile-section-space)] px-[var(--mobile-page-gutter)] md:space-y-[clamp(30px,3.2vw,46px)] md:px-container">
           <Reveal className="border-y border-primary/15 py-[clamp(30px,3.2vw,46px)]">
-            <div className="mx-auto grid w-full max-w-[1180px] lg:grid-cols-[minmax(260px,320px)_minmax(0,820px)] lg:items-center lg:gap-[clamp(44px,4vw,68px)]">
-              <div className="flex min-h-[clamp(190px,20vw,270px)] w-full items-center justify-center lg:text-center">
+            <div className="mx-auto grid w-full max-w-[1180px] gap-8 lg:grid-cols-[minmax(260px,320px)_minmax(0,820px)] lg:items-center lg:gap-[clamp(44px,4vw,68px)]">
+              <div className="order-2 flex min-h-[190px] w-full items-center justify-center lg:order-1 lg:min-h-[clamp(190px,20vw,270px)] lg:text-center">
                 <div className="w-full max-w-[300px] space-y-[10px]">
                   <h2 className="whitespace-pre-line font-heading text-[20px] font-medium uppercase leading-[1.18] tracking-[0.08em] text-primary">
                     {currentPulse.primaryTitle}
@@ -95,14 +95,14 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                 </div>
               </div>
 
-              <Link href={withLocale(locale, '/heritage/loyalty')} className="group block">
+              <Link href={withLocale(locale, '/heritage/loyalty')} className="group order-1 block lg:order-2">
                 <div className="relative overflow-hidden bg-bg">
                   <div className="hover-zoom">
                     <div className="hover-zoom-media">
                       <SafeImage
                         filename={primaryPulseImage}
                         alt={currentPulse.primaryTitle}
-                        aspect="aspect-[2.05/1]"
+                        aspect="aspect-[4/3] lg:aspect-[2.05/1]"
                         variant="plain"
                       />
                     </div>
@@ -113,21 +113,21 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
           </Reveal>
 
           <Reveal className="border-b border-primary/15 pb-[clamp(30px,3.2vw,46px)]">
-            <div className="mx-auto grid w-full max-w-[1180px] lg:grid-cols-[minmax(0,820px)_minmax(260px,320px)] lg:items-center lg:gap-[clamp(44px,4vw,68px)]">
+            <div className="mx-auto grid w-full max-w-[1180px] gap-8 lg:grid-cols-[minmax(0,820px)_minmax(260px,320px)] lg:items-center lg:gap-[clamp(44px,4vw,68px)]">
               <Link href={withLocale(locale, '/mastery/creations')} className="group block">
                 <div className="hover-zoom">
                   <div className="hover-zoom-media">
                     <SafeImage
                       filename={secondaryPulseImage}
                       alt={currentPulse.secondaryTitle}
-                      aspect="aspect-[2.05/1]"
+                        aspect="aspect-[4/3] lg:aspect-[2.05/1]"
                       variant="plain"
                     />
                   </div>
                 </div>
               </Link>
 
-              <div className="flex min-h-[clamp(190px,20vw,270px)] w-full items-center justify-center lg:text-center">
+              <div className="flex min-h-[190px] w-full items-center justify-center lg:min-h-[clamp(190px,20vw,270px)] lg:text-center">
                 <div className="w-full max-w-[300px] space-y-[10px] lg:-translate-x-[24px]">
                   <p className="whitespace-pre-line font-heading text-[20px] font-medium uppercase leading-[1.18] tracking-[0.08em] text-primary">
                     {currentPulse.secondaryTitle}

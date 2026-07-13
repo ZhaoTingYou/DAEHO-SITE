@@ -21,7 +21,7 @@ export function HomeStatBand({items, locale}: HomeStatBandProps) {
   const inView = useInView(ref, {once: true, amount: 0.35});
 
   return (
-    <div ref={ref} className="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-container sm:grid-cols-2 lg:grid-cols-5 lg:gap-0">
+    <div ref={ref} className="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-[var(--mobile-page-gutter)] sm:grid-cols-2 md:px-container lg:grid-cols-5 lg:gap-0">
       {items.map((item, index) => (
         <HomeStatBandCell
           key={`${item.value}-${item.label}`}
@@ -103,7 +103,7 @@ function HomeStatBandCell({
           {item.label}
         </p>
       ) : null}
-      <p className={`home-stat-band__body max-w-[210px] whitespace-pre-line ${isKorean ? 'text-[13px] leading-[1.45]' : 'text-[15px] leading-[1.36]'}`}>
+      <p className={`home-stat-band__body max-w-[210px] whitespace-pre-line text-[16px] ${isKorean ? 'leading-[1.45] md:text-[13px]' : 'leading-[1.36] md:text-[15px]'}`}>
         {item.body}
       </p>
     </div>

@@ -4,6 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {type CSSProperties, useEffect, useMemo, useRef, useState} from 'react';
 
+import {ChronicleMobile} from './chronicle-mobile';
+
 export type ChronicleHorizontalSlide = {
   year: string;
   label: string;
@@ -413,6 +415,10 @@ export function ChronicleHorizontal({
     const travel = Math.max(1, rect.height - window.innerHeight);
     window.scrollTo({top: stageTop + targetProgress * travel, behavior: 'smooth'});
   };
+
+  if (compactViewport) {
+    return <ChronicleMobile slides={slides} yearNavAriaLabel={yearNavAriaLabel} endNav={endNav} />;
+  }
 
   return (
     <main
