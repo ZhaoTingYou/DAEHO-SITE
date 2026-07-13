@@ -39,27 +39,19 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
     setActiveCard(null);
   }, []);
 
-  useEffect(() => {
-    if (activeCard || !openerRef.current) {
+  const handleModalExitComplete = useCallback(() => {
+    const opener = openerRef.current;
+    openerRef.current = null;
+    if (opener?.isConnected) {
+      opener.focus();
       return;
     }
 
-    const opener = openerRef.current;
-    openerRef.current = null;
-    const frame = window.requestAnimationFrame(() => {
-      if (opener?.isConnected) {
-        opener.focus();
-        return;
-      }
-
-      const fallback = document.querySelector<HTMLButtonElement>('.mobile-home-news-row');
-      if (fallback?.isConnected) {
-        fallback.focus();
-      }
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [activeCard]);
+    const fallback = document.querySelector<HTMLButtonElement>('.mobile-home-news-row');
+    if (fallback?.isConnected) {
+      fallback.focus();
+    }
+  }, []);
 
   const handleModalKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
     if (event.key !== 'Tab') {
@@ -146,7 +138,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
         ))}
       </div>
 
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={handleModalExitComplete}>
         {activeCard ? (
           <motion.div
             className="fixed inset-0 z-[120] grid items-end bg-primary/45 px-2 pb-2 pt-8 backdrop-blur-[2px] md:place-items-center md:px-container md:py-8"

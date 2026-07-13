@@ -31,3 +31,8 @@
 
 - Deferred Home news focus restoration until the closed state commits, then restored the connected opener or the first connected `.mobile-home-news-row` fallback and cleared the consumed opener ref. Escape, backdrop, close-button, focus-trap, and body-lock behavior remain intact.
 - Added the focused source regression to `mobile-public-site.test.mjs` and verified the full Task 7 acceptance suite (31 passing), `npm run lint -- --quiet`, `npx tsc --noEmit --pretty false --incremental false --skipLibCheck`, and `git diff --check`.
+
+## Exit Timing Follow-up
+
+- Moved connected opener/fallback restoration to `AnimatePresence` `onExitComplete`, keeping focus in the exiting dialog while its `aria-modal` remains rendered and clearing the opener ref only after exit completes.
+- Removed premature RAF restoration and added a source regression that rejects `requestAnimationFrame` while requiring the exit-complete callback and connected fallback behavior.
