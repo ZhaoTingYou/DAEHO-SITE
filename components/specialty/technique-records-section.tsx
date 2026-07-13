@@ -48,9 +48,18 @@ export function TechniqueRecordsSection({eyebrow, title, records}: TechniqueReco
             return (
               <article
                 key={item.id ?? item.number}
-                className="grid min-w-0 gap-[clamp(28px,5vw,72px)] border-b border-primary/18 py-[clamp(34px,5vw,72px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center"
+                className="mobile-technique-record grid min-w-0 gap-6 border-b border-primary/18 py-[72px] lg:gap-[clamp(28px,5vw,72px)] lg:py-[clamp(34px,5vw,72px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center"
               >
-                <Reveal className={`min-w-0 ${mediaOrderClass}`}>
+                <div className="order-1 flex flex-wrap items-baseline gap-x-5 gap-y-2 md:hidden">
+                  <p className="font-heading text-[32px] font-semibold leading-none text-accent">{item.number}</p>
+                  {item.status ? (
+                    <p className="font-body text-[11px] font-medium uppercase leading-5 tracking-[0.12em] text-subtext">
+                      {item.status}
+                    </p>
+                  ) : null}
+                </div>
+
+                <Reveal className={`order-2 min-w-0 ${mediaOrderClass}`}>
                   <SafeImage
                     filename={item.image}
                     alt={item.title}
@@ -60,8 +69,8 @@ export function TechniqueRecordsSection({eyebrow, title, records}: TechniqueReco
                   />
                 </Reveal>
 
-                <ScrollText className={`min-w-0 lg:px-[clamp(12px,3vw,44px)] ${textOrderClass}`}>
-                  <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
+                <ScrollText className={`order-3 min-w-0 lg:px-[clamp(12px,3vw,44px)] ${textOrderClass}`}>
+                  <div className="hidden flex-wrap items-baseline gap-x-5 gap-y-2 md:flex">
                     <p className="font-heading text-[clamp(30px,3.4vw,46px)] font-semibold leading-none text-accent">
                       {item.number}
                     </p>
@@ -72,13 +81,16 @@ export function TechniqueRecordsSection({eyebrow, title, records}: TechniqueReco
                     ) : null}
                   </div>
 
-                  <h3 className="mt-6 font-heading text-[clamp(25px,2.5vw,34px)] font-semibold leading-[1.22] text-primary">
-                    {item.title}
-                  </h3>
-                  <p className="mt-4 font-body text-[11px] font-semibold uppercase leading-5 tracking-[0.14em] text-primary/55">
+                  <p className="mt-0 break-words font-body text-[11px] font-semibold uppercase leading-5 tracking-[0.14em] text-primary/55 md:hidden">
                     {item.scope}
                   </p>
-                  <p className="mt-6 whitespace-pre-line font-body text-[16px] leading-8 text-text">
+                  <h3 className="mt-4 break-words font-heading text-[clamp(25px,2.5vw,34px)] font-semibold leading-[1.22] text-primary md:mt-6">
+                    {item.title}
+                  </h3>
+                  <p className="mt-4 hidden font-body text-[11px] font-semibold uppercase leading-5 tracking-[0.14em] text-primary/55 md:block">
+                    {item.scope}
+                  </p>
+                  <p className="mobile-copy mt-6 break-words whitespace-pre-line font-body text-[16px] leading-7 text-text md:leading-8">
                     {item.body}
                   </p>
                 </ScrollText>

@@ -153,3 +153,8 @@ test('Technique row metadata keeps status optional and body copy readable', () =
   assert.match(techniqueRecordsSectionSource, /\{item\.scope\}/);
   assert.match(techniqueRecordsSectionSource, /whitespace-pre-line[^"\n]*text-\[16px\][^"\n]*[\s\S]*?\{item\.body\}/);
 });
+
+test('Technique mobile records use metadata, image, and copy reading order', () => {
+  assert.match(techniqueRecordsSectionSource, /mobile-technique-record/);
+  assert.match(techniqueRecordsSectionSource, /order-1[\s\S]+order-2[\s\S]+order-3/);
+});

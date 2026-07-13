@@ -39,7 +39,7 @@ export default async function TechniqueRecordPage({params}: Props) {
   const content = (await getLocaleMessages(locale)).specialtyPages.techniqueRecords;
 
   return (
-    <main className="relative isolate overflow-hidden bg-white text-text">
+    <main className="mobile-page-shell relative isolate overflow-hidden bg-white text-text">
       <RingDrawingBackground />
 
       <section className="relative z-10 pt-28">
@@ -146,12 +146,14 @@ export default async function TechniqueRecordPage({params}: Props) {
 function TechniqueStandardCard({item}: {item: TechniqueStandardItem}) {
   return (
     <article className="grid gap-5 border-t border-primary/16 pt-5 md:grid-cols-[150px_minmax(0,1fr)] md:items-start">
-      <SafeImage filename={item.image} alt={item.title} aspect="aspect-square" variant="plain" sizes="(min-width: 768px) 150px, 100vw" />
+      <div className="hidden md:block">
+        <SafeImage filename={item.image} alt={item.title} aspect="aspect-square" variant="plain" sizes="(min-width: 768px) 150px, 100vw" />
+      </div>
       <div className="max-w-[440px] space-y-3">
         <h3 className="font-heading text-[clamp(20px,1.8vw,25px)] font-semibold leading-[1.26] text-primary">
           {item.title}
         </h3>
-        <p className="whitespace-pre-line font-body text-[15px] leading-7 text-text">
+        <p className="mobile-copy break-words whitespace-pre-line font-body text-[16px] leading-7 text-text md:text-[15px]">
           {item.body}
         </p>
       </div>
@@ -161,16 +163,16 @@ function TechniqueStandardCard({item}: {item: TechniqueStandardItem}) {
 
 function EvidenceRow({row}: {row: TechniqueEvidenceRow}) {
   return (
-    <div className="grid gap-3 px-4 py-5 md:grid-cols-[0.28fr_0.42fr_0.3fr] md:items-center md:px-6">
-      <p className="font-body text-[12px] font-semibold uppercase leading-none tracking-[0.18em] text-accent">
+    <dl className="grid gap-3 px-4 py-5 md:grid-cols-[0.28fr_0.42fr_0.3fr] md:items-center md:px-6">
+      <dt className="font-body text-[12px] font-semibold uppercase leading-none tracking-[0.18em] text-accent">
         {row.label}
-      </p>
-      <p className="font-heading text-[18px] font-semibold leading-[1.35] text-primary">
+      </dt>
+      <dd className="break-words font-heading text-[18px] font-semibold leading-[1.35] text-primary">
         {row.value}
-      </p>
-      <p className="font-body text-[13px] font-medium leading-6 text-subtext md:text-right">
+      </dd>
+      <dd className="mobile-copy break-words font-body text-[16px] font-medium leading-6 text-subtext md:text-[13px] md:text-right">
         {row.proof}
-      </p>
-    </div>
+      </dd>
+    </dl>
   );
 }

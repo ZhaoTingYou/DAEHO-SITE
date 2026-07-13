@@ -15,6 +15,7 @@ const heritageHero = readFileSync(new URL('./components/legacy/heritage-hero.tsx
 const loyaltyPage = readFileSync(new URL('./components/legacy/loyalty-commitment-page.tsx', import.meta.url), 'utf8');
 const credibilityPage = readFileSync(new URL('./components/legacy/credibility-compliance-page.tsx', import.meta.url), 'utf8');
 const achievementPage = readFileSync(new URL('./components/legacy/achievement-records-page.tsx', import.meta.url), 'utf8');
+const specialtyProcessSource = readFileSync(new URL('./components/specialty/specialty-process.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
   assert.match(globals, /@import "\.\.\/styles\/mobile\.css"/);
@@ -97,4 +98,10 @@ test('Loyalty mobile carousel keeps copy and controls in reachable document flow
   assert.match(loyaltyCarousel, /relative z-10 flex w-full flex-col bg-white/);
   assert.match(loyaltyCarousel, /relative z-20 flex justify-center gap-3 bg-white/);
   assert.match(loyaltyCarousel, /mobile-tap-target grid h-11 w-11/);
+});
+
+test('Making mobile process uses readable fixed body copy and 4:3 media', () => {
+  assert.match(specialtyProcessSource, /mobile-making-step/);
+  assert.match(specialtyProcessSource, /mobile-copy/);
+  assert.match(specialtyProcessSource, /max-md:aspect-\[4\/3\]/);
 });

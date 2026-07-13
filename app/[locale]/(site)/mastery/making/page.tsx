@@ -38,7 +38,7 @@ export default async function TechniquePage({params}: Props) {
   }));
 
   return (
-    <main className="relative isolate overflow-hidden bg-white text-text">
+    <main className="mobile-page-shell relative isolate overflow-hidden bg-white text-text">
       <section className="relative z-10 pt-28">
         <div className="mx-auto max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)]">
           <ScrollText className="mx-auto max-w-[720px] space-y-[18px] text-center">
@@ -53,7 +53,7 @@ export default async function TechniquePage({params}: Props) {
             <SafeImage
               filename={content.hero.image}
               alt={content.hero.subtitle}
-              aspect="aspect-[21/9]"
+              aspect="max-md:aspect-[4/3] md:aspect-[21/9]"
               variant="plain"
               priority
             />
@@ -61,7 +61,7 @@ export default async function TechniquePage({params}: Props) {
         </div>
       </section>
 
-      <section className="relative z-10 bg-white py-[clamp(86px,9vw,132px)]">
+      <section className="relative z-10 bg-white py-[72px] md:py-[clamp(86px,9vw,132px)]">
         <div className="mx-auto max-w-[1120px] px-container">
           <ScrollText className="border-l border-accent/45 py-[6px] pl-[clamp(28px,3.6vw,48px)] text-left">
             <p className="font-body text-[10px] font-semibold uppercase leading-none tracking-[0.34em] text-text/45">
