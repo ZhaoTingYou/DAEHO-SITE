@@ -2,7 +2,7 @@
 
 import {AnimatePresence, motion} from 'framer-motion';
 import Image from 'next/image';
-import {useEffect, useId, useRef, useState} from 'react';
+import {type KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useId, useRef, useState} from 'react';
 
 import {imageSrc} from '@/lib/image-src';
 
@@ -32,7 +32,39 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
   const [activeCard, setActiveCard] = useState<HomeNewsPopupCard | null>(null);
   const [modalImageRatio, setModalImageRatio] = useState<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const openerRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
+  const closeModal = useCallback(() => {
+    setActiveCard(null);
+    openerRef.current?.focus();
+  }, []);
+
+  const handleModalKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+
+    if (!focusableElements?.length) {
+      event.preventDefault();
+      return;
+    }
+
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    if (event.shiftKey && document.activeElement === firstFocusable) {
+      event.preventDefault();
+      lastFocusable.focus();
+    } else if (!event.shiftKey && document.activeElement === lastFocusable) {
+      event.preventDefault();
+      firstFocusable.focus();
+    }
+  };
 
   useEffect(() => {
     if (!activeCard) {
@@ -45,7 +77,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setActiveCard(null);
+        closeModal();
       }
     };
 
@@ -55,7 +87,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeCard]);
+  }, [activeCard, closeModal]);
 
   return (
     <>
@@ -64,7 +96,8 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
           <button
             key={card.id}
             type="button"
-            onClick={() => {
+            onClick={(event) => {
+              openerRef.current = event.currentTarget;
               setModalImageRatio(null);
               setActiveCard(card);
             }}
@@ -102,15 +135,17 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
             transition={{duration: 0.22, ease: [0.16, 1, 0.3, 1]}}
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) {
-                setActiveCard(null);
+                closeModal();
               }
             }}
           >
             <motion.article
+              ref={dialogRef}
               role="dialog"
               aria-modal="true"
               aria-label={text.label}
               aria-labelledby={titleId}
+              onKeyDown={handleModalKeyDown}
               className="relative grid max-h-[calc(100dvh-16px)] w-full max-w-[1180px] overflow-y-auto rounded-t-[8px] bg-white p-4 shadow-[0_32px_120px_rgba(16,29,48,0.22)] md:max-h-[calc(100dvh-48px)] md:rounded-none md:p-[clamp(14px,1.6vw,28px)] md:grid-cols-[minmax(320px,0.92fr)_minmax(320px,0.98fr)] md:items-stretch md:gap-[clamp(28px,3.2vw,56px)] md:overflow-hidden"
               initial={{opacity: 0, y: 18, scale: 0.98}}
               animate={{opacity: 1, y: 0, scale: 1}}
@@ -121,7 +156,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                 ref={closeButtonRef}
                 type="button"
                 aria-label={text.close}
-                onClick={() => setActiveCard(null)}
+                onClick={closeModal}
                 className="absolute right-4 top-4 z-10 flex min-h-11 min-w-11 cursor-pointer items-center justify-center bg-white/80 font-body text-[22px] font-light leading-none text-primary backdrop-blur transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
               >
                 <span aria-hidden="true">×</span>

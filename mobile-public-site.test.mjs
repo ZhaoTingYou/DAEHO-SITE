@@ -50,6 +50,18 @@ test('Home mobile hero wraps copy and uses a controlled viewport height', () => 
   assert.match(homeNews, /mobile-home-news-row/);
 });
 
+test('Home news modal retains its launcher and traps keyboard focus', () => {
+  assert.match(homeNews, /openerRef\.current = event\.currentTarget/);
+  assert.match(homeNews, /openerRef\.current\?\.focus\(\)/);
+  assert.match(homeNews, /if \(event\.key === 'Escape'\) \{\s+closeModal\(\);/);
+  assert.match(homeNews, /if \(event\.target === event\.currentTarget\) \{\s+closeModal\(\);/);
+  assert.match(homeNews, /aria-label=\{text\.close\}\s+onClick=\{closeModal\}/);
+  assert.match(homeNews, /onKeyDown=\{handleModalKeyDown\}/);
+  assert.match(homeNews, /event\.key !== 'Tab'/);
+  assert.match(homeNews, /event\.shiftKey && document\.activeElement === firstFocusable/);
+  assert.match(homeNews, /document\.activeElement === lastFocusable/);
+});
+
 test('Archive uses a dedicated linear mobile timeline', () => {
   assert.match(chronicle, /<ChronicleMobile/);
 });

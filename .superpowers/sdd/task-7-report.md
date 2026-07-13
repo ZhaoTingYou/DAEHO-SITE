@@ -20,3 +20,9 @@
 - `npm run lint -- --quiet`
 - `npx tsc --noEmit --pretty false --incremental false --skipLibCheck`
 - `git diff --check`
+
+## Review Follow-up
+
+- Added a keyboard focus trap to the Home news dialog, focused its close control on open, and restored focus to the exact launching card when dismissed by Escape, backdrop click, or the close control. Body scroll locking and the existing mobile/desktop modal layout remain unchanged.
+- Replaced the obsolete Specialty process typography-string assertion with a source assertion that verifies `step.body` is rendered in a `whitespace-pre-line` element. Updated other stale mobile typography fixtures to retain the same whitespace behavior checks.
+- Verified with `node --test mobile-public-site.test.mjs lib/cms/home-news-source.test.mjs lib/cms/public-newline-rendering.test.mjs` (31 passing), `npm run lint -- --quiet`, and `npx tsc --noEmit --pretty false --incremental false --skipLibCheck`.
