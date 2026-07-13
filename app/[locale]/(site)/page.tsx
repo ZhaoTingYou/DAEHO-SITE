@@ -88,7 +88,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                   </h2>
                   <Link
                     href={withLocale(locale, '/heritage/loyalty')}
-                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none tracking-[0.12em] transition duration-hover ease-brand"
+                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[16px] leading-none tracking-[0.12em] transition duration-hover ease-brand md:text-[15px]"
                   >
                     {currentPulse.primaryCta}
                   </Link>
@@ -134,7 +134,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                   </p>
                   <Link
                     href={withLocale(locale, '/news')}
-                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[15px] leading-none tracking-[0.12em] transition duration-hover ease-brand"
+                    className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[16px] leading-none tracking-[0.12em] transition duration-hover ease-brand md:text-[15px]"
                   >
                     {currentPulse.secondaryCta}
                   </Link>
@@ -152,11 +152,11 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
               <p className="[font-family:'MaruBuri',serif] text-[20px] font-semibold uppercase leading-tight text-accent">
                 {content.signature.eyebrow}
               </p>
-              <h2 className="whitespace-nowrap font-body text-[15px] font-normal leading-[1.75] text-primary">
+              <h2 className="whitespace-nowrap font-body text-[16px] font-normal leading-[1.75] text-primary md:text-[15px]">
                 {content.signature.title}
               </h2>
             </div>
-            <p className="max-w-[360px] whitespace-pre-line font-body text-[15px] leading-[1.75] text-text">
+            <p className="max-w-[360px] whitespace-pre-line font-body text-[16px] leading-[1.75] text-text md:text-[15px]">
               {content.signature.body}
             </p>
           </Reveal>

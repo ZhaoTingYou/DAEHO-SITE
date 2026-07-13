@@ -9,6 +9,8 @@ const footer = readFileSync(new URL('./components/site/site-footer.tsx', import.
 const homeHero = readFileSync(new URL('./components/home/home-hero.tsx', import.meta.url), 'utf8');
 const homeNews = readFileSync(new URL('./components/home/home-news-popups.tsx', import.meta.url), 'utf8');
 const chronicle = readFileSync(new URL('./components/chronicle/chronicle-horizontal.tsx', import.meta.url), 'utf8');
+const chronicleMobile = readFileSync(new URL('./components/chronicle/chronicle-mobile.tsx', import.meta.url), 'utf8');
+const homePage = readFileSync(new URL('./app/[locale]/(site)/page.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
   assert.match(globals, /@import "\.\.\/styles\/mobile\.css"/);
@@ -41,4 +43,25 @@ test('Home mobile hero wraps copy and uses a controlled viewport height', () => 
 
 test('Archive uses a dedicated linear mobile timeline', () => {
   assert.match(chronicle, /<ChronicleMobile/);
+});
+
+test('Archive mobile chronology clears the safe-area header and preserves image fallback behavior', () => {
+  assert.match(chronicleMobile, /pt-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\+24px\)\]/);
+  assert.match(chronicleMobile, /top-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\)\]/);
+  assert.match(chronicleMobile, /function ChronicleMobileSlideImage/);
+  assert.match(chronicleMobile, /event\.currentTarget\.style\.visibility = 'hidden'/);
+  assert.match(chronicleMobile, /setSource\(fallbackImage\)/);
+  assert.match(chronicleMobile, /setFailed\(true\)/);
+});
+
+test('Archive viewport selection is SSR-safe and stops desktop scroll work on compact viewports', () => {
+  assert.match(chronicle, /useSyncExternalStore/);
+  assert.match(chronicle, /\(\) => true/);
+  assert.match(chronicle, /if \(compactViewport\) \{\s+return;\s+\}\s+\s+const stage = stageRef\.current;/);
+  assert.match(chronicle, /\}, \[compactViewport, introComplete, slides\.length\]\);/);
+});
+
+test('Home mobile body and action copy use a 16px floor', () => {
+  assert.match(homePage, /home-feature-link inline-flex \[font-family:'Pretendard',sans-serif\] text-\[16px\].*md:text-\[15px\]/);
+  assert.match(homePage, /max-w-\[360px\] whitespace-pre-line font-body text-\[16px\].*md:text-\[15px\]/);
 });

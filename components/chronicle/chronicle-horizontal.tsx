@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import {type CSSProperties, useEffect, useMemo, useRef, useState} from 'react';
+import {type CSSProperties, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
 
 import {ChronicleMobile} from './chronicle-mobile';
 
@@ -41,8 +41,19 @@ const scrollLockKeys = new Set([
 ]);
 
 const isCompactChronicleViewport = () =>
-  typeof window !== 'undefined' &&
-  (window.innerWidth <= 960 || window.matchMedia('(max-aspect-ratio: 3 / 4)').matches);
+  window.innerWidth <= 960 || window.matchMedia('(max-aspect-ratio: 3 / 4)').matches;
+
+const subscribeToCompactChronicleViewport = (onStoreChange: () => void) => {
+  const aspectQuery = window.matchMedia('(max-aspect-ratio: 3 / 4)');
+
+  window.addEventListener('resize', onStoreChange);
+  aspectQuery.addEventListener('change', onStoreChange);
+
+  return () => {
+    window.removeEventListener('resize', onStoreChange);
+    aspectQuery.removeEventListener('change', onStoreChange);
+  };
+};
 
 export function ChronicleHorizontal({
   ariaLabel,
@@ -69,26 +80,17 @@ export function ChronicleHorizontal({
   const [controlsVisible, setControlsVisible] = useState(false);
   const [introExiting, setIntroExiting] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
-  const [compactViewport, setCompactViewport] = useState(() => isCompactChronicleViewport());
+  // Server-render the linear version so compact screens never briefly receive scroll locks.
+  const compactViewport = useSyncExternalStore(
+    subscribeToCompactChronicleViewport,
+    isCompactChronicleViewport,
+    () => true
+  );
 
   const yearStops = useMemo(
     () => slides.map((slide, index) => ({index, year: slide.year})),
     [slides]
   );
-
-  useEffect(() => {
-    const updateCompactViewport = () => setCompactViewport(isCompactChronicleViewport());
-    const aspectQuery = window.matchMedia('(max-aspect-ratio: 3 / 4)');
-
-    updateCompactViewport();
-    window.addEventListener('resize', updateCompactViewport);
-    aspectQuery.addEventListener('change', updateCompactViewport);
-
-    return () => {
-      window.removeEventListener('resize', updateCompactViewport);
-      aspectQuery.removeEventListener('change', updateCompactViewport);
-    };
-  }, []);
 
   useEffect(() => {
     if (compactViewport) {
@@ -197,6 +199,10 @@ export function ChronicleHorizontal({
   }, [compactViewport]);
 
   useEffect(() => {
+    if (compactViewport) {
+      return;
+    }
+
     const stage = stageRef.current;
 
     if (!stage) {
@@ -249,9 +255,7 @@ export function ChronicleHorizontal({
       syncProgressFromStage();
       const target = targetProgressRef.current;
       const current = smoothProgressRef.current;
-      const isMobile =
-        window.innerWidth <= 960 || window.matchMedia('(max-aspect-ratio: 3 / 4)').matches;
-      const next = isMobile ? target : current + (target - current) * 0.07;
+      const next = current + (target - current) * 0.07;
       const settled = Math.abs(target - next) < 0.0005;
       const resolved = settled ? target : next;
       const nextIndex = Math.min(slides.length - 1, Math.round(resolved * (slides.length - 1)));
@@ -280,7 +284,7 @@ export function ChronicleHorizontal({
       window.removeEventListener('scroll', requestUpdate);
       window.removeEventListener('resize', requestUpdate);
     };
-  }, [introComplete, slides.length]);
+  }, [compactViewport, introComplete, slides.length]);
 
   useEffect(() => {
     const nextYear = slides[activeIndex]?.year ?? firstYear;
