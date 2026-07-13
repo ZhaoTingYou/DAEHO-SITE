@@ -69,10 +69,10 @@ export default async function NewsDetailPage({params}: Props) {
   const hasCta = hasBlocks && detail.ctaTitle.trim().length > 0;
 
   return (
-    <main className="bg-bg text-text">
+    <main className="mobile-page-shell bg-bg text-text">
       <NewsReadingProgress />
       <article className="bg-bg">
-        <section className="news-detail-hero border-b border-primary/10 px-container pb-16 pt-[calc(var(--header-height,80px)+48px)] md:pb-24 md:pt-[calc(var(--header-height,80px)+72px)]">
+        <section className="news-detail-hero border-b border-primary/10 px-container pb-10 pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+24px)] md:pb-24 md:pt-[calc(var(--header-height,80px)+72px)]">
           <div className="mx-auto max-w-[1440px]">
             <Reveal className="news-detail-title-lockup mx-auto flex max-w-[1120px] flex-col items-center text-center">
               <Link
@@ -81,7 +81,7 @@ export default async function NewsDetailPage({params}: Props) {
               >
                 {text.back}
               </Link>
-              <h1 className="news-detail-title mt-10 max-w-[1120px] font-body text-[34px] font-medium leading-[1.28] text-accent md:mt-12 md:text-[48px] md:leading-[1.22] lg:text-[60px]">
+              <h1 className="news-detail-title mt-6 max-w-[1120px] break-words font-body text-[34px] font-medium leading-[1.28] text-accent md:mt-12 md:text-[48px] md:leading-[1.22] lg:text-[60px]">
                 {card.title}
               </h1>
             </Reveal>
@@ -89,7 +89,7 @@ export default async function NewsDetailPage({params}: Props) {
         </section>
 
         {hasBlocks ? (
-          <section className="px-container py-[clamp(56px,8vw,112px)]">
+          <section className="px-container py-12 md:py-[clamp(56px,8vw,112px)]">
             <div className="mx-auto max-w-[1440px]">
               <div className="space-y-0">
                 <NewsDetailBlocks blocks={detail.blocks} />
@@ -124,19 +124,19 @@ export default async function NewsDetailPage({params}: Props) {
       </article>
 
       {adjacentNews.length > 0 ? (
-        <section className="border-t border-primary/10 bg-bg px-container py-[clamp(56px,8vw,104px)]">
+        <section className="mobile-news-adjacent border-t border-primary/10 bg-bg px-container py-0 md:py-[clamp(56px,8vw,104px)]">
           <div className="mx-auto max-w-[1120px]">
             <div className={adjacentNews.length > 1 ? 'grid gap-px bg-primary/10 md:grid-cols-2' : 'grid gap-px bg-primary/10'}>
               {adjacentNews.map(({direction, label, item}) => (
                 <Link
                   key={item.id}
                   href={withLocale(locale, `/news/${item.id}`)}
-                  className={`group block bg-bg p-7 transition duration-hover ease-brand hover:bg-muted/40 md:p-9 ${
+                  className={`group flex min-h-11 flex-col justify-center bg-bg px-0 py-5 transition duration-hover ease-brand hover:bg-muted/40 md:block md:p-9 ${
                     direction === 'next' ? 'text-left md:text-right' : 'text-left'
                   }`}
                 >
                   <p className="font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-subtext">{label}</p>
-                  <h2 className="mt-4 font-heading text-[clamp(24px,3vw,34px)] font-semibold leading-tight text-primary transition duration-hover ease-brand group-hover:text-accent">
+                  <h2 className="mt-2 break-words font-heading text-[24px] font-semibold leading-[1.22] text-primary transition duration-hover ease-brand group-hover:text-accent md:mt-4 md:text-[clamp(24px,3vw,34px)] md:leading-tight">
                     {item.title}
                   </h2>
                 </Link>
@@ -192,7 +192,7 @@ function NewsDetailBlock({block}: {block: NewsBodyBlock}) {
     const copy = <NewsBlockCopy block={block} align="left" />;
 
     return (
-      <section className={`${newsBlockWidthClass(block.width)} grid gap-[clamp(28px,4vw,64px)] lg:grid-cols-2 lg:items-center`}>
+      <section className={`${newsBlockWidthClass(block.width)} grid gap-6 md:gap-[clamp(28px,4vw,64px)] lg:grid-cols-2 lg:items-center`}>
         {block.layout === 'imageRight' ? (
           <>
             <div>{copy}</div>
@@ -238,7 +238,7 @@ function NewsBlockCopy({block, align}: {block: NewsBodyBlock; align: 'left' | 'c
       {block.body ? (
         <div className="space-y-4">
           {block.body.split(/\n\s*\n|\n/).filter(Boolean).map((paragraph) => (
-            <p key={paragraph} className="whitespace-pre-line font-body text-[15px] leading-8 text-text md:text-[16px] md:leading-9">
+            <p key={paragraph} className="whitespace-pre-line font-body text-[15px] leading-8 text-text mobile-copy max-md:!leading-[1.8] md:text-[16px] md:leading-9">
               {paragraph}
             </p>
           ))}

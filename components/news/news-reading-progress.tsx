@@ -13,7 +13,7 @@ export function NewsReadingProgress() {
   return (
     <motion.div
       aria-hidden="true"
-      className="fixed inset-x-0 top-0 z-[80] h-[2px] origin-left bg-accent"
+      className="fixed inset-x-0 top-[calc(var(--mobile-header-height)+env(safe-area-inset-top))] z-[80] h-[2px] origin-left bg-accent md:top-0"
       style={{scaleX}}
     />
   );

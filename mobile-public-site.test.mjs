@@ -17,6 +17,9 @@ const credibilityPage = readFileSync(new URL('./components/legacy/credibility-co
 const achievementPage = readFileSync(new URL('./components/legacy/achievement-records-page.tsx', import.meta.url), 'utf8');
 const specialtyProcessSource = readFileSync(new URL('./components/specialty/specialty-process.tsx', import.meta.url), 'utf8');
 const creationsPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/creations/page.tsx', import.meta.url), 'utf8');
+const newsPageSource = readFileSync(new URL('./app/[locale]/(site)/news/page.tsx', import.meta.url), 'utf8');
+const newsDetailSource = readFileSync(new URL('./app/[locale]/(site)/news/[slug]/page.tsx', import.meta.url), 'utf8');
+const newsGridSource = readFileSync(new URL('./components/news/news-journal-grid.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
   assert.match(globals, /@import "\.\.\/styles\/mobile\.css"/);
@@ -110,4 +113,15 @@ test('Making mobile process uses readable fixed body copy and 4:3 media', () => 
 test('Creations mobile masthead cannot clip the display title', () => {
   assert.match(creationsPageSource, /mobile-display/);
   assert.doesNotMatch(creationsPageSource, /whitespace-nowrap[^\n]+CREATIONS/);
+});
+
+test('News mobile list uses compact landscape cards and fixed display type', () => {
+  assert.match(newsPageSource, /mobile-display/);
+  assert.match(newsGridSource, /max-md:aspect-\[4\/3\]/);
+  assert.match(newsGridSource, /mobile-copy/);
+});
+
+test('News detail keeps adjacent navigation reachable on phones', () => {
+  assert.match(newsDetailSource, /mobile-news-adjacent/);
+  assert.match(newsDetailSource, /min-h-11/);
 });

@@ -95,7 +95,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
       <AnimatePresence>
         {activeCard ? (
           <motion.div
-            className="fixed inset-0 z-[120] grid place-items-center bg-primary/45 px-container py-8 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[120] grid items-end bg-primary/45 px-2 pb-2 pt-8 backdrop-blur-[2px] md:place-items-center md:px-container md:py-8"
             initial={{opacity: 0}}
             animate={{opacity: 1}}
             exit={{opacity: 0}}
@@ -111,7 +111,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
               aria-modal="true"
               aria-label={text.label}
               aria-labelledby={titleId}
-              className="relative grid max-h-[calc(100dvh-48px)] w-full max-w-[1180px] overflow-y-auto bg-white p-[clamp(14px,1.6vw,28px)] shadow-[0_32px_120px_rgba(16,29,48,0.22)] md:grid-cols-[minmax(320px,0.92fr)_minmax(320px,0.98fr)] md:items-stretch md:gap-[clamp(28px,3.2vw,56px)] md:overflow-hidden"
+              className="relative grid max-h-[calc(100dvh-16px)] w-full max-w-[1180px] overflow-y-auto rounded-t-[8px] bg-white p-4 shadow-[0_32px_120px_rgba(16,29,48,0.22)] md:max-h-[calc(100dvh-48px)] md:rounded-none md:p-[clamp(14px,1.6vw,28px)] md:grid-cols-[minmax(320px,0.92fr)_minmax(320px,0.98fr)] md:items-stretch md:gap-[clamp(28px,3.2vw,56px)] md:overflow-hidden"
               initial={{opacity: 0, y: 18, scale: 0.98}}
               animate={{opacity: 1, y: 0, scale: 1}}
               exit={{opacity: 0, y: 12, scale: 0.98}}
@@ -122,7 +122,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                 type="button"
                 aria-label={text.close}
                 onClick={() => setActiveCard(null)}
-                className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center bg-white/80 font-body text-[22px] font-light leading-none text-primary backdrop-blur transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                className="absolute right-4 top-4 z-10 flex min-h-11 min-w-11 cursor-pointer items-center justify-center bg-white/80 font-body text-[22px] font-light leading-none text-primary backdrop-blur transition duration-hover ease-brand hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
               >
                 <span aria-hidden="true">×</span>
               </button>
@@ -185,7 +185,7 @@ function NewsImage({
       <div
         style={frameStyle}
         className={`flex w-full items-center justify-center break-all border border-hairline bg-white p-5 text-center font-body text-[15px] font-semibold leading-5 tracking-[0.08em] text-subtext ${
-          fillFrame ? 'aspect-square max-h-[calc(100dvh-136px)]' : 'aspect-[3/4]'
+          fillFrame ? 'aspect-[4/3] max-h-[calc(100dvh-136px)] md:aspect-square' : 'aspect-[3/4]'
         }`}
         role="img"
         aria-label={card.image}
@@ -199,7 +199,7 @@ function NewsImage({
     <div
       style={frameStyle}
         className={`home-news-image relative w-full overflow-hidden bg-bg ${
-        fillFrame ? 'aspect-square max-h-[calc(100dvh-136px)]' : 'aspect-[3/4]'
+        fillFrame ? 'aspect-[4/3] max-h-[calc(100dvh-136px)] md:aspect-square' : 'aspect-[3/4]'
       }`}
     >
       <Image

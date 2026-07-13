@@ -46,9 +46,9 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
   );
 
   return (
-    <div className="space-y-[clamp(32px,4vw,54px)]">
+    <div className="space-y-8 md:space-y-[clamp(32px,4vw,54px)]">
       <div
-        className="-mx-container flex gap-3 overflow-x-auto border-y border-primary/15 px-container py-3 [scroll-snap-type:x_mandatory] md:mx-0 md:flex-wrap md:gap-2 md:overflow-visible md:px-0"
+        className="mobile-news-filters sticky top-[calc(var(--mobile-header-height)+env(safe-area-inset-top))] z-20 -mx-container flex gap-1 overflow-x-auto border-y border-primary/15 bg-white px-container py-2 [scroll-snap-type:x_mandatory] md:static md:mx-0 md:flex-wrap md:gap-2 md:overflow-visible md:bg-transparent md:px-0 md:py-3"
         aria-label={filterLabel}
       >
         {filters.map((filter) => {
@@ -60,7 +60,7 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
               type="button"
               aria-pressed={isActive}
               onClick={() => setActiveFilter(filter.id)}
-              className={`relative min-h-11 shrink-0 cursor-pointer border px-5 py-3 ${bodyTextClass} text-[15px] leading-none tracking-normal transition duration-hover ease-brand [scroll-snap-align:start] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
+              className={`relative min-h-11 shrink-0 cursor-pointer border px-4 py-3 ${bodyTextClass} text-[16px] leading-none tracking-normal transition duration-hover ease-brand [scroll-snap-align:start] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:px-5 md:text-[15px] ${
                 isActive
                   ? 'border-transparent bg-transparent text-primary'
                   : 'border-transparent bg-transparent text-subtext hover:text-primary'
@@ -76,7 +76,7 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
       {visibleCards.length === 0 ? (
         <EmptyState title={empty.title} body={empty.body} />
       ) : (
-        <div className="grid gap-x-[clamp(24px,2.4vw,34px)] gap-y-[clamp(42px,5vw,66px)] md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-0 divide-y divide-primary/15 md:grid-cols-2 md:gap-x-[clamp(24px,2.4vw,34px)] md:gap-y-[clamp(42px,5vw,66px)] md:divide-y-0 xl:grid-cols-3">
           {visibleCards.map((card) => (
             <article
               key={card.id}
@@ -84,7 +84,7 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
             >
               <Link
                 href={`/${locale}/news/${card.id}`}
-                className="group block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                className="group grid grid-cols-[128px_minmax(0,1fr)] gap-4 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:block md:py-0"
                 aria-label={`${card.categoryLabel}: ${card.title}`}
               >
                 <div className="hover-zoom">
@@ -92,13 +92,13 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
                     <NewsCardImage card={card} />
                   </div>
                 </div>
-                <div className="px-0 py-[20px]">
-                  <div className={`${bodyTextClass} flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] leading-none text-subtext`}>
+                <div className="min-w-0 px-0 py-0 md:py-[20px]">
+                  <div className={`${bodyTextClass} mobile-copy flex flex-wrap items-center gap-x-3 gap-y-1 leading-none text-subtext md:text-[15px]`}>
                     <span className="text-accent">{card.categoryLabel}</span>
                     <span className="h-3 w-px bg-hairline" aria-hidden="true" />
                     <span>{card.date}</span>
                   </div>
-                  <h3 className={`${titleTextClass} mt-[12px] text-[clamp(20px,1.7vw,24px)] leading-[1.3] text-primary`}>
+                  <h3 className={`${titleTextClass} mt-2 break-words text-[24px] leading-[1.22] text-primary md:mt-[12px] md:text-[clamp(20px,1.7vw,24px)] md:leading-[1.3]`}>
                     {card.title}
                   </h3>
                 </div>
@@ -115,7 +115,7 @@ function NewsCardImage({card}: {card: NewsCard}) {
   if (!card.hasImage) {
     return (
       <div
-        className="flex aspect-[3/4] w-full items-center justify-center break-all border border-hairline bg-bg p-5 text-center [font-family:'Pretendard',sans-serif] text-[15px] font-normal leading-5 tracking-normal text-subtext"
+        className="flex aspect-[3/4] max-md:aspect-[4/3] w-full items-center justify-center break-all border border-hairline bg-bg p-3 text-center [font-family:'Pretendard',sans-serif] text-[16px] font-normal leading-5 tracking-normal text-subtext md:p-5 md:text-[15px]"
         role="img"
         aria-label={card.image}
       >
@@ -125,7 +125,7 @@ function NewsCardImage({card}: {card: NewsCard}) {
   }
 
   return (
-    <div className="relative aspect-[3/4] w-full overflow-hidden bg-bg">
+    <div className="relative aspect-[3/4] max-md:aspect-[4/3] w-full overflow-hidden bg-bg">
       <Image
         src={imageSrc(card.image)}
         alt={`${card.categoryLabel} ${card.title}`}
