@@ -34,7 +34,7 @@ export default async function ContactPage({params, searchParams}: Props) {
       <section className="bg-bg pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+32px)] md:pt-28">
         <div className="mx-auto grid min-h-[80svh] max-w-[1440px] gap-8 px-[var(--mobile-page-gutter)] py-[var(--mobile-section-space)] md:min-h-[74dvh] md:gap-12 md:px-container md:py-section lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
           <Reveal>
-            <SectionIntro eyebrow={text.hero.eyebrow} title={text.hero.title}>
+            <SectionIntro eyebrow={text.hero.eyebrow} title={text.hero.title} headingLevel="h1">
               {text.hero.body ? <p>{text.hero.body}</p> : null}
             </SectionIntro>
           </Reveal>

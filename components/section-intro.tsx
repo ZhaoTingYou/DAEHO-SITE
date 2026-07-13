@@ -3,6 +3,7 @@ type SectionIntroProps = {
   title: string;
   children?: React.ReactNode;
   align?: 'left' | 'center';
+  headingLevel?: 'h1' | 'h2';
   variant?: 'default' | 'chronicle' | 'legacy' | 'news' | 'specialty' | 'specialtyPlain';
 };
 
@@ -11,8 +12,10 @@ export function SectionIntro({
   title,
   children,
   align = 'left',
+  headingLevel = 'h2',
   variant = 'default'
 }: SectionIntroProps) {
+  const Heading = headingLevel;
   const variantClass = {
     default: '',
     chronicle: 'border-l border-primary/40 pl-5 md:pl-7',
@@ -36,7 +39,7 @@ export function SectionIntro({
       <p className="font-body text-[15px] font-medium uppercase leading-none tracking-[0.22em] text-subtext">
         {eyebrow}
       </p>
-      <h2 className={titleClass}>{title}</h2>
+      <Heading className={titleClass}>{title}</Heading>
       {children ? <div className="whitespace-pre-line font-body text-[15px] leading-[1.85] text-text">{children}</div> : null}
     </div>
   );

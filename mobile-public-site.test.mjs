@@ -10,6 +10,8 @@ const homeHero = readFileSync(new URL('./components/home/home-hero.tsx', import.
 const homeNews = readFileSync(new URL('./components/home/home-news-popups.tsx', import.meta.url), 'utf8');
 const chronicle = readFileSync(new URL('./components/chronicle/chronicle-horizontal.tsx', import.meta.url), 'utf8');
 const chronicleMobile = readFileSync(new URL('./components/chronicle/chronicle-mobile.tsx', import.meta.url), 'utf8');
+const contactPageSource = readFileSync(new URL('./app/[locale]/(site)/contact/page.tsx', import.meta.url), 'utf8');
+const collectionDetailSource = readFileSync(new URL('./app/[locale]/(site)/mastery/creations/[slug]/page.tsx', import.meta.url), 'utf8');
 const homePage = readFileSync(new URL('./app/[locale]/(site)/page.tsx', import.meta.url), 'utf8');
 const heritageHero = readFileSync(new URL('./components/legacy/heritage-hero.tsx', import.meta.url), 'utf8');
 const loyaltyPage = readFileSync(new URL('./components/legacy/loyalty-commitment-page.tsx', import.meta.url), 'utf8');
@@ -74,6 +76,13 @@ test('Home news modal retains its launcher and traps keyboard focus', () => {
 
 test('Archive uses a dedicated linear mobile timeline', () => {
   assert.match(chronicle, /<ChronicleMobile/);
+});
+
+test('Archive, Contact, and collection details expose one page-level heading', () => {
+  assert.match(chronicleMobile, /const Heading = index === 0 \? 'h1' : 'h2'/);
+  assert.match(chronicle, /const Heading = index === 0 \? 'h1' : 'h2'/);
+  assert.match(contactPageSource, /headingLevel="h1"/);
+  assert.equal((collectionDetailSource.match(/<h1\b/g) ?? []).length, 1);
 });
 
 test('Archive mobile chronology clears the safe-area header and preserves image fallback behavior', () => {

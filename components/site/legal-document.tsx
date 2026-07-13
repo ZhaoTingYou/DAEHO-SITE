@@ -41,7 +41,7 @@ export function LegalDocument({content}: {content: LegalDocumentContent}) {
             </p>
           ) : null}
 
-          <div className={`${content.notice || content.intro ? 'mt-12' : 'mt-10'} space-y-12 md:space-y-10`}>
+          <div className={`${content.notice || content.intro ? 'mt-12' : 'mt-10'} space-y-[80px] md:space-y-10`}>
             {content.sections.map((section) => (
               <section key={section.heading} className="space-y-3">
                 <h2 className="overflow-wrap-anywhere font-heading text-[20px] font-semibold leading-snug text-primary [overflow-wrap:anywhere] md:text-[clamp(17px,1.6vw,21px)]">

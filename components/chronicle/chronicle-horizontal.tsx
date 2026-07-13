@@ -461,6 +461,7 @@ export function ChronicleHorizontal({
 
           <div className="chronicle-track" style={trackStyle}>
             {slides.map((slide, index) => {
+              const Heading = index === 0 ? 'h1' : 'h2';
               const textThreshold = Math.max(0, (index - 0.75) / Math.max(1, slideCount - 1));
               const imageThreshold = Math.max(0, (index - 0.65) / Math.max(1, slideCount - 1));
               const isTextVisible = progress >= textThreshold;
@@ -483,7 +484,7 @@ export function ChronicleHorizontal({
                     <div className="chronicle-copy">
                       <span className="chronicle-copy-kicker">{slide.label}</span>
                       <span className="chronicle-copy-year" aria-hidden="true">{slide.year}</span>
-                      <h1>{slide.title}</h1>
+                      <Heading>{slide.title}</Heading>
                       <p className="whitespace-pre-line">{slide.desc}</p>
                     </div>
                     <div className="chronicle-image-frame">

@@ -30,22 +30,28 @@ export function ChronicleMobile({slides, yearNavAriaLabel, endNav}: ChronicleMob
         ))}
       </nav>
       <ol className="space-y-20 px-[var(--mobile-page-gutter)] py-16">
-        {slides.map((slide) => (
-          <li id={`year-${slide.year}`} key={slide.year} className="scroll-mt-32 border-t border-primary/15 pt-8">
-            <p className="font-numeric text-[18px] text-accent">{slide.year}</p>
-            <div className="relative mt-5 aspect-[4/3] overflow-hidden bg-muted">
-              <ChronicleMobileSlideImage
-                key={`${slide.image}-${slide.fallbackImage}`}
-                image={slide.image}
-                fallbackImage={slide.fallbackImage}
-                alt={slide.title}
-              />
-            </div>
-            <p className="mt-6 font-body text-[12px] font-semibold uppercase text-accent">{slide.label}</p>
-            <h2 className="mt-3 font-heading text-[32px] font-semibold leading-[1.15] text-primary">{slide.title}</h2>
-            <p className="mobile-copy mt-4 whitespace-pre-line text-text">{slide.desc}</p>
-          </li>
-        ))}
+        {slides.map((slide, index) => {
+          const Heading = index === 0 ? 'h1' : 'h2';
+
+          return (
+            <li id={`year-${slide.year}`} key={slide.year} className="scroll-mt-32 border-t border-primary/15 pt-8">
+              <p className="font-numeric text-[18px] text-accent">{slide.year}</p>
+              <div className="relative mt-5 aspect-[4/3] overflow-hidden bg-muted">
+                <ChronicleMobileSlideImage
+                  key={`${slide.image}-${slide.fallbackImage}`}
+                  image={slide.image}
+                  fallbackImage={slide.fallbackImage}
+                  alt={slide.title}
+                />
+              </div>
+              <p className="mt-6 font-body text-[12px] font-semibold uppercase text-accent">{slide.label}</p>
+              <Heading className="mt-3 font-heading text-[32px] font-semibold leading-[1.15] text-primary">
+                {slide.title}
+              </Heading>
+              <p className="mobile-copy mt-4 whitespace-pre-line text-text">{slide.desc}</p>
+            </li>
+          );
+        })}
       </ol>
       <Link
         href={endNav.href}

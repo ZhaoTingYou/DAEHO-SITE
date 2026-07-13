@@ -98,9 +98,9 @@ export default async function CollectionDetailPage({params}: Props) {
               <p className="font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">
                 {item.categoryLabel}
               </p>
-              <h1 className="break-words font-heading text-[32px] font-semibold leading-[1.12] text-primary">
+              <p className="break-words font-heading text-[32px] font-semibold leading-[1.12] text-primary">
                 {item.title}
-              </h1>
+              </p>
             </div>
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.72fr)] lg:items-start lg:gap-16">
             <Reveal>
@@ -108,11 +108,11 @@ export default async function CollectionDetailPage({params}: Props) {
             </Reveal>
             <Reveal className="lg:sticky lg:top-32">
               <aside className="space-y-8 bg-transparent p-0 shadow-none lg:space-y-9 lg:bg-bg lg:p-6 lg:shadow-[0_18px_70px_rgba(16,29,48,0.06)]">
-                <div className="hidden space-y-4 lg:block">
-                  <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-accent">
+                <div className="space-y-4">
+                  <p className="hidden font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-accent lg:block">
                     {item.categoryLabel}
                   </p>
-                  <h1 className="font-heading text-[clamp(24px,2.8vw,36px)] font-semibold leading-[1.15] text-primary">
+                  <h1 className="sr-only font-heading text-[clamp(24px,2.8vw,36px)] font-semibold leading-[1.15] text-primary lg:not-sr-only">
                     {item.title}
                   </h1>
                 </div>
