@@ -242,7 +242,7 @@ function PageLocalePanel({
   const t = createAdminTranslator(messages);
 
   return (
-    <Panel className="p-5">
+    <Panel className="min-w-0 p-5">
       <textarea hidden readOnly name={`seo${suffix}`} value={formatJson(seo)} />
       {groups.map((group) => (
         <textarea key={group.key} hidden readOnly name={`content${suffix}.${group.key}`} value={formatJson(group.content)} />

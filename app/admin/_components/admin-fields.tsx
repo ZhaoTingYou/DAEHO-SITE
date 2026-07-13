@@ -515,14 +515,14 @@ export function ImageUploadField({
     : uploadHint;
 
   return (
-    <div className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+    <div className="grid min-w-0 gap-1.5 text-sm font-semibold text-[#344054]">
       <span className="grid gap-1">
         <span>{label}</span>
         {imageGuide ? (
           <span className="text-xs font-medium leading-5 text-[#7a2230]">{imageGuide}</span>
         ) : null}
       </span>
-      <div className={`grid gap-3 ${preview ? 'md:grid-cols-[112px_minmax(0,1fr)]' : ''}`}>
+      <div className={`grid min-w-0 gap-3 ${preview ? 'md:grid-cols-[112px_minmax(0,1fr)]' : ''}`}>
         {preview ? (
           <div
             className={`relative aspect-[4/3] overflow-hidden rounded-md border bg-[#eef2f6] transition ${
@@ -546,16 +546,16 @@ export function ImageUploadField({
             ) : null}
           </div>
         ) : null}
-        <div className="grid gap-2">
-          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="grid min-w-0 gap-2">
+          <div className="grid min-w-0 gap-2 md:grid-cols-[minmax(0,1fr)_auto]">
             <input
               ref={filenameInputRef}
               name={name}
               defaultValue={defaultValue}
               placeholder={placeholder}
-              className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
+              className="min-h-10 min-w-0 w-full rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
             />
-            <label className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054] transition hover:bg-[#f8fafc]">
+            <label className="inline-flex min-h-10 max-w-full cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-md border border-[#cbd3df] bg-white px-3 text-center text-sm font-semibold text-[#344054] transition hover:bg-[#f8fafc]">
               <span className="font-numeric text-base leading-none">+</span>
               <span>{uploadLabel}</span>
               <input
@@ -612,7 +612,7 @@ export function ImageUploadField({
           {statusText ? (
             <p
               aria-live="polite"
-              className={`text-xs font-medium leading-5 ${selectionSource ? 'text-[#7a2230]' : 'text-[#647084]'}`}
+              className={`break-all text-xs font-medium leading-5 ${selectionSource ? 'text-[#7a2230]' : 'text-[#647084]'}`}
             >
               {statusText}
             </p>

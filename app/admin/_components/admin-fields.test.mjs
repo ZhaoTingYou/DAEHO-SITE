@@ -3,6 +3,10 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 
 const source = readFileSync(new URL('./admin-fields.tsx', import.meta.url), 'utf8');
+const imageUploadSource = source.slice(
+  source.indexOf('export function ImageUploadField'),
+  source.indexOf('export function AppendableArrayItemsField')
+);
 const pageEditorSource = readFileSync(new URL('../(dashboard)/pages/[pageKey]/page.tsx', import.meta.url), 'utf8');
 const pageCatalogSource = readFileSync(new URL('../../../lib/cms/page-catalog.ts', import.meta.url), 'utf8');
 const imageGuidesSource = readFileSync(new URL('../../../lib/cms/image-guides.ts', import.meta.url), 'utf8');
@@ -21,6 +25,14 @@ test('CMS image upload fields show per-position ratio and size guidance', () => 
   assert.match(pageEditorSource, /imageGuide=\{getPageImageGuide\(/);
   assert.match(pageEditorSource, /imageGuides=\{Object\.fromEntries/);
   assert.match(pageEditorSource, /getAdminImageGuide\('seo', adminLocale\)/);
+});
+
+test('image upload fields keep long filenames inside bilingual CMS panels', () => {
+  assert.match(pageEditorSource, /<Panel className="min-w-0 p-5">/);
+  assert.match(imageUploadSource, /className="grid min-w-0 gap-1\.5 text-sm/);
+  assert.match(imageUploadSource, /className="grid min-w-0 gap-2"/);
+  assert.match(imageUploadSource, /className="min-h-10 min-w-0 w-full rounded-md border/);
+  assert.match(imageUploadSource, /className=\{`break-all text-xs font-medium leading-5/);
 });
 
 test('every managed page image field has a CMS image guide mapping', () => {
