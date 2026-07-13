@@ -29,7 +29,7 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
 
   return (
     <form
-      className="space-y-6"
+      className="mobile-form space-y-5 pb-[calc(32px+env(safe-area-inset-bottom))] md:space-y-6 md:pb-0"
       onSubmit={async (event) => {
         if (await submitContactForm(event)) {
           setStatus('success');
@@ -49,12 +49,12 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         maxLength={180}
         required
       />
-      <label className="block space-y-2 font-body text-sm font-semibold uppercase tracking-[0.12em] text-subtext">
+      <label className="block space-y-2 font-body text-[16px] font-semibold uppercase tracking-[0.08em] text-subtext md:text-sm md:tracking-[0.12em]">
         <span>{text.type}</span>
         <select
           name="type"
           defaultValue={defaultType}
-          className="min-h-12 w-full border-b border-primary/30 bg-transparent py-3 text-base normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent"
+          className="min-h-[52px] w-full border-b border-primary/30 bg-transparent py-3 text-[16px] normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent md:min-h-12 md:text-base"
         >
           {text.options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -63,32 +63,32 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
           ))}
         </select>
       </label>
-      <label className="block space-y-2 font-body text-sm font-semibold uppercase tracking-[0.12em] text-subtext">
+      <label className="block space-y-2 font-body text-[16px] font-semibold uppercase tracking-[0.08em] text-subtext md:text-sm md:tracking-[0.12em]">
         <span>{text.message}</span>
         <textarea
           name="message"
           rows={6}
           maxLength={3000}
           autoComplete="off"
-          className="w-full resize-none border-b border-primary/30 bg-transparent py-3 text-base normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent"
+          className="min-h-[156px] w-full resize-none border-b border-primary/30 bg-transparent py-3 text-[16px] normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent md:min-h-0 md:text-base"
         />
       </label>
       <button
         type="submit"
         disabled={status === 'submitting' || isSubmitted}
         aria-busy={status === 'submitting'}
-        className="min-h-12 border border-accent bg-accent px-7 py-3 font-body text-sm font-semibold uppercase tracking-[0.14em] text-white transition duration-hover ease-brand hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+        className="min-h-[52px] w-full border border-accent bg-accent px-7 py-3 font-body text-[16px] font-semibold uppercase tracking-[0.1em] text-white transition duration-hover ease-brand hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:min-h-12 md:w-auto md:text-sm md:tracking-[0.14em]"
       >
         {text.submit}
       </button>
       {isSubmitted ? (
-        <div className="border-l-2 border-accent bg-bg px-4 py-3 font-body text-sm leading-6 text-primary" role="status">
+        <div className="border-l-2 border-accent bg-bg px-4 py-3 font-body text-[16px] leading-7 text-primary md:text-sm md:leading-6" role="status">
           <p>{text.success}</p>
           <p className="mt-2 text-subtext">{text.fallback}</p>
         </div>
       ) : null}
       {status === 'error' ? (
-        <div className="border-l-2 border-primary bg-bg px-4 py-3 font-body text-sm leading-6 text-primary" role="alert">
+        <div className="border-l-2 border-primary bg-bg px-4 py-3 font-body text-[16px] leading-7 text-primary md:text-sm md:leading-6" role="alert">
           {text.fallback}
         </div>
       ) : null}
@@ -146,7 +146,7 @@ function TextField({
   required?: boolean;
 }) {
   return (
-    <label htmlFor={id} className="block space-y-2 font-body text-sm font-semibold uppercase tracking-[0.12em] text-subtext">
+    <label htmlFor={id} className="block space-y-2 font-body text-[16px] font-semibold uppercase tracking-[0.08em] text-subtext md:text-sm md:tracking-[0.12em]">
       <span>{label}</span>
       <input
         id={id}
@@ -156,7 +156,7 @@ function TextField({
         autoComplete={autoComplete}
         maxLength={maxLength}
         required={required}
-        className="min-h-12 w-full border-b border-primary/30 bg-transparent py-3 text-base normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent"
+        className="min-h-[52px] w-full border-b border-primary/30 bg-transparent py-3 text-[16px] normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent md:min-h-12 md:text-base"
       />
     </label>
   );

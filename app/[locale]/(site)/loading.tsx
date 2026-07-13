@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function Loading() {
   return (
-    <main className="grid min-h-dvh place-items-center bg-bg px-container text-primary">
+    <main className="grid min-h-[80svh] place-items-center bg-bg px-[var(--mobile-page-gutter)] text-primary md:min-h-dvh md:px-container">
       <div className="space-y-5 text-center">
         <Image
           src="/images/logo.png"

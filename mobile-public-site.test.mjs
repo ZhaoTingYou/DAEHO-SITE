@@ -20,6 +20,9 @@ const creationsPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/
 const newsPageSource = readFileSync(new URL('./app/[locale]/(site)/news/page.tsx', import.meta.url), 'utf8');
 const newsDetailSource = readFileSync(new URL('./app/[locale]/(site)/news/[slug]/page.tsx', import.meta.url), 'utf8');
 const newsGridSource = readFileSync(new URL('./components/news/news-journal-grid.tsx', import.meta.url), 'utf8');
+const contactFormSource = readFileSync(new URL('./components/forms/contact-form.tsx', import.meta.url), 'utf8');
+const golfFormSource = readFileSync(new URL('./components/forms/golf-inquiry-form.tsx', import.meta.url), 'utf8');
+const legalSource = readFileSync(new URL('./components/site/legal-document.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
   assert.match(globals, /@import "\.\.\/styles\/mobile\.css"/);
@@ -142,4 +145,11 @@ test('News mobile list uses compact landscape cards and fixed display type', () 
 test('News detail keeps adjacent navigation reachable on phones', () => {
   assert.match(newsDetailSource, /mobile-news-adjacent/);
   assert.match(newsDetailSource, /min-h-11/);
+});
+
+test('mobile forms and legal pages use readable controls and copy', () => {
+  assert.match(contactFormSource, /mobile-form/);
+  assert.match(golfFormSource, /mobile-form/);
+  assert.match(legalSource, /mobile-copy/);
+  assert.match(legalSource, /overflow-wrap-anywhere/);
 });
