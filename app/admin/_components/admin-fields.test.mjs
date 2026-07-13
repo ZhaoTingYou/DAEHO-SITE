@@ -7,7 +7,19 @@ const imageUploadSource = source.slice(
   source.indexOf('export function ImageUploadField'),
   source.indexOf('export function AppendableArrayItemsField')
 );
+const appendableArraySource = source.slice(
+  source.indexOf('export function AppendableArrayItemsField'),
+  source.indexOf('function imageSrc')
+);
 const pageEditorSource = readFileSync(new URL('../(dashboard)/pages/[pageKey]/page.tsx', import.meta.url), 'utf8');
+const editableArraySource = pageEditorSource.slice(
+  pageEditorSource.indexOf('function EditableArray({'),
+  pageEditorSource.indexOf('function EditableArrayItemFields')
+);
+const editableArrayItemFieldsSource = pageEditorSource.slice(
+  pageEditorSource.indexOf('function EditableArrayItemFields'),
+  pageEditorSource.indexOf('function AppendArrayItems')
+);
 const pageCatalogSource = readFileSync(new URL('../../../lib/cms/page-catalog.ts', import.meta.url), 'utf8');
 const imageGuidesSource = readFileSync(new URL('../../../lib/cms/image-guides.ts', import.meta.url), 'utf8');
 const pageCatalog = JSON.parse(readFileSync(new URL('../../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
@@ -33,6 +45,16 @@ test('image upload fields keep long filenames inside bilingual CMS panels', () =
   assert.match(imageUploadSource, /className="grid min-w-0 gap-2"/);
   assert.match(imageUploadSource, /className="min-h-10 min-w-0 w-full rounded-md border/);
   assert.match(imageUploadSource, /className=\{`break-all text-xs font-medium leading-5/);
+});
+
+test('image array cards constrain long filenames at every nested grid boundary', () => {
+  assert.match(editableArraySource, /<section className="grid min-w-0 w-full max-w-full gap-4/);
+  assert.match(editableArraySource, /className="grid min-w-0 w-full max-w-full gap-3"/);
+  assert.match(editableArraySource, /className="grid min-w-0 w-full max-w-full gap-4 rounded-md/);
+  assert.match(editableArrayItemFieldsSource, /<div className="grid min-w-0 w-full max-w-full gap-4">/);
+  assert.match(appendableArraySource, /<section className="grid min-w-0 w-full max-w-full gap-4/);
+  assert.match(appendableArraySource, /<div className="grid min-w-0 w-full max-w-full gap-4">/);
+  assert.match(appendableArraySource, /className="grid min-w-0 w-full max-w-full gap-4 rounded-md/);
 });
 
 test('every managed page image field has a CMS image guide mapping', () => {

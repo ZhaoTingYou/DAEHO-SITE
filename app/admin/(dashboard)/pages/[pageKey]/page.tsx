@@ -503,7 +503,7 @@ function EditableArray({
 }) {
   if (value.length === 0) {
     return (
-      <section className="grid gap-4 rounded-md border border-[#e4e7ec] bg-white p-4">
+      <section className="grid min-w-0 w-full max-w-full gap-4 rounded-md border border-[#e4e7ec] bg-white p-4">
         <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{label}</h3>
         <p className="mt-2 text-sm text-[#98a2b3]">{createAdminTranslator(context.messages)('page.emptySection')}</p>
         {itemFields?.length ? (
@@ -514,16 +514,16 @@ function EditableArray({
   }
 
   return (
-    <section className="grid gap-4 rounded-md border border-[#e4e7ec] bg-white p-4">
+    <section className="grid min-w-0 w-full max-w-full gap-4 rounded-md border border-[#e4e7ec] bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{label}</h3>
         <span className="rounded-full bg-[#f2f4f7] px-2.5 py-1 text-xs font-semibold text-[#647084]">
           {value.length}
         </span>
       </div>
-      <div className="grid gap-3">
+      <div className="grid min-w-0 w-full max-w-full gap-3">
         {value.map((item, index) => (
-          <div key={`${path}.${index}`} className="grid gap-4 rounded-md border border-[#eef2f6] bg-[#fbfcfe] p-3">
+          <div key={`${path}.${index}`} className="grid min-w-0 w-full max-w-full gap-4 rounded-md border border-[#eef2f6] bg-[#fbfcfe] p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#98a2b3]">
               {itemTitle(item, index, context.adminLocale, itemFields)}
             </p>
@@ -570,7 +570,7 @@ function EditableArrayItemFields({
   const t = createAdminTranslator(context.messages);
 
   return (
-    <div className="grid gap-4">
+    <div className="grid min-w-0 w-full max-w-full gap-4">
       {itemFields.map((field) => {
         const fieldPath = `${path}.${field.path}`;
         const fieldValue = arrayItemFieldValue(item, field);

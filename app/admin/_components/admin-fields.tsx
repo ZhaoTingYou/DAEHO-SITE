@@ -679,7 +679,7 @@ export function AppendableArrayItemsField({
   };
 
   return (
-    <section className="grid gap-4 rounded-md border border-dashed border-[#cbd3df] bg-[#fbfcfe] p-4">
+    <section className="grid min-w-0 w-full max-w-full gap-4 rounded-md border border-dashed border-[#cbd3df] bg-[#fbfcfe] p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">
@@ -697,12 +697,12 @@ export function AppendableArrayItemsField({
           {addButtonLabel}
         </button>
       </div>
-      <div className="grid gap-4">
+      <div className="grid min-w-0 w-full max-w-full gap-4">
         {rows.map((row, rowIndex) => {
           const itemIndex = startIndex + rowIndex;
 
           return (
-            <div key={row} className="grid gap-4 rounded-md border border-[#eef2f6] bg-white p-3">
+            <div key={row} className="grid min-w-0 w-full max-w-full gap-4 rounded-md border border-[#eef2f6] bg-white p-3">
               {rows.length > 1 ? (
                 <div className="flex justify-end">
                   <button
