@@ -104,7 +104,12 @@ export default async function CollectionDetailPage({params}: Props) {
             </div>
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.72fr)] lg:items-start lg:gap-16">
             <Reveal>
-              <CollectionDetailGallery images={images} thumbnailLabel={text.thumbnailLabel} />
+              <CollectionDetailGallery
+                images={images}
+                thumbnailLabel={text.thumbnailLabel}
+                previousLabel={text.previousImage}
+                nextLabel={text.nextImage}
+              />
             </Reveal>
             <Reveal className="lg:sticky lg:top-32">
               <aside className="space-y-8 bg-transparent p-0 shadow-none lg:space-y-9 lg:bg-bg lg:p-6 lg:shadow-[0_18px_70px_rgba(16,29,48,0.06)]">

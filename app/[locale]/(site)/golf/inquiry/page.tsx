@@ -14,7 +14,7 @@ import {withLocale} from '@/lib/site-map';
 
 type Props = {
   params: Promise<{locale: Locale}>;
-  searchParams: Promise<{head?: string; shaft?: string; engraving?: string}>;
+  searchParams: Promise<{head?: string; shaft?: string; style?: string; engraving?: string}>;
 };
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
@@ -42,6 +42,9 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
   const selectedHead = golf.heads.items.find((item) => item.id === query.head) ?? golf.heads.items[0];
   const selectedShaft =
     golf.shafts.items.find((item) => item.id === query.shaft) ?? golf.shafts.items[0];
+  const styleOptions = golf.labels.styleOptions?.length ? golf.labels.styleOptions : ['BASIC', 'COLOUR'];
+  const selectedStyle =
+    styleOptions.find((option) => option === query.style?.trim()) ?? styleOptions[0] ?? 'BASIC';
   const engravingSample = query.engraving?.trim().slice(0, 80) || 'JUDY KIM 2026.05.03';
 
   return (
@@ -74,6 +77,7 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
               </p>
               <SpecRow label={text.head} value={selectedHead.label} />
               <SpecRow label={text.shaft} value={selectedShaft.label} />
+              <SpecRow label={text.style} value={selectedStyle} />
               <SpecRow label={text.engraving} value={engravingSample} />
             </div>
           </Reveal>
@@ -88,6 +92,7 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
               configuration={{
                 head: selectedHead.label,
                 shaft: selectedShaft.label,
+                style: selectedStyle,
                 engraving: engravingSample
               }}
             />

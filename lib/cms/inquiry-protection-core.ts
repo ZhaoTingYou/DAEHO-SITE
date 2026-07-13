@@ -111,7 +111,7 @@ export function getInquiryProtectionConfigFromEnv(env: NodeJS.ProcessEnv = proce
 function buildFingerprint(source: InquirySource, payload: Record<string, unknown>) {
   const fields =
     source === 'golf'
-      ? ['locale', 'name', 'contact', 'quantity', 'due', 'team', 'use', 'message', 'selectedHead', 'selectedShaft', 'engravingSample']
+      ? ['locale', 'name', 'contact', 'quantity', 'due', 'team', 'use', 'message', 'selectedHead', 'selectedShaft', 'selectedStyle', 'engravingSample']
       : ['locale', 'name', 'organization', 'contact', 'type', 'message'];
 
   return [source, ...fields.map((field) => normalizedText(payload[field]))].join('\n');

@@ -80,6 +80,7 @@ public class RequestValidation {
     payload.putIfAbsent("message", "");
     payload.putIfAbsent("selectedHead", "");
     payload.putIfAbsent("selectedShaft", "");
+    payload.putIfAbsent("selectedStyle", "");
     payload.putIfAbsent("engravingSample", "");
     payload.putIfAbsent("pagePath", "");
     requireText(payload, "name", issues);
@@ -92,6 +93,7 @@ public class RequestValidation {
     maxLength(payload, "use", 160, issues);
     maxLength(payload, "selectedHead", 160, issues);
     maxLength(payload, "selectedShaft", 160, issues);
+    maxLength(payload, "selectedStyle", 160, issues);
     maxLength(payload, "engravingSample", 300, issues);
     maxLength(payload, "message", 3000, issues);
     maxLength(payload, "pagePath", 300, issues);

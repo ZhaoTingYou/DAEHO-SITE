@@ -1721,7 +1721,9 @@
       "ctaTitle": "이와 같은 작품을 의뢰하고 싶다면",
       "cta": "맞춤 제작 문의",
       "related": "관련 작품",
-      "thumbnailLabel": "작품 이미지 선택"
+      "thumbnailLabel": "작품 이미지 선택",
+      "previousImage": "이전 이미지",
+      "nextImage": "다음 이미지"
     },
     "allCategories": "전체 분류",
     "countSuffix": "점",
@@ -1933,6 +1935,7 @@
     "summary": "내 구성",
     "head": "클럽 헤드",
     "shaft": "샤프트 컬러",
+    "style": "스타일",
     "engraving": "각인 예시",
     "edit": "구성 다시 보기"
   },

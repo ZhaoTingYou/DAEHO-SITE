@@ -157,7 +157,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
     imageClass: 'object-contain object-center origin-center scale-100'
   };
   const engravingSample = 'JUDY KIM 2026.05.03';
-  const inquiryHref = `/${locale}/golf/inquiry?head=${selectedHead?.id ?? ''}&shaft=${selectedShaft?.id ?? ''}&engraving=${encodeURIComponent(engravingSample)}`;
+  const inquiryHref = `/${locale}/golf/inquiry?head=${selectedHead?.id ?? ''}&shaft=${selectedShaft?.id ?? ''}&style=${encodeURIComponent(selectedStyleOption)}&engraving=${encodeURIComponent(engravingSample)}`;
   const labels = content.labels;
   const process = content.process;
   const styleOptions = labels.styleOptions?.length ? labels.styleOptions : ['BASIC', 'COLOUR'];

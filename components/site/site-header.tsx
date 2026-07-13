@@ -56,6 +56,10 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastScrollYRef = useRef(0);
   const scrollDeltaRef = useRef(0);
+  const mobileHeaderRef = useRef<HTMLDivElement | null>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuPanelRef = useRef<HTMLDivElement | null>(null);
+  const mobileMenuWasOpenRef = useRef(false);
   const [atTop, setAtTop] = useState(true);
   const [overHomeHero, setOverHomeHero] = useState(true);
   const [isHidden, setIsHidden] = useState(false);
@@ -220,11 +224,104 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
   }, [isHome, pathname]);
 
   useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+    const desktopQuery = window.matchMedia('(min-width: 1024px)');
+    const closeMobileMenuAtDesktop = () => {
+      if (desktopQuery.matches) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    closeMobileMenuAtDesktop();
+    desktopQuery.addEventListener('change', closeMobileMenuAtDesktop);
+
+    return () => desktopQuery.removeEventListener('change', closeMobileMenuAtDesktop);
+  }, []);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    const backgroundElements = Array.from(
+      document.querySelectorAll<HTMLElement>('main, footer')
+    );
+    const backgroundStates = backgroundElements.map((element) => ({
+      element,
+      inert: element.inert,
+      ariaHidden: element.getAttribute('aria-hidden')
+    }));
+
+    document.body.style.overflow = 'hidden';
+    backgroundElements.forEach((element) => {
+      element.inert = true;
+      element.setAttribute('aria-hidden', 'true');
+    });
+
+    const getFocusableElements = () => {
+      const selector =
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      const roots = [mobileHeaderRef.current, mobileMenuPanelRef.current].filter(
+        (root): root is HTMLDivElement => root !== null
+      );
+
+      return roots
+        .flatMap((root) => Array.from(root.querySelectorAll<HTMLElement>(selector)))
+        .filter((element) => element.getClientRects().length > 0 && element.getAttribute('aria-hidden') !== 'true');
+    };
+
+    const onMenuKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') {
+        return;
+      }
+
+      const focusableElements = getFocusableElements();
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements.at(-1);
+
+      if (!firstFocusable || !lastFocusable) {
+        event.preventDefault();
+        return;
+      }
+
+      if (!focusableElements.includes(document.activeElement as HTMLElement)) {
+        event.preventDefault();
+        firstFocusable.focus();
+        return;
+      }
+
+      if (event.shiftKey && document.activeElement === firstFocusable) {
+        event.preventDefault();
+        lastFocusable.focus();
+      } else if (!event.shiftKey && document.activeElement === lastFocusable) {
+        event.preventDefault();
+        firstFocusable.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onMenuKeyDown);
 
     return () => {
-      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onMenuKeyDown);
+      document.body.style.overflow = previousOverflow;
+      backgroundStates.forEach(({element, inert, ariaHidden}) => {
+        element.inert = inert;
+
+        if (ariaHidden === null) {
+          element.removeAttribute('aria-hidden');
+        } else {
+          element.setAttribute('aria-hidden', ariaHidden);
+        }
+      });
     };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (!isMenuOpen && mobileMenuWasOpenRef.current) {
+      mobileMenuButtonRef.current?.focus();
+    }
+
+    mobileMenuWasOpenRef.current = isMenuOpen;
   }, [isMenuOpen]);
 
   useEffect(() => {
@@ -280,6 +377,9 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
 
   return (
     <motion.header
+      role={isMenuOpen ? 'dialog' : undefined}
+      aria-modal={isMenuOpen ? 'true' : undefined}
+      aria-label={isMenuOpen ? navText('mobileLabel') : undefined}
       initial={false}
       animate={{y: isHidden ? '-100%' : '0%'}}
       transition={{
@@ -415,8 +515,9 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
         </div>
       </div>
 
-      <div className="mobile-site-header mx-auto flex h-[calc(var(--mobile-header-height)+env(safe-area-inset-top))] max-w-[1440px] items-center justify-between px-[var(--mobile-page-gutter)] pt-[env(safe-area-inset-top)] lg:hidden">
+      <div ref={mobileHeaderRef} className="mobile-site-header mx-auto flex h-[calc(var(--mobile-header-height)+env(safe-area-inset-top))] max-w-[1440px] items-center justify-between px-[var(--mobile-page-gutter)] pt-[env(safe-area-inset-top)] lg:hidden">
         <button
+          ref={mobileMenuButtonRef}
           type="button"
           className="flex h-11 w-11 items-center justify-center"
           aria-label={isMenuOpen ? navText('closeMenu') : navText('openMenu')}
@@ -550,14 +651,13 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
         ) : null}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {isMenuOpen ? (
-          <motion.div
+      {isMenuOpen ? (
+        <motion.div
+            ref={mobileMenuPanelRef}
             initial={{opacity: 0, y: prefersReducedMotion ? 0 : -16}}
             animate={{opacity: 1, y: 0}}
-            exit={{opacity: 0, y: prefersReducedMotion ? 0 : -16}}
             transition={{duration: prefersReducedMotion ? 0 : 0.3, ease: [0.22, 0.61, 0.36, 1]}}
-            className="mobile-menu-panel fixed inset-x-0 bottom-0 top-[calc(var(--mobile-header-height)+env(safe-area-inset-top))] overflow-y-auto overscroll-contain bg-bg px-[var(--mobile-page-gutter)] pb-[calc(28px+env(safe-area-inset-bottom))] text-primary lg:hidden"
+            className="mobile-menu-panel absolute inset-x-0 top-full h-[calc(100dvh-var(--mobile-header-height)-env(safe-area-inset-top))] overflow-y-auto overscroll-contain bg-bg px-[var(--mobile-page-gutter)] pb-[calc(28px+env(safe-area-inset-bottom))] text-primary lg:hidden"
           >
             <motion.nav
               aria-label={navText('mobileLabel')}
@@ -671,9 +771,8 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
                 </div>
               </div>
             ) : null}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+        </motion.div>
+      ) : null}
     </motion.header>
   );
 }

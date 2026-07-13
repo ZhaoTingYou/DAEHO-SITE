@@ -15,9 +15,11 @@ type DetailImage = {
 type CollectionDetailGalleryProps = {
   images: DetailImage[];
   thumbnailLabel: string;
+  previousLabel: string;
+  nextLabel: string;
 };
 
-export function CollectionDetailGallery({images, thumbnailLabel}: CollectionDetailGalleryProps) {
+export function CollectionDetailGallery({images, thumbnailLabel, previousLabel, nextLabel}: CollectionDetailGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selected = images[selectedIndex] ?? images[0];
   const canNavigate = images.length > 1;
@@ -40,10 +42,10 @@ export function CollectionDetailGallery({images, thumbnailLabel}: CollectionDeta
         </AnimatePresence>
         {canNavigate ? (
           <div className="absolute inset-x-3 bottom-3 flex items-center justify-between">
-            <button type="button" onClick={selectPrevious} className="mobile-tap-target grid h-11 w-11 place-items-center bg-white/90 text-[20px] text-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="Previous image">
+            <button type="button" onClick={selectPrevious} className="mobile-tap-target grid h-11 w-11 place-items-center bg-white/90 text-[20px] text-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label={previousLabel}>
               <span aria-hidden="true">←</span>
             </button>
-            <button type="button" onClick={selectNext} className="mobile-tap-target grid h-11 w-11 place-items-center bg-white/90 text-[20px] text-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="Next image">
+            <button type="button" onClick={selectNext} className="mobile-tap-target grid h-11 w-11 place-items-center bg-white/90 text-[20px] text-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label={nextLabel}>
               <span aria-hidden="true">→</span>
             </button>
           </div>

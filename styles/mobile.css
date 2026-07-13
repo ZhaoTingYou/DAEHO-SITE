@@ -1,9 +1,10 @@
+:root {
+  --mobile-page-gutter: 20px;
+  --mobile-section-space: 80px;
+  --mobile-header-height: 64px;
+}
+
 @media (max-width: 767px) {
-  :root {
-    --mobile-page-gutter: 20px;
-    --mobile-section-space: 80px;
-    --mobile-header-height: 64px;
-  }
 
   .mobile-page-shell {
     overflow-x: clip;

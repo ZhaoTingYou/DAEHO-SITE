@@ -25,10 +25,18 @@ const newsGridSource = readFileSync(new URL('./components/news/news-journal-grid
 const contactFormSource = readFileSync(new URL('./components/forms/contact-form.tsx', import.meta.url), 'utf8');
 const golfFormSource = readFileSync(new URL('./components/forms/golf-inquiry-form.tsx', import.meta.url), 'utf8');
 const golfConfiguratorSource = readFileSync(new URL('./components/golf/golf-configurator.tsx', import.meta.url), 'utf8');
+const golfInquiryPageSource = readFileSync(new URL('./app/[locale]/(site)/golf/inquiry/page.tsx', import.meta.url), 'utf8');
+const collectionGallerySource = readFileSync(new URL('./components/specialty/collection-detail-gallery.tsx', import.meta.url), 'utf8');
+const inquiryValidationSource = readFileSync(new URL('./lib/cms/validation.ts', import.meta.url), 'utf8');
+const backendValidationSource = readFileSync(new URL('./backend/cms/src/main/java/com/daeho/cms/service/RequestValidation.java', import.meta.url), 'utf8');
+const backendRepositorySource = readFileSync(new URL('./backend/cms/src/main/java/com/daeho/cms/repository/CmsRepository.java', import.meta.url), 'utf8');
+const koMessages = JSON.parse(readFileSync(new URL('./messages/ko.json', import.meta.url), 'utf8'));
+const enMessages = JSON.parse(readFileSync(new URL('./messages/en.json', import.meta.url), 'utf8'));
 const legalSource = readFileSync(new URL('./components/site/legal-document.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
   assert.match(globals, /@import "\.\.\/styles\/mobile\.css"/);
+  assert.match(mobile, /^:root\s*\{[\s\S]*?--mobile-header-height: 64px;[\s\S]*?\}\s*\n\s*@media \(max-width: 767px\)/);
   assert.match(mobile, /--mobile-page-gutter: 20px/);
   assert.match(mobile, /--mobile-section-space: 80px/);
   assert.match(mobile, /--mobile-header-height: 64px/);
@@ -41,8 +49,20 @@ test('public mobile shell uses a compact safe-area header and scrollable menu', 
   assert.match(header, /mobile-site-header/);
   assert.match(header, /mobile-menu-panel/);
   assert.match(header, /h-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\)\]/);
-  assert.match(header, /top-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\)\]/);
+  assert.match(header, /absolute inset-x-0 top-full h-\[calc\(100dvh-var\(--mobile-header-height\)-env\(safe-area-inset-top\)\)\]/);
+  assert.doesNotMatch(header, /mobile-menu-panel fixed/);
   assert.match(header, /overflow-y-auto/);
+  assert.match(header, /mobileMenuButtonRef/);
+  assert.match(header, /mobileMenuPanelRef/);
+  assert.match(header, /event\.key !== 'Tab'/);
+  assert.match(header, /element\.inert = true/);
+  assert.match(header, /window\.matchMedia\('\(min-width: 1024px\)'\)/);
+  assert.match(header, /if \(desktopQuery\.matches\) \{\s+setIsMenuOpen\(false\);/);
+  assert.match(header, /role=\{isMenuOpen \? 'dialog' : undefined\}/);
+  assert.match(header, /aria-modal=\{isMenuOpen \? 'true' : undefined\}/);
+  assert.match(header, /aria-label=\{isMenuOpen \? navText\('mobileLabel'\) : undefined\}/);
+  assert.doesNotMatch(header, /mobileMenuPanelRef\}[\s\S]{0,120}role="dialog"/);
+  assert.doesNotMatch(header, /exit=\{\{opacity: 0, y: prefersReducedMotion/);
   assert.match(footer, /mobile-site-footer/);
   assert.match(footer, /pt-16 pb-0 md:py-\[clamp\(56px,7vw,96px\)\]/);
   assert.doesNotMatch(footer, /px-container pt-16 pb-12/);
@@ -172,6 +192,28 @@ test('Golf option controls expose and visibly render their selected state', () =
   assert.match(golfConfiguratorSource, /isSelected \? 'border-2 border-primary bg-primary\/5'/);
   assert.match(golfConfiguratorSource, /isSelected \? 'bg-primary text-white hover:bg-primary\/90'/);
   assert.match(golfConfiguratorSource, /focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary/);
+});
+
+test('Golf selected style reaches the inquiry summary, form payload, and CMS storage', () => {
+  assert.match(golfConfiguratorSource, /style=\$\{encodeURIComponent\(selectedStyleOption\)\}/);
+  assert.match(golfInquiryPageSource, /style\?: string/);
+  assert.match(golfInquiryPageSource, /<SpecRow label=\{text\.style\} value=\{selectedStyle\} \/>/);
+  assert.match(golfInquiryPageSource, /style: selectedStyle/);
+  assert.match(golfFormSource, /name="selectedStyle" value=\{configuration\.style\}/);
+  assert.match(golfFormSource, /selectedStyle: String\(formData\.get\('selectedStyle'\)/);
+  assert.match(inquiryValidationSource, /selectedStyle: inquiryShortText/);
+  assert.match(backendValidationSource, /putIfAbsent\("selectedStyle", ""\)/);
+  assert.match(backendRepositorySource, /"selectedStyle", validation\.stringValue\(payload\.get\("selectedStyle"\)\)/);
+});
+
+test('Collection gallery navigation labels follow the active locale', () => {
+  assert.doesNotMatch(collectionGallerySource, /aria-label="(?:Previous|Next) image"/);
+  assert.match(collectionGallerySource, /aria-label=\{previousLabel\}/);
+  assert.match(collectionGallerySource, /aria-label=\{nextLabel\}/);
+  assert.equal(koMessages.collectionUi.detail.previousImage, '이전 이미지');
+  assert.equal(koMessages.collectionUi.detail.nextImage, '다음 이미지');
+  assert.equal(enMessages.collectionUi.detail.previousImage, 'Previous image');
+  assert.equal(enMessages.collectionUi.detail.nextImage, 'Next image');
 });
 
 test('Golf process cards are content-driven in a single mobile column', () => {

@@ -114,6 +114,7 @@ export const golfInquirySchema = z.object({
   message: inquiryLongText,
   selectedHead: inquiryShortText,
   selectedShaft: inquiryShortText,
+  selectedStyle: inquiryShortText,
   engravingSample: inquiryMediumText,
   pagePath: inquiryMediumText,
   website: inquiryHoneypot

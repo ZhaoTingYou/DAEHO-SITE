@@ -9,6 +9,7 @@ type GolfInquiryFormProps = {
   configuration?: {
     head: string;
     shaft: string;
+    style: string;
     engraving: string;
   };
 };
@@ -44,6 +45,7 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
         <>
           <input type="hidden" name="selectedHead" value={configuration.head} />
           <input type="hidden" name="selectedShaft" value={configuration.shaft} />
+          <input type="hidden" name="selectedStyle" value={configuration.style} />
           <input type="hidden" name="engravingSample" value={configuration.engraving} />
         </>
       ) : null}
@@ -115,6 +117,7 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
         message: String(formData.get('message') ?? ''),
         selectedHead: String(formData.get('selectedHead') ?? ''),
         selectedShaft: String(formData.get('selectedShaft') ?? ''),
+        selectedStyle: String(formData.get('selectedStyle') ?? ''),
         engravingSample: String(formData.get('engravingSample') ?? ''),
         website: String(formData.get('website') ?? ''),
         locale: getCurrentLocale(),

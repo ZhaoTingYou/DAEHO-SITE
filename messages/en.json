@@ -1721,7 +1721,9 @@
       "ctaTitle": "Interested in commissioning a work like this?",
       "cta": "Bespoke inquiry",
       "related": "Related works",
-      "thumbnailLabel": "Select work image"
+      "thumbnailLabel": "Select work image",
+      "previousImage": "Previous image",
+      "nextImage": "Next image"
     },
     "allCategories": "All categories",
     "countSuffix": "pieces",
@@ -1933,6 +1935,7 @@
     "summary": "My configuration",
     "head": "Club head",
     "shaft": "Shaft color",
+    "style": "Style",
     "engraving": "Engraving sample",
     "edit": "Edit configuration"
   },

@@ -342,6 +342,7 @@ public class CmsRepository {
     values.put("configuration", Map.of(
         "selectedHead", validation.stringValue(payload.get("selectedHead")),
         "selectedShaft", validation.stringValue(payload.get("selectedShaft")),
+        "selectedStyle", validation.stringValue(payload.get("selectedStyle")),
         "engravingSample", validation.stringValue(payload.get("engravingSample"))
     ));
     values.put("userAgent", requestMeta.getOrDefault("userAgent", ""));
