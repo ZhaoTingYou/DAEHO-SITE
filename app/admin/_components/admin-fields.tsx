@@ -553,7 +553,7 @@ export function ImageUploadField({
               name={name}
               defaultValue={defaultValue}
               placeholder={placeholder}
-              className="min-h-10 w-full min-w-0 max-w-full flex-none rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15 md:w-80"
+              className="min-h-10 w-full min-w-0 max-w-full flex-none rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15 md:w-56"
             />
             <label className="inline-flex min-h-10 max-w-full cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-md border border-[#cbd3df] bg-white px-3 text-center text-sm font-semibold text-[#344054] transition hover:bg-[#f8fafc]">
               <span className="font-numeric text-base leading-none">+</span>
