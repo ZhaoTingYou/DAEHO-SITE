@@ -22,6 +22,7 @@ const newsDetailSource = readFileSync(new URL('./app/[locale]/(site)/news/[slug]
 const newsGridSource = readFileSync(new URL('./components/news/news-journal-grid.tsx', import.meta.url), 'utf8');
 const contactFormSource = readFileSync(new URL('./components/forms/contact-form.tsx', import.meta.url), 'utf8');
 const golfFormSource = readFileSync(new URL('./components/forms/golf-inquiry-form.tsx', import.meta.url), 'utf8');
+const golfConfiguratorSource = readFileSync(new URL('./components/golf/golf-configurator.tsx', import.meta.url), 'utf8');
 const legalSource = readFileSync(new URL('./components/site/legal-document.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
@@ -152,4 +153,19 @@ test('mobile forms and legal pages use readable controls and copy', () => {
   assert.match(golfFormSource, /mobile-form/);
   assert.match(legalSource, /mobile-copy/);
   assert.match(legalSource, /overflow-wrap-anywhere/);
+});
+
+test('Golf option controls expose and visibly render their selected state', () => {
+  assert.match(golfConfiguratorSource, /const \[selectedHeadId, setSelectedHeadId\] = useState/);
+  assert.match(golfConfiguratorSource, /const \[selectedStyleOption, setSelectedStyleOption\] = useState/);
+  assert.match(golfConfiguratorSource, /aria-pressed=\{isSelected\}/);
+  assert.match(golfConfiguratorSource, /onClick=\{\(\) => setSelectedStyleOption\(label\)\}/);
+  assert.match(golfConfiguratorSource, /isSelected \? 'border-2 border-primary bg-primary\/5'/);
+  assert.match(golfConfiguratorSource, /isSelected \? 'bg-primary text-white hover:bg-primary\/90'/);
+  assert.match(golfConfiguratorSource, /focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary/);
+});
+
+test('Golf process cards are content-driven in a single mobile column', () => {
+  assert.match(golfConfiguratorSource, /grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3/);
+  assert.match(golfConfiguratorSource, /grid place-items-center bg-\[#202020\] px-5 py-6 text-center text-white md:aspect-\[1\.2\/1\]/);
 });

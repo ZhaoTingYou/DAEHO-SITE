@@ -119,6 +119,9 @@ const golfHeadVisuals: Record<string, string> = {
 export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [selectedHeadId, setSelectedHeadId] = useState(content.heads.items[0]?.id ?? '');
+  const [selectedStyleOption, setSelectedStyleOption] = useState(
+    content.labels.styleOptions?.[0] ?? 'BASIC'
+  );
   const [heroSlideIndex, setHeroSlideIndex] = useState(0);
 
   const selectedHead = useMemo(
@@ -281,7 +284,9 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => setSelectedHeadId(item.id)}
-                  className="group min-h-11 bg-white p-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                  className={`group min-h-11 border p-2 text-left transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary ${
+                    isSelected ? 'border-2 border-primary bg-primary/5' : 'border-primary/20 bg-white hover:border-primary/60'
+                  }`}
                 >
                   <div className="relative aspect-square overflow-hidden bg-white">
                     <GolfImage
@@ -309,17 +314,25 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
               </p>
             </Reveal>
             <div className="grid gap-4 sm:grid-cols-2">
-              {styleOptions.map((label) => (
-                <button
-                  key={label}
-                  type="button"
-                  className="relative aspect-[1.15/1] min-h-11 bg-[#d8d8d8] text-primary transition duration-hover ease-brand hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-                >
-                  <span className="absolute bottom-3 right-3 font-body text-[16px] font-semibold uppercase tracking-[0.02em] md:text-[18px]">
-                    {label}
-                  </span>
-                </button>
-              ))}
+              {styleOptions.map((label) => {
+                const isSelected = label === selectedStyleOption;
+
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => setSelectedStyleOption(label)}
+                    className={`relative aspect-[1.15/1] min-h-11 transition duration-hover ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary ${
+                      isSelected ? 'bg-primary text-white hover:bg-primary/90' : 'bg-[#d8d8d8] text-primary hover:bg-white'
+                    }`}
+                  >
+                    <span className="absolute bottom-3 right-3 font-body text-[16px] font-semibold uppercase tracking-[0.02em] md:text-[18px]">
+                      {label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -456,10 +469,10 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
             <h2 className="text-center font-heading text-[clamp(20px,2vw,28px)] font-semibold">
               {process.title}
             </h2>
-            <div className="mx-auto grid w-full grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="mx-auto grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               {process.steps.map((step) => (
                 <Reveal key={step.id}>
-                  <div className="grid aspect-[1.2/1] place-items-center bg-[#202020] px-5 py-6 text-center text-white">
+                  <div className="grid place-items-center bg-[#202020] px-5 py-6 text-center text-white md:aspect-[1.2/1]">
                     <div className="space-y-2">
                       <p className="font-numeric text-[15px] font-semibold tracking-[0.08em]">
                         {step.id}

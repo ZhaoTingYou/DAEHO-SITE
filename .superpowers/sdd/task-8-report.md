@@ -16,3 +16,15 @@
 ## Visual Check Note
 
 Playwright requests at 320px, 375px, and 430px reached the local server, but Contact and Terms returned an existing CMS JSON parse error (`Unexpected non-whitespace character after JSON at position 544`). The disabled Golf route returned its expected 404. No CMS data was changed.
+
+## Review Follow-up
+
+- Added local pressed state, `aria-pressed`, and distinct selected styles for the Golf head and bracelet-style controls without changing the inquiry URL contract.
+- Changed Golf process cards to a single content-driven column at 320px; the fixed aspect ratio now applies only from `md` upward.
+- Added focused regression assertions for option state, visible treatments, keyboard focus classes, and the responsive process grid.
+
+## Follow-up Verification
+
+- `node --test mobile-public-site.test.mjs lib/golf-visibility.test.mjs lib/cms/legal-terms-source.test.mjs` passed: 25 tests.
+- `npm run lint` passed.
+- `npx tsc --noEmit` passed.
