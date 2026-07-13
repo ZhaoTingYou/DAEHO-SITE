@@ -52,7 +52,11 @@ test('Home mobile hero wraps copy and uses a controlled viewport height', () => 
 
 test('Home news modal retains its launcher and traps keyboard focus', () => {
   assert.match(homeNews, /openerRef\.current = event\.currentTarget/);
-  assert.match(homeNews, /openerRef\.current\?\.focus\(\)/);
+  assert.match(homeNews, /requestAnimationFrame/);
+  assert.match(homeNews, /openerRef\.current = null/);
+  assert.match(homeNews, /opener\?\.isConnected/);
+  assert.match(homeNews, /document\.querySelector<HTMLButtonElement>\('\.mobile-home-news-row'\)/);
+  assert.match(homeNews, /fallback\?\.isConnected/);
   assert.match(homeNews, /if \(event\.key === 'Escape'\) \{\s+closeModal\(\);/);
   assert.match(homeNews, /if \(event\.target === event\.currentTarget\) \{\s+closeModal\(\);/);
   assert.match(homeNews, /aria-label=\{text\.close\}\s+onClick=\{closeModal\}/);

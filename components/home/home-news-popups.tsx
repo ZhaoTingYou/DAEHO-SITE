@@ -37,8 +37,29 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
   const titleId = useId();
   const closeModal = useCallback(() => {
     setActiveCard(null);
-    openerRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (activeCard || !openerRef.current) {
+      return;
+    }
+
+    const opener = openerRef.current;
+    openerRef.current = null;
+    const frame = window.requestAnimationFrame(() => {
+      if (opener?.isConnected) {
+        opener.focus();
+        return;
+      }
+
+      const fallback = document.querySelector<HTMLButtonElement>('.mobile-home-news-row');
+      if (fallback?.isConnected) {
+        fallback.focus();
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeCard]);
 
   const handleModalKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
     if (event.key !== 'Tab') {
