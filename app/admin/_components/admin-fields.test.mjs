@@ -43,7 +43,9 @@ test('image upload fields keep long filenames inside bilingual CMS panels', () =
   assert.match(pageEditorSource, /<Panel className="min-w-0 p-5">/);
   assert.match(imageUploadSource, /className="grid min-w-0 gap-1\.5 text-sm/);
   assert.match(imageUploadSource, /className="grid min-w-0 gap-2"/);
-  assert.match(imageUploadSource, /className="min-h-10 min-w-0 w-full rounded-md border/);
+  assert.match(imageUploadSource, /className="flex min-w-0 max-w-full flex-wrap items-start gap-2"/);
+  assert.match(imageUploadSource, /className="min-h-10 w-full min-w-0 max-w-full flex-none rounded-md border[^\n]+md:w-80"/);
+  assert.doesNotMatch(imageUploadSource, /md:grid-cols-\[minmax\(0,1fr\)_auto\]/);
   assert.match(imageUploadSource, /className=\{`break-all text-xs font-medium leading-5/);
 });
 
