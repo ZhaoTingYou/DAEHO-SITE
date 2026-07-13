@@ -22,12 +22,13 @@ export default async function ChroniclePage({params}: Props) {
   setRequestLocale(locale);
   const messages = await getLocaleMessages(locale);
   const content = messages.chronicle;
-  const slides = content.timeline.items.map((item) => ({
+  const slides = content.timeline.items.map((item, index) => ({
     year: item.year,
     label: item.kicker,
     title: item.title,
     desc: item.body,
-    image: imageSrc(item.image)
+    image: imageSrc(item.image),
+    fallbackImage: imageSrc(`chronicle_milestone_${String(index + 1).padStart(2, '0')}.png`)
   }));
   const endNav = {
     ...messages.chronicleUi.endNav,

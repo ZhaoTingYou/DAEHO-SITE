@@ -10,6 +10,7 @@ export type ChronicleHorizontalSlide = {
   title: string;
   desc: string;
   image: string;
+  fallbackImage: string;
 };
 
 type ChronicleHorizontalProps = {
@@ -476,11 +477,11 @@ export function ChronicleHorizontal({
                       <p className="whitespace-pre-line">{slide.desc}</p>
                     </div>
                     <div className="chronicle-image-frame">
-                      <Image
-                        src={slide.image}
+                      <ChronicleSlideImage
+                        key={`${slide.image}-${slide.fallbackImage}`}
+                        image={slide.image}
+                        fallbackImage={slide.fallbackImage}
                         alt={slide.title}
-                        fill
-                        sizes="(min-width: 1024px) 58vw, 100vw"
                       />
                     </div>
                   </div>
@@ -507,5 +508,43 @@ export function ChronicleHorizontal({
         <span>{introLabel}</span>
       </div>
     </main>
+  );
+}
+
+function ChronicleSlideImage({
+  image,
+  fallbackImage,
+  alt
+}: {
+  image: string;
+  fallbackImage: string;
+  alt: string;
+}) {
+  const initialSource = image || fallbackImage;
+  const [source, setSource] = useState(initialSource);
+  const [failed, setFailed] = useState(false);
+
+  if (!source || failed) {
+    return null;
+  }
+
+  return (
+    <Image
+      key={source}
+      src={source}
+      alt={alt}
+      fill
+      sizes="(min-width: 1024px) 58vw, 100vw"
+      onError={(event) => {
+        event.currentTarget.style.visibility = 'hidden';
+
+        if (source !== fallbackImage) {
+          setSource(fallbackImage);
+          return;
+        }
+
+        setFailed(true);
+      }}
+    />
   );
 }
