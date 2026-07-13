@@ -20,7 +20,10 @@ test('public mobile pages share fixed typography and spacing tokens', () => {
 test('public mobile shell uses a compact safe-area header and scrollable menu', () => {
   assert.match(header, /mobile-site-header/);
   assert.match(header, /mobile-menu-panel/);
-  assert.match(header, /h-16/);
+  assert.match(header, /h-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\)\]/);
+  assert.match(header, /top-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\)\]/);
   assert.match(header, /overflow-y-auto/);
   assert.match(footer, /mobile-site-footer/);
+  assert.match(footer, /pt-16 pb-12 md:py-\[clamp\(56px,7vw,96px\)\]/);
+  assert.doesNotMatch(mobile, /\.mobile-site-footer \{[\s\S]*padding-top:/);
 });

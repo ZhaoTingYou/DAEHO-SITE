@@ -415,7 +415,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
         </div>
       </div>
 
-      <div className="mobile-site-header mx-auto flex h-16 max-w-[1440px] items-center justify-between px-[var(--mobile-page-gutter)] pt-[env(safe-area-inset-top)] lg:hidden">
+      <div className="mobile-site-header mx-auto flex h-[calc(var(--mobile-header-height)+env(safe-area-inset-top))] max-w-[1440px] items-center justify-between px-[var(--mobile-page-gutter)] pt-[env(safe-area-inset-top)] lg:hidden">
         <button
           type="button"
           className="flex h-11 w-11 items-center justify-center"

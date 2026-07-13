@@ -33,7 +33,6 @@
   .mobile-tap-target { min-width: 44px; min-height: 44px; }
 
   .mobile-site-footer {
-    padding-top: 64px;
     padding-bottom: calc(32px + env(safe-area-inset-bottom));
   }
 
