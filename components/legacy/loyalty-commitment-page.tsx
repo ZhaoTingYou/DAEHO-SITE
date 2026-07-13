@@ -171,7 +171,7 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
   const heroImage = resolveHeritageHeroImage(content.hero.image, copy.imagePlaceholder);
 
   return (
-    <main className="bg-white text-primary">
+    <main className="mobile-page-shell bg-white text-primary">
       <HeritageHero
         image={heroImage}
         imageAlt={content.hero.subtitle || copy.heroTitle}
@@ -181,31 +181,31 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
         title={copy.heroTitle}
       />
 
-      <section className="relative z-10 bg-[#f4f1ee] py-[clamp(108px,12vw,176px)]">
-        <Reveal className="mx-auto max-w-[760px] px-container text-center text-primary">
+      <section className="mobile-section relative z-10 bg-[#f4f1ee] md:py-[clamp(108px,12vw,176px)]">
+        <Reveal className="mx-auto max-w-[760px] text-center text-primary md:px-container">
           <div className="mx-auto mb-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
           <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
             {copy.quoteTitle}
           </p>
-          <p className={`${bodyTextClass} mt-[14px] whitespace-pre-line text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
+          <p className={`${bodyTextClass} mobile-copy mt-[14px] whitespace-pre-line text-primary md:text-[clamp(25px,2.6vw,38px)] md:leading-[1.28]`}>
             {copy.quoteBody}
           </p>
           <div className="mx-auto mt-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
         </Reveal>
       </section>
 
-      <section className="relative z-10 bg-white px-[clamp(20px,2.4vw,36px)] pb-[clamp(30px,5vw,56px)] pt-0">
+      <section className="relative z-10 bg-white px-[var(--mobile-page-gutter)] pb-8 pt-0 md:px-[clamp(20px,2.4vw,36px)] md:pb-[clamp(30px,5vw,56px)]">
         <LoyaltyFeatureCarousel slides={copy.featureSlides} imageAlt={content.hero.subtitle} locale={locale} />
       </section>
 
-      <section className="relative z-10 bg-white py-[clamp(104px,11vw,168px)]">
-        <Reveal className="mx-auto max-w-3xl px-container text-center">
-          <p className="whitespace-pre-line [font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
+      <section className="mobile-section relative z-10 bg-white md:py-[clamp(104px,11vw,168px)]">
+        <Reveal className="mx-auto max-w-3xl text-center md:px-container">
+          <p className="mobile-copy whitespace-pre-line [font-family:'MaruBuri',serif] font-semibold text-primary md:text-[clamp(28px,2.7vw,34px)] md:leading-[1.25]">
             {copy.discoverLead}
           </p>
           <Link
             href={withLocale(locale, '/mastery/creations')}
-            className={`${englishTextClass} link-sweep mt-[10px] inline-flex text-[15px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
+            className={`${englishTextClass} link-sweep mobile-tap-target mt-[10px] inline-flex items-center text-[16px] uppercase leading-[19px] tracking-[0.2em] text-accent md:min-h-0 md:min-w-0 md:text-[15px]`}
           >
             {copy.cta}
           </Link>

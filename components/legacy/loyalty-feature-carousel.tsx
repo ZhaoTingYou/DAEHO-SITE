@@ -57,7 +57,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
   }
 
   return (
-    <div className="relative mx-auto min-h-[clamp(520px,62vw,760px)] max-w-[1500px] overflow-hidden bg-white">
+    <div className="relative mx-auto min-h-[600px] max-w-[1500px] overflow-hidden bg-white md:min-h-[clamp(520px,62vw,760px)]">
       <motion.div
         className="absolute inset-y-0 left-0 flex"
         style={{width: `${slides.length * 100}%`}}
@@ -124,17 +124,17 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
           animate={{opacity: 1, x: 0}}
           exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0, x: current.direction * -28}}
           transition={contentTransition}
-          className="absolute left-1/2 top-1/2 z-10 flex min-h-[360px] w-[min(78vw,760px)] -translate-x-1/2 -translate-y-1/2 flex-col justify-center bg-white px-8 py-12 text-center shadow-[0_24px_80px_rgba(56,33,28,0.16)] md:min-h-[clamp(440px,32vw,520px)] md:px-16 md:py-16"
+          className="absolute left-0 top-0 z-10 flex min-h-0 w-full translate-x-0 translate-y-0 flex-col justify-end bg-transparent px-0 pb-24 pt-[310px] text-center shadow-none md:left-1/2 md:top-1/2 md:min-h-[clamp(440px,32vw,520px)] md:w-[min(78vw,760px)] md:-translate-x-1/2 md:-translate-y-1/2 md:justify-center md:bg-white md:px-16 md:py-16 md:shadow-[0_24px_80px_rgba(56,33,28,0.16)]"
         >
           {activeSlide.kicker ? (
             <p className={`${englishTextClass} text-[14px] uppercase leading-[19px] tracking-[0.2em] text-subtext`}>
               {activeSlide.kicker}
             </p>
           ) : null}
-          <h2 className={`${englishTextClass} text-[32px] leading-tight tracking-normal text-primary ${activeSlide.kicker ? 'mt-7' : ''}`}>
+          <h2 className={`${englishTextClass} mobile-display bg-white/95 px-5 pt-6 text-primary md:bg-transparent md:px-0 md:pt-0 md:text-[32px] ${activeSlide.kicker ? 'mt-7' : ''}`}>
             {activeSlide.title}
           </h2>
-          <p className={`${carouselBodyTextClass} mx-auto mt-8 max-w-[600px] whitespace-pre-line text-[15px] leading-[1.72] tracking-normal text-text`}>
+          <p className={`${carouselBodyTextClass} mobile-copy mx-auto max-w-[600px] bg-white/95 px-5 pb-6 pt-4 whitespace-pre-line text-text md:mt-8 md:bg-transparent md:px-0 md:pb-0 md:pt-0 md:text-[15px] md:leading-[1.72]`}>
             {activeSlide.body}
           </p>
         </motion.article>
@@ -145,7 +145,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
           type="button"
           aria-label="Previous loyalty slide"
           onClick={() => goToSlide(-1)}
-          className="grid h-11 w-11 place-items-center bg-white/90 text-primary shadow-[0_12px_32px_rgba(28,23,20,0.12)]"
+          className="mobile-tap-target grid h-11 w-11 place-items-center bg-white/90 text-primary shadow-[0_12px_32px_rgba(28,23,20,0.12)]"
         >
           <span className="block h-3 w-3 rotate-[135deg] border-b border-r border-primary" />
         </button>
@@ -153,7 +153,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
           type="button"
           aria-label="Next loyalty slide"
           onClick={() => goToSlide(1)}
-          className="grid h-11 w-11 place-items-center bg-white/90 text-primary shadow-[0_12px_32px_rgba(28,23,20,0.12)]"
+          className="mobile-tap-target grid h-11 w-11 place-items-center bg-white/90 text-primary shadow-[0_12px_32px_rgba(28,23,20,0.12)]"
         >
           <span className="block h-3 w-3 -rotate-45 border-b border-r border-primary" />
         </button>

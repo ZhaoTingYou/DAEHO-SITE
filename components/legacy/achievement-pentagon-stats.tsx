@@ -135,14 +135,14 @@ export function AchievementPentagonStats({
       </Reveal>
 
       <Reveal className="md:hidden">
-        <AnimatedStatScope className="grid gap-6 text-center">
-          <div className="grid gap-5 sm:grid-cols-2">
+        <AnimatedStatScope className="text-center">
+          <div className="border-y border-[#F4E6E1]/30">
             {items.map((item, index) => (
               <AchievementPentagonStat
                 key={`${item.value}-${item.label}`}
                 activeIndex={activeIndex}
                 bodyTextClass={bodyTextClass}
-                className="relative rounded-[2px] border border-[#F4E6E1]/18 px-5 py-6"
+                className="relative border-b border-[#F4E6E1]/30 px-0 py-8 last:border-b-0"
                 englishTextClass={englishTextClass}
                 index={index}
                 item={item}
@@ -342,7 +342,7 @@ function AchievementPentagonStat({
     <div
       aria-label={makeStatLabel(item)}
       aria-pressed={isActive}
-      className={`${className} achievement-pentagon-stat ${isActive ? 'is-active' : ''} ${isMuted ? 'is-muted' : ''} text-center md:absolute`}
+      className={`${className} achievement-pentagon-stat mobile-tap-target ${isActive ? 'is-active' : ''} ${isMuted ? 'is-muted' : ''} text-center md:absolute md:min-h-0 md:min-w-0`}
       onBlur={onClear}
       onFocus={() => onActivate(index)}
       onKeyDown={(event) => handleStatKeyDown(event, index, onToggle, onClear)}
@@ -356,7 +356,7 @@ function AchievementPentagonStat({
     >
       <div className="achievement-pentagon-stat__content">
         <AnimatedStatValue
-          className={`${englishTextClass} text-[clamp(44px,5.3vw,74px)] leading-none text-[#F4E6E1]`}
+          className={`${englishTextClass} text-[44px] leading-none text-[#F4E6E1] md:text-[clamp(44px,5.3vw,74px)]`}
           index={index}
           locale={locale}
           value={item.value}
@@ -364,7 +364,7 @@ function AchievementPentagonStat({
         <p className={`${englishTextClass} mt-2 whitespace-pre-line text-[16px] uppercase leading-[1.05] tracking-[0.05em] text-[#F4E6E1]`}>
           {item.label}
         </p>
-        <p className={`${bodyTextClass} mx-auto mt-5 max-w-[250px] whitespace-pre-line text-[14px] leading-[1.45] text-[#F4E6E1]/90`}>
+        <p className={`${bodyTextClass} mobile-copy mx-auto mt-5 max-w-[250px] whitespace-pre-line text-[#F4E6E1]/90 md:text-[14px] md:leading-[1.45]`}>
           {item.body}
         </p>
       </div>

@@ -9,6 +9,10 @@
     overflow-x: clip;
   }
 
+  .mobile-page-shell :where(h1, h2, h3, p, a) {
+    overflow-wrap: anywhere;
+  }
+
   .mobile-section {
     padding-block: var(--mobile-section-space);
     padding-inline: var(--mobile-page-gutter);
@@ -28,9 +32,24 @@
     letter-spacing: 0;
   }
 
+  .mobile-copy > p {
+    font-size: 16px;
+    line-height: 1.75;
+  }
+
   .mobile-media-landscape { aspect-ratio: 4 / 3; }
   .mobile-media-portrait { aspect-ratio: 4 / 5; }
   .mobile-tap-target { min-width: 44px; min-height: 44px; }
+
+  .mobile-page-shell .achievement-record-gallery {
+    gap: 0;
+    padding-inline: 0;
+  }
+
+  .mobile-page-shell .achievement-record-gallery__item {
+    aspect-ratio: 4 / 3;
+    border-bottom: 1px solid rgb(17 17 17 / .14);
+  }
 
   .mobile-home-news-row .home-news-image { aspect-ratio: 4 / 3; }
 

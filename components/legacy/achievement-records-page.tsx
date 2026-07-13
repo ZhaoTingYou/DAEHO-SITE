@@ -313,7 +313,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
   const heroImage = resolveHeritageHeroImage(content.hero.image, copy.imagePlaceholder);
 
   return (
-    <main className="bg-white text-primary">
+    <main className="mobile-page-shell bg-white text-primary">
       <HeritageHero
         image={heroImage}
         imageAlt={content.hero.subtitle || copy.heroTitle}
@@ -324,29 +324,29 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
       />
 
       <div className="relative z-10 bg-white">
-        <section className="bg-[#62302F] py-[clamp(84px,9vw,132px)] text-[#F4E6E1]">
+        <section className="mobile-section bg-[#62302F] text-[#F4E6E1] md:py-[clamp(84px,9vw,132px)]">
           <AchievementPentagonStats items={copy.statBand} locale={locale} />
         </section>
 
-        <section className="bg-[#f4efe6] py-20 md:py-[clamp(108px,12vw,176px)]">
-          <Reveal className="mx-auto max-w-[760px] px-container text-center text-primary">
+        <section className="mobile-section bg-[#f4efe6] md:py-[clamp(108px,12vw,176px)]">
+          <Reveal className="mx-auto max-w-[760px] text-center text-primary md:px-container">
             <div className="mx-auto mb-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
             <p className={`${englishTextClass} text-[clamp(23px,2vw,30px)] italic leading-tight tracking-normal text-primary`}>
               {copy.quoteTitle}
             </p>
-            <p className={`${bodyTextClass} mt-[14px] text-[clamp(25px,2.6vw,38px)] leading-[1.28] text-primary`}>
+            <p className={`${bodyTextClass} mobile-copy mt-[14px] text-primary md:text-[clamp(25px,2.6vw,38px)] md:leading-[1.28]`}>
               {copy.quoteBody}
             </p>
             <div className="mx-auto mt-[clamp(34px,4vw,52px)] h-px w-16 bg-primary/35" aria-hidden="true" />
           </Reveal>
         </section>
 
-        <section className="overflow-hidden bg-bg py-20 md:py-[clamp(104px,11vw,164px)]">
-          <div className="px-container text-center">
+        <section className="overflow-hidden bg-bg mobile-section md:py-[clamp(104px,11vw,164px)]">
+          <div className="text-center md:px-container">
             <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
               {copy.firstTitle}
             </p>
-            <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
+            <h2 className={`${bodyTextClass} mobile-display mt-[14px] text-primary md:text-[clamp(28px,2.8vw,40px)] md:leading-[1.25]`}>
               {copy.firstHeading}
             </h2>
           </div>
@@ -359,50 +359,50 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
           </div>
         </section>
 
-        <section className="bg-[#f4efe6] px-container py-[clamp(116px,12vw,182px)]">
+        <section className="bg-[#f4efe6] mobile-section md:px-container md:py-[clamp(116px,12vw,182px)]">
           <div className="mx-auto max-w-[980px]">
             <Reveal className="mx-auto max-w-[680px] text-center">
               <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
                 {copy.marketLabel}
               </p>
-              <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(29px,2.7vw,40px)] leading-[1.25] text-primary`}>
+              <h2 className={`${bodyTextClass} mobile-display mt-[14px] text-primary md:text-[clamp(29px,2.7vw,40px)] md:leading-[1.25]`}>
                 {copy.marketTitle}
               </h2>
-              <p className={`${bodyTextClass} mt-[26px] whitespace-pre-line text-[15px] leading-[1.82] text-[#252525]`}>
+              <p className={`${bodyTextClass} mobile-copy mt-[26px] whitespace-pre-line text-[#252525] md:text-[15px] md:leading-[1.82]`}>
                 {copy.marketIntro}
               </p>
             </Reveal>
 
-            <div className="mt-[clamp(86px,10vw,132px)] space-y-[clamp(112px,14vw,180px)]">
+            <div className="mt-12 space-y-20 md:mt-[clamp(86px,10vw,132px)] md:space-y-[clamp(112px,14vw,180px)]">
               {copy.marketFeatures.map((item, index) => (
                 <Reveal
                   key={item.value}
-                  className={`grid gap-10 md:items-center md:gap-[clamp(56px,7vw,92px)] ${
+                  className={`grid gap-6 md:items-center md:gap-[clamp(56px,7vw,92px)] ${
                     index % 2 === 1
                       ? 'md:grid-cols-[minmax(248px,0.34fr)_minmax(0,0.66fr)]'
                       : 'md:grid-cols-[minmax(0,0.66fr)_minmax(248px,0.34fr)]'
                   }`}
                 >
-                  {index % 2 === 1 ? <MarketText item={item} locale={locale} /> : null}
-                  <MarketImage image={item.image} alt={item.title} />
-                  {index % 2 === 0 ? <MarketText item={item} locale={locale} /> : null}
+                  <MarketText item={item} locale={locale} className={`order-1 ${index % 2 === 1 ? 'md:order-none' : 'md:order-2'}`} />
+                  <MarketImage image={item.image} alt={item.title} className={`order-2 ${index % 2 === 1 ? 'md:order-none' : 'md:order-1'}`} />
+                  <MarketText item={item} locale={locale} className="order-3 md:hidden" bodyOnly />
                 </Reveal>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="overflow-hidden bg-white py-[clamp(100px,10vw,154px)]">
-          <Reveal className="px-container text-center">
+        <section className="mobile-section overflow-hidden bg-white md:py-[clamp(100px,10vw,154px)]">
+          <Reveal className="text-center md:px-container">
             <p className={`${englishTextClass} text-[15px] uppercase leading-none tracking-[0.08em] text-accent`}>
               {copy.archiveLabel}
             </p>
-            <h2 className={`${bodyTextClass} mt-[14px] text-[clamp(28px,2.8vw,40px)] leading-[1.25] text-primary`}>
+            <h2 className={`${bodyTextClass} mobile-display mt-[14px] text-primary md:text-[clamp(28px,2.8vw,40px)] md:leading-[1.25]`}>
               {copy.archiveTitle}
             </h2>
           </Reveal>
 
-          <Reveal className="mx-auto mt-[clamp(32px,4vw,48px)] flex max-w-[1540px] justify-center px-container">
+          <Reveal className="mx-auto mt-[clamp(32px,4vw,48px)] flex max-w-[1540px] justify-center md:px-container">
             <p
               className={`archive-drag-hint ${englishTextClass} text-[13px] uppercase leading-none tracking-[0.22em]`}
               aria-hidden="true"
@@ -419,7 +419,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
               autoScroll
               autoScrollResetRatio={archiveImages.length > 1 ? 0.5 : 1}
               autoScrollSpeed={48}
-              className="flex gap-6 overflow-x-auto px-container pb-4 [scrollbar-width:none] [touch-action:pan-y] [&::-webkit-scrollbar]:hidden"
+              className="flex gap-6 overflow-x-auto px-[var(--mobile-page-gutter)] pb-4 [scrollbar-width:none] [touch-action:pan-y] [&::-webkit-scrollbar]:hidden md:px-container"
             >
               {loopedArchiveImages.map((image, index) => {
                 const isDuplicate = index >= archiveImages.length;
@@ -445,14 +445,14 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
           </Reveal>
         </section>
 
-        <section className="bg-white py-[clamp(104px,11vw,168px)]">
-          <Reveal className="mx-auto max-w-3xl px-container text-center">
-            <p className="[font-family:'MaruBuri',serif] text-[clamp(28px,2.7vw,34px)] font-semibold leading-[1.25] text-primary">
+        <section className="mobile-section bg-white md:py-[clamp(104px,11vw,168px)]">
+          <Reveal className="mx-auto max-w-3xl text-center md:px-container">
+            <p className="mobile-copy [font-family:'MaruBuri',serif] font-semibold text-primary md:text-[clamp(28px,2.7vw,34px)] md:leading-[1.25]">
               {copy.discoverLead}
             </p>
             <Link
               href={withLocale(locale, '/mastery/creations')}
-              className={`${englishTextClass} link-sweep mt-[10px] inline-flex text-[15px] uppercase leading-[19px] tracking-[0.2em] text-accent`}
+              className={`${englishTextClass} link-sweep mobile-tap-target mt-[10px] inline-flex items-center text-[16px] uppercase leading-[19px] tracking-[0.2em] text-accent md:min-h-0 md:min-w-0 md:text-[15px]`}
             >
               {copy.cta}
             </Link>
@@ -463,9 +463,9 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
   );
 }
 
-function MarketImage({image, alt}: {image: string; alt: string}) {
+function MarketImage({image, alt, className}: {image: string; alt: string; className: string}) {
   return (
-    <div className="relative aspect-[1.45/1] w-full overflow-hidden bg-white">
+    <div className={`${className} mobile-media-landscape relative aspect-[4/3] w-full overflow-hidden bg-white md:aspect-[1.45/1]`}>
       <Image
         src={imageSrc(image)}
         alt={alt}
@@ -477,25 +477,27 @@ function MarketImage({image, alt}: {image: string; alt: string}) {
   );
 }
 
-function MarketText({item, locale}: {item: MarketFeature; locale: Locale}) {
+function MarketText({item, locale, className, bodyOnly = false}: {item: MarketFeature; locale: Locale; className: string; bodyOnly?: boolean}) {
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
 
   return (
-    <div className="mx-auto max-w-[270px] text-primary md:mx-0">
-      <p className={`${englishTextClass} text-[clamp(36px,4.2vw,58px)] leading-none text-primary`}>
+    <div className={`${className} mx-auto max-w-[270px] text-primary md:mx-0`}>
+      {!bodyOnly ? <>
+      <p className={`${englishTextClass} text-[36px] leading-none text-primary md:text-[clamp(36px,4.2vw,58px)]`}>
         {item.value}
       </p>
       <h3 className={`${englishTextClass} mt-3 whitespace-pre-line text-[18px] uppercase leading-[1.08] tracking-[0.04em] text-primary`}>
         {item.title}
       </h3>
-      <p className={`${bodyTextClass} mt-6 whitespace-pre-line text-[15px] leading-[1.62] text-accent`}>
+      </> : null}
+      <p className={`${bodyTextClass} mobile-copy ${bodyOnly ? '' : 'mt-6'} whitespace-pre-line text-accent md:text-[15px] md:leading-[1.62]`}>
         {item.accent}
       </p>
       <div className="mt-6 space-y-[14px]">
         {item.paragraphs.map((paragraph) => (
-          <p key={paragraph} className={`${bodyTextClass} text-[15px] leading-[1.82] text-[#252525]`}>
+          <p key={paragraph} className={`${bodyTextClass} mobile-copy text-[#252525] md:text-[15px] md:leading-[1.82]`}>
             {paragraph}
           </p>
         ))}

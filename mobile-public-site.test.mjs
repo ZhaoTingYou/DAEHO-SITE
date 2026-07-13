@@ -11,6 +11,10 @@ const homeNews = readFileSync(new URL('./components/home/home-news-popups.tsx', 
 const chronicle = readFileSync(new URL('./components/chronicle/chronicle-horizontal.tsx', import.meta.url), 'utf8');
 const chronicleMobile = readFileSync(new URL('./components/chronicle/chronicle-mobile.tsx', import.meta.url), 'utf8');
 const homePage = readFileSync(new URL('./app/[locale]/(site)/page.tsx', import.meta.url), 'utf8');
+const heritageHero = readFileSync(new URL('./components/legacy/heritage-hero.tsx', import.meta.url), 'utf8');
+const loyaltyPage = readFileSync(new URL('./components/legacy/loyalty-commitment-page.tsx', import.meta.url), 'utf8');
+const credibilityPage = readFileSync(new URL('./components/legacy/credibility-compliance-page.tsx', import.meta.url), 'utf8');
+const achievementPage = readFileSync(new URL('./components/legacy/achievement-records-page.tsx', import.meta.url), 'utf8');
 
 test('public mobile pages share fixed typography and spacing tokens', () => {
   assert.match(globals, /@import "\.\.\/styles\/mobile\.css"/);
@@ -68,4 +72,12 @@ test('Home mobile body and action copy use a 16px floor', () => {
 
 test('Home Signature title wraps on mobile and stays unwrapped on desktop', () => {
   assert.match(homePage, /<h2 className="font-body text-\[16px\] font-normal leading-\[1\.75\] text-primary md:text-\[15px\] md:whitespace-nowrap">/);
+});
+
+test('Heritage pages share compact mobile layout hooks', () => {
+  for (const source of [loyaltyPage, credibilityPage, achievementPage]) {
+    assert.match(source, /mobile-page-shell/);
+    assert.match(source, /mobile-copy/);
+  }
+  assert.match(heritageHero, /min-h-\[78svh\]/);
 });

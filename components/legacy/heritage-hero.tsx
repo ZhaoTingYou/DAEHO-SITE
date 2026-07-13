@@ -27,7 +27,7 @@ export function HeritageHero({
   const contentLines = lines?.length ? lines : body ? [body] : [];
 
   return (
-    <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#f4f1ee] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[86svh] max-md:py-[clamp(104px,22vw,142px)]">
+    <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#f4f1ee] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[78svh] max-md:px-[var(--mobile-page-gutter)] max-md:py-[80px]">
       {image ? (
         <>
           <Image
@@ -41,16 +41,16 @@ export function HeritageHero({
         </>
       ) : null}
 
-      <Reveal className="relative w-full max-w-[680px] border border-white/18 bg-[#e5dddc] px-[clamp(30px,4.8vw,70px)] py-[clamp(54px,6vw,74px)] text-center text-[#111111] shadow-[0_28px_90px_rgba(22,10,10,0.10)]">
+      <Reveal className="relative w-full max-w-[680px] border border-white/18 bg-[#e5dddc] px-[clamp(30px,4.8vw,70px)] py-[clamp(54px,6vw,74px)] text-center text-[#111111] shadow-[0_28px_90px_rgba(22,10,10,0.10)] max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-0 max-md:shadow-none">
         <p className={`${englishTextClass} mb-[46px] text-[15px] uppercase leading-none tracking-[0.04em] text-accent`}>
           {label}
         </p>
-        <h1 className={`${englishTextClass} mb-[18px] text-[clamp(30px,3.05vw,42px)] uppercase leading-none tracking-[0.015em] text-black`}>
+        <h1 className={`${englishTextClass} mobile-display mb-[18px] uppercase leading-none tracking-[0.015em] text-black md:text-[clamp(30px,3.05vw,42px)]`}>
           {title}
         </h1>
         <div className="mx-auto max-w-[560px] space-y-1">
           {contentLines.map((line) => (
-            <p key={line} className={`${bodyTextClass} whitespace-pre-line text-[15px] leading-[1.8] tracking-normal text-[#111111]`}>
+            <p key={line} className={`${bodyTextClass} whitespace-pre-line text-[15px] leading-[1.8] tracking-normal mobile-copy text-[#111111]`}>
               {line}
             </p>
           ))}
