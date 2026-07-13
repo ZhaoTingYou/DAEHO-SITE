@@ -40,3 +40,9 @@ All verification commands completed successfully.
 ### Concerns
 
 - Full browser QA remains assigned to Task 9.
+
+## Remaining Review Finding
+
+- Removed the mobile footer wrapper's `pb-12`; mobile top spacing remains `pt-16`, the root footer owns the exact `32px + safe-area` bottom spacing, and the existing `md:py-[clamp(56px,7vw,96px)]` desktop padding is unchanged.
+- Strengthened `mobile-public-site.test.mjs` to require `pb-0`, reject the compounded root `pt-16 pb-12` class, and verify the mobile root safe-area padding rule.
+- Verification: focused tests passed (6/6), owned-file lint passed, `npx tsc --noEmit --pretty false --incremental false --skipLibCheck` passed, and `git diff --check` passed.

@@ -24,6 +24,8 @@ test('public mobile shell uses a compact safe-area header and scrollable menu', 
   assert.match(header, /top-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\)\]/);
   assert.match(header, /overflow-y-auto/);
   assert.match(footer, /mobile-site-footer/);
-  assert.match(footer, /pt-16 pb-12 md:py-\[clamp\(56px,7vw,96px\)\]/);
+  assert.match(footer, /pt-16 pb-0 md:py-\[clamp\(56px,7vw,96px\)\]/);
+  assert.doesNotMatch(footer, /px-container pt-16 pb-12/);
+  assert.match(mobile, /\.mobile-site-footer \{[\s\S]*padding-bottom: calc\(32px \+ env\(safe-area-inset-bottom\)\);/);
   assert.doesNotMatch(mobile, /\.mobile-site-footer \{[\s\S]*padding-top:/);
 });
