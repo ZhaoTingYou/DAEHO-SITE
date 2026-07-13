@@ -93,7 +93,7 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
   const rightsText = formatFooterRights(legal.rights, year);
 
   return (
-    <footer className="relative z-20 border-t border-hairline bg-white text-primary">
+    <footer className="mobile-site-footer relative z-20 border-t border-hairline bg-white text-primary">
       <div className="mx-auto max-w-[1440px] px-container py-12 md:py-[clamp(56px,7vw,96px)]">
         <div className="grid gap-8 border-b border-hairline pb-8 md:gap-10 md:pb-12 lg:grid-cols-[minmax(260px,0.52fr)_minmax(0,0.48fr)] lg:items-start">
           <div className="space-y-4">

@@ -415,7 +415,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
         </div>
       </div>
 
-      <div className="mx-auto flex h-[calc(80px_+_env(safe-area-inset-top))] max-w-[1440px] items-center justify-between px-container pt-[env(safe-area-inset-top)] lg:hidden">
+      <div className="mobile-site-header mx-auto flex h-16 max-w-[1440px] items-center justify-between px-[var(--mobile-page-gutter)] pt-[env(safe-area-inset-top)] lg:hidden">
         <button
           type="button"
           className="flex h-11 w-11 items-center justify-center"
@@ -444,7 +444,8 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
 
         <Link
           href={withLocale(locale, '/')}
-          className="inline-flex min-h-11 items-center font-heading text-[22px] font-semibold tracking-[0.14em]"
+          onClick={() => setIsMenuOpen(false)}
+          className="inline-flex min-h-11 items-center font-heading text-[18px] font-semibold tracking-[0.14em]"
           aria-label={navText('logoHome')}
         >
           DAEHO
@@ -458,9 +459,10 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
                   /
                 </span>
               ) : null}
-              <Link
-                href={item.href}
-                className={`inline-flex min-h-11 min-w-11 items-center justify-center ${
+                <Link
+                  href={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`inline-flex min-h-11 min-w-11 items-center justify-center ${
                   locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-55'
                 }`}
               >
@@ -555,7 +557,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
             animate={{opacity: 1, y: 0}}
             exit={{opacity: 0, y: prefersReducedMotion ? 0 : -16}}
             transition={{duration: prefersReducedMotion ? 0 : 0.3, ease: [0.22, 0.61, 0.36, 1]}}
-            className="fixed inset-x-0 top-[calc(80px_+_env(safe-area-inset-top))] h-[calc(100dvh_-_80px_-_env(safe-area-inset-top))] overflow-y-auto bg-bg px-container pb-[calc(2.5rem_+_env(safe-area-inset-bottom))] pt-10 text-primary [text-shadow:none] lg:hidden"
+            className="mobile-menu-panel fixed inset-x-0 bottom-0 top-[calc(var(--mobile-header-height)+env(safe-area-inset-top))] overflow-y-auto overscroll-contain bg-bg px-[var(--mobile-page-gutter)] pb-[calc(28px+env(safe-area-inset-bottom))] text-primary lg:hidden"
           >
             <motion.nav
               aria-label={navText('mobileLabel')}

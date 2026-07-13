@@ -31,6 +31,14 @@
   .mobile-media-landscape { aspect-ratio: 4 / 3; }
   .mobile-media-portrait { aspect-ratio: 4 / 5; }
   .mobile-tap-target { min-width: 44px; min-height: 44px; }
+
+  .mobile-site-footer {
+    padding-top: 64px;
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .mobile-site-footer nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mobile-site-footer dd { overflow-wrap: anywhere; font-size: 16px; line-height: 1.65; }
 }
 
 @media (max-width: 359px) {
