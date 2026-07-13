@@ -14,3 +14,16 @@
 - `npx eslint components/legacy/heritage-hero.tsx components/legacy/loyalty-commitment-page.tsx components/legacy/loyalty-feature-carousel.tsx components/legacy/credibility-compliance-page.tsx components/legacy/achievement-records-page.tsx components/legacy/achievement-pentagon-stats.tsx mobile-public-site.test.mjs`
 - `npx tsc --noEmit`
 - `git diff --check`
+
+## Review Follow-up
+
+- Fixed Achievement market feature mobile order to render one title/accent heading, its image, and one body; desktop alternating content remains unchanged.
+- Reworked the Loyalty mobile carousel into content-driven document flow with a 4:3 image, non-clipping copy, and reachable 44px controls. Desktop framing remains at `md` and above.
+- Reserved the Heritage mobile hero header and safe area before its 78svh content, then added source-level regression assertions for all three fixes.
+
+### Verification
+
+- `node --test components/legacy/*.test.mjs mobile-public-site.test.mjs` (21 passing)
+- `npx eslint components/legacy/heritage-hero.tsx components/legacy/loyalty-commitment-page.tsx components/legacy/loyalty-feature-carousel.tsx components/legacy/credibility-compliance-page.tsx components/legacy/achievement-records-page.tsx components/legacy/achievement-pentagon-stats.tsx mobile-public-site.test.mjs`
+- `npx tsc --noEmit`
+- `git diff --check`

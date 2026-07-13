@@ -27,7 +27,7 @@ export function HeritageHero({
   const contentLines = lines?.length ? lines : body ? [body] : [];
 
   return (
-    <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#f4f1ee] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[78svh] max-md:px-[var(--mobile-page-gutter)] max-md:py-[80px]">
+    <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#f4f1ee] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[78svh] max-md:px-[var(--mobile-page-gutter)] max-md:pb-[80px] max-md:pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+80px)]">
       {image ? (
         <>
           <Image

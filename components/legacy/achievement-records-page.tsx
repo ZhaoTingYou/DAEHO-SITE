@@ -492,10 +492,12 @@ function MarketText({item, locale, className, bodyOnly = false}: {item: MarketFe
         {item.title}
       </h3>
       </> : null}
-      <p className={`${bodyTextClass} mobile-copy ${bodyOnly ? '' : 'mt-6'} whitespace-pre-line text-accent md:text-[15px] md:leading-[1.62]`}>
-        {item.accent}
-      </p>
-      <div className="mt-6 space-y-[14px]">
+      {!bodyOnly ? (
+        <p className={`${bodyTextClass} mobile-copy mt-6 whitespace-pre-line text-accent md:text-[15px] md:leading-[1.62]`}>
+          {item.accent}
+        </p>
+      ) : null}
+      <div className={`${bodyOnly ? '' : 'mt-6'} space-y-[14px] ${bodyOnly ? '' : 'hidden md:block'}`}>
         {item.paragraphs.map((paragraph) => (
           <p key={paragraph} className={`${bodyTextClass} mobile-copy text-[#252525] md:text-[15px] md:leading-[1.82]`}>
             {paragraph}

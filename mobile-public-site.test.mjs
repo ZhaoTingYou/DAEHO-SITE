@@ -80,4 +80,21 @@ test('Heritage pages share compact mobile layout hooks', () => {
     assert.match(source, /mobile-copy/);
   }
   assert.match(heritageHero, /min-h-\[78svh\]/);
+  assert.match(heritageHero, /pt-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\+80px\)\]/);
+});
+
+test('Achievement market sections render one mobile body after their image', () => {
+  assert.match(achievementPage, /<MarketText item=\{item\} locale=\{locale\} className=\{`order-1[\s\S]*?<MarketImage[\s\S]*?<MarketText item=\{item\} locale=\{locale\} className="order-3 md:hidden" bodyOnly/);
+  assert.match(achievementPage, /\{!bodyOnly \? \([\s\S]*?\{item\.accent\}[\s\S]*?\) : null\}/);
+  assert.match(achievementPage, /\$\{bodyOnly \? '' : 'hidden md:block'\}/);
+});
+
+test('Loyalty mobile carousel keeps copy and controls in reachable document flow', () => {
+  const loyaltyCarousel = readFileSync(new URL('./components/legacy/loyalty-feature-carousel.tsx', import.meta.url), 'utf8');
+
+  assert.doesNotMatch(loyaltyCarousel, /min-h-\[600px\]/);
+  assert.match(loyaltyCarousel, /relative aspect-\[4\/3\] w-full md:hidden/);
+  assert.match(loyaltyCarousel, /relative z-10 flex w-full flex-col bg-white/);
+  assert.match(loyaltyCarousel, /relative z-20 flex justify-center gap-3 bg-white/);
+  assert.match(loyaltyCarousel, /mobile-tap-target grid h-11 w-11/);
 });
