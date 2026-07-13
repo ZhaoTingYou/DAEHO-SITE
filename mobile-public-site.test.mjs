@@ -65,3 +65,7 @@ test('Home mobile body and action copy use a 16px floor', () => {
   assert.match(homePage, /home-feature-link inline-flex \[font-family:'Pretendard',sans-serif\] text-\[16px\].*md:text-\[15px\]/);
   assert.match(homePage, /max-w-\[360px\] whitespace-pre-line font-body text-\[16px\].*md:text-\[15px\]/);
 });
+
+test('Home Signature title wraps on mobile and stays unwrapped on desktop', () => {
+  assert.match(homePage, /<h2 className="font-body text-\[16px\] font-normal leading-\[1\.75\] text-primary md:text-\[15px\] md:whitespace-nowrap">/);
+});

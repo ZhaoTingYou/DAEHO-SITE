@@ -31,3 +31,15 @@ All commands passed. The existing `output/`, `outputs/`, and `tmp/` directories 
 - `npm run lint`
 - `npx tsc --noEmit`
 - `git diff --check`
+
+## Final Finding
+
+- Changed the CMS-driven Home Signature title to wrap naturally on mobile while retaining `whitespace-nowrap` from the `md` breakpoint for desktop layouts.
+- Added a focused source assertion covering mobile wrapping and desktop no-wrap behavior.
+
+## Final Verification
+
+- `node --test mobile-public-site.test.mjs` (8 passed)
+- `npm run lint`
+- `npx tsc --noEmit`
+- `git diff --check`

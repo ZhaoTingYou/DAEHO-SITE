@@ -152,7 +152,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
               <p className="[font-family:'MaruBuri',serif] text-[20px] font-semibold uppercase leading-tight text-accent">
                 {content.signature.eyebrow}
               </p>
-              <h2 className="whitespace-nowrap font-body text-[16px] font-normal leading-[1.75] text-primary md:text-[15px]">
+              <h2 className="font-body text-[16px] font-normal leading-[1.75] text-primary md:text-[15px] md:whitespace-nowrap">
                 {content.signature.title}
               </h2>
             </div>
