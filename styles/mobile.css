@@ -1,0 +1,39 @@
+@media (max-width: 767px) {
+  :root {
+    --mobile-page-gutter: 20px;
+    --mobile-section-space: 80px;
+    --mobile-header-height: 64px;
+  }
+
+  .mobile-page-shell {
+    overflow-x: clip;
+  }
+
+  .mobile-section {
+    padding-block: var(--mobile-section-space);
+    padding-inline: var(--mobile-page-gutter);
+  }
+
+  .mobile-display {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 44px;
+    line-height: .98;
+    letter-spacing: 0;
+  }
+
+  .mobile-copy {
+    font-size: 16px;
+    line-height: 1.75;
+    letter-spacing: 0;
+  }
+
+  .mobile-media-landscape { aspect-ratio: 4 / 3; }
+  .mobile-media-portrait { aspect-ratio: 4 / 5; }
+  .mobile-tap-target { min-width: 44px; min-height: 44px; }
+}
+
+@media (max-width: 359px) {
+  :root { --mobile-page-gutter: 16px; }
+  .mobile-display { font-size: 40px; }
+}
