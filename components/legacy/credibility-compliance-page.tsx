@@ -5,9 +5,9 @@ import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/components/legacy/heritage-hero-image';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
 import {imageExists} from '@/lib/image-exists';
-import {withLocale} from '@/lib/site-map';
 
 type CredibilityContent = {
   hero: {
@@ -47,6 +47,7 @@ type CredibilityPageCopy = {
   quoteBody: string;
   discoverLead: string;
   cta: string;
+  ctaHref: string;
   rows: StandardRow[];
 };
 
@@ -71,6 +72,7 @@ const defaultPageCopy = {
     quoteBody: '신뢰는 기준에서 시작됩니다',
     discoverLead: '대호의 프로젝트 더 알아보기',
     cta: 'DISCOVER MORE',
+    ctaHref: '/mastery/creations',
     rows: [
       {
         number: '01.',
@@ -138,6 +140,7 @@ const defaultPageCopy = {
     quoteBody: 'Trust begins with standards.',
     discoverLead: 'Discover more DAEHO projects',
     cta: 'DISCOVER MORE',
+    ctaHref: '/mastery/creations',
     rows: [
       {
         number: '01.',
@@ -336,7 +339,7 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
             {copy.discoverLead}
           </p>
           <Link
-            href={withLocale(locale, '/mastery/creations')}
+            href={resolveCmsHref(locale, copy.ctaHref, '/mastery/creations')}
             className={`${englishTextClass} link-sweep mobile-tap-target mt-[10px] inline-flex items-center text-[16px] uppercase leading-[19px] tracking-[0.2em] text-accent md:min-h-0 md:min-w-0 md:text-[15px]`}
           >
             {copy.cta}

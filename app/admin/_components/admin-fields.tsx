@@ -66,7 +66,9 @@ export function TextField({
   placeholder,
   editorFont,
   editorAlign,
-  editorLocale
+  editorLocale,
+  inputMode,
+  editorControls = true
 }: {
   label: string;
   name: string;
@@ -77,11 +79,13 @@ export function TextField({
   editorFont?: TextEditorFont;
   editorAlign?: TextEditorAlign;
   editorLocale?: TextEditorLocale;
+  inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+  editorControls?: boolean;
 }) {
   const [font, setFont] = useState<TextEditorFont>(() => normalizeTextEditorFont(editorFont, defaultTextEditorFont(defaultValue, editorLocale)));
   const [align, setAlign] = useState<TextEditorAlign>(() => normalizeTextEditorAlign(editorAlign));
   const editableStyle = textEditorStyle(font, align);
-  const hasTextControls = type === 'text';
+  const hasTextControls = type === 'text' && editorControls;
 
   return (
     <div className="grid gap-1.5 text-sm font-semibold text-[#344054]">
@@ -96,6 +100,7 @@ export function TextField({
       <input
         name={name}
         type={type}
+        inputMode={inputMode}
         aria-label={label}
         required={required}
         defaultValue={defaultValue}
@@ -766,6 +771,8 @@ export function AppendableArrayItemsField({
                     name={name}
                     defaultValue=""
                     placeholder={field.placeholder}
+                    inputMode={field.type === 'link' ? 'url' : undefined}
+                    editorControls={field.type !== 'link'}
                     editorFont={field.editor?.font}
                     editorAlign={field.editor?.align}
                     editorLocale={locale === 'ko' || locale === 'en' ? locale : undefined}

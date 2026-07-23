@@ -206,7 +206,8 @@ test('Golf option controls expose and visibly render their selected state', () =
 });
 
 test('Golf selected style reaches the inquiry summary, form payload, and CMS storage', () => {
-  assert.match(golfConfiguratorSource, /style=\$\{encodeURIComponent\(selectedStyleOption\)\}/);
+  assert.match(golfConfiguratorSource, /appendCmsQuery\(/);
+  assert.match(golfConfiguratorSource, /style: selectedStyleOption/);
   assert.match(golfInquiryPageSource, /style\?: string/);
   assert.match(golfInquiryPageSource, /<SpecRow label=\{text\.style\} value=\{selectedStyle\} \/>/);
   assert.match(golfInquiryPageSource, /style: selectedStyle/);

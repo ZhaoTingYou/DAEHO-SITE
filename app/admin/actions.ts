@@ -236,6 +236,7 @@ export async function saveCollectionAction(formData: FormData) {
       specs: {
         year: stringFromForm(formData, 'specs.year'),
         sportCategory: stringFromForm(formData, 'specs.sportCategory'),
+        linkHref: stringFromForm(formData, 'specs.linkHref'),
         detailImages: await readDetailGalleryImages(formData, editorPath)
       },
       isVisible: formData.get('isVisible') !== 'off',
@@ -418,7 +419,9 @@ async function readNewsTranslation(formData: FormData, locale: Locale, editorPat
       paragraphs: parseParagraphs(stringFromForm(formData, `${locale}.body.paragraphs`)),
       blocks: await readNewsBlocks(formData, locale, editorPath),
       quote: stringFromForm(formData, `${locale}.body.quote`),
-      ctaTitle: stringFromForm(formData, `${locale}.body.ctaTitle`)
+      ctaTitle: stringFromForm(formData, `${locale}.body.ctaTitle`),
+      ctaHref: stringFromForm(formData, `${locale}.body.ctaHref`),
+      linkHref: stringFromForm(formData, `${locale}.body.linkHref`)
     },
     tags: parseTags(stringFromForm(formData, `${locale}.tags`)),
     seoTitle: stringFromForm(formData, `${locale}.seoTitle`),

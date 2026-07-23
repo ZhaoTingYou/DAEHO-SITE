@@ -7,10 +7,10 @@ import {GolfInquiryForm} from '@/components/forms/golf-inquiry-form';
 import {Reveal} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
-import {withLocale} from '@/lib/site-map';
 
 type Props = {
   params: Promise<{locale: Locale}>;
@@ -59,7 +59,7 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
               {text.hero.title}
             </h1>
             <p className="mobile-copy max-w-2xl break-words whitespace-pre-line font-body text-text md:text-body">{text.hero.body}</p>
-            <Link href={withLocale(locale, '/golf')} className="link-sweep inline-flex min-h-11 items-center font-body text-[16px] font-semibold uppercase tracking-[0.08em] md:text-sm md:tracking-[0.12em]">
+            <Link href={resolveCmsHref(locale, text.editHref, '/golf')} className="link-sweep inline-flex min-h-11 items-center font-body text-[16px] font-semibold uppercase tracking-[0.08em] md:text-sm md:tracking-[0.12em]">
               {text.edit}
             </Link>
           </Reveal>

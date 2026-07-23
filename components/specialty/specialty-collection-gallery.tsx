@@ -13,6 +13,7 @@ import {imageSrc} from '@/lib/image-src';
 export type SpecialtyCollectionFilter = {
   id: string;
   label: string;
+  href?: string;
   description?: string;
   image?: string;
   background?: string;
@@ -53,6 +54,7 @@ function getCollectionStageArtwork(filter: SpecialtyCollectionFilter, index: num
 
 export type SpecialtyCollectionItem = {
   id: string;
+  href?: string;
   title: string;
   caption: string;
   category: string;
@@ -103,6 +105,7 @@ type SpecialtyCollectionCategoryProps = {
   appointment?: Partial<AppointmentShowcaseCopy>;
   bespoke?: Partial<BespokeViewCopy>;
   locale: Locale;
+  backHref: string;
 };
 
 export function SpecialtyCollectionGallery({
@@ -161,7 +164,7 @@ export function SpecialtyCollectionGallery({
               label={category.label}
               description={category.description}
               viewLabel={viewLabel}
-              href={`/${locale}/mastery/creations/${category.id}`}
+              href={category.href ?? `/${locale}/mastery/creations/${category.id}`}
               item={category.item}
               artwork={getCollectionStageArtwork(category, index)}
               reducedMotion={prefersReducedMotion}
@@ -220,7 +223,7 @@ function MobileCollectionCard({
   viewLabel: string;
 }) {
   const artwork = getCollectionStageArtwork(category, index);
-  const href = `/${locale}/mastery/creations/${category.id}`;
+  const href = category.href ?? `/${locale}/mastery/creations/${category.id}`;
   const copy = getMobileCollectionCopy(locale, category.id);
 
   return (
@@ -316,7 +319,8 @@ export function SpecialtyCollectionCategory({
   finder,
   appointment,
   bespoke,
-  locale
+  locale,
+  backHref
 }: SpecialtyCollectionCategoryProps) {
   const [finderOpen, setFinderOpen] = useState(false);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
@@ -326,7 +330,6 @@ export function SpecialtyCollectionCategory({
     () => items.filter((item) => item.category === categoryId),
     [categoryId, items]
   );
-  const backHref = `/${locale}/mastery/creations`;
 
   if (!activeFilter) {
     return null;
@@ -1080,7 +1083,7 @@ function BespokeCanvasItem({
       }}
     >
       <Link
-        href={`/${locale}/mastery/creations/${item.id}`}
+        href={item.href ?? `/${locale}/mastery/creations/${item.id}`}
         className="group relative block h-full w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         aria-label={`${item.title}: ${item.caption}`}
       >
@@ -1244,7 +1247,7 @@ function BespokeCreationCard({
 }) {
   return (
     <Link
-      href={`/${locale}/mastery/creations/${item.id}`}
+      href={item.href ?? `/${locale}/mastery/creations/${item.id}`}
       className="group block min-h-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
       aria-label={`${item.title}: ${item.caption}`}
     >
@@ -1987,7 +1990,7 @@ function CollectionProductGrid({
           }}
         >
           <Link
-            href={`/${locale}/mastery/creations/${item.id}`}
+            href={item.href ?? `/${locale}/mastery/creations/${item.id}`}
             className="group block min-h-11 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
             aria-label={`${item.title}: ${item.caption}`}
           >

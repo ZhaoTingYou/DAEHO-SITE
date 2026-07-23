@@ -64,6 +64,8 @@ const footerFieldSections: FooterFieldSection[] = [
       'footer.legal.heading',
       'footer.legal.terms',
       'footer.legal.privacy',
+      'navigation.hrefs.terms',
+      'navigation.hrefs.privacy',
       'footer.legal.rights'
     ]
   },
@@ -97,8 +99,11 @@ const footerFieldSections: FooterFieldSection[] = [
     titleKey: 'footer.sectionCollections',
     paths: [
       'footer.collectionCategoryLinks.0.label',
+      'footer.collectionCategoryLinks.0.href',
       'footer.collectionCategoryLinks.1.label',
-      'footer.collectionCategoryLinks.2.label'
+      'footer.collectionCategoryLinks.1.href',
+      'footer.collectionCategoryLinks.2.label',
+      'footer.collectionCategoryLinks.2.href'
     ]
   },
   {
@@ -134,7 +139,21 @@ const footerFieldSections: FooterFieldSection[] = [
       'navigation.items.collection',
       'navigation.items.news',
       'navigation.items.golf',
-      'navigation.contactCta'
+      'navigation.contactCta',
+      'navigation.hrefs.home',
+      'navigation.hrefs.chronicle',
+      'navigation.hrefs.legacy',
+      'navigation.hrefs.loyalty',
+      'navigation.hrefs.credibility',
+      'navigation.hrefs.achievement',
+      'navigation.hrefs.specialty',
+      'navigation.hrefs.technique',
+      'navigation.hrefs.making',
+      'navigation.hrefs.collection',
+      'navigation.hrefs.news',
+      'navigation.hrefs.golf',
+      'navigation.hrefs.golfInquiry',
+      'navigation.hrefs.contact'
     ]
   }
 ];
@@ -291,6 +310,10 @@ function FooterField({
 
   if (field.type === 'textarea') {
     return <TextAreaField label={label} name={name} defaultValue={text} rows={field.rows ?? 3} />;
+  }
+
+  if (field.type === 'link') {
+    return <TextField label={label} name={name} defaultValue={text} inputMode="url" editorControls={false} placeholder="/contact, https://…, mailto:…" />;
   }
 
   if (typeof value === 'boolean') {

@@ -9,9 +9,9 @@ import {resolveHeritageHeroImage, resolveHeritageHeroPlaceholder} from '@/compon
 import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
 import {normalizeAchievementFirstRecords} from '@/lib/achievement-first-records-core';
-import {withLocale} from '@/lib/site-map';
 
 type AchievementContent = {
   hero: {
@@ -71,6 +71,7 @@ type AchievementPageCopy = {
   archiveTitle: string;
   discoverLead: string;
   cta: string;
+  ctaHref: string;
   statBand: HomeStatBandItem[];
   firstRecords: FirstRecord[];
   marketFeatures: MarketFeature[];
@@ -99,6 +100,7 @@ const defaultPageCopy = {
     archiveTitle: '다양한 분야의 프로젝트',
     discoverLead: '대호의 프로젝트 더 알아보기',
     cta: 'DISCOVER MORE',
+    ctaHref: '/mastery/creations',
     statBand: [
       {
         value: '38',
@@ -172,6 +174,7 @@ const defaultPageCopy = {
     archiveTitle: 'Projects across many fields',
     discoverLead: 'Discover more DAEHO projects',
     cta: 'DISCOVER MORE',
+    ctaHref: '/mastery/creations',
     statBand: [
       {
         value: '38',
@@ -422,7 +425,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
               {copy.discoverLead}
             </p>
             <Link
-              href={withLocale(locale, '/mastery/creations')}
+              href={resolveCmsHref(locale, copy.ctaHref, '/mastery/creations')}
               className={`${englishTextClass} link-sweep mobile-tap-target mt-[10px] inline-flex items-center text-[16px] uppercase leading-[19px] tracking-[0.2em] text-accent md:min-h-0 md:min-w-0 md:text-[15px]`}
             >
               {copy.cta}

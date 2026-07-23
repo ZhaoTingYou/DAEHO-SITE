@@ -10,10 +10,10 @@ import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
 import {routing} from '@/i18n/routing';
 import {getNewsCardsForSite, getNewsDetailForSite, type NewsBodyBlock} from '@/lib/cms/public-content';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
-import {withLocale} from '@/lib/site-map';
 import koMessages from '@/messages/ko.json';
 
 type Props = {
@@ -76,7 +76,7 @@ export default async function NewsDetailPage({params}: Props) {
           <div className="mx-auto max-w-[1440px]">
             <Reveal className="news-detail-title-lockup mx-auto flex max-w-[1120px] flex-col items-center text-center">
               <Link
-                href={withLocale(locale, '/news')}
+                href={resolveCmsHref(locale, text.backHref, '/news')}
                 className="link-sweep inline-flex min-h-11 items-center justify-center font-body text-sm font-semibold text-subtext"
               >
                 {text.back}
@@ -110,7 +110,7 @@ export default async function NewsDetailPage({params}: Props) {
                   <Reveal className="mx-auto mt-8 max-w-[760px] border-y border-primary/15 py-8">
                     <p className="font-heading text-[clamp(28px,3.8vw,42px)] font-semibold leading-tight text-primary">{detail.ctaTitle}</p>
                     <Link
-                      href={withLocale(locale, `/contact?type=other&source=news&item=${slug}`)}
+                      href={detail.ctaHref}
                       className="link-sweep mt-6 inline-flex min-h-11 items-center font-body text-sm font-semibold uppercase tracking-[0.12em]"
                     >
                       {text.cta}
@@ -130,7 +130,7 @@ export default async function NewsDetailPage({params}: Props) {
               {adjacentNews.map(({direction, label, item}) => (
                 <Link
                   key={item.id}
-                  href={withLocale(locale, `/news/${item.id}`)}
+                  href={item.href ?? resolveCmsHref(locale, `/news/${item.id}`)}
                   className={`group flex min-h-11 flex-col justify-center bg-bg px-0 py-5 transition duration-hover ease-brand hover:bg-muted/40 md:block md:p-9 ${
                     direction === 'next' ? 'text-left md:text-right' : 'text-left'
                   }`}

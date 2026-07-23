@@ -4,9 +4,9 @@ import {setRequestLocale} from 'next-intl/server';
 import {ChronicleHorizontal} from '@/components/chronicle/chronicle-horizontal';
 import type {Locale} from '@/i18n/routing';
 import {imageSrc} from '@/lib/image-src';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
-import {withLocale} from '@/lib/site-map';
 
 type Props = {
   params: Promise<{locale: Locale}>;
@@ -32,7 +32,7 @@ export default async function ChroniclePage({params}: Props) {
   }));
   const endNav = {
     ...messages.chronicleUi.endNav,
-    href: withLocale(locale, messages.chronicleUi.endNav.href)
+    href: resolveCmsHref(locale, messages.chronicleUi.endNav.href, '/')
   };
 
   return (

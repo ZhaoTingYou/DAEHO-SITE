@@ -26,17 +26,20 @@
         {
           "title": "Championship Rings",
           "caption": "CHAMPIONSHIP\nRINGS",
-          "image": "c1.png"
+          "image": "c1.png",
+          "href": "/mastery/creations/champion"
         },
         {
           "title": "Commission Rings",
           "caption": "COMMISSION\nRINGS",
-          "image": "c2.png"
+          "image": "c2.png",
+          "href": "/mastery/creations/appointment"
         },
         {
           "title": "Custom Products",
           "caption": "CUSTOM\nPRODUCTS",
-          "image": "c3.png"
+          "image": "c3.png",
+          "href": "/mastery/creations/bespoke"
         }
       ]
     },
@@ -347,7 +350,8 @@
             "accentEnd": "rgba(47,83,64,0.86)"
           }
         ],
-        "cta": "DISCOVER MORE"
+        "cta": "DISCOVER MORE",
+        "ctaHref": "/mastery/creations"
       }
     },
     "credibility": {
@@ -407,6 +411,7 @@
         "quoteBody": "Trust begins with standards.",
         "discoverLead": "Discover more DAEHO projects",
         "cta": "DISCOVER MORE",
+        "ctaHref": "/mastery/creations",
         "rows": [
           {
             "number": "01.",
@@ -533,6 +538,7 @@
         "archiveTitle": "Projects across many fields",
         "discoverLead": "Discover more DAEHO projects",
         "cta": "DISCOVER MORE",
+        "ctaHref": "/mastery/creations",
         "statBand": [
           {
             "value": "38",
@@ -753,7 +759,9 @@
       "cta": {
         "title": "Technical records connect to the making process and completed works.",
         "makingLabel": "View making process",
-        "creationsLabel": "View completed works"
+        "makingHref": "/mastery/making",
+        "creationsLabel": "View completed works",
+        "creationsHref": "/mastery/creations"
       }
     },
     "technique": {
@@ -846,7 +854,8 @@
         "title": "Discover more DAEHO projects",
         "body": "A championship ring is not a repeated product. It is a bespoke work designed around symbols and season memories.",
         "image": "specialty_bespoke.png",
-        "cta": "DISCOVER MORE"
+        "cta": "DISCOVER MORE",
+        "href": "/mastery/creations"
       }
     },
     "collection": {
@@ -862,6 +871,7 @@
         "filters": [
           {
             "id": "champion",
+            "href": "/mastery/creations/champion",
             "label": "Championship Rings",
             "description": "The winning moment, made permanent",
             "image": "c1.png",
@@ -870,6 +880,7 @@
           },
           {
             "id": "appointment",
+            "href": "/mastery/creations/appointment",
             "label": "Appointment Rings",
             "description": "Rings for belonging and appointment",
             "image": "c2.png",
@@ -878,6 +889,7 @@
           },
           {
             "id": "bespoke",
+            "href": "/mastery/creations/bespoke",
             "label": "Bespoke",
             "description": "Made-to-order works shaped by a story",
             "image": "c3.png",
@@ -1226,6 +1238,7 @@
       "shaftGroup": "Shaft color selection",
       "inquiryCta": "Inquire with this configuration",
       "requestEstimate": "Request an estimate",
+      "inquiryHref": "/golf/inquiry",
       "quoteText": "Celebrate the moment forever.",
       "braceletTitle": "Design your own bracelet",
       "braceletBody": "For your taste, for your style",
@@ -1311,6 +1324,24 @@
       "expand": "Expand {label}",
       "collapse": "Collapse {label}",
       "contactCta": "Contact",
+      "hrefs": {
+        "home": "/",
+        "chronicle": "/archive",
+        "legacy": "/heritage/loyalty",
+        "loyalty": "/heritage/loyalty",
+        "credibility": "/heritage/credibility",
+        "achievement": "/heritage/achievement",
+        "specialty": "/mastery/making",
+        "technique": "/mastery/technique",
+        "making": "/mastery/making",
+        "collection": "/mastery/creations",
+        "news": "/news",
+        "golf": "/golf",
+        "golfInquiry": "/golf/inquiry",
+        "contact": "/contact",
+        "terms": "/terms",
+        "privacy": "/privacy"
+      },
       "items": {
         "home": "HOME",
         "chronicle": "ARCHIVE",
@@ -1449,9 +1480,13 @@
       "primaryTitle": "NEW LEGACY\nRELEASED",
       "primaryImage": "news_featured.png.png",
       "primaryCta": "Explore More",
+      "primaryCtaHref": "/heritage/loyalty",
+      "primaryImageHref": "/heritage/loyalty",
       "secondaryTitle": "RECENT\nHIGHLIGHT",
       "secondaryImage": "home_ring_01.png",
-      "secondaryCta": "Explore More"
+      "secondaryCta": "Explore More",
+      "secondaryCtaHref": "/news",
+      "secondaryImageHref": "/mastery/creations"
     },
     "latestNews": {
       "eyebrow": "LATEST NEWS",
@@ -1694,6 +1729,7 @@
     },
     "detail": {
       "back": "Back to news",
+      "backHref": "/news",
       "author": "DAEHO News",
       "ogImagePath": "news_detail_hero.png",
       "lead": "",
@@ -1702,6 +1738,7 @@
       "tags": [],
       "ctaTitle": "",
       "cta": "Contact us",
+      "ctaHref": "/contact?type=other&source=news&item={slug}",
       "previous": "Previous story",
       "next": "Next story",
       "related": "Next stories"
@@ -1709,12 +1746,14 @@
   },
   "collectionUi": {
     "filtersLabel": "Collection filters",
+    "categoryBackHref": "/mastery/creations",
     "empty": {
       "title": "No works in this category",
       "body": "Works in the selected category will appear here once the archive is ready."
     },
     "detail": {
       "back": "Back to collection",
+      "backHref": "/mastery/creations",
       "specs": "Work information",
       "story": "Work story",
       "material": "Material",
@@ -1725,9 +1764,11 @@
       "detailStrip": "Detail studies",
       "processTitle": "Process applied to this work",
       "processCta": "View technique",
+      "processHref": "/mastery/making",
       "commissionEyebrow": "Commission",
       "ctaTitle": "Interested in commissioning a work like this?",
       "cta": "Bespoke inquiry",
+      "ctaHref": "/contact?type=bespoke&source=collection&item={slug}",
       "related": "Related works",
       "thumbnailLabel": "Select work image",
       "previousImage": "Previous image",
@@ -1945,7 +1986,8 @@
     "shaft": "Shaft color",
     "style": "Style",
     "engraving": "Engraving sample",
-    "edit": "Edit configuration"
+    "edit": "Edit configuration",
+    "editHref": "/golf"
   },
   "notFound": {
     "title": "Page not found",

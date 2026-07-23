@@ -8,6 +8,7 @@ import {motion} from 'framer-motion';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
+import {appendCmsQuery, resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
 
 type GolfImageRef = {
@@ -79,6 +80,7 @@ export type GolfConfiguratorContent = {
     headGroup: string;
     shaftGroup: string;
     inquiryCta: string;
+    inquiryHref: string;
     requestEstimate: string;
     quoteText: string;
     braceletTitle: string;
@@ -157,7 +159,15 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
     imageClass: 'object-contain object-center origin-center scale-100'
   };
   const engravingSample = 'JUDY KIM 2026.05.03';
-  const inquiryHref = `/${locale}/golf/inquiry?head=${selectedHead?.id ?? ''}&shaft=${selectedShaft?.id ?? ''}&style=${encodeURIComponent(selectedStyleOption)}&engraving=${encodeURIComponent(engravingSample)}`;
+  const inquiryHref = appendCmsQuery(
+    resolveCmsHref(locale, content.labels.inquiryHref, '/golf/inquiry'),
+    {
+      head: selectedHead?.id ?? '',
+      shaft: selectedShaft?.id ?? '',
+      style: selectedStyleOption,
+      engraving: engravingSample
+    }
+  );
   const labels = content.labels;
   const process = content.process;
   const styleOptions = labels.styleOptions?.length ? labels.styleOptions : ['BASIC', 'COLOUR'];

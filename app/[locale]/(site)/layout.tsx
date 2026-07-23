@@ -8,6 +8,8 @@ import {SiteCursor} from '@/components/site/site-cursor';
 import {SiteHeader} from '@/components/site/site-header';
 import {routing, type Locale} from '@/i18n/routing';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
+import {getLocaleMessages} from '@/lib/locale-messages';
 
 type Props = {
   children: React.ReactNode;
@@ -23,9 +25,11 @@ export default async function SiteLayout({children, params}: Props) {
 
   setRequestLocale(locale);
   const golfEnabled = await isGolfEnabledForSite();
+  const messages = await getLocaleMessages(locale as Locale);
+  const privacyHref = resolveCmsHref(locale, messages.common.navigation.hrefs.privacy, '/privacy');
 
   return (
-    <AnalyticsProvider locale={locale as Locale}>
+    <AnalyticsProvider locale={locale as Locale} privacyHref={privacyHref}>
       <SiteCursor />
       <div className="site-cursor-scope">
         <SiteHeader locale={locale as Locale} golfEnabled={golfEnabled} />

@@ -2,6 +2,7 @@ import type {HomeNewsPopupCard} from '@/components/home/home-news-popups';
 import type {NewsCard} from '@/components/news/news-journal-grid';
 import type {SpecialtyCollectionItem} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
@@ -18,6 +19,7 @@ export type PublicNewsDetail = {
   blocks: NewsBodyBlock[];
   tags: string[];
   ctaTitle: string;
+  ctaHref: string;
   seoTitle: string;
   seoDescription: string;
   ogImagePath: string;
@@ -37,7 +39,7 @@ export async function getNewsCardsForSite(locale: Locale): Promise<NewsCard[]> {
   const cmsItems = await readCmsValue(() => listPublicNews(locale), []);
 
   if (cmsItems.length > 0) {
-    return cmsItems.map((item) => toNewsCard(item));
+    return cmsItems.map((item) => toNewsCard(item, locale));
   }
 
   return (await getLocaleMessages(locale)).news.grid.cards.map((card) => ({
@@ -51,7 +53,7 @@ export async function getHomeNewsCardsForSite(locale: Locale): Promise<HomeNewsP
 
   if (cmsItems.length > 0) {
     return cmsItems.slice(0, 4).map((item) => ({
-      ...toNewsCard(item),
+      ...toNewsCard(item, locale),
       body: ''
     }));
   }
@@ -68,13 +70,14 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
 
   if (cmsItem) {
     const body = normalizeNewsBody(cmsItem.body);
-    const card = toNewsCard(cmsItem);
+    const card = toNewsCard(cmsItem, locale);
 
     return {
       card,
       blocks: body.blocks,
       tags: Array.isArray(cmsItem.tags) && cmsItem.tags.length > 0 ? cmsItem.tags.filter((tag): tag is string => typeof tag === 'string') : text.tags,
       ctaTitle: body.ctaTitle,
+      ctaHref: resolveCmsHref(locale, body.ctaHref, text.ctaHref, {slug}),
       seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
       seoDescription: String(cmsItem.seoDescription || body.lead || cmsItem.excerpt || ''),
       ogImagePath: cmsImageName(cmsItem.ogImagePath || card.image)
@@ -90,11 +93,13 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
   return {
     card: {
       ...card,
+      href: resolveCmsHref(locale, `/news/${card.id}`),
       hasImage: imageExists(card.image)
     },
     blocks: [],
     tags: [],
     ctaTitle: '',
+    ctaHref: resolveCmsHref(locale, text.ctaHref, '/contact?type=other&source=news&item={slug}', {slug}),
     seoTitle: card.title,
     seoDescription: card.title,
     ogImagePath: card.image
@@ -110,6 +115,7 @@ export async function getCollectionItemsForSite(locale: Locale): Promise<Special
         const specs = normalizeCollectionSpecs(item.specs);
         return {
           id: String(item.slug),
+          href: resolveCmsHref(locale, specs.linkHref, `/mastery/creations/${String(item.slug)}`),
           title: String(item.title),
           caption: String(item.caption),
           category: String(item.category),
@@ -123,6 +129,7 @@ export async function getCollectionItemsForSite(locale: Locale): Promise<Special
       })
     : messages.specialtyPages.collection.gallery.items.map((item) => ({
         ...item,
+        href: resolveCmsHref(locale, `/mastery/creations/${item.id}`),
         hasImage: imageExists(item.image)
       }));
 }
@@ -138,6 +145,7 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
 
     return {
       id: String(cmsItem.slug),
+      href: resolveCmsHref(locale, specs.linkHref, `/mastery/creations/${String(cmsItem.slug)}`),
       title: String(cmsItem.title),
       caption: String(cmsItem.caption),
       story: String(cmsItem.story),
@@ -193,7 +201,9 @@ function normalizeNewsBody(value: unknown) {
       paragraphs: [],
       blocks: [],
       quote: '',
-      ctaTitle: ''
+      ctaTitle: '',
+      ctaHref: '',
+      linkHref: ''
     };
   }
 
@@ -205,7 +215,9 @@ function normalizeNewsBody(value: unknown) {
       : [],
     blocks: normalizeNewsBlocks(body.blocks),
     quote: typeof body.quote === 'string' ? body.quote : '',
-    ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : ''
+    ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : '',
+    ctaHref: typeof body.ctaHref === 'string' ? body.ctaHref : '',
+    linkHref: typeof body.linkHref === 'string' ? body.linkHref : ''
   };
 }
 
@@ -213,11 +225,13 @@ function firstString(...values: unknown[]) {
   return values.find((value): value is string => typeof value === 'string' && value.trim().length > 0) ?? '';
 }
 
-function toNewsCard(item: Record<string, unknown>): NewsCard {
+function toNewsCard(item: Record<string, unknown>, locale: Locale): NewsCard {
   const image = cmsImageName(item.imagePath);
+  const body = normalizeNewsBody(item.body);
 
   return {
     id: String(item.slug),
+    href: resolveCmsHref(locale, body.linkHref, `/news/${String(item.slug)}`),
     category: String(item.category),
     categoryLabel: String(item.categoryLabel),
     date: String(item.publishedAt),
@@ -282,6 +296,7 @@ function normalizeCollectionSpecs(value: unknown) {
     return {
       year: '',
       sportCategory: '',
+      linkHref: '',
       detailImages: []
     };
   }
@@ -290,6 +305,7 @@ function normalizeCollectionSpecs(value: unknown) {
   return {
     year: typeof specs.year === 'string' ? specs.year : '',
     sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : '',
+    linkHref: typeof specs.linkHref === 'string' ? specs.linkHref : '',
     detailImages: normalizeCollectionDetailImages(specs.detailImages)
   };
 }

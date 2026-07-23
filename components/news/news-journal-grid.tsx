@@ -15,6 +15,7 @@ export type NewsFilter = {
 
 export type NewsCard = {
   id: string;
+  href?: string;
   category: string;
   categoryLabel: string;
   date: string;
@@ -83,7 +84,7 @@ export function NewsJournalGrid({filters, cards, empty, filterLabel, locale}: Ne
               className="bg-transparent transition duration-hover ease-brand hover:-translate-y-1"
             >
               <Link
-                href={`/${locale}/news/${card.id}`}
+                href={card.href ?? `/${locale}/news/${card.id}`}
                 className="group grid grid-cols-[128px_minmax(0,1fr)] gap-4 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:block md:py-0"
                 aria-label={`${card.categoryLabel}: ${card.title}`}
               >

@@ -133,11 +133,28 @@ function TranslationPanel({
         <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required />
         <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
         <TextAreaField label={t('form.excerpt')} name={`${locale}.excerpt`} defaultValue={translation.excerpt} rows={3} />
+        <TextField
+          label={t('form.linkHref')}
+          name={`${locale}.body.linkHref`}
+          defaultValue={body.linkHref}
+          placeholder="/news/slug, https://…"
+          inputMode="url"
+          editorControls={false}
+        />
         <NewsBlocksEditor
           locale={locale}
           blocks={body.blocks}
           mediaItems={mediaItems}
           labels={newsBlocksEditorLabels(t)}
+        />
+        <TextField label={t('form.ctaTitle')} name={`${locale}.body.ctaTitle`} defaultValue={body.ctaTitle} />
+        <TextField
+          label={t('form.ctaHref')}
+          name={`${locale}.body.ctaHref`}
+          defaultValue={body.ctaHref}
+          placeholder="/contact?item={slug}, https://…"
+          inputMode="url"
+          editorControls={false}
         />
         <TextField label={t('form.tags')} name={`${locale}.tags`} defaultValue={(translation.tags ?? []).join(', ')} placeholder="tag 1, tag 2" />
         <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
@@ -175,7 +192,9 @@ function newsBody(value: unknown) {
       paragraphs: [],
       blocks: [],
       quote: '',
-      ctaTitle: ''
+      ctaTitle: '',
+      ctaHref: '',
+      linkHref: ''
     };
   }
 
@@ -188,7 +207,9 @@ function newsBody(value: unknown) {
       : [],
     blocks: normalizeNewsBlocks(body.blocks),
     quote: typeof body.quote === 'string' ? body.quote : '',
-    ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : ''
+    ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : '',
+    ctaHref: typeof body.ctaHref === 'string' ? body.ctaHref : '',
+    linkHref: typeof body.linkHref === 'string' ? body.linkHref : ''
   };
 }
 

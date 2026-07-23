@@ -32,18 +32,25 @@
       {"groupKey": "homeUi", "path": "currentPulse.primaryTitle", "label": "上方展示标题", "type": "textarea", "rows": 2},
       {"groupKey": "homeUi", "path": "currentPulse.primaryImage", "label": "上方展示图片", "type": "image"},
       {"groupKey": "homeUi", "path": "currentPulse.primaryCta", "label": "上方展示按钮"},
+      {"groupKey": "homeUi", "path": "currentPulse.primaryCtaHref", "label": "上方按钮跳转链接", "type": "link"},
+      {"groupKey": "homeUi", "path": "currentPulse.primaryImageHref", "label": "上方图片跳转链接", "type": "link"},
       {"groupKey": "homeUi", "path": "currentPulse.secondaryTitle", "label": "下方展示标题", "type": "textarea", "rows": 2},
       {"groupKey": "homeUi", "path": "currentPulse.secondaryImage", "label": "下方展示图片", "type": "image"},
       {"groupKey": "homeUi", "path": "currentPulse.secondaryCta", "label": "下方展示按钮"},
+      {"groupKey": "homeUi", "path": "currentPulse.secondaryCtaHref", "label": "下方按钮跳转链接", "type": "link"},
+      {"groupKey": "homeUi", "path": "currentPulse.secondaryImageHref", "label": "下方图片跳转链接", "type": "link"},
       {"groupKey": "main", "path": "signature.eyebrow", "label": "代表项目标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.title", "label": "代表项目副标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.body", "label": "代表项目正文", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.projects.0.title", "label": "代表项目 1 标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.projects.0.image", "label": "代表项目 1 图片", "type": "image"},
+      {"groupKey": "main", "path": "signature.projects.0.href", "label": "代表项目 1 跳转链接", "type": "link"},
       {"groupKey": "main", "path": "signature.projects.1.title", "label": "代表项目 2 标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.projects.1.image", "label": "代表项目 2 图片", "type": "image"},
+      {"groupKey": "main", "path": "signature.projects.1.href", "label": "代表项目 2 跳转链接", "type": "link"},
       {"groupKey": "main", "path": "signature.projects.2.title", "label": "代表项目 3 标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "signature.projects.2.image", "label": "代表项目 3 图片", "type": "image"},
+      {"groupKey": "main", "path": "signature.projects.2.href", "label": "代表项目 3 跳转链接", "type": "link"},
       {"groupKey": "main", "path": "statBand", "label": "首页数字带", "type": "json"},
       {"groupKey": "main", "path": "videoSection.src", "label": "首页视频模块 MP4 文件名"},
       {"groupKey": "main", "path": "videoSection.poster", "label": "首页视频模块封面", "type": "image"},
@@ -97,7 +104,7 @@
       {"groupKey": "chronicleUi", "path": "horizontalAriaLabel", "label": "横向浏览辅助标签"},
       {"groupKey": "chronicleUi", "path": "yearNavAriaLabel", "label": "年份导航辅助标签"},
       {"groupKey": "chronicleUi", "path": "endNav.label", "label": "结束页按钮"},
-      {"groupKey": "chronicleUi", "path": "endNav.href", "label": "结束页链接"}
+      {"groupKey": "chronicleUi", "path": "endNav.href", "label": "结束页链接", "type": "link"}
     ]
   },
   {
@@ -130,7 +137,8 @@
         ]
       },
       {"path": "copy.discoverLead", "label": "底部标题", "editor": {"align": "center"}},
-      {"path": "copy.cta", "label": "底部按钮"}
+      {"path": "copy.cta", "label": "底部按钮"},
+      {"path": "copy.ctaHref", "label": "底部按钮跳转链接", "type": "link"}
     ]
   },
   {
@@ -161,7 +169,8 @@
         ]
       },
       {"path": "copy.discoverLead", "label": "底部标题", "editor": {"align": "center"}},
-      {"path": "copy.cta", "label": "底部按钮"}
+      {"path": "copy.cta", "label": "底部按钮"},
+      {"path": "copy.ctaHref", "label": "底部按钮跳转链接", "type": "link"}
     ]
   },
   {
@@ -227,7 +236,8 @@
         ]
       },
       {"path": "copy.discoverLead", "label": "底部标题", "editor": {"align": "center"}},
-      {"path": "copy.cta", "label": "底部按钮"}
+      {"path": "copy.cta", "label": "底部按钮"},
+      {"path": "copy.ctaHref", "label": "底部按钮跳转链接", "type": "link"}
     ]
   },
   {
@@ -288,7 +298,9 @@
       },
       {"path": "cta.title", "label": "CTA 标题", "editor": {"align": "center"}},
       {"path": "cta.makingLabel", "label": "Making 按钮"},
-      {"path": "cta.creationsLabel", "label": "Creations 按钮"}
+      {"path": "cta.makingHref", "label": "Making 按钮跳转链接", "type": "link"},
+      {"path": "cta.creationsLabel", "label": "Creations 按钮"},
+      {"path": "cta.creationsHref", "label": "Creations 按钮跳转链接", "type": "link"}
     ]
   },
   {
@@ -331,7 +343,8 @@
         ]
       },
       {"path": "bespoke.title", "label": "Bespoke 标题"},
-      {"path": "bespoke.cta", "label": "Bespoke 按钮"}
+      {"path": "bespoke.cta", "label": "Bespoke 按钮"},
+      {"path": "bespoke.href", "label": "Bespoke 按钮跳转链接", "type": "link"}
     ]
   },
   {
@@ -356,6 +369,7 @@
         "type": "json",
         "itemFields": [
           {"path": "id", "label": "分类 ID"},
+          {"path": "href", "label": "分类跳转链接", "type": "link"},
           {"path": "label", "label": "分类名称"},
           {"path": "description", "label": "分类说明", "type": "textarea", "rows": 3},
           {"path": "image", "label": "分类图片", "type": "image"},
@@ -363,6 +377,10 @@
           {"path": "product", "label": "展示产品 PNG", "type": "image"}
         ]
       },
+      {"groupKey": "collectionUi", "path": "categoryBackHref", "label": "分类页返回链接", "type": "link"},
+      {"groupKey": "collectionUi", "path": "detail.backHref", "label": "作品详情返回链接", "type": "link"},
+      {"groupKey": "collectionUi", "path": "detail.processHref", "label": "作品详情工艺按钮链接", "type": "link"},
+      {"groupKey": "collectionUi", "path": "detail.ctaHref", "label": "作品详情咨询按钮链接", "type": "link"},
       {"groupKey": "collectionUi", "path": "chooseLabel", "label": "选择按钮文案"},
       {"groupKey": "collectionUi", "path": "countSuffix", "label": "数量后缀"},
       {"groupKey": "collectionUi", "path": "view", "label": "查看按钮文案"},
@@ -549,6 +567,7 @@
       {"groupKey": "newsUi", "path": "share.label", "label": "分享按钮"},
       {"groupKey": "newsUi", "path": "share.copied", "label": "分享成功提示"},
       {"groupKey": "newsUi", "path": "detail.back", "label": "详情返回按钮"},
+      {"groupKey": "newsUi", "path": "detail.backHref", "label": "详情返回跳转链接", "type": "link"},
       {"groupKey": "newsUi", "path": "detail.author", "label": "详情作者"},
       {"groupKey": "newsUi", "path": "detail.ogImagePath", "label": "详情默认大图", "type": "image"},
       {"groupKey": "newsUi", "path": "detail.lead", "label": "详情导语", "type": "textarea", "rows": 3},
@@ -557,6 +576,7 @@
       {"groupKey": "newsUi", "path": "detail.tags", "label": "详情标签", "type": "json"},
       {"groupKey": "newsUi", "path": "detail.ctaTitle", "label": "详情 CTA 标题"},
       {"groupKey": "newsUi", "path": "detail.cta", "label": "详情 CTA 按钮"},
+      {"groupKey": "newsUi", "path": "detail.ctaHref", "label": "详情 CTA 跳转链接", "type": "link"},
       {"groupKey": "newsUi", "path": "detail.related", "label": "相关推荐标题"}
     ]
   },
@@ -633,6 +653,7 @@
       {"path": "labels.shaftGroup", "label": "Shaft 选项辅助标签"},
       {"path": "labels.inquiryCta", "label": "配置询问按钮"},
       {"path": "labels.requestEstimate", "label": "底部询价按钮"},
+      {"path": "labels.inquiryHref", "label": "咨询按钮跳转链接", "type": "link"},
       {"path": "labels.quoteText", "label": "黑底引用文案", "editor": {"align": "center"}},
       {"path": "labels.braceletTitle", "label": "设计区标题", "editor": {"align": "center"}},
       {"path": "labels.braceletBody", "label": "设计区正文", "type": "textarea", "rows": 2, "editor": {"align": "center"}},
@@ -666,6 +687,7 @@
       {"groupKey": "main", "path": "shaft", "label": "Shaft 标签"},
       {"groupKey": "main", "path": "engraving", "label": "刻字标签"},
       {"groupKey": "main", "path": "edit", "label": "返回编辑按钮"},
+      {"groupKey": "main", "path": "editHref", "label": "返回编辑跳转链接", "type": "link"},
       {"groupKey": "form", "path": "name", "label": "姓名标签"},
       {"groupKey": "form", "path": "contact", "label": "联系方式标签"},
       {"groupKey": "form", "path": "quantity", "label": "数量标签"},
@@ -699,6 +721,7 @@
       {"groupKey": "form", "path": "name", "label": "姓名标签"},
       {"groupKey": "form", "path": "organization", "label": "公司/团队标签"},
       {"groupKey": "form", "path": "contact", "label": "联系方式标签"},
+      {"groupKey": "form", "path": "email", "label": "邮箱标签"},
       {"groupKey": "form", "path": "type", "label": "咨询类型标签"},
       {"groupKey": "form", "path": "message", "label": "消息标签"},
       {"groupKey": "form", "path": "submit", "label": "提交按钮"},
@@ -792,8 +815,11 @@
       {"path": "footer.business.items.9.value", "label": "企业信息 10 内容：隐私负责人", "labels": {"ko": "사업자 정보 10 내용: 개인정보보호책임자", "en": "Business item 10 value: Privacy officer"}},
 
       {"path": "footer.collectionCategoryLinks.0.label", "label": "作品分类 1：冠军戒指", "labels": {"ko": "작품 분류 1: 우승반지", "en": "Collection category 1: Championship"}},
+      {"path": "footer.collectionCategoryLinks.0.href", "label": "作品分类 1 跳转链接", "type": "link"},
       {"path": "footer.collectionCategoryLinks.1.label", "label": "作品分类 2：任命戒指", "labels": {"ko": "작품 분류 2: 임관반지", "en": "Collection category 2: Appointment"}},
+      {"path": "footer.collectionCategoryLinks.1.href", "label": "作品分类 2 跳转链接", "type": "link"},
       {"path": "footer.collectionCategoryLinks.2.label", "label": "作品分类 3：定制产品", "labels": {"ko": "작품 분류 3: 주문제작", "en": "Collection category 3: Bespoke"}},
+      {"path": "footer.collectionCategoryLinks.2.href", "label": "作品分类 3 跳转链接", "type": "link"},
 
       {"path": "footer.socialLinks.instagram", "label": "SNS 链接：Instagram", "labels": {"ko": "SNS 링크: Instagram", "en": "SNS link: Instagram"}},
       {"path": "footer.socialLinks.youtube", "label": "SNS 链接：YouTube", "labels": {"ko": "SNS 링크: YouTube", "en": "SNS link: YouTube"}},
@@ -818,7 +844,23 @@
       {"path": "navigation.items.collection", "label": "导航：CREATIONS", "labels": {"ko": "내비게이션: CREATIONS", "en": "Navigation: CREATIONS"}},
       {"path": "navigation.items.news", "label": "导航：NEWS", "labels": {"ko": "내비게이션: NEWS", "en": "Navigation: NEWS"}},
       {"path": "navigation.items.golf", "label": "导航：GOLF", "labels": {"ko": "내비게이션: GOLF", "en": "Navigation: GOLF"}},
-      {"path": "navigation.contactCta", "label": "导航：CONTACT", "labels": {"ko": "내비게이션: CONTACT", "en": "Navigation: CONTACT"}}
+      {"path": "navigation.contactCta", "label": "导航：CONTACT", "labels": {"ko": "내비게이션: CONTACT", "en": "Navigation: CONTACT"}},
+      {"path": "navigation.hrefs.home", "label": "HOME 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.chronicle", "label": "ARCHIVE 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.legacy", "label": "HERITAGE 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.loyalty", "label": "LOYALTY 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.credibility", "label": "CREDIBILITY 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.achievement", "label": "ACHIEVEMENT 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.specialty", "label": "MASTERY 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.technique", "label": "TECHNIQUE 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.making", "label": "MAKING 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.collection", "label": "CREATIONS 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.news", "label": "NEWS 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.golf", "label": "GOLF 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.golfInquiry", "label": "GOLF 문의跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.contact", "label": "CONTACT 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.terms", "label": "TERMS 跳转链接", "type": "link"},
+      {"path": "navigation.hrefs.privacy", "label": "PRIVACY 跳转链接", "type": "link"}
     ]
   }
 ]

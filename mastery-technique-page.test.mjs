@@ -63,8 +63,8 @@ test('Technique is hidden from public navigation while Making and Creations rema
   assert.ok(navCollection > navMaking, 'Creations should follow Making');
   assert.match(siteMapSource, /isTechniquePageVisible[\s\S]*?href: '\/mastery\/technique'/);
   assert.match(siteMapSource, /href: '\/mastery\/making'/);
-  assert.match(footerSource, /isTechniquePageVisible[\s\S]*?href: '\/mastery\/technique'/);
-  assert.match(footerSource, /href: '\/mastery\/making'/);
+  assert.match(footerSource, /isTechniquePageVisible[\s\S]*?navHref\('technique', '\/mastery\/technique'\)/);
+  assert.match(footerSource, /navHref\('making', '\/mastery\/making'\)/);
   assert.equal((techniquePageSource.match(/if \(!isTechniquePageVisible\) \{\s+notFound\(\);/g) ?? []).length, 2);
   assert.match(localeMessagesSource, /normalizeTechniquePageVisibility\(messages, isTechniquePageVisible\)/);
   assert.equal(koMessages.home.pillars.items.find((item) => item.title === 'MASTERY')?.href, '/mastery/technique');
@@ -139,7 +139,9 @@ test('Technique page keeps CMS, SEO, and image guide content while sitemap expos
       'evidence.rows',
       'cta.title',
       'cta.makingLabel',
-      'cta.creationsLabel'
+      'cta.makingHref',
+      'cta.creationsLabel',
+      'cta.creationsHref'
     ]
   );
   assert.match(seoSource, /techniqueRecords: 'mastery-technique'/);

@@ -8,6 +8,7 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import type {Locale} from '@/i18n/routing';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {externalLinks} from '@/lib/config';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isActivePath, navItems, withLocale} from '@/lib/site-map';
@@ -71,6 +72,9 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
     legacy: false,
     specialty: false
   });
+  const navigationHrefs = navText.raw('hrefs') as Record<string, string>;
+  const navigationHref = (id: string, fallback: string) =>
+    resolveCmsHref(locale, navigationHrefs?.[id], fallback);
 
   const relativePath = useMemo(() => {
     const parts = pathname.split('/').filter(Boolean);
@@ -81,6 +85,17 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
 
     return pathname || '/';
   }, [pathname]);
+  const isNavigationItemActive = (item: (typeof navItems)[number]) => {
+    if (isActivePath(relativePath, item.href)) {
+      return true;
+    }
+
+    return [item, ...(item.children ?? [])].some((candidate) => {
+      const resolvedHref = navigationHref(candidate.id, candidate.href);
+      const internalHref = cmsInternalPath(resolvedHref, locale);
+      return internalHref ? isActivePath(relativePath, internalHref) : false;
+    });
+  };
 
   const languageLinks = locales.map((targetLocale) => ({
     locale: targetLocale,
@@ -414,7 +429,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
       <div className="hidden lg:block">
         <div className="mx-auto grid h-20 max-w-[1440px] grid-cols-[minmax(150px,1fr)_auto_minmax(150px,1fr)] items-center gap-6 px-container">
           <Link
-            href={withLocale(locale, '/')}
+            href={navigationHref('home', '/')}
             className="inline-flex min-h-11 items-center font-heading text-[22px] font-semibold tracking-[0.18em]"
             aria-label={navText('logoHome')}
           >
@@ -431,7 +446,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
             {visibleNavItems.map((item) => {
               const megaKey = isMegaMenuKey(item.id) ? item.id : null;
               const hasMega = megaKey !== null;
-              const active = isActivePath(relativePath, item.href);
+              const active = isNavigationItemActive(item);
               const itemLabel = navText(`items.${item.id}`);
               const openDesktopMega = () => {
                 if (megaKey) {
@@ -456,7 +471,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
                     </button>
                   ) : (
                     <Link
-                      href={withLocale(locale, item.href)}
+                      href={navigationHref(item.id, item.href)}
                       className={`site-nav-link ${active ? 'is-active' : ''}`}
                       aria-current={active ? 'page' : undefined}
                       onClick={() => setOpenMenu(null)}
@@ -506,7 +521,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
             ) : null}
 
             <Link
-              href={withLocale(locale, '/contact')}
+              href={navigationHref('contact', '/contact')}
               className={`consult-cta ${isHeroTransparent ? 'consult-cta--light' : 'consult-cta--accent'}`}
             >
               <span className="consult-cta__label">{contactLabel}</span>
@@ -544,7 +559,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
         </button>
 
         <Link
-          href={withLocale(locale, '/')}
+          href={navigationHref('home', '/')}
           onClick={() => setIsMenuOpen(false)}
           className="inline-flex min-h-11 items-center font-heading text-[18px] font-semibold tracking-[0.14em]"
           aria-label={navText('logoHome')}
@@ -631,7 +646,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
                     className="border-b border-hairline last:border-b-0"
                   >
                     <Link
-                      href={withLocale(locale, child.href)}
+                      href={navigationHref(child.id, child.href)}
                       className="group grid min-h-16 gap-1 py-3"
                       onClick={() => setOpenMenu(null)}
                     >
@@ -693,7 +708,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
                         aria-label={navText(isExpanded ? 'collapse' : 'expand', {label: itemLabel})}
                         onClick={toggleExpanded}
                         className={`group flex min-h-14 w-full items-center justify-between gap-5 border-0 bg-transparent p-0 text-left ${
-                          isActivePath(relativePath, item.href) ? 'text-accent' : ''
+                          isNavigationItemActive(item) ? 'text-accent' : ''
                         } focus-visible:text-accent focus-visible:outline-none`}
                       >
                         <span className="font-body text-[15px] font-semibold uppercase leading-none tracking-[0.22em]">
@@ -712,10 +727,10 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
                       </button>
                     ) : (
                       <Link
-                        href={withLocale(locale, item.href)}
+                        href={navigationHref(item.id, item.href)}
                         onClick={() => setIsMenuOpen(false)}
                         className={`flex min-h-14 items-center font-body text-[15px] font-semibold uppercase leading-none tracking-[0.22em] ${
-                          isActivePath(relativePath, item.href) ? 'text-accent' : ''
+                          isNavigationItemActive(item) ? 'text-accent' : ''
                         } focus-visible:text-accent focus-visible:outline-none`}
                       >
                         {itemLabel}
@@ -732,7 +747,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
                         {item.children?.map((child) => (
                           <Link
                             key={child.href}
-                            href={withLocale(locale, child.href)}
+                            href={navigationHref(child.id, child.href)}
                             onClick={() => setIsMenuOpen(false)}
                             className="grid min-h-[52px] gap-1 py-2 font-body text-[12px] font-semibold uppercase tracking-[0.16em] text-subtext transition duration-300 ease-brand hover:text-primary focus-visible:text-accent focus-visible:outline-none"
                           >
@@ -752,7 +767,7 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
             </motion.nav>
 
             <Link
-              href={withLocale(locale, '/contact')}
+              href={navigationHref('contact', '/contact')}
               onClick={() => setIsMenuOpen(false)}
               className="consult-cta consult-cta--accent consult-cta--large mt-10 flex w-full"
             >
@@ -779,4 +794,19 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
 
 function isMegaMenuKey(id: string): id is MegaMenuKey {
   return id === 'legacy' || id === 'specialty';
+}
+
+function cmsInternalPath(href: string, locale: Locale) {
+  if (!href.startsWith('/')) {
+    return null;
+  }
+
+  const path = href.split(/[?#]/, 1)[0] || '/';
+  const localePrefix = `/${locale}`;
+
+  if (path === localePrefix) {
+    return '/';
+  }
+
+  return path.startsWith(`${localePrefix}/`) ? path.slice(localePrefix.length) : path;
 }

@@ -26,17 +26,20 @@
         {
           "title": "우승반지",
           "caption": "우승반지 제작",
-          "image": "c1.png"
+          "image": "c1.png",
+          "href": "/mastery/creations/champion"
         },
         {
           "title": "임관반지",
           "caption": "임관반지 제작",
-          "image": "c2.png"
+          "image": "c2.png",
+          "href": "/mastery/creations/appointment"
         },
         {
           "title": "주문제작",
           "caption": "단체 맞춤 제작",
-          "image": "c3.png"
+          "image": "c3.png",
+          "href": "/mastery/creations/bespoke"
         }
       ]
     },
@@ -347,7 +350,8 @@
             "accentEnd": "rgba(47,83,64,0.86)"
           }
         ],
-        "cta": "DISCOVER MORE"
+        "cta": "DISCOVER MORE",
+        "ctaHref": "/mastery/creations"
       }
     },
     "credibility": {
@@ -407,6 +411,7 @@
         "quoteBody": "신뢰는 기준에서 시작됩니다",
         "discoverLead": "대호의 프로젝트 더 알아보기",
         "cta": "DISCOVER MORE",
+        "ctaHref": "/mastery/creations",
         "rows": [
           {
             "number": "01.",
@@ -533,6 +538,7 @@
         "archiveTitle": "다양한 분야의 프로젝트",
         "discoverLead": "대호의 프로젝트 더 알아보기",
         "cta": "DISCOVER MORE",
+        "ctaHref": "/mastery/creations",
         "statBand": [
           {
             "value": "38",
@@ -753,7 +759,9 @@
       "cta": {
         "title": "기술 기록은 제작 공정과 완성된 작품으로 이어집니다.",
         "makingLabel": "제작 공정 보기",
-        "creationsLabel": "완성 작품 보기"
+        "makingHref": "/mastery/making",
+        "creationsLabel": "완성 작품 보기",
+        "creationsHref": "/mastery/creations"
       }
     },
     "technique": {
@@ -846,7 +854,8 @@
         "title": "대호의 프로젝트 더 알아보기",
         "body": "챔피언십 링은 같은 모양의 제품이 아니라, 팀의 상징과 시즌의 기억을 담아 설계되는 주문 제작 작품입니다.",
         "image": "specialty_bespoke.png",
-        "cta": "DISCOVER MORE"
+        "cta": "DISCOVER MORE",
+        "href": "/mastery/creations"
       }
     },
     "collection": {
@@ -862,6 +871,7 @@
         "filters": [
           {
             "id": "champion",
+            "href": "/mastery/creations/champion",
             "label": "우승반지",
             "description": "승리의 순간을 영원의 형태로",
             "image": "c1.png",
@@ -870,6 +880,7 @@
           },
           {
             "id": "appointment",
+            "href": "/mastery/creations/appointment",
             "label": "임관반지",
             "description": "소속과 임명의 의미를 담은 반지",
             "image": "c2.png",
@@ -878,6 +889,7 @@
           },
           {
             "id": "bespoke",
+            "href": "/mastery/creations/bespoke",
             "label": "주문제작",
             "description": "이야기에서 시작되는 맞춤 제작",
             "image": "c3.png",
@@ -1226,6 +1238,7 @@
       "shaftGroup": "샤프트 컬러 선택",
       "inquiryCta": "이 구성으로 문의하기",
       "requestEstimate": "견적 문의하러 가기",
+      "inquiryHref": "/golf/inquiry",
       "quoteText": "순간을 영원히 기념하세요",
       "braceletTitle": "나만의 팔찌 디자인하기",
       "braceletBody": "취향에 맞게, 스타일에 맞게",
@@ -1311,6 +1324,24 @@
       "expand": "{label} 펼치기",
       "collapse": "{label} 접기",
       "contactCta": "문의",
+      "hrefs": {
+        "home": "/",
+        "chronicle": "/archive",
+        "legacy": "/heritage/loyalty",
+        "loyalty": "/heritage/loyalty",
+        "credibility": "/heritage/credibility",
+        "achievement": "/heritage/achievement",
+        "specialty": "/mastery/making",
+        "technique": "/mastery/technique",
+        "making": "/mastery/making",
+        "collection": "/mastery/creations",
+        "news": "/news",
+        "golf": "/golf",
+        "golfInquiry": "/golf/inquiry",
+        "contact": "/contact",
+        "terms": "/terms",
+        "privacy": "/privacy"
+      },
       "items": {
         "home": "HOME",
         "chronicle": "ARCHIVE",
@@ -1449,9 +1480,13 @@
       "primaryTitle": "NEW LEGACY\nRELEASED",
       "primaryImage": "news_featured.png.png",
       "primaryCta": "자세히 보기",
+      "primaryCtaHref": "/heritage/loyalty",
+      "primaryImageHref": "/heritage/loyalty",
       "secondaryTitle": "RECENT\nHIGHLIGHT",
       "secondaryImage": "home_ring_01.png",
-      "secondaryCta": "자세히 보기"
+      "secondaryCta": "자세히 보기",
+      "secondaryCtaHref": "/news",
+      "secondaryImageHref": "/mastery/creations"
     },
     "latestNews": {
       "eyebrow": "최근 소식",
@@ -1694,6 +1729,7 @@
     },
     "detail": {
       "back": "저널 목록",
+      "backHref": "/news",
       "author": "대호 뉴스",
       "ogImagePath": "news_detail_hero.png",
       "lead": "",
@@ -1702,6 +1738,7 @@
       "tags": [],
       "ctaTitle": "",
       "cta": "문의하기",
+      "ctaHref": "/contact?type=other&source=news&item={slug}",
       "previous": "이전 소식",
       "next": "다음 소식",
       "related": "다음 소식"
@@ -1709,12 +1746,14 @@
   },
   "collectionUi": {
     "filtersLabel": "작품 필터",
+    "categoryBackHref": "/mastery/creations",
     "empty": {
       "title": "등록된 작품이 없습니다",
       "body": "선택한 분류의 작품 자료가 준비되면 이곳에 추가됩니다."
     },
     "detail": {
       "back": "작품 목록",
+      "backHref": "/mastery/creations",
       "specs": "작품 정보",
       "story": "작품 이야기",
       "material": "소재",
@@ -1725,9 +1764,11 @@
       "detailStrip": "세부 미감",
       "processTitle": "본 작품에 적용된 공정",
       "processCta": "공정 보기",
+      "processHref": "/mastery/making",
       "commissionEyebrow": "의뢰",
       "ctaTitle": "이와 같은 작품을 의뢰하고 싶다면",
       "cta": "맞춤 제작 문의",
+      "ctaHref": "/contact?type=bespoke&source=collection&item={slug}",
       "related": "관련 작품",
       "thumbnailLabel": "작품 이미지 선택",
       "previousImage": "이전 이미지",
@@ -1945,7 +1986,8 @@
     "shaft": "샤프트 컬러",
     "style": "스타일",
     "engraving": "각인 예시",
-    "edit": "구성 다시 보기"
+    "edit": "구성 다시 보기",
+    "editHref": "/golf"
   },
   "notFound": {
     "title": "페이지를 찾을 수 없습니다",

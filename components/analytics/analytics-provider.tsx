@@ -24,6 +24,7 @@ import {
 type AnalyticsProviderProps = {
   children: React.ReactNode;
   locale: 'ko' | 'en';
+  privacyHref?: string;
 };
 
 const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? '';
@@ -45,7 +46,7 @@ const copy = {
   }
 } as const;
 
-export function AnalyticsProvider({children, locale}: AnalyticsProviderProps) {
+export function AnalyticsProvider({children, locale, privacyHref}: AnalyticsProviderProps) {
   const [consent, setConsent] = useState<AnalyticsConsent>('unknown');
   const [bannerOpen, setBannerOpen] = useState(false);
   const [analyticsReady, setAnalyticsReady] = useState(false);
@@ -148,8 +149,9 @@ export function AnalyticsProvider({children, locale}: AnalyticsProviderProps) {
         ) : null}
       </Suspense>
       {bannerOpen && validMeasurementId ? (
-        <ConsentBanner
-          locale={locale}
+          <ConsentBanner
+            locale={locale}
+            privacyHref={privacyHref}
           onAccept={() => updateConsent('granted')}
           onReject={() => updateConsent('denied')}
         />
@@ -187,10 +189,12 @@ function AnalyticsPageView({enabled}: {enabled: boolean}) {
 
 function ConsentBanner({
   locale,
+  privacyHref,
   onAccept,
   onReject
 }: {
   locale: 'ko' | 'en';
+  privacyHref?: string;
   onAccept: () => void;
   onReject: () => void;
 }) {
@@ -211,7 +215,7 @@ function ConsentBanner({
           </h2>
           <p id="analytics-consent-description" className="mt-1 font-body text-[13px] leading-6 text-subtext md:text-sm">
             {text.body}{' '}
-            <a href={`/${locale}/privacy`} className="underline decoration-hairline underline-offset-4 hover:text-accent focus-visible:text-accent">
+            <a href={privacyHref ?? `/${locale}/privacy`} className="underline decoration-hairline underline-offset-4 hover:text-accent focus-visible:text-accent">
               {text.privacy}
             </a>
           </p>

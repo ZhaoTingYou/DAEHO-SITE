@@ -6,6 +6,7 @@ import {notFound} from 'next/navigation';
 import {SpecialtyCollectionCategory} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
 import {getCollectionItemsForSite} from '@/lib/cms/public-content';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getCollectionCategorySeoFallback} from '@/lib/collection-category-seo';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
@@ -52,6 +53,7 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
   const text = messages.collectionUi;
   const filters = content.gallery.filters.map((filter) => ({
     ...filter,
+    href: resolveCmsHref(locale, filter.href, `/mastery/creations/${filter.id}`),
     hasImage: Boolean(filter.image && imageExists(filter.image))
   }));
   const items = await getCollectionItemsForSite(locale);
@@ -66,7 +68,7 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
         {filters.map((filter) => (
           <Link
             key={filter.id}
-            href={`/${locale}/mastery/creations/${filter.id}`}
+            href={filter.href}
             className={`mobile-tap-target inline-flex shrink-0 items-center px-3 font-body text-[11px] font-semibold uppercase tracking-[0.14em] ${filter.id === categoryId ? 'text-accent' : 'text-primary/65'}`}
             aria-current={filter.id === categoryId ? 'page' : undefined}
           >
@@ -86,6 +88,7 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
         appointment={text.appointment}
         bespoke={text.bespoke}
         locale={locale}
+        backHref={resolveCmsHref(locale, text.categoryBackHref, '/mastery/creations')}
       />
     </main>
   );

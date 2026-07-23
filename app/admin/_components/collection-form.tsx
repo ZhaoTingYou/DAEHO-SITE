@@ -87,6 +87,14 @@ export function CollectionForm({
             <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.specs')}</p>
             <TextField label={t('form.year')} name="specs.year" defaultValue={specs.year} />
             <TextField label={t('form.sportCategory')} name="specs.sportCategory" defaultValue={specs.sportCategory} />
+            <TextField
+              label={t('form.linkHref')}
+              name="specs.linkHref"
+              defaultValue={specs.linkHref}
+              placeholder="/mastery/creations/slug, https://…"
+              inputMode="url"
+              editorControls={false}
+            />
           </div>
         </div>
         <CollectionGalleryField
@@ -236,6 +244,7 @@ function normalizeSpecs(value: unknown) {
     return {
       year: '',
       sportCategory: '',
+      linkHref: '',
       detailImages: []
     };
   }
@@ -245,6 +254,7 @@ function normalizeSpecs(value: unknown) {
   return {
     year: typeof specs.year === 'string' ? specs.year : '',
     sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : '',
+    linkHref: typeof specs.linkHref === 'string' ? specs.linkHref : '',
     detailImages: normalizeSpecImages(specs.detailImages)
   };
 }

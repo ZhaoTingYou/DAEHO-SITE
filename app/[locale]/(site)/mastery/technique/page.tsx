@@ -9,10 +9,10 @@ import {SafeImage} from '@/components/safe-image';
 import {RingDrawingBackground} from '@/components/specialty/ring-drawing-background';
 import {TechniqueRecordsSection} from '@/components/specialty/technique-records-section';
 import type {Locale} from '@/i18n/routing';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {getPageMetadata} from '@/lib/seo';
-import {withLocale} from '@/lib/site-map';
 
 type Props = {
   params: Promise<{locale: Locale}>;
@@ -134,14 +134,14 @@ export default async function TechniqueRecordPage({params}: Props) {
             </h2>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
-                href={withLocale(locale, '/mastery/making')}
+                href={resolveCmsHref(locale, content.cta.makingHref, '/mastery/making')}
                 className="link-sweep inline-flex min-h-11 items-center font-body text-[12px] font-semibold uppercase leading-none tracking-[0.18em] text-accent"
               >
                 {content.cta.makingLabel}
               </Link>
               <span className="hidden h-4 w-px bg-primary/18 sm:block" aria-hidden="true" />
               <Link
-                href={withLocale(locale, '/mastery/creations')}
+                href={resolveCmsHref(locale, content.cta.creationsHref, '/mastery/creations')}
                 className="link-sweep inline-flex min-h-11 items-center font-body text-[12px] font-semibold uppercase leading-none tracking-[0.18em] text-accent"
               >
                 {content.cta.creationsLabel}

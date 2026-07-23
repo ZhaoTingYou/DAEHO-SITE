@@ -1,6 +1,6 @@
 import pageCatalogData from './page-catalog.json';
 
-export type PageFieldType = 'text' | 'textarea' | 'image' | 'select' | 'stringList' | 'json';
+export type PageFieldType = 'text' | 'textarea' | 'image' | 'link' | 'select' | 'stringList' | 'json';
 
 export type PageFieldOption = {
   label: string;

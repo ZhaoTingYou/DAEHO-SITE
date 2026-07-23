@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {CookieSettingsButton} from '@/components/analytics/cookie-settings-button';
 import type {Locale} from '@/i18n/routing';
 import {externalLinks} from '@/lib/config';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
@@ -40,6 +41,9 @@ type SocialLinkKey = (typeof socialLinkItems)[number]['key'];
 export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
   const text = (await getLocaleMessages(locale)).common;
   const navLabels = text.navigation.items;
+  const navHrefs = text.navigation.hrefs;
+  const navHref = (id: keyof typeof navHrefs, fallback: string) =>
+    resolveCmsHref(locale, navHrefs[id], fallback);
   const externalLabels = text.footer.externalSites;
   const {business, legal} = text.footer;
   const contactLabel = text.navigation.contactCta;
@@ -51,45 +55,50 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
   const footerGroups: FooterGroup[] = [
     {
       heading: navLabels.chronicle,
-      href: '/archive',
+      href: navHref('chronicle', '/archive'),
       links: []
     },
     {
       heading: navLabels.legacy,
+      href: navHref('legacy', '/heritage/loyalty'),
       links: [
-        {label: navLabels.loyalty, href: '/heritage/loyalty'},
-        {label: navLabels.credibility, href: '/heritage/credibility'},
-        {label: navLabels.achievement, href: '/heritage/achievement'}
+        {label: navLabels.loyalty, href: navHref('loyalty', '/heritage/loyalty')},
+        {label: navLabels.credibility, href: navHref('credibility', '/heritage/credibility')},
+        {label: navLabels.achievement, href: navHref('achievement', '/heritage/achievement')}
       ]
     },
     {
       heading: navLabels.specialty,
+      href: navHref('specialty', '/mastery/making'),
       links: [
         ...(isTechniquePageVisible
-          ? [{label: navLabels.technique, href: '/mastery/technique'}]
+          ? [{label: navLabels.technique, href: navHref('technique', '/mastery/technique')}]
           : []),
-        {label: navLabels.making, href: '/mastery/making'},
-        {label: navLabels.collection, href: '/mastery/creations'},
-        ...collectionCategoryLinks
+        {label: navLabels.making, href: navHref('making', '/mastery/making')},
+        {label: navLabels.collection, href: navHref('collection', '/mastery/creations')},
+        ...collectionCategoryLinks.map((item) => ({
+          ...item,
+          href: resolveCmsHref(locale, item.href, '/mastery/creations')
+        }))
       ]
     },
     {
       heading: navLabels.news,
-      href: '/news',
+      href: navHref('news', '/news'),
       links: []
     },
     ...(golfEnabled ? [
       {
         heading: navLabels.golf,
-        href: '/golf',
+        href: navHref('golf', '/golf'),
         links: [
-          {label: text.footer.golfInquiry, href: '/golf/inquiry'}
+          {label: text.footer.golfInquiry, href: navHref('golfInquiry', '/golf/inquiry')}
         ]
       }
     ] : []),
     {
       heading: contactLabel,
-      href: '/contact',
+      href: navHref('contact', '/contact'),
       links: []
     }
   ];
@@ -101,7 +110,7 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
       <div className="mx-auto max-w-[1440px] px-container pt-16 pb-0 md:py-[clamp(56px,7vw,96px)]">
         <div className="grid gap-8 border-b border-hairline pb-8 md:gap-10 md:pb-12 lg:grid-cols-[minmax(260px,0.52fr)_minmax(0,0.48fr)] lg:items-start">
           <div className="space-y-4">
-            <Link href={withLocale(locale, '/')} className="inline-flex min-h-11 items-center font-heading text-[28px] font-semibold tracking-[0.18em] text-primary">
+            <Link href={navHref('home', '/')} className="inline-flex min-h-11 items-center font-heading text-[28px] font-semibold tracking-[0.18em] text-primary">
               DAEHO
             </Link>
             <p className="max-w-sm whitespace-pre-line font-body text-[14px] leading-6 text-subtext">
@@ -154,7 +163,7 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
           {footerGroups.map((group) => (
             <div key={group.heading} className="min-w-0">
               {group.href ? (
-                <Link href={withLocale(locale, group.href)} className="footer-group-title">
+                <Link href={group.href} className="footer-group-title">
                   {group.heading}
                 </Link>
               ) : (
@@ -164,7 +173,7 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
               {group.links.length > 0 ? (
                 <div className="footer-subnav grid">
                   {group.links.map((item) => (
-                    <Link key={item.href} href={withLocale(locale, item.href)} className="footer-link footer-link--muted">
+                    <Link key={item.href} href={item.href} className="footer-link footer-link--muted">
                       {item.label}
                     </Link>
                   ))}
@@ -182,10 +191,10 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
               {rightsText}
             </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <Link href={withLocale(locale, '/terms')} className="footer-link footer-link--legal">
+              <Link href={navHref('terms', '/terms')} className="footer-link footer-link--legal">
                 {legal.terms}
               </Link>
-              <Link href={withLocale(locale, '/privacy')} className="footer-link footer-link--legal font-semibold text-primary">
+              <Link href={navHref('privacy', '/privacy')} className="footer-link footer-link--legal font-semibold text-primary">
                 {legal.privacy}
               </Link>
               <CookieSettingsButton locale={locale} />

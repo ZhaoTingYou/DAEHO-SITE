@@ -11,10 +11,10 @@ import {Reveal, RevealItem} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
 import {getHomeNewsCardsForSite} from '@/lib/cms/public-content';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
-import {withLocale} from '@/lib/site-map';
 import {resolveVideoSource} from '@/lib/video-src';
 import koMessages from '@/messages/ko.json';
 
@@ -87,7 +87,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                     {currentPulse.primaryTitle}
                   </h2>
                   <Link
-                    href={withLocale(locale, '/heritage/loyalty')}
+                    href={resolveCmsHref(locale, currentPulse.primaryCtaHref, '/heritage/loyalty')}
                     className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[16px] leading-none tracking-[0.12em] transition duration-hover ease-brand md:text-[15px]"
                   >
                     {currentPulse.primaryCta}
@@ -95,7 +95,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                 </div>
               </div>
 
-              <Link href={withLocale(locale, '/heritage/loyalty')} className="group order-1 block lg:order-2">
+              <Link href={resolveCmsHref(locale, currentPulse.primaryImageHref, '/heritage/loyalty')} className="group order-1 block lg:order-2">
                 <div className="relative overflow-hidden bg-bg">
                   <div className="hover-zoom">
                     <div className="hover-zoom-media">
@@ -114,7 +114,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
 
           <Reveal className="border-b border-primary/15 pb-[clamp(30px,3.2vw,46px)]">
             <div className="mx-auto grid w-full max-w-[1180px] gap-8 lg:grid-cols-[minmax(0,820px)_minmax(260px,320px)] lg:items-center lg:gap-[clamp(44px,4vw,68px)]">
-              <Link href={withLocale(locale, '/mastery/creations')} className="group block">
+              <Link href={resolveCmsHref(locale, currentPulse.secondaryImageHref, '/mastery/creations')} className="group block">
                 <div className="hover-zoom">
                   <div className="hover-zoom-media">
                     <SafeImage
@@ -133,7 +133,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                     {currentPulse.secondaryTitle}
                   </p>
                   <Link
-                    href={withLocale(locale, '/news')}
+                    href={resolveCmsHref(locale, currentPulse.secondaryCtaHref, '/news')}
                     className="home-feature-link inline-flex [font-family:'Pretendard',sans-serif] text-[16px] leading-none tracking-[0.12em] transition duration-hover ease-brand md:text-[15px]"
                   >
                     {currentPulse.secondaryCta}
@@ -165,7 +165,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
             {content.signature.projects.map((item) => (
               <RevealItem key={item.image} className="h-full">
                 <Link
-                  href={withLocale(locale, '/mastery/creations')}
+                  href={resolveCmsHref(locale, item.href, '/mastery/creations')}
                   className="group mx-auto grid h-full w-full max-w-[300px] grid-rows-[auto_1fr] border border-transparent bg-white p-[clamp(12px,0.95vw,16px)] transition duration-hover ease-brand hover:-translate-y-1 hover:border-primary/25 focus-visible:border-primary/35"
                 >
                   <div className="hover-zoom">

@@ -10,9 +10,9 @@ import {SpecialtyDetailTriplet} from '@/components/specialty/specialty-detail-tr
 import {SpecialtyProcess} from '@/components/specialty/specialty-process';
 import type {Locale} from '@/i18n/routing';
 import {imageExists} from '@/lib/image-exists';
+import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
-import {withLocale} from '@/lib/site-map';
 
 type Props = {
   params: Promise<{locale: Locale}>;
@@ -98,7 +98,7 @@ export default async function TechniquePage({params}: Props) {
               {content.bespoke.title}
             </h2>
             <Link
-              href={withLocale(locale, '/mastery/creations')}
+              href={resolveCmsHref(locale, content.bespoke.href, '/mastery/creations')}
               className="link-sweep inline-flex [font-family:'Cormorant_Garamond',serif] text-[15px] font-bold uppercase leading-[19px] tracking-[0.2em] text-accent"
             >
               {content.bespoke.cta}

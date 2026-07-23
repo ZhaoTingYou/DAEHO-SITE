@@ -18,7 +18,8 @@ import {
   type PageDefinition,
   type PageFieldEditorSettings,
   type PageFieldDefinition,
-  type PageFieldOption
+  type PageFieldOption,
+  type PageFieldType
 } from '@/lib/cms/page-catalog';
 import {
   getLocalizedArrayItemFields,
@@ -347,6 +348,7 @@ function ContentGroupEditor({
                 itemFields={getLocalizedArrayItemFields(field.itemFields, context.adminLocale)}
                 options={getLocalizedPageFieldOptions(field, context.adminLocale)}
                 rows={field.rows}
+                fieldType={field.type}
                 editorFont={field.editor?.font}
                 editorAlign={field.editor?.align}
               />
@@ -370,7 +372,8 @@ function EditableNode({
   options,
   rows,
   editorFont,
-  editorAlign
+  editorAlign,
+  fieldType
 }: {
   path: string;
   label: string;
@@ -383,6 +386,7 @@ function EditableNode({
   rows?: number;
   editorFont?: PageFieldEditorSettings['font'];
   editorAlign?: PageFieldEditorSettings['align'];
+  fieldType?: PageFieldType;
 }) {
   if (hiddenKeys.has(lastPathSegment(path))) {
     return <input type="hidden" name={contentFieldName(context.locale, context.groupKey, path)} value={stringValue(value)} />;
@@ -417,6 +421,7 @@ function EditableNode({
       options={options}
       rows={rows}
       editor={{font: editorFont, align: editorAlign}}
+      fieldType={fieldType}
     />
   );
 }
@@ -645,6 +650,8 @@ function EditableArrayItemFields({
             name={name}
             defaultValue={stringValue(fieldValue)}
             placeholder={field.placeholder}
+            inputMode={field.type === 'link' ? 'url' : undefined}
+            editorControls={field.type !== 'link'}
             editorFont={field.editor?.font}
             editorAlign={field.editor?.align}
             editorLocale={context.locale}
@@ -715,7 +722,8 @@ function EditableLeaf({
   forceImage = false,
   options,
   rows,
-  editor
+  editor,
+  fieldType
 }: {
   path: string;
   label: string;
@@ -725,6 +733,7 @@ function EditableLeaf({
   options?: PageFieldOption[];
   rows?: number;
   editor?: PageFieldEditorSettings;
+  fieldType?: PageFieldType;
 }) {
   const name = contentFieldName(context.locale, context.groupKey, path);
   const t = createAdminTranslator(context.messages);
@@ -778,6 +787,19 @@ function EditableLeaf({
   }
 
   const text = stringValue(value);
+
+  if (fieldType === 'link') {
+    return (
+      <TextField
+        label={label}
+        name={name}
+        defaultValue={text}
+        placeholder="/contact, https://…, mailto:…"
+        inputMode="url"
+        editorControls={false}
+      />
+    );
+  }
 
   if (options?.length) {
     return <SelectField label={label} name={name} defaultValue={text} options={options} />;

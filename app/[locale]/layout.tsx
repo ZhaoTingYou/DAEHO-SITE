@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import {NextIntlClientProvider, hasLocale} from 'next-intl';
-import {getMessages, getTranslations, setRequestLocale} from 'next-intl/server';
+import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
 import '@/app/globals.css';
@@ -8,7 +8,7 @@ import {LenisProvider} from '@/components/motion/lenis-provider';
 import {ReducedMotionProvider} from '@/components/motion/reduced-motion-provider';
 import {SiteStructuredData} from '@/components/site/site-structured-data';
 import {routing, type Locale} from '@/i18n/routing';
-import type {LocaleMessages} from '@/lib/locale-messages';
+import {getLocaleMessages} from '@/lib/locale-messages';
 import {metadataBase, previewNoindexRobots} from '@/lib/seo';
 
 type Props = {
@@ -60,9 +60,9 @@ export default async function LocaleLayout({children, params}: Props) {
   }
 
   setRequestLocale(locale);
-  const messages = (await getMessages()) as LocaleMessages;
-  // Only namespaces read via useTranslations in client components belong here;
-  // server components get their copy through getLocaleMessages(locale) props.
+  const messages = await getLocaleMessages(locale as Locale);
+  // Client namespaces are also sourced through the CMS-aware message boundary so
+  // header, 404, and other client navigation destinations update immediately.
   const clientMessages = {
     common: messages.common,
     notFound: messages.notFound

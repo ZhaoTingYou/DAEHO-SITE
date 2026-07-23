@@ -72,8 +72,8 @@ test('collection detail back arrow returns to browser history with a localized d
     'collection details should render the history-aware back button'
   );
   assert.ok(
-    detailPageSource.includes("fallbackHref={withLocale(locale, '/mastery/creations')}"),
-    'direct detail visits should retain the localized Creations fallback'
+    detailPageSource.includes("fallbackHref={resolveCmsHref(locale, text.backHref, '/mastery/creations')}"),
+    'direct detail visits should retain a CMS-editable localized Creations fallback'
   );
   assert.ok(historyBackButtonSource.includes("'use client'"), 'history navigation requires a client component');
   assert.ok(
