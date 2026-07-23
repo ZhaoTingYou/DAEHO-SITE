@@ -83,6 +83,7 @@ export type CmsInquiry = {
   locale: Locale;
   name: string;
   contact: string;
+  email: string;
   organization: string;
   inquiryType: string;
   team: string;

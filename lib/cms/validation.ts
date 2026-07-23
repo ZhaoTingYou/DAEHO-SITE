@@ -94,6 +94,7 @@ export const contactInquirySchema = z.object({
   name: inquiryName,
   organization: inquiryShortText,
   contact: inquiryContact,
+  email: z.string().trim().email().max(254),
   type: inquiryShortText,
   message: inquiryLongText,
   pagePath: inquiryMediumText,

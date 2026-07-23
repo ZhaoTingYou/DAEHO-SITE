@@ -68,6 +68,7 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                     </td>
                     <td className="px-4 py-4">
                       <p className="font-semibold text-[#101827]">{item.contact}</p>
+                      {item.email ? <p className="mt-1 text-xs text-[#647084]">{item.email}</p> : null}
                       {item.organization ? <p className="mt-1 text-xs text-[#647084]">{item.organization}</p> : null}
                     </td>
                     <td className="px-4 py-4">

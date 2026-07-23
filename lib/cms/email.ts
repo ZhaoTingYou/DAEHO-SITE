@@ -8,6 +8,7 @@ type InquiryForEmail = {
   locale: string;
   name: string;
   contact: string;
+  email: string;
   organization: string;
   inquiryType: string;
   team: string;
@@ -97,6 +98,7 @@ function renderInquiryText(inquiry: InquiryForEmail) {
     `Locale: ${inquiry.locale}`,
     `Name: ${inquiry.name}`,
     `Contact: ${inquiry.contact}`,
+    inquiry.email ? `Email: ${inquiry.email}` : '',
     inquiry.organization ? `Organization: ${inquiry.organization}` : '',
     inquiry.inquiryType ? `Type: ${inquiry.inquiryType}` : '',
     inquiry.team ? `Team: ${inquiry.team}` : '',
@@ -123,6 +125,7 @@ function renderInquiryHtml(inquiry: InquiryForEmail) {
     ['Locale', inquiry.locale],
     ['Name', inquiry.name],
     ['Contact', inquiry.contact],
+    ['Email', inquiry.email],
     ['Organization', inquiry.organization],
     ['Type', inquiry.inquiryType],
     ['Team', inquiry.team],

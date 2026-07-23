@@ -56,6 +56,7 @@ export default async function AdminInquiryDetailPage({params}: Props) {
             </div>
             <dl className="grid gap-4 md:grid-cols-2">
               <DetailItem label={t('inquiry.contact')} value={inquiry.contact} />
+              <DetailItem label={t('inquiry.email')} value={inquiry.email || '-'} />
               <DetailItem label={t('inquiry.locale')} value={inquiry.locale.toUpperCase()} />
               <DetailItem label={t('inquiry.organization')} value={inquiry.organization || '-'} />
               <DetailItem label={t('inquiry.type')} value={inquiry.inquiryType || '-'} />

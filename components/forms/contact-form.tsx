@@ -16,6 +16,7 @@ type ContactFormCopy = {
   name: string;
   organization: string;
   contact: string;
+  email: string;
   type: string;
   message: string;
   submit: string;
@@ -53,6 +54,16 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         inputMode="tel"
         autoComplete="tel"
         maxLength={180}
+        required
+      />
+      <TextField
+        id="contact-email"
+        label={text.email}
+        name="email"
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        maxLength={254}
         required
       />
       <label className="block space-y-2 font-body text-[16px] font-semibold uppercase tracking-[0.08em] text-subtext md:text-sm md:tracking-[0.12em]">
@@ -114,6 +125,7 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         name: String(formData.get('name') ?? ''),
         organization: String(formData.get('organization') ?? ''),
         contact: String(formData.get('contact') ?? ''),
+        email: String(formData.get('email') ?? ''),
         type: String(formData.get('type') ?? ''),
         message: String(formData.get('message') ?? ''),
         website: String(formData.get('website') ?? ''),

@@ -3,12 +3,14 @@ package com.daeho.cms.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RequestValidation {
   public static final List<String> LOCALES = List.of("ko", "en");
   public static final List<String> INQUIRY_STATUSES = List.of("new", "contacted", "in_progress", "done", "spam");
+  private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
   public ValidatedRequest pagePayload(Map<String, Object> body) {
     var issues = new ArrayList<Map<String, String>>();
@@ -60,9 +62,12 @@ public class RequestValidation {
     payload.putIfAbsent("pagePath", "");
     requireText(payload, "name", issues);
     requireText(payload, "contact", issues);
+    requireText(payload, "email", issues);
+    validateEmail(payload.get("email"), "email", issues);
     validateLocale(payload.get("locale"), "locale", issues);
     maxLength(payload, "name", 120, issues);
     maxLength(payload, "contact", 180, issues);
+    maxLength(payload, "email", 254, issues);
     maxLength(payload, "organization", 160, issues);
     maxLength(payload, "type", 160, issues);
     maxLength(payload, "message", 3000, issues);
@@ -222,6 +227,13 @@ public class RequestValidation {
   private void validateLocale(Object value, String path, List<Map<String, String>> issues) {
     if (!LOCALES.contains(stringValue(value))) {
       issues.add(issue(path, "Expected locale to be ko or en."));
+    }
+  }
+
+  private void validateEmail(Object value, String path, List<Map<String, String>> issues) {
+    var email = stringValue(value);
+    if (!email.isBlank() && !EMAIL_PATTERN.matcher(email).matches()) {
+      issues.add(issue(path, "Expected a valid email address."));
     }
   }
 

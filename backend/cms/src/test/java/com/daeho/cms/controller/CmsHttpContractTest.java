@@ -341,7 +341,7 @@ class CmsHttpContractTest {
 
     mvc.perform(post("/api/inquiries/contact")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("{\"locale\":\"ko\",\"name\":\"Tester\",\"contact\":\"tester@example.com\",\"message\":\"Hello\"}"))
+            .content("{\"locale\":\"ko\",\"name\":\"Tester\",\"contact\":\"tester@example.com\",\"email\":\"tester@example.com\",\"message\":\"Hello\"}"))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.inquiry.id").value("inquiry-1"))
         .andExpect(jsonPath("$.email.status").value("skipped"));

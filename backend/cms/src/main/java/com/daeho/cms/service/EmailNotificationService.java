@@ -89,6 +89,7 @@ public class EmailNotificationService {
         "Locale: " + inquiry.get("locale"),
         "Name: " + inquiry.get("name"),
         "Contact: " + inquiry.get("contact"),
+        "Email: " + inquiry.get("email"),
         "Organization: " + inquiry.get("organization"),
         "Type: " + inquiry.get("inquiryType"),
         "Team: " + inquiry.get("team"),

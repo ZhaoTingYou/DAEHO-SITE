@@ -1634,6 +1634,7 @@
       "name": "Name",
       "organization": "Company / Team",
       "contact": "Contact",
+      "email": "Email",
       "type": "Inquiry type",
       "message": "Message",
       "submit": "Send inquiry",

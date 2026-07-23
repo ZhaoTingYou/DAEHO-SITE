@@ -310,6 +310,7 @@ public class CmsRepository {
         Map.entry("locale", validation.stringValue(payload.get("locale"))),
         Map.entry("name", validation.stringValue(payload.get("name"))),
         Map.entry("contact", validation.stringValue(payload.get("contact"))),
+        Map.entry("email", validation.stringValue(payload.get("email"))),
         Map.entry("organization", validation.stringValue(payload.get("organization"))),
         Map.entry("inquiryType", validation.stringValue(payload.get("type"))),
         Map.entry("team", ""),
@@ -331,6 +332,7 @@ public class CmsRepository {
     values.put("locale", validation.stringValue(payload.get("locale")));
     values.put("name", validation.stringValue(payload.get("name")));
     values.put("contact", validation.stringValue(payload.get("contact")));
+    values.put("email", "");
     values.put("organization", "");
     values.put("inquiryType", "");
     values.put("team", validation.stringValue(payload.get("team")));
@@ -545,16 +547,17 @@ public class CmsRepository {
     var id = UUID.randomUUID().toString();
     jdbc.update("""
         INSERT INTO cms_inquiries (
-          id, source, status, locale, name, contact, organization, inquiry_type,
+          id, source, status, locale, name, contact, email, organization, inquiry_type,
           team, quantity, due_date, use_case, message, configuration_json,
           page_path, user_agent, ip_address, created_at, updated_at
-        ) VALUES (?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+        ) VALUES (?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
         """,
         id,
         payload.get("source"),
         payload.get("locale"),
         payload.get("name"),
         payload.get("contact"),
+        payload.get("email"),
         payload.get("organization"),
         payload.get("inquiryType"),
         payload.get("team"),
@@ -890,6 +893,7 @@ public class CmsRepository {
         "locale", rs.getString("locale"),
         "name", rs.getString("name"),
         "contact", rs.getString("contact"),
+        "email", rs.getString("email"),
         "organization", rs.getString("organization"),
         "inquiryType", rs.getString("inquiry_type"),
         "team", rs.getString("team"),
