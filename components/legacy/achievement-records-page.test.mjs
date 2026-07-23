@@ -9,6 +9,7 @@ const pentagonSource = readFileSync(new URL('./achievement-pentagon-stats.tsx', 
 const renderSource = `${source}\n${cardSource}`;
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
 const mobileCssSource = readFileSync(new URL('../../styles/mobile.css', import.meta.url), 'utf8');
+const localeMessagesSource = readFileSync(new URL('../../lib/locale-messages.ts', import.meta.url), 'utf8');
 const localeMessages = Object.fromEntries(
   ['ko', 'en'].map((locale) => [
     locale,
@@ -61,14 +62,16 @@ test('achievement runtime locale messages have four localized titled fallback re
   ]);
 });
 
-test('achievement component uses the exact static locale records as its empty-or-invalid CMS fallback', () => {
-  assert.ok(source.includes("import enMessages from '@/messages/en.json';"), 'English static messages should be an explicit fallback source');
-  assert.ok(source.includes("import koMessages from '@/messages/ko.json';"), 'Korean static messages should be an explicit fallback source');
-  assert.ok(source.includes('ko: koMessages.legacyPages.achievement.copy.firstRecords'), 'Korean fallback records should come from the static locale messages');
-  assert.ok(source.includes('en: enMessages.legacyPages.achievement.copy.firstRecords'), 'English fallback records should come from the static locale messages');
-  assert.ok(source.includes('normalizeFirstRecords(staticFirstRecordsByLocale[locale])'), 'empty or image-invalid configured arrays should use normalized exact locale records');
-  assert.ok(!source.includes('fallbackFirstRecordImages'), 'the component should not duplicate a separate fallback image/title list');
-  assert.ok(!source.includes('titlePrefix'), 'the component should not replace exact localized titles with generated generic copy');
+test('achievement exact static fallback is normalized at the locale-message boundary, not in the component', () => {
+  assert.ok(!source.includes("@/messages/en.json"), 'the page component should not import English messages directly');
+  assert.ok(!source.includes("@/messages/ko.json"), 'the page component should not import Korean messages directly');
+  assert.ok(!source.includes('staticFirstRecordsByLocale'), 'the page component should not own a locale fallback map');
+  assert.match(localeMessagesSource, /normalizeAchievementFirstRecordsFallback/);
+  assert.match(
+    localeMessagesSource,
+    /const messages = normalizeMasteryNavigationCopy[\s\S]*?normalizeAchievementFirstRecordsFallback\(messages, staticMessages\);[\s\S]*?return normalizePublicPageVisibility\(messages\);/,
+    'locale messages should restore exact static records after CMS/navigation normalization and before returning'
+  );
   assert.doesNotMatch(source, /title: '국내 최초 이니셜 조각 적용'|title: 'First domestic application of initial engraving'/);
   assert.doesNotMatch(source, /backTitle|hoverText/);
 });
@@ -111,8 +114,9 @@ test('achievement mobile styles do not override the gallery gap or impose an asp
 
 test('achievement first record normalization prefers frontTitle, falls back to title, and never fills configured records from fallback images', () => {
   assert.ok(source.includes("title: record.frontTitle?.trim() || record.title?.trim() || ''"), 'legacy frontTitle should be displayed before the trimmed title compatibility fallback');
+  assert.ok(source.includes("image: record.image?.trim() || ''"), 'image values should be trimmed before blank records are filtered');
   assert.ok(!source.includes('fallbackRecords[index]?.image'), 'configured records should not receive synthesized fallback images');
-  assert.ok(source.includes('firstRecords: firstRecords.length > 0 ? firstRecords : fallbackFirstRecords'), 'the complete safety fallback list should only be used when no configured records are valid');
+  assert.ok(source.includes('firstRecords,'), 'the component should render only the normalized locale-boundary records');
 });
 
 test('achievement mobile stat section hides the pentagon diagram', () => {

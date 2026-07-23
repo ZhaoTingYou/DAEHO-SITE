@@ -9,6 +9,7 @@ import {
   setObjectValueAtPath
 } from '@/lib/cms/page-catalog';
 import {listPages} from '@/lib/cms/repositories';
+import {normalizeAchievementFirstRecordsFallback} from '@/lib/achievement-first-records-core';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {normalizeTechniquePageVisibility} from '@/lib/public-page-visibility-core';
@@ -30,6 +31,7 @@ export async function getLocaleMessages(locale: Locale): Promise<LocaleMessages>
     await applyCmsPageOverrides(baseMessages, locale),
     staticMessages
   );
+  normalizeAchievementFirstRecordsFallback(messages, staticMessages);
 
   return normalizePublicPageVisibility(messages);
 }

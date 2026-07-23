@@ -11,8 +11,6 @@ import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {imageSrc} from '@/lib/image-src';
 import {withLocale} from '@/lib/site-map';
-import enMessages from '@/messages/en.json';
-import koMessages from '@/messages/ko.json';
 
 type AchievementContent = {
   hero: {
@@ -76,11 +74,6 @@ type AchievementPageCopy = {
   firstRecords: FirstRecord[];
   marketFeatures: MarketFeature[];
 };
-
-const staticFirstRecordsByLocale = {
-  ko: koMessages.legacyPages.achievement.copy.firstRecords,
-  en: enMessages.legacyPages.achievement.copy.firstRecords
-} satisfies Record<Locale, FirstRecordInput[]>;
 
 const defaultPageCopy = {
   ko: {
@@ -235,7 +228,6 @@ function resolveAchievementCopy(locale: Locale, content: AchievementContent): Ac
   const fallback = defaultPageCopy[locale];
   const copy = content.copy ?? {};
   const firstRecords = normalizeFirstRecords(copy.firstRecords);
-  const fallbackFirstRecords = normalizeFirstRecords(staticFirstRecordsByLocale[locale]);
   const marketFeatures = normalizeMarketFeatures(copy.marketFeatures);
 
   return {
@@ -243,7 +235,7 @@ function resolveAchievementCopy(locale: Locale, content: AchievementContent): Ac
     ...copy,
     introLines: copy.introLines?.length ? copy.introLines : fallback.introLines,
     statBand: copy.statBand?.length ? copy.statBand : fallback.statBand,
-    firstRecords: firstRecords.length > 0 ? firstRecords : fallbackFirstRecords,
+    firstRecords,
     marketFeatures: marketFeatures.length > 0 ? marketFeatures : fallback.marketFeatures
   };
 }
@@ -256,7 +248,7 @@ function normalizeFirstRecords(records: FirstRecordInput[] | undefined): FirstRe
   return records
     .map((record) => ({
       title: record.frontTitle?.trim() || record.title?.trim() || '',
-      image: record.image || ''
+      image: record.image?.trim() || ''
     }))
     .filter((record) => record.image);
 }
