@@ -40,16 +40,19 @@ test('Docker build receives the public GA4 measurement ID', () => {
   assert.match(read('.env.example'), /NEXT_PUBLIC_GA_MEASUREMENT_ID=G-FXQGWE9XZ0/);
 });
 
-test('internal analytics mounts only after consent and clears its anonymous session on withdrawal', () => {
+test('internal analytics clears denied consent on hydration and mounts independently of GA readiness', () => {
   const provider = read('components/analytics/analytics-provider.tsx');
 
   assert.match(provider, /<InternalAnalyticsTracker enabled=/);
   assert.match(provider, /clearInternalAnalyticsSession/);
-  assert.match(provider, /enabled=\{analyticsReady && consent === 'granted'\}/);
+  assert.match(provider, /if \(storedConsent === 'denied'\) \{\s+clearInternalAnalyticsSession\(\);\s+\}/);
+  assert.match(provider, /<AnalyticsPageView enabled=\{analyticsReady && consent === 'granted'\}/);
+  assert.match(provider, /enabled=\{consent === 'granted'\}/);
   assert.match(
     provider,
-    /analyticsReady && consent === 'granted' \? \(\s*<InternalAnalyticsTracker enabled=\{analyticsReady && consent === 'granted'\}/
+    /consent === 'granted' && validMeasurementId \? \(\s*<InternalAnalyticsTracker enabled=\{consent === 'granted'\}/
   );
+  assert.doesNotMatch(provider, /<InternalAnalyticsTracker enabled=\{[^}]*analyticsReady/);
 });
 
 test('internal analytics tracker sends one consented, anonymous route payload through the same-origin proxy', () => {
@@ -58,6 +61,8 @@ test('internal analytics tracker sends one consented, anonymous route payload th
 
   assert.match(tracker, /crypto\.randomUUID/);
   assert.match(tracker, /INTERNAL_ANALYTICS_SESSION_TIMEOUT_MS/);
+  assert.match(tracker, /sanitizeInternalAnalyticsPath/);
+  assert.doesNotMatch(tracker, /sanitizeAnalyticsUrl/);
   assert.match(tracker, /\/api\/cms\/analytics\/page-view/);
   assert.match(tracker, /lastPageKey/);
   assert.match(tracker, /keepalive:\s*true/);

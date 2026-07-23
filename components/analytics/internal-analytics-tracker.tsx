@@ -3,13 +3,13 @@
 import {usePathname, useSearchParams} from 'next/navigation';
 import {useEffect, useRef} from 'react';
 
-import {sanitizeAnalyticsUrl} from '@/lib/analytics-core.mjs';
 import {
   classifyDevice,
   classifyTrafficSource,
   INTERNAL_ANALYTICS_SESSION_TIMEOUT_MS,
   INTERNAL_ANALYTICS_STORAGE_KEY,
   resolveSessionState,
+  sanitizeInternalAnalyticsPath,
   sanitizeReferrerHost,
   type TrafficAttribution
 } from '@/lib/internal-analytics-core.mjs';
@@ -39,7 +39,7 @@ export function InternalAnalyticsTracker({enabled, locale}: InternalAnalyticsTra
     }
 
     const currentUrl = `${window.location.origin}${pathname}${search ? `?${search}` : ''}`;
-    const {pagePath} = sanitizeAnalyticsUrl(currentUrl);
+    const pagePath = sanitizeInternalAnalyticsPath(currentUrl);
     const pageKey = `${pagePath}|${document.title}`;
     if (lastPageKey.current === pageKey) {
       return;
@@ -60,7 +60,7 @@ export function InternalAnalyticsTracker({enabled, locale}: InternalAnalyticsTra
           landingPath: storedSession.landingPath,
           referrerHost: storedSession.referrerHost
         }
-      : createSession(resolution.sessionId, resolution.lastActivityAt, currentUrl, pagePath);
+      : createSession(resolution.sessionId, resolution.lastActivityAt, pagePath);
 
     writeStoredSession(session);
 
@@ -94,8 +94,8 @@ export function clearInternalAnalyticsSession() {
   }
 }
 
-function createSession(sessionId: string, lastActivityAt: number, currentUrl: string, landingPath: string): StoredInternalAnalyticsSession {
-  const url = new URL(currentUrl);
+function createSession(sessionId: string, lastActivityAt: number, landingPath: string): StoredInternalAnalyticsSession {
+  const url = new URL(landingPath, window.location.origin);
   const referrerHost = sanitizeReferrerHost(document.referrer, window.location.origin);
 
   return {

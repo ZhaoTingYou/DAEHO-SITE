@@ -44,6 +44,7 @@ declare module '@/lib/internal-analytics-core.mjs' {
   export const INTERNAL_ANALYTICS_STORAGE_KEY: string;
   export const INTERNAL_ANALYTICS_SESSION_TIMEOUT_MS: number;
 
+  export function sanitizeInternalAnalyticsPath(input: string | URL): string;
   export function classifyTrafficSource(input?: TrafficAttributionInput): TrafficAttribution;
   export function sanitizeReferrerHost(referrer: string, siteOrigin: string): string;
   export function classifyDevice(viewportWidth: number, userAgentDataMobile: boolean): TrafficDevice;

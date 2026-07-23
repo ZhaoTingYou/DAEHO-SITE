@@ -51,11 +51,15 @@ export function AnalyticsProvider({children, locale}: AnalyticsProviderProps) {
   const [analyticsReady, setAnalyticsReady] = useState(false);
 
   useEffect(() => {
+    const storedConsent = parseAnalyticsConsent(document.cookie);
+    if (storedConsent === 'denied') {
+      clearInternalAnalyticsSession();
+    }
+
     if (!validMeasurementId) {
       return;
     }
 
-    const storedConsent = parseAnalyticsConsent(document.cookie);
     let active = true;
     if (storedConsent === 'granted') {
       initializeGoogleAnalytics(measurementId);
@@ -139,8 +143,8 @@ export function AnalyticsProvider({children, locale}: AnalyticsProviderProps) {
       ) : null}
       <Suspense fallback={null}>
         <AnalyticsPageView enabled={analyticsReady && consent === 'granted'} />
-        {analyticsReady && consent === 'granted' ? (
-          <InternalAnalyticsTracker enabled={analyticsReady && consent === 'granted'} locale={locale} />
+        {consent === 'granted' && validMeasurementId ? (
+          <InternalAnalyticsTracker enabled={consent === 'granted'} locale={locale} />
         ) : null}
       </Suspense>
       {bannerOpen && validMeasurementId ? (
