@@ -111,6 +111,68 @@ export type CmsEmailEvent = {
   createdAt: string;
 };
 
+export const trafficAnalyticsChannels = [
+  'google',
+  'naver',
+  'instagram',
+  'kakao',
+  'qr',
+  'social',
+  'referral',
+  'direct',
+  'other'
+] as const;
+
+export type TrafficAnalyticsChannel = (typeof trafficAnalyticsChannels)[number];
+
+export type TrafficAnalyticsFilters = {
+  from: string;
+  to: string;
+  channel?: TrafficAnalyticsChannel;
+  page?: number;
+  pageSize?: 25 | 50 | 100;
+};
+
+export type TrafficAnalyticsSummary = {
+  totals: {
+    sessions: number;
+    pageViews: number;
+    activeSessions: number;
+    averagePagesPerSession: number;
+  };
+  daily: Array<{date: string; sessions: number; pageViews: number}>;
+  channels: Array<{
+    channel: string;
+    source: string;
+    medium: string;
+    sessions: number;
+    pageViews: number;
+    share: number;
+  }>;
+  landingPages: Array<{path: string; sessions: number; leadingChannel: string}>;
+};
+
+export type TrafficAnalyticsVisit = {
+  channel: string;
+  source: string;
+  medium: string;
+  landingPath: string;
+  latestPath: string;
+  locale: string;
+  deviceClass: string;
+  pageViewCount: number;
+  startedAt: string;
+  lastActivityAt: string;
+};
+
+export type TrafficAnalyticsVisits = {
+  items: TrafficAnalyticsVisit[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
 type RequestMeta = {
   userAgent: string;
   ipAddress: string;
@@ -139,6 +201,14 @@ export function getCmsBackendBaseUrl() {
 
 export async function cmsBackendRequest<T>(path: string, options: CmsFetchOptions = {}) {
   return cmsFetch<T>(path, options);
+}
+
+export async function getTrafficAnalyticsSummary(filters: TrafficAnalyticsFilters) {
+  return cmsFetch<TrafficAnalyticsSummary>(`/api/admin/analytics/summary${trafficAnalyticsQuery(filters)}`, {admin: true});
+}
+
+export async function listTrafficAnalyticsVisits(filters: TrafficAnalyticsFilters) {
+  return cmsFetch<TrafficAnalyticsVisits>(`/api/admin/analytics/visits${trafficAnalyticsQuery(filters, true)}`, {admin: true});
 }
 
 export async function listPages() {
@@ -506,6 +576,25 @@ function requestMetaHeaders(requestMeta: RequestMeta) {
     headers.set('x-forwarded-for', requestMeta.ipAddress);
   }
   return headers;
+}
+
+function trafficAnalyticsQuery(filters: TrafficAnalyticsFilters, includePagination = false) {
+  const params = new URLSearchParams({from: filters.from, to: filters.to});
+
+  if (filters.channel) {
+    params.set('channel', filters.channel);
+  }
+
+  if (includePagination) {
+    if (filters.page) {
+      params.set('page', String(filters.page));
+    }
+    if (filters.pageSize) {
+      params.set('pageSize', String(filters.pageSize));
+    }
+  }
+
+  return `?${params.toString()}`;
 }
 
 async function readStaticSnapshotValue<T>(

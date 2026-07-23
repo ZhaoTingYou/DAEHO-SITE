@@ -14,6 +14,7 @@ const navItems = [
   {href: '/admin/footer', labelKey: 'nav.footer'},
   {href: '/admin/pages', labelKey: 'nav.pages'},
   {href: '/admin/export', labelKey: 'nav.export'},
+  {href: '/admin/analytics', labelKey: 'nav.analytics'},
   {href: '/admin/account', labelKey: 'nav.account'}
 ];
 
