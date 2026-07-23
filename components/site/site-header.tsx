@@ -7,9 +7,9 @@ import {usePathname} from 'next/navigation';
 import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import {getVisibleExternalSites} from '@/lib/cms/external-sites-core.mjs';
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
-import {externalLinks} from '@/lib/config';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isActivePath, navItems, withLocale} from '@/lib/site-map';
 
@@ -46,12 +46,12 @@ const instantItemVariants = {
   visible: {opacity: 1, y: 0}
 };
 
-const showExternalHeaderLinks = false;
-
 export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
   const navText = useTranslations('common.navigation');
   const footerText = useTranslations('common.footer');
-  const externalText = useTranslations('common.footer.externalSites');
+  const visibleExternalSites = getVisibleExternalSites(
+    footerText.raw('externalSites.items')
+  );
   const pathname = usePathname();
   const prefersReducedMotion = usePrefersReducedMotion();
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -508,12 +508,17 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
 
             <span className="h-3 w-px bg-current opacity-25" aria-hidden="true" />
 
-            {showExternalHeaderLinks ? (
+            {visibleExternalSites.length > 0 ? (
               <>
                 <div className="flex items-center gap-4">
-                  <ExternalSiteLink label={externalText('daeho')} href={externalLinks.daeho} className="site-nav-link no-underline" />
-                  <ExternalSiteLink label={externalText('oh')} href={externalLinks.oh} className="site-nav-link no-underline" />
-                  <ExternalSiteLink label={externalText('vulcan')} href={externalLinks.vulcan} className="site-nav-link no-underline" />
+                  {visibleExternalSites.map((item) => (
+                    <ExternalSiteLink
+                      key={item.id}
+                      label={item.label}
+                      href={item.href}
+                      className="site-nav-link no-underline"
+                    />
+                  ))}
                 </div>
 
                 <span className="h-3 w-px bg-current opacity-25" aria-hidden="true" />
@@ -774,15 +779,20 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
               <span className="consult-cta__label">{contactLabel}</span>
             </Link>
 
-            {showExternalHeaderLinks ? (
+            {visibleExternalSites.length > 0 ? (
               <div className="mt-12 border-t border-hairline pt-8">
                 <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-subtext">
                   {footerText('otherSites')}
                 </p>
                 <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-primary">
-                  <ExternalSiteLink label={externalText('daeho')} href={externalLinks.daeho} className="site-nav-link no-underline" />
-                  <ExternalSiteLink label={externalText('oh')} href={externalLinks.oh} className="site-nav-link no-underline" />
-                  <ExternalSiteLink label={externalText('vulcan')} href={externalLinks.vulcan} className="site-nav-link no-underline" />
+                  {visibleExternalSites.map((item) => (
+                    <ExternalSiteLink
+                      key={item.id}
+                      label={item.label}
+                      href={item.href}
+                      className="site-nav-link no-underline"
+                    />
+                  ))}
                 </div>
               </div>
             ) : null}
