@@ -39,6 +39,8 @@ type AchievementRecordsPageProps = {
 
 type FirstRecord = AchievementFirstRecord;
 
+const MAX_ARCHIVE_IMAGES = 20;
+
 type FirstRecordInput = Partial<FirstRecord> & {
   frontTitle?: string;
 };
@@ -280,7 +282,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const koreanTextClass = "[font-family:'MaruBuri',serif] font-semibold";
   const bodyTextClass = locale === 'ko' ? koreanTextClass : englishTextClass;
-  const archiveImages = (content.gallery?.items.map((item) => item.image).filter(Boolean) ?? []).slice(0, 7);
+  const archiveImages = (content.gallery?.items.map((item) => item.image).filter(Boolean) ?? []).slice(0, MAX_ARCHIVE_IMAGES);
   const loopedArchiveImages = archiveImages.length > 1
     ? [...archiveImages, ...archiveImages]
     : archiveImages;

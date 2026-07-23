@@ -634,6 +634,7 @@ export function AppendableArrayItemsField({
   locale,
   groupKey,
   itemFields,
+  maxItems,
   mediaItems,
   title,
   hint,
@@ -656,6 +657,7 @@ export function AppendableArrayItemsField({
   locale: string;
   groupKey: string;
   itemFields: PageArrayItemFieldDefinition[];
+  maxItems?: number;
   mediaItems: MediaLibraryItem[];
   title: string;
   hint: string;
@@ -674,9 +676,16 @@ export function AppendableArrayItemsField({
   mediaSelectedLabel: string;
 }) {
   const [rows, setRows] = useState([0]);
+  const canAddRow = maxItems === undefined || startIndex + rows.length < maxItems;
 
   const addRow = () => {
-    setRows((current) => [...current, Math.max(...current) + 1]);
+    setRows((current) => {
+      if (maxItems !== undefined && startIndex + current.length >= maxItems) {
+        return current;
+      }
+
+      return [...current, Math.max(...current) + 1];
+    });
   };
 
   const removeRow = (row: number) => {
@@ -697,7 +706,8 @@ export function AppendableArrayItemsField({
         <button
           type="button"
           onClick={addRow}
-          className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054] transition hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]"
+          disabled={!canAddRow}
+          className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054] transition hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230] disabled:cursor-not-allowed disabled:bg-[#f2f4f7] disabled:text-[#98a2b3]"
         >
           {addButtonLabel}
         </button>

@@ -351,6 +351,7 @@ function ContentGroupEditor({
                 fieldType={field.type}
                 editorFont={field.editor?.font}
                 editorAlign={field.editor?.align}
+                maxItems={field.maxItems}
               />
             ))
           : entries.map(([key, value]) => (
@@ -373,7 +374,8 @@ function EditableNode({
   rows,
   editorFont,
   editorAlign,
-  fieldType
+  fieldType,
+  maxItems
 }: {
   path: string;
   label: string;
@@ -387,6 +389,7 @@ function EditableNode({
   editorFont?: PageFieldEditorSettings['font'];
   editorAlign?: PageFieldEditorSettings['align'];
   fieldType?: PageFieldType;
+  maxItems?: number;
 }) {
   if (hiddenKeys.has(lastPathSegment(path))) {
     return <input type="hidden" name={contentFieldName(context.locale, context.groupKey, path)} value={stringValue(value)} />;
@@ -403,6 +406,7 @@ function EditableNode({
         itemFields={itemFields}
         editorFont={editorFont}
         editorAlign={editorAlign}
+        maxItems={maxItems}
       />
     );
   }
@@ -495,7 +499,8 @@ function EditableArray({
   depth,
   itemFields,
   editorFont,
-  editorAlign
+  editorAlign,
+  maxItems
 }: {
   path: string;
   label: string;
@@ -505,14 +510,15 @@ function EditableArray({
   itemFields?: PageArrayItemFieldDefinition[];
   editorFont?: PageFieldEditorSettings['font'];
   editorAlign?: PageFieldEditorSettings['align'];
+  maxItems?: number;
 }) {
   if (value.length === 0) {
     return (
       <section className="grid min-w-0 w-full max-w-full gap-4 rounded-md border border-[#e4e7ec] bg-white p-4">
         <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{label}</h3>
         <p className="mt-2 text-sm text-[#98a2b3]">{createAdminTranslator(context.messages)('page.emptySection')}</p>
-        {itemFields?.length ? (
-          <AppendArrayItems path={path} startIndex={0} context={context} itemFields={itemFields} />
+        {itemFields?.length && (maxItems === undefined || maxItems > 0) ? (
+          <AppendArrayItems path={path} startIndex={0} context={context} itemFields={itemFields} maxItems={maxItems} />
         ) : null}
       </section>
     );
@@ -553,8 +559,14 @@ function EditableArray({
           </div>
         ))}
       </div>
-      {itemFields?.length ? (
-        <AppendArrayItems path={path} startIndex={value.length} context={context} itemFields={itemFields} />
+      {itemFields?.length && (maxItems === undefined || value.length < maxItems) ? (
+        <AppendArrayItems
+          path={path}
+          startIndex={value.length}
+          context={context}
+          itemFields={itemFields}
+          maxItems={maxItems}
+        />
       ) : null}
     </section>
   );
@@ -666,12 +678,14 @@ function AppendArrayItems({
   path,
   startIndex,
   context,
-  itemFields
+  itemFields,
+  maxItems
 }: {
   path: string;
   startIndex: number;
   context: RenderContext;
   itemFields: PageArrayItemFieldDefinition[];
+  maxItems?: number;
 }) {
   const t = createAdminTranslator(context.messages);
 
@@ -682,6 +696,7 @@ function AppendArrayItems({
       locale={context.locale}
       groupKey={context.groupKey}
       itemFields={itemFields}
+      maxItems={maxItems}
       mediaItems={context.mediaItems}
       imageGuides={Object.fromEntries(
         itemFields
@@ -697,7 +712,7 @@ function AppendArrayItems({
           ])
       )}
       title={appendItemTitle(context.adminLocale)}
-      hint={appendItemHint(context.adminLocale)}
+      hint={appendItemHint(context.adminLocale, maxItems)}
       addButtonLabel={appendItemButtonLabel(context.adminLocale)}
       removeButtonLabel={removeItemButtonLabel(context.adminLocale)}
       uploadLabel={t('page.uploadLocalImage')}
@@ -1012,16 +1027,24 @@ function appendItemTitle(adminLocale: AdminLocale) {
   return '添加项目';
 }
 
-function appendItemHint(adminLocale: AdminLocale) {
+function appendItemHint(adminLocale: AdminLocale, maxItems?: number) {
+  const limit = maxItems
+    ? adminLocale === 'ko'
+      ? `최대 ${maxItems}개까지 저장할 수 있습니다. `
+      : adminLocale === 'en'
+        ? `You can save up to ${maxItems} items. `
+        : `最多可保存 ${maxItems} 个。`
+    : '';
+
   if (adminLocale === 'ko') {
-    return '비워 두면 저장되지 않습니다.';
+    return `${limit}비워 두면 저장되지 않습니다.`;
   }
 
   if (adminLocale === 'en') {
-    return 'Leave empty to skip adding a new item.';
+    return `${limit}Leave empty to skip adding a new item.`;
   }
 
-  return '留空则不会新增。';
+  return `${limit}留空则不会新增。`;
 }
 
 function appendItemButtonLabel(adminLocale: AdminLocale) {

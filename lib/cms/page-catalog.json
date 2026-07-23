@@ -230,6 +230,7 @@
         "path": "gallery.items",
         "label": "项目 Archive 图片",
         "type": "json",
+        "maxItems": 20,
         "itemFields": [
           {"path": "title", "label": "标题"},
           {"path": "image", "label": "图片", "type": "image"}

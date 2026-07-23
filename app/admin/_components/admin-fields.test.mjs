@@ -99,9 +99,21 @@ test('media library selection stores remote object URLs when media lives in obje
 
 test('appendable CMS arrays expose a client-side add button for multiple new image cards', () => {
   assert.match(source, /export function AppendableArrayItemsField/);
-  assert.match(source, /setRows\(\(current\) => \[\.\.\.current,/);
+  assert.match(source, /return \[\.\.\.current, Math\.max\(\.\.\.current\) \+ 1\]/);
   assert.match(source, /type="button"[\s\S]*\{addButtonLabel\}/);
   assert.match(source, /contentImageFieldName\(locale, groupKey, fieldPath\)/);
+});
+
+test('appendable CMS arrays honor field-specific maximum item counts', () => {
+  const achievementPage = pageCatalog.find((page) => page.pageKey === 'heritage-achievement');
+  const archiveField = achievementPage?.fields.find((field) => field.path === 'gallery.items');
+
+  assert.equal(archiveField?.maxItems, 20);
+  assert.match(pageCatalogSource, /maxItems\?: number/);
+  assert.match(pageEditorSource, /maxItems=\{field\.maxItems\}/);
+  assert.match(editableArraySource, /maxItems === undefined \|\| value\.length < maxItems/);
+  assert.match(appendableArraySource, /const canAddRow = maxItems === undefined \|\| startIndex \+ rows\.length < maxItems/);
+  assert.match(appendableArraySource, /disabled=\{!canAddRow\}/);
 });
 
 test('text editors expose only approved brand fonts and alignment controls', () => {

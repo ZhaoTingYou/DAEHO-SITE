@@ -34,6 +34,7 @@ export type PageFieldDefinition = {
   rows?: number;
   placeholder?: string;
   itemFields?: PageArrayItemFieldDefinition[];
+  maxItems?: number;
   options?: PageFieldOption[];
   editor?: PageFieldEditorSettings;
 };

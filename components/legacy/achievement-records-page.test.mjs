@@ -127,6 +127,16 @@ test('achievement FIRST RECORDS CMS images use a dedicated 16:9 guide', () => {
   );
 });
 
+test('achievement project archive displays up to twenty CMS images', () => {
+  assert.match(source, /const MAX_ARCHIVE_IMAGES = 20;/, 'project archive should declare a twenty-image limit');
+  assert.match(
+    source,
+    /\.slice\(0, MAX_ARCHIVE_IMAGES\)/,
+    'project archive should retain all configured images up to the twenty-image limit'
+  );
+  assert.doesNotMatch(source, /\.slice\(0, 7\)/, 'project archive should not keep the previous seven-image limit');
+});
+
 test('achievement mobile styles do not override the gallery gap or impose an aspect ratio on title-plus-image cards', () => {
   assert.match(
     mobileCssSource,
