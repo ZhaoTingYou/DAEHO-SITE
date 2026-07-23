@@ -106,7 +106,11 @@ test('header external sites use bordered destination buttons without changing fo
   );
   assert.match(
     globalStyles,
-    /\.site-header-external-link\s*\{[\s\S]*?min-height:\s*44px;[\s\S]*?border:\s*1px solid var\(--external-link-border\);[\s\S]*?border-radius:\s*4px;[\s\S]*?font-weight:\s*500;/
+    /\.site-header-external-link\s*\{[\s\S]*?min-height:\s*44px;[\s\S]*?isolation:\s*isolate;[\s\S]*?font-weight:\s*500;/
+  );
+  assert.match(
+    globalStyles,
+    /\.site-header-external-link::before\s*\{[\s\S]*?inset:\s*4px 0;[\s\S]*?border:\s*1px solid var\(--external-link-border\);[\s\S]*?border-radius:\s*4px;/
   );
   assert.match(
     globalStyles,

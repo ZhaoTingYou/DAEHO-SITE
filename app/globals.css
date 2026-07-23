@@ -1254,10 +1254,9 @@ select {
   justify-content: center;
   gap: 9px;
   padding: 0 15px;
-  border: 1px solid var(--external-link-border);
-  border-radius: 4px;
+  isolation: isolate;
   color: var(--external-link-fg);
-  background: var(--external-link-bg);
+  background: transparent;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
@@ -1267,9 +1266,20 @@ select {
   white-space: nowrap;
   transition:
     color var(--dur-hover) var(--ease),
-    background-color var(--dur-hover) var(--ease),
-    border-color var(--dur-hover) var(--ease),
     transform var(--dur-hover) var(--ease);
+}
+
+.site-header-external-link::before {
+  position: absolute;
+  z-index: -1;
+  inset: 4px 0;
+  content: "";
+  border: 1px solid var(--external-link-border);
+  border-radius: 4px;
+  background: var(--external-link-bg);
+  transition:
+    background-color var(--dur-hover) var(--ease),
+    border-color var(--dur-hover) var(--ease);
 }
 
 .site-header-external-link--light {
