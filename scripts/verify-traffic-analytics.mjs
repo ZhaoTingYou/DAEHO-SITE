@@ -78,6 +78,7 @@ async function verifyPublicAnalytics(browser, config, checks) {
   const consoleErrors = collectConsoleErrors(page, {ignoreLocalImageOptimizerErrors: isLocalVerification(config.baseUrl)});
   const internalRequests = [];
   const gaTagRequests = [];
+  const gaPageViewRequests = [];
 
   page.on('request', (request) => {
     if (isInternalPageViewRequest(request)) {
@@ -85,6 +86,9 @@ async function verifyPublicAnalytics(browser, config, checks) {
     }
     if (isGoogleAnalyticsTagRequest(request)) {
       gaTagRequests.push(request);
+    }
+    if (isGoogleAnalyticsPageViewRequest(request)) {
+      gaPageViewRequests.push(request);
     }
   });
 
@@ -105,22 +109,29 @@ async function verifyPublicAnalytics(browser, config, checks) {
 
     verificationStage = 'consent activation';
     const internalResponse = page.waitForResponse(isInternalPageViewResponse, {timeout: REQUEST_TIMEOUT_MS});
-    const gaCollectRequest = page.waitForRequest(isGoogleAnalyticsCollectRequest, {timeout: REQUEST_TIMEOUT_MS});
+    const gaPageViewRequest = page.waitForRequest(isGoogleAnalyticsPageViewRequest, {timeout: REQUEST_TIMEOUT_MS});
     await page.getByRole('button', {name: /allow analytics|분석 허용/i}).click();
-    const [recordResponse] = await Promise.all([internalResponse, gaCollectRequest]);
+    const [recordResponse] = await Promise.all([internalResponse, gaPageViewRequest]);
     assert.ok([200, 202].includes(recordResponse.status()), 'Initial internal page view must be accepted.');
     await page.waitForTimeout(QUIET_PERIOD_MS);
 
     assert.equal(internalRequests.length, 1, 'Accepting consent must send exactly one initial internal page view.');
+    assert.equal(gaPageViewRequests.length, 1, 'Accepting consent must send exactly one initial GA page view.');
     await waitForAnalyticsCookie(context);
-    checks.push('consent sends one accepted internal page view, one GA collect request, and creates an analytics cookie');
+    checks.push('consent sends one accepted internal page view, one GA page view, and creates an analytics cookie');
 
     verificationStage = 'client-side route page view';
     const initialRequestCount = internalRequests.length;
+    const initialGaPageViewCount = gaPageViewRequests.length;
     const secondInternalResponse = page.waitForResponse(isInternalPageViewResponse, {timeout: REQUEST_TIMEOUT_MS});
+    const secondGaPageViewRequest = page.waitForRequest(isGoogleAnalyticsPageViewRequest, {timeout: REQUEST_TIMEOUT_MS});
     const routeNavigation = page.waitForURL(config.secondRouteUrl.href, {timeout: REQUEST_TIMEOUT_MS});
     await page.getByRole('link', {name: /privacy policy|개인정보처리방침/i}).last().click();
-    const [secondRecordResponse] = await Promise.all([secondInternalResponse, routeNavigation]);
+    const [secondRecordResponse] = await Promise.all([
+      secondInternalResponse,
+      routeNavigation,
+      secondGaPageViewRequest
+    ]);
     assert.ok([200, 202].includes(secondRecordResponse.status()), 'Second internal page view must be accepted.');
     await page.waitForTimeout(QUIET_PERIOD_MS);
 
@@ -129,7 +140,12 @@ async function verifyPublicAnalytics(browser, config, checks) {
       1,
       'Navigating to the second route must send exactly one additional internal page view.'
     );
-    checks.push('second route adds exactly one internal page view');
+    assert.equal(
+      gaPageViewRequests.length - initialGaPageViewCount,
+      1,
+      'Navigating to the second route must send exactly one additional GA page view.'
+    );
+    checks.push('second route adds exactly one internal and one GA page view');
 
     verificationStage = 'duplicate page-view replay';
     const replayResponse = await page.request.post(
@@ -268,6 +284,16 @@ function isGoogleAnalyticsTagRequest(request) {
 function isGoogleAnalyticsCollectRequest(request) {
   const url = new URL(request.url());
   return url.hostname.endsWith('google-analytics.com') && /\/g\/collect$/.test(url.pathname);
+}
+
+function isGoogleAnalyticsPageViewRequest(request) {
+  if (!isGoogleAnalyticsCollectRequest(request)) {
+    return false;
+  }
+
+  const url = new URL(request.url());
+  return url.searchParams.get('en') === 'page_view'
+    || new URLSearchParams(request.postData() ?? '').get('en') === 'page_view';
 }
 
 function collectConsoleErrors(page, {ignoreLocalImageOptimizerErrors = false} = {}) {

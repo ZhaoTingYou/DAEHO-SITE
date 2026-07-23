@@ -88,19 +88,14 @@ public class TrafficAnalyticsRepository {
   public Map<String, Object> summary(OffsetDateTime from, OffsetDateTime to, String channel) {
     var totals = jdbc.queryForList("""
         SELECT COUNT(*) AS sessions,
+          COALESCE(SUM(page_view_count), 0) AS page_views,
           COUNT(*) FILTER (WHERE last_activity_at >= now() - interval '30 minutes') AS active_sessions
         FROM cms_analytics_sessions
         WHERE started_at >= ? AND started_at < ?
           AND (? = '' OR channel = ?)
         """, from, to, channel, channel).get(0);
     long sessionCount = longValue(totals.get("sessions"));
-    long pageViewCount = longValue(jdbc.queryForList("""
-        SELECT COUNT(*) AS event_page_views
-        FROM cms_analytics_pageviews pv
-        JOIN cms_analytics_sessions s ON s.session_id = pv.session_id
-        WHERE pv.viewed_at >= ? AND pv.viewed_at < ?
-          AND (? = '' OR s.channel = ?)
-        """, from, to, channel, channel).get(0).get("event_page_views"));
+    long pageViewCount = longValue(totals.get("page_views"));
 
     var daily = jdbc.queryForList("""
         WITH days AS (
@@ -110,62 +105,37 @@ public class TrafficAnalyticsRepository {
             interval '1 day'
           )::date AS date
         ),
-        session_daily AS (
+        traffic_daily AS (
           SELECT (s.started_at AT TIME ZONE 'Asia/Seoul')::date AS date,
-            COUNT(*) AS sessions
+            COUNT(*) AS sessions,
+            COALESCE(SUM(s.page_view_count), 0) AS page_views
           FROM cms_analytics_sessions s
           WHERE s.started_at >= ? AND s.started_at < ?
             AND (? = '' OR s.channel = ?)
           GROUP BY (s.started_at AT TIME ZONE 'Asia/Seoul')::date
-        ),
-        page_view_daily AS (
-          SELECT (pv.viewed_at AT TIME ZONE 'Asia/Seoul')::date AS date,
-            COUNT(*) AS page_views
-          FROM cms_analytics_pageviews pv
-          JOIN cms_analytics_sessions s ON s.session_id = pv.session_id
-          WHERE pv.viewed_at >= ? AND pv.viewed_at < ?
-            AND (? = '' OR s.channel = ?)
-          GROUP BY (pv.viewed_at AT TIME ZONE 'Asia/Seoul')::date
         )
         SELECT days.date,
-          COALESCE(session_daily.sessions, 0) AS sessions,
-          COALESCE(page_view_daily.page_views, 0) AS page_views
+          COALESCE(traffic_daily.sessions, 0) AS sessions,
+          COALESCE(traffic_daily.page_views, 0) AS page_views
         FROM days
-        LEFT JOIN session_daily ON session_daily.date = days.date
-        LEFT JOIN page_view_daily ON page_view_daily.date = days.date
+        LEFT JOIN traffic_daily ON traffic_daily.date = days.date
         ORDER BY days.date ASC
-        """, from, to, from, to, channel, channel, from, to, channel, channel).stream().map(row -> Map.<String, Object>of(
+        """, from, to, from, to, channel, channel).stream().map(row -> Map.<String, Object>of(
             "date", String.valueOf(row.get("date")),
             "sessions", longValue(row.get("sessions")),
             "pageViews", longValue(row.get("page_views"))
         )).toList();
 
     var channels = jdbc.queryForList("""
-        WITH session_channels AS (
-          SELECT channel, source, medium, COUNT(*) AS sessions
-          FROM cms_analytics_sessions
-          WHERE started_at >= ? AND started_at < ?
-            AND (? = '' OR channel = ?)
-          GROUP BY channel, source, medium
-        ),
-        page_view_channels AS (
-          SELECT s.channel, s.source, s.medium, COUNT(*) AS event_page_views
-          FROM cms_analytics_pageviews pv
-          JOIN cms_analytics_sessions s ON s.session_id = pv.session_id
-          WHERE pv.viewed_at >= ? AND pv.viewed_at < ?
-            AND (? = '' OR s.channel = ?)
-          GROUP BY s.channel, s.source, s.medium
-        )
-        SELECT COALESCE(session_channels.channel, page_view_channels.channel) AS channel,
-          COALESCE(session_channels.source, page_view_channels.source) AS source,
-          COALESCE(session_channels.medium, page_view_channels.medium) AS medium,
-          COALESCE(session_channels.sessions, 0) AS sessions,
-          COALESCE(page_view_channels.event_page_views, 0) AS page_views
-        FROM session_channels
-        FULL OUTER JOIN page_view_channels
-          USING (channel, source, medium)
+        SELECT channel, source, medium,
+          COUNT(*) AS sessions,
+          COALESCE(SUM(page_view_count), 0) AS page_views
+        FROM cms_analytics_sessions
+        WHERE started_at >= ? AND started_at < ?
+          AND (? = '' OR channel = ?)
+        GROUP BY channel, source, medium
         ORDER BY sessions DESC, channel ASC, source ASC, medium ASC
-        """, from, to, channel, channel, from, to, channel, channel).stream().map(row -> Map.<String, Object>of(
+        """, from, to, channel, channel).stream().map(row -> Map.<String, Object>of(
             "channel", row.get("channel"),
             "source", row.get("source"),
             "medium", row.get("medium"),

@@ -97,6 +97,23 @@ class TrafficAnalyticsServiceTest {
   }
 
   @Test
+  void derivesNaturalSearchAndReferralChannelsFromReferrerHosts() {
+    service.record(payload("", "", "www.google.com"));
+    assertEquals("google", repository.lastPayload.get("channel"));
+    assertEquals("google", repository.lastPayload.get("source"));
+    assertEquals("organic", repository.lastPayload.get("medium"));
+
+    service.record(payload("", "", "search.naver.com"));
+    assertEquals("naver", repository.lastPayload.get("channel"));
+    assertEquals("naver", repository.lastPayload.get("source"));
+    assertEquals("organic", repository.lastPayload.get("medium"));
+
+    service.record(payload("", "", "partner.example.com"));
+    assertEquals("referral", repository.lastPayload.get("channel"));
+    assertEquals("partner.example.com", repository.lastPayload.get("source"));
+  }
+
+  @Test
   void validatesReportDatesAndVisitPageSizes() {
     assertThrows(ValidationFailedException.class, () -> service.summary("2026-07-23", "2026-07-01", ""));
     assertThrows(ValidationFailedException.class, () -> service.summary("not-a-date", "2026-07-23", ""));

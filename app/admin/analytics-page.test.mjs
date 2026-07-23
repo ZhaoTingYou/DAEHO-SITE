@@ -16,6 +16,8 @@ test('analytics report uses summary and visits data without personal identifiers
   assert.match(page, /listTrafficAnalyticsVisits/);
   assert.match(page, /searchParams/);
   assert.match(page, /analytics\.metricVisits/);
+  assert.match(page, /analytics\.campaign/);
+  assert.match(page, /item\.campaign/);
   assert.doesNotMatch(page, /sessionId|pageViewId|ipAddress|userAgent|geolocation/);
   assert.match(repositories, /admin: true/);
   const visitType = repositories.match(/export type TrafficAnalyticsVisit = \{[\s\S]*?\n\};/)?.[0] ?? '';

@@ -149,16 +149,31 @@ public class TrafficAnalyticsService {
 
     var source = clean(value(body, "source"), 120);
     var medium = clean(value(body, "medium"), 120);
-    var payload = new java.util.LinkedHashMap<String, Object>();
-    payload.put("sessionId", sessionId);
-    payload.put("pageViewId", pageViewId);
-    payload.put("channel", normalizeChannel(Map.of(
+    var channel = normalizeChannel(Map.of(
         "source", source,
         "medium", medium,
         "referrerHost", referrerHost
-    )));
-    payload.put("source", source.isBlank() ? (referrerHost.isBlank() ? "(direct)" : referrerHost) : source);
-    payload.put("medium", medium.isBlank() ? (referrerHost.isBlank() ? "(none)" : "referral") : medium);
+    ));
+    var normalizedSource = source;
+    var normalizedMedium = medium;
+    if (source.isBlank() && medium.isBlank()) {
+      if (channel.equals("google") || channel.equals("naver")) {
+        normalizedSource = channel;
+        normalizedMedium = "organic";
+      } else {
+        normalizedSource = referrerHost.isBlank() ? "(direct)" : referrerHost;
+        normalizedMedium = referrerHost.isBlank() ? "(none)" : "referral";
+      }
+    } else {
+      normalizedSource = source.isBlank() ? (referrerHost.isBlank() ? "(direct)" : referrerHost) : source;
+      normalizedMedium = medium.isBlank() ? (referrerHost.isBlank() ? "(none)" : "referral") : medium;
+    }
+    var payload = new java.util.LinkedHashMap<String, Object>();
+    payload.put("sessionId", sessionId);
+    payload.put("pageViewId", pageViewId);
+    payload.put("channel", channel);
+    payload.put("source", normalizedSource);
+    payload.put("medium", normalizedMedium);
     payload.put("campaign", clean(value(body, "campaign"), 160));
     payload.put("content", clean(value(body, "content"), 160));
     payload.put("referrerHost", referrerHost);

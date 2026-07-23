@@ -176,12 +176,13 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
       <Panel className="overflow-hidden">
         <SectionTitle title={t('analytics.recentVisits')} />
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
+          <table className="w-full min-w-[1240px] border-collapse text-left text-sm">
             <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
               <tr>
                 <th scope="col" className="px-4 py-3">{t('analytics.startedAt')}</th>
                 <th scope="col" className="px-4 py-3">{t('analytics.channel')}</th>
                 <th scope="col" className="px-4 py-3">{t('analytics.source')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.campaign')}</th>
                 <th scope="col" className="px-4 py-3">{t('analytics.landingPages')}</th>
                 <th scope="col" className="px-4 py-3">{t('analytics.latestPath')}</th>
                 <th scope="col" className="px-4 py-3">{t('analytics.locale')}</th>
@@ -190,11 +191,12 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e4e7ec]">
-              {visits.items.length === 0 ? <TableEmpty colSpan={8} body={t('analytics.noVisits')} /> : visits.items.map((item) => (
+              {visits.items.length === 0 ? <TableEmpty colSpan={9} body={t('analytics.noVisits')} /> : visits.items.map((item) => (
                 <tr key={`${item.startedAt}:${item.landingPath}:${item.latestPath}`} className="align-top">
                   <td className="whitespace-nowrap px-4 py-3 font-numeric text-xs text-[#647084]">{formatDateTime(item.startedAt, locale)}</td>
                   <td className="px-4 py-3"><ChannelLabel channel={item.channel} t={t} /></td>
                   <td className="px-4 py-3 text-[#475467]">{item.source || '—'} / {item.medium || '—'}</td>
+                  <td className="max-w-[180px] break-words px-4 py-3 text-[#475467]">{item.campaign || '—'}</td>
                   <td className="max-w-[260px] break-words px-4 py-3 font-mono text-xs text-[#344054]">{item.landingPath}</td>
                   <td className="max-w-[260px] break-words px-4 py-3 font-mono text-xs text-[#344054]">{item.latestPath}</td>
                   <td className="px-4 py-3 font-numeric text-xs text-[#475467]">{item.locale.toUpperCase()}</td>
