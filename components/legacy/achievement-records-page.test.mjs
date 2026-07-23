@@ -10,6 +10,7 @@ const renderSource = `${source}\n${cardSource}`;
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
 const mobileCssSource = readFileSync(new URL('../../styles/mobile.css', import.meta.url), 'utf8');
 const localeMessagesSource = readFileSync(new URL('../../lib/locale-messages.ts', import.meta.url), 'utf8');
+const imageGuidesSource = readFileSync(new URL('../../lib/cms/image-guides.ts', import.meta.url), 'utf8');
 const localeMessages = Object.fromEntries(
   ['ko', 'en'].map((locale) => [
     locale,
@@ -76,14 +77,17 @@ test('achievement exact static fallback is normalized at the locale-message boun
   assert.doesNotMatch(source, /backTitle|hoverText/);
 });
 
-test('achievement first record gallery uses a one, two, four-column responsive static layout', () => {
+test('achievement first record gallery uses a one-column phone and two-column tablet/desktop layout', () => {
   const firstRecordsSection = source.match(
     /<section className="overflow-hidden bg-bg[\s\S]*?<section className="bg-\[#f4efe6\]/
   )?.[0] ?? '';
 
   assert.ok(firstRecordsSection.includes('aria-label={copy.firstHeading}'), 'static gallery should keep an accessible section label');
   assert.ok(cardSource.includes('md:grid-cols-2'), 'gallery should become two columns on tablets');
-  assert.ok(cardSource.includes('lg:grid-cols-4'), 'gallery should become four columns on large desktop screens');
+  assert.ok(!cardSource.includes('lg:grid-cols-4'), 'large desktops should retain the two-column matrix');
+  assert.ok(cardSource.includes('aspect-video'), 'FIRST RECORDS images should use the selected 16:9 landscape surface');
+  assert.ok(!cardSource.includes('aspect-[3/4]'), 'FIRST RECORDS images should no longer use the portrait surface');
+  assert.ok(cardSource.includes('object-cover'), 'landscape FIRST RECORDS images should remain object-cover');
   assert.ok(cardSource.includes('gap-6'), 'gallery should retain approximately 24px gaps');
   assert.ok(cardSource.includes('max-w-[1440px]'), 'gallery width should grow beyond the former three-card layout');
   assert.ok(!firstRecordsSection.includes('achievement-record-mobile-list'), 'first records should not keep a separate mobile interactive list');
@@ -91,6 +95,24 @@ test('achievement first record gallery uses a one, two, four-column responsive s
     firstRecordsSection,
     /<DraggableScroll[\s\S]*?copy\.firstRecords[\s\S]*?<\/DraggableScroll>/,
     'first records must not use a draggable or animated scroll surface'
+  );
+});
+
+test('achievement FIRST RECORDS CMS images use a dedicated 16:9 guide', () => {
+  assert.match(
+    imageGuidesSource,
+    /firstRecord: spec\('16:9', '1920 x 1080'/,
+    'the CMS should define a dedicated FIRST RECORDS landscape guide'
+  );
+  assert.match(
+    imageGuidesSource,
+    /'heritage-achievement\|main\|copy\.firstRecords\.\*\.image': 'firstRecord'/,
+    'FIRST RECORDS image fields should map to the dedicated guide'
+  );
+  assert.doesNotMatch(
+    imageGuidesSource,
+    /'heritage-achievement\|main\|copy\.firstRecords\.\*\.image': 'portrait'/,
+    'FIRST RECORDS should no longer advertise portrait uploads'
   );
 });
 

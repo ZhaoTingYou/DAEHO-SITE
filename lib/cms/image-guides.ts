@@ -54,6 +54,11 @@ const guideSpecs = {
     ko: '세로형 object-cover 이미지입니다. 피사체가 상하 가장자리에 붙지 않게 해주세요.',
     en: 'Portrait object-cover image. Keep the subject away from top and bottom edges.'
   }),
+  firstRecord: spec('16:9', '1920 x 1080', {
+    zh: 'FIRST RECORDS 横向图，object-cover；主体放在中央安全区并预留裁切空间。',
+    ko: 'FIRST RECORDS 가로형 이미지입니다. object-cover에 맞춰 피사체를 중앙 안전 영역에 두세요.',
+    en: 'FIRST RECORDS landscape image. Keep the subject in the center safe area for object-cover cropping.'
+  }),
   techniqueRecord: spec('4:3', '1600 x 1200', {
     zh: '横向技术档案图，object-cover；主体放在中央安全区，四周保留裁切空间。',
     ko: '가로형 기술 기록 이미지입니다. 피사체는 중앙 안전 영역에 두고 가장자리에 여백을 남기세요.',
@@ -180,7 +185,7 @@ const pageGuideKeys: Record<string, string> = {
   'heritage-credibility|main|copy.rows.*.image': 'wide43Scaled',
 
   'heritage-achievement|main|hero.image': 'heroBackground',
-  'heritage-achievement|main|copy.firstRecords.*.image': 'portrait',
+  'heritage-achievement|main|copy.firstRecords.*.image': 'firstRecord',
   'heritage-achievement|main|copy.marketFeatures.*.image': 'marketWide',
   'heritage-achievement|main|gallery.items.*.image': 'portrait',
 
