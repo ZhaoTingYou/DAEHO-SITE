@@ -42,7 +42,15 @@ export default async function AdminNewsPage({searchParams}: Props) {
       ) : (
         <Panel className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1316px] table-fixed border-collapse text-left text-sm">
+              <colgroup>
+                <col className="w-[320px]" />
+                <col className="w-[160px]" />
+                <col className="w-[420px]" />
+                <col className="w-[120px]" />
+                <col className="w-[120px]" />
+                <col className="w-[176px]" />
+              </colgroup>
               <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
                 <tr>
                   <th className="px-4 py-3">{t('news.article')}</th>
@@ -60,15 +68,19 @@ export default async function AdminNewsPage({searchParams}: Props) {
                   return (
                     <tr key={item.id} className="align-middle">
                       <td className="px-4 py-4">
-                        <p className="font-semibold text-[#101827]">{ko.title || item.slug}</p>
-                        <p className="mt-1 font-numeric text-xs text-[#647084]">{item.slug}</p>
+                        <p className="truncate font-semibold text-[#101827]" title={ko.title || item.slug}>
+                          {ko.title || item.slug}
+                        </p>
+                        <p className="mt-1 truncate font-numeric text-xs text-[#647084]" title={item.slug}>
+                          {item.slug}
+                        </p>
                       </td>
                       <td className="px-4 py-4">
-                        <p className="font-semibold text-[#344054]">{item.category}</p>
-                        <p className="mt-1 text-xs text-[#647084]">{ko.categoryLabel}</p>
+                        <p className="truncate font-semibold text-[#344054]" title={item.category}>{item.category}</p>
+                        <p className="mt-1 truncate text-xs text-[#647084]" title={ko.categoryLabel}>{ko.categoryLabel}</p>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
                           <div
                             className="news-thumbnail h-16 w-16 shrink-0 rounded-md border border-[#e4e7ec] bg-[#f8fafc] bg-cover bg-center"
                             style={previewSrc ? {backgroundImage: `url("${cssUrl(previewSrc)}")`} : undefined}
@@ -81,10 +93,15 @@ export default async function AdminNewsPage({searchParams}: Props) {
                               </span>
                             )}
                           </div>
-                          <p className="max-w-[280px] break-all font-numeric text-xs leading-5 text-[#647084]">{item.imagePath || '-'}</p>
+                          <p
+                            className="min-w-0 flex-1 truncate font-numeric text-xs leading-5 text-[#647084]"
+                            title={item.imagePath || undefined}
+                          >
+                            {item.imagePath || '-'}
+                          </p>
                         </div>
                       </td>
-                      <td className="px-4 py-4 font-numeric text-xs text-[#647084]">{item.publishedAt}</td>
+                      <td className="whitespace-nowrap px-4 py-4 font-numeric text-xs text-[#647084]">{item.publishedAt}</td>
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-2">
                           <Badge tone={item.isVisible ? 'green' : 'gray'}>{item.isVisible ? t('common.visible') : t('common.hidden')}</Badge>
