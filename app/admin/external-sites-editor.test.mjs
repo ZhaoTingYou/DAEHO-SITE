@@ -22,5 +22,11 @@ test('common page save synchronizes the dedicated external-sites payload', () =>
   const actions = readText('./actions.ts');
   assert.match(actions, /formData\.has\('externalSites\.payload'\)/);
   assert.match(actions, /parseExternalSitesSubmission/);
-  assert.match(actions, /footer\.externalSites\.items/);
+  assert.match(actions, /pageContentGroupsKey/);
+  assert.match(
+    actions,
+    /const externalSitesPath = `\$\{pageContentGroupsKey\}\.main\.footer\.externalSites\.items`/
+  );
+  assert.match(actions, /setObjectValueAtPath\(contentKo, externalSitesPath, externalSites\.ko\)/);
+  assert.match(actions, /setObjectValueAtPath\(contentEn, externalSitesPath, externalSites\.en\)/);
 });

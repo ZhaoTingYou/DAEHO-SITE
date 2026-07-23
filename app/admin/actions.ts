@@ -63,6 +63,7 @@ import {
   getPageFieldDefinitionsForGroup,
   getPageContentGroups,
   isImageEditableField,
+  pageContentGroupsKey,
   setObjectValueAtPath,
   type PageDefinition,
 } from '@/lib/cms/page-catalog';
@@ -297,8 +298,9 @@ export async function savePageAction(formData: FormData) {
       const externalSites = parseExternalSitesSubmission(
         stringFromForm(formData, 'externalSites.payload')
       );
-      setObjectValueAtPath(contentKo, 'footer.externalSites.items', externalSites.ko);
-      setObjectValueAtPath(contentEn, 'footer.externalSites.items', externalSites.en);
+      const externalSitesPath = `${pageContentGroupsKey}.main.footer.externalSites.items`;
+      setObjectValueAtPath(contentKo, externalSitesPath, externalSites.ko);
+      setObjectValueAtPath(contentEn, externalSitesPath, externalSites.en);
     }
 
     if (pageKey === 'mastery-technique') {
