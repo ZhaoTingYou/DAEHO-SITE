@@ -67,8 +67,12 @@ import {
   setObjectValueAtPath,
   type PageDefinition,
 } from '@/lib/cms/page-catalog';
+import {getAdminI18n} from '@/lib/admin-i18n';
 import type {TechniqueLocaleRecord} from '@/lib/cms/technique-records-core.mjs';
-import {parseExternalSitesSubmission} from '@/lib/cms/external-sites-core.mjs';
+import {
+  getExternalSiteValidationMessageKey,
+  parseExternalSitesSubmission
+} from '@/lib/cms/external-sites-core.mjs';
 import {normalizeSubmittedTechniqueRecords} from '@/lib/cms/technique-records-submit-core.mjs';
 import {locales, type Locale} from '@/lib/locales';
 import enMessages from '@/messages/en.json';
@@ -347,6 +351,13 @@ export async function savePageAction(formData: FormData) {
 
     redirect(returnTo);
   } catch (error) {
+    const externalSiteErrorKey = getExternalSiteValidationMessageKey(error);
+
+    if (externalSiteErrorKey) {
+      const {t} = await getAdminI18n();
+      redirectWithAdminActionError(returnTo, new Error(t(externalSiteErrorKey)));
+    }
+
     redirectWithAdminActionError(returnTo, error);
   }
 }
