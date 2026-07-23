@@ -261,27 +261,11 @@ function isGoogleAnalyticsCollectRequest(request) {
   return url.hostname.endsWith('google-analytics.com') && /\/g\/collect$/.test(url.pathname);
 }
 
-function isGoogleAnalyticsPageViewRequest(request) {
-  if (!isGoogleAnalyticsCollectRequest(request)) {
-    return false;
-  }
-
-  const url = new URL(request.url());
-  return url.searchParams.get('en') === 'page_view'
-    || new URLSearchParams(request.postData() ?? '').get('en') === 'page_view';
-}
-
 function collectConsoleErrors(page, {ignoreLocalImageOptimizerErrors = false} = {}) {
   const errors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') {
-      const location = message.location().url;
-      if (
-        ignoreLocalImageOptimizerErrors
-        && message.text().startsWith('Failed to load resource:')
-        && location
-        && new URL(location).pathname === '/_next/image'
-      ) {
+      if (ignoreLocalImageOptimizerErrors && isKnownLocalS3ImageError(message)) {
         return;
       }
       errors.push(message);
@@ -291,6 +275,25 @@ function collectConsoleErrors(page, {ignoreLocalImageOptimizerErrors = false} = 
     errors.push(error);
   });
   return errors;
+}
+
+function isKnownLocalS3ImageError(message) {
+  const location = message.location().url;
+  if (!message.text().includes('status of 403 (Forbidden)') || !location) {
+    return false;
+  }
+
+  try {
+    const optimizerUrl = new URL(location);
+    const source = optimizerUrl.searchParams.get('url');
+    return (
+      optimizerUrl.pathname === '/_next/image'
+      && Boolean(source)
+      && new URL(source).hostname === 'daeho-prod-media.s3.ap-northeast-2.amazonaws.com'
+    );
+  } catch {
+    return false;
+  }
 }
 
 function isLocalVerification(baseUrl) {
@@ -321,14 +324,14 @@ async function verifyPostWithdrawalNavigation(browser, config, storageState) {
   });
   const page = await context.newPage();
   const internalRequests = [];
-  const gaPageViewRequests = [];
+  const gaCollectRequests = [];
 
   page.on('request', (request) => {
     if (isInternalPageViewRequest(request)) {
       internalRequests.push(request);
     }
-    if (isGoogleAnalyticsPageViewRequest(request)) {
-      gaPageViewRequests.push(request);
+    if (isGoogleAnalyticsCollectRequest(request)) {
+      gaCollectRequests.push(request);
     }
   });
 
@@ -338,7 +341,7 @@ async function verifyPostWithdrawalNavigation(browser, config, storageState) {
     verificationStage = 'post-withdrawal CMS assertion';
     assert.equal(internalRequests.length, 0, 'Withdrawing consent must stop further internal page views.');
     verificationStage = 'post-withdrawal GA assertion';
-    assert.equal(gaPageViewRequests.length, 0, 'Withdrawing consent must stop further GA page views.');
+    assert.equal(gaCollectRequests.length, 0, 'Withdrawing consent must stop all further GA collect requests.');
     verificationStage = 'post-withdrawal cookie assertion';
     await assertNoAnalyticsCookies(context, 'on a page visited after consent withdrawal');
     verificationStage = 'post-withdrawal local storage assertion';
