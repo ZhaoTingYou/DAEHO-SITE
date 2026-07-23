@@ -21,7 +21,7 @@ export function AchievementRecordGallery({records, imageAltPrefix}: AchievementR
           key={`${record.image}-${index}`}
           className="achievement-record-gallery__item"
         >
-          <p className="achievement-record-gallery__title min-h-[3.5rem] line-clamp-2 text-left text-[15px] leading-7 text-primary md:text-base">
+          <p className="achievement-record-gallery__title min-h-[2.25rem] line-clamp-2 text-left text-[15px] leading-7 text-primary md:min-h-[2.5rem] md:text-base">
             {record.title}
           </p>
           <figure className="relative aspect-video overflow-hidden bg-[#d8d8d8]">
