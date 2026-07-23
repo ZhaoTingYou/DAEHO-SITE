@@ -67,6 +67,7 @@ import {
   type PageDefinition,
 } from '@/lib/cms/page-catalog';
 import type {TechniqueLocaleRecord} from '@/lib/cms/technique-records-core.mjs';
+import {parseExternalSitesSubmission} from '@/lib/cms/external-sites-core.mjs';
 import {normalizeSubmittedTechniqueRecords} from '@/lib/cms/technique-records-submit-core.mjs';
 import {locales, type Locale} from '@/lib/locales';
 import enMessages from '@/messages/en.json';
@@ -291,6 +292,14 @@ export async function savePageAction(formData: FormData) {
     const sharedSeoImages = await readSharedPageSeoImageUploads(formData, returnTo);
     const contentKo = await readPageLocaleContent(formData, 'ko', returnTo, definition, sharedContentImages);
     const contentEn = await readPageLocaleContent(formData, 'en', returnTo, definition, sharedContentImages);
+
+    if (pageKey === 'common' && formData.has('externalSites.payload')) {
+      const externalSites = parseExternalSitesSubmission(
+        stringFromForm(formData, 'externalSites.payload')
+      );
+      setObjectValueAtPath(contentKo, 'footer.externalSites.items', externalSites.ko);
+      setObjectValueAtPath(contentEn, 'footer.externalSites.items', externalSites.en);
+    }
 
     if (pageKey === 'mastery-technique') {
       const normalizedRecords = normalizeSubmittedTechniqueRecords({
