@@ -239,8 +239,8 @@ Current behavior:
 - Header becomes solid when the mouse hovers at the top area.
 - Header hides on scroll down and reappears on scroll up.
 - Mega menus exist for `LEGACY` and `SPECIALTY`.
-- Hidden external links for `대호`, `OH`, and `VULCAN` are currently disabled
-  with `showExternalHeaderLinks = false` in `components/site/site-header.tsx`.
+- External official-site links are managed in **CMS → Footer → External sites**.
+  Enabled valid HTTP(S) entries appear in desktop/mobile headers and the footer.
 - Contact CTA is styled as a simple underline-style button to match the site
   direction.
 
@@ -565,22 +565,10 @@ Current decisions:
 
 ## External Links
 
-Configured in:
-
-- `lib/config.ts`
-
-Current values:
-
-```ts
-export const externalLinks = {
-  daeho: '',
-  oh: '',
-  vulcan: ''
-} as const;
-```
-
-These links are currently hidden in the header. Keep them disabled/hidden until
-the user asks to show them or provides confirmed URLs.
+External official-site links are managed in **CMS → Footer → External sites**.
+Each item has Korean and English labels plus one shared URL, enabled state,
+and order. Enabled valid HTTP(S) entries appear in desktop/mobile headers
+and the footer.
 
 ## Known Placeholders
 
@@ -589,7 +577,6 @@ Do not invent these:
 - exact CHRONICLE milestone years and descriptions
 - partner counts
 - retention rates
-- external DAEHO/OH/VULCAN URLs
 - final names/captions for collection works
 - final news dates
 - final article sources
