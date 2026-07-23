@@ -38,7 +38,9 @@ type AchievementRecordsPageProps = {
 
 type FirstRecord = AchievementFirstRecord;
 
-type FirstRecordInput = Partial<FirstRecord>;
+type FirstRecordInput = Partial<FirstRecord> & {
+  frontTitle?: string;
+};
 
 type MarketFeature = {
   value: string;
@@ -125,13 +127,20 @@ const defaultPageCopy = {
     ],
     firstRecords: [
       {
+        title: '국내 최초 이니셜 조각 적용',
         image: 'legacy_achievement_01.png'
       },
       {
+        title: '국내 최초 엔티크 블랙 코팅 적용',
         image: 'legacy_achievement_02.png'
       },
       {
+        title: '국내 최초 반지 내부 디자인 적용',
         image: 'legacy_achievement_03.png'
+      },
+      {
+        title: '국내 최초 기록 04',
+        image: 'legacy_achievement_04.png'
       }
     ],
     marketFeatures: [
@@ -208,13 +217,20 @@ const defaultPageCopy = {
     ],
     firstRecords: [
       {
+        title: 'First domestic application of initial engraving',
         image: 'legacy_achievement_01.png'
       },
       {
+        title: 'First domestic application of antique black coating',
         image: 'legacy_achievement_02.png'
       },
       {
+        title: 'First domestic approach to interior ring design',
         image: 'legacy_achievement_03.png'
+      },
+      {
+        title: 'DAEHO first record 04',
+        image: 'legacy_achievement_04.png'
       }
     ],
     marketFeatures: [
@@ -245,7 +261,7 @@ const defaultPageCopy = {
 function resolveAchievementCopy(locale: Locale, content: AchievementContent): AchievementPageCopy {
   const fallback = defaultPageCopy[locale];
   const copy = content.copy ?? {};
-  const firstRecords = normalizeFirstRecords(copy.firstRecords, fallback.firstRecords);
+  const firstRecords = normalizeFirstRecords(copy.firstRecords);
   const marketFeatures = normalizeMarketFeatures(copy.marketFeatures);
 
   return {
@@ -258,14 +274,15 @@ function resolveAchievementCopy(locale: Locale, content: AchievementContent): Ac
   };
 }
 
-function normalizeFirstRecords(records: FirstRecordInput[] | undefined, fallbackRecords: FirstRecord[] = []): FirstRecord[] {
+function normalizeFirstRecords(records: FirstRecordInput[] | undefined): FirstRecord[] {
   if (!Array.isArray(records)) {
     return [];
   }
 
   return records
-    .map((record, index) => ({
-      image: record.image || fallbackRecords[index]?.image || ''
+    .map((record) => ({
+      title: record.frontTitle?.trim() || record.title?.trim() || '',
+      image: record.image || ''
     }))
     .filter((record) => record.image);
 }

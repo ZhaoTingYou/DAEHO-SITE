@@ -6,14 +6,18 @@ const source = readFileSync(new URL('./achievement-records-page.tsx', import.met
 const cardSourceUrl = new URL('./achievement-record-card.tsx', import.meta.url);
 const cardSource = existsSync(cardSourceUrl) ? readFileSync(cardSourceUrl, 'utf8') : '';
 const pentagonSource = readFileSync(new URL('./achievement-pentagon-stats.tsx', import.meta.url), 'utf8');
-const adminPageSource = readFileSync(new URL('../../app/admin/(dashboard)/pages/[pageKey]/page.tsx', import.meta.url), 'utf8');
 const renderSource = `${source}\n${cardSource}`;
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
 
-test('achievement first records render as three static images without hover panels or pagination', () => {
+test('achievement first records render up to four static title-above-image cards without hover panels or pagination', () => {
   assert.ok(source.includes('<AchievementRecordGallery'), 'page should render first records through the static image gallery');
   assert.ok(cardSource.includes('achievement-record-gallery'), 'first records should use a named static gallery');
-  assert.ok(cardSource.includes('records.slice(0, 3)'), 'gallery should be limited to the three record images');
+  assert.ok(cardSource.includes('records.slice(0, 4)'), 'gallery should be limited to the first four record images');
+  assert.ok(cardSource.includes('achievement-record-gallery__title'), 'each record should render its editable title above the image');
+  assert.ok(cardSource.includes('line-clamp-2'), 'record titles should be clamped to two lines');
+  assert.ok(cardSource.includes('min-h-['), 'record titles should reserve a consistent height before the image');
+  assert.ok(cardSource.indexOf('achievement-record-gallery__title') < cardSource.indexOf('<figure'), 'the title must precede the image in DOM order');
+  assert.ok(cardSource.includes('record.title || `${imageAltPrefix} ${index + 1}`'), 'image alt text should use the displayed title with a section/index fallback');
   assert.ok(!cardSource.includes("'use client'"), 'static first record images should not need a client component');
   assert.ok(!renderSource.includes('AchievementRecordDeck'), 'desktop first records should not use the previous hover deck');
   assert.ok(!renderSource.includes('AchievementRecordCard'), 'mobile first records should not use the previous interactive cards');
@@ -25,40 +29,52 @@ test('achievement first records render as three static images without hover pane
   assert.ok(!renderSource.includes('bg-[#62302F] p-8 text-[#F4E6E1]'), 'first records should not render the old red content block');
 });
 
-test('achievement first record CMS items only expose image fields', () => {
+test('achievement first record CMS items expose the image-above title before the image', () => {
   const achievementPage = pageCatalog.find((page) => page.pageKey === 'heritage-achievement');
   const firstRecordsField = achievementPage?.fields.find((field) => field.path === 'copy.firstRecords');
   const firstRecordItemPaths = firstRecordsField?.itemFields.map((field) => field.path) ?? [];
 
-  assert.deepEqual(firstRecordItemPaths, ['image']);
-  assert.ok(
-    adminPageSource.includes("itemFields?.length === 1 && itemFields[0]?.path === 'image'"),
-    'image-only CMS arrays should not show hidden legacy title fields as item headings'
-  );
+  assert.deepEqual(firstRecordItemPaths, ['frontTitle', 'image']);
+  assert.equal(firstRecordsField?.itemFields[0]?.label, '图片上方标题');
+  assert.equal(firstRecordsField?.itemFields[1]?.type, 'image');
 });
 
-test('achievement first record fallback data only carries images', () => {
+test('achievement first record fallback data has four localized titled records', () => {
   const fallbackBlock = source.match(/firstRecords: \[[\s\S]*?\],\n    marketFeatures:/)?.[0] ?? '';
 
   assert.match(fallbackBlock, /image: 'legacy_achievement_01\.png'/);
   assert.match(fallbackBlock, /image: 'legacy_achievement_02\.png'/);
   assert.match(fallbackBlock, /image: 'legacy_achievement_03\.png'/);
-  assert.doesNotMatch(fallbackBlock, /frontTitle|backTitle|hoverText/);
+  assert.match(fallbackBlock, /image: 'legacy_achievement_04\.png'/);
+  assert.match(source, /title: '국내 최초 이니셜 조각 적용'/);
+  assert.match(source, /title: 'First domestic application of initial engraving'/);
+  assert.match(source, /title: '국내 최초 기록 04'/);
+  assert.match(source, /title: 'DAEHO first record 04'/);
+  assert.doesNotMatch(source, /backTitle|hoverText/);
 });
 
-test('achievement first record gallery uses one responsive static layout for desktop and mobile', () => {
+test('achievement first record gallery uses a one, two, four-column responsive static layout', () => {
   const firstRecordsSection = source.match(
     /<section className="overflow-hidden bg-bg[\s\S]*?<section className="bg-\[#f4efe6\]/
   )?.[0] ?? '';
 
   assert.ok(firstRecordsSection.includes('aria-label={copy.firstHeading}'), 'static gallery should keep an accessible section label');
-  assert.ok(cardSource.includes('md:grid-cols-3'), 'gallery should become three columns on desktop');
+  assert.ok(cardSource.includes('md:grid-cols-2'), 'gallery should become two columns on tablets');
+  assert.ok(cardSource.includes('lg:grid-cols-4'), 'gallery should become four columns on large desktop screens');
+  assert.ok(cardSource.includes('gap-6'), 'gallery should retain approximately 24px gaps');
+  assert.ok(cardSource.includes('max-w-[1440px]'), 'gallery width should grow beyond the former three-card layout');
   assert.ok(!firstRecordsSection.includes('achievement-record-mobile-list'), 'first records should not keep a separate mobile interactive list');
   assert.doesNotMatch(
     firstRecordsSection,
     /<DraggableScroll[\s\S]*?copy\.firstRecords[\s\S]*?<\/DraggableScroll>/,
     'first records must not use a draggable or animated scroll surface'
   );
+});
+
+test('achievement first record normalization prefers frontTitle, falls back to title, and never fills configured records from fallback images', () => {
+  assert.ok(source.includes("title: record.frontTitle?.trim() || record.title?.trim() || ''"), 'legacy frontTitle should be displayed before the trimmed title compatibility fallback');
+  assert.ok(!source.includes('fallbackRecords[index]?.image'), 'configured records should not receive synthesized fallback images');
+  assert.ok(source.includes('firstRecords: firstRecords.length > 0 ? firstRecords : fallback.firstRecords'), 'the complete fallback list should only be used when no configured records are valid');
 });
 
 test('achievement mobile stat section hides the pentagon diagram', () => {

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import {imageSrc} from '@/lib/image-src';
 
 export type AchievementFirstRecord = {
+  title: string;
   image: string;
 };
 
@@ -13,20 +14,25 @@ type AchievementRecordGalleryProps = {
 
 export function AchievementRecordGallery({records, imageAltPrefix}: AchievementRecordGalleryProps) {
   return (
-    <div className="achievement-record-gallery mx-auto grid w-full max-w-[1110px] gap-6 px-container md:grid-cols-3 lg:px-0">
-      {records.slice(0, 3).map((record, index) => (
-        <figure
+    <div className="achievement-record-gallery mx-auto grid w-full max-w-[1440px] gap-6 px-container md:grid-cols-2 lg:grid-cols-4 lg:px-0">
+      {records.slice(0, 4).map((record, index) => (
+        <div
           key={`${record.image}-${index}`}
-          className="achievement-record-gallery__item relative aspect-[3/4] overflow-hidden bg-[#d8d8d8]"
+          className="achievement-record-gallery__item"
         >
-          <Image
-            src={imageSrc(record.image)}
-            alt={`${imageAltPrefix} ${index + 1}`}
-            fill
-            sizes="(min-width: 1024px) 330px, (min-width: 768px) 30vw, 100vw"
-            className="object-cover"
-          />
-        </figure>
+          <p className="achievement-record-gallery__title min-h-[3.5rem] line-clamp-2 text-left text-[15px] leading-7 text-primary md:text-base">
+            {record.title}
+          </p>
+          <figure className="relative aspect-[3/4] overflow-hidden bg-[#d8d8d8]">
+            <Image
+              src={imageSrc(record.image)}
+              alt={record.title || `${imageAltPrefix} ${index + 1}`}
+              fill
+              sizes="(min-width: 1024px) 342px, (min-width: 768px) 45vw, 100vw"
+              className="object-cover"
+            />
+          </figure>
+        </div>
       ))}
     </div>
   );

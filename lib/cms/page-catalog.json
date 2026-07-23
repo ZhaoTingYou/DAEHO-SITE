@@ -196,6 +196,7 @@
         "label": "FIRST RECORDS 卡片",
         "type": "json",
         "itemFields": [
+          {"path": "frontTitle", "label": "图片上方标题"},
           {"path": "image", "label": "图片", "type": "image"}
         ]
       },
