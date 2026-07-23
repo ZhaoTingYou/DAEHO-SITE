@@ -34,5 +34,5 @@ test('footer exposes cookie settings and successful forms emit generate_lead', (
 test('Docker build receives the public GA4 measurement ID', () => {
   assert.match(read('Dockerfile.next'), /ARG NEXT_PUBLIC_GA_MEASUREMENT_ID/);
   assert.match(read('docker-compose.yml'), /NEXT_PUBLIC_GA_MEASUREMENT_ID/);
-  assert.match(read('.env.example'), /NEXT_PUBLIC_GA_MEASUREMENT_ID=G-82KD55VCJL/);
+  assert.match(read('.env.example'), /NEXT_PUBLIC_GA_MEASUREMENT_ID=G-FXQGWE9XZ0/);
 });

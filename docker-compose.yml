@@ -52,7 +52,7 @@ services:
       dockerfile: Dockerfile.next
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
-        NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-G-82KD55VCJL}
+        NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-G-FXQGWE9XZ0}
     restart: unless-stopped
     environment:
       CMS_BACKEND_URL: http://cms-api:8080
@@ -63,7 +63,7 @@ services:
       CMS_ADMIN_SESSION_SECRET: ${CMS_ADMIN_SESSION_SECRET:-replace-with-a-long-random-session-secret}
       ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
-      NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-G-82KD55VCJL}
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-G-FXQGWE9XZ0}
     volumes:
       - ./public/images:/app/public/images:ro
     depends_on:
