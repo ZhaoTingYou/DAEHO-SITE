@@ -10,6 +10,7 @@ import {HeritageHero} from '@/components/legacy/heritage-hero';
 import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {imageSrc} from '@/lib/image-src';
+import {normalizeAchievementFirstRecords} from '@/lib/achievement-first-records-core';
 import {withLocale} from '@/lib/site-map';
 
 type AchievementContent = {
@@ -227,7 +228,7 @@ const defaultPageCopy = {
 function resolveAchievementCopy(locale: Locale, content: AchievementContent): AchievementPageCopy {
   const fallback = defaultPageCopy[locale];
   const copy = content.copy ?? {};
-  const firstRecords = normalizeFirstRecords(copy.firstRecords);
+  const firstRecords = normalizeAchievementFirstRecords(copy.firstRecords);
   const marketFeatures = normalizeMarketFeatures(copy.marketFeatures);
 
   return {
@@ -238,19 +239,6 @@ function resolveAchievementCopy(locale: Locale, content: AchievementContent): Ac
     firstRecords,
     marketFeatures: marketFeatures.length > 0 ? marketFeatures : fallback.marketFeatures
   };
-}
-
-function normalizeFirstRecords(records: FirstRecordInput[] | undefined): FirstRecord[] {
-  if (!Array.isArray(records)) {
-    return [];
-  }
-
-  return records
-    .map((record) => ({
-      title: record.frontTitle?.trim() || record.title?.trim() || '',
-      image: record.image?.trim() || ''
-    }))
-    .filter((record) => record.image);
 }
 
 function normalizeMarketFeatures(features: MarketFeatureInput[] | undefined): MarketFeature[] {

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 
+import {PlaceholderImg} from '@/components/placeholder-img';
 import {imageSrc} from '@/lib/image-src';
 
 export type AchievementFirstRecord = {
@@ -24,13 +25,17 @@ export function AchievementRecordGallery({records, imageAltPrefix}: AchievementR
             {record.title}
           </p>
           <figure className="relative aspect-video overflow-hidden bg-[#d8d8d8]">
-            <Image
-              src={imageSrc(record.image)}
-              alt={record.title || `${imageAltPrefix} ${index + 1}`}
-              fill
-              sizes="(min-width: 1024px) 600px, (min-width: 768px) 45vw, 100vw"
-              className="object-cover"
-            />
+            {record.image ? (
+              <Image
+                src={imageSrc(record.image)}
+                alt={record.title || `${imageAltPrefix} ${index + 1}`}
+                fill
+                sizes="(min-width: 1024px) 600px, (min-width: 768px) 45vw, 100vw"
+                className="object-cover"
+              />
+            ) : (
+              <PlaceholderImg filename={`${imageAltPrefix} ${index + 1}`} aspect="h-full" />
+            )}
           </figure>
         </div>
       ))}

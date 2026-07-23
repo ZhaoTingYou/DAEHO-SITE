@@ -11,6 +11,7 @@ const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.
 const mobileCssSource = readFileSync(new URL('../../styles/mobile.css', import.meta.url), 'utf8');
 const localeMessagesSource = readFileSync(new URL('../../lib/locale-messages.ts', import.meta.url), 'utf8');
 const imageGuidesSource = readFileSync(new URL('../../lib/cms/image-guides.ts', import.meta.url), 'utf8');
+const firstRecordsCoreSource = readFileSync(new URL('../../lib/achievement-first-records-core.ts', import.meta.url), 'utf8');
 const localeMessages = Object.fromEntries(
   ['ko', 'en'].map((locale) => [
     locale,
@@ -18,10 +19,12 @@ const localeMessages = Object.fromEntries(
   ])
 );
 
-test('achievement first records render up to four static title-above-image cards without hover panels or pagination', () => {
+test('achievement first records render up to four stable title-above-image cards without hover panels or pagination', () => {
   assert.ok(source.includes('<AchievementRecordGallery'), 'page should render first records through the static image gallery');
   assert.ok(cardSource.includes('achievement-record-gallery'), 'first records should use a named static gallery');
   assert.ok(cardSource.includes('records.slice(0, 4)'), 'gallery should be limited to the first four record images');
+  assert.ok(cardSource.includes('PlaceholderImg'), 'missing record images should render a named placeholder instead of collapsing a grid slot');
+  assert.ok(cardSource.includes('record.image ?'), 'each record slot should choose between its image and a placeholder');
   assert.ok(cardSource.includes('achievement-record-gallery__title'), 'each record should render its editable title above the image');
   assert.ok(cardSource.includes('line-clamp-2'), 'record titles should be clamped to two lines');
   assert.ok(cardSource.includes('min-h-['), 'record titles should reserve a consistent height before the image');
@@ -137,9 +140,10 @@ test('achievement mobile styles do not override the gallery gap or impose an asp
   );
 });
 
-test('achievement first record normalization prefers frontTitle, falls back to title, and never fills configured records from fallback images', () => {
-  assert.ok(source.includes("title: record.frontTitle?.trim() || record.title?.trim() || ''"), 'legacy frontTitle should be displayed before the trimmed title compatibility fallback');
-  assert.ok(source.includes("image: record.image?.trim() || ''"), 'image values should be trimmed before blank records are filtered');
+test('achievement first record normalization preserves configured slots without synthesizing fallback images', () => {
+  assert.ok(source.includes('normalizeAchievementFirstRecords(copy.firstRecords)'), 'the page should normalize CMS record slots through the behavior-tested helper');
+  assert.ok(firstRecordsCoreSource.includes('.slice(0, 4)'), 'normalization should read at most the first four configured records');
+  assert.ok(firstRecordsCoreSource.includes('record.frontTitle !== undefined'), 'legacy title should be used only when frontTitle is absent');
   assert.ok(!source.includes('fallbackRecords[index]?.image'), 'configured records should not receive synthesized fallback images');
   assert.ok(source.includes('firstRecords,'), 'the component should render only the normalized locale-boundary records');
 });

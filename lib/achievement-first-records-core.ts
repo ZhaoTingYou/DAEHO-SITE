@@ -8,6 +8,34 @@ export type AchievementFirstRecordsMessages = {
   };
 };
 
+export type AchievementFirstRecordInput = {
+  frontTitle?: string;
+  title?: string;
+  image?: string;
+};
+
+export type AchievementFirstRecord = {
+  title: string;
+  image: string;
+};
+
+export function normalizeAchievementFirstRecords(
+  records: AchievementFirstRecordInput[] | undefined
+): AchievementFirstRecord[] {
+  if (!Array.isArray(records)) {
+    return [];
+  }
+
+  return records.slice(0, 4).map((record) => {
+    const title = record.frontTitle !== undefined ? record.frontTitle : record.title;
+
+    return {
+      title: title?.trim() || '',
+      image: record.image?.trim() || ''
+    };
+  });
+}
+
 function hasRecordWithImage(value: unknown): boolean {
   if (!Array.isArray(value)) {
     return false;
