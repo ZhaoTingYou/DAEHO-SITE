@@ -2,7 +2,7 @@
 
 import {useState} from 'react';
 
-import type {ExternalSiteItem} from '@/lib/cms/external-sites-core';
+import type {ExternalSiteItem} from '@/lib/cms/external-sites-core.mjs';
 
 type EditorItem = {
   id: string;

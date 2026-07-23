@@ -23,7 +23,7 @@ import {AdminActionAlert} from '../../_components/admin-feedback';
 import {CheckboxField, SubmitButton, TextAreaField, TextField} from '../../_components/admin-fields';
 import {ExternalSitesEditor} from '../../_components/external-sites-editor';
 import {PageHeader, Panel} from '../../_components/admin-shell';
-import type {ExternalSiteItem} from '@/lib/cms/external-sites-core';
+import type {ExternalSiteItem} from '@/lib/cms/external-sites-core.mjs';
 
 type FooterLocaleData = {
   locale: Locale;
