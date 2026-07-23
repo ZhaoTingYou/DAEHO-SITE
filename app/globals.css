@@ -611,7 +611,7 @@ select {
 .home-feature-link::after {
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: 6px;
   left: 0;
   height: 1px;
   content: "";

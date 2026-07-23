@@ -129,6 +129,14 @@ test('Home mobile body and action copy use a 16px floor', () => {
   assert.match(homePage, /max-w-\[360px\] whitespace-pre-line font-body text-\[16px\].*md:text-\[15px\]/);
 });
 
+test('Home feature CTA keeps its red underline close to the label', () => {
+  assert.match(
+    globals,
+    /\.home-feature-link::after\s*\{[\s\S]*?bottom:\s*6px;/,
+    'the underline should sit above the bottom edge of the 44px tap target'
+  );
+});
+
 test('Home Signature title wraps on mobile and stays unwrapped on desktop', () => {
   assert.match(homePage, /<h2 className="font-body text-\[16px\] font-normal leading-\[1\.75\] text-primary md:text-\[15px\] md:whitespace-nowrap">/);
 });
