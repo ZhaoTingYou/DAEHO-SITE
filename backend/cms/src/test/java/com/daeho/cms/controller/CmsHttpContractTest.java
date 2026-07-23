@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.daeho.cms.config.CmsProperties;
 import com.daeho.cms.error.ApiExceptionHandler;
 import com.daeho.cms.repository.CmsRepository;
+import com.daeho.cms.repository.TrafficAnalyticsRepository;
 import com.daeho.cms.security.AdminAuth;
 import com.daeho.cms.service.AdminPasswordService;
 import com.daeho.cms.service.CmsSnapshotService;
@@ -28,6 +29,7 @@ import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.EmailNotificationService;
 import com.daeho.cms.service.MediaStorageService;
 import com.daeho.cms.service.RequestValidation;
+import com.daeho.cms.service.TrafficAnalyticsService;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,6 +50,7 @@ class CmsHttpContractTest {
   private EmailNotificationService email;
   private CmsSnapshotService snapshots;
   private CmsStatusService status;
+  private AnalyticsServiceStub analytics;
   private MockMvc mvc;
 
   @BeforeEach
@@ -57,6 +60,7 @@ class CmsHttpContractTest {
     email = mock(EmailNotificationService.class);
     snapshots = mock(CmsSnapshotService.class);
     status = mock(CmsStatusService.class);
+    analytics = new AnalyticsServiceStub();
 
     var auth = new AdminAuth(new CmsProperties(
         ADMIN_KEY,
@@ -78,7 +82,9 @@ class CmsHttpContractTest {
     mvc = MockMvcBuilders.standaloneSetup(
             new AdminCmsController(auth, repository, validation, mediaStorage, email, snapshots, status, mock(AdminPasswordService.class)),
             new PublicCmsController(repository, validation),
-            new PublicInquiryController(repository, validation, email)
+            new PublicInquiryController(repository, validation, email),
+            new PublicAnalyticsController(analytics),
+            new AdminAnalyticsController(auth, analytics)
         )
         .setControllerAdvice(new ApiExceptionHandler())
         .build();
@@ -351,6 +357,40 @@ class CmsHttpContractTest {
         .andExpect(jsonPath("$.issues[0].path").exists());
   }
 
+  @Test
+  void servesTrafficAnalyticsCollectionAndReports() throws Exception {
+    mvc.perform(post("/api/cms/analytics/page-view")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(validAnalyticsPayload()))
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.accepted").value(true))
+        .andExpect(jsonPath("$.inserted").value(true));
+
+    analytics.inserted = false;
+    mvc.perform(post("/api/cms/analytics/page-view")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(validAnalyticsPayload()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.inserted").value(false));
+
+    mvc.perform(get("/api/admin/analytics/summary?from=2026-07-01&to=2026-07-23")
+            .header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.result").value("summary"));
+
+    mvc.perform(get("/api/admin/analytics/visits")
+            .param("from", "2026-07-01")
+            .param("to", "2026-07-23"))
+        .andExpect(status().isUnauthorized());
+
+    mvc.perform(get("/api/admin/analytics/visits")
+            .param("from", "2026-07-01")
+            .param("to", "2026-07-23")
+            .header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.result").value("visits"));
+  }
+
   private Map<String, Object> page() {
     return Map.of(
         "pageKey", "home",
@@ -539,11 +579,53 @@ class CmsHttpContractTest {
         """;
   }
 
+  private String validAnalyticsPayload() {
+    return """
+        {
+          "sessionId":"00000000-0000-4000-8000-000000000001",
+          "pageViewId":"00000000-0000-4000-8000-000000000002",
+          "source":"instagram",
+          "medium":"social",
+          "campaign":"always_on",
+          "content":"profile_link",
+          "referrerHost":"instagram.com",
+          "landingPath":"/en",
+          "pagePath":"/en/collections",
+          "pageTitle":"Collections",
+          "locale":"en",
+          "deviceClass":"desktop"
+        }
+        """;
+  }
+
   private Map<String, Object> map(Object... values) {
     var map = new LinkedHashMap<String, Object>();
     for (var index = 0; index < values.length; index += 2) {
       map.put((String) values[index], values[index + 1]);
     }
     return map;
+  }
+
+  private static class AnalyticsServiceStub extends TrafficAnalyticsService {
+    private boolean inserted = true;
+
+    AnalyticsServiceStub() {
+      super(new TrafficAnalyticsRepository(null));
+    }
+
+    @Override
+    public TrafficAnalyticsRepository.RecordResult record(Map<String, Object> body) {
+      return new TrafficAnalyticsRepository.RecordResult(inserted);
+    }
+
+    @Override
+    public Map<String, Object> summary(String from, String to, String channel) {
+      return Map.of("result", "summary");
+    }
+
+    @Override
+    public Map<String, Object> visits(String from, String to, String channel, Object page, Object pageSize) {
+      return Map.of("result", "visits");
+    }
   }
 }
