@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {type CSSProperties, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
 
 import {ChronicleMobile} from './chronicle-mobile';
-import {getChronicleYearWindow} from './chronicle-year-window';
+import {getChronicleYearReelLayout} from './chronicle-year-window';
 
 export type ChronicleHorizontalSlide = {
   year: string;
@@ -92,8 +92,7 @@ export function ChronicleHorizontal({
     () => slides.map((slide, index) => ({index, year: slide.year})),
     [slides]
   );
-  const {start, end} = getChronicleYearWindow(yearStops.length, activeIndex);
-  const visibleYearStops = yearStops.slice(start, end);
+  const yearReel = getChronicleYearReelLayout(yearStops.length, activeIndex);
   const previousYear = yearStops[activeIndex - 1]?.year;
   const nextYear = yearStops[activeIndex + 1]?.year;
 
@@ -445,17 +444,18 @@ export function ChronicleHorizontal({
         >
           <span aria-hidden="true">↑</span>
         </button>
-        <div
-          className={[
-            'chronicle-year-nav__window',
-            start > 0 ? 'has-before' : '',
-            end < yearStops.length ? 'has-after' : ''
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          <div className="chronicle-year-nav__list">
-            {visibleYearStops.map((stop) => (
+        <div className="chronicle-year-nav__window">
+          <div
+            className="chronicle-year-nav__list"
+            style={
+              {
+                '--chronicle-active-index': yearReel.activeIndex,
+                '--chronicle-center-row': yearReel.centerRow,
+                '--chronicle-reel-offset': `${(yearReel.centerRow - yearReel.activeIndex) * 44}px`
+              } as CSSProperties
+            }
+          >
+            {yearStops.map((stop) => (
               <button
                 className={`chronicle-year-nav__year ${activeIndex === stop.index ? 'is-active' : ''}`}
                 type="button"
