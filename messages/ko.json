@@ -562,13 +562,20 @@
         ],
         "firstRecords": [
           {
+            "frontTitle": "국내 최초 이니셜 조각 적용",
             "image": "legacy_achievement_01.png"
           },
           {
+            "frontTitle": "국내 최초 엔티크 블랙 코팅 적용",
             "image": "legacy_achievement_02.png"
           },
           {
+            "frontTitle": "국내 최초 반지 내부 디자인 적용",
             "image": "legacy_achievement_03.png"
+          },
+          {
+            "frontTitle": "국내 최초 기록 04",
+            "image": "legacy_achievement_04.png"
           }
         ],
         "marketFeatures": [

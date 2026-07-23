@@ -75,6 +75,20 @@ type AchievementPageCopy = {
   marketFeatures: MarketFeature[];
 };
 
+const fallbackFirstRecordImages = [
+  'legacy_achievement_01.png',
+  'legacy_achievement_02.png',
+  'legacy_achievement_03.png',
+  'legacy_achievement_04.png'
+] as const;
+
+function createFallbackFirstRecords(titlePrefix: string): FirstRecord[] {
+  return fallbackFirstRecordImages.map((image, index) => ({
+    title: `${titlePrefix} ${String(index + 1).padStart(2, '0')}`,
+    image
+  }));
+}
+
 const defaultPageCopy = {
   ko: {
     heroLabel: 'ACHIEVEMENTS',
@@ -125,24 +139,7 @@ const defaultPageCopy = {
         body: '처음부터 끝까지\n전 공정 책임제'
       }
     ],
-    firstRecords: [
-      {
-        title: '국내 최초 이니셜 조각 적용',
-        image: 'legacy_achievement_01.png'
-      },
-      {
-        title: '국내 최초 엔티크 블랙 코팅 적용',
-        image: 'legacy_achievement_02.png'
-      },
-      {
-        title: '국내 최초 반지 내부 디자인 적용',
-        image: 'legacy_achievement_03.png'
-      },
-      {
-        title: '국내 최초 기록 04',
-        image: 'legacy_achievement_04.png'
-      }
-    ],
+    firstRecords: [],
     marketFeatures: [
       {
         value: '95%',
@@ -215,24 +212,7 @@ const defaultPageCopy = {
         body: 'Full-process responsibility\nfrom start to finish'
       }
     ],
-    firstRecords: [
-      {
-        title: 'First domestic application of initial engraving',
-        image: 'legacy_achievement_01.png'
-      },
-      {
-        title: 'First domestic application of antique black coating',
-        image: 'legacy_achievement_02.png'
-      },
-      {
-        title: 'First domestic approach to interior ring design',
-        image: 'legacy_achievement_03.png'
-      },
-      {
-        title: 'DAEHO first record 04',
-        image: 'legacy_achievement_04.png'
-      }
-    ],
+    firstRecords: [],
     marketFeatures: [
       {
         value: '95%',
@@ -262,6 +242,7 @@ function resolveAchievementCopy(locale: Locale, content: AchievementContent): Ac
   const fallback = defaultPageCopy[locale];
   const copy = content.copy ?? {};
   const firstRecords = normalizeFirstRecords(copy.firstRecords);
+  const fallbackFirstRecords = createFallbackFirstRecords(fallback.firstHeading);
   const marketFeatures = normalizeMarketFeatures(copy.marketFeatures);
 
   return {
@@ -269,7 +250,7 @@ function resolveAchievementCopy(locale: Locale, content: AchievementContent): Ac
     ...copy,
     introLines: copy.introLines?.length ? copy.introLines : fallback.introLines,
     statBand: copy.statBand?.length ? copy.statBand : fallback.statBand,
-    firstRecords: firstRecords.length > 0 ? firstRecords : fallback.firstRecords,
+    firstRecords: firstRecords.length > 0 ? firstRecords : fallbackFirstRecords,
     marketFeatures: marketFeatures.length > 0 ? marketFeatures : fallback.marketFeatures
   };
 }

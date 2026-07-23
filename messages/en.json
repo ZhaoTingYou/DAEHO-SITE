@@ -562,13 +562,20 @@
         ],
         "firstRecords": [
           {
+            "frontTitle": "First domestic application of initial engraving",
             "image": "legacy_achievement_01.png"
           },
           {
+            "frontTitle": "First domestic application of antique black coating",
             "image": "legacy_achievement_02.png"
           },
           {
+            "frontTitle": "First domestic approach to interior ring design",
             "image": "legacy_achievement_03.png"
+          },
+          {
+            "frontTitle": "DAEHO first record 04",
+            "image": "legacy_achievement_04.png"
           }
         ],
         "marketFeatures": [

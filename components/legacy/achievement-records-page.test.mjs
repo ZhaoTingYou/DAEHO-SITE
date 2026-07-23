@@ -8,6 +8,13 @@ const cardSource = existsSync(cardSourceUrl) ? readFileSync(cardSourceUrl, 'utf8
 const pentagonSource = readFileSync(new URL('./achievement-pentagon-stats.tsx', import.meta.url), 'utf8');
 const renderSource = `${source}\n${cardSource}`;
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
+const mobileCssSource = readFileSync(new URL('../../styles/mobile.css', import.meta.url), 'utf8');
+const localeMessages = Object.fromEntries(
+  ['ko', 'en'].map((locale) => [
+    locale,
+    JSON.parse(readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), 'utf8'))
+  ])
+);
 
 test('achievement first records render up to four static title-above-image cards without hover panels or pagination', () => {
   assert.ok(source.includes('<AchievementRecordGallery'), 'page should render first records through the static image gallery');
@@ -39,17 +46,26 @@ test('achievement first record CMS items expose the image-above title before the
   assert.equal(firstRecordsField?.itemFields[1]?.type, 'image');
 });
 
-test('achievement first record fallback data has four localized titled records', () => {
-  const fallbackBlock = source.match(/firstRecords: \[[\s\S]*?\],\n    marketFeatures:/)?.[0] ?? '';
+test('achievement runtime locale messages have four localized titled fallback records', () => {
+  assert.deepEqual(localeMessages.ko.legacyPages.achievement.copy.firstRecords, [
+    {frontTitle: '국내 최초 이니셜 조각 적용', image: 'legacy_achievement_01.png'},
+    {frontTitle: '국내 최초 엔티크 블랙 코팅 적용', image: 'legacy_achievement_02.png'},
+    {frontTitle: '국내 최초 반지 내부 디자인 적용', image: 'legacy_achievement_03.png'},
+    {frontTitle: '국내 최초 기록 04', image: 'legacy_achievement_04.png'}
+  ]);
+  assert.deepEqual(localeMessages.en.legacyPages.achievement.copy.firstRecords, [
+    {frontTitle: 'First domestic application of initial engraving', image: 'legacy_achievement_01.png'},
+    {frontTitle: 'First domestic application of antique black coating', image: 'legacy_achievement_02.png'},
+    {frontTitle: 'First domestic approach to interior ring design', image: 'legacy_achievement_03.png'},
+    {frontTitle: 'DAEHO first record 04', image: 'legacy_achievement_04.png'}
+  ]);
+});
 
-  assert.match(fallbackBlock, /image: 'legacy_achievement_01\.png'/);
-  assert.match(fallbackBlock, /image: 'legacy_achievement_02\.png'/);
-  assert.match(fallbackBlock, /image: 'legacy_achievement_03\.png'/);
-  assert.match(fallbackBlock, /image: 'legacy_achievement_04\.png'/);
-  assert.match(source, /title: '국내 최초 이니셜 조각 적용'/);
-  assert.match(source, /title: 'First domestic application of initial engraving'/);
-  assert.match(source, /title: '국내 최초 기록 04'/);
-  assert.match(source, /title: 'DAEHO first record 04'/);
+test('achievement component keeps only a generic four-image safety fallback', () => {
+  assert.ok(source.includes('const fallbackFirstRecordImages = ['), 'the component should retain a four-image safety fallback');
+  assert.equal((source.match(/legacy_achievement_0[1-4]\.png/g) ?? []).length, 8, 'the four FIRST RECORDS safety images should coexist with four market image references');
+  assert.ok(source.includes("title: `${titlePrefix} ${String(index + 1).padStart(2, '0')}`"), 'the safety fallback should derive neutral titles from the localized section heading');
+  assert.doesNotMatch(source, /title: '국내 최초 이니셜 조각 적용'|title: 'First domestic application of initial engraving'/);
   assert.doesNotMatch(source, /backTitle|hoverText/);
 });
 
@@ -71,10 +87,23 @@ test('achievement first record gallery uses a one, two, four-column responsive s
   );
 });
 
+test('achievement mobile styles do not override the gallery gap or impose an aspect ratio on title-plus-image cards', () => {
+  assert.doesNotMatch(
+    mobileCssSource,
+    /\.mobile-page-shell \.achievement-record-gallery\s*\{[^}]*gap:\s*0;/,
+    'mobile CSS must preserve the gallery gap-6 spacing'
+  );
+  assert.doesNotMatch(
+    mobileCssSource,
+    /\.mobile-page-shell \.achievement-record-gallery__item\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*3;/,
+    'mobile CSS must not flatten the title-plus-portrait card to 4:3'
+  );
+});
+
 test('achievement first record normalization prefers frontTitle, falls back to title, and never fills configured records from fallback images', () => {
   assert.ok(source.includes("title: record.frontTitle?.trim() || record.title?.trim() || ''"), 'legacy frontTitle should be displayed before the trimmed title compatibility fallback');
   assert.ok(!source.includes('fallbackRecords[index]?.image'), 'configured records should not receive synthesized fallback images');
-  assert.ok(source.includes('firstRecords: firstRecords.length > 0 ? firstRecords : fallback.firstRecords'), 'the complete fallback list should only be used when no configured records are valid');
+  assert.ok(source.includes('firstRecords: firstRecords.length > 0 ? firstRecords : fallbackFirstRecords'), 'the complete safety fallback list should only be used when no configured records are valid');
 });
 
 test('achievement mobile stat section hides the pentagon diagram', () => {
