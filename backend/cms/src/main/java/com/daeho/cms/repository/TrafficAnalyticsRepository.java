@@ -1,6 +1,7 @@
 package com.daeho.cms.repository;
 
 import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class TrafficAnalyticsRepository {
+  private static final String CLEANUP_DATE_SETTING = "traffic_analytics_cleanup_date";
   private final JdbcTemplate jdbc;
 
   public TrafficAnalyticsRepository(JdbcTemplate jdbc) {
@@ -190,6 +192,23 @@ public class TrafficAnalyticsRepository {
     int pageViews = jdbc.update("DELETE FROM cms_analytics_pageviews WHERE viewed_at < ?", cutoff);
     int sessions = jdbc.update("DELETE FROM cms_analytics_sessions WHERE last_activity_at < ?", cutoff);
     return pageViews + sessions;
+  }
+
+  @Transactional
+  public boolean cleanupExpiredIfDue(OffsetDateTime cutoff, LocalDate cleanupDate) {
+    int claimed = jdbc.update("""
+        INSERT INTO cms_admin_settings (setting_key, setting_value)
+        VALUES (?, ?)
+        ON CONFLICT (setting_key) DO UPDATE
+        SET setting_value = EXCLUDED.setting_value,
+            updated_at = now()
+        WHERE cms_admin_settings.setting_value < EXCLUDED.setting_value
+        """, CLEANUP_DATE_SETTING, cleanupDate.toString());
+    if (claimed == 0) {
+      return false;
+    }
+    deleteExpired(cutoff);
+    return true;
   }
 
   private Map<String, Object> visitRow(Map<String, Object> row) {

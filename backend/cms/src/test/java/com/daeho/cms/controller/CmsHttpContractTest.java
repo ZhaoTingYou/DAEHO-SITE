@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.daeho.cms.config.CmsProperties;
 import com.daeho.cms.error.ApiExceptionHandler;
+import com.daeho.cms.error.ValidationFailedException;
 import com.daeho.cms.repository.CmsRepository;
 import com.daeho.cms.repository.TrafficAnalyticsRepository;
 import com.daeho.cms.security.AdminAuth;
@@ -31,11 +32,13 @@ import com.daeho.cms.service.MediaStorageService;
 import com.daeho.cms.service.RequestValidation;
 import com.daeho.cms.service.TrafficAnalyticsService;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -378,6 +381,9 @@ class CmsHttpContractTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.result").value("summary"));
 
+    mvc.perform(get("/api/admin/analytics/summary?from=2026-07-01&to=2026-07-23"))
+        .andExpect(status().isUnauthorized());
+
     mvc.perform(get("/api/admin/analytics/visits")
             .param("from", "2026-07-01")
             .param("to", "2026-07-23"))
@@ -389,6 +395,41 @@ class CmsHttpContractTest {
             .header("x-admin-api-key", ADMIN_KEY))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.result").value("visits"));
+
+    mvc.perform(get("/api/admin/analytics/summary").header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk());
+    assertEquals("", analytics.summaryChannel);
+    assertEquals(29, java.time.temporal.ChronoUnit.DAYS.between(
+        LocalDate.parse(analytics.summaryFrom),
+        LocalDate.parse(analytics.summaryTo)
+    ));
+
+    mvc.perform(get("/api/admin/analytics/visits").header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk());
+    assertEquals("", analytics.visitsChannel);
+    assertEquals("1", analytics.visitsPage);
+    assertEquals("25", analytics.visitsPageSize);
+  }
+
+  @Test
+  void returnsStructuredAnalyticsRequestErrors() throws Exception {
+    analytics.recordError = new ValidationFailedException(List.of(Map.of(
+        "path", "pagePath",
+        "message", "Expected a slash-prefixed path."
+    )));
+    mvc.perform(post("/api/cms/analytics/page-view")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(validAnalyticsPayload()))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error").value("Validation failed"))
+        .andExpect(jsonPath("$.issues[0].path").value("pagePath"));
+
+    mvc.perform(post("/api/cms/analytics/page-view")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error").value("Invalid JSON request."))
+        .andExpect(jsonPath("$.issues[0].path").value("body"));
   }
 
   private Map<String, Object> page() {
@@ -608,6 +649,13 @@ class CmsHttpContractTest {
 
   private static class AnalyticsServiceStub extends TrafficAnalyticsService {
     private boolean inserted = true;
+    private ValidationFailedException recordError;
+    private String summaryFrom;
+    private String summaryTo;
+    private String summaryChannel;
+    private String visitsChannel;
+    private Object visitsPage;
+    private Object visitsPageSize;
 
     AnalyticsServiceStub() {
       super(new TrafficAnalyticsRepository(null));
@@ -615,16 +663,25 @@ class CmsHttpContractTest {
 
     @Override
     public TrafficAnalyticsRepository.RecordResult record(Map<String, Object> body) {
+      if (recordError != null) {
+        throw recordError;
+      }
       return new TrafficAnalyticsRepository.RecordResult(inserted);
     }
 
     @Override
     public Map<String, Object> summary(String from, String to, String channel) {
+      summaryFrom = from;
+      summaryTo = to;
+      summaryChannel = channel;
       return Map.of("result", "summary");
     }
 
     @Override
     public Map<String, Object> visits(String from, String to, String channel, Object page, Object pageSize) {
+      visitsChannel = channel;
+      visitsPage = page;
+      visitsPageSize = pageSize;
       return Map.of("result", "visits");
     }
   }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.daeho.cms.error.ValidationFailedException;
 import com.daeho.cms.repository.TrafficAnalyticsRepository;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -68,6 +69,33 @@ class TrafficAnalyticsServiceTest {
   }
 
   @Test
+  void stripsPrivateQueryValuesAndFragmentsFromStoredPaths() {
+    service.record(with(
+        "landingPath", "/en?utm_source=instagram&email=private@example.com&message=secret#ignored",
+        "pagePath", "/en/contact?gclid=abc123&engraving=private&utm_campaign=launch#details"
+    ));
+
+    assertEquals("/en?utm_source=instagram", repository.lastPayload.get("landingPath"));
+    assertEquals("/en/contact?gclid=abc123&utm_campaign=launch", repository.lastPayload.get("pagePath"));
+    assertFalse(repository.lastPayload.values().stream().map(Object::toString)
+        .anyMatch(value -> value.contains("private@example.com") || value.contains("secret") || value.contains("engraving")));
+  }
+
+  @Test
+  void treatsInternalReferrersAsDirectAndRejectsMalformedHosts() {
+    service.record(payload("", "", "daeho.works"));
+    assertEquals("", repository.lastPayload.get("referrerHost"));
+    assertEquals("direct", repository.lastPayload.get("channel"));
+
+    service.record(payload("", "", "www.daeho.works"));
+
+    assertEquals("", repository.lastPayload.get("referrerHost"));
+    assertEquals("direct", repository.lastPayload.get("channel"));
+    assertEquals("(direct)", repository.lastPayload.get("source"));
+    assertThrows(ValidationFailedException.class, () -> service.record(payload("", "", "not a hostname")));
+  }
+
+  @Test
   void validatesReportDatesAndVisitPageSizes() {
     assertThrows(ValidationFailedException.class, () -> service.summary("2026-07-23", "2026-07-01", ""));
     assertThrows(ValidationFailedException.class, () -> service.summary("not-a-date", "2026-07-23", ""));
@@ -89,12 +117,18 @@ class TrafficAnalyticsServiceTest {
   }
 
   @Test
-  void cleansExpiredAnalyticsOnlyOnceAfterAcceptedWrites() {
-    service.record(payload("instagram", "social", "google.com"));
-    service.record(with("pageViewId", UUID.randomUUID().toString()));
+  void keepsThePageViewSuccessfulAndRetriesCleanupAfterFailure() {
+    repository.cleanupFailure = true;
 
+    var first = service.record(payload("instagram", "social", "google.com"));
+    repository.cleanupFailure = false;
+    var second = service.record(with("pageViewId", UUID.randomUUID().toString()));
+
+    assertTrue(first.inserted());
+    assertTrue(second.inserted());
     assertEquals(2, repository.recordCalls);
-    assertEquals(1, repository.deleteExpiredCalls);
+    assertEquals(2, repository.cleanupAttempts);
+    assertEquals(LocalDate.now(java.time.ZoneOffset.UTC), repository.lastCleanupDate);
     assertFalse(repository.lastCutoff.isAfter(OffsetDateTime.now().minusMonths(14).plusMinutes(1)));
   }
 
@@ -117,6 +151,10 @@ class TrafficAnalyticsServiceTest {
 
   private static Map<String, Object> with(String key, Object value) {
     return with(key, value, null, null, null, null, null, null, null, null, null, null);
+  }
+
+  private static Map<String, Object> with(String key1, Object value1, String key2, Object value2) {
+    return with(key1, value1, key2, value2, null, null, null, null, null, null, null, null);
   }
 
   private static Map<String, Object> with(
@@ -149,9 +187,11 @@ class TrafficAnalyticsServiceTest {
 
   private static class TrackingRepository extends TrafficAnalyticsRepository {
     private int recordCalls;
-    private int deleteExpiredCalls;
+    private int cleanupAttempts;
+    private boolean cleanupFailure;
     private Map<String, Object> lastPayload = Map.of();
     private OffsetDateTime lastCutoff;
+    private LocalDate lastCleanupDate;
     private String summaryChannel;
     private OffsetDateTime summaryFrom;
     private OffsetDateTime summaryTo;
@@ -187,10 +227,14 @@ class TrafficAnalyticsServiceTest {
     }
 
     @Override
-    public int deleteExpired(OffsetDateTime cutoff) {
-      deleteExpiredCalls++;
+    public boolean cleanupExpiredIfDue(OffsetDateTime cutoff, LocalDate cleanupDate) {
+      cleanupAttempts++;
       lastCutoff = cutoff;
-      return 0;
+      lastCleanupDate = cleanupDate;
+      if (cleanupFailure) {
+        throw new IllegalStateException("cleanup unavailable");
+      }
+      return true;
     }
   }
 }

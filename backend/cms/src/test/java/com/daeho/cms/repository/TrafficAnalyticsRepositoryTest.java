@@ -2,9 +2,11 @@ package com.daeho.cms.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -206,6 +208,56 @@ class TrafficAnalyticsRepositoryTest {
     assertTrue(calls.get(1).sql().contains("DELETE FROM cms_analytics_sessions WHERE last_activity_at < ?"));
     assertEquals(List.of(FROM), Arrays.asList(calls.get(0).args()));
     assertEquals(List.of(FROM), Arrays.asList(calls.get(1).args()));
+  }
+
+  @Test
+  void claimsTheUtcCleanupDateBeforeDeletingExpiredAnalytics() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.updateResult = call -> call.sql().contains("cms_admin_settings") ? 1 : 2;
+    var repository = new TrafficAnalyticsRepository(jdbc);
+    var cleanupDate = LocalDate.of(2026, 7, 23);
+
+    assertTrue(repository.cleanupExpiredIfDue(FROM, cleanupDate));
+
+    var calls = jdbc.calls();
+    assertEquals(3, calls.size());
+    assertTrue(calls.get(0).sql().contains("INSERT INTO cms_admin_settings"));
+    assertTrue(calls.get(0).sql().contains("setting_value < EXCLUDED.setting_value"));
+    assertEquals(List.of("traffic_analytics_cleanup_date", "2026-07-23"), Arrays.asList(calls.get(0).args()));
+    assertTrue(calls.get(1).sql().contains("DELETE FROM cms_analytics_pageviews"));
+    assertTrue(calls.get(2).sql().contains("DELETE FROM cms_analytics_sessions"));
+  }
+
+  @Test
+  void skipsCleanupWhenAnotherProcessAlreadyClaimedToday() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.updateResult = call -> 0;
+    var repository = new TrafficAnalyticsRepository(jdbc);
+
+    assertFalse(repository.cleanupExpiredIfDue(FROM, LocalDate.of(2026, 7, 23)));
+    assertEquals(1, jdbc.calls().size());
+    assertTrue(jdbc.calls().get(0).sql().contains("cms_admin_settings"));
+  }
+
+  @Test
+  void leavesTheClaimRetryableWhenCleanupFails() {
+    var jdbc = new RecordingJdbcTemplate();
+    var pageViewDeletes = new AtomicInteger();
+    jdbc.updateResult = call -> {
+      if (call.sql().contains("cms_admin_settings")) {
+        return 1;
+      }
+      if (call.sql().contains("cms_analytics_pageviews") && pageViewDeletes.getAndIncrement() == 0) {
+        throw new IllegalStateException("cleanup failed");
+      }
+      return 1;
+    };
+    var repository = new TrafficAnalyticsRepository(jdbc);
+    var cleanupDate = LocalDate.of(2026, 7, 23);
+
+    assertThrows(IllegalStateException.class, () -> repository.cleanupExpiredIfDue(FROM, cleanupDate));
+    assertTrue(repository.cleanupExpiredIfDue(FROM, cleanupDate));
+    assertEquals(2, jdbc.callsMatching("cms_admin_settings").size());
   }
 
   private static Map<String, Object> payload(UUID pageViewId, String landingPath, String pagePath, String pageTitle) {

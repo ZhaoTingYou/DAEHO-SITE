@@ -1,5 +1,6 @@
 package com.daeho.cms.error;
 
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -31,6 +33,14 @@ public class ApiExceptionHandler {
   @ExceptionHandler(MissingServletRequestParameterException.class)
   public ResponseEntity<Map<String, String>> missingParameter(MissingServletRequestParameterException error) {
     return ResponseEntity.badRequest().body(Map.of("error", message(error, "Missing request parameter.")));
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<Map<String, Object>> malformedJson(HttpMessageNotReadableException error) {
+    return ResponseEntity.badRequest().body(Map.of(
+        "error", "Invalid JSON request.",
+        "issues", List.of(Map.of("path", "body", "message", "Expected valid JSON."))
+    ));
   }
 
   @ExceptionHandler(IllegalArgumentException.class)

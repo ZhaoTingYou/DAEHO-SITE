@@ -2,6 +2,7 @@ package com.daeho.cms.service;
 
 import com.daeho.cms.error.ValidationFailedException;
 import com.daeho.cms.repository.TrafficAnalyticsRepository;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -12,12 +13,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TrafficAnalyticsService {
+  private static final Logger log = LoggerFactory.getLogger(TrafficAnalyticsService.class);
   private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
   private static final Set<String> LOCALES = Set.of("ko", "en");
   private static final Set<String> DEVICES = Set.of("desktop", "tablet", "mobile");
@@ -25,6 +28,9 @@ public class TrafficAnalyticsService {
       "google", "naver", "instagram", "kakao", "qr", "social", "referral", "direct", "other"
   );
   private static final Set<Integer> PAGE_SIZES = Set.of(25, 50, 100);
+  private static final Set<String> ATTRIBUTION_PARAMETERS = Set.of(
+      "utm_id", "utm_source", "utm_medium", "utm_campaign", "utm_source_platform", "utm_term", "utm_content", "gclid", "dclid"
+  );
   private static final Pattern UUID_PATTERN = Pattern.compile(
       "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
   );
@@ -36,7 +42,6 @@ public class TrafficAnalyticsService {
   );
 
   private final TrafficAnalyticsRepository repository;
-  private final AtomicReference<LocalDate> cleanupDate = new AtomicReference<>();
 
   public TrafficAnalyticsService(TrafficAnalyticsRepository repository) {
     this.repository = repository;
@@ -45,9 +50,7 @@ public class TrafficAnalyticsService {
   public TrafficAnalyticsRepository.RecordResult record(Map<String, Object> body) {
     var payload = normalizePayload(body);
     var result = repository.recordPageView(payload);
-    if (result.inserted()) {
-      cleanupExpiredOnceToday();
-    }
+    cleanupExpiredOnceToday();
     return result;
   }
 
@@ -115,8 +118,8 @@ public class TrafficAnalyticsService {
     var issues = new ArrayList<Map<String, String>>();
     var sessionId = clean(value(body, "sessionId"), 36);
     var pageViewId = clean(value(body, "pageViewId"), 36);
-    var landingPath = clean(value(body, "landingPath"), 300);
-    var pagePath = clean(value(body, "pagePath"), 300);
+    var landingPath = sanitizePath("landingPath", value(body, "landingPath"), issues);
+    var pagePath = sanitizePath("pagePath", value(body, "pagePath"), issues);
     var locale = clean(value(body, "locale"), 8);
     var deviceClass = clean(value(body, "deviceClass"), 16);
     var referrerHost = cleanReferrerHost(value(body, "referrerHost"));
@@ -127,15 +130,13 @@ public class TrafficAnalyticsService {
     if (!UUID_PATTERN.matcher(pageViewId).matches()) {
       issues.add(issue("pageViewId", "Expected a UUID."));
     }
-    validatePath("landingPath", landingPath, issues);
-    validatePath("pagePath", pagePath, issues);
     if (!LOCALES.contains(locale)) {
       issues.add(issue("locale", "Expected locale to be ko or en."));
     }
     if (!DEVICES.contains(deviceClass)) {
       issues.add(issue("deviceClass", "Expected deviceClass to be desktop, tablet, or mobile."));
     }
-    if (!value(body, "referrerHost").isBlank() && referrerHost.isBlank()) {
+    if (!value(body, "referrerHost").isBlank() && normalizedHost(value(body, "referrerHost")).isBlank()) {
       issues.add(issue("referrerHost", "Expected an external referrer hostname."));
     }
     if (!issues.isEmpty()) {
@@ -166,12 +167,14 @@ public class TrafficAnalyticsService {
   }
 
   private void cleanupExpiredOnceToday() {
-    var today = LocalDate.now(ZoneOffset.UTC);
-    var previous = cleanupDate.get();
-    if (today.equals(previous) || !cleanupDate.compareAndSet(previous, today)) {
-      return;
+    try {
+      repository.cleanupExpiredIfDue(
+          OffsetDateTime.now(ZoneOffset.UTC).minusMonths(14),
+          LocalDate.now(ZoneOffset.UTC)
+      );
+    } catch (RuntimeException error) {
+      log.warn("Traffic analytics retention cleanup failed; a later page view will retry it.", error);
     }
-    repository.deleteExpired(OffsetDateTime.now(ZoneOffset.UTC).minusMonths(14));
   }
 
   private ReportRange parseRange(String from, String to) {
@@ -219,10 +222,39 @@ public class TrafficAnalyticsService {
     }
   }
 
-  private void validatePath(String path, String value, List<Map<String, String>> issues) {
+  private String sanitizePath(String path, String rawValue, List<Map<String, String>> issues) {
+    var value = rawValue == null ? "" : rawValue.trim();
     if (value.isBlank() || !value.startsWith("/")) {
       issues.add(issue(path, "Expected a slash-prefixed path."));
+      return "";
     }
+    try {
+      var uri = URI.create(value);
+      if (uri.isAbsolute() || uri.getRawAuthority() != null || uri.getRawPath() == null || uri.getRawPath().isBlank()) {
+        issues.add(issue(path, "Expected a slash-prefixed path."));
+        return "";
+      }
+      var query = allowedQuery(uri.getRawQuery());
+      return clean(uri.getRawPath() + (query.isBlank() ? "" : "?" + query), 300);
+    } catch (IllegalArgumentException error) {
+      issues.add(issue(path, "Expected a valid slash-prefixed path."));
+      return "";
+    }
+  }
+
+  private static String allowedQuery(String rawQuery) {
+    if (rawQuery == null || rawQuery.isBlank()) {
+      return "";
+    }
+    var allowed = new ArrayList<String>();
+    for (var part : rawQuery.split("&")) {
+      var separator = part.indexOf('=');
+      var key = separator < 0 ? part : part.substring(0, separator);
+      if (ATTRIBUTION_PARAMETERS.contains(key)) {
+        allowed.add(part);
+      }
+    }
+    return String.join("&", allowed);
   }
 
   private static boolean hostMatches(String host, String domain) {
@@ -230,6 +262,11 @@ public class TrafficAnalyticsService {
   }
 
   private static String cleanReferrerHost(String value) {
+    var host = normalizedHost(value);
+    return hostMatches(host, "daeho.works") ? "" : host;
+  }
+
+  private static String normalizedHost(String value) {
     var host = clean(value, 253).toLowerCase(Locale.ROOT).replaceFirst("^www\\.", "");
     return HOST_PATTERN.matcher(host).matches() ? host : "";
   }
