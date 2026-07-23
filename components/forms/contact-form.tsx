@@ -2,6 +2,7 @@
 
 import {type FormEvent, useState} from 'react';
 
+import {currentAnalyticsPagePath, trackAnalyticsEvent} from '@/lib/analytics';
 import {isLocale} from '@/lib/locales';
 
 type ContactFormProps = {
@@ -32,6 +33,11 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
       className="mobile-form space-y-5 pb-[calc(32px+env(safe-area-inset-bottom))] md:space-y-6 md:pb-0"
       onSubmit={async (event) => {
         if (await submitContactForm(event)) {
+          trackAnalyticsEvent('generate_lead', {
+            form_type: 'contact',
+            locale: getCurrentLocale(),
+            page_path: currentAnalyticsPagePath()
+          });
           setStatus('success');
         }
       }}

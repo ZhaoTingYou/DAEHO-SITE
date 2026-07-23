@@ -2,6 +2,7 @@
 
 import {type FormEvent, useState} from 'react';
 
+import {currentAnalyticsPagePath, trackAnalyticsEvent} from '@/lib/analytics';
 import {isLocale} from '@/lib/locales';
 
 type GolfInquiryFormProps = {
@@ -36,6 +37,11 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
       className="mobile-form grid gap-5 pb-[calc(32px+env(safe-area-inset-bottom))] md:gap-6 md:pb-0 md:grid-cols-2"
       onSubmit={async (event) => {
         if (await submitGolfInquiryForm(event)) {
+          trackAnalyticsEvent('generate_lead', {
+            form_type: 'golf',
+            locale: getCurrentLocale(),
+            page_path: currentAnalyticsPagePath()
+          });
           setStatus('success');
         }
       }}

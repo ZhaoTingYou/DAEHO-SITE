@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import {CookieSettingsButton} from '@/components/analytics/cookie-settings-button';
 import type {Locale} from '@/i18n/routing';
 import {externalLinks} from '@/lib/config';
 import {getLocaleMessages} from '@/lib/locale-messages';
@@ -187,6 +188,7 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
               <Link href={withLocale(locale, '/privacy')} className="footer-link footer-link--legal font-semibold text-primary">
                 {legal.privacy}
               </Link>
+              <CookieSettingsButton locale={locale} />
             </div>
           </div>
 

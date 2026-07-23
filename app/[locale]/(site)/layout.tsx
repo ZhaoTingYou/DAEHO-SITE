@@ -2,6 +2,7 @@ import {hasLocale} from 'next-intl';
 import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
+import {AnalyticsProvider} from '@/components/analytics/analytics-provider';
 import {SiteFooter} from '@/components/site/site-footer';
 import {SiteCursor} from '@/components/site/site-cursor';
 import {SiteHeader} from '@/components/site/site-header';
@@ -24,13 +25,13 @@ export default async function SiteLayout({children, params}: Props) {
   const golfEnabled = await isGolfEnabledForSite();
 
   return (
-    <>
+    <AnalyticsProvider locale={locale as Locale}>
       <SiteCursor />
       <div className="site-cursor-scope">
         <SiteHeader locale={locale as Locale} golfEnabled={golfEnabled} />
         {children}
         <SiteFooter locale={locale as Locale} golfEnabled={golfEnabled} />
       </div>
-    </>
+    </AnalyticsProvider>
   );
 }

@@ -2201,7 +2201,7 @@
     "privacy": {
       "eyebrow": "LEGAL",
       "title": "Privacy Policy",
-      "effective": "Effective date: 2026-06-27",
+      "effective": "Effective date: 2026-07-23",
       "notice": "DAEHO does not currently provide member registration, shopping cart, or online payment services through the official website. This Policy is based on personal information processed when users browse brand and product information, submit Contact or Golf Inquiry forms, and receive consultation responses.",
       "intro": "DAEHO (the “Company”) complies with the Personal Information Protection Act of Korea and other applicable laws. The Company establishes and discloses this Privacy Policy to protect users’ personal information safely. The Company processes only the personal information necessary for the stated purposes and does not use it for unrelated purposes.",
       "sections": [
@@ -2258,8 +2258,9 @@
           "heading": "Article 6 (Overseas Transfer of Personal Information)",
           "body": [
             "Some services, including Site operation, server hosting, security management, email sending, and backup, may be processed through infrastructure provided by overseas service providers.",
-            "Where personal information is transferred overseas, the Company will confirm the recipient, country, transferred items, purpose of transfer, retention and use period, and implement necessary protective measures in accordance with applicable law.",
-            "When specific details of overseas transfer are confirmed, the Company will provide notice through this Policy or separate notice."
+            "When a user consents to analytics, online and cookie identifiers, browser and device information, approximate region, referral source, visited pages, and usage events may be transferred to Google LLC and processed in Google service locations, including the United States, to provide Google Analytics.",
+            "The transfer occurs over the network when the consenting user accesses and uses the Site, for the purpose of analyzing acquisition sources and Site usage. User-level and event-level Google Analytics data is configured to be retained for 14 months.",
+            "Users may reject analytics on their first visit or withdraw consent through Cookie settings in the Footer. Rejection or withdrawal stops analytics while the Site's general functions remain available."
           ]
         },
         {
@@ -2294,8 +2295,9 @@
           "heading": "Article 10 (Cookies and Similar Technologies)",
           "body": [
             "The Company may use cookies or similar technologies for stable Site operation, language or session maintenance, security, and improved usability.",
-            "Users may refuse or delete cookies through browser settings. However, restricting cookies may affect the smooth use of some functions.",
-            "If the Company uses visit statistics, advertising, or analytics tools in the future, the Company will provide notice of the purpose and opt-out method through this Policy or separate notice."
+            "Google Analytics is activated only after the user gives explicit consent. It is used to analyze acquisition sources, visited pages, browser and device types, and usage events. The _ga and _ga_* cookies may be used, and advertising personalization is not enabled.",
+            "Users may allow or reject analytics on their first visit and may change their choice at any time through Cookie settings in the Footer. Rejecting or withdrawing consent stops further Google Analytics collection and removes analytics cookies that the Site can identify.",
+            "Users may also refuse or delete cookies through browser settings. Rejecting analytics cookies does not prevent use of the Site's general functions."
           ]
         },
         {
@@ -2323,7 +2325,7 @@
           "body": [
             "The Company may amend this Policy due to changes in laws, service content, or personal information processing methods.",
             "Where there are material changes, the Company will post the effective date, changed content, and reasons on the Site.",
-            "This Privacy Policy is effective from June 27, 2026."
+            "This Privacy Policy is effective from July 23, 2026."
           ]
         }
       ]
