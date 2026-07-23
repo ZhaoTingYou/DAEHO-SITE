@@ -30,3 +30,16 @@ test('common page save synchronizes the dedicated external-sites payload', () =>
   assert.match(actions, /setObjectValueAtPath\(contentKo, externalSitesPath, externalSites\.ko\)/);
   assert.match(actions, /setObjectValueAtPath\(contentEn, externalSitesPath, externalSites\.en\)/);
 });
+
+test('footer CMS exposes one bilingual dynamic editor', () => {
+  const editor = readText('./_components/external-sites-editor.tsx');
+  const footerPage = readText('./(dashboard)/footer/page.tsx');
+  assert.match(editor, /name="externalSites\.payload"/);
+  assert.match(editor, /setItems/);
+  assert.match(editor, /addItem/);
+  assert.match(editor, /removeItem/);
+  assert.match(editor, /moveItem/);
+  assert.match(editor, /type="checkbox"/);
+  assert.match(footerPage, /<ExternalSitesEditor/);
+  assert.doesNotMatch(footerPage, /'footer\.externalSites\.daeho'/);
+});
