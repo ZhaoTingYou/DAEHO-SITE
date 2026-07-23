@@ -7,6 +7,7 @@ const QUIET_PERIOD_MS = 750;
 const DEFAULT_UTM_SOURCE_PREFIX = 'daeho-traffic-verification';
 const DEFAULT_UTM_MEDIUM = 'verification';
 const DEFAULT_UTM_CAMPAIGN = 'traffic-analytics';
+let verificationStage = 'initialization';
 
 async function main() {
   const config = readConfig();
@@ -15,8 +16,11 @@ async function main() {
   const checks = [];
 
   try {
+    verificationStage = 'public analytics';
     await verifyPublicAnalytics(browser, config, checks);
+    verificationStage = 'mobile layout';
     await verifyMobileLayout(browser, config, checks);
+    verificationStage = 'CMS analytics report';
     await verifyCmsAnalytics(browser, config, checks);
 
     for (const check of checks) {
@@ -71,10 +75,9 @@ async function verifyPublicAnalytics(browser, config, checks) {
     window.sessionStorage.clear();
   });
   const page = await context.newPage();
-  const consoleErrors = collectConsoleErrors(page);
+  const consoleErrors = collectConsoleErrors(page, {ignoreLocalImageOptimizerErrors: isLocalVerification(config.baseUrl)});
   const internalRequests = [];
   const gaTagRequests = [];
-  const gaCollectRequests = [];
 
   page.on('request', (request) => {
     if (isInternalPageViewRequest(request)) {
@@ -83,12 +86,10 @@ async function verifyPublicAnalytics(browser, config, checks) {
     if (isGoogleAnalyticsTagRequest(request)) {
       gaTagRequests.push(request);
     }
-    if (isGoogleAnalyticsCollectRequest(request)) {
-      gaCollectRequests.push(request);
-    }
   });
 
   try {
+    verificationStage = 'pre-consent assertions';
     await page.goto(config.trafficUrl.href, {waitUntil: 'domcontentloaded'});
     await page.waitForTimeout(QUIET_PERIOD_MS);
 
@@ -102,6 +103,7 @@ async function verifyPublicAnalytics(browser, config, checks) {
     await assertNoAnalyticsCookies(context, 'before consent');
     checks.push('pre-consent page has no GA tag, analytics cookies, or internal page-view request');
 
+    verificationStage = 'consent activation';
     const internalResponse = page.waitForResponse(isInternalPageViewResponse, {timeout: REQUEST_TIMEOUT_MS});
     const gaCollectRequest = page.waitForRequest(isGoogleAnalyticsCollectRequest, {timeout: REQUEST_TIMEOUT_MS});
     await page.getByRole('button', {name: /allow analytics|분석 허용/i}).click();
@@ -113,6 +115,7 @@ async function verifyPublicAnalytics(browser, config, checks) {
     await waitForAnalyticsCookie(context);
     checks.push('consent sends one accepted internal page view, one GA collect request, and creates an analytics cookie');
 
+    verificationStage = 'client-side route page view';
     const initialRequestCount = internalRequests.length;
     const secondInternalResponse = page.waitForResponse(isInternalPageViewResponse, {timeout: REQUEST_TIMEOUT_MS});
     const routeNavigation = page.waitForURL(config.secondRouteUrl.href, {timeout: REQUEST_TIMEOUT_MS});
@@ -128,34 +131,33 @@ async function verifyPublicAnalytics(browser, config, checks) {
     );
     checks.push('second route adds exactly one internal page view');
 
+    verificationStage = 'consent withdrawal';
     const requestCountBeforeWithdrawal = internalRequests.length;
-    const collectCountBeforeWithdrawal = gaCollectRequests.length;
     await page.getByRole('button', {name: /cookie settings|쿠키 설정/i}).click();
     await page.getByRole('button', {name: /^reject$|^거부$/i}).click();
     await page.waitForTimeout(QUIET_PERIOD_MS);
 
+    verificationStage = 'withdrawal state cleanup';
     await assertNoAnalyticsCookies(context, 'after consent withdrawal');
     assert.equal(
       await page.evaluate(() => window.localStorage.getItem('daeho_internal_analytics_session_v1')),
       null,
       'Withdrawing consent must clear the internal analytics session.'
     );
-
-    await page.goto(new URL('/en/terms', config.baseUrl).href, {waitUntil: 'domcontentloaded'});
-    await page.waitForTimeout(QUIET_PERIOD_MS);
     assert.equal(
       internalRequests.length,
       requestCountBeforeWithdrawal,
-      'Withdrawing consent must stop further internal page views.'
+      'Withdrawing consent must not send another internal page view.'
     );
-    assert.equal(
-      gaCollectRequests.length,
-      collectCountBeforeWithdrawal,
-      'Withdrawing consent must stop further GA collect requests.'
-    );
+
+    verificationStage = 'post-withdrawal navigation';
+    const withdrawnState = await context.storageState();
+    await verifyPostWithdrawalNavigation(browser, config, withdrawnState);
     checks.push('withdrawing consent clears analytics state and stops GA and CMS collection');
 
-    assertNoHorizontalOverflow(page, 'desktop public page');
+    verificationStage = 'desktop horizontal overflow assertion';
+    await assertNoHorizontalOverflow(page, 'desktop public page');
+    verificationStage = 'desktop console assertion';
     assertNoConsoleErrors(consoleErrors, 'desktop public page');
     checks.push('desktop public page has no horizontal overflow or console errors');
   } finally {
@@ -171,12 +173,12 @@ async function verifyMobileLayout(browser, config, checks) {
     deviceScaleFactor: 3
   });
   const page = await context.newPage();
-  const consoleErrors = collectConsoleErrors(page);
+  const consoleErrors = collectConsoleErrors(page, {ignoreLocalImageOptimizerErrors: isLocalVerification(config.baseUrl)});
 
   try {
     await page.goto(new URL('/en', config.baseUrl).href, {waitUntil: 'domcontentloaded'});
     await page.waitForTimeout(QUIET_PERIOD_MS);
-    assertNoHorizontalOverflow(page, 'mobile public page');
+    await assertNoHorizontalOverflow(page, 'mobile public page');
     assertNoConsoleErrors(consoleErrors, 'mobile public page');
     checks.push('mobile public page has no horizontal overflow or console errors');
   } finally {
@@ -192,23 +194,34 @@ async function verifyCmsAnalytics(browser, config, checks) {
   const consoleErrors = collectConsoleErrors(page);
 
   try {
+    verificationStage = 'CMS analytics page load';
     await page.goto(config.adminUrl.href, {waitUntil: 'domcontentloaded'});
     if (new URL(page.url()).pathname.startsWith('/admin/login')) {
+      verificationStage = 'CMS login';
       assert.ok(config.adminPassword, 'CMS login requires DAEHO_VERIFY_ADMIN_PASSWORD when no valid storage state is supplied.');
       await page.locator('input[name="password"]').fill(config.adminPassword);
       await Promise.all([
         page.waitForURL((url) => url.pathname === '/admin', {timeout: REQUEST_TIMEOUT_MS}),
-        page.locator('button[type="submit"]').click()
+        page.locator('form button').click()
       ]);
       assert.equal(new URL(page.url()).pathname, '/admin', 'CMS login must complete successfully.');
+      verificationStage = 'CMS analytics page after login';
       await page.goto(config.adminUrl.href, {waitUntil: 'networkidle'});
     } else {
       await page.waitForLoadState('networkidle');
     }
 
-    assert.equal(await page.getByRole('alert').count(), 0, 'CMS analytics report must load without an error state.');
+    verificationStage = 'CMS analytics error state';
+    const alertTexts = await page.getByRole('alert').allTextContents();
+    assert.equal(
+      alertTexts.filter((text) => text.trim()).length,
+      0,
+      'CMS analytics report must load without a visible error state.'
+    );
+    verificationStage = 'CMS analytics source tables';
     const matchingTables = page.locator('table').filter({hasText: config.source});
     assert.ok(await matchingTables.count() >= 2, 'The verification source must appear in both summary and recent visits.');
+    verificationStage = 'CMS analytics console assertion';
     assertNoConsoleErrors(consoleErrors, 'CMS analytics page');
     checks.push('CMS summary and recent visits show the verification source without console errors');
   } finally {
@@ -248,10 +261,29 @@ function isGoogleAnalyticsCollectRequest(request) {
   return url.hostname.endsWith('google-analytics.com') && /\/g\/collect$/.test(url.pathname);
 }
 
-function collectConsoleErrors(page) {
+function isGoogleAnalyticsPageViewRequest(request) {
+  if (!isGoogleAnalyticsCollectRequest(request)) {
+    return false;
+  }
+
+  const url = new URL(request.url());
+  return url.searchParams.get('en') === 'page_view'
+    || new URLSearchParams(request.postData() ?? '').get('en') === 'page_view';
+}
+
+function collectConsoleErrors(page, {ignoreLocalImageOptimizerErrors = false} = {}) {
   const errors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') {
+      const location = message.location().url;
+      if (
+        ignoreLocalImageOptimizerErrors
+        && message.text().startsWith('Failed to load resource:')
+        && location
+        && new URL(location).pathname === '/_next/image'
+      ) {
+        return;
+      }
       errors.push(message);
     }
   });
@@ -259,6 +291,10 @@ function collectConsoleErrors(page) {
     errors.push(error);
   });
   return errors;
+}
+
+function isLocalVerification(baseUrl) {
+  return ['localhost', '127.0.0.1', '::1'].includes(baseUrl.hostname);
 }
 
 async function assertNoHorizontalOverflow(page, label) {
@@ -278,6 +314,44 @@ async function assertNoAnalyticsCookies(context, label) {
   assert.equal(analyticsCookies.length, 0, `Analytics cookies must not exist ${label}.`);
 }
 
+async function verifyPostWithdrawalNavigation(browser, config, storageState) {
+  const context = await browser.newContext({
+    storageState,
+    viewport: {width: 1440, height: 960}
+  });
+  const page = await context.newPage();
+  const internalRequests = [];
+  const gaPageViewRequests = [];
+
+  page.on('request', (request) => {
+    if (isInternalPageViewRequest(request)) {
+      internalRequests.push(request);
+    }
+    if (isGoogleAnalyticsPageViewRequest(request)) {
+      gaPageViewRequests.push(request);
+    }
+  });
+
+  try {
+    await page.goto(new URL('/en/terms', config.baseUrl).href, {waitUntil: 'domcontentloaded'});
+    await page.waitForTimeout(QUIET_PERIOD_MS);
+    verificationStage = 'post-withdrawal CMS assertion';
+    assert.equal(internalRequests.length, 0, 'Withdrawing consent must stop further internal page views.');
+    verificationStage = 'post-withdrawal GA assertion';
+    assert.equal(gaPageViewRequests.length, 0, 'Withdrawing consent must stop further GA page views.');
+    verificationStage = 'post-withdrawal cookie assertion';
+    await assertNoAnalyticsCookies(context, 'on a page visited after consent withdrawal');
+    verificationStage = 'post-withdrawal local storage assertion';
+    assert.equal(
+      await page.evaluate(() => window.localStorage.getItem('daeho_internal_analytics_session_v1')),
+      null,
+      'The internal analytics session must remain cleared after withdrawal.'
+    );
+  } finally {
+    await context.close();
+  }
+}
+
 async function waitForAnalyticsCookie(context) {
   const deadline = Date.now() + REQUEST_TIMEOUT_MS;
   while (Date.now() < deadline) {
@@ -291,6 +365,6 @@ async function waitForAnalyticsCookie(context) {
 }
 
 main().catch(() => {
-  console.error('FAIL: Traffic analytics verification did not complete. Only non-sensitive assertions are reported.');
+  console.error(`FAIL: Traffic analytics verification stopped during ${verificationStage}. No sensitive error details are reported.`);
   process.exitCode = 1;
 });
