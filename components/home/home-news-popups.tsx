@@ -188,7 +188,7 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                 }}
               />
 
-              <div className="flex min-h-0 flex-col justify-center gap-[clamp(12px,1.5vw,21px)] px-2 py-8 md:h-full md:px-0 md:py-[clamp(34px,4vw,58px)]">
+              <div className="flex min-h-0 flex-col justify-center gap-[clamp(12px,1.5vw,21px)] overflow-y-auto px-2 py-8 md:h-full md:px-0 md:py-[clamp(34px,4vw,58px)]">
                 <div className="space-y-[clamp(14px,1.8vw,22px)]">
                   <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[15px] font-medium uppercase tracking-[0.08em] text-subtext">
                     <span className="text-accent">{activeCard.categoryLabel}</span>
@@ -201,6 +201,11 @@ export function HomeNewsPopups({cards, text}: HomeNewsPopupsProps) {
                   >
                     {activeCard.title}
                   </h3>
+                  {activeCard.body ? (
+                    <p className="whitespace-pre-line font-body text-[15px] leading-[1.8] text-[#475467] md:text-base">
+                      {activeCard.body}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </motion.article>

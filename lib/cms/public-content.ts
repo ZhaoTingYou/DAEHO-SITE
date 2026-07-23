@@ -54,7 +54,7 @@ export async function getHomeNewsCardsForSite(locale: Locale): Promise<HomeNewsP
   if (cmsItems.length > 0) {
     return cmsItems.slice(0, 4).map((item) => ({
       ...toNewsCard(item, locale),
-      body: ''
+      body: typeof item.excerpt === 'string' ? item.excerpt : ''
     }));
   }
 
