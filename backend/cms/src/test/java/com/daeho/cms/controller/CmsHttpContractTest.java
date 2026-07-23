@@ -394,7 +394,9 @@ class CmsHttpContractTest {
             .param("to", "2026-07-23")
             .header("x-admin-api-key", ADMIN_KEY))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.result").value("visits"));
+        .andExpect(jsonPath("$.items[0].landingPath").value("/en"))
+        .andExpect(jsonPath("$.items[0].sessionId").doesNotExist())
+        .andExpect(jsonPath("$.items[0].pageViewId").doesNotExist());
 
     mvc.perform(get("/api/admin/analytics/summary").header("x-admin-api-key", ADMIN_KEY))
         .andExpect(status().isOk());
@@ -682,7 +684,27 @@ class CmsHttpContractTest {
       visitsChannel = channel;
       visitsPage = page;
       visitsPageSize = pageSize;
-      return Map.of("result", "visits");
+      return Map.of(
+          "items", List.of(Map.ofEntries(
+              Map.entry("channel", "google"),
+              Map.entry("source", "google"),
+              Map.entry("medium", "organic"),
+              Map.entry("campaign", ""),
+              Map.entry("content", ""),
+              Map.entry("referrerHost", "google.com"),
+              Map.entry("landingPath", "/en"),
+              Map.entry("latestPath", "/en/contact"),
+              Map.entry("locale", "en"),
+              Map.entry("deviceClass", "desktop"),
+              Map.entry("pageViewCount", 2),
+              Map.entry("startedAt", "2026-07-22T01:00:00Z"),
+              Map.entry("lastActivityAt", "2026-07-22T01:10:00Z")
+          )),
+          "total", 1,
+          "page", 1,
+          "pageSize", 25,
+          "totalPages", 1
+      );
     }
   }
 }

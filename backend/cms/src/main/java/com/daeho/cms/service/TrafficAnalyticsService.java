@@ -27,6 +27,7 @@ public class TrafficAnalyticsService {
   private static final Set<String> CHANNELS = Set.of(
       "google", "naver", "instagram", "kakao", "qr", "social", "referral", "direct", "other"
   );
+  private static final int MAX_REPORT_PAGE = 1_000_000;
   private static final Set<Integer> PAGE_SIZES = Set.of(25, 50, 100);
   private static final Set<String> ATTRIBUTION_PARAMETERS = Set.of(
       "utm_id", "utm_source", "utm_medium", "utm_campaign", "utm_source_platform", "utm_term", "utm_content", "gclid", "dclid"
@@ -108,6 +109,9 @@ public class TrafficAnalyticsService {
     var range = parseRange(from, to);
     var parsedPage = positiveInteger(page, "page");
     var parsedPageSize = positiveInteger(pageSize, "pageSize");
+    if (parsedPage > MAX_REPORT_PAGE) {
+      throw validation("page", "Expected page to be at most " + MAX_REPORT_PAGE + ".");
+    }
     if (!PAGE_SIZES.contains(parsedPageSize)) {
       throw validation("pageSize", "Expected pageSize to be 25, 50, or 100.");
     }

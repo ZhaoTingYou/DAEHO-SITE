@@ -98,15 +98,38 @@ public class TrafficAnalyticsRepository {
     long sessionCount = longValue(totals.get("sessions"));
 
     var daily = jdbc.queryForList("""
-        SELECT (started_at AT TIME ZONE 'Asia/Seoul')::date AS date,
-          COUNT(*) AS sessions,
-          COALESCE(SUM(page_view_count), 0) AS page_views
-        FROM cms_analytics_sessions
-        WHERE started_at >= ? AND started_at < ?
-          AND (? = '' OR channel = ?)
-        GROUP BY (started_at AT TIME ZONE 'Asia/Seoul')::date
-        ORDER BY date ASC
-        """, from, to, channel, channel).stream().map(row -> Map.<String, Object>of(
+        WITH days AS (
+          SELECT generate_series(
+            (CAST(? AS timestamptz) AT TIME ZONE 'Asia/Seoul')::date,
+            (CAST(? AS timestamptz) AT TIME ZONE 'Asia/Seoul')::date - 1,
+            interval '1 day'
+          )::date AS date
+        ),
+        session_daily AS (
+          SELECT (s.started_at AT TIME ZONE 'Asia/Seoul')::date AS date,
+            COUNT(*) AS sessions
+          FROM cms_analytics_sessions s
+          WHERE s.started_at >= ? AND s.started_at < ?
+            AND (? = '' OR s.channel = ?)
+          GROUP BY (s.started_at AT TIME ZONE 'Asia/Seoul')::date
+        ),
+        page_view_daily AS (
+          SELECT (pv.viewed_at AT TIME ZONE 'Asia/Seoul')::date AS date,
+            COUNT(*) AS page_views
+          FROM cms_analytics_pageviews pv
+          JOIN cms_analytics_sessions s ON s.session_id = pv.session_id
+          WHERE pv.viewed_at >= ? AND pv.viewed_at < ?
+            AND (? = '' OR s.channel = ?)
+          GROUP BY (pv.viewed_at AT TIME ZONE 'Asia/Seoul')::date
+        )
+        SELECT days.date,
+          COALESCE(session_daily.sessions, 0) AS sessions,
+          COALESCE(page_view_daily.page_views, 0) AS page_views
+        FROM days
+        LEFT JOIN session_daily ON session_daily.date = days.date
+        LEFT JOIN page_view_daily ON page_view_daily.date = days.date
+        ORDER BY days.date ASC
+        """, from, to, from, to, channel, channel, from, to, channel, channel).stream().map(row -> Map.<String, Object>of(
             "date", String.valueOf(row.get("date")),
             "sessions", longValue(row.get("sessions")),
             "pageViews", longValue(row.get("page_views"))
@@ -131,14 +154,30 @@ public class TrafficAnalyticsRepository {
         )).toList();
 
     var landingPages = jdbc.queryForList("""
+        WITH landing_channel_counts AS (
+          SELECT landing_path, channel, COUNT(*) AS channel_sessions
+          FROM cms_analytics_sessions
+          WHERE started_at >= ? AND started_at < ?
+            AND (? = '' OR channel = ?)
+          GROUP BY landing_path, channel
+        ),
+        ranked_landing_channels AS (
+          SELECT landing_path,
+            channel,
+            SUM(channel_sessions) OVER (PARTITION BY landing_path) AS sessions,
+            ROW_NUMBER() OVER (
+              PARTITION BY landing_path
+              ORDER BY channel_sessions DESC, channel ASC
+            ) AS channel_rank
+          FROM landing_channel_counts
+        )
         SELECT landing_path AS path,
-          COUNT(*) AS sessions,
-          (ARRAY_AGG(channel ORDER BY started_at ASC, session_id ASC))[1] AS leading_channel
-        FROM cms_analytics_sessions
-        WHERE started_at >= ? AND started_at < ?
-          AND (? = '' OR channel = ?)
-        GROUP BY landing_path
+          sessions,
+          channel AS leading_channel
+        FROM ranked_landing_channels
+        WHERE channel_rank = 1
         ORDER BY sessions DESC, path ASC
+        LIMIT 10
         """, from, to, channel, channel).stream().map(row -> Map.<String, Object>of(
             "path", row.get("path"),
             "sessions", longValue(row.get("sessions")),
@@ -159,7 +198,7 @@ public class TrafficAnalyticsRepository {
   }
 
   public Map<String, Object> visits(OffsetDateTime from, OffsetDateTime to, String channel, int page, int pageSize) {
-    int offset = (page - 1) * pageSize;
+    long offset = Math.multiplyExact((long) page - 1L, pageSize);
     var total = longValue(jdbc.queryForList("""
         SELECT COUNT(*) AS total
         FROM cms_analytics_sessions
@@ -167,7 +206,7 @@ public class TrafficAnalyticsRepository {
           AND (? = '' OR channel = ?)
         """, from, to, channel, channel).get(0).get("total"));
     var rows = jdbc.queryForList("""
-        SELECT s.session_id, s.channel, s.source, s.medium, s.campaign, s.content, s.referrer_host,
+        SELECT s.channel, s.source, s.medium, s.campaign, s.content, s.referrer_host,
           s.landing_path, s.latest_path, s.locale, s.device_class, s.page_view_count,
           s.started_at, s.last_activity_at
         FROM cms_analytics_sessions s
@@ -177,13 +216,14 @@ public class TrafficAnalyticsRepository {
         LIMIT ? OFFSET ?
         """, from, to, channel, channel, pageSize, offset);
     var items = rows.stream().map(this::visitRow).toList();
+    long totalPageCount = total == 0 ? 0 : 1 + (total - 1) / pageSize;
 
     return Map.of(
         "items", items,
         "total", total,
         "page", page,
         "pageSize", pageSize,
-        "totalPages", total == 0 ? 0 : (int) ((total + pageSize - 1) / pageSize)
+        "totalPages", (int) Math.min(totalPageCount, Integer.MAX_VALUE)
     );
   }
 
@@ -213,7 +253,6 @@ public class TrafficAnalyticsRepository {
 
   private Map<String, Object> visitRow(Map<String, Object> row) {
     var result = new LinkedHashMap<String, Object>();
-    result.put("sessionId", row.get("session_id"));
     result.put("channel", row.get("channel"));
     result.put("source", row.get("source"));
     result.put("medium", row.get("medium"));

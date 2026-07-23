@@ -1,39 +1,65 @@
 import Link from 'next/link';
+import {redirect} from 'next/navigation';
 
+import {
+  addDays,
+  analyticsHref,
+  analyticsPageCorrectionHref,
+  formatDate,
+  formatDateTime,
+  formatDecimal,
+  formatNumber,
+  formatPercent,
+  isAnalyticsPresetActive,
+  normalizeAnalyticsFilters,
+  nowInSeoul,
+  type AnalyticsPageFilters,
+  type AnalyticsSearchParams
+} from '@/lib/admin-analytics-core.mjs';
 import {getAdminI18n} from '@/lib/admin-i18n';
 import type {AdminLocale} from '@/lib/admin-locales';
 import {
+  CmsBackendError,
   getTrafficAnalyticsSummary,
   listTrafficAnalyticsVisits,
   trafficAnalyticsChannels,
   type TrafficAnalyticsChannel,
-  type TrafficAnalyticsFilters,
   type TrafficAnalyticsSummary,
   type TrafficAnalyticsVisits
 } from '@/lib/cms/repositories';
 
 import {PageHeader, Panel} from '../../_components/admin-shell';
 
-type SearchParams = Record<string, string | string[] | undefined>;
-
 type Props = {
-  searchParams?: Promise<SearchParams>;
-};
-
-type AnalyticsPageFilters = TrafficAnalyticsFilters & {
-  page: number;
-  pageSize: 25;
+  searchParams?: Promise<AnalyticsSearchParams>;
 };
 
 const presetDays = [7, 30, 90];
 
 export default async function AdminAnalyticsPage({searchParams}: Props) {
   const {locale, t} = await getAdminI18n();
-  const filters = normalizeAnalyticsFilters(await searchParams, nowInSeoul());
-  const [summary, visits] = await Promise.all([
-    getTrafficAnalyticsSummary(filters),
-    listTrafficAnalyticsVisits(filters)
-  ]);
+  const today = nowInSeoul();
+  const filters = normalizeAnalyticsFilters(await searchParams, today);
+  let report: [TrafficAnalyticsSummary, TrafficAnalyticsVisits];
+
+  try {
+    report = await Promise.all([
+      getTrafficAnalyticsSummary(filters),
+      listTrafficAnalyticsVisits(filters)
+    ]);
+  } catch (error) {
+    if (error instanceof CmsBackendError && (error.status === 401 || error.status === 403)) {
+      throw error;
+    }
+
+    return <AnalyticsReportError filters={filters} t={t} />;
+  }
+
+  const [summary, visits] = report;
+  const correctionHref = analyticsPageCorrectionHref(filters, visits.totalPages);
+  if (correctionHref) {
+    redirect(correctionHref);
+  }
 
   return (
     <>
@@ -47,9 +73,9 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
               {presetDays.map((days) => (
                 <DatePresetLink
                   key={days}
-                  href={analyticsHref(filters, {from: addDays(filters.to, -(days - 1)), page: 1})}
+                  href={analyticsHref(filters, {from: addDays(today, -(days - 1)), to: today, page: 1})}
                   label={datePresetLabel(t, days)}
-                  active={dateRangeDays(filters) === days}
+                  active={isAnalyticsPresetActive(filters, today, days)}
                 />
               ))}
             </div>
@@ -103,12 +129,12 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
           <table className="w-full min-w-[760px] border-collapse text-left text-sm">
             <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
               <tr>
-                <th className="px-4 py-3">{t('analytics.channel')}</th>
-                <th className="px-4 py-3">{t('analytics.source')}</th>
-                <th className="px-4 py-3">{t('analytics.medium')}</th>
-                <th className="px-4 py-3 text-right">{t('analytics.sessions')}</th>
-                <th className="px-4 py-3 text-right">{t('analytics.pageViews')}</th>
-                <th className="px-4 py-3 text-right">{t('analytics.share')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.channel')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.source')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.medium')}</th>
+                <th scope="col" className="px-4 py-3 text-right">{t('analytics.sessions')}</th>
+                <th scope="col" className="px-4 py-3 text-right">{t('analytics.pageViews')}</th>
+                <th scope="col" className="px-4 py-3 text-right">{t('analytics.share')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e4e7ec]">
@@ -133,9 +159,9 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
           <table className="w-full min-w-[620px] border-collapse text-left text-sm">
             <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
               <tr>
-                <th className="px-4 py-3">{t('analytics.path')}</th>
-                <th className="px-4 py-3 text-right">{t('analytics.sessions')}</th>
-                <th className="px-4 py-3">{t('analytics.leadingChannel')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.path')}</th>
+                <th scope="col" className="px-4 py-3 text-right">{t('analytics.sessions')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.leadingChannel')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e4e7ec]">
@@ -157,14 +183,14 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
           <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
             <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
               <tr>
-                <th className="px-4 py-3">{t('analytics.startedAt')}</th>
-                <th className="px-4 py-3">{t('analytics.channel')}</th>
-                <th className="px-4 py-3">{t('analytics.source')}</th>
-                <th className="px-4 py-3">{t('analytics.landingPages')}</th>
-                <th className="px-4 py-3">{t('analytics.latestPath')}</th>
-                <th className="px-4 py-3">{t('analytics.locale')}</th>
-                <th className="px-4 py-3">{t('analytics.device')}</th>
-                <th className="px-4 py-3 text-right">{t('analytics.pages')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.startedAt')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.channel')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.source')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.landingPages')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.latestPath')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.locale')}</th>
+                <th scope="col" className="px-4 py-3">{t('analytics.device')}</th>
+                <th scope="col" className="px-4 py-3 text-right">{t('analytics.pages')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e4e7ec]">
@@ -176,7 +202,7 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
                   <td className="max-w-[260px] break-words px-4 py-3 font-mono text-xs text-[#344054]">{item.landingPath}</td>
                   <td className="max-w-[260px] break-words px-4 py-3 font-mono text-xs text-[#344054]">{item.latestPath}</td>
                   <td className="px-4 py-3 font-numeric text-xs text-[#475467]">{item.locale.toUpperCase()}</td>
-                  <td className="px-4 py-3 text-[#475467]">{item.deviceClass}</td>
+                  <td className="px-4 py-3 text-[#475467]">{deviceLabel(t, item.deviceClass)}</td>
                   <td className="px-4 py-3 text-right font-numeric font-semibold text-[#101827]">{formatNumber(item.pageViewCount, locale)}</td>
                 </tr>
               ))}
@@ -184,6 +210,23 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
           </table>
         </div>
         <Pagination filters={filters} visits={visits} t={t} />
+      </Panel>
+    </>
+  );
+}
+
+function AnalyticsReportError({filters, t}: {filters: AnalyticsPageFilters; t: (key: string) => string}) {
+  return (
+    <>
+      <PageHeader title={t('analytics.title')} description={t('analytics.description')} />
+      <Panel className="p-5">
+        <div role="alert" className="max-w-2xl">
+          <h2 className="text-base font-semibold text-[#101827]">{t('analytics.errorTitle')}</h2>
+          <p className="mt-2 text-sm leading-6 text-[#647084]">{t('analytics.errorBody')}</p>
+          <Link href={analyticsHref(filters)} className="mt-4 inline-flex min-h-10 items-center rounded-md border border-[#cbd3df] bg-white px-4 text-sm font-semibold text-[#344054] transition hover:bg-[#f8fafc]">
+            {t('analytics.retry')}
+          </Link>
+        </div>
       </Panel>
     </>
   );
@@ -200,7 +243,7 @@ function DateField({label, name, value}: {label: string; name: string; value: st
 
 function DatePresetLink({href, label, active}: {href: string; label: string; active: boolean}) {
   return (
-    <Link href={href} className={`inline-flex min-h-9 items-center rounded-md border px-3 text-sm font-semibold transition ${active ? 'admin-on-dark border-[#101827] bg-[#101827] text-white' : 'border-[#cbd3df] bg-white text-[#344054] hover:bg-[#f8fafc]'}`}>
+    <Link href={href} aria-current={active ? 'page' : undefined} className={`inline-flex min-h-9 items-center rounded-md border px-3 text-sm font-semibold transition ${active ? 'admin-on-dark border-[#101827] bg-[#101827] text-white' : 'border-[#cbd3df] bg-white text-[#344054] hover:bg-[#f8fafc]'}`}>
       {label}
     </Link>
   );
@@ -246,6 +289,27 @@ function DailyTrafficChart({daily, locale, t}: {daily: TrafficAnalyticsSummary['
         <span>{formatDate(daily[0].date, locale)}</span>
         <span>{formatDate(daily[daily.length - 1].date, locale)}</span>
       </div>
+      <div className="mt-5 max-h-72 overflow-auto border-t border-[#e4e7ec]">
+        <table className="w-full min-w-[420px] border-collapse text-left text-sm">
+          <caption className="sr-only">{t('analytics.dailyValues')}</caption>
+          <thead className="sticky top-0 bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
+            <tr>
+              <th scope="col" className="px-3 py-2.5">{t('analytics.date')}</th>
+              <th scope="col" className="px-3 py-2.5 text-right">{t('analytics.sessions')}</th>
+              <th scope="col" className="px-3 py-2.5 text-right">{t('analytics.pageViews')}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#e4e7ec]">
+            {daily.map((item) => (
+              <tr key={`daily-value:${item.date}`}>
+                <th scope="row" className="px-3 py-2.5 font-numeric font-medium text-[#344054]">{formatDate(item.date, locale)}</th>
+                <td className="px-3 py-2.5 text-right font-numeric text-[#475467]">{formatNumber(item.sessions, locale)}</td>
+                <td className="px-3 py-2.5 text-right font-numeric text-[#475467]">{formatNumber(item.pageViews, locale)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -276,83 +340,8 @@ function Pagination({filters, visits, t}: {filters: AnalyticsPageFilters; visits
   );
 }
 
-function normalizeAnalyticsFilters(query: SearchParams | undefined, today: string): AnalyticsPageFilters {
-  const defaultFrom = addDays(today, -29);
-  const from = normalizeDate(firstValue(query?.from)) ?? defaultFrom;
-  const to = normalizeDate(firstValue(query?.to)) ?? today;
-
-  return {
-    from: from <= to ? from : defaultFrom,
-    to: from <= to ? to : today,
-    channel: normalizeChannel(firstValue(query?.channel)),
-    page: positiveInteger(firstValue(query?.page)) ?? 1,
-    pageSize: 25
-  };
-}
-
-function analyticsHref(filters: AnalyticsPageFilters, updates: Partial<AnalyticsPageFilters> = {}) {
-  const next = {...filters, ...updates};
-  const params = new URLSearchParams({from: next.from, to: next.to});
-
-  if (next.channel) {
-    params.set('channel', next.channel);
-  }
-  if (next.page > 1) {
-    params.set('page', String(next.page));
-  }
-
-  return `/admin/analytics?${params.toString()}`;
-}
-
-function nowInSeoul() {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).formatToParts(new Date());
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-
-  return `${values.year}-${values.month}-${values.day}`;
-}
-
-function addDays(date: string, days: number) {
-  const next = new Date(`${date}T12:00:00.000Z`);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next.toISOString().slice(0, 10);
-}
-
-function normalizeDate(value?: string) {
-  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return undefined;
-  }
-
-  const parsed = new Date(`${value}T12:00:00.000Z`);
-  return Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value ? undefined : value;
-}
-
-function normalizeChannel(value?: string): TrafficAnalyticsChannel | undefined {
-  const channel = value?.trim().toLowerCase();
-  return channel && isTrafficAnalyticsChannel(channel) ? channel : undefined;
-}
-
 function isTrafficAnalyticsChannel(value: string): value is TrafficAnalyticsChannel {
   return trafficAnalyticsChannels.includes(value as TrafficAnalyticsChannel);
-}
-
-function firstValue(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function positiveInteger(value?: string) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
-}
-
-function dateRangeDays(filters: AnalyticsPageFilters) {
-  const from = new Date(`${filters.from}T12:00:00.000Z`).getTime();
-  const to = new Date(`${filters.to}T12:00:00.000Z`).getTime();
-  return Math.round((to - from) / 86_400_000) + 1;
 }
 
 function datePresetLabel(t: (key: string) => string, days: number) {
@@ -363,26 +352,8 @@ function channelLabel(t: (key: string) => string, channel: TrafficAnalyticsChann
   return t(`analytics.channel.${channel}`);
 }
 
-function formatNumber(value: number, locale: AdminLocale) {
-  return new Intl.NumberFormat(numberLocale(locale)).format(value);
-}
-
-function formatDecimal(value: number, locale: AdminLocale) {
-  return new Intl.NumberFormat(numberLocale(locale), {maximumFractionDigits: 2}).format(value);
-}
-
-function formatPercent(value: number, locale: AdminLocale) {
-  return new Intl.NumberFormat(numberLocale(locale), {style: 'percent', maximumFractionDigits: 1}).format(value);
-}
-
-function formatDate(value: string, locale: AdminLocale) {
-  return new Intl.DateTimeFormat(numberLocale(locale), {dateStyle: 'medium', timeZone: 'Asia/Seoul'}).format(new Date(`${value}T00:00:00+09:00`));
-}
-
-function formatDateTime(value: string, locale: AdminLocale) {
-  return new Intl.DateTimeFormat(numberLocale(locale), {dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Seoul'}).format(new Date(value));
-}
-
-function numberLocale(locale: AdminLocale) {
-  return locale === 'zh' ? 'zh-CN' : locale === 'ko' ? 'ko-KR' : 'en-US';
+function deviceLabel(t: (key: string) => string, deviceClass: string) {
+  return ['desktop', 'tablet', 'mobile'].includes(deviceClass)
+    ? t(`analytics.device.${deviceClass}`)
+    : deviceClass || '—';
 }

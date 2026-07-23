@@ -117,6 +117,17 @@ class TrafficAnalyticsServiceTest {
   }
 
   @Test
+  void rejectsVisitPagesAboveTheSafeMaximum() {
+    service.visits("2026-07-01", "2026-07-23", "", 1_000_000, 100);
+
+    assertEquals(1_000_000, repository.visitsPage);
+    assertThrows(
+        ValidationFailedException.class,
+        () -> service.visits("2026-07-01", "2026-07-23", "", 1_000_001, 100)
+    );
+  }
+
+  @Test
   void keepsThePageViewSuccessfulAndRetriesCleanupAfterFailure() {
     repository.cleanupFailure = true;
 

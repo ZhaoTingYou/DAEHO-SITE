@@ -11,7 +11,7 @@ import type {
   pagePayloadSchema
 } from './validation';
 import type {Locale} from '@/lib/locales';
-import type {z} from 'zod';
+import {z} from 'zod';
 
 type PagePayload = z.infer<typeof pagePayloadSchema>;
 type NewsPayload = z.infer<typeof newsPayloadSchema>;
@@ -156,6 +156,9 @@ export type TrafficAnalyticsVisit = {
   channel: string;
   source: string;
   medium: string;
+  campaign: string;
+  content: string;
+  referrerHost: string;
   landingPath: string;
   latestPath: string;
   locale: string;
@@ -172,6 +175,56 @@ export type TrafficAnalyticsVisits = {
   pageSize: number;
   totalPages: number;
 };
+
+const analyticsCountSchema = z.number().int().nonnegative();
+const trafficAnalyticsChannelSchema = z.enum(trafficAnalyticsChannels);
+const trafficAnalyticsSummarySchema: z.ZodType<TrafficAnalyticsSummary> = z.strictObject({
+  totals: z.strictObject({
+    sessions: analyticsCountSchema,
+    pageViews: analyticsCountSchema,
+    activeSessions: analyticsCountSchema,
+    averagePagesPerSession: z.number().nonnegative()
+  }),
+  daily: z.array(z.strictObject({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    sessions: analyticsCountSchema,
+    pageViews: analyticsCountSchema
+  })),
+  channels: z.array(z.strictObject({
+    channel: trafficAnalyticsChannelSchema,
+    source: z.string(),
+    medium: z.string(),
+    sessions: analyticsCountSchema,
+    pageViews: analyticsCountSchema,
+    share: z.number().min(0).max(1)
+  })),
+  landingPages: z.array(z.strictObject({
+    path: z.string(),
+    sessions: analyticsCountSchema,
+    leadingChannel: trafficAnalyticsChannelSchema
+  })).max(10)
+});
+const trafficAnalyticsVisitsSchema: z.ZodType<TrafficAnalyticsVisits> = z.strictObject({
+  items: z.array(z.strictObject({
+    channel: trafficAnalyticsChannelSchema,
+    source: z.string(),
+    medium: z.string(),
+    campaign: z.string(),
+    content: z.string(),
+    referrerHost: z.string(),
+    landingPath: z.string(),
+    latestPath: z.string(),
+    locale: z.enum(['ko', 'en']),
+    deviceClass: z.enum(['desktop', 'tablet', 'mobile']),
+    pageViewCount: analyticsCountSchema,
+    startedAt: z.string().min(1),
+    lastActivityAt: z.string().min(1)
+  })),
+  total: analyticsCountSchema,
+  page: z.number().int().positive(),
+  pageSize: z.union([z.literal(25), z.literal(50), z.literal(100)]),
+  totalPages: analyticsCountSchema
+});
 
 type RequestMeta = {
   userAgent: string;
@@ -204,11 +257,13 @@ export async function cmsBackendRequest<T>(path: string, options: CmsFetchOption
 }
 
 export async function getTrafficAnalyticsSummary(filters: TrafficAnalyticsFilters) {
-  return cmsFetch<TrafficAnalyticsSummary>(`/api/admin/analytics/summary${trafficAnalyticsQuery(filters)}`, {admin: true});
+  const response = await cmsFetch<unknown>(`/api/admin/analytics/summary${trafficAnalyticsQuery(filters)}`, {admin: true});
+  return trafficAnalyticsSummarySchema.parse(response);
 }
 
 export async function listTrafficAnalyticsVisits(filters: TrafficAnalyticsFilters) {
-  return cmsFetch<TrafficAnalyticsVisits>(`/api/admin/analytics/visits${trafficAnalyticsQuery(filters, true)}`, {admin: true});
+  const response = await cmsFetch<unknown>(`/api/admin/analytics/visits${trafficAnalyticsQuery(filters, true)}`, {admin: true});
+  return trafficAnalyticsVisitsSchema.parse(response);
 }
 
 export async function listPages() {

@@ -113,13 +113,17 @@ class TrafficAnalyticsRepositoryTest {
       if (call.sql().contains("active_sessions")) {
         return List.of(Map.of("sessions", 2L, "page_views", 3L, "active_sessions", 1L, "average_pages_per_session", 1.5D));
       }
-      if (call.sql().contains("GROUP BY (started_at AT TIME ZONE 'Asia/Seoul')::date")) {
-        return List.of(Map.of("date", "2026-07-02", "sessions", 2L, "page_views", 3L));
+      if (call.sql().contains("generate_series")) {
+        return List.of(
+            Map.of("date", "2026-07-01", "sessions", 0L, "page_views", 1L),
+            Map.of("date", "2026-07-02", "sessions", 2L, "page_views", 2L),
+            Map.of("date", "2026-07-03", "sessions", 0L, "page_views", 0L)
+        );
       }
       if (call.sql().contains("GROUP BY channel, source, medium")) {
         return List.of(Map.of("channel", "google", "source", "google", "medium", "organic", "sessions", 2L, "page_views", 3L));
       }
-      if (call.sql().contains("GROUP BY landing_path")) {
+      if (call.sql().contains("landing_channel_counts")) {
         return List.of(Map.of("path", "/en", "sessions", 2L, "leading_channel", "google"));
       }
       throw new AssertionError("Unexpected summary query: " + call.sql());
@@ -129,14 +133,33 @@ class TrafficAnalyticsRepositoryTest {
     var summary = repository.summary(FROM, TO, "google");
 
     assertEquals(Map.of("sessions", 2L, "pageViews", 3L, "activeSessions", 1L, "averagePagesPerSession", 1.5D), summary.get("totals"));
-    assertEquals(List.of(Map.of("date", "2026-07-02", "sessions", 2L, "pageViews", 3L)), summary.get("daily"));
+    assertEquals(List.of(
+        Map.of("date", "2026-07-01", "sessions", 0L, "pageViews", 1L),
+        Map.of("date", "2026-07-02", "sessions", 2L, "pageViews", 2L),
+        Map.of("date", "2026-07-03", "sessions", 0L, "pageViews", 0L)
+    ), summary.get("daily"));
     assertEquals(List.of(Map.of("channel", "google", "source", "google", "medium", "organic", "sessions", 2L, "pageViews", 3L, "share", 1.0D)), summary.get("channels"));
     assertEquals(List.of(Map.of("path", "/en", "sessions", 2L, "leadingChannel", "google")), summary.get("landingPages"));
 
     var summaryCalls = jdbc.callsMatching("SELECT");
     assertEquals(4, summaryCalls.size());
-    assertTrue(summaryCalls.stream().allMatch(call -> call.sql().contains("started_at >= ? AND started_at < ?") && call.sql().contains("(? = '' OR channel = ?)")));
-    assertTrue(summaryCalls.stream().allMatch(call -> Arrays.asList(call.args()).subList(0, 4).equals(List.of(FROM, TO, "google", "google"))));
+    var dailyCall = jdbc.callsMatching("generate_series").get(0);
+    assertTrue(dailyCall.sql().contains("LEFT JOIN session_daily"));
+    assertTrue(dailyCall.sql().contains("LEFT JOIN page_view_daily"));
+    assertTrue(dailyCall.sql().contains("s.started_at AT TIME ZONE 'Asia/Seoul'"));
+    assertTrue(dailyCall.sql().contains("pv.viewed_at AT TIME ZONE 'Asia/Seoul'"));
+    assertTrue(dailyCall.sql().contains("JOIN cms_analytics_sessions s ON s.session_id = pv.session_id"));
+    assertTrue(dailyCall.sql().contains("pv.viewed_at >= ? AND pv.viewed_at < ?"));
+    assertEquals(
+        List.of(FROM, TO, FROM, TO, "google", "google", FROM, TO, "google", "google"),
+        Arrays.asList(dailyCall.args())
+    );
+
+    var landingCall = jdbc.callsMatching("landing_channel_counts").get(0);
+    assertTrue(landingCall.sql().contains("COUNT(*) AS channel_sessions"));
+    assertTrue(landingCall.sql().contains("ROW_NUMBER() OVER"));
+    assertTrue(landingCall.sql().contains("ORDER BY channel_sessions DESC, channel ASC"));
+    assertTrue(landingCall.sql().contains("LIMIT 10"));
   }
 
   @Test
@@ -169,12 +192,30 @@ class TrafficAnalyticsRepositoryTest {
     assertEquals(2, visits.get("page"));
     assertEquals(25, visits.get("pageSize"));
     assertEquals(3, visits.get("totalPages"));
-    assertEquals("/en/contact", ((Map<?, ?>) ((List<?>) visits.get("items")).get(0)).get("latestPath"));
+    var item = (Map<?, ?>) ((List<?>) visits.get("items")).get(0);
+    assertEquals("/en/contact", item.get("latestPath"));
+    assertFalse(item.containsKey("sessionId"));
+    assertFalse(item.containsKey("pageViewId"));
 
     var call = jdbc.callsMatching("ORDER BY s.started_at DESC").get(0);
     assertTrue(call.sql().contains("ORDER BY s.started_at DESC"));
     assertTrue(call.sql().contains("LIMIT ? OFFSET ?"));
-    assertEquals(List.of(FROM, TO, "google", "google", 25, 25), Arrays.asList(call.args()));
+    assertEquals(List.of(FROM, TO, "google", "google", 25, 25L), Arrays.asList(call.args()));
+    assertFalse(call.sql().contains("s.session_id,"));
+  }
+
+  @Test
+  void calculatesVisitOffsetsWithoutIntegerOverflow() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> call.sql().contains("COUNT(*) AS total")
+        ? List.of(Map.of("total", 0L))
+        : List.of();
+    var repository = new TrafficAnalyticsRepository(jdbc);
+
+    repository.visits(FROM, TO, "", Integer.MAX_VALUE, 100);
+
+    var call = jdbc.callsMatching("ORDER BY s.started_at DESC").get(0);
+    assertEquals(214_748_364_600L, call.args()[5]);
   }
 
   @Test
