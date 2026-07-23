@@ -13,6 +13,7 @@ import {normalizeAchievementFirstRecordsFallback} from '@/lib/achievement-first-
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {normalizeTechniquePageVisibility} from '@/lib/public-page-visibility-core';
+import {mergeExternalSitesWithDefaults} from '@/lib/cms/external-sites-core.mjs';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 
@@ -86,6 +87,19 @@ async function applyCmsPageOverrides(messages: LocaleMessages, locale: Locale) {
         const override = getPageContentGroupOverride(page.content[locale], group.key);
         const currentValue = getObjectValueAtPath(messages, group.sourcePath);
         const nextValue = deepMergeJson(currentValue ?? {}, override);
+
+        if (page.pageKey === 'common' && group.key === 'main') {
+          const externalSitesPath = 'footer.externalSites';
+          const externalSites = mergeExternalSitesWithDefaults(
+            getObjectValueAtPath(currentValue, externalSitesPath),
+            getObjectValueAtPath(override, externalSitesPath)
+          );
+          setObjectValueAtPath(
+            nextValue as Record<string, unknown>,
+            externalSitesPath,
+            externalSites
+          );
+        }
 
         setObjectValueAtPath(messages as unknown as Record<string, unknown>, group.sourcePath, nextValue);
       }

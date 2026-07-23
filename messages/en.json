@@ -1387,7 +1387,12 @@
       "externalSites": {
         "daeho": "DAEHO",
         "oh": "OH",
-        "vulcan": "VULCAN"
+        "vulcan": "VULCAN",
+        "items": [
+          {"id": "daeho", "label": "DAEHO", "href": "", "enabled": false},
+          {"id": "oh", "label": "OH", "href": "", "enabled": false},
+          {"id": "vulcan", "label": "VULCAN", "href": "", "enabled": false}
+        ]
       },
       "socialLinks": {
         "instagram": "https://instagram.com/",

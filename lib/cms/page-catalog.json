@@ -828,9 +828,6 @@
       {"path": "footer.socialLinks.twitter", "label": "SNS 链接：Twitter", "labels": {"ko": "SNS 링크: Twitter", "en": "SNS link: Twitter"}},
       {"path": "footer.socialLinks.blog", "label": "SNS 链接：Naver Blog", "labels": {"ko": "SNS 링크: Naver Blog", "en": "SNS link: Naver Blog"}},
 
-      {"path": "footer.externalSites.daeho", "label": "相关站点：DAEHO", "labels": {"ko": "관련 사이트: DAEHO", "en": "Related site: DAEHO"}},
-      {"path": "footer.externalSites.oh", "label": "相关站点：OH", "labels": {"ko": "관련 사이트: OH", "en": "Related site: OH"}},
-      {"path": "footer.externalSites.vulcan", "label": "相关站点：VULCAN", "labels": {"ko": "관련 사이트: VULCAN", "en": "Related site: VULCAN"}},
 
       {"path": "navigation.items.home", "label": "导航：HOME", "labels": {"ko": "내비게이션: HOME", "en": "Navigation: HOME"}},
       {"path": "navigation.items.chronicle", "label": "导航：ARCHIVE", "labels": {"ko": "내비게이션: ARCHIVE", "en": "Navigation: ARCHIVE"}},

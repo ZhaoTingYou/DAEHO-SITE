@@ -9,7 +9,10 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
-import {externalLinks} from '@/lib/config';
+import {
+  getVisibleExternalSites,
+  type ExternalSiteItem
+} from '@/lib/cms/external-sites-core.mjs';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isActivePath, navItems, withLocale} from '@/lib/site-map';
 
@@ -18,6 +21,7 @@ import {ExternalSiteLink} from './external-site-link';
 type SiteHeaderProps = {
   locale: Locale;
   golfEnabled: boolean;
+  externalSites: readonly ExternalSiteItem[];
 };
 
 type MegaMenuKey = 'legacy' | 'specialty';
@@ -46,12 +50,10 @@ const instantItemVariants = {
   visible: {opacity: 1, y: 0}
 };
 
-const showExternalHeaderLinks = false;
-
-export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
+export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps) {
   const navText = useTranslations('common.navigation');
   const footerText = useTranslations('common.footer');
-  const externalText = useTranslations('common.footer.externalSites');
+  const visibleExternalSites = getVisibleExternalSites(externalSites);
   const pathname = usePathname();
   const prefersReducedMotion = usePrefersReducedMotion();
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -484,8 +486,8 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
             })}
           </motion.nav>
 
-          <div className="flex items-center justify-end gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
-            <div className="flex items-center gap-1" aria-label={navText('languageSwitcherLabel')}>
+          <div className="flex min-w-0 items-center justify-end gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
+            <div className="flex shrink-0 items-center gap-1" aria-label={navText('languageSwitcherLabel')}>
               {languageLinks.map((item, index) => (
                 <span key={item.locale} className="contents">
                   {index > 0 ? (
@@ -506,23 +508,30 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
               ))}
             </div>
 
-            <span className="h-3 w-px bg-current opacity-25" aria-hidden="true" />
+            <span className="h-3 w-px shrink-0 bg-current opacity-25" aria-hidden="true" />
 
-            {showExternalHeaderLinks ? (
+            {visibleExternalSites.length > 0 ? (
               <>
-                <div className="flex items-center gap-4">
-                  <ExternalSiteLink label={externalText('daeho')} href={externalLinks.daeho} className="site-nav-link no-underline" />
-                  <ExternalSiteLink label={externalText('oh')} href={externalLinks.oh} className="site-nav-link no-underline" />
-                  <ExternalSiteLink label={externalText('vulcan')} href={externalLinks.vulcan} className="site-nav-link no-underline" />
+                <div className="min-w-0 max-w-[min(32vw,32rem)] overflow-x-auto overscroll-x-contain">
+                  <div className="flex w-max items-center gap-4">
+                    {visibleExternalSites.map((item) => (
+                      <ExternalSiteLink
+                        key={item.id}
+                        label={item.label}
+                        href={item.href}
+                        className="site-nav-link shrink-0 no-underline"
+                      />
+                    ))}
+                  </div>
                 </div>
 
-                <span className="h-3 w-px bg-current opacity-25" aria-hidden="true" />
+                <span className="h-3 w-px shrink-0 bg-current opacity-25" aria-hidden="true" />
               </>
             ) : null}
 
             <Link
               href={navigationHref('contact', '/contact')}
-              className={`consult-cta ${isHeroTransparent ? 'consult-cta--light' : 'consult-cta--accent'}`}
+              className={`consult-cta shrink-0 ${isHeroTransparent ? 'consult-cta--light' : 'consult-cta--accent'}`}
             >
               <span className="consult-cta__label">{contactLabel}</span>
             </Link>
@@ -774,15 +783,20 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
               <span className="consult-cta__label">{contactLabel}</span>
             </Link>
 
-            {showExternalHeaderLinks ? (
+            {visibleExternalSites.length > 0 ? (
               <div className="mt-12 border-t border-hairline pt-8">
                 <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-subtext">
                   {footerText('otherSites')}
                 </p>
                 <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-primary">
-                  <ExternalSiteLink label={externalText('daeho')} href={externalLinks.daeho} className="site-nav-link no-underline" />
-                  <ExternalSiteLink label={externalText('oh')} href={externalLinks.oh} className="site-nav-link no-underline" />
-                  <ExternalSiteLink label={externalText('vulcan')} href={externalLinks.vulcan} className="site-nav-link no-underline" />
+                  {visibleExternalSites.map((item) => (
+                    <ExternalSiteLink
+                      key={item.id}
+                      label={item.label}
+                      href={item.href}
+                      className="site-nav-link no-underline"
+                    />
+                  ))}
                 </div>
               </div>
             ) : null}

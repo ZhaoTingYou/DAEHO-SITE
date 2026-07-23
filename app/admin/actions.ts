@@ -63,10 +63,16 @@ import {
   getPageFieldDefinitionsForGroup,
   getPageContentGroups,
   isImageEditableField,
+  pageContentGroupsKey,
   setObjectValueAtPath,
   type PageDefinition,
 } from '@/lib/cms/page-catalog';
+import {getAdminI18n} from '@/lib/admin-i18n';
 import type {TechniqueLocaleRecord} from '@/lib/cms/technique-records-core.mjs';
+import {
+  getExternalSiteValidationMessageKey,
+  parseExternalSitesSubmission
+} from '@/lib/cms/external-sites-core.mjs';
 import {normalizeSubmittedTechniqueRecords} from '@/lib/cms/technique-records-submit-core.mjs';
 import {locales, type Locale} from '@/lib/locales';
 import enMessages from '@/messages/en.json';
@@ -292,6 +298,15 @@ export async function savePageAction(formData: FormData) {
     const contentKo = await readPageLocaleContent(formData, 'ko', returnTo, definition, sharedContentImages);
     const contentEn = await readPageLocaleContent(formData, 'en', returnTo, definition, sharedContentImages);
 
+    if (pageKey === 'common' && formData.has('externalSites.payload')) {
+      const externalSites = parseExternalSitesSubmission(
+        stringFromForm(formData, 'externalSites.payload')
+      );
+      const externalSitesPath = `${pageContentGroupsKey}.main.footer.externalSites.items`;
+      setObjectValueAtPath(contentKo, externalSitesPath, externalSites.ko);
+      setObjectValueAtPath(contentEn, externalSitesPath, externalSites.en);
+    }
+
     if (pageKey === 'mastery-technique') {
       const normalizedRecords = normalizeSubmittedTechniqueRecords({
         koItems: techniqueLocaleRecords(getObjectValueAtPath(contentKo, 'records.items')),
@@ -336,6 +351,13 @@ export async function savePageAction(formData: FormData) {
 
     redirect(returnTo);
   } catch (error) {
+    const externalSiteErrorKey = getExternalSiteValidationMessageKey(error);
+
+    if (externalSiteErrorKey) {
+      const {t} = await getAdminI18n();
+      redirectWithAdminActionError(returnTo, new Error(t(externalSiteErrorKey)));
+    }
+
     redirectWithAdminActionError(returnTo, error);
   }
 }

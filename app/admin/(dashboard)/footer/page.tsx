@@ -21,7 +21,9 @@ import {localeFieldSuffixes, locales, type Locale} from '@/lib/locales';
 
 import {AdminActionAlert} from '../../_components/admin-feedback';
 import {CheckboxField, SubmitButton, TextAreaField, TextField} from '../../_components/admin-fields';
+import {ExternalSitesEditor} from '../../_components/external-sites-editor';
 import {PageHeader, Panel} from '../../_components/admin-shell';
+import type {ExternalSiteItem} from '@/lib/cms/external-sites-core.mjs';
 
 type FooterLocaleData = {
   locale: Locale;
@@ -118,14 +120,6 @@ const footerFieldSections: FooterFieldSection[] = [
     ]
   },
   {
-    titleKey: 'footer.sectionExternal',
-    paths: [
-      'footer.externalSites.daeho',
-      'footer.externalSites.oh',
-      'footer.externalSites.vulcan'
-    ]
-  },
-  {
     titleKey: 'footer.sectionNavigation',
     paths: [
       'navigation.items.home',
@@ -177,6 +171,10 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
   ) as Record<Locale, Awaited<ReturnType<typeof getLocaleMessages>>>;
   const localeData = locales.map((locale) => getFooterLocaleData(locale, definition, row, localeMessages[locale]));
   const fieldsByPath = new Map(definition.fields.map((field) => [field.path, field]));
+  const koMain = localeData.find((data) => data.locale === 'ko')
+    ?.groups.find((group) => group.key === mainGroupKey)?.content;
+  const enMain = localeData.find((data) => data.locale === 'en')
+    ?.groups.find((group) => group.key === mainGroupKey)?.content;
 
   return (
     <>
@@ -202,6 +200,24 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
         <input type="hidden" name="returnTo" value={footerReturnPath} />
         <input type="hidden" name="section" value={row?.section ?? definition.section} />
         <input type="hidden" name="sortOrder" value={row?.sortOrder ?? definition.sortOrder} />
+
+        <ExternalSitesEditor
+          itemsKo={externalSiteItems(koMain)}
+          itemsEn={externalSiteItems(enMain)}
+          labels={{
+            title: t('externalSites.title'),
+            description: t('externalSites.description'),
+            add: t('externalSites.add'),
+            labelKo: t('externalSites.labelKo'),
+            labelEn: t('externalSites.labelEn'),
+            href: t('externalSites.href'),
+            enabled: t('externalSites.enabled'),
+            moveUp: t('externalSites.moveUp'),
+            moveDown: t('externalSites.moveDown'),
+            remove: t('externalSites.remove'),
+            empty: t('externalSites.empty')
+          }}
+        />
 
         <div className="grid gap-6 xl:grid-cols-2">
           {localeData.map((data) => (
@@ -232,6 +248,11 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
       </form>
     </>
   );
+}
+
+function externalSiteItems(content: unknown): ExternalSiteItem[] {
+  const value = getObjectValueAtPath(content, 'footer.externalSites.items');
+  return Array.isArray(value) ? value as ExternalSiteItem[] : [];
 }
 
 function FooterLocalePanel({

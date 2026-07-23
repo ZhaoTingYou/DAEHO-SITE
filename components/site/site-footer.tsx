@@ -2,8 +2,11 @@ import Link from 'next/link';
 
 import {CookieSettingsButton} from '@/components/analytics/cookie-settings-button';
 import type {Locale} from '@/i18n/routing';
-import {externalLinks} from '@/lib/config';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
+import {
+  getVisibleExternalSites,
+  type ExternalSiteItem
+} from '@/lib/cms/external-sites-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
@@ -14,6 +17,7 @@ import {ExternalSiteLink} from './external-site-link';
 type SiteFooterProps = {
   locale: Locale;
   golfEnabled: boolean;
+  externalSites: readonly ExternalSiteItem[];
 };
 
 type FooterLink = {
@@ -27,7 +31,6 @@ type FooterGroup = {
   links: FooterLink[];
 };
 
-const showFooterExternalLinks = false;
 const socialLinkItems = [
   {key: 'instagram', label: 'Instagram'},
   {key: 'youtube', label: 'YouTube'},
@@ -38,13 +41,13 @@ const socialLinkItems = [
 ] as const;
 type SocialLinkKey = (typeof socialLinkItems)[number]['key'];
 
-export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
+export async function SiteFooter({locale, golfEnabled, externalSites}: SiteFooterProps) {
   const text = (await getLocaleMessages(locale)).common;
   const navLabels = text.navigation.items;
   const navHrefs = text.navigation.hrefs;
   const navHref = (id: keyof typeof navHrefs, fallback: string) =>
     resolveCmsHref(locale, navHrefs[id], fallback);
-  const externalLabels = text.footer.externalSites;
+  const visibleExternalSites = getVisibleExternalSites(externalSites);
   const {business, legal} = text.footer;
   const contactLabel = text.navigation.contactCta;
   const collectionCategoryLinks = text.footer.collectionCategoryLinks ?? [];
@@ -132,18 +135,23 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
               </div>
             ) : null}
 
-            {showFooterExternalLinks ? (
+            {visibleExternalSites.length > 0 ? (
               <div>
                 <p className="footer-label">{text.footer.otherSites}</p>
                 <div className="mt-5 flex flex-wrap gap-x-7 gap-y-3">
-                  <ExternalSiteLink label={externalLabels.daeho} href={externalLinks.daeho} className="footer-link" />
-                  <ExternalSiteLink label={externalLabels.oh} href={externalLinks.oh} className="footer-link" />
-                  <ExternalSiteLink label={externalLabels.vulcan} href={externalLinks.vulcan} className="footer-link" />
+                  {visibleExternalSites.map((item) => (
+                    <ExternalSiteLink
+                      key={item.id}
+                      label={item.label}
+                      href={item.href}
+                      className="footer-link"
+                    />
+                  ))}
                 </div>
               </div>
             ) : null}
 
-            <div className={showFooterExternalLinks || visibleSocialLinks.length > 0 ? '' : 'sm:col-start-2'}>
+            <div className={visibleExternalSites.length > 0 || visibleSocialLinks.length > 0 ? '' : 'sm:col-start-2'}>
               <p className="footer-label">{text.footer.locale}</p>
               <div className="mt-5 flex gap-5">
                 {locales.map((targetLocale) => (
