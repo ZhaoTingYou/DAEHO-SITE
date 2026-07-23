@@ -72,13 +72,14 @@ class TrafficAnalyticsServiceTest {
   void stripsPrivateQueryValuesAndFragmentsFromStoredPaths() {
     service.record(with(
         "landingPath", "/en?utm_source=instagram&email=private@example.com&message=secret#ignored",
-        "pagePath", "/en/contact?gclid=abc123&engraving=private&utm_campaign=launch#details"
+        "pagePath", "/en/contact?gclid=abc123&dclid=def456&engraving=private&utm_campaign=launch#details"
     ));
 
     assertEquals("/en?utm_source=instagram", repository.lastPayload.get("landingPath"));
-    assertEquals("/en/contact?gclid=abc123&utm_campaign=launch", repository.lastPayload.get("pagePath"));
+    assertEquals("/en/contact?utm_campaign=launch", repository.lastPayload.get("pagePath"));
     assertFalse(repository.lastPayload.values().stream().map(Object::toString)
-        .anyMatch(value -> value.contains("private@example.com") || value.contains("secret") || value.contains("engraving")));
+        .anyMatch(value -> value.contains("private@example.com") || value.contains("secret")
+            || value.contains("engraving") || value.contains("abc123") || value.contains("def456")));
   }
 
   @Test

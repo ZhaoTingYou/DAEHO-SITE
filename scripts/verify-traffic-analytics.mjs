@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
 
 const REQUEST_TIMEOUT_MS = 15_000;
 const QUIET_PERIOD_MS = 750;
-const DEFAULT_UTM_SOURCE = 'daeho-traffic-verification';
+const DEFAULT_UTM_SOURCE_PREFIX = 'daeho-traffic-verification';
 const DEFAULT_UTM_MEDIUM = 'verification';
 const DEFAULT_UTM_CAMPAIGN = 'traffic-analytics';
 
@@ -29,7 +30,7 @@ async function main() {
 function readConfig() {
   const baseUrl = requiredUrl('DAEHO_VERIFY_BASE_URL');
   const trafficUrl = new URL(process.env.DAEHO_VERIFY_TRAFFIC_URL?.trim() || '/en', baseUrl);
-  const source = process.env.DAEHO_VERIFY_UTM_SOURCE?.trim() || DEFAULT_UTM_SOURCE;
+  const source = process.env.DAEHO_VERIFY_UTM_SOURCE?.trim() || `${DEFAULT_UTM_SOURCE_PREFIX}-${randomUUID()}`;
 
   trafficUrl.searchParams.set('utm_source', source);
   trafficUrl.searchParams.set('utm_medium', DEFAULT_UTM_MEDIUM);
@@ -73,6 +74,7 @@ async function verifyPublicAnalytics(browser, config, checks) {
   const consoleErrors = collectConsoleErrors(page);
   const internalRequests = [];
   const gaTagRequests = [];
+  const gaCollectRequests = [];
 
   page.on('request', (request) => {
     if (isInternalPageViewRequest(request)) {
@@ -80,6 +82,9 @@ async function verifyPublicAnalytics(browser, config, checks) {
     }
     if (isGoogleAnalyticsTagRequest(request)) {
       gaTagRequests.push(request);
+    }
+    if (isGoogleAnalyticsCollectRequest(request)) {
+      gaCollectRequests.push(request);
     }
   });
 
@@ -94,21 +99,24 @@ async function verifyPublicAnalytics(browser, config, checks) {
     );
     assert.equal(gaTagRequests.length, 0, 'GA tag must not load before consent.');
     assert.equal(internalRequests.length, 0, 'Internal page views must not be sent before consent.');
-    checks.push('pre-consent page has no GA tag or internal page-view request');
+    await assertNoAnalyticsCookies(context, 'before consent');
+    checks.push('pre-consent page has no GA tag, analytics cookies, or internal page-view request');
 
-    const internalRequest = page.waitForRequest(isInternalPageViewRequest, {timeout: REQUEST_TIMEOUT_MS});
+    const internalResponse = page.waitForResponse(isInternalPageViewResponse, {timeout: REQUEST_TIMEOUT_MS});
     const gaCollectRequest = page.waitForRequest(isGoogleAnalyticsCollectRequest, {timeout: REQUEST_TIMEOUT_MS});
     await page.getByRole('button', {name: /allow analytics|분석 허용/i}).click();
-    await Promise.all([internalRequest, gaCollectRequest]);
+    const [recordResponse] = await Promise.all([internalResponse, gaCollectRequest]);
+    assert.ok([200, 202].includes(recordResponse.status()), 'Initial internal page view must be accepted.');
     await page.waitForTimeout(QUIET_PERIOD_MS);
 
     assert.equal(internalRequests.length, 1, 'Accepting consent must send exactly one initial internal page view.');
-    checks.push('consent sends one internal page view and one GA collect request');
+    checks.push('consent sends one accepted internal page view and one GA collect request');
 
     const initialRequestCount = internalRequests.length;
-    const secondInternalRequest = page.waitForRequest(isInternalPageViewRequest, {timeout: REQUEST_TIMEOUT_MS});
+    const secondInternalResponse = page.waitForResponse(isInternalPageViewResponse, {timeout: REQUEST_TIMEOUT_MS});
     await page.goto(config.secondRouteUrl.href, {waitUntil: 'domcontentloaded'});
-    await secondInternalRequest;
+    const secondRecordResponse = await secondInternalResponse;
+    assert.ok([200, 202].includes(secondRecordResponse.status()), 'Second internal page view must be accepted.');
     await page.waitForTimeout(QUIET_PERIOD_MS);
 
     assert.equal(
@@ -117,6 +125,33 @@ async function verifyPublicAnalytics(browser, config, checks) {
       'Navigating to the second route must send exactly one additional internal page view.'
     );
     checks.push('second route adds exactly one internal page view');
+
+    const requestCountBeforeWithdrawal = internalRequests.length;
+    const collectCountBeforeWithdrawal = gaCollectRequests.length;
+    await page.getByRole('button', {name: /cookie settings|쿠키 설정/i}).click();
+    await page.getByRole('button', {name: /^reject$|^거부$/i}).click();
+    await page.waitForTimeout(QUIET_PERIOD_MS);
+
+    await assertNoAnalyticsCookies(context, 'after consent withdrawal');
+    assert.equal(
+      await page.evaluate(() => window.localStorage.getItem('daeho_internal_analytics_session_v1')),
+      null,
+      'Withdrawing consent must clear the internal analytics session.'
+    );
+
+    await page.goto(new URL('/en/terms', config.baseUrl).href, {waitUntil: 'domcontentloaded'});
+    await page.waitForTimeout(QUIET_PERIOD_MS);
+    assert.equal(
+      internalRequests.length,
+      requestCountBeforeWithdrawal,
+      'Withdrawing consent must stop further internal page views.'
+    );
+    assert.equal(
+      gaCollectRequests.length,
+      collectCountBeforeWithdrawal,
+      'Withdrawing consent must stop further GA collect requests.'
+    );
+    checks.push('withdrawing consent clears analytics state and stops GA and CMS collection');
 
     assertNoHorizontalOverflow(page, 'desktop public page');
     assertNoConsoleErrors(consoleErrors, 'desktop public page');
@@ -197,6 +232,10 @@ function isInternalPageViewRequest(request) {
   return request.method() === 'POST' && url.pathname === '/api/cms/analytics/page-view';
 }
 
+function isInternalPageViewResponse(response) {
+  return isInternalPageViewRequest(response.request());
+}
+
 function isGoogleAnalyticsTagRequest(request) {
   const url = new URL(request.url());
   return url.hostname.endsWith('googletagmanager.com') && url.pathname === '/gtag/js';
@@ -230,6 +269,11 @@ async function assertNoHorizontalOverflow(page, label) {
 
 function assertNoConsoleErrors(errors, label) {
   assert.equal(errors.length, 0, `${label} must not have console errors.`);
+}
+
+async function assertNoAnalyticsCookies(context, label) {
+  const analyticsCookies = (await context.cookies()).filter((cookie) => /^_ga(?:_|$)/.test(cookie.name));
+  assert.equal(analyticsCookies.length, 0, `Analytics cookies must not exist ${label}.`);
 }
 
 main().catch(() => {

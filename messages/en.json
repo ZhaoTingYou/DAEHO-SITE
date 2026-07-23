@@ -2339,7 +2339,7 @@
           "body": [
             "The Company may use cookies or similar technologies for stable Site operation, language or session maintenance, security, and improved usability.",
             "Only after explicit consent, the Company activates Google Analytics and operates first-party anonymous session analytics in its CMS database. Google Analytics is used to analyze acquisition sources, visited pages, browser and device types, and usage events. The _ga and _ga_* cookies may be used, and advertising personalization is not enabled.",
-            "Only the consenting user's anonymous session ID, acquisition channel and source, campaign information, first and most recent visit paths, visit time, page-view count, language and device class are retained in the CMS database for up to 14 months.",
+            "Only the consenting user's anonymous session ID, acquisition channel, source and medium, campaign name and content, external referrer host, first and most recent visit paths and viewed-page titles, visit and page-view times, page-view count, language and device class are retained in the CMS database for up to 14 months.",
             "IP addresses, raw User-Agent strings, and inquiry, contact, or engraving content are not stored in visit analytics records.",
             "Users may allow or reject analytics on their first visit and may change their choice at any time through Cookie settings in the Footer. Rejecting or withdrawing consent stops further Google Analytics and internal CMS collection and removes analytics cookies that the Site can identify.",
             "Users may also refuse or delete cookies through browser settings. Rejecting analytics cookies does not prevent use of the Site's general functions."
