@@ -15,10 +15,16 @@ test('back-to-top control starts a smooth return on the first pointer press', ()
   assert.match(source, /window\.addEventListener\('scroll', updateVisibility, \{passive: true\}\)/);
   assert.match(source, /window\.scrollTo\(\{/);
   assert.match(source, /behavior: 'smooth'/);
-  assert.match(source, /event\.preventDefault\(\)/);
+  assert.match(source, /lastPointerTriggerAt\.current = Date\.now\(\)/);
   assert.match(source, /onPointerDown=\{handlePointerDown\}/);
-  assert.match(source, /if \(event\.detail === 0\) scrollToTop\(\)/);
   assert.match(source, /touch-manipulation/);
   assert.match(source, /tabIndex=\{isVisible \? 0 : -1\}/);
   assert.match(source, /aria-label=\{label\}/);
+});
+
+test('back-to-top control keeps a click fallback without restarting a pointer-triggered scroll', () => {
+  assert.match(source, /const handleClick = \(\) => \{/);
+  assert.match(source, /Date\.now\(\) - lastPointerTriggerAt\.current > 500/);
+  assert.match(source, /onClick=\{handleClick\}/);
+  assert.doesNotMatch(source, /event\.preventDefault\(\)/);
 });

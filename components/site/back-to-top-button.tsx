@@ -1,10 +1,11 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import type {MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent} from 'react';
+import {useEffect, useRef, useState} from 'react';
+import type {PointerEvent as ReactPointerEvent} from 'react';
 
 export function BackToTopButton({label}: {label: string}) {
   const [isVisible, setIsVisible] = useState(false);
+  const lastPointerTriggerAt = useRef(0);
 
   useEffect(() => {
     let frame = 0;
@@ -36,14 +37,14 @@ export function BackToTopButton({label}: {label: string}) {
   };
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (!event.isPrimary || event.button !== 0) return;
+    if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
 
-    event.preventDefault();
+    lastPointerTriggerAt.current = Date.now();
     scrollToTop();
   };
 
-  const handleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    if (event.detail === 0) scrollToTop();
+  const handleClick = () => {
+    if (Date.now() - lastPointerTriggerAt.current > 500) scrollToTop();
   };
 
   return (
