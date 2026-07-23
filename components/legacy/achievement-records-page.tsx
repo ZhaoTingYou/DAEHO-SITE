@@ -11,6 +11,8 @@ import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {imageSrc} from '@/lib/image-src';
 import {withLocale} from '@/lib/site-map';
+import enMessages from '@/messages/en.json';
+import koMessages from '@/messages/ko.json';
 
 type AchievementContent = {
   hero: {
@@ -75,19 +77,10 @@ type AchievementPageCopy = {
   marketFeatures: MarketFeature[];
 };
 
-const fallbackFirstRecordImages = [
-  'legacy_achievement_01.png',
-  'legacy_achievement_02.png',
-  'legacy_achievement_03.png',
-  'legacy_achievement_04.png'
-] as const;
-
-function createFallbackFirstRecords(titlePrefix: string): FirstRecord[] {
-  return fallbackFirstRecordImages.map((image, index) => ({
-    title: `${titlePrefix} ${String(index + 1).padStart(2, '0')}`,
-    image
-  }));
-}
+const staticFirstRecordsByLocale = {
+  ko: koMessages.legacyPages.achievement.copy.firstRecords,
+  en: enMessages.legacyPages.achievement.copy.firstRecords
+} satisfies Record<Locale, FirstRecordInput[]>;
 
 const defaultPageCopy = {
   ko: {
@@ -242,7 +235,7 @@ function resolveAchievementCopy(locale: Locale, content: AchievementContent): Ac
   const fallback = defaultPageCopy[locale];
   const copy = content.copy ?? {};
   const firstRecords = normalizeFirstRecords(copy.firstRecords);
-  const fallbackFirstRecords = createFallbackFirstRecords(fallback.firstHeading);
+  const fallbackFirstRecords = normalizeFirstRecords(staticFirstRecordsByLocale[locale]);
   const marketFeatures = normalizeMarketFeatures(copy.marketFeatures);
 
   return {

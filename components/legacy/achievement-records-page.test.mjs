@@ -61,10 +61,14 @@ test('achievement runtime locale messages have four localized titled fallback re
   ]);
 });
 
-test('achievement component keeps only a generic four-image safety fallback', () => {
-  assert.ok(source.includes('const fallbackFirstRecordImages = ['), 'the component should retain a four-image safety fallback');
-  assert.equal((source.match(/legacy_achievement_0[1-4]\.png/g) ?? []).length, 8, 'the four FIRST RECORDS safety images should coexist with four market image references');
-  assert.ok(source.includes("title: `${titlePrefix} ${String(index + 1).padStart(2, '0')}`"), 'the safety fallback should derive neutral titles from the localized section heading');
+test('achievement component uses the exact static locale records as its empty-or-invalid CMS fallback', () => {
+  assert.ok(source.includes("import enMessages from '@/messages/en.json';"), 'English static messages should be an explicit fallback source');
+  assert.ok(source.includes("import koMessages from '@/messages/ko.json';"), 'Korean static messages should be an explicit fallback source');
+  assert.ok(source.includes('ko: koMessages.legacyPages.achievement.copy.firstRecords'), 'Korean fallback records should come from the static locale messages');
+  assert.ok(source.includes('en: enMessages.legacyPages.achievement.copy.firstRecords'), 'English fallback records should come from the static locale messages');
+  assert.ok(source.includes('normalizeFirstRecords(staticFirstRecordsByLocale[locale])'), 'empty or image-invalid configured arrays should use normalized exact locale records');
+  assert.ok(!source.includes('fallbackFirstRecordImages'), 'the component should not duplicate a separate fallback image/title list');
+  assert.ok(!source.includes('titlePrefix'), 'the component should not replace exact localized titles with generated generic copy');
   assert.doesNotMatch(source, /title: '국내 최초 이니셜 조각 적용'|title: 'First domestic application of initial engraving'/);
   assert.doesNotMatch(source, /backTitle|hoverText/);
 });
@@ -88,6 +92,11 @@ test('achievement first record gallery uses a one, two, four-column responsive s
 });
 
 test('achievement mobile styles do not override the gallery gap or impose an aspect ratio on title-plus-image cards', () => {
+  assert.match(
+    mobileCssSource,
+    /\.mobile-page-shell \.achievement-record-gallery\s*\{[^}]*padding-inline:\s*0;[^}]*\}/,
+    'mobile CSS should remove nested gallery padding while preserving the outer section gutter'
+  );
   assert.doesNotMatch(
     mobileCssSource,
     /\.mobile-page-shell \.achievement-record-gallery\s*\{[^}]*gap:\s*0;/,
