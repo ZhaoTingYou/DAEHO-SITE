@@ -15,6 +15,8 @@ test('public site mounts a consent-gated analytics provider', () => {
   assert.match(provider, /NEXT_PUBLIC_GA_MEASUREMENT_ID/);
   assert.match(provider, /consent === 'granted'/);
   assert.match(analytics, /send_page_view:\s*false/);
+  assert.match(analytics, /dataLayer\?\.push\(arguments\)/);
+  assert.doesNotMatch(analytics, /dataLayer\?\.push\(args\)/);
   assert.match(provider, /sanitizeAnalyticsUrl/);
   assert.match(provider, /ANALYTICS_CONSENT_EVENT/);
 });

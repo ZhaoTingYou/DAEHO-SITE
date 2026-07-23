@@ -29,9 +29,11 @@ export function initializeGoogleAnalytics(measurementId: string) {
   }
 
   window.dataLayer = window.dataLayer ?? [];
-  window.gtag = window.gtag ?? ((...args: unknown[]) => {
-    window.dataLayer?.push(args);
-  });
+  window.gtag = window.gtag ?? function gtag() {
+    // gtag.js consumes the native Arguments object used by its standard snippet.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments);
+  };
 
   window.gtag('consent', 'default', {
     analytics_storage: 'granted',
