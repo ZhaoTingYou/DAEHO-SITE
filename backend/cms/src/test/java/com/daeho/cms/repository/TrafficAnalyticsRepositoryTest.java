@@ -107,21 +107,24 @@ class TrafficAnalyticsRepositoryTest {
   }
 
   @Test
-  void returnsSummarySectionsWithTheSharedRangeAndChannelFilter() {
+  void countsCrossBoundaryPageViewEventsByViewedAtForTotalsDailyAndChannels() {
     var jdbc = new RecordingJdbcTemplate();
     jdbc.queryResult = call -> {
       if (call.sql().contains("active_sessions")) {
-        return List.of(Map.of("sessions", 2L, "page_views", 3L, "active_sessions", 1L, "average_pages_per_session", 1.5D));
+        return List.of(Map.of("sessions", 2L, "active_sessions", 1L));
+      }
+      if (call.sql().contains("event_page_views") && !call.sql().contains("session_channels")) {
+        return List.of(Map.of("event_page_views", 4L));
       }
       if (call.sql().contains("generate_series")) {
         return List.of(
             Map.of("date", "2026-07-01", "sessions", 0L, "page_views", 1L),
-            Map.of("date", "2026-07-02", "sessions", 2L, "page_views", 2L),
+            Map.of("date", "2026-07-02", "sessions", 2L, "page_views", 3L),
             Map.of("date", "2026-07-03", "sessions", 0L, "page_views", 0L)
         );
       }
-      if (call.sql().contains("GROUP BY channel, source, medium")) {
-        return List.of(Map.of("channel", "google", "source", "google", "medium", "organic", "sessions", 2L, "page_views", 3L));
+      if (call.sql().contains("session_channels")) {
+        return List.of(Map.of("channel", "google", "source", "google", "medium", "organic", "sessions", 2L, "page_views", 4L));
       }
       if (call.sql().contains("landing_channel_counts")) {
         return List.of(Map.of("path", "/en", "sessions", 2L, "leading_channel", "google"));
@@ -132,17 +135,33 @@ class TrafficAnalyticsRepositoryTest {
 
     var summary = repository.summary(FROM, TO, "google");
 
-    assertEquals(Map.of("sessions", 2L, "pageViews", 3L, "activeSessions", 1L, "averagePagesPerSession", 1.5D), summary.get("totals"));
+    assertEquals(Map.of("sessions", 2L, "pageViews", 4L, "activeSessions", 1L, "averagePagesPerSession", 2.0D), summary.get("totals"));
     assertEquals(List.of(
         Map.of("date", "2026-07-01", "sessions", 0L, "pageViews", 1L),
-        Map.of("date", "2026-07-02", "sessions", 2L, "pageViews", 2L),
+        Map.of("date", "2026-07-02", "sessions", 2L, "pageViews", 3L),
         Map.of("date", "2026-07-03", "sessions", 0L, "pageViews", 0L)
     ), summary.get("daily"));
-    assertEquals(List.of(Map.of("channel", "google", "source", "google", "medium", "organic", "sessions", 2L, "pageViews", 3L, "share", 1.0D)), summary.get("channels"));
+    assertEquals(List.of(Map.of("channel", "google", "source", "google", "medium", "organic", "sessions", 2L, "pageViews", 4L, "share", 1.0D)), summary.get("channels"));
     assertEquals(List.of(Map.of("path", "/en", "sessions", 2L, "leadingChannel", "google")), summary.get("landingPages"));
 
     var summaryCalls = jdbc.callsMatching("SELECT");
-    assertEquals(4, summaryCalls.size());
+    assertEquals(5, summaryCalls.size());
+
+    var totalsCall = jdbc.callsMatching("active_sessions").get(0);
+    assertTrue(totalsCall.sql().contains("started_at >= ? AND started_at < ?"));
+    assertFalse(totalsCall.sql().contains("page_view_count"));
+
+    var pageViewTotalsCall = jdbc.callsMatching("event_page_views").stream()
+        .filter(call -> !call.sql().contains("session_channels"))
+        .findFirst()
+        .orElseThrow();
+    assertTrue(pageViewTotalsCall.sql().contains("FROM cms_analytics_pageviews pv"));
+    assertTrue(pageViewTotalsCall.sql().contains("JOIN cms_analytics_sessions s ON s.session_id = pv.session_id"));
+    assertTrue(pageViewTotalsCall.sql().contains("pv.viewed_at >= ? AND pv.viewed_at < ?"));
+    assertFalse(pageViewTotalsCall.sql().contains("started_at"));
+    assertFalse(pageViewTotalsCall.sql().contains("page_view_count"));
+    assertEquals(List.of(FROM, TO, "google", "google"), Arrays.asList(pageViewTotalsCall.args()));
+
     var dailyCall = jdbc.callsMatching("generate_series").get(0);
     assertTrue(dailyCall.sql().contains("LEFT JOIN session_daily"));
     assertTrue(dailyCall.sql().contains("LEFT JOIN page_view_daily"));
@@ -153,6 +172,19 @@ class TrafficAnalyticsRepositoryTest {
     assertEquals(
         List.of(FROM, TO, FROM, TO, "google", "google", FROM, TO, "google", "google"),
         Arrays.asList(dailyCall.args())
+    );
+
+    var channelsCall = jdbc.callsMatching("session_channels").get(0);
+    assertTrue(channelsCall.sql().contains("FULL OUTER JOIN page_view_channels"));
+    assertTrue(channelsCall.sql().contains("JOIN cms_analytics_sessions s ON s.session_id = pv.session_id"));
+    assertTrue(channelsCall.sql().contains("pv.viewed_at >= ? AND pv.viewed_at < ?"));
+    assertFalse(channelsCall.sql().contains("page_view_count"));
+    var pageViewChannelsSql = channelsCall.sql().substring(channelsCall.sql().indexOf("page_view_channels AS"));
+    pageViewChannelsSql = pageViewChannelsSql.substring(0, pageViewChannelsSql.indexOf("SELECT COALESCE"));
+    assertFalse(pageViewChannelsSql.contains("started_at"));
+    assertEquals(
+        List.of(FROM, TO, "google", "google", FROM, TO, "google", "google"),
+        Arrays.asList(channelsCall.args())
     );
 
     var landingCall = jdbc.callsMatching("landing_channel_counts").get(0);

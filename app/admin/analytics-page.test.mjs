@@ -30,7 +30,18 @@ test('analytics report provides URL-based date, channel, and page controls', () 
   assert.match(page, /page: filters\.page - 1/);
   assert.match(page, /page: filters\.page \+ 1/);
   assert.match(page, /analyticsPageCorrectionHref/);
+  assert.match(page, /const totalPages = cappedAnalyticsTotalPages\(visits\.totalPages\)/);
+  assert.match(page, /filters\.page < totalPages/);
+  assert.doesNotMatch(page, /filters\.page < visits\.totalPages/);
   assert.match(page, /redirect\(/);
+});
+
+test('analytics report catches every fetch or parse failure in its localized error state', () => {
+  assert.match(page, /catch \{/);
+  assert.match(page, /return <AnalyticsReportError filters=\{filters\} t=\{t\} \/>/);
+  assert.doesNotMatch(page, /error\.status === 401|error\.status === 403|throw error/);
+  assert.doesNotMatch(page, /CmsBackendError/);
+  assert.match(page, /analytics\.errorTitle/);
 });
 
 test('analytics report exposes exact daily values and accessible state', () => {
@@ -38,8 +49,6 @@ test('analytics report exposes exact daily values and accessible state', () => {
   assert.match(page, /scope="col"/);
   assert.match(page, /aria-current/);
   assert.match(page, /deviceLabel/);
-  assert.match(page, /analytics\.errorTitle/);
-  assert.match(page, /CmsBackendError/);
 });
 
 test('analytics copy describes visits and localizes every device class', () => {

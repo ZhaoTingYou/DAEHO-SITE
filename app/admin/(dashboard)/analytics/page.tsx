@@ -5,6 +5,7 @@ import {
   addDays,
   analyticsHref,
   analyticsPageCorrectionHref,
+  cappedAnalyticsTotalPages,
   formatDate,
   formatDateTime,
   formatDecimal,
@@ -19,7 +20,6 @@ import {
 import {getAdminI18n} from '@/lib/admin-i18n';
 import type {AdminLocale} from '@/lib/admin-locales';
 import {
-  CmsBackendError,
   getTrafficAnalyticsSummary,
   listTrafficAnalyticsVisits,
   trafficAnalyticsChannels,
@@ -47,11 +47,7 @@ export default async function AdminAnalyticsPage({searchParams}: Props) {
       getTrafficAnalyticsSummary(filters),
       listTrafficAnalyticsVisits(filters)
     ]);
-  } catch (error) {
-    if (error instanceof CmsBackendError && (error.status === 401 || error.status === 403)) {
-      throw error;
-    }
-
+  } catch {
     return <AnalyticsReportError filters={filters} t={t} />;
   }
 
@@ -323,7 +319,7 @@ function TableEmpty({colSpan, body}: {colSpan: number; body: string}) {
 }
 
 function Pagination({filters, visits, t}: {filters: AnalyticsPageFilters; visits: TrafficAnalyticsVisits; t: (key: string, values?: Record<string, string | number>) => string}) {
-  const totalPages = Math.max(visits.totalPages, 1);
+  const totalPages = cappedAnalyticsTotalPages(visits.totalPages);
 
   return (
     <div className="flex flex-col gap-3 border-t border-[#e4e7ec] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -332,7 +328,7 @@ function Pagination({filters, visits, t}: {filters: AnalyticsPageFilters; visits
         {filters.page > 1 ? (
           <Link href={analyticsHref(filters, {page: filters.page - 1})} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">{t('analytics.previous')}</Link>
         ) : <span aria-disabled="true" className="inline-flex min-h-9 items-center rounded-md border border-[#e4e7ec] bg-[#f8fafc] px-3 text-sm font-semibold text-[#98a2b3]">{t('analytics.previous')}</span>}
-        {filters.page < visits.totalPages ? (
+        {filters.page < totalPages ? (
           <Link href={analyticsHref(filters, {page: filters.page + 1})} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">{t('analytics.next')}</Link>
         ) : <span aria-disabled="true" className="inline-flex min-h-9 items-center rounded-md border border-[#e4e7ec] bg-[#f8fafc] px-3 text-sm font-semibold text-[#98a2b3]">{t('analytics.next')}</span>}
       </div>

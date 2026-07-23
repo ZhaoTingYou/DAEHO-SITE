@@ -23,6 +23,7 @@ declare module '@/lib/admin-analytics-core.mjs' {
     filters: AnalyticsPageFilters,
     totalPages: number
   ): string | null;
+  export function cappedAnalyticsTotalPages(totalPages: number): number;
   export function isAnalyticsPresetActive(
     filters: AnalyticsPageFilters,
     today: string,
