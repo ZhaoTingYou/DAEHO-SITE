@@ -131,6 +131,15 @@ async function verifyPublicAnalytics(browser, config, checks) {
     );
     checks.push('second route adds exactly one internal page view');
 
+    verificationStage = 'duplicate page-view replay';
+    const replayResponse = await page.request.post(
+      new URL('/api/cms/analytics/page-view', config.baseUrl).href,
+      {data: internalRequests[0].postDataJSON()}
+    );
+    assert.equal(replayResponse.status(), 200, 'A duplicate page-view ID must return 200.');
+    assert.equal((await replayResponse.json()).inserted, false, 'A duplicate page-view ID must not be inserted again.');
+    checks.push('duplicate page-view replay is accepted without another insert');
+
     verificationStage = 'consent withdrawal';
     const requestCountBeforeWithdrawal = internalRequests.length;
     await page.getByRole('button', {name: /cookie settings|쿠키 설정/i}).click();
