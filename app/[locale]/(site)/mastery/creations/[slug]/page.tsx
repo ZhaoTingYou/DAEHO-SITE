@@ -4,6 +4,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
 import {Reveal} from '@/components/motion/reveal';
+import {HistoryBackButton} from '@/components/navigation/history-back-button';
 import {SafeImage} from '@/components/safe-image';
 import {CollectionDetailGallery} from '@/components/specialty/collection-detail-gallery';
 import type {Locale} from '@/i18n/routing';
@@ -86,13 +87,11 @@ export default async function CollectionDetailPage({params}: Props) {
     <main className="mobile-page-shell bg-bg text-text">
       <section className="bg-bg pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+20px)] md:pt-28">
         <div className="mx-auto max-w-[1280px] px-[var(--mobile-page-gutter)] pb-section pt-6 md:px-container md:pt-[clamp(40px,5vw,72px)]">
-          <Link
-            href={withLocale(locale, '/mastery/creations')}
-            aria-label={text.back}
-            className="mobile-tap-target link-sweep no-underline inline-flex items-center justify-center font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
-          >
-            <span aria-hidden="true">←</span>
-          </Link>
+          <HistoryBackButton
+            fallbackHref={withLocale(locale, '/mastery/creations')}
+            ariaLabel={text.back}
+            className="mobile-tap-target link-sweep no-underline inline-flex items-center justify-center border-0 bg-transparent p-0 font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
+          />
           <div className="mt-8 md:mt-[clamp(40px,5vw,64px)]">
             <div className="mb-8 space-y-3 lg:hidden">
               <p className="font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">

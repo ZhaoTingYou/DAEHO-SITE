@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 import test from 'node:test';
 
 const source = readFileSync(new URL('./specialty-collection-gallery.tsx', import.meta.url), 'utf8');
@@ -9,6 +9,10 @@ const detailPageSource = readFileSync(
   'utf8'
 );
 const detailGallerySource = readFileSync(new URL('./collection-detail-gallery.tsx', import.meta.url), 'utf8');
+const historyBackButtonUrl = new URL('../navigation/history-back-button.tsx', import.meta.url);
+const historyBackButtonSource = existsSync(historyBackButtonUrl)
+  ? readFileSync(historyBackButtonUrl, 'utf8')
+  : '';
 const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
 const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
@@ -56,8 +60,31 @@ test('creations subpage back arrows do not render the link sweep underline', () 
     assert.ok(className.includes('no-underline'), `back arrow should opt out of underline: ${className}`);
   }
 
-  const detailBackArrow = detailPageSource.match(/className="([^"]*link-sweep[^"]*)"[\s\S]*?<span aria-hidden="true">←<\/span>/)?.[1] ?? '';
+  const detailBackArrow = detailPageSource.match(
+    /<HistoryBackButton[\s\S]*?className="([^"]*link-sweep[^"]*)"/
+  )?.[1] ?? '';
   assert.ok(detailBackArrow.includes('no-underline'), 'detail page back arrow should opt out of underline');
+});
+
+test('collection detail back arrow returns to browser history with a localized direct-entry fallback', () => {
+  assert.ok(
+    detailPageSource.includes('<HistoryBackButton'),
+    'collection details should render the history-aware back button'
+  );
+  assert.ok(
+    detailPageSource.includes("fallbackHref={withLocale(locale, '/mastery/creations')}"),
+    'direct detail visits should retain the localized Creations fallback'
+  );
+  assert.ok(historyBackButtonSource.includes("'use client'"), 'history navigation requires a client component');
+  assert.ok(
+    historyBackButtonSource.includes('window.history.length > 1') &&
+      historyBackButtonSource.includes('router.back()'),
+    'the button should return to the actual previous history entry when one exists'
+  );
+  assert.ok(
+    historyBackButtonSource.includes('router.push(fallbackHref)'),
+    'the button should use its safe fallback when no previous entry exists'
+  );
 });
 
 test('collection stage cards declare separate background and product artwork in order', () => {
