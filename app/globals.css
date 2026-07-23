@@ -1321,15 +1321,6 @@ select {
   outline-color: var(--white);
 }
 
-.site-external-link-arrow {
-  display: inline-block;
-  flex: 0 0 auto;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-  transform: translateY(-1px);
-}
-
 .mobile-external-site-link {
   --external-link-bg: rgba(255, 255, 255, .54);
   --external-link-border: rgba(70, 76, 86, .38);

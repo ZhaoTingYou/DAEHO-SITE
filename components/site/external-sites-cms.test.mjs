@@ -83,7 +83,7 @@ test('desktop external sites scroll without shrinking the permanent contact acti
   );
 });
 
-test('header external sites use bordered destination buttons without changing footer links', () => {
+test('header external sites use bordered destination buttons without arrows or footer changes', () => {
   const globalStyles = stripComments(
     readFileSync(path.join(repoRoot, 'app/globals.css'), 'utf8')
   );
@@ -92,18 +92,13 @@ test('header external sites use bordered destination buttons without changing fo
     desktopHeader,
     /site-header-external-link--\$\{isHeroTransparent \? 'light' : 'dark'\}/
   );
-  assert.match(
-    desktopHeader,
-    /<span className="site-external-link-arrow" aria-hidden="true">↗<\/span>/
-  );
+  assert.doesNotMatch(desktopHeader, /site-external-link-arrow|↗/);
   assert.match(
     mobileMenu,
     /className="mobile-external-site-link"/
   );
-  assert.match(
-    mobileMenu,
-    /<span className="site-external-link-arrow" aria-hidden="true">↗<\/span>/
-  );
+  assert.doesNotMatch(mobileMenu, /site-external-link-arrow|↗/);
+  assert.doesNotMatch(globalStyles, /\.site-external-link-arrow/);
   assert.match(
     globalStyles,
     /\.site-header-external-link\s*\{[\s\S]*?min-height:\s*44px;[\s\S]*?isolation:\s*isolate;[\s\S]*?font-weight:\s*500;/

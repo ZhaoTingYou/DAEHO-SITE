@@ -522,7 +522,6 @@ export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps
                         className={`site-header-external-link site-header-external-link--${isHeroTransparent ? 'light' : 'dark'} shrink-0`}
                       >
                         <span>{item.label}</span>
-                        <span className="site-external-link-arrow" aria-hidden="true">↗</span>
                       </ExternalSiteLink>
                     ))}
                   </div>
@@ -800,7 +799,6 @@ export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps
                       className="mobile-external-site-link"
                     >
                       <span>{item.label}</span>
-                      <span className="site-external-link-arrow" aria-hidden="true">↗</span>
                     </ExternalSiteLink>
                   ))}
                 </div>
