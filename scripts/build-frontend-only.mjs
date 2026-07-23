@@ -13,6 +13,7 @@ const disabledPaths = [
 ];
 const forceDynamicFiles = [
   'app/sitemap.ts',
+  'app/rss.xml/route.ts',
   'app/[locale]/(site)/page.tsx',
   'app/[locale]/(site)/mastery/creations/page.tsx',
   'app/[locale]/(site)/mastery/creations/[slug]/page.tsx',
@@ -51,7 +52,7 @@ const staticPreviewPatches = [
       ],
       [
         '  const query = await searchParams;\n',
-        '  const query = {} as {head?: string; shaft?: string; engraving?: string};\n'
+        '  const query = {} as {head?: string; shaft?: string; style?: string; engraving?: string};\n'
       ]
     ]
   }
@@ -113,7 +114,8 @@ function stripForceDynamicMarkers() {
 
     const source = readFileSync(filePath, 'utf8');
     originalFiles.set(filePath, source);
-    const nextSource = relativePath === 'app/sitemap.ts'
+    const nextSource = relativePath === 'app/sitemap.ts' ||
+      relativePath === 'app/rss.xml/route.ts'
       ? source.replace("export const dynamic = 'force-dynamic';", "export const dynamic = 'force-static';")
       : source.replace(/\nexport const dynamic = 'force-dynamic';\n/g, '\n');
 
