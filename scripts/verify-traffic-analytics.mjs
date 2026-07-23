@@ -110,12 +110,14 @@ async function verifyPublicAnalytics(browser, config, checks) {
     await page.waitForTimeout(QUIET_PERIOD_MS);
 
     assert.equal(internalRequests.length, 1, 'Accepting consent must send exactly one initial internal page view.');
-    checks.push('consent sends one accepted internal page view and one GA collect request');
+    await waitForAnalyticsCookie(context);
+    checks.push('consent sends one accepted internal page view, one GA collect request, and creates an analytics cookie');
 
     const initialRequestCount = internalRequests.length;
     const secondInternalResponse = page.waitForResponse(isInternalPageViewResponse, {timeout: REQUEST_TIMEOUT_MS});
-    await page.goto(config.secondRouteUrl.href, {waitUntil: 'domcontentloaded'});
-    const secondRecordResponse = await secondInternalResponse;
+    const routeNavigation = page.waitForURL(config.secondRouteUrl.href, {timeout: REQUEST_TIMEOUT_MS});
+    await page.getByRole('link', {name: /privacy policy|개인정보처리방침/i}).last().click();
+    const [secondRecordResponse] = await Promise.all([secondInternalResponse, routeNavigation]);
     assert.ok([200, 202].includes(secondRecordResponse.status()), 'Second internal page view must be accepted.');
     await page.waitForTimeout(QUIET_PERIOD_MS);
 
@@ -274,6 +276,18 @@ function assertNoConsoleErrors(errors, label) {
 async function assertNoAnalyticsCookies(context, label) {
   const analyticsCookies = (await context.cookies()).filter((cookie) => /^_ga(?:_|$)/.test(cookie.name));
   assert.equal(analyticsCookies.length, 0, `Analytics cookies must not exist ${label}.`);
+}
+
+async function waitForAnalyticsCookie(context) {
+  const deadline = Date.now() + REQUEST_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const analyticsCookies = (await context.cookies()).filter((cookie) => /^_ga(?:_|$)/.test(cookie.name));
+    if (analyticsCookies.length > 0) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  assert.fail('Analytics consent must create an analytics cookie before withdrawal is tested.');
 }
 
 main().catch(() => {
