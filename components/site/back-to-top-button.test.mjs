@@ -10,12 +10,12 @@ test('public site layout includes a localized back-to-top control', () => {
   assert.match(layoutSource, /<BackToTopButton label=\{locale === 'ko' \? '맨 위로' : 'Back to top'\} \/>/);
 });
 
-test('back-to-top control appears after scrolling and supports reduced motion', () => {
+test('back-to-top control appears after scrolling and returns instantly', () => {
   assert.match(source, /window\.scrollY > Math\.max\(480, window\.innerHeight \* 0\.66\)/);
   assert.match(source, /window\.addEventListener\('scroll', updateVisibility, \{passive: true\}\)/);
-  assert.match(source, /window\.matchMedia\('\(prefers-reduced-motion: reduce\)'\)\.matches/);
   assert.match(source, /window\.scrollTo\(\{/);
-  assert.match(source, /behavior: prefersReducedMotion \? 'auto' : 'smooth'/);
+  assert.match(source, /behavior: 'instant'/);
+  assert.doesNotMatch(source, /behavior: 'smooth'/);
   assert.match(source, /tabIndex=\{isVisible \? 0 : -1\}/);
   assert.match(source, /aria-label=\{label\}/);
 });
