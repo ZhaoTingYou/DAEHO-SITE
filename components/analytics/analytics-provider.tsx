@@ -12,6 +12,7 @@ import {
   serializeAnalyticsConsent,
   type AnalyticsConsent
 } from '@/lib/analytics-core.mjs';
+import {clearInternalAnalyticsSession, InternalAnalyticsTracker} from './internal-analytics-tracker';
 import {
   deleteGoogleAnalyticsCookies,
   denyGoogleAnalyticsConsent,
@@ -113,6 +114,7 @@ export function AnalyticsProvider({children, locale}: AnalyticsProviderProps) {
     if (nextConsent === 'denied') {
       denyGoogleAnalyticsConsent();
       deleteGoogleAnalyticsCookies();
+      clearInternalAnalyticsSession();
       setAnalyticsReady(false);
     }
   };
@@ -137,6 +139,9 @@ export function AnalyticsProvider({children, locale}: AnalyticsProviderProps) {
       ) : null}
       <Suspense fallback={null}>
         <AnalyticsPageView enabled={analyticsReady && consent === 'granted'} />
+        {analyticsReady && consent === 'granted' ? (
+          <InternalAnalyticsTracker enabled={analyticsReady && consent === 'granted'} locale={locale} />
+        ) : null}
       </Suspense>
       {bannerOpen && validMeasurementId ? (
         <ConsentBanner

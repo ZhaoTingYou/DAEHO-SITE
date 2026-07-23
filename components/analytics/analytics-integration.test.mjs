@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 import test from 'node:test';
 
 function read(path) {
-  return readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+  const file = new URL(`../../${path}`, import.meta.url);
+  return existsSync(file) ? readFileSync(file, 'utf8') : '';
 }
 
 test('public site mounts a consent-gated analytics provider', () => {
@@ -37,4 +38,32 @@ test('Docker build receives the public GA4 measurement ID', () => {
   assert.match(read('Dockerfile.next'), /ARG NEXT_PUBLIC_GA_MEASUREMENT_ID/);
   assert.match(read('docker-compose.yml'), /NEXT_PUBLIC_GA_MEASUREMENT_ID/);
   assert.match(read('.env.example'), /NEXT_PUBLIC_GA_MEASUREMENT_ID=G-FXQGWE9XZ0/);
+});
+
+test('internal analytics mounts only after consent and clears its anonymous session on withdrawal', () => {
+  const provider = read('components/analytics/analytics-provider.tsx');
+
+  assert.match(provider, /<InternalAnalyticsTracker enabled=/);
+  assert.match(provider, /clearInternalAnalyticsSession/);
+  assert.match(provider, /enabled=\{analyticsReady && consent === 'granted'\}/);
+  assert.match(
+    provider,
+    /analyticsReady && consent === 'granted' \? \(\s*<InternalAnalyticsTracker enabled=\{analyticsReady && consent === 'granted'\}/
+  );
+});
+
+test('internal analytics tracker sends one consented, anonymous route payload through the same-origin proxy', () => {
+  const tracker = read('components/analytics/internal-analytics-tracker.tsx');
+  const route = read('app/api/cms/analytics/page-view/route.ts');
+
+  assert.match(tracker, /crypto\.randomUUID/);
+  assert.match(tracker, /INTERNAL_ANALYTICS_SESSION_TIMEOUT_MS/);
+  assert.match(tracker, /\/api\/cms\/analytics\/page-view/);
+  assert.match(tracker, /lastPageKey/);
+  assert.match(tracker, /keepalive:\s*true/);
+  assert.match(tracker, /\.catch\(\(\) => undefined\)/);
+  assert.match(route, /cmsBackendRequest/);
+  assert.match(route, /error instanceof CmsBackendError/);
+  assert.match(route, /Invalid JSON body/);
+  assert.doesNotMatch(route, /user-agent|x-forwarded-for|ipAddress/i);
 });
