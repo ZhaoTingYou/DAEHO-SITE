@@ -7,9 +7,12 @@ import {usePathname} from 'next/navigation';
 import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
-import {getVisibleExternalSites} from '@/lib/cms/external-sites-core.mjs';
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
+import {
+  getVisibleExternalSites,
+  type ExternalSiteItem
+} from '@/lib/cms/external-sites-core.mjs';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isActivePath, navItems, withLocale} from '@/lib/site-map';
 
@@ -18,6 +21,7 @@ import {ExternalSiteLink} from './external-site-link';
 type SiteHeaderProps = {
   locale: Locale;
   golfEnabled: boolean;
+  externalSites: readonly ExternalSiteItem[];
 };
 
 type MegaMenuKey = 'legacy' | 'specialty';
@@ -46,12 +50,10 @@ const instantItemVariants = {
   visible: {opacity: 1, y: 0}
 };
 
-export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
+export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps) {
   const navText = useTranslations('common.navigation');
   const footerText = useTranslations('common.footer');
-  const visibleExternalSites = getVisibleExternalSites(
-    footerText.raw('externalSites.items')
-  );
+  const visibleExternalSites = getVisibleExternalSites(externalSites);
   const pathname = usePathname();
   const prefersReducedMotion = usePrefersReducedMotion();
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -484,8 +486,8 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
             })}
           </motion.nav>
 
-          <div className="flex items-center justify-end gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
-            <div className="flex items-center gap-1" aria-label={navText('languageSwitcherLabel')}>
+          <div className="flex min-w-0 items-center justify-end gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
+            <div className="flex shrink-0 items-center gap-1" aria-label={navText('languageSwitcherLabel')}>
               {languageLinks.map((item, index) => (
                 <span key={item.locale} className="contents">
                   {index > 0 ? (
@@ -506,28 +508,30 @@ export function SiteHeader({locale, golfEnabled}: SiteHeaderProps) {
               ))}
             </div>
 
-            <span className="h-3 w-px bg-current opacity-25" aria-hidden="true" />
+            <span className="h-3 w-px shrink-0 bg-current opacity-25" aria-hidden="true" />
 
             {visibleExternalSites.length > 0 ? (
               <>
-                <div className="flex items-center gap-4">
-                  {visibleExternalSites.map((item) => (
-                    <ExternalSiteLink
-                      key={item.id}
-                      label={item.label}
-                      href={item.href}
-                      className="site-nav-link no-underline"
-                    />
-                  ))}
+                <div className="min-w-0 max-w-[min(32vw,32rem)] overflow-x-auto overscroll-x-contain">
+                  <div className="flex w-max items-center gap-4">
+                    {visibleExternalSites.map((item) => (
+                      <ExternalSiteLink
+                        key={item.id}
+                        label={item.label}
+                        href={item.href}
+                        className="site-nav-link shrink-0 no-underline"
+                      />
+                    ))}
+                  </div>
                 </div>
 
-                <span className="h-3 w-px bg-current opacity-25" aria-hidden="true" />
+                <span className="h-3 w-px shrink-0 bg-current opacity-25" aria-hidden="true" />
               </>
             ) : null}
 
             <Link
               href={navigationHref('contact', '/contact')}
-              className={`consult-cta ${isHeroTransparent ? 'consult-cta--light' : 'consult-cta--accent'}`}
+              className={`consult-cta shrink-0 ${isHeroTransparent ? 'consult-cta--light' : 'consult-cta--accent'}`}
             >
               <span className="consult-cta__label">{contactLabel}</span>
             </Link>

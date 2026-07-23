@@ -3,7 +3,10 @@ import Link from 'next/link';
 import {CookieSettingsButton} from '@/components/analytics/cookie-settings-button';
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
-import {getVisibleExternalSites} from '@/lib/cms/external-sites-core.mjs';
+import {
+  getVisibleExternalSites,
+  type ExternalSiteItem
+} from '@/lib/cms/external-sites-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
@@ -14,6 +17,7 @@ import {ExternalSiteLink} from './external-site-link';
 type SiteFooterProps = {
   locale: Locale;
   golfEnabled: boolean;
+  externalSites: readonly ExternalSiteItem[];
 };
 
 type FooterLink = {
@@ -37,13 +41,13 @@ const socialLinkItems = [
 ] as const;
 type SocialLinkKey = (typeof socialLinkItems)[number]['key'];
 
-export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
+export async function SiteFooter({locale, golfEnabled, externalSites}: SiteFooterProps) {
   const text = (await getLocaleMessages(locale)).common;
   const navLabels = text.navigation.items;
   const navHrefs = text.navigation.hrefs;
   const navHref = (id: keyof typeof navHrefs, fallback: string) =>
     resolveCmsHref(locale, navHrefs[id], fallback);
-  const visibleExternalSites = getVisibleExternalSites(text.footer.externalSites.items);
+  const visibleExternalSites = getVisibleExternalSites(externalSites);
   const {business, legal} = text.footer;
   const contactLabel = text.navigation.contactCta;
   const collectionCategoryLinks = text.footer.collectionCategoryLinks ?? [];

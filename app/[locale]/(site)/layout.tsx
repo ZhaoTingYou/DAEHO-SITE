@@ -26,15 +26,24 @@ export default async function SiteLayout({children, params}: Props) {
   setRequestLocale(locale);
   const golfEnabled = await isGolfEnabledForSite();
   const messages = await getLocaleMessages(locale as Locale);
+  const externalSites = messages.common.footer.externalSites.items;
   const privacyHref = resolveCmsHref(locale, messages.common.navigation.hrefs.privacy, '/privacy');
 
   return (
     <AnalyticsProvider locale={locale as Locale} privacyHref={privacyHref}>
       <SiteCursor />
       <div className="site-cursor-scope">
-        <SiteHeader locale={locale as Locale} golfEnabled={golfEnabled} />
+        <SiteHeader
+          locale={locale as Locale}
+          golfEnabled={golfEnabled}
+          externalSites={externalSites}
+        />
         {children}
-        <SiteFooter locale={locale as Locale} golfEnabled={golfEnabled} />
+        <SiteFooter
+          locale={locale as Locale}
+          golfEnabled={golfEnabled}
+          externalSites={externalSites}
+        />
       </div>
     </AnalyticsProvider>
   );
