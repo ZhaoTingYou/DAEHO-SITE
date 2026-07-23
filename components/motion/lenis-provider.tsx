@@ -1,12 +1,29 @@
 'use client';
 
 import Lenis from 'lenis';
-import {useEffect, type ReactNode} from 'react';
+import {usePathname} from 'next/navigation';
+import {useEffect, useRef, type ReactNode} from 'react';
 
 import {usePrefersReducedMotion} from './reduced-motion-provider';
 
 export function LenisProvider({children}: {children: ReactNode}) {
   const prefersReducedMotion = usePrefersReducedMotion();
+  const pathname = usePathname();
+  const lenisRef = useRef<Lenis | null>(null);
+
+  useEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+    lenisRef.current?.scrollTo(0, {immediate: true, force: true});
+  }, [pathname]);
 
   useEffect(() => {
     const isTouch = window.matchMedia('(pointer: coarse)').matches;
@@ -21,6 +38,7 @@ export function LenisProvider({children}: {children: ReactNode}) {
       touchMultiplier: 1,
       prevent: (node) => node instanceof Element && Boolean(node.closest('[data-lenis-prevent]'))
     });
+    lenisRef.current = lenis;
 
     let frame = 0;
     const stopLenis = () => lenis.stop();
@@ -40,6 +58,7 @@ export function LenisProvider({children}: {children: ReactNode}) {
       window.removeEventListener('daeho:lenis-start', startLenis);
       cancelAnimationFrame(frame);
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, [prefersReducedMotion]);
 
