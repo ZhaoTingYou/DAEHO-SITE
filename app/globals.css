@@ -502,6 +502,10 @@ select {
   transition: transform var(--dur-hover) var(--ease);
 }
 
+.collection-stage-cta::after {
+  bottom: 0.45rem;
+}
+
 @media (hover: hover) {
   .link-sweep:hover::after {
     transform: scaleX(1);

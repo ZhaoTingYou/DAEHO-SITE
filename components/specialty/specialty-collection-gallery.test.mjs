@@ -265,6 +265,18 @@ test('collection stage text is left aligned and CTA uses the original link style
   );
 });
 
+test('collection stage CTA keeps its hover underline close to the label', () => {
+  assert.ok(
+    stagePanelSource.includes('collection-stage-cta link-sweep'),
+    'stage CTA should expose a page-specific underline positioning hook'
+  );
+  assert.match(
+    globals,
+    /\.collection-stage-cta::after\s*\{[^}]*bottom:\s*0\.45rem;/,
+    'stage CTA underline should sit close to its centered text without shrinking the tap target'
+  );
+});
+
 test('collection stage panels fill the desktop viewport like the reference', () => {
   assert.ok(
     stagePanelSource.includes('min-h-[100svh]'),

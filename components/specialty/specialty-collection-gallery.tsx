@@ -2383,7 +2383,7 @@ function CollectionStagePanel({
           </div>
           <Link
             href={href}
-            className="link-sweep inline-flex min-h-11 items-center justify-center font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            className="collection-stage-cta link-sweep inline-flex min-h-11 items-center justify-center font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
             {viewLabel}
           </Link>
