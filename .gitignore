@@ -33,6 +33,7 @@ pnpm-debug.log*
 /data/*.sqlite-*
 /backend/cms/target
 /.frontend-only-build-backup
+/.worktrees
 /.agents
 /skills-lock.json
 /README.updated.md
