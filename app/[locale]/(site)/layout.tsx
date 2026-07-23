@@ -3,6 +3,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
 import {AnalyticsProvider} from '@/components/analytics/analytics-provider';
+import {BackToTopButton} from '@/components/site/back-to-top-button';
 import {SiteFooter} from '@/components/site/site-footer';
 import {SiteCursor} from '@/components/site/site-cursor';
 import {SiteHeader} from '@/components/site/site-header';
@@ -44,6 +45,7 @@ export default async function SiteLayout({children, params}: Props) {
           golfEnabled={golfEnabled}
           externalSites={externalSites}
         />
+        <BackToTopButton label={locale === 'ko' ? '맨 위로' : 'Back to top'} />
       </div>
     </AnalyticsProvider>
   );
