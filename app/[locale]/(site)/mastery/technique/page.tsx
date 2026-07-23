@@ -1,5 +1,6 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
+import {notFound} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
 
 import {Reveal} from '@/components/motion/reveal';
@@ -9,6 +10,7 @@ import {RingDrawingBackground} from '@/components/specialty/ring-drawing-backgro
 import {TechniqueRecordsSection} from '@/components/specialty/technique-records-section';
 import type {Locale} from '@/i18n/routing';
 import {getLocaleMessages} from '@/lib/locale-messages';
+import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {getPageMetadata} from '@/lib/seo';
 import {withLocale} from '@/lib/site-map';
 
@@ -30,10 +32,19 @@ type TechniqueEvidenceRow = {
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
+
+  if (!isTechniquePageVisible) {
+    notFound();
+  }
+
   return getPageMetadata(locale, 'techniqueRecords');
 }
 
 export default async function TechniqueRecordPage({params}: Props) {
+  if (!isTechniquePageVisible) {
+    notFound();
+  }
+
   const {locale} = await params;
   setRequestLocale(locale);
   const content = (await getLocaleMessages(locale)).specialtyPages.techniqueRecords;

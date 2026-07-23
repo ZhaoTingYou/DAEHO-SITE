@@ -1,4 +1,5 @@
 import type {Locale} from '@/i18n/routing';
+import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 
 export type NavItem = {
   id: string;
@@ -25,7 +26,9 @@ export const navItems: NavItem[] = [
     label: 'MASTERY',
     href: '/mastery',
     children: [
-      {id: 'technique', label: 'TECHNIQUE', href: '/mastery/technique'},
+      ...(isTechniquePageVisible
+        ? [{id: 'technique', label: 'TECHNIQUE', href: '/mastery/technique'}]
+        : []),
       {id: 'making', label: 'MAKING', href: '/mastery/making'},
       {id: 'collection', label: 'CREATIONS', href: '/mastery/creations'}
     ]

@@ -4,6 +4,7 @@ import {routing} from '@/i18n/routing';
 import {listPublicCollections, listPublicNews} from '@/lib/cms/repositories';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
+import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {metadataBase} from '@/lib/seo';
 import koMessages from '@/messages/ko.json';
 
@@ -18,7 +19,7 @@ const baseStaticPaths = [
   '/heritage/loyalty',
   '/heritage/credibility',
   '/heritage/achievement',
-  '/mastery/technique',
+  ...(isTechniquePageVisible ? ['/mastery/technique'] : []),
   '/mastery/making',
   '/mastery/creations',
   '/mastery/creations/champion',

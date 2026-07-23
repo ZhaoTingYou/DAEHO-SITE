@@ -1,6 +1,28 @@
 import assert from 'node:assert/strict';
 import {existsSync, readFileSync} from 'node:fs';
+import path from 'node:path';
 import test from 'node:test';
+import ts from 'typescript';
+import vm from 'node:vm';
+import {fileURLToPath} from 'node:url';
+
+const repoRoot = path.resolve(fileURLToPath(new URL('.', import.meta.url)));
+
+function loadTechniqueVisibilityNormalizer() {
+  const sourcePath = path.join(repoRoot, 'lib/public-page-visibility-core.ts');
+  const source = readFileSync(sourcePath, 'utf8');
+  const compiled = ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022
+    }
+  }).outputText;
+  const exports = {};
+  const sandbox = {exports, module: {exports}};
+
+  vm.runInNewContext(compiled, sandbox, {filename: sourcePath});
+  return sandbox.module.exports;
+}
 
 const techniquePagePath = new URL('./app/[locale]/(site)/mastery/technique/page.tsx', import.meta.url);
 const techniqueRecordsSectionPath = new URL('./components/specialty/technique-records-section.tsx', import.meta.url);
@@ -11,6 +33,7 @@ const techniqueRecordsSectionSource = existsSync(techniqueRecordsSectionPath)
 const makingPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/making/page.tsx', import.meta.url), 'utf8');
 const siteMapSource = readFileSync(new URL('./lib/site-map.ts', import.meta.url), 'utf8');
 const footerSource = readFileSync(new URL('./components/site/site-footer.tsx', import.meta.url), 'utf8');
+const visibilitySource = readFileSync(new URL('./lib/public-page-visibility.ts', import.meta.url), 'utf8');
 const seoSource = readFileSync(new URL('./lib/seo.ts', import.meta.url), 'utf8');
 const sitemapSource = readFileSync(new URL('./app/sitemap.ts', import.meta.url), 'utf8');
 const imageGuidesSource = readFileSync(new URL('./lib/cms/image-guides.ts', import.meta.url), 'utf8');
@@ -29,20 +52,61 @@ test('Mastery has a standalone Technique page separate from Making', () => {
   assert.match(makingPageSource, /SpecialtyProcess/);
 });
 
-test('Mastery navigation orders Technique before Making and Creations', () => {
+test('Technique is hidden from public navigation while Making and Creations remain', () => {
   const navTechnique = siteMapSource.indexOf("id: 'technique'");
   const navMaking = siteMapSource.indexOf("id: 'making'");
   const navCollection = siteMapSource.indexOf("id: 'collection'");
 
-  assert.ok(navTechnique >= 0, 'site map should include Technique');
-  assert.ok(navMaking > navTechnique, 'Making should follow Technique');
+  assert.match(visibilitySource, /isTechniquePageVisible = false/);
+  assert.ok(navTechnique >= 0, 'the restorable Technique definition should remain');
+  assert.ok(navMaking > navTechnique, 'Making should follow the gated Technique definition');
   assert.ok(navCollection > navMaking, 'Creations should follow Making');
-  assert.match(siteMapSource, /href: '\/mastery\/technique'/);
+  assert.match(siteMapSource, /isTechniquePageVisible[\s\S]*?href: '\/mastery\/technique'/);
   assert.match(siteMapSource, /href: '\/mastery\/making'/);
-  assert.match(footerSource, /href: '\/mastery\/technique'/);
+  assert.match(footerSource, /isTechniquePageVisible[\s\S]*?href: '\/mastery\/technique'/);
   assert.match(footerSource, /href: '\/mastery\/making'/);
+  assert.equal((techniquePageSource.match(/if \(!isTechniquePageVisible\) \{\s+notFound\(\);/g) ?? []).length, 2);
+  assert.match(localeMessagesSource, /normalizeTechniquePageVisibility\(messages, isTechniquePageVisible\)/);
   assert.equal(koMessages.home.pillars.items.find((item) => item.title === 'MASTERY')?.href, '/mastery/technique');
   assert.equal(enMessages.home.pillars.items.find((item) => item.title === 'MASTERY')?.href, '/mastery/technique');
+});
+
+test('Technique visibility normalizer reroutes and filters CMS-overridden public links only while hidden', () => {
+  const {normalizeTechniquePageVisibility} = loadTechniqueVisibilityNormalizer();
+  const createMessages = () => ({
+    home: {
+      pillars: {
+        items: [
+          {title: 'MASTERY', href: '/mastery/technique'},
+          {title: 'NEWS', href: '/news'}
+        ]
+      }
+    },
+    specialty: {
+      branches: {
+        items: [
+          {title: 'TECHNIQUE', href: '/mastery/technique'},
+          {title: 'CREATIONS', href: '/mastery/creations'}
+        ]
+      }
+    }
+  });
+  const visibleMessages = createMessages();
+  const hiddenMessages = createMessages();
+
+  normalizeTechniquePageVisibility(visibleMessages, true);
+  normalizeTechniquePageVisibility(hiddenMessages, false);
+
+  assert.equal(visibleMessages.home.pillars.items[0].href, '/mastery/technique');
+  assert.deepEqual(
+    visibleMessages.specialty.branches.items.map((item) => item.href),
+    ['/mastery/technique', '/mastery/creations']
+  );
+  assert.equal(hiddenMessages.home.pillars.items[0].href, '/mastery/making');
+  assert.deepEqual(
+    hiddenMessages.specialty.branches.items.map((item) => item.href),
+    ['/mastery/creations']
+  );
 });
 
 test('CMS common copy cannot keep stale Making labels on the new Technique nav item', () => {
@@ -52,7 +116,7 @@ test('CMS common copy cannot keep stale Making labels on the new Technique nav i
   assert.match(localeMessagesSource, /Technique · Seven careful stages/);
 });
 
-test('Technique page has CMS, SEO, sitemap, and image guide entries', () => {
+test('Technique page keeps CMS, SEO, and image guide content while sitemap exposure is gated', () => {
   const techniqueDefinition = pageCatalog.find((page) => page.pageKey === 'mastery-technique');
 
   assert.equal(techniqueDefinition?.href, '/mastery/technique');
@@ -80,7 +144,7 @@ test('Technique page has CMS, SEO, sitemap, and image guide entries', () => {
   );
   assert.match(seoSource, /techniqueRecords: 'mastery-technique'/);
   assert.match(seoSource, /techniqueRecords: '\/mastery\/technique'/);
-  assert.match(sitemapSource, /'\/mastery\/technique'/);
+  assert.match(sitemapSource, /isTechniquePageVisible \? \['\/mastery\/technique'\] : \[\]/);
   assert.match(sitemapSource, /'\/mastery\/technique': 0\.91/);
   assert.match(imageGuidesSource, /'mastery-technique\|main\|hero\.image': 'ultrawide'/);
   assert.match(imageGuidesSource, /'mastery-technique\|main\|records\.items\.\*\.image': 'techniqueRecord'/);

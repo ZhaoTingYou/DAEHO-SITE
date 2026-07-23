@@ -10,6 +10,8 @@ import {
 } from '@/lib/cms/page-catalog';
 import {listPages} from '@/lib/cms/repositories';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
+import {isTechniquePageVisible} from '@/lib/public-page-visibility';
+import {normalizeTechniquePageVisibility} from '@/lib/public-page-visibility-core';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 
@@ -24,7 +26,16 @@ export async function getLocaleMessages(locale: Locale): Promise<LocaleMessages>
   const staticMessages = messagesByLocale[locale] ?? koMessages;
   const baseMessages = cloneJson(staticMessages);
 
-  return normalizeMasteryNavigationCopy(await applyCmsPageOverrides(baseMessages, locale), staticMessages);
+  const messages = normalizeMasteryNavigationCopy(
+    await applyCmsPageOverrides(baseMessages, locale),
+    staticMessages
+  );
+
+  return normalizePublicPageVisibility(messages);
+}
+
+export function normalizePublicPageVisibility(messages: LocaleMessages): LocaleMessages {
+  return normalizeTechniquePageVisibility(messages, isTechniquePageVisible);
 }
 
 export function normalizeMasteryNavigationCopy(messages: LocaleMessages, staticMessages: LocaleMessages): LocaleMessages {

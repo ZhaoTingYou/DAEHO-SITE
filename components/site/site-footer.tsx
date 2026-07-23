@@ -4,6 +4,7 @@ import type {Locale} from '@/i18n/routing';
 import {externalLinks} from '@/lib/config';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {localeShortLabels, locales} from '@/lib/locales';
+import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {withLocale} from '@/lib/site-map';
 
 import {ExternalSiteLink} from './external-site-link';
@@ -63,7 +64,9 @@ export async function SiteFooter({locale, golfEnabled}: SiteFooterProps) {
     {
       heading: navLabels.specialty,
       links: [
-        {label: navLabels.technique, href: '/mastery/technique'},
+        ...(isTechniquePageVisible
+          ? [{label: navLabels.technique, href: '/mastery/technique'}]
+          : []),
         {label: navLabels.making, href: '/mastery/making'},
         {label: navLabels.collection, href: '/mastery/creations'},
         ...collectionCategoryLinks
