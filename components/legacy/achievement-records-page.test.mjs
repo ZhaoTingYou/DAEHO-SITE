@@ -89,7 +89,8 @@ test('achievement first record gallery uses a one-column phone and two-column ta
   assert.ok(!cardSource.includes('aspect-[3/4]'), 'FIRST RECORDS images should no longer use the portrait surface');
   assert.ok(cardSource.includes('object-cover'), 'landscape FIRST RECORDS images should remain object-cover');
   assert.ok(cardSource.includes('gap-6'), 'gallery should retain approximately 24px gaps');
-  assert.ok(cardSource.includes('max-w-[1440px]'), 'gallery width should grow beyond the former three-card layout');
+  assert.ok(cardSource.includes('max-w-[1240px]'), 'gallery should align to the centered site content boundary');
+  assert.ok(!cardSource.includes('max-w-[1440px]'), 'gallery should not protrude beyond surrounding editorial sections');
   assert.ok(!firstRecordsSection.includes('achievement-record-mobile-list'), 'first records should not keep a separate mobile interactive list');
   assert.doesNotMatch(
     firstRecordsSection,
