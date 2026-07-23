@@ -91,6 +91,8 @@ test('achievement first record gallery uses a one-column phone and two-column ta
   assert.ok(cardSource.includes('gap-6'), 'gallery should retain approximately 24px gaps');
   assert.ok(cardSource.includes('max-w-[1240px]'), 'gallery should align to the centered site content boundary');
   assert.ok(!cardSource.includes('max-w-[1440px]'), 'gallery should not protrude beyond surrounding editorial sections');
+  assert.ok(cardSource.includes('px-container'), 'gallery should retain the standard site container gutters');
+  assert.ok(!cardSource.includes('lg:px-0'), 'desktop should not remove the standard container gutters');
   assert.ok(!firstRecordsSection.includes('achievement-record-mobile-list'), 'first records should not keep a separate mobile interactive list');
   assert.doesNotMatch(
     firstRecordsSection,

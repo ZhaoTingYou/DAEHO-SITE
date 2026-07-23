@@ -14,7 +14,7 @@ type AchievementRecordGalleryProps = {
 
 export function AchievementRecordGallery({records, imageAltPrefix}: AchievementRecordGalleryProps) {
   return (
-    <div className="achievement-record-gallery mx-auto grid w-full max-w-[1240px] gap-6 px-container md:grid-cols-2 lg:px-0">
+    <div className="achievement-record-gallery mx-auto grid w-full max-w-[1240px] gap-6 px-container md:grid-cols-2">
       {records.slice(0, 4).map((record, index) => (
         <div
           key={`${record.image}-${index}`}
