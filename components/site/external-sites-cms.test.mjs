@@ -17,8 +17,8 @@ const footer = stripComments(
 const layout = stripComments(
   readFileSync(path.join(repoRoot, 'app/[locale]/(site)/layout.tsx'), 'utf8')
 );
-const externalSiteMapPattern = /\{visibleExternalSites\.map\(\(item\) => \(\s*<ExternalSiteLink\s+key=\{item\.id\}\s+label=\{item\.label\}\s+href=\{item\.href\}\s+className="([^"]+)"\s*\/>\s*\)\)\}/g;
-const visibleBlockPattern = /\{visibleExternalSites\.length > 0 \? \([\s\S]{0,900}?\{visibleExternalSites\.map\(\(item\) => \([\s\S]{0,500}?\)\)\}[\s\S]{0,500}?\) : null\}/g;
+const externalSiteMapPattern = /\{visibleExternalSites\.map\(\(item\) => \(\s*<ExternalSiteLink[\s\S]{0,700}?(?:\/>|<\/ExternalSiteLink>)\s*\)\)\}/g;
+const visibleBlockPattern = /\{visibleExternalSites\.length > 0 \? \([\s\S]{0,1500}?\{visibleExternalSites\.map\(\(item\) => \([\s\S]{0,900}?\)\)\}[\s\S]{0,500}?\) : null\}/g;
 const desktopHeader = header.match(
   /<div className="hidden lg:block">([\s\S]*?)<div ref=\{mobileHeaderRef\}/
 )?.[1] ?? '';
@@ -59,14 +59,12 @@ test('all three public positions conditionally render keyed ExternalSiteLink ite
 
   assert.deepEqual(maps.map((matches) => matches.length), [1, 1, 1]);
   assert.deepEqual(blocks.map((matches) => matches.length), [1, 1, 1]);
-  assert.deepEqual(
-    maps.map(([match]) => match[1]),
-    [
-      'site-nav-link shrink-0 no-underline',
-      'site-nav-link no-underline',
-      'footer-link'
-    ]
+  assert.match(
+    desktopHeader,
+    /className=\{`site-header-external-link site-header-external-link--/
   );
+  assert.match(mobileMenu, /className="mobile-external-site-link"/);
+  assert.match(footerMarkup, /className="footer-link"/);
 });
 
 test('desktop external sites scroll without shrinking the permanent contact action', () => {
@@ -83,4 +81,36 @@ test('desktop external sites scroll without shrinking the permanent contact acti
     desktopHeader,
     /className=\{`consult-cta shrink-0 \$\{isHeroTransparent/
   );
+});
+
+test('header external sites use bordered destination buttons without changing footer links', () => {
+  const globalStyles = stripComments(
+    readFileSync(path.join(repoRoot, 'app/globals.css'), 'utf8')
+  );
+
+  assert.match(
+    desktopHeader,
+    /site-header-external-link--\$\{isHeroTransparent \? 'light' : 'dark'\}/
+  );
+  assert.match(
+    desktopHeader,
+    /<span className="site-external-link-arrow" aria-hidden="true">↗<\/span>/
+  );
+  assert.match(
+    mobileMenu,
+    /className="mobile-external-site-link"/
+  );
+  assert.match(
+    mobileMenu,
+    /<span className="site-external-link-arrow" aria-hidden="true">↗<\/span>/
+  );
+  assert.match(
+    globalStyles,
+    /\.site-header-external-link\s*\{[\s\S]*?min-height:\s*44px;[\s\S]*?border:\s*1px solid var\(--external-link-border\);[\s\S]*?border-radius:\s*4px;[\s\S]*?font-weight:\s*500;/
+  );
+  assert.match(
+    globalStyles,
+    /\.mobile-external-site-link\s*\{[\s\S]*?width:\s*100%;[\s\S]*?min-height:\s*48px;[\s\S]*?justify-content:\s*space-between;/
+  );
+  assert.doesNotMatch(footerMarkup, /site-header-external-link|mobile-external-site-link/);
 });

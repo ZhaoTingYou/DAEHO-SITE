@@ -519,8 +519,11 @@ export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps
                         key={item.id}
                         label={item.label}
                         href={item.href}
-                        className="site-nav-link shrink-0 no-underline"
-                      />
+                        className={`site-header-external-link site-header-external-link--${isHeroTransparent ? 'light' : 'dark'} shrink-0`}
+                      >
+                        <span>{item.label}</span>
+                        <span className="site-external-link-arrow" aria-hidden="true">↗</span>
+                      </ExternalSiteLink>
                     ))}
                   </div>
                 </div>
@@ -788,14 +791,17 @@ export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps
                 <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-subtext">
                   {footerText('otherSites')}
                 </p>
-                <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-primary">
+                <div className="mt-5 grid gap-3 text-primary">
                   {visibleExternalSites.map((item) => (
                     <ExternalSiteLink
                       key={item.id}
                       label={item.label}
                       href={item.href}
-                      className="site-nav-link no-underline"
-                    />
+                      className="mobile-external-site-link"
+                    >
+                      <span>{item.label}</span>
+                      <span className="site-external-link-arrow" aria-hidden="true">↗</span>
+                    </ExternalSiteLink>
                   ))}
                 </div>
               </div>
