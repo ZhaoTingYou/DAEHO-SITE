@@ -776,9 +776,10 @@ select {
   inset: 0 auto 0 0;
   z-index: 45;
   display: grid;
+  grid-template-rows: 36px 308px 36px;
   align-content: center;
   width: clamp(118px, 10vw, 168px);
-  gap: 14px;
+  gap: 4px;
   padding: 0 clamp(18px, 2vw, 34px);
   pointer-events: none;
   visibility: hidden;
@@ -815,7 +816,48 @@ select {
   content: none;
 }
 
-.chronicle-year-nav button {
+.chronicle-year-nav__window {
+  position: relative;
+  min-height: 308px;
+  overflow: hidden;
+}
+
+.chronicle-year-nav__window::before,
+.chronicle-year-nav__window::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 18px;
+  pointer-events: none;
+  content: "";
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.chronicle-year-nav__window::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, .94), transparent);
+}
+
+.chronicle-year-nav__window::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(255, 255, 255, .94), transparent);
+}
+
+.chronicle-year-nav__window.has-before::before,
+.chronicle-year-nav__window.has-after::after {
+  opacity: 1;
+}
+
+.chronicle-year-nav__list {
+  display: grid;
+  min-height: 308px;
+  grid-auto-rows: 44px;
+  align-content: center;
+}
+
+.chronicle-year-nav__year {
   position: relative;
   display: flex;
   min-height: 44px;
@@ -839,7 +881,7 @@ select {
     transform 220ms var(--ease);
 }
 
-.chronicle-year-nav button::before {
+.chronicle-year-nav__year::before {
   position: absolute;
   top: 50%;
   left: 3px;
@@ -856,21 +898,55 @@ select {
     box-shadow 220ms ease;
 }
 
-.chronicle-year-nav button:hover,
-.chronicle-year-nav button.is-active {
+.chronicle-year-nav__year:hover,
+.chronicle-year-nav__year.is-active {
   color: var(--chronicle-day-accent);
   transform: translateX(3px);
 }
 
-.chronicle-year-nav button:focus-visible {
+.chronicle-year-nav__year:focus-visible,
+.chronicle-year-nav__step:focus-visible {
   outline: 2px solid var(--chronicle-day-accent);
   outline-offset: 4px;
 }
 
-.chronicle-year-nav button.is-active::before {
+.chronicle-year-nav__year.is-active::before {
   background: var(--chronicle-day-accent);
   border-color: var(--chronicle-day-accent);
   box-shadow: 0 0 0 5px rgba(122, 34, 48, .1);
+}
+
+.chronicle-year-nav__step {
+  display: grid;
+  width: 100%;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  color: rgba(16, 29, 48, .48);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1;
+  transition:
+    color 220ms ease,
+    opacity 220ms ease,
+    transform 220ms var(--ease);
+}
+
+.chronicle-year-nav__step:not(:disabled):hover {
+  color: var(--chronicle-day-accent);
+  transform: translateY(-2px);
+}
+
+.chronicle-year-nav__step--next:not(:disabled):hover {
+  transform: translateY(2px);
+}
+
+.chronicle-year-nav__step:disabled {
+  cursor: default;
+  opacity: .22;
 }
 
 .chronicle-track {

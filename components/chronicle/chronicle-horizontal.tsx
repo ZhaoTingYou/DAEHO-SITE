@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {type CSSProperties, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
 
 import {ChronicleMobile} from './chronicle-mobile';
+import {getChronicleYearWindow} from './chronicle-year-window';
 
 export type ChronicleHorizontalSlide = {
   year: string;
@@ -91,6 +92,10 @@ export function ChronicleHorizontal({
     () => slides.map((slide, index) => ({index, year: slide.year})),
     [slides]
   );
+  const {start, end} = getChronicleYearWindow(yearStops.length, activeIndex);
+  const visibleYearStops = yearStops.slice(start, end);
+  const previousYear = yearStops[activeIndex - 1]?.year;
+  const nextYear = yearStops[activeIndex + 1]?.year;
 
   useEffect(() => {
     if (compactViewport) {
@@ -431,17 +436,47 @@ export function ChronicleHorizontal({
       } ${endNavVisible ? 'is-end-nav-visible' : ''}`}
     >
       <nav className="chronicle-year-nav" aria-label={yearNavAriaLabel}>
-        {yearStops.map((stop) => (
-          <button
-            className={activeIndex === stop.index ? 'is-active' : ''}
-            type="button"
-            aria-current={activeIndex === stop.index ? 'step' : undefined}
-            onClick={() => scrollToChronicleYear(stop.index)}
-            key={`${stop.year}-${stop.index}`}
-          >
-            {stop.year}
-          </button>
-        ))}
+        <button
+          className="chronicle-year-nav__step chronicle-year-nav__step--previous"
+          type="button"
+          aria-label={`${yearNavAriaLabel}: ${previousYear ?? firstYear}`}
+          disabled={activeIndex <= 0}
+          onClick={() => scrollToChronicleYear(activeIndex - 1)}
+        >
+          <span aria-hidden="true">↑</span>
+        </button>
+        <div
+          className={[
+            'chronicle-year-nav__window',
+            start > 0 ? 'has-before' : '',
+            end < yearStops.length ? 'has-after' : ''
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <div className="chronicle-year-nav__list">
+            {visibleYearStops.map((stop) => (
+              <button
+                className={`chronicle-year-nav__year ${activeIndex === stop.index ? 'is-active' : ''}`}
+                type="button"
+                aria-current={activeIndex === stop.index ? 'step' : undefined}
+                onClick={() => scrollToChronicleYear(stop.index)}
+                key={`${stop.year}-${stop.index}`}
+              >
+                {stop.year}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button
+          className="chronicle-year-nav__step chronicle-year-nav__step--next"
+          type="button"
+          aria-label={`${yearNavAriaLabel}: ${nextYear ?? displayYear}`}
+          disabled={activeIndex >= yearStops.length - 1}
+          onClick={() => scrollToChronicleYear(activeIndex + 1)}
+        >
+          <span aria-hidden="true">↓</span>
+        </button>
       </nav>
 
       <Link className="chronicle-end-nav" href={endNav.href} aria-label={endNav.label}>

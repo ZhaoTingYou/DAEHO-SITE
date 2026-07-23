@@ -108,6 +108,9 @@ test('Archive, Contact, and collection details expose one page-level heading', (
 test('Archive mobile chronology clears the safe-area header and preserves image fallback behavior', () => {
   assert.match(chronicleMobile, /pt-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\+24px\)\]/);
   assert.match(chronicleMobile, /top-\[calc\(var\(--mobile-header-height\)\+env\(safe-area-inset-top\)\)\]/);
+  assert.match(chronicleMobile, /const anchorId = `archive-year-\$\{index\}`/);
+  assert.match(chronicleMobile, /href=\{`#\$\{anchorId\}`\}/);
+  assert.match(chronicleMobile, /id=\{anchorId\} key=\{anchorId\}/);
   assert.match(chronicleMobile, /function ChronicleMobileSlideImage/);
   assert.match(chronicleMobile, /event\.currentTarget\.style\.visibility = 'hidden'/);
   assert.match(chronicleMobile, /setSource\(fallbackImage\)/);

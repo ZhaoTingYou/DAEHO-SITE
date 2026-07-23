@@ -23,18 +23,23 @@ export function ChronicleMobile({slides, yearNavAriaLabel, endNav}: ChronicleMob
         aria-label={yearNavAriaLabel}
         className="sticky top-[calc(var(--mobile-header-height)+env(safe-area-inset-top))] z-20 flex gap-5 overflow-x-auto border-y border-primary/15 bg-bg/95 px-[var(--mobile-page-gutter)] py-4 backdrop-blur"
       >
-        {slides.map((slide) => (
-          <a key={slide.year} href={`#year-${slide.year}`} className="mobile-tap-target shrink-0">
-            {slide.year}
-          </a>
-        ))}
+        {slides.map((slide, index) => {
+          const anchorId = `archive-year-${index}`;
+
+          return (
+            <a key={anchorId} href={`#${anchorId}`} className="mobile-tap-target shrink-0">
+              {slide.year}
+            </a>
+          );
+        })}
       </nav>
       <ol className="space-y-20 px-[var(--mobile-page-gutter)] py-16">
         {slides.map((slide, index) => {
           const Heading = index === 0 ? 'h1' : 'h2';
+          const anchorId = `archive-year-${index}`;
 
           return (
-            <li id={`year-${slide.year}`} key={slide.year} className="scroll-mt-32 border-t border-primary/15 pt-8">
+            <li id={anchorId} key={anchorId} className="scroll-mt-32 border-t border-primary/15 pt-8">
               <p className="font-numeric text-[18px] text-accent">{slide.year}</p>
               <div className="relative mt-5 aspect-[4/3] overflow-hidden bg-muted">
                 <ChronicleMobileSlideImage
