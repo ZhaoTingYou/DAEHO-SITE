@@ -25,7 +25,13 @@ public class TrafficAnalyticsRepository {
     var now = OffsetDateTime.now(ZoneOffset.UTC);
     var pagePath = value(payload, "pagePath");
 
-    jdbc.update("""
+    // Every writer for a session shares this transaction-scoped lock before retry cleanup can run.
+    jdbc.queryForList(
+        "SELECT pg_advisory_xact_lock(hashtextextended(?::text, 0))",
+        sessionId.toString()
+    );
+
+    int sessionInserted = jdbc.update("""
         INSERT INTO cms_analytics_sessions (
           session_id, channel, source, medium, campaign, content, referrer_host,
           landing_path, latest_path, locale, device_class, started_at, last_activity_at
@@ -61,6 +67,17 @@ public class TrafficAnalyticsRepository {
               last_activity_at = GREATEST(last_activity_at, ?)
           WHERE session_id = ?
           """, pagePath, value(payload, "locale"), value(payload, "deviceClass"), now, sessionId);
+    } else if (sessionInserted == 1) {
+      jdbc.update("""
+          DELETE FROM cms_analytics_sessions s
+          WHERE s.session_id = ?
+            AND s.page_view_count = 0
+            AND NOT EXISTS (
+              SELECT 1
+              FROM cms_analytics_pageviews pv
+              WHERE pv.session_id = s.session_id
+            )
+          """, sessionId);
     }
 
     return new RecordResult(inserted == 1);
@@ -141,17 +158,22 @@ public class TrafficAnalyticsRepository {
 
   public Map<String, Object> visits(OffsetDateTime from, OffsetDateTime to, String channel, int page, int pageSize) {
     int offset = (page - 1) * pageSize;
+    var total = longValue(jdbc.queryForList("""
+        SELECT COUNT(*) AS total
+        FROM cms_analytics_sessions
+        WHERE started_at >= ? AND started_at < ?
+          AND (? = '' OR channel = ?)
+        """, from, to, channel, channel).get(0).get("total"));
     var rows = jdbc.queryForList("""
         SELECT s.session_id, s.channel, s.source, s.medium, s.campaign, s.content, s.referrer_host,
           s.landing_path, s.latest_path, s.locale, s.device_class, s.page_view_count,
-          s.started_at, s.last_activity_at, COUNT(*) OVER() AS total_count
+          s.started_at, s.last_activity_at
         FROM cms_analytics_sessions s
         WHERE s.started_at >= ? AND s.started_at < ?
           AND (? = '' OR s.channel = ?)
         ORDER BY s.started_at DESC, s.session_id DESC
         LIMIT ? OFFSET ?
         """, from, to, channel, channel, pageSize, offset);
-    long total = rows.isEmpty() ? 0 : longValue(rows.get(0).get("total_count"));
     var items = rows.stream().map(this::visitRow).toList();
 
     return Map.of(

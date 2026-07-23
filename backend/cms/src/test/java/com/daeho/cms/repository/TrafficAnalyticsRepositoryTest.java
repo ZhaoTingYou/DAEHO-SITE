@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 class TrafficAnalyticsRepositoryTest {
   private static final UUID SESSION_ID = UUID.fromString("00000000-0000-4000-8000-000000000001");
+  private static final UUID RETRY_SESSION_ID = UUID.fromString("00000000-0000-4000-8000-000000000004");
   private static final UUID FIRST_PAGE_VIEW_ID = UUID.fromString("00000000-0000-4000-8000-000000000002");
   private static final UUID SECOND_PAGE_VIEW_ID = UUID.fromString("00000000-0000-4000-8000-000000000003");
   private static final OffsetDateTime FROM = OffsetDateTime.of(2026, 7, 1, 0, 0, 0, 0, ZoneOffset.UTC);
@@ -27,9 +28,16 @@ class TrafficAnalyticsRepositoryTest {
   void recordsDistinctPageViewsAndIgnoresAPageViewRetry() {
     var jdbc = new RecordingJdbcTemplate();
     var pageViewInserts = new AtomicInteger();
-    jdbc.updateResult = call -> call.sql().contains("INSERT INTO cms_analytics_pageviews")
-        ? pageViewInserts.getAndIncrement() < 2 ? 1 : 0
-        : 1;
+    var sessionInsertResults = new AtomicInteger();
+    jdbc.updateResult = call -> {
+      if (call.sql().contains("INSERT INTO cms_analytics_sessions")) {
+        return sessionInsertResults.getAndIncrement() == 0 ? 1 : 0;
+      }
+      if (call.sql().contains("INSERT INTO cms_analytics_pageviews")) {
+        return pageViewInserts.getAndIncrement() < 2 ? 1 : 0;
+      }
+      return 1;
+    };
     var repository = new TrafficAnalyticsRepository(jdbc);
 
     var first = repository.recordPageView(payload(FIRST_PAGE_VIEW_ID, "/en", "/en/collections", "Collections"));
@@ -62,6 +70,38 @@ class TrafficAnalyticsRepositoryTest {
     assertTrue(sessionUpdates.get(0).sql().contains("page_view_count = page_view_count + 1"));
     assertTrue(pageViewInsertCalls.get(0).sql().contains("ON CONFLICT (page_view_id) DO NOTHING"));
     assertTrue(sessionInserts.get(0).sql().contains("ON CONFLICT (session_id) DO NOTHING"));
+    assertTrue(jdbc.callsMatching("DELETE FROM cms_analytics_sessions").isEmpty());
+  }
+
+  @Test
+  void removesOnlyANewEmptySessionWhenAPageViewRetryUsesADifferentSession() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.updateResult = call -> {
+      if (call.sql().contains("INSERT INTO cms_analytics_sessions")) {
+        return 1;
+      }
+      if (call.sql().contains("INSERT INTO cms_analytics_pageviews")) {
+        return 0;
+      }
+      if (call.sql().contains("DELETE FROM cms_analytics_sessions")) {
+        return 1;
+      }
+      return 0;
+    };
+    var repository = new TrafficAnalyticsRepository(jdbc);
+
+    var result = repository.recordPageView(payload(RETRY_SESSION_ID, SECOND_PAGE_VIEW_ID, "/en", "/en/contact", "Contact"));
+
+    assertFalse(result.inserted());
+    var lock = jdbc.callsMatching("pg_advisory_xact_lock").get(0);
+    var sessionInsert = jdbc.callsMatching("INSERT INTO cms_analytics_sessions").get(0);
+    var cleanup = jdbc.callsMatching("DELETE FROM cms_analytics_sessions").get(0);
+    assertTrue(jdbc.calls().indexOf(lock) < jdbc.calls().indexOf(sessionInsert));
+    assertEquals(List.of(RETRY_SESSION_ID.toString()), Arrays.asList(lock.args()));
+    assertTrue(cleanup.sql().contains("page_view_count = 0"));
+    assertTrue(cleanup.sql().contains("NOT EXISTS"));
+    assertTrue(cleanup.sql().contains("cms_analytics_pageviews"));
+    assertEquals(List.of(RETRY_SESSION_ID), Arrays.asList(cleanup.args()));
   }
 
   @Test
@@ -100,7 +140,9 @@ class TrafficAnalyticsRepositoryTest {
   @Test
   void returnsNewestFirstVisitsWithRequestedPagination() {
     var jdbc = new RecordingJdbcTemplate();
-    jdbc.queryResult = call -> List.of(Map.ofEntries(
+    jdbc.queryResult = call -> call.sql().contains("COUNT(*) AS total")
+        ? List.of(Map.of("total", 51L))
+        : List.of(Map.ofEntries(
         Map.entry("session_id", SESSION_ID),
         Map.entry("channel", "google"),
         Map.entry("source", "google"),
@@ -127,10 +169,27 @@ class TrafficAnalyticsRepositoryTest {
     assertEquals(3, visits.get("totalPages"));
     assertEquals("/en/contact", ((Map<?, ?>) ((List<?>) visits.get("items")).get(0)).get("latestPath"));
 
-    var call = jdbc.callsMatching("SELECT").get(0);
+    var call = jdbc.callsMatching("ORDER BY s.started_at DESC").get(0);
     assertTrue(call.sql().contains("ORDER BY s.started_at DESC"));
     assertTrue(call.sql().contains("LIMIT ? OFFSET ?"));
     assertEquals(List.of(FROM, TO, "google", "google", 25, 25), Arrays.asList(call.args()));
+  }
+
+  @Test
+  void retainsTotalAndTotalPagesWhenTheRequestedVisitPageIsEmpty() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> call.sql().contains("COUNT(*) AS total")
+        ? List.of(Map.of("total", 51L))
+        : List.of();
+    var repository = new TrafficAnalyticsRepository(jdbc);
+
+    var visits = repository.visits(FROM, TO, "google", 4, 25);
+
+    assertEquals(List.of(), visits.get("items"));
+    assertEquals(51L, visits.get("total"));
+    assertEquals(3, visits.get("totalPages"));
+    var count = jdbc.callsMatching("COUNT(*) AS total").get(0);
+    assertEquals(List.of(FROM, TO, "google", "google"), Arrays.asList(count.args()));
   }
 
   @Test
@@ -150,8 +209,12 @@ class TrafficAnalyticsRepositoryTest {
   }
 
   private static Map<String, Object> payload(UUID pageViewId, String landingPath, String pagePath, String pageTitle) {
+    return payload(SESSION_ID, pageViewId, landingPath, pagePath, pageTitle);
+  }
+
+  private static Map<String, Object> payload(UUID sessionId, UUID pageViewId, String landingPath, String pagePath, String pageTitle) {
     return Map.ofEntries(
-        Map.entry("sessionId", SESSION_ID.toString()),
+        Map.entry("sessionId", sessionId.toString()),
         Map.entry("pageViewId", pageViewId.toString()),
         Map.entry("channel", "google"),
         Map.entry("source", "google"),
