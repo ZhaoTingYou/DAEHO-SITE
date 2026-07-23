@@ -10,12 +10,15 @@ test('public site layout includes a localized back-to-top control', () => {
   assert.match(layoutSource, /<BackToTopButton label=\{locale === 'ko' \? '맨 위로' : 'Back to top'\} \/>/);
 });
 
-test('back-to-top control appears after scrolling and returns instantly', () => {
+test('back-to-top control starts a smooth return on the first pointer press', () => {
   assert.match(source, /window\.scrollY > Math\.max\(480, window\.innerHeight \* 0\.66\)/);
   assert.match(source, /window\.addEventListener\('scroll', updateVisibility, \{passive: true\}\)/);
   assert.match(source, /window\.scrollTo\(\{/);
-  assert.match(source, /behavior: 'instant'/);
-  assert.doesNotMatch(source, /behavior: 'smooth'/);
+  assert.match(source, /behavior: 'smooth'/);
+  assert.match(source, /event\.preventDefault\(\)/);
+  assert.match(source, /onPointerDown=\{handlePointerDown\}/);
+  assert.match(source, /if \(event\.detail === 0\) scrollToTop\(\)/);
+  assert.match(source, /touch-manipulation/);
   assert.match(source, /tabIndex=\{isVisible \? 0 : -1\}/);
   assert.match(source, /aria-label=\{label\}/);
 });

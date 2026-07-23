@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useState} from 'react';
+import type {MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent} from 'react';
 
 export function BackToTopButton({label}: {label: string}) {
   const [isVisible, setIsVisible] = useState(false);
@@ -30,8 +31,19 @@ export function BackToTopButton({label}: {label: string}) {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'instant'
+      behavior: 'smooth'
     });
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!event.isPrimary || event.button !== 0) return;
+
+    event.preventDefault();
+    scrollToTop();
+  };
+
+  const handleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    if (event.detail === 0) scrollToTop();
   };
 
   return (
@@ -41,8 +53,9 @@ export function BackToTopButton({label}: {label: string}) {
       title={label}
       aria-hidden={!isVisible}
       tabIndex={isVisible ? 0 : -1}
-      onClick={scrollToTop}
-      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[90] grid h-12 w-12 place-items-center rounded-full border border-primary/20 bg-white/95 text-primary shadow-[0_12px_32px_rgba(16,29,48,0.16)] backdrop-blur transition duration-hover ease-brand hover:-translate-y-1 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:bottom-8 md:right-8 ${
+      onPointerDown={handlePointerDown}
+      onClick={handleClick}
+      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[90] grid h-12 w-12 touch-manipulation select-none place-items-center rounded-full border border-primary/20 bg-white/95 text-primary shadow-[0_12px_32px_rgba(16,29,48,0.16)] backdrop-blur transition duration-hover ease-brand hover:-translate-y-1 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:bottom-8 md:right-8 ${
         isVisible
           ? 'pointer-events-auto translate-y-0 opacity-100'
           : 'pointer-events-none translate-y-3 opacity-0'
