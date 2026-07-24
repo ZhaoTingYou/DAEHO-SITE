@@ -1706,8 +1706,8 @@
     "filtersLabel": "Collection filters",
     "categoryBackHref": "/mastery/creations",
     "empty": {
-      "title": "No works in this category",
-      "body": "Works in the selected category will appear here once the archive is ready."
+      "title": "No rings have been added",
+      "body": "Rings will appear here when they are added."
     },
     "detail": {
       "back": "Back to collection",

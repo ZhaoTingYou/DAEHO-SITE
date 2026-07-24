@@ -347,6 +347,33 @@ export function SpecialtyCollectionCategory({
     return null;
   }
 
+  if (categoryId === 'appointment') {
+    return (
+      <AppointmentCollectionView
+        filterLabel={filterLabel}
+        activeLabel={activeFilter.label}
+        allLabel={allLabel}
+        backHref={backHref}
+        locale={locale}
+        appointment={appointment}
+      />
+    );
+  }
+
+  if (visibleItems.length === 0) {
+    return (
+      <CollectionGridView
+        items={visibleItems}
+        empty={empty}
+        filterLabel={filterLabel}
+        activeLabel={activeFilter.label}
+        allLabel={allLabel}
+        backHref={backHref}
+        locale={locale}
+      />
+    );
+  }
+
   if (categoryId === 'champion') {
     return (
       <CollectionFinderView
@@ -364,19 +391,6 @@ export function SpecialtyCollectionCategory({
         setFinderOpen={setFinderOpen}
         backHref={backHref}
         locale={locale}
-      />
-    );
-  }
-
-  if (categoryId === 'appointment') {
-    return (
-      <AppointmentCollectionView
-        filterLabel={filterLabel}
-        activeLabel={activeFilter.label}
-        allLabel={allLabel}
-        backHref={backHref}
-        locale={locale}
-        appointment={appointment}
       />
     );
   }
