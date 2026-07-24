@@ -7,6 +7,7 @@ import {ScrollText} from '@/components/motion/scroll-text';
 import {SafeImage} from '@/components/safe-image';
 import {RingDrawingBackground} from '@/components/specialty/ring-drawing-background';
 import {TechniqueCarouselSection} from '@/components/specialty/technique-carousel-section';
+import {TechniqueIntroSection} from '@/components/specialty/technique-intro-section';
 import type {Locale} from '@/i18n/routing';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
@@ -40,7 +41,7 @@ export default async function TechniqueRecordPage({params}: Props) {
       <RingDrawingBackground />
 
       <section className="relative z-10 pt-28">
-        <div className="mx-auto max-w-[1220px] px-container pb-[clamp(72px,8vw,124px)] pt-[clamp(64px,8vw,116px)]">
+        <div className="mx-auto max-w-[1220px] px-container pb-[clamp(36px,3vw,56px)] pt-[clamp(64px,8vw,116px)]">
           <ScrollText className="mx-auto max-w-[760px] space-y-[18px] text-center">
             <p className="font-body text-[11px] font-semibold uppercase leading-none tracking-[0.32em] text-accent">
               {content.hero.eyebrow}
@@ -65,6 +66,11 @@ export default async function TechniqueRecordPage({params}: Props) {
           </Reveal>
         </div>
       </section>
+
+      <TechniqueIntroSection
+        title={content.intro.title}
+        body={content.intro.body}
+      />
 
       <TechniqueCarouselSection
         items={content.records.items}

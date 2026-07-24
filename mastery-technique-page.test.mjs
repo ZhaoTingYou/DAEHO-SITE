@@ -25,8 +25,12 @@ function loadTechniqueVisibilityNormalizer() {
 }
 
 const techniquePagePath = new URL('./app/[locale]/(site)/mastery/technique/page.tsx', import.meta.url);
+const techniqueIntroPath = new URL('./components/specialty/technique-intro-section.tsx', import.meta.url);
 const techniqueCarouselPath = new URL('./components/specialty/technique-carousel-section.tsx', import.meta.url);
 const techniquePageSource = readFileSync(techniquePagePath, 'utf8');
+const techniqueIntroSource = existsSync(techniqueIntroPath)
+  ? readFileSync(techniqueIntroPath, 'utf8')
+  : '';
 const techniqueCarouselSource = existsSync(techniqueCarouselPath)
   ? readFileSync(techniqueCarouselPath, 'utf8')
   : '';
@@ -188,6 +192,28 @@ test('Technique page keeps the complete Hero and replaces every lower section wi
     /<TechniqueCarouselSection[\s\S]*?items=\{content\.records\.items\}[\s\S]*?\/>/
   );
   assert.doesNotMatch(techniquePageSource, /content\.(standards|evidence|cta)|<Link|TechniqueRecordsSection/);
+});
+
+test('Technique introduction renders semantic localized copy between the Hero and carousel', () => {
+  assert.equal(existsSync(techniqueIntroPath), true);
+  assert.match(techniqueIntroSource, /export function TechniqueIntroSection/);
+  assert.match(techniqueIntroSource, /<section/);
+  assert.match(techniqueIntroSource, /<h2[^>]*id="technique-intro-title"/);
+  assert.match(techniqueIntroSource, /<p/);
+  assert.match(techniqueIntroSource, /<ScrollText/);
+  assert.doesNotMatch(techniqueIntroSource, /<Link|href=|<button|<img|<Image/);
+
+  const heroIndex = techniquePageSource.indexOf('<section className="relative z-10 pt-28">');
+  const introIndex = techniquePageSource.indexOf('<TechniqueIntroSection');
+  const carouselIndex = techniquePageSource.indexOf('<TechniqueCarouselSection');
+
+  assert.ok(heroIndex >= 0);
+  assert.ok(introIndex > heroIndex);
+  assert.ok(carouselIndex > introIndex);
+  assert.match(
+    techniquePageSource,
+    /<TechniqueIntroSection[\s\S]*?title=\{content\.intro\.title\}[\s\S]*?body=\{content\.intro\.body\}[\s\S]*?\/>/
+  );
 });
 
 test('Technique carousel uses Embla looped dragging with arrows, dots, keyboard, and no autoplay', () => {
