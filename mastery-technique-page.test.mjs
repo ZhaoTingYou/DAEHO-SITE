@@ -52,12 +52,12 @@ test('Mastery has a standalone Technique page separate from Making', () => {
   assert.match(makingPageSource, /SpecialtyProcess/);
 });
 
-test('Technique is hidden from public navigation while Making and Creations remain', () => {
+test('Technique is enabled in public navigation before Making and Creations', () => {
   const navTechnique = siteMapSource.indexOf("id: 'technique'");
   const navMaking = siteMapSource.indexOf("id: 'making'");
   const navCollection = siteMapSource.indexOf("id: 'collection'");
 
-  assert.match(visibilitySource, /isTechniquePageVisible = false/);
+  assert.match(visibilitySource, /isTechniquePageVisible = true/);
   assert.ok(navTechnique >= 0, 'the restorable Technique definition should remain');
   assert.ok(navMaking > navTechnique, 'Making should follow the gated Technique definition');
   assert.ok(navCollection > navMaking, 'Creations should follow Making');
