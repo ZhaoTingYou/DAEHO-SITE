@@ -3,6 +3,14 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 
 const source = readFileSync(new URL('./admin-fields.tsx', import.meta.url), 'utf8');
+const textFieldSource = source.slice(
+  source.indexOf('export function TextField'),
+  source.indexOf('export function TextAreaField')
+);
+const textEditorLabelSource = source.slice(
+  source.indexOf('function TextEditorLabel'),
+  source.indexOf('function textEditorStyle')
+);
 const imageUploadSource = source.slice(
   source.indexOf('export function ImageUploadField'),
   source.indexOf('export function AppendableArrayItemsField')
@@ -129,6 +137,14 @@ test('text editors expose only approved brand fonts and alignment controls', () 
   assert.match(source, /\{value: 'left', label: 'L'\}/);
   assert.match(source, /\{value: 'center', label: 'C'\}/);
   assert.match(source, /\{value: 'right', label: 'R'\}/);
+});
+
+test('text editor controls and inputs cannot overflow their admin card', () => {
+  assert.match(textFieldSource, /className="grid min-w-0 max-w-full gap-1\.5/);
+  assert.match(textFieldSource, /className="min-h-10 w-full min-w-0 max-w-full rounded-md/);
+  assert.match(textEditorLabelSource, /className="grid min-w-0 max-w-full gap-2"/);
+  assert.match(textEditorLabelSource, /className="flex min-w-0 max-w-full flex-wrap items-center gap-2/);
+  assert.match(textEditorLabelSource, /className="min-h-8 min-w-0 max-w-full flex-\[1_1_12rem\]/);
 });
 
 test('page text fields read their editor font and alignment preset from the catalog', () => {

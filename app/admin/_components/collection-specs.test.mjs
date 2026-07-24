@@ -46,6 +46,31 @@ test('collection CMS exposes and saves every localized specification shown on de
   }
 });
 
+test('localized specifications stay inside the original top specification card', () => {
+  const panelCallIndex = formSource.indexOf('<CollectionSpecificationsPanel');
+  const galleryIndex = formSource.indexOf('<CollectionGalleryField');
+  const panelDefinitionIndex = formSource.indexOf('function CollectionSpecificationsPanel');
+  const translationPanelIndex = formSource.indexOf('function TranslationPanel');
+  const translationPanelEndIndex = formSource.indexOf('function getTranslation');
+
+  assert.ok(panelCallIndex > 0 && panelCallIndex < galleryIndex, 'Specification card should remain beside the cover image');
+  assert.ok(panelDefinitionIndex > 0, 'Collection form should have one dedicated specification panel');
+
+  const specificationPanelSource = formSource.slice(panelDefinitionIndex, translationPanelIndex);
+  const translationPanelSource = formSource.slice(translationPanelIndex, translationPanelEndIndex);
+
+  for (const field of localizedSpecFields) {
+    assert.ok(
+      specificationPanelSource.includes(`name={\`\${locale}.${field}\`}`),
+      `${field} should be rendered in the top specification card`
+    );
+    assert.ok(
+      !translationPanelSource.includes(`name={\`\${locale}.${field}\`}`),
+      `${field} should not create a second specification card inside translation content`
+    );
+  }
+});
+
 test('collection repository persists and returns localized specification fields', () => {
   for (const column of ['material', 'stones', 'made_for', 'work_info']) {
     assert.ok(

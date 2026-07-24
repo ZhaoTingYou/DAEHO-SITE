@@ -61,15 +61,15 @@ export function CollectionForm({
     <form action={saveCollectionAction} className="grid gap-6">
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
 
-      <Panel className="p-5">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <Panel className="min-w-0 p-5">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="ring-01" />
           <SelectField label={t('form.category')} name="category" defaultValue={normalizeCollectionCategory(item?.category)} options={collectionCategoryOptions(t)} />
           <TextField label={t('form.sportCategory')} name="sportCategory" defaultValue={item?.sportCategory} placeholder="baseball" />
           <TextField label={t('common.sortOrder')} name="sortOrder" type="number" defaultValue={item?.sortOrder ?? 0} />
           <CheckboxField label={t('form.visible')} name="isVisible" defaultChecked={item?.isVisible ?? true} />
         </div>
-        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div className="mt-4 grid min-w-0 gap-4 xl:grid-cols-2">
           <ImageUploadField
             label={t('form.imageFilename')}
             name="imagePath"
@@ -87,19 +87,11 @@ export function CollectionForm({
             mediaEmptyLabel={t('media.libraryEmpty')}
             mediaSelectedLabel={t('media.selectedExisting')}
           />
-          <div className="grid gap-4 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4">
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.specs')}</p>
-            <TextField label={t('form.year')} name="specs.year" defaultValue={specs.year} />
-            <TextField label={t('form.sportCategory')} name="specs.sportCategory" defaultValue={specs.sportCategory} />
-            <TextField
-              label={t('form.linkHref')}
-              name="specs.linkHref"
-              defaultValue={specs.linkHref}
-              placeholder="/mastery/creations/slug, https://…"
-              inputMode="url"
-              editorControls={false}
-            />
-          </div>
+          <CollectionSpecificationsPanel
+            specs={specs}
+            translations={item?.translations ?? {}}
+            messages={messages}
+          />
         </div>
         <CollectionGalleryField
           gallery={gallery}
@@ -166,6 +158,55 @@ export function CollectionForm({
   );
 }
 
+function CollectionSpecificationsPanel({
+  specs,
+  translations,
+  messages
+}: {
+  specs: ReturnType<typeof normalizeSpecs>;
+  translations: Record<string, unknown>;
+  messages: Record<string, string>;
+}) {
+  const t = createAdminTranslator(messages);
+
+  return (
+    <div className="grid min-w-0 max-w-full gap-4 overflow-hidden rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4">
+      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.specs')}</p>
+      <div className="grid min-w-0 max-w-full gap-4 sm:grid-cols-2">
+        <TextField label={t('form.year')} name="specs.year" defaultValue={specs.year} />
+        <TextField label={t('form.sportCategory')} name="specs.sportCategory" defaultValue={specs.sportCategory} />
+        <div className="min-w-0 sm:col-span-2">
+          <TextField
+            label={t('form.linkHref')}
+            name="specs.linkHref"
+            defaultValue={specs.linkHref}
+            placeholder="/mastery/creations/slug, https://…"
+            inputMode="url"
+            editorControls={false}
+          />
+        </div>
+      </div>
+      {locales.map((locale) => {
+        const translation = (translations[locale] ?? {}) as CollectionTranslation;
+
+        return (
+          <section key={locale} className="grid min-w-0 max-w-full gap-4 border-t border-[#d9dee7] pt-4">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">
+              {getContentLocaleLabel(messages, locale)}
+            </h3>
+            <div className="grid min-w-0 max-w-full gap-4 sm:grid-cols-2">
+              <TextField label={t('form.material')} name={`${locale}.material`} defaultValue={translation.material} editorLocale={locale} />
+              <TextField label={t('form.stones')} name={`${locale}.stones`} defaultValue={translation.stones} editorLocale={locale} />
+              <TextField label={t('form.madeFor')} name={`${locale}.madeFor`} defaultValue={translation.madeFor} editorLocale={locale} />
+              <TextField label={t('form.workInfo')} name={`${locale}.workInfo`} defaultValue={translation.workInfo} editorLocale={locale} />
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 function TranslationPanel({
   locale,
   mediaItems,
@@ -180,7 +221,7 @@ function TranslationPanel({
   const t = createAdminTranslator(messages);
 
   return (
-    <Panel className="p-5">
+    <Panel className="min-w-0 p-5">
       <div className="mb-4 flex items-center justify-between border-b border-[#e4e7ec] pb-3">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{getContentLocaleLabel(messages, locale)}</h2>
         <SecondaryLink href="/admin/media">{t('common.media')}</SecondaryLink>
@@ -191,13 +232,6 @@ function TranslationPanel({
         <TextAreaField label={t('form.story')} name={`${locale}.story`} defaultValue={translation.story} rows={5} />
         <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
         <TextField label={t('form.sportCategoryLabel')} name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} />
-        <div className="grid gap-4 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4 md:grid-cols-2">
-          <p className="md:col-span-2 text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.specs')}</p>
-          <TextField label={t('form.material')} name={`${locale}.material`} defaultValue={translation.material} />
-          <TextField label={t('form.stones')} name={`${locale}.stones`} defaultValue={translation.stones} />
-          <TextField label={t('form.madeFor')} name={`${locale}.madeFor`} defaultValue={translation.madeFor} />
-          <TextField label={t('form.workInfo')} name={`${locale}.workInfo`} defaultValue={translation.workInfo} />
-        </div>
         <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
         <TextAreaField label={t('form.seoDescription')} name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
         <ImageUploadField

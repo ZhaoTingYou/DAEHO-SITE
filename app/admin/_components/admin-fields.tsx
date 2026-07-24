@@ -88,7 +88,7 @@ export function TextField({
   const hasTextControls = type === 'text' && editorControls;
 
   return (
-    <div className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+    <div className="grid min-w-0 max-w-full gap-1.5 text-sm font-semibold text-[#344054]">
       <TextEditorLabel
         label={label}
         enabled={hasTextControls}
@@ -106,7 +106,7 @@ export function TextField({
         defaultValue={defaultValue}
         placeholder={placeholder}
         style={hasTextControls ? editableStyle : undefined}
-        className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
+        className="min-h-10 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
       />
     </div>
   );
@@ -138,7 +138,7 @@ export function TextAreaField({
   const editableStyle = textEditorStyle(font, align);
 
   return (
-    <div className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+    <div className="grid min-w-0 max-w-full gap-1.5 text-sm font-semibold text-[#344054]">
       <TextEditorLabel
         label={label}
         enabled
@@ -155,7 +155,7 @@ export function TextAreaField({
         defaultValue={defaultValue}
         placeholder={placeholder}
         style={editableStyle}
-        className="rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm leading-6 text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
+        className="w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm leading-6 text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
       />
     </div>
   );
@@ -181,14 +181,14 @@ function TextEditorLabel({
   }
 
   return (
-    <span className="grid gap-2">
+    <span className="grid min-w-0 max-w-full gap-2">
       <span>{label}</span>
-      <span className="flex flex-wrap items-center gap-2 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-1.5">
+      <span className="flex min-w-0 max-w-full flex-wrap items-center gap-2 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-1.5">
         <select
           aria-label={`${label} font`}
           value={font}
           onChange={(event) => onFontChange(event.target.value as TextEditorFont)}
-          className="min-h-8 rounded border border-[#cbd3df] bg-white px-2 text-xs font-semibold text-[#344054] outline-none focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
+          className="min-h-8 min-w-0 max-w-full flex-[1_1_12rem] rounded border border-[#cbd3df] bg-white px-2 text-xs font-semibold text-[#344054] outline-none focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
         >
           {textEditorFonts.map((option) => (
             <option key={option.value} value={option.value}>
@@ -196,7 +196,7 @@ function TextEditorLabel({
             </option>
           ))}
         </select>
-        <span className="inline-flex overflow-hidden rounded border border-[#cbd3df] bg-white">
+        <span className="inline-flex shrink-0 overflow-hidden rounded border border-[#cbd3df] bg-white">
           {textEditorAlignments.map((option) => (
             <button
               key={option.value}
@@ -264,12 +264,12 @@ export function SelectField({
   options: Array<{label: string; value: string}>;
 }) {
   return (
-    <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+    <label className="grid min-w-0 max-w-full gap-1.5 text-sm font-semibold text-[#344054]">
       <span>{label}</span>
       <select
         name={name}
         defaultValue={defaultValue}
-        className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
+        className="min-h-10 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
