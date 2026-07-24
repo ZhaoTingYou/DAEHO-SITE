@@ -8,6 +8,7 @@ import {LenisProvider} from '@/components/motion/lenis-provider';
 import {ReducedMotionProvider} from '@/components/motion/reduced-motion-provider';
 import {SiteStructuredData} from '@/components/site/site-structured-data';
 import {routing, type Locale} from '@/i18n/routing';
+import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {metadataBase, previewNoindexRobots} from '@/lib/seo';
 
@@ -28,6 +29,7 @@ export async function generateMetadata({params}: Omit<Props, 'children'>): Promi
   }
 
   const t = await getTranslations({locale, namespace: 'metadata'});
+  const englishEnabled = await isEnglishEnabledForSite();
 
   return {
     metadataBase,
@@ -35,11 +37,9 @@ export async function generateMetadata({params}: Omit<Props, 'children'>): Promi
     description: t('description'),
     robots: previewNoindexRobots(),
     alternates: {
-      languages: {
-        ko: '/ko',
-        en: '/en',
-        'x-default': '/ko'
-      }
+      languages: englishEnabled
+        ? {ko: '/ko', en: '/en', 'x-default': '/ko'}
+        : {ko: '/ko', 'x-default': '/ko'}
     },
     icons: {
       icon: [
@@ -60,7 +60,10 @@ export default async function LocaleLayout({children, params}: Props) {
   }
 
   setRequestLocale(locale);
-  const messages = await getLocaleMessages(locale as Locale);
+  const [messages, englishEnabled] = await Promise.all([
+    getLocaleMessages(locale as Locale),
+    isEnglishEnabledForSite()
+  ]);
   // Client namespaces are also sourced through the CMS-aware message boundary so
   // header, 404, and other client navigation destinations update immediately.
   const clientMessages = {
@@ -72,7 +75,7 @@ export default async function LocaleLayout({children, params}: Props) {
   return (
     <html lang={locale} className={localeClass}>
       <body className="bg-bg text-text font-body">
-        <SiteStructuredData />
+        <SiteStructuredData englishEnabled={englishEnabled} />
         <a href="#main-content" className="skip-link">
           {messages.common.skipLink}
         </a>

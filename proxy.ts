@@ -3,12 +3,18 @@ import {NextResponse, type NextRequest} from 'next/server';
 
 import {routing} from '@/i18n/routing';
 import {isAdminIpAllowed, isAdminProtectedPath} from '@/lib/cms/admin-ip-allowlist';
+import {
+  getKoreanFallbackPath,
+  isEnglishEnabled
+} from '@/lib/english-visibility-core';
 import {isGolfEnabled} from '@/lib/golf-visibility-core';
 
 const intlMiddleware = createMiddleware(routing);
 const golfVisibilityCacheMs = 5_000;
+const englishVisibilityCacheMs = 5_000;
 
 let golfVisibilityCache: {enabled: boolean; expiresAt: number} | null = null;
+let englishVisibilityCache: {enabled: boolean; expiresAt: number} | null = null;
 
 export default async function proxy(request: NextRequest) {
   if (isAdminProtectedPath(request.nextUrl.pathname)) {
@@ -31,6 +37,14 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.rewrite(new URL('/ko/styleguide-internal', request.url));
   }
 
+  if (isEnglishRequestPath(request.nextUrl.pathname) && !(await isEnglishEnabledForProxy())) {
+    const koreanUrl = new URL(getKoreanFallbackPath(request.nextUrl.pathname), request.url);
+    koreanUrl.search = request.nextUrl.search;
+    const response = NextResponse.redirect(koreanUrl, 308);
+    response.cookies.set('NEXT_LOCALE', 'ko', {path: '/', sameSite: 'lax'});
+    return response;
+  }
+
   if (isGolfRequestPath(request.nextUrl.pathname) && !(await isGolfEnabledForProxy())) {
     return notFoundResponse();
   }
@@ -48,6 +62,43 @@ export function isGolfRequestPath(pathname: string) {
   const golfSegmentIndex = firstSegment === 'ko' || firstSegment === 'en' ? 1 : 0;
 
   return segments[golfSegmentIndex] === 'golf';
+}
+
+export function isEnglishRequestPath(pathname: string) {
+  const firstSegment = pathname.split('/').filter(Boolean)[0];
+  return firstSegment === 'en';
+}
+
+async function isEnglishEnabledForProxy() {
+  const now = Date.now();
+
+  if (englishVisibilityCache && englishVisibilityCache.expiresAt > now) {
+    return englishVisibilityCache.enabled;
+  }
+
+  const enabled = await readEnglishEnabledFromCms();
+  englishVisibilityCache = {
+    enabled,
+    expiresAt: now + englishVisibilityCacheMs
+  };
+
+  return enabled;
+}
+
+async function readEnglishEnabledFromCms() {
+  const baseUrl = process.env.CMS_BACKEND_URL?.replace(/\/+$/, '');
+
+  if (!baseUrl) {
+    return false;
+  }
+
+  try {
+    const pages = await Promise.all(routing.locales.map((locale) => fetchCommonPage(baseUrl, locale)));
+
+    return pages.some((page) => isEnglishEnabled(page));
+  } catch {
+    return false;
+  }
 }
 
 async function isGolfEnabledForProxy() {
@@ -78,7 +129,7 @@ async function readGolfEnabledFromCms() {
   }
 
   try {
-    const pages = await Promise.all(['ko', 'en'].map((locale) => fetchGolfCommonPage(baseUrl, locale)));
+    const pages = await Promise.all(routing.locales.map((locale) => fetchCommonPage(baseUrl, locale)));
 
     return pages.some((page) => isGolfEnabled(page));
   } catch {
@@ -86,7 +137,7 @@ async function readGolfEnabledFromCms() {
   }
 }
 
-async function fetchGolfCommonPage(baseUrl: string, locale: string) {
+async function fetchCommonPage(baseUrl: string, locale: string) {
   const response = await fetch(`${baseUrl}/api/cms/pages/common?locale=${locale}`, {
     cache: 'no-store',
     headers: {

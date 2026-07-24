@@ -298,6 +298,13 @@ export async function savePageAction(formData: FormData) {
     const contentKo = await readPageLocaleContent(formData, 'ko', returnTo, definition, sharedContentImages);
     const contentEn = await readPageLocaleContent(formData, 'en', returnTo, definition, sharedContentImages);
 
+    if (pageKey === 'common' && formData.has('englishEnabled.present')) {
+      const englishEnabled = formData.has('englishEnabled');
+      const englishEnabledPath = `${pageContentGroupsKey}.main.features.englishEnabled`;
+      setObjectValueAtPath(contentKo, englishEnabledPath, englishEnabled);
+      setObjectValueAtPath(contentEn, englishEnabledPath, englishEnabled);
+    }
+
     if (pageKey === 'common' && formData.has('externalSites.payload')) {
       const externalSites = parseExternalSitesSubmission(
         stringFromForm(formData, 'externalSites.payload')

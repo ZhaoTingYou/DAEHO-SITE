@@ -36,8 +36,8 @@ test('layout passes one CMS external-site snapshot to the header and footer', ()
   assert.match(layout, /<SiteFooter[^>]*externalSites=\{externalSites\}[^>]*\/>/);
   assert.equal((layout.match(/externalSites=\{externalSites\}/g) ?? []).length, 2);
 
-  assert.match(header, /SiteHeader\(\{locale, golfEnabled, externalSites\}/);
-  assert.match(footer, /SiteFooter\(\{locale, golfEnabled, externalSites\}/);
+  assert.match(header, /SiteHeader\(\{locale, englishEnabled, golfEnabled, externalSites\}/);
+  assert.match(footer, /SiteFooter\(\{locale, englishEnabled, golfEnabled, externalSites\}/);
   assert.match(header, /getVisibleExternalSites\(externalSites\)/);
   assert.match(footer, /getVisibleExternalSites\(externalSites\)/);
   assert.doesNotMatch(header, /footerText\.raw\('externalSites\.items'\)/);

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {CookieSettingsButton} from '@/components/analytics/cookie-settings-button';
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
+import {getPublicLocales} from '@/lib/english-visibility-core';
 import {
   getVisibleExternalSites,
   type ExternalSiteItem
@@ -16,6 +17,7 @@ import {ExternalSiteLink} from './external-site-link';
 
 type SiteFooterProps = {
   locale: Locale;
+  englishEnabled: boolean;
   golfEnabled: boolean;
   externalSites: readonly ExternalSiteItem[];
 };
@@ -41,7 +43,7 @@ const socialLinkItems = [
 ] as const;
 type SocialLinkKey = (typeof socialLinkItems)[number]['key'];
 
-export async function SiteFooter({locale, golfEnabled, externalSites}: SiteFooterProps) {
+export async function SiteFooter({locale, englishEnabled, golfEnabled, externalSites}: SiteFooterProps) {
   const text = (await getLocaleMessages(locale)).common;
   const navLabels = text.navigation.items;
   const navHrefs = text.navigation.hrefs;
@@ -151,16 +153,18 @@ export async function SiteFooter({locale, golfEnabled, externalSites}: SiteFoote
               </div>
             ) : null}
 
-            <div className={visibleExternalSites.length > 0 || visibleSocialLinks.length > 0 ? '' : 'sm:col-start-2'}>
-              <p className="footer-label">{text.footer.locale}</p>
-              <div className="mt-5 flex gap-5">
-                {locales.map((targetLocale) => (
-                  <Link key={targetLocale} href={withLocale(targetLocale, '/')} className="footer-link">
-                    {localeShortLabels[targetLocale]}
-                  </Link>
-                ))}
+            {englishEnabled ? (
+              <div className={visibleExternalSites.length > 0 || visibleSocialLinks.length > 0 ? '' : 'sm:col-start-2'}>
+                <p className="footer-label">{text.footer.locale}</p>
+                <div className="mt-5 flex gap-5">
+                  {getPublicLocales(locales, englishEnabled).map((targetLocale) => (
+                    <Link key={targetLocale} href={withLocale(targetLocale, '/')} className="footer-link">
+                      {localeShortLabels[targetLocale]}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
         </div>
 

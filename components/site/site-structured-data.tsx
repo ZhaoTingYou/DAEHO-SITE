@@ -1,3 +1,5 @@
+import {getPublicLocales} from '@/lib/english-visibility-core';
+import {locales} from '@/lib/locales';
 import {metadataBase} from '@/lib/seo';
 
 const siteName = '대호';
@@ -32,7 +34,7 @@ const serviceItems = [
   }
 ];
 
-export function SiteStructuredData() {
+export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) {
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -42,7 +44,9 @@ export function SiteStructuredData() {
         url: absoluteSiteUrl('/'),
         name: siteName,
         alternateName: siteAlternateNames,
-        inLanguage: ['ko-KR', 'en-US'],
+        inLanguage: getPublicLocales(locales, englishEnabled).map((locale) =>
+          locale === 'ko' ? 'ko-KR' : 'en-US'
+        ),
         publisher: {
           '@id': absoluteSiteUrl('/#organization')
         },

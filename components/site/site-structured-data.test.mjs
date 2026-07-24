@@ -38,5 +38,11 @@ test('site structured data exposes service entities for high-intent search terms
 
 test('localized public layout renders site structured data on every locale page', () => {
   assert.ok(localeLayoutSource.includes("import {SiteStructuredData} from '@/components/site/site-structured-data';"));
-  assert.ok(localeLayoutSource.includes('<SiteStructuredData />'));
+  assert.ok(localeLayoutSource.includes('<SiteStructuredData englishEnabled={englishEnabled} />'));
+});
+
+test('website structured data follows the CMS English visibility switch', () => {
+  assert.match(structuredDataSource, /SiteStructuredData\(\{englishEnabled\}/);
+  assert.match(structuredDataSource, /getPublicLocales\(locales, englishEnabled\)/);
+  assert.doesNotMatch(structuredDataSource, /inLanguage: \['ko-KR', 'en-US'\]/);
 });

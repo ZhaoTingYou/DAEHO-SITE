@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 
 import type {Locale} from '@/i18n/routing';
 import {getPage} from '@/lib/cms/repositories';
+import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {imageSrc} from '@/lib/image-src';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 
@@ -251,15 +252,16 @@ export function previewNoindexRobots(): Metadata['robots'] | undefined {
   };
 }
 
-export function getDetailMetadata(
+export async function getDetailMetadata(
   locale: Locale,
   path: string,
   pageTitle: string,
   description: string,
   image = '/images/home_hero.png'
-): Metadata {
+): Promise<Metadata> {
   const title = formatMetadataTitle(locale, pageTitle);
   const brandedDescription = formatMetadataDescription(locale, description);
+  const englishEnabled = await isEnglishEnabledForSite();
 
   return {
     title,
@@ -267,11 +269,16 @@ export function getDetailMetadata(
     robots: previewNoindexRobots(),
     alternates: {
       canonical: withLocale(locale, path),
-      languages: {
-        ko: withLocale('ko', path),
-        en: withLocale('en', path),
-        'x-default': withLocale('ko', path)
-      }
+      languages: englishEnabled
+        ? {
+            ko: withLocale('ko', path),
+            en: withLocale('en', path),
+            'x-default': withLocale('ko', path)
+          }
+        : {
+            ko: withLocale('ko', path),
+            'x-default': withLocale('ko', path)
+          }
     },
     openGraph: {
       title,

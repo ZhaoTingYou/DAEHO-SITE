@@ -175,6 +175,10 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
     ?.groups.find((group) => group.key === mainGroupKey)?.content;
   const enMain = localeData.find((data) => data.locale === 'en')
     ?.groups.find((group) => group.key === mainGroupKey)?.content;
+  const englishField = fieldsByPath.get('features.englishEnabled');
+  const englishEnabled =
+    getObjectValueAtPath(koMain, 'features.englishEnabled') === true ||
+    getObjectValueAtPath(enMain, 'features.englishEnabled') === true;
 
   return (
     <>
@@ -200,6 +204,20 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
         <input type="hidden" name="returnTo" value={footerReturnPath} />
         <input type="hidden" name="section" value={row?.section ?? definition.section} />
         <input type="hidden" name="sortOrder" value={row?.sortOrder ?? definition.sortOrder} />
+
+        <Panel className="p-5">
+          <input type="hidden" name="englishEnabled.present" value="1" />
+          <h2 className="mb-4 border-b border-[#e4e7ec] pb-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">
+            {t('footer.sectionVisibility')}
+          </h2>
+          {englishField ? (
+            <CheckboxField
+              label={getLocalizedPageFieldLabel(englishField, adminLocale)}
+              name="englishEnabled"
+              defaultChecked={englishEnabled}
+            />
+          ) : null}
+        </Panel>
 
         <ExternalSitesEditor
           itemsKo={externalSiteItems(koMain)}

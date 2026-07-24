@@ -1,8 +1,10 @@
 import type {MetadataRoute} from 'next';
 
-import {routing} from '@/i18n/routing';
 import {listPublicCollections, listPublicNews} from '@/lib/cms/repositories';
+import {getPublicLocales} from '@/lib/english-visibility-core';
+import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
+import {locales} from '@/lib/locales';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {metadataBase} from '@/lib/seo';
@@ -34,7 +36,10 @@ const baseStaticPaths = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const cmsNews = await readCmsValue(() => listPublicNews('ko'), []);
   const cmsCollections = await readCmsValue(() => listPublicCollections('ko'), []);
-  const golfEnabled = await isGolfEnabledForSite();
+  const [englishEnabled, golfEnabled] = await Promise.all([
+    isEnglishEnabledForSite(),
+    isGolfEnabledForSite()
+  ]);
   const staticPaths = [
     ...baseStaticPaths,
     ...(golfEnabled ? ['/golf', '/golf/inquiry'] : [])
@@ -50,22 +55,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
 
   return [...staticPaths, ...detailPaths].flatMap((path) =>
-    routing.locales.map((locale) => createSitemapEntry(locale, path, lastModified))
+    getPublicLocales(locales, englishEnabled).map((locale) =>
+      createSitemapEntry(locale, path, lastModified, englishEnabled)
+    )
   );
 }
 
-function createSitemapEntry(locale: string, path: string, lastModified: Date): SitemapEntry {
+function createSitemapEntry(
+  locale: string,
+  path: string,
+  lastModified: Date,
+  englishEnabled: boolean
+): SitemapEntry {
   return {
     url: localizedAbsoluteUrl(locale, path),
     lastModified,
     changeFrequency: changeFrequencyForPath(path),
     priority: priorityForPath(path),
     alternates: {
-      languages: {
-        ko: localizedAbsoluteUrl('ko', path),
-        en: localizedAbsoluteUrl('en', path),
-        'x-default': localizedAbsoluteUrl('ko', path)
-      }
+      languages: englishEnabled
+        ? {
+            ko: localizedAbsoluteUrl('ko', path),
+            en: localizedAbsoluteUrl('en', path),
+            'x-default': localizedAbsoluteUrl('ko', path)
+          }
+        : {
+            ko: localizedAbsoluteUrl('ko', path),
+            'x-default': localizedAbsoluteUrl('ko', path)
+          }
     }
   };
 }

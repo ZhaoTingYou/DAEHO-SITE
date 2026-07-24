@@ -8,6 +8,7 @@ import {SiteFooter} from '@/components/site/site-footer';
 import {SiteCursor} from '@/components/site/site-cursor';
 import {SiteHeader} from '@/components/site/site-header';
 import {routing, type Locale} from '@/i18n/routing';
+import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
@@ -25,7 +26,10 @@ export default async function SiteLayout({children, params}: Props) {
   }
 
   setRequestLocale(locale);
-  const golfEnabled = await isGolfEnabledForSite();
+  const [englishEnabled, golfEnabled] = await Promise.all([
+    isEnglishEnabledForSite(),
+    isGolfEnabledForSite()
+  ]);
   const messages = await getLocaleMessages(locale as Locale);
   const externalSites = messages.common.footer.externalSites.items;
   const privacyHref = resolveCmsHref(locale, messages.common.navigation.hrefs.privacy, '/privacy');
@@ -36,12 +40,14 @@ export default async function SiteLayout({children, params}: Props) {
       <div className="site-cursor-scope">
         <SiteHeader
           locale={locale as Locale}
+          englishEnabled={englishEnabled}
           golfEnabled={golfEnabled}
           externalSites={externalSites}
         />
         {children}
         <SiteFooter
           locale={locale as Locale}
+          englishEnabled={englishEnabled}
           golfEnabled={golfEnabled}
           externalSites={externalSites}
         />

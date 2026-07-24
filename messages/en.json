@@ -1248,6 +1248,7 @@
   "common": {
     "skipLink": "Skip to main content",
     "features": {
+      "englishEnabled": false,
       "golfEnabled": false
     },
     "navigation": {

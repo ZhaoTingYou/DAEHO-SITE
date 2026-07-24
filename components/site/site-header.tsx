@@ -13,6 +13,7 @@ import {
   getVisibleExternalSites,
   type ExternalSiteItem
 } from '@/lib/cms/external-sites-core.mjs';
+import {getPublicLocales} from '@/lib/english-visibility-core';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isActivePath, navItems, withLocale} from '@/lib/site-map';
 
@@ -20,6 +21,7 @@ import {ExternalSiteLink} from './external-site-link';
 
 type SiteHeaderProps = {
   locale: Locale;
+  englishEnabled: boolean;
   golfEnabled: boolean;
   externalSites: readonly ExternalSiteItem[];
 };
@@ -50,7 +52,7 @@ const instantItemVariants = {
   visible: {opacity: 1, y: 0}
 };
 
-export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps) {
+export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}: SiteHeaderProps) {
   const navText = useTranslations('common.navigation');
   const footerText = useTranslations('common.footer');
   const visibleExternalSites = getVisibleExternalSites(externalSites);
@@ -99,7 +101,7 @@ export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps
     });
   };
 
-  const languageLinks = locales.map((targetLocale) => ({
+  const languageLinks = getPublicLocales(locales, englishEnabled).map((targetLocale) => ({
     locale: targetLocale,
     label: localeShortLabels[targetLocale],
     href: withLocale(targetLocale, relativePath === '/' ? '/' : relativePath)
@@ -487,28 +489,32 @@ export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps
           </motion.nav>
 
           <div className="flex min-w-0 items-center justify-end gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
-            <div className="flex shrink-0 items-center gap-1" aria-label={navText('languageSwitcherLabel')}>
-              {languageLinks.map((item, index) => (
-                <span key={item.locale} className="contents">
-                  {index > 0 ? (
-                    <span className={isHeroTransparent ? 'opacity-70' : 'opacity-40'} aria-hidden="true">
-                      /
+            {englishEnabled ? (
+              <>
+                <div className="flex shrink-0 items-center gap-1" aria-label={navText('languageSwitcherLabel')}>
+                  {languageLinks.map((item, index) => (
+                    <span key={item.locale} className="contents">
+                      {index > 0 ? (
+                        <span className={isHeroTransparent ? 'opacity-70' : 'opacity-40'} aria-hidden="true">
+                          /
+                        </span>
+                      ) : null}
+                      <Link
+                        href={item.href}
+                        className={`site-nav-link site-header-language-link no-underline ${
+                          locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-60'
+                        }`}
+                        aria-current={locale === item.locale ? 'page' : undefined}
+                      >
+                        {item.label}
+                      </Link>
                     </span>
-                  ) : null}
-                  <Link
-                    href={item.href}
-                    className={`site-nav-link site-header-language-link no-underline ${
-                      locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-60'
-                    }`}
-                    aria-current={locale === item.locale ? 'page' : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                </span>
-              ))}
-            </div>
+                  ))}
+                </div>
 
-            <span className="h-3 w-px shrink-0 bg-current opacity-25" aria-hidden="true" />
+                <span className="h-3 w-px shrink-0 bg-current opacity-25" aria-hidden="true" />
+              </>
+            ) : null}
 
             {visibleExternalSites.length > 0 ? (
               <>
@@ -578,26 +584,30 @@ export function SiteHeader({locale, golfEnabled, externalSites}: SiteHeaderProps
           DAEHO
         </Link>
 
-        <div className="flex min-h-11 items-center gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
-          {languageLinks.map((item, index) => (
-            <span key={item.locale} className="contents">
-              {index > 0 ? (
-                <span className={isHeroTransparent ? 'opacity-70' : 'opacity-35'} aria-hidden="true">
-                  /
-                </span>
-              ) : null}
-                <Link
-                  href={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`inline-flex min-h-11 min-w-11 items-center justify-center ${
-                  locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-55'
-                }`}
-              >
-                {item.label}
-              </Link>
-            </span>
-          ))}
-        </div>
+        {englishEnabled ? (
+          <div className="flex min-h-11 items-center gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
+            {languageLinks.map((item, index) => (
+              <span key={item.locale} className="contents">
+                {index > 0 ? (
+                  <span className={isHeroTransparent ? 'opacity-70' : 'opacity-35'} aria-hidden="true">
+                    /
+                  </span>
+                ) : null}
+                  <Link
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`inline-flex min-h-11 min-w-11 items-center justify-center ${
+                    locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-55'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="h-11 w-11" aria-hidden="true" />
+        )}
       </div>
 
       <AnimatePresence>

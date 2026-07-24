@@ -1248,6 +1248,7 @@
   "common": {
     "skipLink": "본문으로 건너뛰기",
     "features": {
+      "englishEnabled": false,
       "golfEnabled": false
     },
     "navigation": {

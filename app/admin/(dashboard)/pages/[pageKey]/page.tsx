@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {notFound} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 import {createAdminTranslator, getAdminI18n, getContentLocaleLabel} from '@/lib/admin-i18n';
 import type {AdminLocale} from '@/lib/admin-locales';
@@ -75,8 +75,13 @@ type RenderContext = {
 const hiddenKeys = new Set(['id']);
 
 export default async function AdminPageEditor({params, searchParams}: Props) {
-  const {locale: adminLocale, messages, t} = await getAdminI18n();
   const {pageKey} = await params;
+
+  if (pageKey === 'common') {
+    redirect('/admin/footer');
+  }
+
+  const {locale: adminLocale, messages, t} = await getAdminI18n();
   const query = await searchParams;
   const definition = getManagedPageDefinition(pageKey);
   const row = await getPage(pageKey);

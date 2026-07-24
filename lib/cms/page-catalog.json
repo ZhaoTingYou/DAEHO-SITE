@@ -749,6 +749,7 @@
       {"key": "notFound", "title": "404 页面文案", "sourcePath": "notFound"}
     ],
     "fields": [
+      {"groupKey": "main", "path": "features.englishEnabled", "label": "启用英文网站", "labels": {"ko": "영문 웹사이트 활성화", "en": "Enable English website"}},
       {"groupKey": "main", "path": "features.golfEnabled", "label": "启用 Golf 页面和入口", "labels": {"ko": "Golf 페이지와 메뉴 표시", "en": "Enable Golf page and navigation"}},
       {"path": "footer.tagline", "label": "品牌标语", "labels": {"ko": "브랜드 문구", "en": "Brand tagline"}, "type": "textarea", "rows": 2},
       {"path": "footer.navigation", "label": "Footer 导航辅助文案", "labels": {"ko": "푸터 내비게이션 접근성 라벨", "en": "Footer navigation aria label"}},
