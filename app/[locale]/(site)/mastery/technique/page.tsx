@@ -41,7 +41,7 @@ export default async function TechniqueRecordPage({params}: Props) {
       <RingDrawingBackground />
 
       <section className="relative z-10 pt-28">
-        <div className="mx-auto max-w-[1220px] px-container pb-[clamp(36px,3vw,56px)] pt-[clamp(64px,8vw,116px)]">
+        <div className="mx-auto max-w-[1220px] px-container pb-0 pt-[clamp(64px,8vw,116px)]">
           <ScrollText className="mx-auto max-w-[760px] space-y-[18px] text-center">
             <p className="font-body text-[11px] font-semibold uppercase leading-none tracking-[0.32em] text-accent">
               {content.hero.eyebrow}

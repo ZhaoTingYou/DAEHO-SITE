@@ -13,7 +13,7 @@ export function TechniqueIntroSection({title, body}: TechniqueIntroSectionProps)
   return (
     <section
       aria-labelledby="technique-intro-title"
-      className="relative z-10 px-container pb-[clamp(36px,3vw,56px)]"
+      className="relative z-10 px-container py-[clamp(72px,7vw,112px)]"
     >
       <ScrollText className="mx-auto max-w-[780px] text-center">
         <h2

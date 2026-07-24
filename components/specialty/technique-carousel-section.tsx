@@ -85,7 +85,7 @@ export function TechniqueCarouselSection({
     <section
       aria-label={carouselLabel}
       aria-roledescription="carousel"
-      className="relative z-10 overflow-hidden bg-white pb-[clamp(84px,9vw,138px)] pt-[clamp(24px,4vw,64px)]"
+      className="relative z-10 overflow-hidden bg-white pb-[clamp(84px,9vw,138px)] pt-0"
       onKeyDown={handleKeyDown}
     >
       <div className="relative">

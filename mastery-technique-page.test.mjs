@@ -216,6 +216,18 @@ test('Technique introduction renders semantic localized copy between the Hero an
   );
 });
 
+test('Technique introduction owns equal enlarged spacing without adjacent section padding stacking', () => {
+  assert.match(techniqueIntroSource, /py-\[clamp\(72px,7vw,112px\)\]/);
+  assert.match(
+    techniquePageSource,
+    /max-w-\[1220px\][^"]*pb-0[^"]*pt-\[clamp\(64px,8vw,116px\)\]/
+  );
+  assert.match(
+    techniqueCarouselSource,
+    /pb-\[clamp\(84px,9vw,138px\)\] pt-0/
+  );
+});
+
 test('Technique carousel uses Embla looped dragging with arrows, dots, keyboard, and no autoplay', () => {
   assert.match(techniqueCarouselSource, /from 'embla-carousel-react'/);
   assert.match(techniqueCarouselSource, /useEmblaCarousel\(\{/);
