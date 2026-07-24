@@ -3,6 +3,12 @@
     "title": "DAEHO",
     "description": "The moment of victory, shaped for eternity."
   },
+  "sitePopup": {
+    "enabled": false,
+    "image": "",
+    "startsAt": "",
+    "endsAt": ""
+  },
   "home": {
     "eyebrow": "CUSTOM JEWELRY · SYMBOLIC OBJECTS · DESIGN CONSULTING",
     "title": "WE DESIGN SYMBOLS THAT LAST",

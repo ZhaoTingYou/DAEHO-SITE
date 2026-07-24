@@ -82,6 +82,10 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
     redirect('/admin/footer');
   }
 
+  if (pageKey === 'site-popup') {
+    redirect('/admin/popup');
+  }
+
   const {locale: adminLocale, messages, t} = await getAdminI18n();
   const query = await searchParams;
   const definition = getManagedPageDefinition(pageKey);

@@ -874,5 +874,20 @@
       {"path": "navigation.hrefs.terms", "label": "TERMS 跳转链接", "type": "link"},
       {"path": "navigation.hrefs.privacy", "label": "PRIVACY 跳转链接", "type": "link"}
     ]
+  },
+  {
+    "pageKey": "site-popup",
+    "title": "全站弹窗公告",
+    "description": "设置全站定时显示的图片公告",
+    "section": "settings",
+    "sortOrder": 990,
+    "href": "/",
+    "sourcePath": "sitePopup",
+    "fields": [
+      {"path": "enabled", "label": "显示弹窗"},
+      {"path": "image", "label": "公告图片", "type": "image"},
+      {"path": "startsAt", "label": "开始时间"},
+      {"path": "endsAt", "label": "结束时间"}
+    ]
   }
 ]

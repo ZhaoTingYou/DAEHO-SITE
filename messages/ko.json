@@ -3,6 +3,12 @@
     "title": "DAEHO",
     "description": "승리의 순간을, 영원의 형태로."
   },
+  "sitePopup": {
+    "enabled": false,
+    "image": "",
+    "startsAt": "",
+    "endsAt": ""
+  },
   "home": {
     "eyebrow": "CUSTOM JEWELRY · SYMBOLIC OBJECTS · DESIGN CONSULTING",
     "title": "브랜드의 이야기를,\n오래 남는 상징으로 설계합니다",

@@ -54,6 +54,11 @@ const guideSpecs = {
     ko: '세로형 object-cover 이미지입니다. 피사체가 상하 가장자리에 붙지 않게 해주세요.',
     en: 'Portrait object-cover image. Keep the subject away from top and bottom edges.'
   }),
+  sitePopup: spec('3:4 或 4:3', '1200 x 1600 / 1600 x 1200', {
+    zh: '弹窗会按原比例完整显示，不裁切。',
+    ko: '팝업에서 원본 비율로 전체 이미지를 표시하며 잘리지 않습니다.',
+    en: 'The popup shows the complete image at its natural ratio without cropping.'
+  }),
   firstRecord: spec('16:9', '1920 x 1080', {
     zh: 'FIRST RECORDS 横向图，object-cover；主体放在中央安全区并预留裁切空间。',
     ko: 'FIRST RECORDS 가로형 이미지입니다. object-cover에 맞춰 피사체를 중앙 안전 영역에 두세요.',
@@ -172,6 +177,8 @@ const guideSpecs = {
 } satisfies Record<string, ImageGuideSpec>;
 
 const pageGuideKeys: Record<string, string> = {
+  'site-popup|main|image': 'sitePopup',
+
   'home|main|image': 'heroBackground',
   'home|main|videoPoster': 'heroBackground',
   'home|homeUi|currentPulse.primaryImage': 'homePulse',
