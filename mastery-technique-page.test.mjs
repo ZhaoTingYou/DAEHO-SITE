@@ -194,10 +194,13 @@ test('Technique carousel renders dynamic 2:1 slides with center sizing and side 
   assert.match(techniqueCarouselSource, /items\.map\(\(item, index\) =>/);
   assert.match(techniqueCarouselSource, /key=\{item\.id\}/);
   assert.match(techniqueCarouselSource, /aspect="aspect-\[2\/1\]"/);
-  assert.match(techniqueCarouselSource, /basis-\[84vw\]/);
-  assert.match(techniqueCarouselSource, /md:basis-\[84vw\]/);
-  assert.match(techniqueCarouselSource, /lg:basis-\[min\(74vw,1920px\)\]/);
-  assert.match(techniqueCarouselSource, /gap-3 md:gap-4 lg:gap-6/);
+  assert.match(techniqueCarouselSource, /basis-\[86vw\]/);
+  assert.match(techniqueCarouselSource, /md:basis-\[86vw\]/);
+  assert.match(techniqueCarouselSource, /lg:basis-\[calc\(min\(74vw,1920px\)\+24px\)\]/);
+  assert.match(techniqueCarouselSource, /px-1\.5/);
+  assert.match(techniqueCarouselSource, /md:px-2/);
+  assert.match(techniqueCarouselSource, /lg:px-3/);
+  assert.doesNotMatch(techniqueCarouselSource, /flex touch-pan-y gap-/);
   assert.match(techniqueCarouselSource, /overflow-hidden/);
 });
 

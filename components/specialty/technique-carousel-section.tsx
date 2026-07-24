@@ -90,13 +90,13 @@ export function TechniqueCarouselSection({
     >
       <div className="relative">
         <div ref={emblaRef} className="overflow-hidden cursor-grab active:cursor-grabbing">
-          <div className="flex touch-pan-y gap-3 md:gap-4 lg:gap-6">
+          <div className="flex touch-pan-y">
             {items.map((item, index) => (
               <div
                 key={item.id}
                 aria-label={`${item.title} · ${index + 1} / ${items.length}`}
                 aria-roledescription="slide"
-                className="min-w-0 flex-[0_0_84vw] basis-[84vw] md:basis-[84vw] lg:basis-[min(74vw,1920px)]"
+                className="min-w-0 flex-[0_0_86vw] basis-[86vw] px-1.5 md:basis-[86vw] md:px-2 lg:basis-[calc(min(74vw,1920px)+24px)] lg:px-3"
                 role="group"
               >
                 <TechniqueCarouselImage
