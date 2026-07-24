@@ -33,3 +33,27 @@ test('desktop and mobile admin navigation expose popup settings', () => {
   assert.ok(shell.includes("{href: '/admin/popup', labelKey: 'nav.popup'}"));
   assert.ok(messages.includes("'nav.popup'"));
 });
+
+test('dedicated popup editor exposes one shared image and Seoul schedule', () => {
+  const page = readText('./(dashboard)/popup/page.tsx');
+
+  assert.ok(page.includes('action={saveSitePopupAction}'));
+  assert.ok(page.includes('name="enabled"'));
+  assert.ok(page.includes('name="image"'));
+  assert.ok(page.includes('uploadName="imageUpload"'));
+  assert.ok(page.includes('name="startsAt"'));
+  assert.ok(page.includes('name="endsAt"'));
+  assert.ok(page.includes('type="datetime-local"'));
+  assert.ok(page.includes('sitePopupIsoToDateTimeInput'));
+  assert.ok(page.includes('getMediaLibraryItems'));
+});
+
+test('popup save validates once and synchronizes both public locales', () => {
+  const actions = readText('./actions.ts');
+
+  assert.ok(actions.includes('export async function saveSitePopupAction'));
+  assert.ok(actions.includes('validateSitePopupSubmission'));
+  assert.ok(actions.includes('content: {ko: config, en: config}'));
+  assert.ok(actions.includes('saveSharedPageImage(upload, returnTo, image)'));
+  assert.ok(actions.includes('revalidateManagedPublicPaths()'));
+});
