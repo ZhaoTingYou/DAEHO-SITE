@@ -11,6 +11,7 @@ const navItems = [
   {href: '/admin/news', labelKey: 'nav.news'},
   {href: '/admin/collections', labelKey: 'nav.collections'},
   {href: '/admin/media', labelKey: 'nav.media'},
+  {href: '/admin/popup', labelKey: 'nav.popup'},
   {href: '/admin/footer', labelKey: 'nav.footer'},
   {href: '/admin/pages', labelKey: 'nav.pages'},
   {href: '/admin/export', labelKey: 'nav.export'},
