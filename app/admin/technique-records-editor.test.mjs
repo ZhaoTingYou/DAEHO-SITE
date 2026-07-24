@@ -13,25 +13,25 @@ test('Technique records use a dedicated bilingual CMS editor', () => {
   assert.equal(existsSync(editorUrl), true);
 });
 
-test('Technique editor manages stable rows with add, reorder, and protected deletion controls', () => {
+test('Technique editor manages stable carousel slides with add, reorder, and a three-item deletion floor', () => {
   assert.match(editorSource, /useState/);
   assert.match(editorSource, /crypto\.randomUUID/);
   assert.match(editorSource, /key=\{item\.id\}/);
   assert.match(editorSource, /moveItem/);
   assert.match(editorSource, /window\.confirm/);
-  assert.match(editorSource, /items\.length <= 1/);
+  assert.match(editorSource, /items\.length <= minimumTechniqueCarouselItems/);
   assert.match(editorSource, /disabled=\{index === 0\}/);
   assert.match(editorSource, /disabled=\{index === items\.length - 1\}/);
 });
 
-test('Technique editor submits one shared image and synchronized locale fields in visual order', () => {
+test('Technique editor submits one shared image and only bilingual title and body fields', () => {
   assert.match(editorSource, /name="techniqueRecords\.ids"/);
   assert.match(editorSource, /name="techniqueRecords\.length"/);
   assert.match(editorSource, /contentField\.\$\{locale\}\.main\.records\.items\.\$\{index\}\.\$\{field\}/);
   assert.match(editorSource, /contentImage\.ko\.main\.records\.items\.\$\{index\}\.image/);
-  assert.match(editorSource, /String\(index \+ 1\)\.padStart\(2, '0'\)/);
   assert.equal((editorSource.match(/<ImageUploadField/g) ?? []).length, 1);
   assert.match(editorSource, /type="hidden"[\s\S]*contentFieldName\('en', index, 'image'\)/);
+  assert.doesNotMatch(editorSource, /fieldScope|fieldStatus|['"]number['"]/);
 });
 
 test('Mastery Technique replaces only records.items with the full-width bilingual editor', () => {
@@ -54,19 +54,22 @@ test('Technique editor labels exist in all three CMS interface languages', () =>
     'techniqueRecords.sharedImage',
     'techniqueRecords.ko',
     'techniqueRecords.en',
-    'techniqueRecords.minimumOne'
+    'techniqueRecords.minimumThree',
+    'techniqueRecords.fieldTitle',
+    'techniqueRecords.fieldBody'
   ]) {
     assert.equal((i18nSource.match(new RegExp(`'${key.replace('.', '\\\.')}'`, 'g')) ?? []).length, 3, `${key} should exist in zh/en/ko`);
   }
 });
 
-test('Technique CMS catalog and image guide describe archive rows and 4:3 media', () => {
+test('Technique CMS catalog and image guide describe bilingual 2:1 carousel slides', () => {
   const technique = pageCatalog.find((page) => page.pageKey === 'mastery-technique');
   const records = technique?.fields.find((field) => field.path === 'records.items');
 
-  assert.equal(records?.label, '技术记录档案');
-  assert.equal(records?.labels?.ko, '기술 기록 아카이브');
-  assert.equal(records?.labels?.en, 'Technical record archive');
-  assert.match(imageGuidesSource, /techniqueRecord: spec\('4:3', '1600 x 1200'/);
-  assert.match(imageGuidesSource, /'mastery-technique\|main\|records\.items\.\*\.image': 'techniqueRecord'/);
+  assert.equal(records?.label, '工艺轮播');
+  assert.equal(records?.labels?.ko, '테크닉 캐러셀');
+  assert.equal(records?.labels?.en, 'Technique carousel');
+  assert.deepEqual(records?.itemFields.map((field) => field.path), ['title', 'body', 'image']);
+  assert.match(imageGuidesSource, /techniqueCarousel: spec\('2:1', '2000 x 1000'/);
+  assert.match(imageGuidesSource, /'mastery-technique\|main\|records\.items\.\*\.image': 'techniqueCarousel'/);
 });

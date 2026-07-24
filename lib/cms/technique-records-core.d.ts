@@ -1,18 +1,13 @@
 declare module '@/lib/cms/technique-records-core.mjs' {
   export type TechniqueLocaleRecord = {
     id?: string;
-    number: string;
     title: string;
-    scope: string;
-    status: string;
     body: string;
     image: string;
   };
 
   export type TechniqueRecordText = {
     title: string;
-    scope: string;
-    status: string;
     body: string;
   };
 
@@ -32,4 +27,6 @@ declare module '@/lib/cms/technique-records-core.mjs' {
     ko: TechniqueLocaleRecord[];
     en: TechniqueLocaleRecord[];
   };
+
+  export const minimumTechniqueCarouselItems: 3;
 }

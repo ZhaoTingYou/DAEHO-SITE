@@ -25,10 +25,10 @@ function loadTechniqueVisibilityNormalizer() {
 }
 
 const techniquePagePath = new URL('./app/[locale]/(site)/mastery/technique/page.tsx', import.meta.url);
-const techniqueRecordsSectionPath = new URL('./components/specialty/technique-records-section.tsx', import.meta.url);
+const techniqueCarouselPath = new URL('./components/specialty/technique-carousel-section.tsx', import.meta.url);
 const techniquePageSource = readFileSync(techniquePagePath, 'utf8');
-const techniqueRecordsSectionSource = existsSync(techniqueRecordsSectionPath)
-  ? readFileSync(techniqueRecordsSectionPath, 'utf8')
+const techniqueCarouselSource = existsSync(techniqueCarouselPath)
+  ? readFileSync(techniqueCarouselPath, 'utf8')
   : '';
 const makingPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/making/page.tsx', import.meta.url), 'utf8');
 const siteMapSource = readFileSync(new URL('./lib/site-map.ts', import.meta.url), 'utf8');
@@ -116,7 +116,7 @@ test('CMS common copy cannot keep stale Making labels on the new Technique nav i
   assert.match(localeMessagesSource, /Technique · Seven careful stages/);
 });
 
-test('Technique page keeps CMS, SEO, and image guide content while sitemap exposure is gated', () => {
+test('Technique page keeps only Hero and carousel CMS fields while sitemap exposure remains enabled', () => {
   const techniqueDefinition = pageCatalog.find((page) => page.pageKey === 'mastery-technique');
 
   assert.equal(techniqueDefinition?.href, '/mastery/technique');
@@ -128,20 +128,7 @@ test('Technique page keeps CMS, SEO, and image guide content while sitemap expos
       'hero.title',
       'hero.body',
       'hero.image',
-      'records.eyebrow',
-      'records.title',
-      'records.items',
-      'standards.eyebrow',
-      'standards.title',
-      'standards.items',
-      'evidence.eyebrow',
-      'evidence.title',
-      'evidence.rows',
-      'cta.title',
-      'cta.makingLabel',
-      'cta.makingHref',
-      'cta.creationsLabel',
-      'cta.creationsHref'
+      'records.items'
     ]
   );
   assert.match(seoSource, /techniqueRecords: 'mastery-technique'/);
@@ -149,78 +136,85 @@ test('Technique page keeps CMS, SEO, and image guide content while sitemap expos
   assert.match(sitemapSource, /isTechniquePageVisible \? \['\/mastery\/technique'\] : \[\]/);
   assert.match(sitemapSource, /'\/mastery\/technique': 0\.91/);
   assert.match(imageGuidesSource, /'mastery-technique\|main\|hero\.image': 'ultrawide'/);
-  assert.match(imageGuidesSource, /'mastery-technique\|main\|records\.items\.\*\.image': 'techniqueRecord'/);
-  assert.match(imageGuidesSource, /'mastery-technique\|main\|standards\.items\.\*\.image': 'square'/);
+  assert.match(imageGuidesSource, /'mastery-technique\|main\|records\.items\.\*\.image': 'techniqueCarousel'/);
+  assert.doesNotMatch(JSON.stringify(techniqueDefinition), /standards|evidence|cta|records\.eyebrow|records\.title/);
 });
 
-test('Technique copy uses placeholder proof language without unverified absolute claims', () => {
+test('Technique copy exposes exactly three clean initial carousel items without retired content', () => {
   for (const messages of [koMessages, enMessages]) {
     const content = messages.specialtyPages.techniqueRecords;
 
-    assert.ok(content, 'Technique records copy should exist');
+    assert.ok(content, 'Technique carousel copy should exist');
     assert.equal(content.hero.title, 'TECHNIQUE');
+    assert.deepEqual(Object.keys(content).sort(), ['hero', 'records']);
+    assert.deepEqual(Object.keys(content.records), ['items']);
     assert.equal(content.records.items.length, 3);
-    assert.equal(content.standards.items.length, 4);
-    assert.ok(content.records.items.every((item) => /확인 예정|To be confirmed/.test(item.status)));
-    assert.ok(content.evidence.rows.every((row) => /기록 준비 중|Record pending/.test(row.proof)));
+    assert.ok(content.records.items.every((item) => item.id && item.image && item.title && item.body));
+    assert.ok(
+      content.records.items.every(
+        (item) => JSON.stringify(Object.keys(item).sort()) === JSON.stringify(['body', 'id', 'image', 'title'])
+      )
+    );
   }
 
   assert.doesNotMatch(koMessages.specialtyPages.techniqueRecords.hero.body, /국내 유일|유일하게|확정/);
   assert.doesNotMatch(enMessages.specialtyPages.techniqueRecords.hero.body, /only maker|first in Korea/i);
 });
 
-test('Technique records are extracted into a named server component', () => {
-  assert.equal(existsSync(techniqueRecordsSectionPath), true, 'TechniqueRecordsSection should have its own module');
-  assert.match(techniqueRecordsSectionSource, /export function TechniqueRecordsSection\(/);
-  assert.doesNotMatch(techniqueRecordsSectionSource, /['"]use client['"]/, 'records section should remain a server component');
+test('Technique page keeps the complete Hero and replaces every lower section with the client carousel', () => {
+  assert.equal(existsSync(techniqueCarouselPath), true, 'TechniqueCarouselSection should have its own module');
+  assert.match(techniqueCarouselSource, /['"]use client['"]/);
+  assert.match(techniqueCarouselSource, /export function TechniqueCarouselSection\(/);
   assert.match(
     techniquePageSource,
-    /import \{TechniqueRecordsSection\} from '@\/components\/specialty\/technique-records-section';/
+    /import \{TechniqueCarouselSection\} from '@\/components\/specialty\/technique-carousel-section';/
   );
+  assert.match(techniquePageSource, /<section className="relative z-10 pt-28">/);
+  assert.match(techniquePageSource, /aspect="aspect-\[21\/9\]"/);
   assert.match(
     techniquePageSource,
-    /<TechniqueRecordsSection[\s\S]*?eyebrow=\{content\.records\.eyebrow\}[\s\S]*?title=\{content\.records\.title\}[\s\S]*?records=\{content\.records\.items\}[\s\S]*?\/>/
+    /<TechniqueCarouselSection[\s\S]*?items=\{content\.records\.items\}[\s\S]*?\/>/
   );
-  assert.doesNotMatch(`${techniquePageSource}\n${techniqueRecordsSectionSource}`, /TechniqueRecordCard/);
+  assert.doesNotMatch(techniquePageSource, /content\.(standards|evidence|cta)|<Link|TechniqueRecordsSection/);
 });
 
-test('Technique records render arbitrary-length archive rows with a count header', () => {
-  assert.match(techniqueRecordsSectionSource, /records:\s*TechniqueRecord\[\]/);
-  assert.match(techniqueRecordsSectionSource, /records\.map\(\(item, index\) =>/);
-  assert.match(techniqueRecordsSectionSource, /key=\{item\.id \?\? item\.number\}/);
-  assert.match(techniqueRecordsSectionSource, /String\(records\.length\)\.padStart\(2, '0'\)/);
-  assert.doesNotMatch(`${techniquePageSource}\n${techniqueRecordsSectionSource}`, /\bsticky\b/);
-  assert.doesNotMatch(techniqueRecordsSectionSource, /md:grid-cols-3/);
+test('Technique carousel uses Embla looped dragging with arrows, dots, keyboard, and no autoplay', () => {
+  assert.match(techniqueCarouselSource, /from 'embla-carousel-react'/);
+  assert.match(techniqueCarouselSource, /useEmblaCarousel\(\{/);
+  assert.match(techniqueCarouselSource, /loop:\s*true/);
+  assert.match(techniqueCarouselSource, /align:\s*'center'/);
+  assert.match(techniqueCarouselSource, /scrollPrev\(\)|scrollNext\(\)|scrollTo\(index\)/);
+  assert.match(techniqueCarouselSource, /onKeyDown/);
+  assert.match(techniqueCarouselSource, /event\.key === 'ArrowLeft'|event\.key === 'ArrowRight'/);
+  assert.doesNotMatch(techniqueCarouselSource, /autoplay|setInterval|setTimeout/);
 });
 
-test('Technique rows keep image-first mobile order and alternate desktop columns with CSS', () => {
-  const mapStart = techniqueRecordsSectionSource.indexOf('records.map');
-  const imageStart = techniqueRecordsSectionSource.indexOf('<SafeImage', mapStart);
-  const copyStart = techniqueRecordsSectionSource.indexOf('<ScrollText', imageStart);
-
-  assert.ok(mapStart >= 0 && imageStart > mapStart && copyStart > imageStart, 'row DOM should render image before text');
-  assert.match(techniqueRecordsSectionSource, /aspect="aspect-\[4\/3\]"/);
-  assert.match(techniqueRecordsSectionSource, /alt=\{item\.title\}/);
-  assert.match(techniqueRecordsSectionSource, /sizes="\(min-width: 1024px\) 560px, 100vw"/);
-  assert.match(techniqueRecordsSectionSource, /index % 2 === 0 \? 'lg:order-1' : 'lg:order-2'/);
-  assert.match(techniqueRecordsSectionSource, /index % 2 === 0 \? 'lg:order-2' : 'lg:order-1'/);
-
-  const articleClass = techniqueRecordsSectionSource.match(/<article[\s\S]*?className="([^"]+)"/)?.[1] ?? '';
-  assert.ok(articleClass.includes('border-b'), 'archive rows should be border-separated');
-  assert.equal(articleClass.split(/\s+/).includes('border'), false, 'archive rows should not use a card border wrapper');
-  assert.equal(articleClass.includes('shadow'), false, 'archive rows should not use card shadows');
+test('Technique carousel renders dynamic 2:1 slides with center sizing and side previews at every breakpoint', () => {
+  assert.match(techniqueCarouselSource, /items:\s*TechniqueCarouselItem\[\]/);
+  assert.match(techniqueCarouselSource, /items\.map\(\(item, index\) =>/);
+  assert.match(techniqueCarouselSource, /key=\{item\.id\}/);
+  assert.match(techniqueCarouselSource, /aspect="aspect-\[2\/1\]"/);
+  assert.match(techniqueCarouselSource, /basis-\[84vw\]/);
+  assert.match(techniqueCarouselSource, /md:basis-\[84vw\]/);
+  assert.match(techniqueCarouselSource, /lg:basis-\[min\(74vw,1920px\)\]/);
+  assert.match(techniqueCarouselSource, /gap-3 md:gap-4 lg:gap-6/);
+  assert.match(techniqueCarouselSource, /overflow-hidden/);
 });
 
-test('Technique row metadata keeps status optional and body copy readable', () => {
-  const statusMarkup = techniqueRecordsSectionSource.match(/\{item\.status \? \(([\s\S]*?)\) : null\}/)?.[1] ?? '';
-
-  assert.ok(statusMarkup, 'status should render only when it is non-empty');
-  assert.doesNotMatch(statusMarkup, /\bborder\b|<button/, 'status should be quiet text without box or button treatment');
-  assert.match(techniqueRecordsSectionSource, /\{item\.scope\}/);
-  assert.match(techniqueRecordsSectionSource, /whitespace-pre-line[^"\n]*text-\[16px\][^"\n]*[\s\S]*?\{item\.body\}/);
+test('Technique carousel caption and controls remain accessible and contain no navigation links', () => {
+  assert.match(techniqueCarouselSource, /aria-live="polite"/);
+  assert.match(techniqueCarouselSource, /aria-current=\{index === selectedIndex \? 'true' : undefined\}/);
+  assert.match(techniqueCarouselSource, /min-h-11 min-w-11/);
+  assert.match(techniqueCarouselSource, /usePrefersReducedMotion/);
+  assert.match(techniqueCarouselSource, /\{activeItem\.title\}/);
+  assert.match(techniqueCarouselSource, /\{activeItem\.body\}/);
+  assert.doesNotMatch(techniqueCarouselSource, /<Link|href=|autoPlay/);
 });
 
-test('Technique mobile records use metadata, image, and copy reading order', () => {
-  assert.match(techniqueRecordsSectionSource, /mobile-technique-record/);
-  assert.match(techniqueRecordsSectionSource, /order-1[\s\S]+order-2[\s\S]+order-3/);
+test('Technique carousel uses localized labels from the page without exposing a visible intro heading', () => {
+  assert.match(techniquePageSource, /carouselLabel=\{locale === 'ko'/);
+  assert.match(techniquePageSource, /previousLabel=\{locale === 'ko'/);
+  assert.match(techniquePageSource, /nextLabel=\{locale === 'ko'/);
+  assert.match(techniquePageSource, /goToSlideLabel=\{locale === 'ko'/);
+  assert.doesNotMatch(techniquePageSource, /content\.records\.(eyebrow|title)/);
 });

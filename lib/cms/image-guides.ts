@@ -59,10 +59,10 @@ const guideSpecs = {
     ko: 'FIRST RECORDS 가로형 이미지입니다. object-cover에 맞춰 피사체를 중앙 안전 영역에 두세요.',
     en: 'FIRST RECORDS landscape image. Keep the subject in the center safe area for object-cover cropping.'
   }),
-  techniqueRecord: spec('4:3', '1600 x 1200', {
-    zh: '横向技术档案图，object-cover；主体放在中央安全区，四周保留裁切空间。',
-    ko: '가로형 기술 기록 이미지입니다. 피사체는 중앙 안전 영역에 두고 가장자리에 여백을 남기세요.',
-    en: 'Landscape technical record image. Keep the subject inside the center safe area with crop room around it.'
+  techniqueCarousel: spec('2:1', '2000 x 1000', {
+    zh: '超宽工艺轮播图，object-cover；主体放在中央 70% 安全区，两侧预留裁切空间。',
+    ko: '2:1 테크닉 캐러셀 이미지입니다. 피사체는 중앙 70% 안전 영역에 두고 양옆에 여백을 남기세요.',
+    en: 'Wide 2:1 technique carousel image. Keep the subject inside the center 70% with crop room at both sides.'
   }),
   wide43: spec('4:3', '1600 x 1200', {
     zh: '4:3 横图，object-cover；主体居中。',
@@ -190,7 +190,7 @@ const pageGuideKeys: Record<string, string> = {
   'heritage-achievement|main|gallery.items.*.image': 'portrait',
 
   'mastery-technique|main|hero.image': 'ultrawide',
-  'mastery-technique|main|records.items.*.image': 'techniqueRecord',
+  'mastery-technique|main|records.items.*.image': 'techniqueCarousel',
   'mastery-technique|main|standards.items.*.image': 'square',
 
   'mastery-making|main|hero.image': 'ultrawide',

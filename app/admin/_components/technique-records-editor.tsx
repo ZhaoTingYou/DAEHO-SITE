@@ -2,7 +2,11 @@
 
 import {useState} from 'react';
 
-import type {TechniqueRecordDraft, TechniqueRecordText} from '@/lib/cms/technique-records-core.mjs';
+import {
+  minimumTechniqueCarouselItems,
+  type TechniqueRecordDraft,
+  type TechniqueRecordText
+} from '@/lib/cms/technique-records-core.mjs';
 
 import {
   ImageUploadField,
@@ -22,10 +26,8 @@ export type TechniqueRecordsEditorLabels = {
   sharedImage: string;
   ko: string;
   en: string;
-  minimumOne: string;
+  minimumThree: string;
   fieldTitle: string;
-  fieldScope: string;
-  fieldStatus: string;
   fieldBody: string;
   uploadLabel: string;
   uploadHint: string;
@@ -48,7 +50,7 @@ type TechniqueRecordsEditorProps = {
   labels: TechniqueRecordsEditorLabels;
 };
 
-const blankText = (): TechniqueRecordText => ({title: '', scope: '', status: '', body: ''});
+const blankText = (): TechniqueRecordText => ({title: '', body: ''});
 
 export function TechniqueRecordsEditor({drafts, mediaItems, imageGuide, labels}: TechniqueRecordsEditorProps) {
   const [items, setItems] = useState<EditableTechniqueRecord[]>(() => normalizeDrafts(drafts));
@@ -81,7 +83,7 @@ export function TechniqueRecordsEditor({drafts, mediaItems, imageGuide, labels}:
   };
 
   const removeItem = (index: number) => {
-    if (items.length <= 1 || !window.confirm(labels.confirmDelete)) {
+    if (items.length <= minimumTechniqueCarouselItems || !window.confirm(labels.confirmDelete)) {
       return;
     }
 
@@ -108,17 +110,14 @@ export function TechniqueRecordsEditor({drafts, mediaItems, imageGuide, labels}:
       </div>
 
       <div className="grid gap-5">
-        {items.map((item, index) => {
-          const number = String(index + 1).padStart(2, '0');
-
-          return (
+        {items.map((item, index) => (
             <article key={item.id} className="grid gap-5 rounded-md border border-[#e4e7ec] bg-[#fbfcfe] p-4">
-              <input type="hidden" name={contentFieldName('ko', index, 'number')} value={number} readOnly />
-              <input type="hidden" name={contentFieldName('en', index, 'number')} value={number} readOnly />
               <input type="hidden" name={contentFieldName('en', index, 'image')} defaultValue={item.image} />
 
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="font-numeric text-base font-semibold text-[#7a2230]">{number}</p>
+                <p className="font-numeric text-base font-semibold text-[#7a2230]">
+                  {String(index + 1).padStart(2, '0')}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -139,8 +138,8 @@ export function TechniqueRecordsEditor({drafts, mediaItems, imageGuide, labels}:
                   <button
                     type="button"
                     onClick={() => removeItem(index)}
-                    disabled={items.length <= 1}
-                    title={items.length <= 1 ? labels.minimumOne : undefined}
+                    disabled={items.length <= minimumTechniqueCarouselItems}
+                    title={items.length <= minimumTechniqueCarouselItems ? labels.minimumThree : undefined}
                     className="min-h-10 rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-xs font-semibold text-[#b42318] transition hover:bg-[#fee4e2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b42318] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {labels.delete}
@@ -173,11 +172,12 @@ export function TechniqueRecordsEditor({drafts, mediaItems, imageGuide, labels}:
                 <LocalizedRecordFields locale="en" index={index} values={item.en} label={labels.en} labels={labels} />
               </div>
             </article>
-          );
-        })}
+        ))}
       </div>
 
-      {items.length <= 1 ? <p className="text-xs font-medium text-[#98a2b3]">{labels.minimumOne}</p> : null}
+      {items.length <= minimumTechniqueCarouselItems ? (
+        <p className="text-xs font-medium text-[#98a2b3]">{labels.minimumThree}</p>
+      ) : null}
     </section>
   );
 }
@@ -199,8 +199,6 @@ function LocalizedRecordFields({
     <section className="grid gap-4 rounded-md border border-[#e4e7ec] bg-white p-4">
       <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">{label}</h3>
       <TextField label={labels.fieldTitle} name={contentFieldName(locale, index, 'title')} defaultValue={values.title} editorLocale={locale} />
-      <TextField label={labels.fieldScope} name={contentFieldName(locale, index, 'scope')} defaultValue={values.scope} editorLocale={locale} />
-      <TextField label={labels.fieldStatus} name={contentFieldName(locale, index, 'status')} defaultValue={values.status} editorLocale={locale} />
       <TextAreaField label={labels.fieldBody} name={contentFieldName(locale, index, 'body')} defaultValue={values.body} rows={4} editorLocale={locale} />
     </section>
   );
@@ -211,7 +209,11 @@ function contentFieldName(locale: 'ko' | 'en', index: number, field: string) {
 }
 
 function normalizeDrafts(drafts: TechniqueRecordDraft[]): EditableTechniqueRecord[] {
-  const source = drafts.length > 0 ? drafts : [{id: '', image: '', ko: blankText(), en: blankText()}];
+  const source = [...drafts];
+
+  while (source.length < minimumTechniqueCarouselItems) {
+    source.push({id: '', image: '', ko: blankText(), en: blankText()});
+  }
 
   return source.map((draft, index) => ({
     ...draft,

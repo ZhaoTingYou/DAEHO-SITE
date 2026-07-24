@@ -244,7 +244,7 @@
   {
     "pageKey": "mastery-technique",
     "title": "Mastery / Technique",
-    "description": "管理技术记录页面的 Hero、技术记录档案、标准说明和证据矩阵。",
+    "description": "管理 TECHNIQUE 页面的 Hero 与可拖拽工艺轮播。",
     "section": "Mastery",
     "sortOrder": 39,
     "href": "/mastery/technique",
@@ -254,54 +254,20 @@
       {"path": "hero.title", "label": "Hero 标题", "editor": {"align": "center"}},
       {"path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4, "editor": {"align": "center"}},
       {"path": "hero.image", "label": "Hero 图片", "type": "image"},
-      {"path": "records.eyebrow", "label": "技术记录眉标", "editor": {"align": "center"}},
-      {"path": "records.title", "label": "技术记录标题", "editor": {"align": "center"}},
       {
         "path": "records.items",
-        "label": "技术记录档案",
+        "label": "工艺轮播",
         "labels": {
-          "ko": "기술 기록 아카이브",
-          "en": "Technical record archive"
+          "ko": "테크닉 캐러셀",
+          "en": "Technique carousel"
         },
         "type": "json",
         "itemFields": [
-          {"path": "number", "label": "编号"},
           {"path": "title", "label": "技术名"},
-          {"path": "scope", "label": "适用范围"},
-          {"path": "status", "label": "证据状态"},
           {"path": "body", "label": "说明", "type": "textarea", "rows": 3},
           {"path": "image", "label": "图片", "type": "image"}
         ]
-      },
-      {"path": "standards.eyebrow", "label": "技术标准眉标", "editor": {"align": "center"}},
-      {"path": "standards.title", "label": "技术标准标题", "editor": {"align": "center"}},
-      {
-        "path": "standards.items",
-        "label": "技术标准",
-        "type": "json",
-        "itemFields": [
-          {"path": "title", "label": "标题"},
-          {"path": "body", "label": "正文", "type": "textarea", "rows": 3},
-          {"path": "image", "label": "图片", "type": "image"}
-        ]
-      },
-      {"path": "evidence.eyebrow", "label": "证据区眉标", "editor": {"align": "center"}},
-      {"path": "evidence.title", "label": "证据区标题", "editor": {"align": "center"}},
-      {
-        "path": "evidence.rows",
-        "label": "证据矩阵",
-        "type": "json",
-        "itemFields": [
-          {"path": "label", "label": "标签"},
-          {"path": "value", "label": "内容"},
-          {"path": "proof", "label": "证明状态"}
-        ]
-      },
-      {"path": "cta.title", "label": "CTA 标题", "editor": {"align": "center"}},
-      {"path": "cta.makingLabel", "label": "Making 按钮"},
-      {"path": "cta.makingHref", "label": "Making 按钮跳转链接", "type": "link"},
-      {"path": "cta.creationsLabel", "label": "Creations 按钮"},
-      {"path": "cta.creationsHref", "label": "Creations 按钮跳转链接", "type": "link"}
+      }
     ]
   },
   {
