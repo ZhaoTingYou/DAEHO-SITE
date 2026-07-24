@@ -74,10 +74,17 @@ import {
 } from '@/lib/cms/external-sites-core.mjs';
 import {normalizeSubmittedTechniqueRecords} from '@/lib/cms/technique-records-submit-core.mjs';
 import {locales, type Locale} from '@/lib/locales';
+import {validateSitePopupSubmission} from '@/lib/site-popup-core.mjs';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 
 const maxCollectionGalleryImages = 6;
+const sitePopupErrorMessageKeys = {
+  imageRequired: 'popup.error.imageRequired',
+  scheduleRequired: 'popup.error.scheduleRequired',
+  invalidDate: 'popup.error.invalidDate',
+  endAfterStart: 'popup.error.endAfterStart'
+} as const;
 
 export async function loginAction(formData: FormData) {
   const password = stringFromForm(formData, 'password');
@@ -350,6 +357,52 @@ export async function savePageAction(formData: FormData) {
       redirectWithAdminActionError(returnTo, new Error(t(externalSiteErrorKey)));
     }
 
+    redirectWithAdminActionError(returnTo, error);
+  }
+}
+
+export async function saveSitePopupAction(formData: FormData) {
+  await assertAdminSession();
+  const returnTo = '/admin/popup';
+
+  try {
+    const previousPage = await getPage('site-popup');
+    const previousImages = collectImageFilenames(previousPage);
+    const file = formData.get('imageUpload');
+    let image = stringFromForm(formData, 'image');
+    const upload = file instanceof File && file.size > 0 ? file : null;
+    const result = validateSitePopupSubmission({
+      enabled: formData.get('enabled') === 'on',
+      image: upload?.name || image,
+      startsAtInput: stringFromForm(formData, 'startsAt'),
+      endsAtInput: stringFromForm(formData, 'endsAt')
+    });
+
+    if (!result.ok) {
+      const {t} = await getAdminI18n();
+      throw new Error(t(sitePopupErrorMessageKeys[result.error]));
+    }
+
+    if (upload) {
+      image = await saveSharedPageImage(upload, returnTo, image);
+    }
+
+    const config = {...result.config, image};
+    const payload = pagePayloadSchema.parse({
+      section: 'settings',
+      sortOrder: 990,
+      content: {ko: config, en: config},
+      seo: {ko: {}, en: {}}
+    });
+    const savedPage = await upsertPage('site-popup', payload);
+
+    await cleanupRemovedImages(previousImages, collectImageFilenames(savedPage));
+    revalidatePath('/admin/pages');
+    revalidatePath('/admin/pages/site-popup');
+    revalidatePath(returnTo);
+    revalidateManagedPublicPaths();
+    redirect(`${returnTo}?saved=1`);
+  } catch (error) {
     redirectWithAdminActionError(returnTo, error);
   }
 }
