@@ -1697,8 +1697,8 @@
     "filtersLabel": "작품 필터",
     "categoryBackHref": "/mastery/creations",
     "empty": {
-      "title": "등록된 작품이 없습니다",
-      "body": "선택한 분류의 작품 자료가 준비되면 이곳에 추가됩니다."
+      "title": "등록된 반지가 없습니다",
+      "body": "반지가 등록되면 이곳에 표시됩니다."
     },
     "detail": {
       "back": "작품 목록",

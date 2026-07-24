@@ -8,7 +8,6 @@ import {HistoryBackButton} from '@/components/navigation/history-back-button';
 import {SafeImage} from '@/components/safe-image';
 import {CollectionDetailGallery} from '@/components/specialty/collection-detail-gallery';
 import type {Locale} from '@/i18n/routing';
-import {routing} from '@/i18n/routing';
 import {
   getCollectionItemForSite,
   getCollectionItemsForSite
@@ -18,7 +17,6 @@ import {imageExists} from '@/lib/image-exists';
 import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
-import koMessages from '@/messages/ko.json';
 
 type Props = {
   params: Promise<{locale: Locale; slug: string}>;
@@ -33,11 +31,6 @@ const detailImages = [
   'collection_detail_04.png',
   'collection_detail_05.png'
 ];
-
-export function generateStaticParams() {
-  const slugs = koMessages.specialtyPages.collection.gallery.items.map((item) => item.id);
-  return routing.locales.flatMap((locale) => slugs.map((slug) => ({locale, slug})));
-}
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;

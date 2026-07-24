@@ -8,6 +8,10 @@ const detailPageSource = readFileSync(
   new URL('../../app/[locale]/(site)/mastery/creations/[slug]/page.tsx', import.meta.url),
   'utf8'
 );
+const creationsPageSource = readFileSync(
+  new URL('../../app/[locale]/(site)/mastery/creations/page.tsx', import.meta.url),
+  'utf8'
+);
 const detailGallerySource = readFileSync(new URL('./collection-detail-gallery.tsx', import.meta.url), 'utf8');
 const historyBackButtonUrl = new URL('../navigation/history-back-button.tsx', import.meta.url);
 const historyBackButtonSource = existsSync(historyBackButtonUrl)
@@ -17,6 +21,10 @@ const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', imp
 const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
 const publicContentSource = readFileSync(new URL('../../lib/cms/public-content.ts', import.meta.url), 'utf8');
+const collectionItemsSource = publicContentSource.slice(
+  publicContentSource.indexOf('export async function getCollectionItemsForSite('),
+  publicContentSource.indexOf('export async function getCollectionItemForSite(')
+);
 const adminCollectionsSource = readFileSync(new URL('../../app/admin/(dashboard)/collections/page.tsx', import.meta.url), 'utf8');
 const collectionFormSource = readFileSync(new URL('../../app/admin/_components/collection-form.tsx', import.meta.url), 'utf8');
 const bespokeViewSource = source.slice(
@@ -30,6 +38,10 @@ const stagePanelSource = source.slice(
 const stageImageSource = source.slice(
   source.indexOf('function StageImage('),
   source.indexOf('function CollectionImage(')
+);
+const categoryViewSource = source.slice(
+  source.indexOf('export function SpecialtyCollectionCategory('),
+  source.indexOf('type BespokeDisplayMode')
 );
 
 test('bespoke toolbar does not render the active category label beside the filter button', () => {
@@ -171,6 +183,44 @@ test('creations products are managed only through Collections admin', () => {
     publicContentSource.includes('mergeBespokeItems'),
     false,
     'Public Creations source should not merge Page-level bespoke product overrides'
+  );
+});
+
+test('empty Collection CMS data does not restore demo rings on public Creations pages', () => {
+  assert.ok(
+    collectionItemsSource.includes('if (cmsItems.length === 0)') &&
+      collectionItemsSource.includes('return [];'),
+    'an empty CMS collection should remain empty so the localized empty state is rendered'
+  );
+  assert.equal(
+    collectionItemsSource.includes('messages.specialtyPages.collection.gallery.items'),
+    false,
+    'public Creations items must not fall back to the static demo ring list'
+  );
+  assert.equal(
+    detailPageSource.includes('specialtyPages.collection.gallery.items.map'),
+    false,
+    'detail routes must not pre-generate static demo ring slugs'
+  );
+});
+
+test('Creations index and every category render the empty state before default ring artwork', () => {
+  assert.equal(koMessages.collectionUi.empty.title, '등록된 반지가 없습니다');
+  assert.equal(enMessages.collectionUi.empty.title, 'No rings have been added');
+
+  assert.ok(
+    creationsPageSource.includes('items.length === 0') &&
+      creationsPageSource.includes('<EmptyState title={text.empty.title} body={text.empty.body} />'),
+    'the Creations index should show the localized empty state instead of category ring artwork'
+  );
+
+  const emptyGuardIndex = categoryViewSource.indexOf('if (visibleItems.length === 0)');
+  const categoryBranchIndex = categoryViewSource.indexOf("if (categoryId === 'champion')");
+
+  assert.ok(emptyGuardIndex >= 0, 'category pages should share an empty Collection guard');
+  assert.ok(
+    emptyGuardIndex < categoryBranchIndex,
+    'the empty guard must run before category-specific default ring layouts'
   );
 });
 

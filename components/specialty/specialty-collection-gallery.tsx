@@ -335,6 +335,20 @@ export function SpecialtyCollectionCategory({
     return null;
   }
 
+  if (visibleItems.length === 0) {
+    return (
+      <CollectionGridView
+        items={visibleItems}
+        empty={empty}
+        filterLabel={filterLabel}
+        activeLabel={activeFilter.label}
+        allLabel={allLabel}
+        backHref={backHref}
+        locale={locale}
+      />
+    );
+  }
+
   if (categoryId === 'champion') {
     return (
       <CollectionFinderView

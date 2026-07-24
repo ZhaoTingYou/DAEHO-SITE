@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import Image from 'next/image';
 import {setRequestLocale} from 'next-intl/server';
 
+import {EmptyState} from '@/components/empty-state';
 import {ScrollText} from '@/components/motion/scroll-text';
 import {SpecialtyCollectionGallery} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
@@ -92,14 +93,20 @@ export default async function CollectionPage({params}: Props) {
       </section>
 
       <section>
-        <SpecialtyCollectionGallery
-          filters={filters}
-          items={items}
-          chooseLabel={text.chooseLabel}
-          countSuffix={text.countSuffix}
-          viewLabel={text.view}
-          locale={locale}
-        />
+        {items.length === 0 ? (
+          <div className="mx-auto max-w-[1280px] px-[var(--mobile-page-gutter)] py-section md:px-container">
+            <EmptyState title={text.empty.title} body={text.empty.body} />
+          </div>
+        ) : (
+          <SpecialtyCollectionGallery
+            filters={filters}
+            items={items}
+            chooseLabel={text.chooseLabel}
+            countSuffix={text.countSuffix}
+            viewLabel={text.view}
+            locale={locale}
+          />
+        )}
       </section>
     </main>
   );

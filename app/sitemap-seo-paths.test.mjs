@@ -17,3 +17,10 @@ test('sitemap declares localized alternates and priority for core SEO pages', ()
   assert.match(sitemapSource, /'\/mastery\/making': 0\.9/);
   assert.match(sitemapSource, /'\/contact': 0\.88/);
 });
+
+test('sitemap does not publish demo Creation detail URLs when the CMS is empty', () => {
+  assert.equal(
+    sitemapSource.includes('koMessages.specialtyPages.collection.gallery.items'),
+    false
+  );
+});

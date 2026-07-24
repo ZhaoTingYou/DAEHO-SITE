@@ -48,9 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(cmsNews.length > 0
       ? cmsNews.map((card) => `/news/${card.slug}`)
       : koMessages.news.grid.cards.map((card) => `/news/${card.id}`)),
-    ...(cmsCollections.length > 0
-      ? cmsCollections.map((item) => `/mastery/creations/${item.slug}`)
-      : koMessages.specialtyPages.collection.gallery.items.map((item) => `/mastery/creations/${item.id}`))
+    ...cmsCollections.map((item) => `/mastery/creations/${item.slug}`)
   ];
   const lastModified = new Date();
 
