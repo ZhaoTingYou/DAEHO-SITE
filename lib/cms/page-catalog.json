@@ -244,7 +244,7 @@
   {
     "pageKey": "mastery-technique",
     "title": "Mastery / Technique",
-    "description": "管理 TECHNIQUE 页面的 Hero 与可拖拽工艺轮播。",
+    "description": "管理 TECHNIQUE 页面的 Hero、中间引言、可拖拽工艺轮播与 SEO。",
     "section": "Mastery",
     "sortOrder": 39,
     "href": "/mastery/technique",
@@ -254,6 +254,8 @@
       {"path": "hero.title", "label": "Hero 标题", "editor": {"align": "center"}},
       {"path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4, "editor": {"align": "center"}},
       {"path": "hero.image", "label": "Hero 图片", "type": "image"},
+      {"path": "intro.title", "label": "中间引言标题", "editor": {"align": "center"}},
+      {"path": "intro.body", "label": "中间引言正文", "type": "textarea", "rows": 4, "editor": {"align": "center"}},
       {
         "path": "records.items",
         "label": "工艺轮播",

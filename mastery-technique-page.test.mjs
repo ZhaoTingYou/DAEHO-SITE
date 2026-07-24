@@ -116,7 +116,7 @@ test('CMS common copy cannot keep stale Making labels on the new Technique nav i
   assert.match(localeMessagesSource, /Technique · Seven careful stages/);
 });
 
-test('Technique page keeps only Hero and carousel CMS fields while sitemap exposure remains enabled', () => {
+test('Technique page exposes Hero, introduction, and carousel CMS fields while sitemap exposure remains enabled', () => {
   const techniqueDefinition = pageCatalog.find((page) => page.pageKey === 'mastery-technique');
 
   assert.equal(techniqueDefinition?.href, '/mastery/technique');
@@ -128,6 +128,8 @@ test('Technique page keeps only Hero and carousel CMS fields while sitemap expos
       'hero.title',
       'hero.body',
       'hero.image',
+      'intro.title',
+      'intro.body',
       'records.items'
     ]
   );
@@ -140,13 +142,23 @@ test('Technique page keeps only Hero and carousel CMS fields while sitemap expos
   assert.doesNotMatch(JSON.stringify(techniqueDefinition), /standards|evidence|cta|records\.eyebrow|records\.title/);
 });
 
-test('Technique copy exposes exactly three clean initial carousel items without retired content', () => {
+test('Technique copy exposes localized introduction and exactly three clean carousel items without retired content', () => {
   for (const messages of [koMessages, enMessages]) {
     const content = messages.specialtyPages.techniqueRecords;
+    const expectedIntro = messages === koMessages
+      ? {
+          title: '기술은 디테일에서 완성됩니다.',
+          body: '대호는 설계부터 세공과 마감에 이르기까지, 각 공정의 작은 차이를 오래 남는 완성도로 연결합니다.'
+        }
+      : {
+          title: 'Technique is perfected in the details.',
+          body: 'From design and craftsmanship to the final finish, DAEHO turns the smallest distinctions in every process into lasting refinement.'
+        };
 
     assert.ok(content, 'Technique carousel copy should exist');
     assert.equal(content.hero.title, 'TECHNIQUE');
-    assert.deepEqual(Object.keys(content).sort(), ['hero', 'records']);
+    assert.deepEqual(Object.keys(content).sort(), ['hero', 'intro', 'records']);
+    assert.deepEqual(content.intro, expectedIntro);
     assert.deepEqual(Object.keys(content.records), ['items']);
     assert.equal(content.records.items.length, 3);
     assert.ok(content.records.items.every((item) => item.id && item.image && item.title && item.body));

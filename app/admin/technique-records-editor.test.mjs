@@ -42,6 +42,18 @@ test('Mastery Technique replaces only records.items with the full-width bilingua
   assert.match(pageSource, /<TechniqueRecordsEditor/);
 });
 
+test('Technique CMS exposes a centered bilingual introduction beside the dedicated carousel editor', () => {
+  const technique = pageCatalog.find((page) => page.pageKey === 'mastery-technique');
+  const introTitle = technique?.fields.find((field) => field.path === 'intro.title');
+  const introBody = technique?.fields.find((field) => field.path === 'intro.body');
+
+  assert.equal(introTitle?.editor?.align, 'center');
+  assert.equal(introBody?.type, 'textarea');
+  assert.equal(introBody?.rows, 4);
+  assert.equal(introBody?.editor?.align, 'center');
+  assert.match(pageSource, /excludedFieldPaths=\{techniqueEditor \? \['records\.items'\] : \[\]\}/);
+});
+
 test('Technique editor labels exist in all three CMS interface languages', () => {
   for (const key of [
     'techniqueRecords.title',
