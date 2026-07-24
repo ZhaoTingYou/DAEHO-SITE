@@ -5,7 +5,6 @@ import {setRequestLocale} from 'next-intl/server';
 import {ScrollText} from '@/components/motion/scroll-text';
 import {SpecialtyCollectionGallery} from '@/components/specialty/specialty-collection-gallery';
 import type {Locale} from '@/i18n/routing';
-import {getCollectionItemsForSite} from '@/lib/cms/public-content';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
@@ -28,7 +27,6 @@ export default async function CollectionPage({params}: Props) {
   const messages = await getLocaleMessages(locale);
   const content = messages.specialtyPages.collection;
   const text = messages.collectionUi;
-  const items = await getCollectionItemsForSite(locale);
   const filters = content.gallery.filters.map((filter) => ({
     ...filter,
     href: resolveCmsHref(locale, filter.href, `/mastery/creations/${filter.id}`),
@@ -94,7 +92,6 @@ export default async function CollectionPage({params}: Props) {
       <section>
         <SpecialtyCollectionGallery
           filters={filters}
-          items={items}
           chooseLabel={text.chooseLabel}
           countSuffix={text.countSuffix}
           viewLabel={text.view}

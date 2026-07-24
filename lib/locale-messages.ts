@@ -10,6 +10,7 @@ import {
 } from '@/lib/cms/page-catalog';
 import {listPages} from '@/lib/cms/repositories';
 import {normalizeAchievementFirstRecordsFallback} from '@/lib/achievement-first-records-core';
+import {preserveCollectionCategoryFilters} from '@/lib/collection-category-filters-core';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {normalizeTechniquePageVisibility} from '@/lib/public-page-visibility-core';
@@ -31,6 +32,10 @@ export async function getLocaleMessages(locale: Locale): Promise<LocaleMessages>
   const messages = normalizeMasteryNavigationCopy(
     await applyCmsPageOverrides(baseMessages, locale),
     staticMessages
+  );
+  messages.specialtyPages.collection.gallery.filters = preserveCollectionCategoryFilters(
+    messages.specialtyPages.collection.gallery.filters,
+    staticMessages.specialtyPages.collection.gallery.filters
   );
   normalizeAchievementFirstRecordsFallback(messages, staticMessages);
 

@@ -56,7 +56,9 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
     href: resolveCmsHref(locale, filter.href, `/mastery/creations/${filter.id}`),
     hasImage: Boolean(filter.image && imageExists(filter.image))
   }));
-  const items = await getCollectionItemsForSite(locale);
+  const items = categoryId === 'appointment'
+    ? []
+    : await getCollectionItemsForSite(locale);
 
   if (!filters.some((filter) => filter.id === categoryId)) {
     notFound();

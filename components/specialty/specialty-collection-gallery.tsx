@@ -83,7 +83,6 @@ type CollectionFinderLabels = {
 
 type SpecialtyCollectionGalleryProps = {
   filters: SpecialtyCollectionFilter[];
-  items: SpecialtyCollectionItem[];
   chooseLabel: string;
   countSuffix: string;
   viewLabel: string;
@@ -110,7 +109,6 @@ type SpecialtyCollectionCategoryProps = {
 
 export function SpecialtyCollectionGallery({
   filters,
-  items,
   chooseLabel,
   viewLabel,
   locale
@@ -120,7 +118,6 @@ export function SpecialtyCollectionGallery({
   const categoryCards = useMemo(
     () =>
       filters.map((filter) => {
-        const categoryItems = items.filter((item) => item.category === filter.id);
         return {
           ...filter,
           item:
@@ -131,11 +128,11 @@ export function SpecialtyCollectionGallery({
                   image: filter.image,
                   hasImage: filter.hasImage
                 }
-              : categoryItems.find((item) => item.hasImage) ?? categoryItems[0],
-          description: filter.description ?? categoryItems[0]?.caption ?? ''
+              : undefined,
+          description: filter.description ?? ''
         };
       }),
-    [filters, items]
+    [filters]
   );
 
   return (
@@ -326,10 +323,7 @@ export function SpecialtyCollectionCategory({
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const activeFilter = filters.find((filter) => filter.id === categoryId);
-  const visibleItems = useMemo(
-    () => items.filter((item) => item.category === categoryId),
-    [categoryId, items]
-  );
+  const visibleItems = items.filter((item) => item.category === categoryId);
 
   if (!activeFilter) {
     return null;
@@ -359,8 +353,6 @@ export function SpecialtyCollectionCategory({
   if (categoryId === 'appointment') {
     return (
       <AppointmentCollectionView
-        items={visibleItems}
-        empty={empty}
         filterLabel={filterLabel}
         activeLabel={activeFilter.label}
         allLabel={allLabel}
@@ -1661,11 +1653,6 @@ function AppointmentCollectionView({
   locale,
   appointment
 }: {
-  items: SpecialtyCollectionItem[];
-  empty: {
-    title: string;
-    body: string;
-  };
   filterLabel: string;
   activeLabel: string;
   allLabel: string;
