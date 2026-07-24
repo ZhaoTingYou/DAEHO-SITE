@@ -1,0 +1,5 @@
+ALTER TABLE cms_collection_translations
+  ADD COLUMN IF NOT EXISTS material text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS stones text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS made_for text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS work_info text NOT NULL DEFAULT '';

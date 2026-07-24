@@ -35,6 +35,10 @@ type CollectionTranslation = {
   story?: string;
   categoryLabel?: string;
   sportCategoryLabel?: string;
+  material?: string;
+  stones?: string;
+  madeFor?: string;
+  workInfo?: string;
   seoTitle?: string;
   seoDescription?: string;
   ogImagePath?: string;
@@ -187,6 +191,13 @@ function TranslationPanel({
         <TextAreaField label={t('form.story')} name={`${locale}.story`} defaultValue={translation.story} rows={5} />
         <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
         <TextField label={t('form.sportCategoryLabel')} name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} />
+        <div className="grid gap-4 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4 md:grid-cols-2">
+          <p className="md:col-span-2 text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.specs')}</p>
+          <TextField label={t('form.material')} name={`${locale}.material`} defaultValue={translation.material} />
+          <TextField label={t('form.stones')} name={`${locale}.stones`} defaultValue={translation.stones} />
+          <TextField label={t('form.madeFor')} name={`${locale}.madeFor`} defaultValue={translation.madeFor} />
+          <TextField label={t('form.workInfo')} name={`${locale}.workInfo`} defaultValue={translation.workInfo} />
+        </div>
         <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
         <TextAreaField label={t('form.seoDescription')} name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
         <ImageUploadField

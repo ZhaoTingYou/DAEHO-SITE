@@ -66,6 +66,10 @@ const collectionTranslationSchema = z.object({
   story: optionalText,
   categoryLabel: optionalText,
   sportCategoryLabel: optionalText,
+  material: optionalText,
+  stones: optionalText,
+  madeFor: optionalText,
+  workInfo: optionalText,
   seoTitle: optionalText,
   seoDescription: optionalText,
   ogImagePath: optionalText

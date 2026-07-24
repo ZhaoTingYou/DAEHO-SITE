@@ -605,6 +605,10 @@ async function readCollectionTranslation(formData: FormData, locale: Locale, edi
     story: stringFromForm(formData, `${locale}.story`),
     categoryLabel: stringFromForm(formData, `${locale}.categoryLabel`),
     sportCategoryLabel: stringFromForm(formData, `${locale}.sportCategoryLabel`),
+    material: stringFromForm(formData, `${locale}.material`),
+    stones: stringFromForm(formData, `${locale}.stones`),
+    madeFor: stringFromForm(formData, `${locale}.madeFor`),
+    workInfo: stringFromForm(formData, `${locale}.workInfo`),
     seoTitle: stringFromForm(formData, `${locale}.seoTitle`),
     seoDescription: stringFromForm(formData, `${locale}.seoDescription`),
     ogImagePath: await readUploadedImageOrText(formData, `${locale}.ogImagePath`, `${locale}.ogImageUpload`, locale, editorPath)

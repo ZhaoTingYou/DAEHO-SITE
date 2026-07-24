@@ -151,6 +151,10 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
       sportCategory: String(cmsItem.sportCategory || specs.sportCategory),
       sportCategoryLabel: String(cmsItem.sportCategoryLabel),
       year: specs.year,
+      material: String(cmsItem.material || ''),
+      stones: String(cmsItem.stones || ''),
+      madeFor: String(cmsItem.madeFor || ''),
+      workInfo: String(cmsItem.workInfo || ''),
       image,
       gallery,
       detailImages: normalizeCollectionDetailImages(specs.detailImages),
@@ -187,7 +191,11 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
     specs: {
       year: item.year ?? '',
       sportCategory: item.sportCategory ?? ''
-    }
+    },
+    material: '',
+    stones: '',
+    madeFor: '',
+    workInfo: ''
   };
 }
 

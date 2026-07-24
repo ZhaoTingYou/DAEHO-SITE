@@ -69,11 +69,11 @@ export default async function CollectionDetailPage({params}: Props) {
   }));
   const related = (await getCollectionItemsForSite(locale)).filter((entry) => entry.id !== slug).slice(0, 4);
   const specs = [
-    [text.material, text.placeholder],
-    [text.stones, text.placeholder],
+    [text.material, item.material || text.placeholder],
+    [text.stones, item.stones || text.placeholder],
     [text.year, item.year || '20XX'],
-    [text.madeFor, text.placeholder],
-    [text.specs, item.categoryLabel]
+    [text.madeFor, item.madeFor || text.placeholder],
+    [text.specs, item.workInfo || item.categoryLabel || text.placeholder]
   ];
 
   return (

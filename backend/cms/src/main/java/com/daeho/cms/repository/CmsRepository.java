@@ -209,6 +209,7 @@ public class CmsRepository {
   public List<Map<String, Object>> listPublicCollections(String locale) {
     return jdbc.query("""
         SELECT c.*, t.locale, t.title, t.caption, t.story, t.category_label, t.sport_category_label,
+          t.material, t.stones, t.made_for, t.work_info,
           t.seo_title, t.seo_description, t.og_image_path
         FROM cms_collections c
         JOIN cms_collection_translations t ON t.collection_id = c.id AND t.locale = ?
@@ -229,6 +230,7 @@ public class CmsRepository {
   public Map<String, Object> getPublicCollection(String slug, String locale) {
     return jdbc.query("""
         SELECT c.*, t.locale, t.title, t.caption, t.story, t.category_label, t.sport_category_label,
+          t.material, t.stones, t.made_for, t.work_info,
           t.seo_title, t.seo_description, t.og_image_path
         FROM cms_collections c
         JOIN cms_collection_translations t ON t.collection_id = c.id AND t.locale = ?
@@ -634,14 +636,19 @@ public class CmsRepository {
       jdbc.update("""
           INSERT INTO cms_collection_translations (
             collection_id, locale, title, caption, story, category_label, sport_category_label,
+            material, stones, made_for, work_info,
             seo_title, seo_description, og_image_path, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
           ON CONFLICT(collection_id, locale) DO UPDATE SET
             title = excluded.title,
             caption = excluded.caption,
             story = excluded.story,
             category_label = excluded.category_label,
             sport_category_label = excluded.sport_category_label,
+            material = excluded.material,
+            stones = excluded.stones,
+            made_for = excluded.made_for,
+            work_info = excluded.work_info,
             seo_title = excluded.seo_title,
             seo_description = excluded.seo_description,
             og_image_path = excluded.og_image_path,
@@ -654,6 +661,10 @@ public class CmsRepository {
           validation.stringValue(translation.get("story")),
           validation.stringValue(translation.get("categoryLabel")),
           validation.stringValue(translation.get("sportCategoryLabel")),
+          validation.stringValue(translation.get("material")),
+          validation.stringValue(translation.get("stones")),
+          validation.stringValue(translation.get("madeFor")),
+          validation.stringValue(translation.get("workInfo")),
           validation.stringValue(translation.get("seoTitle")),
           validation.stringValue(translation.get("seoDescription")),
           validation.stringValue(translation.get("ogImagePath"))
@@ -863,6 +874,10 @@ public class CmsRepository {
         "story", rs.getString("story"),
         "categoryLabel", rs.getString("category_label"),
         "sportCategoryLabel", rs.getString("sport_category_label"),
+        "material", rs.getString("material"),
+        "stones", rs.getString("stones"),
+        "madeFor", rs.getString("made_for"),
+        "workInfo", rs.getString("work_info"),
         "seoTitle", rs.getString("seo_title"),
         "seoDescription", rs.getString("seo_description"),
         "ogImagePath", rs.getString("og_image_path")
