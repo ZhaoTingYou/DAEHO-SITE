@@ -10,6 +10,7 @@ import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getCollectionCategorySeoFallback} from '@/lib/collection-category-seo';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
+import {optionalImage} from '@/lib/optional-image';
 import {getCmsPageSeoOverride, getDetailMetadata} from '@/lib/seo';
 
 export type CollectionCategoryId = 'champion' | 'appointment' | 'bespoke';
@@ -54,6 +55,7 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
   const filters = content.gallery.filters.map((filter) => ({
     ...filter,
     href: resolveCmsHref(locale, filter.href, `/mastery/creations/${filter.id}`),
+    mobileBackground: optionalImage(filter, 'mobileBackground'),
     hasImage: Boolean(filter.image && imageExists(filter.image))
   }));
   const items = await getCollectionItemsForSite(locale);

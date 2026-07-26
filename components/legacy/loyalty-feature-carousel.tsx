@@ -1,19 +1,19 @@
 'use client';
 
-import Image from 'next/image';
 import {useState} from 'react';
 import {AnimatePresence, motion, type Transition} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {PlaceholderImg} from '@/components/placeholder-img';
+import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
 import type {Locale} from '@/i18n/routing';
-import {imageSrc} from '@/lib/image-src';
 
 export type LoyaltyFeatureSlide = {
   kicker: string;
   title: string;
   body: string;
   backgroundImage: string;
+  mobileImage?: string;
   previewImage: string;
   accentStart: string;
   accentEnd: string;
@@ -89,6 +89,7 @@ export function LoyaltyFeatureCarousel({slides, imageAlt}: LoyaltyFeatureCarouse
       <div className="relative aspect-[4/3] w-full md:hidden">
         <LoyaltyCarouselImage
           filename={activeSlide.previewImage || activeSlide.backgroundImage}
+          mobileFilename={activeSlide.mobileImage}
           alt={imageAlt}
           loading="eager"
           sizes="100vw"
@@ -210,12 +211,14 @@ function LoyaltyCarouselImage({
   alt,
   className,
   filename,
+  mobileFilename,
   loading = 'lazy',
   sizes
 }: {
   alt: string;
   className: string;
   filename: string;
+  mobileFilename?: string;
   loading?: 'eager' | 'lazy';
   sizes: string;
 }) {
@@ -226,14 +229,14 @@ function LoyaltyCarouselImage({
   }
 
   return (
-    <Image
-      src={imageSrc(filename)}
+    <ResponsiveCmsImage
+      filename={filename}
+      mobileFilename={mobileFilename}
       alt={alt}
-      fill
       loading={loading}
       sizes={sizes}
       className={className}
-      onError={() => setFailed(true)}
+      onDesktopError={() => setFailed(true)}
     />
   );
 }

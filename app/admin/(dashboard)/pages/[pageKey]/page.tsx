@@ -41,7 +41,7 @@ import {localeFieldSuffixes, locales, type Locale} from '@/lib/locales';
 
 import {savePageAction} from '../../../actions';
 import {AdminActionAlert} from '../../../_components/admin-feedback';
-import {AppendableArrayItemsField, ImageUploadField, SelectField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
+import {AppendableArrayItemsField, ImageUploadField, ResponsiveImageUploadField, SelectField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
 import {PageHeader, Panel} from '../../../_components/admin-shell';
 import {TechniqueRecordsEditor} from '../../../_components/technique-records-editor';
 
@@ -359,6 +359,8 @@ function ContentGroupEditor({
                 editorFont={field.editor?.font}
                 editorAlign={field.editor?.align}
                 maxItems={field.maxItems}
+                mobilePath={field.mobilePath}
+                mobileValue={field.mobilePath ? getObjectValueAtPath(group.content, field.mobilePath) : undefined}
               />
             ))
           : entries.map(([key, value]) => (
@@ -382,7 +384,9 @@ function EditableNode({
   editorFont,
   editorAlign,
   fieldType,
-  maxItems
+  maxItems,
+  mobilePath,
+  mobileValue
 }: {
   path: string;
   label: string;
@@ -397,6 +401,8 @@ function EditableNode({
   editorAlign?: PageFieldEditorSettings['align'];
   fieldType?: PageFieldType;
   maxItems?: number;
+  mobilePath?: string;
+  mobileValue?: unknown;
 }) {
   if (hiddenKeys.has(lastPathSegment(path))) {
     return <input type="hidden" name={contentFieldName(context.locale, context.groupKey, path)} value={stringValue(value)} />;
@@ -433,6 +439,8 @@ function EditableNode({
       rows={rows}
       editor={{font: editorFont, align: editorAlign}}
       fieldType={fieldType}
+      mobilePath={mobilePath}
+      mobileValue={mobileValue}
     />
   );
 }
@@ -601,6 +609,53 @@ function EditableArrayItemFields({
         const name = contentFieldName(context.locale, context.groupKey, fieldPath);
 
         if (field.type === 'image') {
+          if (field.mobilePath) {
+            const mobileFieldPath = `${path}.${field.mobilePath}`;
+            const mobileFieldValue = getObjectValueAtPath(item, field.mobilePath);
+
+            return (
+              <ResponsiveImageUploadField
+                key={field.path}
+                label={field.label}
+                desktopLabel={t('page.desktopImage')}
+                mobileLabel={t('page.mobileImage')}
+                desktopName={name}
+                desktopUploadName={contentImageFieldName(context.locale, context.groupKey, fieldPath)}
+                desktopDefaultValue={stringValue(fieldValue)}
+                mobileName={contentFieldName(context.locale, context.groupKey, mobileFieldPath)}
+                mobileUploadName={contentImageFieldName(context.locale, context.groupKey, mobileFieldPath)}
+                mobileDefaultValue={stringValue(mobileFieldValue)}
+                uploadLabel={t('page.uploadLocalImage')}
+                uploadHint={t('page.uploadLocalImageHint')}
+                emptyLabel={t('common.noImage')}
+                changedLabel={t('common.changed')}
+                selectedLabel={t('common.imageSelected')}
+                syncedLabel={t('common.imageSynced')}
+                desktopImageGuide={getPageImageGuide({
+                  pageKey: context.pageKey,
+                  groupKey: context.groupKey,
+                  path: fieldPath,
+                  locale: context.adminLocale
+                })}
+                mobileImageGuide={getPageImageGuide({
+                  pageKey: context.pageKey,
+                  groupKey: context.groupKey,
+                  path: mobileFieldPath,
+                  locale: context.adminLocale
+                })}
+                mediaItems={context.mediaItems}
+                mediaSelectLabel={t('media.selectFromLibrary')}
+                mediaLibraryTitle={t('media.libraryTitle')}
+                mediaEmptyLabel={t('media.libraryEmpty')}
+                mediaSelectedLabel={t('media.selectedExisting')}
+                clearLabel={t('page.clearMobileImage')}
+                clearedLabel={t('page.mobileImageCleared')}
+                fallbackHint={t('page.mobileImageFallback')}
+                syncKey={`page-content:${context.groupKey}:${fieldPath}`}
+              />
+            );
+          }
+
           return (
             <ImageUploadField
               key={field.path}
@@ -708,14 +763,27 @@ function AppendArrayItems({
       imageGuides={Object.fromEntries(
         itemFields
           .filter((field) => field.type === 'image')
-          .map((field) => [
-            field.path,
-            getPageImageGuide({
-              pageKey: context.pageKey,
-              groupKey: context.groupKey,
-              path: `${path}.0.${field.path}`,
-              locale: context.adminLocale
-            })
+          .flatMap((field) => [
+            [
+              field.path,
+              getPageImageGuide({
+                pageKey: context.pageKey,
+                groupKey: context.groupKey,
+                path: `${path}.0.${field.path}`,
+                locale: context.adminLocale
+              })
+            ],
+            ...(field.mobilePath
+              ? [[
+                  field.mobilePath,
+                  getPageImageGuide({
+                    pageKey: context.pageKey,
+                    groupKey: context.groupKey,
+                    path: `${path}.0.${field.mobilePath}`,
+                    locale: context.adminLocale
+                  })
+                ]]
+              : [])
           ])
       )}
       title={appendItemTitle(context.adminLocale)}
@@ -732,6 +800,11 @@ function AppendArrayItems({
       mediaLibraryTitle={t('media.libraryTitle')}
       mediaEmptyLabel={t('media.libraryEmpty')}
       mediaSelectedLabel={t('media.selectedExisting')}
+      desktopImageLabel={t('page.desktopImage')}
+      mobileImageLabel={t('page.mobileImage')}
+      clearImageLabel={t('page.clearMobileImage')}
+      clearedImageLabel={t('page.mobileImageCleared')}
+      mobileFallbackHint={t('page.mobileImageFallback')}
     />
   );
 }
@@ -745,7 +818,9 @@ function EditableLeaf({
   options,
   rows,
   editor,
-  fieldType
+  fieldType,
+  mobilePath,
+  mobileValue
 }: {
   path: string;
   label: string;
@@ -756,11 +831,56 @@ function EditableLeaf({
   rows?: number;
   editor?: PageFieldEditorSettings;
   fieldType?: PageFieldType;
+  mobilePath?: string;
+  mobileValue?: unknown;
 }) {
   const name = contentFieldName(context.locale, context.groupKey, path);
   const t = createAdminTranslator(context.messages);
 
   if (forceImage || isImageEditableField(path, value)) {
+    if (mobilePath) {
+      return (
+        <ResponsiveImageUploadField
+          label={label}
+          desktopLabel={t('page.desktopImage')}
+          mobileLabel={t('page.mobileImage')}
+          desktopName={name}
+          desktopUploadName={contentImageFieldName(context.locale, context.groupKey, path)}
+          desktopDefaultValue={stringValue(value)}
+          mobileName={contentFieldName(context.locale, context.groupKey, mobilePath)}
+          mobileUploadName={contentImageFieldName(context.locale, context.groupKey, mobilePath)}
+          mobileDefaultValue={stringValue(mobileValue)}
+          uploadLabel={t('page.uploadLocalImage')}
+          uploadHint={t('page.uploadLocalImageHint')}
+          emptyLabel={t('common.noImage')}
+          changedLabel={t('common.changed')}
+          selectedLabel={t('common.imageSelected')}
+          syncedLabel={t('common.imageSynced')}
+          desktopImageGuide={getPageImageGuide({
+            pageKey: context.pageKey,
+            groupKey: context.groupKey,
+            path,
+            locale: context.adminLocale
+          })}
+          mobileImageGuide={getPageImageGuide({
+            pageKey: context.pageKey,
+            groupKey: context.groupKey,
+            path: mobilePath,
+            locale: context.adminLocale
+          })}
+          mediaItems={context.mediaItems}
+          mediaSelectLabel={t('media.selectFromLibrary')}
+          mediaLibraryTitle={t('media.libraryTitle')}
+          mediaEmptyLabel={t('media.libraryEmpty')}
+          mediaSelectedLabel={t('media.selectedExisting')}
+          clearLabel={t('page.clearMobileImage')}
+          clearedLabel={t('page.mobileImageCleared')}
+          fallbackHint={t('page.mobileImageFallback')}
+          syncKey={`page-content:${context.groupKey}:${path}`}
+        />
+      );
+    }
+
     return (
       <ImageUploadField
         label={label}

@@ -185,10 +185,18 @@ export async function saveNewsAction(formData: FormData) {
     const previousNews = id ? await getNews(id) : null;
     const previousImages = collectImageFilenames(previousNews);
     const imagePath = await readUploadedImageOrText(formData, 'imagePath', 'imageUpload', 'ko', editorPath);
+    const mobileImagePath = await readUploadedImageOrText(
+      formData,
+      'mobileImagePath',
+      'mobileImageUpload',
+      'ko',
+      editorPath
+    );
     const payload = newsPayloadSchema.parse({
       slug: stringFromForm(formData, 'slug'),
       category: stringFromForm(formData, 'category'),
       imagePath,
+      mobileImagePath,
       publishedAt: stringFromForm(formData, 'publishedAt'),
       isFeatured: formData.get('isFeatured') === 'on',
       isVisible: formData.get('isVisible') !== 'off',
@@ -822,6 +830,19 @@ function applyAppendablePageArrayFields(
 
         if (rawValue) {
           setObjectValueAtPath(nextItem, itemField.path, rawValue);
+        }
+
+        if (itemField.mobilePath) {
+          const mobileItemPath = `${field.path}.${index}.${itemField.mobilePath}`;
+          const mobileFormKey = contentFieldFormKey(locale, groupKey, mobileItemPath);
+          const sharedMobileImage = sharedContentImages.get(
+            sharedPageImageKey(groupKey, mobileItemPath)
+          );
+          const mobileValue = sharedMobileImage || stringFromForm(formData, mobileFormKey);
+
+          if (mobileValue) {
+            setObjectValueAtPath(nextItem, itemField.mobilePath, mobileValue);
+          }
         }
       }
 

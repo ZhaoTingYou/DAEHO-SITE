@@ -10,6 +10,7 @@ import {getCollectionItemsForSite} from '@/lib/cms/public-content';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
 import {getLocaleMessages} from '@/lib/locale-messages';
+import {optionalImage} from '@/lib/optional-image';
 import {getPageMetadata} from '@/lib/seo';
 
 type Props = {
@@ -33,6 +34,7 @@ export default async function CollectionPage({params}: Props) {
   const filters = content.gallery.filters.map((filter) => ({
     ...filter,
     href: resolveCmsHref(locale, filter.href, `/mastery/creations/${filter.id}`),
+    mobileBackground: optionalImage(filter, 'mobileBackground'),
     hasImage: Boolean(filter.image && imageExists(filter.image))
   }));
 

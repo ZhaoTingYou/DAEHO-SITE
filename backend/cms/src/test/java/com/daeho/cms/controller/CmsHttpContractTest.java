@@ -134,7 +134,8 @@ class CmsHttpContractTest {
 
     mvc.perform(get("/api/admin/news").header("x-admin-api-key", ADMIN_KEY))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.items[0].slug").value("launch"));
+        .andExpect(jsonPath("$.items[0].slug").value("launch"))
+        .andExpect(jsonPath("$.items[0].mobileImagePath").value("news-mobile.png"));
 
     mvc.perform(post("/api/admin/news")
             .header("x-admin-api-key", ADMIN_KEY)
@@ -318,7 +319,8 @@ class CmsHttpContractTest {
 
     mvc.perform(get("/api/cms/news?locale=ko"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.items[0].slug").value("launch"));
+        .andExpect(jsonPath("$.items[0].slug").value("launch"))
+        .andExpect(jsonPath("$.items[0].mobileImagePath").value("news-mobile.png"));
 
     mvc.perform(get("/api/cms/news/launch?locale=ko"))
         .andExpect(status().isOk())
@@ -452,6 +454,7 @@ class CmsHttpContractTest {
         "slug", "launch",
         "category", "brand",
         "imagePath", "news.png",
+        "mobileImagePath", "news-mobile.png",
         "publishedAt", "2026-06-27",
         "isFeatured", true,
         "isVisible", true,
@@ -468,6 +471,7 @@ class CmsHttpContractTest {
         "slug", "launch",
         "category", "brand",
         "imagePath", "news.png",
+        "mobileImagePath", "news-mobile.png",
         "publishedAt", "2026-06-27",
         "title", "뉴스",
         "categoryLabel", "브랜드",
@@ -597,6 +601,7 @@ class CmsHttpContractTest {
           "slug":"launch",
           "category":"brand",
           "imagePath":"news.png",
+          "mobileImagePath":"news-mobile.png",
           "publishedAt":"2026-06-27",
           "isFeatured":true,
           "isVisible":true,

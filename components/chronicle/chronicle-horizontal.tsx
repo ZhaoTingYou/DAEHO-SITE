@@ -13,6 +13,7 @@ export type ChronicleHorizontalSlide = {
   title: string;
   desc: string;
   image: string;
+  mobileImage: string;
   fallbackImage: string;
 };
 

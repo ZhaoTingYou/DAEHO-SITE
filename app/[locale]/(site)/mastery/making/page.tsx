@@ -13,6 +13,7 @@ import {imageExists} from '@/lib/image-exists';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
+import {optionalImage} from '@/lib/optional-image';
 
 type Props = {
   params: Promise<{locale: Locale}>;
@@ -52,6 +53,7 @@ export default async function TechniquePage({params}: Props) {
           <Reveal className="mx-auto mt-[clamp(52px,6vw,88px)] w-full max-w-[1120px] border border-primary/12 bg-white p-2">
             <SafeImage
               filename={content.hero.image}
+              mobileFilename={optionalImage(content.hero, 'mobileImage')}
               alt={content.hero.subtitle}
               aspect="max-md:aspect-[4/3] md:aspect-[21/9]"
               variant="plain"

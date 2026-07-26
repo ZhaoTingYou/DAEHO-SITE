@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import {useState} from 'react';
 
+import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
 import type {ChronicleHorizontalSlide} from './chronicle-horizontal';
 
 type ChronicleMobileProps = {
@@ -45,6 +45,7 @@ export function ChronicleMobile({slides, yearNavAriaLabel, endNav}: ChronicleMob
                 <ChronicleMobileSlideImage
                   key={`${slide.image}-${slide.fallbackImage}`}
                   image={slide.image}
+                  mobileImage={slide.mobileImage}
                   fallbackImage={slide.fallbackImage}
                   alt={slide.title}
                 />
@@ -71,10 +72,12 @@ export function ChronicleMobile({slides, yearNavAriaLabel, endNav}: ChronicleMob
 
 function ChronicleMobileSlideImage({
   image,
+  mobileImage,
   fallbackImage,
   alt
 }: {
   image: string;
+  mobileImage: string;
   fallbackImage: string;
   alt: string;
 }) {
@@ -86,16 +89,13 @@ function ChronicleMobileSlideImage({
   }
 
   return (
-    <Image
-      key={source}
-      src={source}
+    <ResponsiveCmsImage
+      filename={source}
+      mobileFilename={mobileImage}
       alt={alt}
-      fill
       sizes="100vw"
       className="object-cover"
-      onError={(event) => {
-        event.currentTarget.style.visibility = 'hidden';
-
+      onDesktopError={() => {
         if (source !== fallbackImage) {
           setSource(fallbackImage);
           return;

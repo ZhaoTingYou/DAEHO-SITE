@@ -349,7 +349,10 @@ export function ImageUploadField({
   mediaEmptyLabel = '还没有媒体',
   mediaSelectedLabel = '已从媒体库选择 {filename}，保存后生效。',
   syncKey,
-  preview = true
+  preview = true,
+  allowClear = false,
+  clearLabel = '清除',
+  clearedLabel = '已清除，保存后生效。'
 }: {
   label: string;
   name: string;
@@ -370,6 +373,9 @@ export function ImageUploadField({
   mediaSelectedLabel?: string;
   syncKey?: string;
   preview?: boolean;
+  allowClear?: boolean;
+  clearLabel?: string;
+  clearedLabel?: string;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const filenameInputRef = useRef<HTMLInputElement | null>(null);
@@ -377,9 +383,10 @@ export function ImageUploadField({
   const initialPreviewUrl = useMemo(() => (defaultValue ? imageSrc(defaultValue) : ''), [defaultValue]);
   const [selectedPreviewUrl, setSelectedPreviewUrl] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
-  const [selectionSource, setSelectionSource] = useState<'local' | 'media' | 'synced' | ''>('');
+  const [selectionSource, setSelectionSource] = useState<'local' | 'media' | 'synced' | 'cleared' | ''>('');
   const [isMediaOpen, setIsMediaOpen] = useState(false);
-  const previewUrl = selectedPreviewUrl || initialPreviewUrl;
+  const [isCleared, setIsCleared] = useState(false);
+  const previewUrl = isCleared ? '' : selectedPreviewUrl || initialPreviewUrl;
 
   const releaseObjectUrl = useCallback(() => {
     if (objectUrlRef.current) {
@@ -423,13 +430,15 @@ export function ImageUploadField({
 
       if (detail.file) {
         previewFile(detail.file);
+        setIsCleared(false);
       } else {
         releaseObjectUrl();
         setSelectedPreviewUrl(detail.previewUrl ?? imageSrc(detail.filename));
+        setIsCleared(!detail.filename && !detail.previewUrl);
       }
 
       setSelectedFileName(detail.displayName ?? detail.filename);
-      setSelectionSource('synced');
+      setSelectionSource(!detail.filename && !detail.file && !detail.previewUrl ? 'cleared' : 'synced');
     };
 
     window.addEventListener(imageUploadSyncEventName, handleSync);
@@ -448,6 +457,7 @@ export function ImageUploadField({
     const targetFilename = filenameInputRef.current?.value.trim() || suggestedUploadFilename(file.name);
 
     previewFile(file);
+    setIsCleared(false);
     setSelectedFileName(targetFilename);
     setSelectionSource('local');
 
@@ -496,6 +506,7 @@ export function ImageUploadField({
     }
 
     setSelectedPreviewUrl(nextPreviewUrl);
+    setIsCleared(false);
     setSelectedFileName(item.filename);
     setSelectionSource('media');
     setIsMediaOpen(false);
@@ -515,7 +526,40 @@ export function ImageUploadField({
     }
   };
 
-  const statusText = selectedFileName
+  const handleClear = () => {
+    releaseObjectUrl();
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    if (filenameInputRef.current) {
+      filenameInputRef.current.value = '';
+    }
+
+    setSelectedPreviewUrl('');
+    setSelectedFileName('');
+    setSelectionSource('cleared');
+    setIsCleared(true);
+    setIsMediaOpen(false);
+
+    if (syncKey) {
+      window.dispatchEvent(
+        new CustomEvent<ImageUploadSyncDetail>(imageUploadSyncEventName, {
+          detail: {
+            syncKey,
+            source: uploadName,
+            filename: '',
+            previewUrl: ''
+          }
+        })
+      );
+    }
+  };
+
+  const statusText = selectionSource === 'cleared'
+    ? clearedLabel
+    : selectedFileName
     ? formatTemplate(selectionSource === 'synced' ? syncedLabel : selectionSource === 'media' ? mediaSelectedLabel : selectedLabel, selectedFileName)
     : uploadHint;
 
@@ -572,6 +616,15 @@ export function ImageUploadField({
                 onChange={handleFileChange}
               />
             </label>
+            {allowClear && !isCleared && previewUrl ? (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="inline-flex min-h-10 max-w-full items-center justify-center rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-sm font-semibold text-[#b42318] transition hover:bg-[#fee4e2]"
+              >
+                {clearLabel}
+              </button>
+            ) : null}
           </div>
           {mediaItems.length > 0 ? (
             <div className="grid gap-2">
@@ -628,6 +681,118 @@ export function ImageUploadField({
   );
 }
 
+export function ResponsiveImageUploadField({
+  label,
+  desktopLabel,
+  mobileLabel,
+  desktopName,
+  desktopUploadName,
+  desktopDefaultValue,
+  mobileName,
+  mobileUploadName,
+  mobileDefaultValue,
+  uploadLabel,
+  uploadHint,
+  emptyLabel,
+  changedLabel,
+  selectedLabel,
+  syncedLabel,
+  desktopImageGuide,
+  mobileImageGuide,
+  mediaItems,
+  mediaSelectLabel,
+  mediaLibraryTitle,
+  mediaEmptyLabel,
+  mediaSelectedLabel,
+  clearLabel,
+  clearedLabel,
+  fallbackHint,
+  syncKey
+}: {
+  label: string;
+  desktopLabel: string;
+  mobileLabel: string;
+  desktopName: string;
+  desktopUploadName: string;
+  desktopDefaultValue?: string;
+  mobileName: string;
+  mobileUploadName: string;
+  mobileDefaultValue?: string;
+  uploadLabel: string;
+  uploadHint: string;
+  emptyLabel: string;
+  changedLabel: string;
+  selectedLabel: string;
+  syncedLabel: string;
+  desktopImageGuide?: string;
+  mobileImageGuide?: string;
+  mediaItems: MediaLibraryItem[];
+  mediaSelectLabel: string;
+  mediaLibraryTitle: string;
+  mediaEmptyLabel: string;
+  mediaSelectedLabel: string;
+  clearLabel: string;
+  clearedLabel: string;
+  fallbackHint: string;
+  syncKey?: string;
+}) {
+  return (
+    <section className="grid min-w-0 w-full max-w-full gap-4 rounded-md border border-[#d9dee7] bg-[#fbfcfe] p-4">
+      <div className="min-w-0">
+        <h4 className="break-words text-sm font-semibold text-[#344054]">{label}</h4>
+        <p className="mt-1 break-words text-xs font-medium leading-5 text-[#647084]">{fallbackHint}</p>
+      </div>
+      <div className="grid min-w-0 w-full max-w-full grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="min-w-0 rounded-md border border-[#e4e7ec] bg-white p-3">
+          <ImageUploadField
+            label={desktopLabel}
+            name={desktopName}
+            uploadName={desktopUploadName}
+            defaultValue={desktopDefaultValue}
+            uploadLabel={uploadLabel}
+            uploadHint={uploadHint}
+            emptyLabel={emptyLabel}
+            changedLabel={changedLabel}
+            selectedLabel={selectedLabel}
+            syncedLabel={syncedLabel}
+            imageGuide={desktopImageGuide}
+            mediaItems={mediaItems}
+            mediaSelectLabel={mediaSelectLabel}
+            mediaLibraryTitle={mediaLibraryTitle}
+            mediaEmptyLabel={mediaEmptyLabel}
+            mediaSelectedLabel={mediaSelectedLabel}
+            syncKey={syncKey ? `${syncKey}:desktop` : undefined}
+          />
+        </div>
+        <div className="min-w-0 rounded-md border border-[#e4e7ec] bg-white p-3">
+          <ImageUploadField
+            label={mobileLabel}
+            name={mobileName}
+            uploadName={mobileUploadName}
+            defaultValue={mobileDefaultValue}
+            uploadLabel={uploadLabel}
+            uploadHint={uploadHint}
+            emptyLabel={emptyLabel}
+            changedLabel={changedLabel}
+            selectedLabel={selectedLabel}
+            syncedLabel={syncedLabel}
+            imageGuide={mobileImageGuide}
+            mediaItems={mediaItems}
+            mediaSelectLabel={mediaSelectLabel}
+            mediaLibraryTitle={mediaLibraryTitle}
+            mediaEmptyLabel={mediaEmptyLabel}
+            mediaSelectedLabel={mediaSelectedLabel}
+            syncKey={syncKey ? `${syncKey}:mobile` : undefined}
+            allowClear
+            clearLabel={clearLabel}
+            clearedLabel={clearedLabel}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function AppendableArrayItemsField({
   path,
   startIndex,
@@ -650,7 +815,12 @@ export function AppendableArrayItemsField({
   mediaSelectLabel,
   mediaLibraryTitle,
   mediaEmptyLabel,
-  mediaSelectedLabel
+  mediaSelectedLabel,
+  desktopImageLabel,
+  mobileImageLabel,
+  clearImageLabel,
+  clearedImageLabel,
+  mobileFallbackHint
 }: {
   path: string;
   startIndex: number;
@@ -674,6 +844,11 @@ export function AppendableArrayItemsField({
   mediaLibraryTitle: string;
   mediaEmptyLabel: string;
   mediaSelectedLabel: string;
+  desktopImageLabel: string;
+  mobileImageLabel: string;
+  clearImageLabel: string;
+  clearedImageLabel: string;
+  mobileFallbackHint: string;
 }) {
   const [rows, setRows] = useState([0]);
   const canAddRow = maxItems === undefined || startIndex + rows.length < maxItems;
@@ -734,6 +909,42 @@ export function AppendableArrayItemsField({
                 const name = contentFieldName(locale, groupKey, fieldPath);
 
                 if (field.type === 'image') {
+                  if (field.mobilePath) {
+                    const mobileFieldPath = `${path}.${itemIndex}.${field.mobilePath}`;
+
+                    return (
+                      <ResponsiveImageUploadField
+                        key={field.path}
+                        label={field.label}
+                        desktopLabel={desktopImageLabel}
+                        mobileLabel={mobileImageLabel}
+                        desktopName={name}
+                        desktopUploadName={contentImageFieldName(locale, groupKey, fieldPath)}
+                        desktopDefaultValue=""
+                        mobileName={contentFieldName(locale, groupKey, mobileFieldPath)}
+                        mobileUploadName={contentImageFieldName(locale, groupKey, mobileFieldPath)}
+                        mobileDefaultValue=""
+                        uploadLabel={uploadLabel}
+                        uploadHint={uploadHint}
+                        emptyLabel={emptyLabel}
+                        changedLabel={changedLabel}
+                        selectedLabel={selectedLabel}
+                        syncedLabel={syncedLabel}
+                        desktopImageGuide={imageGuides[field.path]}
+                        mobileImageGuide={imageGuides[field.mobilePath]}
+                        mediaItems={mediaItems}
+                        mediaSelectLabel={mediaSelectLabel}
+                        mediaLibraryTitle={mediaLibraryTitle}
+                        mediaEmptyLabel={mediaEmptyLabel}
+                        mediaSelectedLabel={mediaSelectedLabel}
+                        clearLabel={clearImageLabel}
+                        clearedLabel={clearedImageLabel}
+                        fallbackHint={mobileFallbackHint}
+                        syncKey={`page-content:${groupKey}:${fieldPath}`}
+                      />
+                    );
+                  }
+
                   return (
                     <ImageUploadField
                       key={field.path}

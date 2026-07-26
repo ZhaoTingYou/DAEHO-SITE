@@ -31,8 +31,9 @@ test('heritage hero backgrounds are editable through CMS hero image fields', () 
     assert.ok(pageSource.includes('image={heroImage}'));
   }
 
-  assert.ok(source.includes("import {imageSrc} from '@/lib/image-src';"));
-  assert.ok(source.includes('src={imageSrc(image)}'));
+  assert.ok(source.includes("import {ResponsiveCmsImage} from '@/components/responsive-cms-image';"));
+  assert.ok(source.includes('filename={image}'));
+  assert.ok(source.includes('mobileFilename={mobileImage}'));
 });
 
 test('heritage hero images render without the previous red tint overlay', () => {

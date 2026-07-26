@@ -7,6 +7,7 @@ import {AnimatePresence, motion, useScroll, useTransform, type MotionValue} from
 
 import {EmptyState} from '@/components/empty-state';
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
 import type {Locale} from '@/i18n/routing';
 import {imageSrc} from '@/lib/image-src';
 
@@ -17,6 +18,7 @@ export type SpecialtyCollectionFilter = {
   description?: string;
   image?: string;
   background?: string;
+  mobileBackground?: string;
   product?: string;
   hasImage?: boolean;
 };
@@ -30,6 +32,7 @@ type CollectionImageSource = {
 
 type CollectionStageArtwork = {
   background: string;
+  mobileBackground?: string;
   product: string;
   productWidth: number;
   productHeight: number;
@@ -48,6 +51,7 @@ function getCollectionStageArtwork(filter: SpecialtyCollectionFilter, index: num
   return {
     ...fallback,
     background: filter.background ?? fallback.background,
+    mobileBackground: filter.mobileBackground,
     product: filter.product ?? filter.image ?? fallback.product
   };
 }
@@ -238,10 +242,10 @@ function MobileCollectionCard({
 
       <div className="mt-4 grid gap-5">
         <div className="relative aspect-[4/5] overflow-hidden border border-primary/10 bg-primary">
-          <Image
-            src={imageSrc(artwork.background)}
+          <ResponsiveCmsImage
+            filename={artwork.background}
+            mobileFilename={artwork.mobileBackground}
             alt=""
-            fill
             sizes="(min-width: 768px) 520px, calc(100vw - 40px)"
             className="object-cover object-center opacity-95 transition duration-700 ease-brand group-hover:scale-[1.035]"
             priority={index === 0}

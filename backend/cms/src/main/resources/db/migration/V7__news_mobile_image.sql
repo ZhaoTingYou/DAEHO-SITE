@@ -1,0 +1,2 @@
+ALTER TABLE cms_news
+  ADD COLUMN IF NOT EXISTS mobile_image_path TEXT NOT NULL DEFAULT '';

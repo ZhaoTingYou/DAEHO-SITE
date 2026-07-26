@@ -112,7 +112,9 @@ test('Archive mobile chronology clears the safe-area header and preserves image 
   assert.match(chronicleMobile, /href=\{`#\$\{anchorId\}`\}/);
   assert.match(chronicleMobile, /id=\{anchorId\} key=\{anchorId\}/);
   assert.match(chronicleMobile, /function ChronicleMobileSlideImage/);
-  assert.match(chronicleMobile, /event\.currentTarget\.style\.visibility = 'hidden'/);
+  assert.match(chronicleMobile, /<ResponsiveCmsImage/);
+  assert.match(chronicleMobile, /mobileFilename=\{mobileImage\}/);
+  assert.match(chronicleMobile, /onDesktopError=/);
   assert.match(chronicleMobile, /setSource\(fallbackImage\)/);
   assert.match(chronicleMobile, /setFailed\(true\)/);
 });

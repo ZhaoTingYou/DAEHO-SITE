@@ -15,6 +15,7 @@ export type PageFieldEditorSettings = {
 
 export type PageArrayItemFieldDefinition = {
   path: string;
+  mobilePath?: string;
   label: string;
   labels?: Record<string, string>;
   type?: PageFieldType;
@@ -28,6 +29,7 @@ export type PageArrayItemFieldDefinition = {
 export type PageFieldDefinition = {
   groupKey?: string;
   path: string;
+  mobilePath?: string;
   label: string;
   labels?: Record<string, string>;
   type?: PageFieldType;
@@ -162,6 +164,10 @@ export function getEditableLeavesForPageGroup(
       ? getEditableArrayItemFieldLeaves(value, field.path, field.itemFields)
       : getEditableLeaves(value, field.path);
 
+    if (field.mobilePath) {
+      fieldLeaves.push(mobileImageLeaf(field.mobilePath, getObjectValueAtPath(content, field.mobilePath)));
+    }
+
     for (const leaf of fieldLeaves) {
       if (seenPaths.has(leaf.path)) {
         continue;
@@ -198,10 +204,26 @@ function getEditableArrayItemFieldLeaves(
         valueType: getEditableLeafValueType(value),
         isImage: itemField.type === 'image' || isImageEditableField(fieldPath, value)
       });
+
+      if (itemField.mobilePath) {
+        const mobilePath = joinPath(joinPath(path, String(index)), itemField.mobilePath);
+        leaves.push(mobileImageLeaf(mobilePath, getObjectValueAtPath(itemObject, itemField.mobilePath)));
+      }
     }
   });
 
   return leaves;
+}
+
+function mobileImageLeaf(path: string, value: unknown): EditableLeaf {
+  const normalizedValue = value ?? '';
+
+  return {
+    path,
+    value: normalizedValue,
+    valueType: getEditableLeafValueType(normalizedValue),
+    isImage: true
+  };
 }
 
 function getArrayItemFieldValue(item: Record<string, unknown>, itemField: PageArrayItemFieldDefinition) {

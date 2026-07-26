@@ -1,17 +1,19 @@
 'use client';
 
-import Image from 'next/image';
 import {useEffect, useRef, useState} from 'react';
 import {motion, useScroll, useTransform} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {PlaceholderImg} from '@/components/placeholder-img';
+import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
 import {imageSrc} from '@/lib/image-src';
 import {resolveVideoSource} from '@/lib/video-src';
 
 type HeroMediaProps = {
   poster: string;
+  mobilePoster?: string;
   videoPoster?: string;
+  mobileVideoPoster?: string;
   videoSrc?: string;
   webmSrc?: string;
   priority?: boolean;
@@ -26,7 +28,9 @@ type NavigatorWithConnection = Navigator & {
 
 export function HeroMedia({
   poster,
+  mobilePoster,
   videoPoster,
+  mobileVideoPoster,
   videoSrc,
   webmSrc,
   priority = false,
@@ -51,6 +55,7 @@ export function HeroMedia({
 
     return window.matchMedia('(pointer: coarse)').matches;
   });
+  const [mobileViewport, setMobileViewport] = useState<boolean | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const {scrollYProgress} = useScroll({
     target: frameRef,
@@ -60,14 +65,26 @@ export function HeroMedia({
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(pointer: coarse)');
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
     const updatePointer = () => setCoarsePointer(mediaQuery.matches);
+    const updateMobileViewport = () => setMobileViewport(mobileQuery.matches);
+    updateMobileViewport();
     mediaQuery.addEventListener('change', updatePointer);
+    mobileQuery.addEventListener('change', updateMobileViewport);
 
-    return () => mediaQuery.removeEventListener('change', updatePointer);
+    return () => {
+      mediaQuery.removeEventListener('change', updatePointer);
+      mobileQuery.removeEventListener('change', updateMobileViewport);
+    };
   }, []);
 
-  const resolvedPoster = imageSrc(poster);
-  const resolvedVideoPoster = videoPoster ? imageSrc(videoPoster) : undefined;
+  const resolvedMobilePoster = mobilePoster ? imageSrc(mobilePoster) : undefined;
+  const selectedVideoPoster = mobileViewport === null
+    ? undefined
+    : mobileViewport && mobileVideoPoster
+      ? mobileVideoPoster
+      : videoPoster;
+  const resolvedVideoPoster = selectedVideoPoster ? imageSrc(selectedVideoPoster) : undefined;
   const resolvedVideoSrc = resolveVideoSource(videoSrc);
   const resolvedWebmSrc = resolveVideoSource(webmSrc);
   const shouldRenderVideo =
@@ -152,14 +169,14 @@ export function HeroMedia({
               {resolvedVideoSrc ? <source src={resolvedVideoSrc} type="video/mp4" /> : null}
             </video>
           ) : (
-            <Image
-              src={resolvedPoster}
+            <ResponsiveCmsImage
+              filename={poster}
+              mobileFilename={resolvedMobilePoster}
               alt=""
-              fill
               priority={priority}
               sizes="100vw"
               className="object-cover"
-              onError={() => setImageFailed(true)}
+              onDesktopError={() => setImageFailed(true)}
             />
           )}
         </motion.div>

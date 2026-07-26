@@ -10,6 +10,7 @@ import {Reveal} from '@/components/motion/reveal';
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
+import {optionalImage} from '@/lib/optional-image';
 
 type LoyaltyContent = {
   hero: {
@@ -17,6 +18,7 @@ type LoyaltyContent = {
     title: string;
     subtitle: string;
     image: string;
+    mobileImage?: string;
   };
   metrics: Array<{
     value: number;
@@ -161,7 +163,8 @@ function normalizeLoyaltySlides(slides: LoyaltyFeatureSlide[]): LoyaltyFeatureSl
     return {
       ...slide,
       backgroundImage,
-      previewImage
+      previewImage,
+      mobileImage: optionalImage(slide, 'mobileImage')
     };
   });
 }
@@ -177,6 +180,7 @@ export function LoyaltyCommitmentPage({locale, content}: LoyaltyCommitmentPagePr
     <main className="mobile-page-shell bg-white text-primary">
       <HeritageHero
         image={heroImage}
+        mobileImage={optionalImage(content.hero, 'mobileImage')}
         imageAlt={content.hero.subtitle || copy.heroTitle}
         imagePlaceholder={resolveHeritageHeroPlaceholder(copy.imagePlaceholder)}
         label={copy.heroLabel}
