@@ -1,17 +1,17 @@
 'use client';
 
-import Image from 'next/image';
 import {type KeyboardEvent, useCallback, useEffect, useState} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import {AnimatePresence, motion} from 'framer-motion';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {PlaceholderImg} from '@/components/placeholder-img';
-import {imageSrc} from '@/lib/image-src';
+import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
 
 export type TechniqueCarouselItem = {
   id: string;
   image: string;
+  mobileImage?: string;
   title: string;
   body: string;
 };
@@ -101,6 +101,7 @@ export function TechniqueCarouselSection({
               >
                 <TechniqueCarouselImage
                   filename={item.image}
+                  mobileFilename={item.mobileImage}
                   alt={item.title}
                   sizes="(min-width: 1024px) 74vw, 84vw"
                 />
@@ -183,22 +184,32 @@ function CarouselArrow({
   );
 }
 
-function TechniqueCarouselImage({alt, filename, sizes}: {alt: string; filename: string; sizes: string}) {
+function TechniqueCarouselImage({
+  alt,
+  filename,
+  mobileFilename,
+  sizes
+}: {
+  alt: string;
+  filename: string;
+  mobileFilename?: string;
+  sizes: string;
+}) {
   const [failed, setFailed] = useState(false);
 
   if (!filename || failed) {
-    return <PlaceholderImg filename={filename || alt} aspect="aspect-[2/1]" />;
+    return <PlaceholderImg filename={filename || alt} aspect="aspect-[4/3] md:aspect-[2/1]" />;
   }
 
   return (
-    <div className="relative w-full overflow-hidden bg-white aspect-[2/1]">
-      <Image
-        src={imageSrc(filename)}
+    <div className="relative aspect-[4/3] w-full overflow-hidden bg-white md:aspect-[2/1]">
+      <ResponsiveCmsImage
+        filename={filename}
+        mobileFilename={mobileFilename}
         alt={alt}
-        fill
         sizes={sizes}
         className="object-cover"
-        onError={() => setFailed(true)}
+        onDesktopError={() => setFailed(true)}
       />
     </div>
   );

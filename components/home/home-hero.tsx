@@ -9,7 +9,9 @@ type HomeHeroProps = {
   title: string;
   subtitle: string;
   poster: string;
+  mobilePoster?: string;
   videoPoster?: string;
+  mobileVideoPoster?: string;
   videoSrc?: string;
   webmSrc?: string;
   locale: Locale;
@@ -20,7 +22,9 @@ export function HomeHero({
   title,
   subtitle,
   poster,
+  mobilePoster,
   videoPoster,
+  mobileVideoPoster,
   videoSrc,
   webmSrc,
   locale
@@ -36,7 +40,9 @@ export function HomeHero({
     <section className="relative min-h-[80svh] overflow-hidden bg-bg md:min-h-screen">
       <HeroMedia
         poster={poster}
+        mobilePoster={mobilePoster}
         videoPoster={videoPoster}
+        mobileVideoPoster={mobileVideoPoster}
         videoSrc={videoSrc}
         webmSrc={webmSrc}
         priority

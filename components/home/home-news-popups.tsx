@@ -1,10 +1,9 @@
 'use client';
 
 import {AnimatePresence, motion} from 'framer-motion';
-import Image from 'next/image';
 import {type KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useId, useRef, useState} from 'react';
 
-import {imageSrc} from '@/lib/image-src';
+import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
 
 export type HomeNewsPopupCard = {
   id: string;
@@ -13,6 +12,7 @@ export type HomeNewsPopupCard = {
   date: string;
   title: string;
   image: string;
+  mobileImage?: string;
   hasImage: boolean;
   body?: string;
 };
@@ -255,10 +255,10 @@ function NewsImage({
         fillFrame ? 'aspect-[4/3] max-h-[calc(100dvh-136px)] md:aspect-square' : 'aspect-[3/4]'
       }`}
     >
-      <Image
-        src={imageSrc(card.image)}
+      <ResponsiveCmsImage
+        filename={card.image}
+        mobileFilename={card.mobileImage}
         alt={`${card.categoryLabel} ${card.title}`}
-        fill
         priority={priority}
         sizes="(min-width: 1280px) 290px, (min-width: 768px) 50vw, 100vw"
         className="object-cover"

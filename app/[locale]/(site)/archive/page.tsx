@@ -7,6 +7,7 @@ import {imageSrc} from '@/lib/image-src';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
+import {optionalImage} from '@/lib/optional-image';
 
 type Props = {
   params: Promise<{locale: Locale}>;
@@ -28,6 +29,7 @@ export default async function ChroniclePage({params}: Props) {
     title: item.title,
     desc: item.body,
     image: imageSrc(item.image),
+    mobileImage: imageSrc(optionalImage(item, 'mobileImage')),
     fallbackImage: imageSrc(`chronicle_milestone_${String(index + 1).padStart(2, '0')}.png`)
   }));
   const endNav = {

@@ -12,6 +12,7 @@ import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
 import {normalizeAchievementFirstRecords} from '@/lib/achievement-first-records-core';
+import {optionalImage} from '@/lib/optional-image';
 
 type AchievementContent = {
   hero: {
@@ -19,6 +20,7 @@ type AchievementContent = {
     title: string;
     subtitle: string;
     image: string;
+    mobileImage?: string;
   };
   gallery?: {
     items: Array<{
@@ -292,6 +294,7 @@ export function AchievementRecordsPage({locale, content}: AchievementRecordsPage
     <main className="mobile-page-shell bg-white text-primary">
       <HeritageHero
         image={heroImage}
+        mobileImage={optionalImage(content.hero, 'mobileImage')}
         imageAlt={content.hero.subtitle || copy.heroTitle}
         imagePlaceholder={resolveHeritageHeroPlaceholder(copy.imagePlaceholder)}
         label={copy.heroLabel}

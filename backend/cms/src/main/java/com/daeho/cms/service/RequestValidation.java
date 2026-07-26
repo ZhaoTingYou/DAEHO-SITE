@@ -27,6 +27,7 @@ public class RequestValidation {
     var issues = new ArrayList<Map<String, String>>();
     var payload = mutableCopy(body);
     payload.putIfAbsent("imagePath", "");
+    payload.putIfAbsent("mobileImagePath", "");
     payload.putIfAbsent("publishedAt", "");
     payload.putIfAbsent("isFeatured", false);
     payload.putIfAbsent("isVisible", true);

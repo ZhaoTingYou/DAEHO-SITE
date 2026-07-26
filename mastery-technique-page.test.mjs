@@ -284,11 +284,12 @@ test('Technique carousel uses Embla looped dragging with arrows, dots, keyboard,
   assert.doesNotMatch(techniqueCarouselSource, /autoplay|setInterval|setTimeout/);
 });
 
-test('Technique carousel renders dynamic 2:1 slides with center sizing and side previews at every breakpoint', () => {
+test('Technique carousel renders 4:3 mobile and 2:1 desktop slides with center sizing and side previews', () => {
   assert.match(techniqueCarouselSource, /items:\s*TechniqueCarouselItem\[\]/);
   assert.match(techniqueCarouselSource, /items\.map\(\(item, index\) =>/);
   assert.match(techniqueCarouselSource, /key=\{item\.id\}/);
-  assert.match(techniqueCarouselSource, /aspect="aspect-\[2\/1\]"/);
+  assert.match(techniqueCarouselSource, /aspect-\[4\/3\].*md:aspect-\[2\/1\]/);
+  assert.match(techniqueCarouselSource, /mobileFilename=\{item\.mobileImage\}/);
   assert.match(techniqueCarouselSource, /basis-\[86vw\]/);
   assert.match(techniqueCarouselSource, /md:basis-\[86vw\]/);
   assert.match(techniqueCarouselSource, /lg:basis-\[calc\(min\(74vw,1920px\)\+24px\)\]/);

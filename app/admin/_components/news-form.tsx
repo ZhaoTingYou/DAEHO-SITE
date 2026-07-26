@@ -7,6 +7,7 @@ import {
   CheckboxField,
   ImageUploadField,
   type MediaLibraryItem,
+  ResponsiveImageUploadField,
   SecondaryLink,
   SubmitButton,
   TextAreaField,
@@ -25,6 +26,7 @@ type NewsItem = {
   slug: string;
   category: string;
   imagePath: string;
+  mobileImagePath: string;
   publishedAt: string;
   isFeatured: boolean;
   isVisible: boolean;
@@ -76,22 +78,32 @@ export function NewsForm({
           <CheckboxField label={t('form.visible')} name="isVisible" defaultChecked={item?.isVisible ?? true} />
         </div>
         <div className="mt-4">
-          <ImageUploadField
+          <ResponsiveImageUploadField
             label={t('form.imageFilename')}
-            name="imagePath"
-            uploadName="imageUpload"
-            defaultValue={item?.imagePath}
+            desktopLabel={t('page.desktopImage')}
+            mobileLabel={t('page.mobileImage')}
+            desktopName="imagePath"
+            desktopUploadName="imageUpload"
+            desktopDefaultValue={item?.imagePath}
+            mobileName="mobileImagePath"
+            mobileUploadName="mobileImageUpload"
+            mobileDefaultValue={item?.mobileImagePath}
             uploadLabel={t('page.uploadLocalImage')}
             uploadHint={t('page.uploadLocalImageHint')}
-            imageGuide={t('imageGuide.newsCover')}
+            desktopImageGuide={t('imageGuide.newsCover')}
+            mobileImageGuide={t('imageGuide.newsMobileCover')}
             emptyLabel={t('common.noImage')}
             changedLabel={t('common.changed')}
             selectedLabel={t('common.imageSelected')}
+            syncedLabel={t('common.imageSynced')}
             mediaItems={mediaItems}
             mediaSelectLabel={t('media.selectFromLibrary')}
             mediaLibraryTitle={t('media.libraryTitle')}
             mediaEmptyLabel={t('media.libraryEmpty')}
             mediaSelectedLabel={t('media.selectedExisting')}
+            clearLabel={t('page.clearMobileImage')}
+            clearedLabel={t('page.mobileImageCleared')}
+            fallbackHint={t('page.mobileImageFallback')}
           />
         </div>
       </Panel>

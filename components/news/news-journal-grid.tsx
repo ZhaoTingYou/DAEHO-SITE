@@ -1,12 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import {useMemo, useState} from 'react';
 
 import {EmptyState} from '@/components/empty-state';
+import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
 import type {Locale} from '@/i18n/routing';
-import {imageSrc} from '@/lib/image-src';
 
 export type NewsFilter = {
   id: string;
@@ -21,6 +20,7 @@ export type NewsCard = {
   date: string;
   title: string;
   image: string;
+  mobileImage?: string;
   hasImage: boolean;
 };
 
@@ -127,10 +127,10 @@ function NewsCardImage({card}: {card: NewsCard}) {
 
   return (
     <div className="relative aspect-[3/4] max-md:aspect-[4/3] w-full overflow-hidden bg-bg">
-      <Image
-        src={imageSrc(card.image)}
+      <ResponsiveCmsImage
+        filename={card.image}
+        mobileFilename={card.mobileImage}
         alt={`${card.categoryLabel} ${card.title}`}
-        fill
         sizes="(min-width: 1280px) 420px, (min-width: 768px) 50vw, 100vw"
         className="object-cover"
       />

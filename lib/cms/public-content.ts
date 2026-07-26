@@ -235,6 +235,7 @@ function toNewsCard(item: Record<string, unknown>, locale: Locale): NewsCard {
     date: String(item.publishedAt),
     title: String(item.title),
     image,
+    mobileImage: cmsImageName(item.mobileImagePath),
     hasImage: imageExists(image)
   };
 }

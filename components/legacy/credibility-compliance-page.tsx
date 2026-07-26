@@ -8,6 +8,7 @@ import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
 import {imageExists} from '@/lib/image-exists';
+import {optionalImage} from '@/lib/optional-image';
 
 type CredibilityContent = {
   hero: {
@@ -15,6 +16,7 @@ type CredibilityContent = {
     title: string;
     subtitle: string;
     image: string;
+    mobileImage?: string;
   };
   copy?: Partial<Omit<CredibilityPageCopy, 'rows'>> & {
     rows?: CredibilityStandardRowInput[];
@@ -271,6 +273,7 @@ export function CredibilityCompliancePage({locale, content}: CredibilityComplian
       <HeritageHero
         body={copy.intro}
         image={heroImage}
+        mobileImage={optionalImage(content.hero, 'mobileImage')}
         imageAlt={content.hero.subtitle || copy.heroTitle}
         imagePlaceholder={resolveHeritageHeroPlaceholder(copy.imagePlaceholder)}
         label={copy.heroLabel}

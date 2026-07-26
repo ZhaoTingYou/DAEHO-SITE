@@ -19,6 +19,21 @@ const guideSpecs = {
     ko: '넓은 object-cover 영역입니다. 주 피사체는 중앙 또는 문구 반대편에 두세요.',
     en: 'Large object-cover area. Keep the subject centered or away from text.'
   }),
+  mobileHero: spec('9:16', '1080 x 1920', {
+    zh: '手机 Hero 专用竖图；主体放在中央安全区，避免贴近上下边缘。',
+    ko: '모바일 Hero 전용 세로 이미지입니다. 피사체는 중앙 안전 영역에 두세요.',
+    en: 'Portrait mobile Hero image. Keep the subject inside the center safe area.'
+  }),
+  mobileWide: spec('4:3', '1600 x 1200', {
+    zh: '手机横图；主体居中并预留裁切空间。',
+    ko: '모바일 가로 이미지입니다. 피사체를 중앙에 두고 재단 여백을 남기세요.',
+    en: 'Mobile landscape image. Center the subject and leave crop room.'
+  }),
+  mobileCollectionBackground: spec('4:5', '1200 x 1500', {
+    zh: 'Creations 手机分类背景；产品和主体放在中间区域。',
+    ko: 'Creations 모바일 카테고리 배경입니다. 제품과 피사체를 중앙에 두세요.',
+    en: 'Mobile Creations category background. Keep the product and subject centered.'
+  }),
   seo: spec('1.91:1', '1200 x 630', {
     zh: '用于搜索和社交分享预览。',
     ko: '검색 및 소셜 공유 미리보기에 사용합니다.',
@@ -180,47 +195,62 @@ const pageGuideKeys: Record<string, string> = {
   'site-popup|main|image': 'sitePopup',
 
   'home|main|image': 'heroBackground',
+  'home|main|mobileImage': 'mobileHero',
   'home|main|videoPoster': 'heroBackground',
+  'home|main|mobileVideoPoster': 'mobileHero',
   'home|homeUi|currentPulse.primaryImage': 'homePulse',
+  'home|homeUi|currentPulse.primaryMobileImage': 'mobileWide',
   'home|homeUi|currentPulse.secondaryImage': 'homePulse',
+  'home|homeUi|currentPulse.secondaryMobileImage': 'mobileWide',
   'home|main|signature.projects.*.image': 'square',
   'home|main|videoSection.poster': 'videoPoster',
   'home|homeUi|partners.items.*.logo': 'logo',
 
   'archive|main|timeline.items.*.image': 'archive',
+  'archive|main|timeline.items.*.mobileImage': 'mobileWide',
 
   'heritage-loyalty|main|hero.image': 'heroBackground',
+  'heritage-loyalty|main|hero.mobileImage': 'mobileHero',
   'heritage-loyalty|main|copy.featureSlides.*.backgroundImage': 'heroBackground',
+  'heritage-loyalty|main|copy.featureSlides.*.mobileImage': 'mobileWide',
   'heritage-loyalty|main|copy.featureSlides.*.previewImage': 'portrait',
 
   'heritage-credibility|main|hero.image': 'heroBackground',
+  'heritage-credibility|main|hero.mobileImage': 'mobileHero',
   'heritage-credibility|main|copy.rows.*.image': 'wide43Scaled',
 
   'heritage-achievement|main|hero.image': 'heroBackground',
+  'heritage-achievement|main|hero.mobileImage': 'mobileHero',
   'heritage-achievement|main|copy.firstRecords.*.image': 'firstRecord',
   'heritage-achievement|main|copy.marketFeatures.*.image': 'marketWide',
   'heritage-achievement|main|gallery.items.*.image': 'portrait',
 
   'mastery-technique|main|hero.image': 'ultrawide',
+  'mastery-technique|main|hero.mobileImage': 'mobileHero',
   'mastery-technique|main|records.items.*.image': 'techniqueCarousel',
+  'mastery-technique|main|records.items.*.mobileImage': 'mobileWide',
   'mastery-technique|main|standards.items.*.image': 'square',
 
   'mastery-making|main|hero.image': 'ultrawide',
+  'mastery-making|main|hero.mobileImage': 'mobileHero',
   'mastery-making|main|process.steps.*.image': 'square',
   'mastery-making|main|details.items.*.image': 'square',
 
   'mastery-creations|main|gallery.filters.*.image': 'collectionProduct',
   'mastery-creations|main|gallery.filters.*.background': 'collectionBackground',
+  'mastery-creations|main|gallery.filters.*.mobileBackground': 'mobileCollectionBackground',
   'mastery-creations|main|gallery.filters.*.product': 'collectionStageProduct',
   'mastery-creations|main|gallery.filters.*.mobileImage': 'mobileCollectionAct',
 
   'mastery-creations-champion|main|image': 'collectionProduct',
   'mastery-creations-champion|main|background': 'collectionBackground',
+  'mastery-creations-champion|main|mobileBackground': 'mobileCollectionBackground',
   'mastery-creations-champion|main|product': 'collectionStageProduct',
   'mastery-creations-champion|main|mobileImage': 'mobileCollectionAct',
 
   'mastery-creations-appointment|main|image': 'collectionProduct',
   'mastery-creations-appointment|main|background': 'collectionBackground',
+  'mastery-creations-appointment|main|mobileBackground': 'mobileCollectionBackground',
   'mastery-creations-appointment|main|product': 'collectionStageProduct',
   'mastery-creations-appointment|main|mobileImage': 'mobileCollectionAct',
   'mastery-creations-appointment|appointment|heroImage': 'appointmentHero',
@@ -230,6 +260,7 @@ const pageGuideKeys: Record<string, string> = {
 
   'mastery-creations-bespoke|main|image': 'collectionProduct',
   'mastery-creations-bespoke|main|background': 'collectionBackground',
+  'mastery-creations-bespoke|main|mobileBackground': 'mobileCollectionBackground',
   'mastery-creations-bespoke|main|product': 'collectionStageProduct',
   'mastery-creations-bespoke|main|mobileImage': 'mobileCollectionAct',
 

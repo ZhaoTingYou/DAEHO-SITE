@@ -1,11 +1,13 @@
-import Image from 'next/image';
+'use client';
 
-import {imageExists} from '@/lib/image-exists';
-import {imageSrc} from '@/lib/image-src';
+import {useState} from 'react';
+
 import {PlaceholderImg} from './placeholder-img';
+import {ResponsiveCmsImage} from './responsive-cms-image';
 
 type SafeImageProps = {
   filename: string;
+  mobileFilename?: string;
   alt: string;
   aspect?: string;
   priority?: boolean;
@@ -15,13 +17,16 @@ type SafeImageProps = {
 
 export function SafeImage({
   filename,
+  mobileFilename,
   alt,
   aspect = 'aspect-[4/3]',
   priority = false,
   sizes = '(min-width: 1024px) 520px, 100vw',
   variant = 'spotlight'
 }: SafeImageProps) {
-  if (!imageExists(filename)) {
+  const [failed, setFailed] = useState(false);
+
+  if (!filename.trim() || failed) {
     return <PlaceholderImg filename={filename} aspect={aspect} />;
   }
 
@@ -32,13 +37,14 @@ export function SafeImage({
 
   return (
     <div className={`${aspect} ${frame} relative w-full overflow-hidden`}>
-      <Image
-        src={imageSrc(filename)}
+      <ResponsiveCmsImage
+        filename={filename}
+        mobileFilename={mobileFilename}
         alt={alt}
-        fill
         priority={priority}
         sizes={sizes}
         className="object-cover"
+        onDesktopError={() => setFailed(true)}
       />
     </div>
   );

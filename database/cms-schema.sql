@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS cms_news (
   slug TEXT NOT NULL UNIQUE,
   category TEXT NOT NULL,
   image_path TEXT NOT NULL DEFAULT '',
+  mobile_image_path TEXT NOT NULL DEFAULT '',
   published_at TEXT NOT NULL DEFAULT '',
   is_featured INTEGER NOT NULL DEFAULT 0,
   is_visible INTEGER NOT NULL DEFAULT 1,

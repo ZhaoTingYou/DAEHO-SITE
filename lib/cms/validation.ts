@@ -56,6 +56,7 @@ export const newsPayloadSchema = z.object({
   slug: z.string().trim().min(1).optional(),
   category: z.string().trim().min(1),
   imagePath: optionalText,
+  mobileImagePath: optionalText,
   publishedAt: optionalText,
   isFeatured: z.coerce.boolean().optional().default(false),
   isVisible: z.coerce.boolean().optional().default(true),

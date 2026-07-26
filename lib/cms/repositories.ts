@@ -37,6 +37,7 @@ export type CmsNews = {
   slug: string;
   category: string;
   imagePath: string;
+  mobileImagePath: string;
   publishedAt: string;
   isFeatured: boolean;
   isVisible: boolean;

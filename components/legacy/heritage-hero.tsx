@@ -1,11 +1,10 @@
-import Image from 'next/image';
-
 import {Reveal} from '@/components/motion/reveal';
-import {imageSrc} from '@/lib/image-src';
+import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
 
 type HeritageHeroProps = {
   body?: string;
   image?: string;
+  mobileImage?: string;
   imageAlt?: string;
   imagePlaceholder: string;
   label: string;
@@ -16,6 +15,7 @@ type HeritageHeroProps = {
 export function HeritageHero({
   body,
   image,
+  mobileImage,
   imageAlt = '',
   imagePlaceholder,
   label,
@@ -30,10 +30,10 @@ export function HeritageHero({
     <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#f4f1ee] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[78svh] max-md:px-[var(--mobile-page-gutter)] max-md:pb-[80px] max-md:pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+80px)]">
       {image ? (
         <>
-          <Image
-            src={imageSrc(image)}
+          <ResponsiveCmsImage
+            filename={image}
+            mobileFilename={mobileImage}
             alt={imageAlt}
-            fill
             priority
             sizes="100vw"
             className="object-cover"

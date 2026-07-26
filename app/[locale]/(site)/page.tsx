@@ -16,6 +16,7 @@ import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 import {resolveVideoSource} from '@/lib/video-src';
+import {optionalImage} from '@/lib/optional-image';
 import koMessages from '@/messages/ko.json';
 
 type Props = {
@@ -71,8 +72,10 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
         title={content.title}
         subtitle={content.subtitle}
         poster={content.image || 'home hero.png'}
+        mobilePoster={optionalImage(content, 'mobileImage')}
         videoSrc={heroMediaMode === 'video' ? content.videoSrc || 'home.mp4' : undefined}
         videoPoster={content.videoPoster || content.image || 'home hero.png'}
+        mobileVideoPoster={optionalImage(content, 'mobileVideoPoster')}
         webmSrc={heroMediaMode === 'video' ? content.webmSrc || undefined : undefined}
         locale={locale}
       />
@@ -101,6 +104,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                     <div className="hover-zoom-media">
                       <SafeImage
                         filename={primaryPulseImage}
+                        mobileFilename={optionalImage(currentPulse, 'primaryMobileImage')}
                         alt={currentPulse.primaryTitle}
                         aspect="aspect-[4/3] lg:aspect-[2.05/1]"
                         variant="plain"
@@ -119,6 +123,7 @@ function HomeContent({content, homeUi, latestNews, locale}: HomeContentProps) {
                   <div className="hover-zoom-media">
                     <SafeImage
                       filename={secondaryPulseImage}
+                      mobileFilename={optionalImage(currentPulse, 'secondaryMobileImage')}
                       alt={currentPulse.secondaryTitle}
                         aspect="aspect-[4/3] lg:aspect-[2.05/1]"
                       variant="plain"

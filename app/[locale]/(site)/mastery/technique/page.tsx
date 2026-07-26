@@ -12,6 +12,7 @@ import type {Locale} from '@/i18n/routing';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {getPageMetadata} from '@/lib/seo';
+import {optionalImage} from '@/lib/optional-image';
 
 type Props = {
   params: Promise<{locale: Locale}>;
@@ -57,6 +58,7 @@ export default async function TechniqueRecordPage({params}: Props) {
           <Reveal className="mx-auto mt-[clamp(46px,6vw,78px)] w-full max-w-[1120px] border border-primary/12 bg-white p-2 shadow-[0_30px_100px_rgba(16,29,48,.08)]">
             <SafeImage
               filename={content.hero.image}
+              mobileFilename={optionalImage(content.hero, 'mobileImage')}
               alt={content.hero.title}
               aspect="aspect-[21/9]"
               variant="plain"

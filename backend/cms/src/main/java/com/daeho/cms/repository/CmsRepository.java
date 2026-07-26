@@ -151,14 +151,15 @@ public class CmsRepository {
     var slug = firstNonBlank(payload.get("slug"), id);
     jdbc.update("""
         INSERT INTO cms_news (
-          id, slug, category, image_path, published_at, is_featured, is_visible,
-          sort_order, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+          id, slug, category, image_path, mobile_image_path, published_at,
+          is_featured, is_visible, sort_order, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
         """,
         id,
         slug,
         validation.stringValue(payload.get("category")),
         validation.stringValue(payload.get("imagePath")),
+        validation.stringValue(payload.get("mobileImagePath")),
         validation.stringValue(payload.get("publishedAt")),
         validation.booleanValue(payload.get("isFeatured"), false),
         validation.booleanValue(payload.get("isVisible"), true),
@@ -179,6 +180,7 @@ public class CmsRepository {
           slug = ?,
           category = ?,
           image_path = ?,
+          mobile_image_path = ?,
           published_at = ?,
           is_featured = ?,
           is_visible = ?,
@@ -189,6 +191,7 @@ public class CmsRepository {
         firstNonBlank(payload.get("slug"), existing.get("slug")),
         validation.stringValue(payload.get("category")),
         validation.stringValue(payload.get("imagePath")),
+        validation.stringValue(payload.get("mobileImagePath")),
         validation.stringValue(payload.get("publishedAt")),
         validation.booleanValue(payload.get("isFeatured"), false),
         validation.booleanValue(payload.get("isVisible"), true),
@@ -788,6 +791,7 @@ public class CmsRepository {
         "slug", rs.getString("slug"),
         "category", rs.getString("category"),
         "imagePath", rs.getString("image_path"),
+        "mobileImagePath", rs.getString("mobile_image_path"),
         "publishedAt", rs.getString("published_at"),
         "isFeatured", rs.getBoolean("is_featured"),
         "isVisible", rs.getBoolean("is_visible"),
@@ -817,6 +821,7 @@ public class CmsRepository {
         "slug", rs.getString("slug"),
         "category", rs.getString("category"),
         "imagePath", rs.getString("image_path"),
+        "mobileImagePath", rs.getString("mobile_image_path"),
         "publishedAt", rs.getString("published_at"),
         "isFeatured", rs.getBoolean("is_featured"),
         "sortOrder", rs.getInt("sort_order"),
