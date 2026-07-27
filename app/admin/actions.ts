@@ -68,6 +68,7 @@ import {
   type PageDefinition,
 } from '@/lib/cms/page-catalog';
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {pruneObjectPaths} from '@/lib/cms/page-content-pruning-core.mjs';
 import type {TechniqueLocaleRecord} from '@/lib/cms/technique-records-core.mjs';
 import {
   getExternalSiteValidationMessageKey,
@@ -652,6 +653,11 @@ async function readPageLocaleContent(
         sharedContentImages
       );
     }
+
+    const retiredPaths = definition?.retiredFields
+      ?.filter((field) => field.groupKey === group.key)
+      .map((field) => field.path) ?? [];
+    pruneObjectPaths(nextContent, retiredPaths);
 
     nextGroups[group.key] = nextContent;
   }

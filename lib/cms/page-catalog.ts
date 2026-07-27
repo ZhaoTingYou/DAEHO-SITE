@@ -45,6 +45,11 @@ export type PageContentGroupDefinition = {
   sourcePath: string;
 };
 
+export type PageRetiredFieldDefinition = {
+  groupKey: string;
+  path: string;
+};
+
 export type PageDefinition = {
   pageKey: string;
   title: string;
@@ -54,6 +59,7 @@ export type PageDefinition = {
   href: string;
   sourcePath: string;
   contentGroups?: PageContentGroupDefinition[];
+  retiredFields?: PageRetiredFieldDefinition[];
   fields: PageFieldDefinition[];
 };
 

@@ -16,7 +16,9 @@ const historyBackButtonSource = existsSync(historyBackButtonUrl)
 const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
 const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
+const cmsPreview = JSON.parse(readFileSync(new URL('../../data/cms-preview.json', import.meta.url), 'utf8'));
 const publicContentSource = readFileSync(new URL('../../lib/cms/public-content.ts', import.meta.url), 'utf8');
+const adminActionsSource = readFileSync(new URL('../../app/admin/actions.ts', import.meta.url), 'utf8');
 const adminCollectionsSource = readFileSync(new URL('../../app/admin/(dashboard)/collections/page.tsx', import.meta.url), 'utf8');
 const collectionFormSource = readFileSync(new URL('../../app/admin/_components/collection-form.tsx', import.meta.url), 'utf8');
 const bespokeViewSource = source.slice(
@@ -213,6 +215,19 @@ test('collection edit form uses a fixed category dropdown', () => {
 });
 
 test('collection detail keeps only the work story beside the gallery and removes retired sections', () => {
+  const retiredDetailKeys = [
+    'specs',
+    'material',
+    'stones',
+    'year',
+    'madeFor',
+    'placeholder',
+    'detailStrip',
+    'processTitle',
+    'processCta',
+    'processHref'
+  ];
+
   assert.ok(
     detailPageSource.includes('{text.story}') &&
       detailPageSource.includes('{item.story || item.caption}'),
@@ -224,18 +239,7 @@ test('collection detail keeps only the work story beside the gallery and removes
   assert.equal(publicContentSource.includes('normalizeCollectionDetailImages'), false, 'retired detail images should not remain in the public model');
 
   for (const messages of [koMessages, enMessages]) {
-    for (const retiredKey of [
-      'specs',
-      'material',
-      'stones',
-      'year',
-      'madeFor',
-      'placeholder',
-      'detailStrip',
-      'processTitle',
-      'processCta',
-      'processHref'
-    ]) {
+    for (const retiredKey of retiredDetailKeys) {
       assert.equal(
         Object.hasOwn(messages.collectionUi.detail, retiredKey),
         false,
@@ -252,6 +256,35 @@ test('collection detail keeps only the work story beside the gallery and removes
   assert.equal(detailFieldPaths.includes('detail'), false, 'CMS should not expose the retired detail JSON blob');
   assert.equal(detailFieldPaths.includes('detail.processHref'), false, 'CMS should not expose the retired process link');
   assert.ok(detailFieldPaths.includes('detail.story'), 'the remaining work-story label should stay editable');
+
+  const retiredCmsPaths = creationsPage.retiredFields
+    .filter((field) => field.groupKey === 'collectionUi')
+    .map((field) => field.path);
+  assert.deepEqual(
+    retiredCmsPaths,
+    retiredDetailKeys.map((key) => `detail.${key}`),
+    'CMS saves should explicitly prune every retired Collection detail value'
+  );
+  assert.ok(
+    adminActionsSource.includes('pruneObjectPaths(nextContent, retiredPaths)'),
+    'the page save flow should prune retired CMS values before persistence'
+  );
+
+  const previewRow = cmsPreview.tables.cms_pages.find((row) => row.page_key === 'mastery-creations');
+  assert.ok(previewRow, 'the static CMS preview should include the Creations page');
+
+  for (const localeField of ['content_ko', 'content_en']) {
+    const previewContent = JSON.parse(previewRow[localeField]);
+    const previewDetail = previewContent.__groups.collectionUi.detail;
+
+    for (const retiredKey of retiredDetailKeys) {
+      assert.equal(
+        Object.hasOwn(previewDetail, retiredKey),
+        false,
+        `static CMS preview ${localeField} should not retain ${retiredKey}`
+      );
+    }
+  }
 });
 
 test('bespoke shuffle uses the Collection item pool and repeats only when there are fewer images than slots', () => {
