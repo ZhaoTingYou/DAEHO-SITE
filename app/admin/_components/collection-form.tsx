@@ -36,10 +36,6 @@ type CollectionTranslation = {
   story?: string;
   categoryLabel?: string;
   sportCategoryLabel?: string;
-  material?: string;
-  stones?: string;
-  madeFor?: string;
-  workInfo?: string;
   seoTitle?: string;
   seoDescription?: string;
   ogImagePath?: string;
@@ -98,7 +94,6 @@ export function CollectionForm({
           />
           <CollectionSpecificationsPanel
             specs={specs}
-            translations={item?.translations ?? {}}
             messages={messages}
           />
         </div>
@@ -148,11 +143,9 @@ export function CollectionForm({
 
 function CollectionSpecificationsPanel({
   specs,
-  translations,
   messages
 }: {
   specs: ReturnType<typeof normalizeSpecs>;
-  translations: Record<string, unknown>;
   messages: Record<string, string>;
 }) {
   const t = createAdminTranslator(messages);
@@ -174,25 +167,6 @@ function CollectionSpecificationsPanel({
           />
         </div>
       </div>
-      {locales.map((locale) => {
-        const translation = (translations[locale] ?? {}) as CollectionTranslation;
-
-        return (
-          <ContentLocalePanel key={locale} locale={locale}>
-            <section className="grid min-w-0 max-w-full gap-4 border-t border-[#d9dee7] pt-4">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">
-                {getContentLocaleLabel(messages, locale)}
-              </h3>
-              <div className="grid min-w-0 max-w-full gap-4 sm:grid-cols-2">
-                <TextField label={t('form.material')} name={`${locale}.material`} defaultValue={translation.material} editorLocale={locale} />
-                <TextField label={t('form.stones')} name={`${locale}.stones`} defaultValue={translation.stones} editorLocale={locale} />
-                <TextField label={t('form.madeFor')} name={`${locale}.madeFor`} defaultValue={translation.madeFor} editorLocale={locale} />
-                <TextField label={t('form.workInfo')} name={`${locale}.workInfo`} defaultValue={translation.workInfo} editorLocale={locale} />
-              </div>
-            </section>
-          </ContentLocalePanel>
-        );
-      })}
     </div>
   );
 }

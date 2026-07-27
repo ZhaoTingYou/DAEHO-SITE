@@ -142,10 +142,6 @@ function mapPublicCollection(row: Record<string, unknown>, translation: Record<s
     story: stringValue(translation.story),
     categoryLabel: stringValue(translation.category_label),
     sportCategoryLabel: stringValue(translation.sport_category_label),
-    material: stringValue(translation.material),
-    stones: stringValue(translation.stones),
-    madeFor: stringValue(translation.made_for),
-    workInfo: stringValue(translation.work_info),
     seoTitle: stringValue(translation.seo_title),
     seoDescription: stringValue(translation.seo_description),
     ogImagePath: stringValue(translation.og_image_path)

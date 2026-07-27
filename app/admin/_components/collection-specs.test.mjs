@@ -4,14 +4,8 @@ import test from 'node:test';
 
 const formSource = readFileSync(new URL('./collection-form.tsx', import.meta.url), 'utf8');
 const actionsSource = readFileSync(new URL('../actions.ts', import.meta.url), 'utf8');
-const validationSource = readFileSync(
-  new URL('../../../lib/cms/validation.ts', import.meta.url),
-  'utf8'
-);
-const publicContentSource = readFileSync(
-  new URL('../../../lib/cms/public-content.ts', import.meta.url),
-  'utf8'
-);
+const validationSource = readFileSync(new URL('../../../lib/cms/validation.ts', import.meta.url), 'utf8');
+const publicContentSource = readFileSync(new URL('../../../lib/cms/public-content.ts', import.meta.url), 'utf8');
 const detailPageSource = readFileSync(
   new URL('../../../app/[locale]/(site)/mastery/creations/[slug]/page.tsx', import.meta.url),
   'utf8'
@@ -26,74 +20,44 @@ const migrationUrl = new URL(
 );
 const migrationSource = existsSync(migrationUrl) ? readFileSync(migrationUrl, 'utf8') : '';
 
-const localizedSpecFields = ['material', 'stones', 'madeFor', 'workInfo'];
+const retiredFields = ['material', 'stones', 'madeFor', 'workInfo'];
 
-test('collection CMS exposes and saves every localized specification shown on details', () => {
-  for (const field of localizedSpecFields) {
-    assert.ok(
+test('collection CMS retains Finder metadata but removes retired localized detail specifications', () => {
+  for (const field of retiredFields) {
+    assert.equal(
       formSource.includes(`name={\`\${locale}.${field}\`}`),
-      `Collection form should expose ${field} for each locale`
+      false,
+      `Collection form should not expose retired ${field}`
     );
-    assert.ok(
+    assert.equal(
       actionsSource.includes(`${field}: stringFromForm(formData, \`\${locale}.${field}\`)`),
-      `Collection action should save ${field} for each locale`
+      false,
+      `Collection action should not save retired ${field}`
     );
-    assert.match(
+    assert.doesNotMatch(
       validationSource,
       new RegExp(`\\b${field}: optionalText`),
-      `Collection validation should retain ${field}`
+      `Collection validation should not retain ${field}`
     );
-  }
-});
-
-test('localized specifications stay inside the original top specification card', () => {
-  const panelCallIndex = formSource.indexOf('<CollectionSpecificationsPanel');
-  const galleryIndex = formSource.indexOf('<CollectionGalleryField');
-  const panelDefinitionIndex = formSource.indexOf('function CollectionSpecificationsPanel');
-  const translationPanelIndex = formSource.indexOf('function TranslationPanel');
-  const translationPanelEndIndex = formSource.indexOf('function getTranslation');
-
-  assert.ok(panelCallIndex > 0 && panelCallIndex < galleryIndex, 'Specification card should remain beside the cover image');
-  assert.ok(panelDefinitionIndex > 0, 'Collection form should have one dedicated specification panel');
-
-  const specificationPanelSource = formSource.slice(panelDefinitionIndex, translationPanelIndex);
-  const translationPanelSource = formSource.slice(translationPanelIndex, translationPanelEndIndex);
-
-  for (const field of localizedSpecFields) {
-    assert.ok(
-      specificationPanelSource.includes(`name={\`\${locale}.${field}\`}`),
-      `${field} should be rendered in the top specification card`
-    );
-    assert.ok(
-      !translationPanelSource.includes(`name={\`\${locale}.${field}\`}`),
-      `${field} should not create a second specification card inside translation content`
-    );
-  }
-});
-
-test('collection repository persists and returns localized specification fields', () => {
-  for (const column of ['material', 'stones', 'made_for', 'work_info']) {
-    assert.ok(
-      migrationSource.includes(`ADD COLUMN IF NOT EXISTS ${column}`),
-      `Migration should add ${column}`
-    );
-    assert.ok(
-      repositorySource.includes(`rs.getString("${column}")`),
-      `Repository should return ${column}`
-    );
-  }
-});
-
-test('collection detail uses CMS specification values instead of fixed placeholders', () => {
-  for (const field of localizedSpecFields) {
-    assert.ok(
+    assert.equal(
       publicContentSource.includes(`${field}: String(cmsItem.${field} || '')`),
-      `Public collection mapping should expose ${field}`
+      false,
+      `Public collection mapping should not expose ${field}`
     );
   }
 
-  assert.ok(detailPageSource.includes('item.material || text.placeholder'));
-  assert.ok(detailPageSource.includes('item.stones || text.placeholder'));
-  assert.ok(detailPageSource.includes('item.madeFor || text.placeholder'));
-  assert.ok(detailPageSource.includes('item.workInfo || item.categoryLabel || text.placeholder'));
+  for (const field of ['year', 'sportCategory', 'linkHref']) {
+    assert.ok(formSource.includes(`name="specs.${field}"`), `Finder metadata should keep ${field}`);
+    assert.ok(actionsSource.includes(`${field}: stringFromForm(formData, 'specs.${field}')`));
+  }
+});
+
+test('collection detail and backend transport do not retain retired specification values', () => {
+  assert.doesNotMatch(detailPageSource, /item\.(material|stones|madeFor|workInfo)/);
+
+  for (const column of ['material', 'stones', 'made_for', 'work_info']) {
+    assert.ok(migrationSource.includes(`ADD COLUMN IF NOT EXISTS ${column}`), 'applied migrations must remain immutable');
+    assert.equal(repositorySource.includes(`rs.getString("${column}")`), false, `Repository should not return ${column}`);
+    assert.equal(repositorySource.includes(`t.${column}`), false, `Public queries should not select ${column}`);
+  }
 });
