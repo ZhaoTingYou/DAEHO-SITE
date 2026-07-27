@@ -156,7 +156,6 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
       year: specs.year,
       image,
       gallery,
-      detailImages: normalizeCollectionDetailImages(specs.detailImages),
       hasImage: imageExists(image),
       seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
       seoDescription: String(cmsItem.seoDescription || cmsItem.caption || ''),
@@ -182,7 +181,6 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
       'collection_detail_04.png',
       'collection_detail_05.png'
     ],
-    detailImages: [],
     hasImage: imageExists(item.image),
     seoTitle: item.title,
     seoDescription: item.caption,
@@ -296,8 +294,7 @@ function normalizeCollectionSpecs(value: unknown) {
     return {
       year: '',
       sportCategory: '',
-      linkHref: '',
-      detailImages: []
+      linkHref: ''
     };
   }
 
@@ -305,13 +302,8 @@ function normalizeCollectionSpecs(value: unknown) {
   return {
     year: typeof specs.year === 'string' ? specs.year : '',
     sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : '',
-    linkHref: typeof specs.linkHref === 'string' ? specs.linkHref : '',
-    detailImages: normalizeCollectionDetailImages(specs.detailImages)
+    linkHref: typeof specs.linkHref === 'string' ? specs.linkHref : ''
   };
-}
-
-function normalizeCollectionDetailImages(value: unknown) {
-  return normalizeCollectionImageArray(value).slice(0, 3);
 }
 
 function normalizeGallery(value: unknown, fallbackImage: string) {

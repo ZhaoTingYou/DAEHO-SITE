@@ -212,19 +212,46 @@ test('collection edit form uses a fixed category dropdown', () => {
   );
 });
 
-test('collection detail strip uses dedicated CMS detail images before gallery fallback', () => {
+test('collection detail keeps only the work story beside the gallery and removes retired sections', () => {
   assert.ok(
-    publicContentSource.includes('detailImages: normalizeCollectionDetailImages'),
-    'public collection records should expose detail strip images from CMS specs'
+    detailPageSource.includes('{text.story}') &&
+      detailPageSource.includes('{item.story || item.caption}'),
+    'the work story should remain beside the collection gallery'
   );
-  assert.ok(
-    detailPageSource.includes('const detailStripImages = item.detailImages.length > 0 ? item.detailImages : galleryImages.slice(1, 4)'),
-    'detail page should prefer dedicated detail images and only fall back to gallery images'
-  );
-  assert.ok(
-    detailPageSource.includes('detailStripImages.map'),
-    'detail strip should render from the dedicated image list'
-  );
+  assert.equal(detailPageSource.includes('const specs = ['), false, 'the right column should not render work specs');
+  assert.equal(detailPageSource.includes('detailStripImages'), false, 'the detail studies strip should be removed');
+  assert.equal(detailPageSource.includes('text.processTitle'), false, 'the applied process section should be removed');
+  assert.equal(publicContentSource.includes('normalizeCollectionDetailImages'), false, 'retired detail images should not remain in the public model');
+
+  for (const messages of [koMessages, enMessages]) {
+    for (const retiredKey of [
+      'specs',
+      'material',
+      'stones',
+      'year',
+      'madeFor',
+      'placeholder',
+      'detailStrip',
+      'processTitle',
+      'processCta',
+      'processHref'
+    ]) {
+      assert.equal(
+        Object.hasOwn(messages.collectionUi.detail, retiredKey),
+        false,
+        `collection detail copy should not retain ${retiredKey}`
+      );
+    }
+  }
+
+  const creationsPage = pageCatalog.find((page) => page.pageKey === 'mastery-creations');
+  const detailFieldPaths = creationsPage.fields
+    .filter((field) => field.groupKey === 'collectionUi' && field.path.startsWith('detail'))
+    .map((field) => field.path);
+
+  assert.equal(detailFieldPaths.includes('detail'), false, 'CMS should not expose the retired detail JSON blob');
+  assert.equal(detailFieldPaths.includes('detail.processHref'), false, 'CMS should not expose the retired process link');
+  assert.ok(detailFieldPaths.includes('detail.story'), 'the remaining work-story label should stay editable');
 });
 
 test('bespoke shuffle uses the Collection item pool and repeats only when there are fewer images than slots', () => {
