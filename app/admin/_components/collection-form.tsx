@@ -15,6 +15,7 @@ import {
 } from './admin-fields';
 import {Panel} from './admin-shell';
 import {CollectionGalleryField} from './collection-gallery-field';
+import {ContentLocaleForm, ContentLocalePanel} from './content-locale-editor';
 
 type CollectionItem = {
   id: string;
@@ -54,7 +55,15 @@ export function CollectionForm({
   const specs = normalizeSpecs(item?.specs);
 
   return (
-    <form action={saveCollectionAction} className="grid gap-6">
+    <ContentLocaleForm
+      action={saveCollectionAction}
+      className="grid gap-6"
+      label={t('contentLocale.editorLabel')}
+      localeLabels={{
+        ko: t('contentLocale.ko'),
+        en: t('contentLocale.en')
+      }}
+    >
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
 
       <Panel className="p-5">
@@ -118,15 +127,16 @@ export function CollectionForm({
         />
       </Panel>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6">
         {locales.map((locale) => (
-          <TranslationPanel
-            key={locale}
-            locale={locale}
-            mediaItems={mediaItems}
-            messages={messages}
-            translation={getTranslation(item, locale)}
-          />
+          <ContentLocalePanel key={locale} locale={locale}>
+            <TranslationPanel
+              locale={locale}
+              mediaItems={mediaItems}
+              messages={messages}
+              translation={getTranslation(item, locale)}
+            />
+          </ContentLocalePanel>
         ))}
       </div>
 
@@ -136,7 +146,7 @@ export function CollectionForm({
         </Link>
         <SubmitButton>{item ? t('form.saveCollection') : t('form.createCollection')}</SubmitButton>
       </div>
-    </form>
+    </ContentLocaleForm>
   );
 }
 

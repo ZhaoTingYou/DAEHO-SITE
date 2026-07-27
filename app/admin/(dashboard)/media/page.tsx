@@ -8,6 +8,11 @@ import {
   uploadMediaAction
 } from '../../actions';
 import {AdminActionAlert} from '../../_components/admin-feedback';
+import {
+  ContentLocalePanel,
+  ContentLocaleProvider,
+  ContentLocaleSwitcher
+} from '../../_components/content-locale-editor';
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
 
 type Props = {
@@ -26,8 +31,19 @@ export default async function AdminMediaPage({searchParams}: Props) {
         description={t('media.description')}
       />
 
-      <Panel className="mb-6 p-5">
-        <form action={uploadMediaAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
+      <ContentLocaleProvider>
+        <div className="mb-6">
+          <ContentLocaleSwitcher
+            label={t('contentLocale.editorLabel')}
+            labels={{
+              ko: t('contentLocale.ko'),
+              en: t('contentLocale.en')
+            }}
+          />
+        </div>
+
+        <Panel className="mb-6 p-5">
+          <form action={uploadMediaAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
           <label className="grid min-w-0 gap-1.5 text-sm font-semibold text-[#344054]">
             <span>{t('media.file')}</span>
             <input
@@ -39,24 +55,28 @@ export default async function AdminMediaPage({searchParams}: Props) {
             />
           </label>
           <MediaUploadTextField label={t('media.filename')} name="filename" placeholder="hero-ring.png" />
-          <MediaUploadTextField label={t('media.altKo')} name="altKo" />
-          <MediaUploadTextField label={t('media.altEn')} name="altEn" />
+          <ContentLocalePanel locale="ko">
+            <MediaUploadTextField label={t('media.altKo')} name="altKo" />
+          </ContentLocalePanel>
+          <ContentLocalePanel locale="en">
+            <MediaUploadTextField label={t('media.altEn')} name="altEn" />
+          </ContentLocalePanel>
           <div className="md:col-span-2 xl:col-span-1">
             <button className="admin-on-dark min-h-10 w-full whitespace-nowrap rounded-md bg-[#7a2230] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#101827] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]">
               {t('common.upload')}
             </button>
           </div>
-        </form>
-      </Panel>
+          </form>
+        </Panel>
 
-      <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={query?.error === 'file' ? t('media.chooseFile') : t('cmsAlert.fallback')} />
+        <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={query?.error === 'file' ? t('media.chooseFile') : t('cmsAlert.fallback')} />
 
-      {items.length === 0 ? (
-        <EmptyState title={t('media.noItemsTitle')} body={t('media.noItemsBody')} />
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {items.map((item) => (
-            <Panel key={item.id} className="overflow-hidden">
+        {items.length === 0 ? (
+          <EmptyState title={t('media.noItemsTitle')} body={t('media.noItemsBody')} />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {items.map((item) => (
+              <Panel key={item.id} className="overflow-hidden">
               <div className="relative aspect-[4/3] bg-[#eef2f6]">
                 {item.url ? (
                   <span
@@ -73,22 +93,26 @@ export default async function AdminMediaPage({searchParams}: Props) {
                 <p className="font-numeric text-xs text-[#98a2b3]">{item.path}</p>
                 <form action={updateMediaAction} className="grid gap-2 border-t border-[#e4e7ec] pt-3">
                   <input type="hidden" name="id" value={item.id} />
-                  <label className="grid gap-1 text-xs font-semibold text-[#647084]">
-                    <span>{t('media.altKo')}</span>
-                    <input
-                      name="altKo"
-                      defaultValue={item.altKo}
-                      className="min-h-9 rounded-md border border-[#cbd3df] px-2 text-sm text-[#101827]"
-                    />
-                  </label>
-                  <label className="grid gap-1 text-xs font-semibold text-[#647084]">
-                    <span>{t('media.altEn')}</span>
-                    <input
-                      name="altEn"
-                      defaultValue={item.altEn}
-                      className="min-h-9 rounded-md border border-[#cbd3df] px-2 text-sm text-[#101827]"
-                    />
-                  </label>
+                  <ContentLocalePanel locale="ko">
+                    <label className="grid gap-1 text-xs font-semibold text-[#647084]">
+                      <span>{t('media.altKo')}</span>
+                      <input
+                        name="altKo"
+                        defaultValue={item.altKo}
+                        className="min-h-9 w-full rounded-md border border-[#cbd3df] px-2 text-sm text-[#101827]"
+                      />
+                    </label>
+                  </ContentLocalePanel>
+                  <ContentLocalePanel locale="en">
+                    <label className="grid gap-1 text-xs font-semibold text-[#647084]">
+                      <span>{t('media.altEn')}</span>
+                      <input
+                        name="altEn"
+                        defaultValue={item.altEn}
+                        className="min-h-9 w-full rounded-md border border-[#cbd3df] px-2 text-sm text-[#101827]"
+                      />
+                    </label>
+                  </ContentLocalePanel>
                   <button className="admin-on-dark min-h-9 rounded-md bg-[#101827] px-3 text-sm font-semibold text-[#ffffff] transition hover:bg-[#7a2230]">
                     {t('common.saveAltText')}
                   </button>
@@ -100,10 +124,11 @@ export default async function AdminMediaPage({searchParams}: Props) {
                   </button>
                 </form>
               </div>
-            </Panel>
-          ))}
-        </div>
-      )}
+              </Panel>
+            ))}
+          </div>
+        )}
+      </ContentLocaleProvider>
     </>
   );
 }

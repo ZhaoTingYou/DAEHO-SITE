@@ -14,6 +14,7 @@ import {
   TextField,
   type MediaLibraryItem
 } from './admin-fields';
+import {ContentLocalePanel} from './content-locale-editor';
 
 export type TechniqueRecordsEditorLabels = {
   title: string;
@@ -167,9 +168,13 @@ export function TechniqueRecordsEditor({drafts, mediaItems, imageGuide, labels}:
                 syncKey={`technique-record:${item.id}`}
               />
 
-              <div className="grid gap-4 xl:grid-cols-2">
-                <LocalizedRecordFields locale="ko" index={index} values={item.ko} label={labels.ko} labels={labels} />
-                <LocalizedRecordFields locale="en" index={index} values={item.en} label={labels.en} labels={labels} />
+              <div className="grid gap-4">
+                <ContentLocalePanel locale="ko">
+                  <LocalizedRecordFields locale="ko" index={index} values={item.ko} label={labels.ko} labels={labels} />
+                </ContentLocalePanel>
+                <ContentLocalePanel locale="en">
+                  <LocalizedRecordFields locale="en" index={index} values={item.en} label={labels.en} labels={labels} />
+                </ContentLocalePanel>
               </div>
             </article>
         ))}
