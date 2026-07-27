@@ -76,7 +76,6 @@ export default async function CollectionDetailPage({params}: Props) {
             ariaLabel={text.back}
             className="mobile-tap-target link-sweep no-underline inline-flex items-center justify-center border-0 bg-transparent p-0 font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
           />
-          <h1 className="sr-only">{item.title}</h1>
           <div className="mt-8 md:mt-[clamp(40px,5vw,64px)]">
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.72fr)] lg:items-start lg:gap-16">
               <Reveal>
@@ -88,7 +87,10 @@ export default async function CollectionDetailPage({params}: Props) {
                 />
               </Reveal>
               <Reveal className="lg:sticky lg:top-32">
-                <aside>
+                <aside className="space-y-6">
+                  <h1 className="break-words font-heading text-[clamp(28px,3.2vw,46px)] font-semibold leading-[1.15] text-primary">
+                    {item.title}
+                  </h1>
                   <div className="space-y-3.5 border-l-2 border-accent bg-white px-5 py-5 lg:px-6">
                     <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.2em] text-accent">
                       {text.story}
