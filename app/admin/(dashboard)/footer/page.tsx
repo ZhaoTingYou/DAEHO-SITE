@@ -21,6 +21,7 @@ import {localeFieldSuffixes, locales, type Locale} from '@/lib/locales';
 
 import {AdminActionAlert} from '../../_components/admin-feedback';
 import {CheckboxField, SubmitButton, TextAreaField, TextField} from '../../_components/admin-fields';
+import {ContentLocaleForm, ContentLocalePanel} from '../../_components/content-locale-editor';
 import {ExternalSitesEditor} from '../../_components/external-sites-editor';
 import {PageHeader, Panel} from '../../_components/admin-shell';
 import type {ExternalSiteItem} from '@/lib/cms/external-sites-core.mjs';
@@ -199,7 +200,15 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
 
       <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={query?.error === 'file' ? t('page.uploadError') : t('cmsAlert.fallback')} />
 
-      <form action={savePageAction} className="grid gap-6 pb-24">
+      <ContentLocaleForm
+        action={savePageAction}
+        className="grid gap-6 pb-24"
+        label={t('contentLocale.editorLabel')}
+        localeLabels={{
+          ko: t('contentLocale.ko'),
+          en: t('contentLocale.en')
+        }}
+      >
         <input type="hidden" name="pageKey" value={commonPageKey} />
         <input type="hidden" name="returnTo" value={footerReturnPath} />
         <input type="hidden" name="section" value={row?.section ?? definition.section} />
@@ -237,16 +246,17 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
           }}
         />
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-6">
           {localeData.map((data) => (
-            <FooterLocalePanel
-              key={data.locale}
-              data={data}
-              adminLocale={adminLocale}
-              messages={messages}
-              fieldsByPath={fieldsByPath}
-              t={t}
-            />
+            <ContentLocalePanel key={data.locale} locale={data.locale}>
+              <FooterLocalePanel
+                data={data}
+                adminLocale={adminLocale}
+                messages={messages}
+                fieldsByPath={fieldsByPath}
+                t={t}
+              />
+            </ContentLocalePanel>
           ))}
         </div>
 
@@ -263,7 +273,7 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
           </Link>
           <SubmitButton>{t('footer.save')}</SubmitButton>
         </div>
-      </form>
+      </ContentLocaleForm>
     </>
   );
 }

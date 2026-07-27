@@ -3,6 +3,7 @@
 import {useState} from 'react';
 
 import type {ExternalSiteItem} from '@/lib/cms/external-sites-core.mjs';
+import {ContentLocalePanel} from './content-locale-editor';
 
 type EditorItem = {
   id: string;
@@ -73,25 +74,29 @@ export function ExternalSitesEditor({itemsKo, itemsEn, labels}: Props) {
 
       {items.map((item, index) => (
         <article key={item.id} className="grid gap-4 rounded-md border border-[#eef2f6] bg-[#fbfcfe] p-4">
-          <div className="grid gap-4 xl:grid-cols-2">
-            <label className="grid gap-2 text-sm font-semibold text-[#344054]">
-              {labels.labelKo}
-              <input
-                aria-label={labels.labelKo}
-                value={item.labelKo}
-                onChange={(event) => updateItem(item.id, {labelKo: event.target.value})}
-                className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#344054]"
-              />
-            </label>
-            <label className="grid gap-2 text-sm font-semibold text-[#344054]">
-              {labels.labelEn}
-              <input
-                aria-label={labels.labelEn}
-                value={item.labelEn}
-                onChange={(event) => updateItem(item.id, {labelEn: event.target.value})}
-                className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#344054]"
-              />
-            </label>
+          <div className="grid gap-4">
+            <ContentLocalePanel locale="ko">
+              <label className="grid gap-2 text-sm font-semibold text-[#344054]">
+                {labels.labelKo}
+                <input
+                  aria-label={labels.labelKo}
+                  value={item.labelKo}
+                  onChange={(event) => updateItem(item.id, {labelKo: event.target.value})}
+                  className="min-h-10 w-full rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#344054]"
+                />
+              </label>
+            </ContentLocalePanel>
+            <ContentLocalePanel locale="en">
+              <label className="grid gap-2 text-sm font-semibold text-[#344054]">
+                {labels.labelEn}
+                <input
+                  aria-label={labels.labelEn}
+                  value={item.labelEn}
+                  onChange={(event) => updateItem(item.id, {labelEn: event.target.value})}
+                  className="min-h-10 w-full rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#344054]"
+                />
+              </label>
+            </ContentLocalePanel>
           </div>
 
           <label className="grid gap-2 text-sm font-semibold text-[#344054]">

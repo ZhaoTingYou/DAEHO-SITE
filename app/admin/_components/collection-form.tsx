@@ -15,6 +15,7 @@ import {
 } from './admin-fields';
 import {Panel} from './admin-shell';
 import {CollectionGalleryField} from './collection-gallery-field';
+import {ContentLocaleForm, ContentLocalePanel} from './content-locale-editor';
 
 type CollectionItem = {
   id: string;
@@ -58,7 +59,15 @@ export function CollectionForm({
   const specs = normalizeSpecs(item?.specs);
 
   return (
-    <form action={saveCollectionAction} className="grid gap-6">
+    <ContentLocaleForm
+      action={saveCollectionAction}
+      className="grid gap-6"
+      label={t('contentLocale.editorLabel')}
+      localeLabels={{
+        ko: t('contentLocale.ko'),
+        en: t('contentLocale.en')
+      }}
+    >
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
 
       <Panel className="min-w-0 p-5">
@@ -136,15 +145,16 @@ export function CollectionForm({
         />
       </Panel>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6">
         {locales.map((locale) => (
-          <TranslationPanel
-            key={locale}
-            locale={locale}
-            mediaItems={mediaItems}
-            messages={messages}
-            translation={getTranslation(item, locale)}
-          />
+          <ContentLocalePanel key={locale} locale={locale}>
+            <TranslationPanel
+              locale={locale}
+              mediaItems={mediaItems}
+              messages={messages}
+              translation={getTranslation(item, locale)}
+            />
+          </ContentLocalePanel>
         ))}
       </div>
 
@@ -154,7 +164,7 @@ export function CollectionForm({
         </Link>
         <SubmitButton>{item ? t('form.saveCollection') : t('form.createCollection')}</SubmitButton>
       </div>
-    </form>
+    </ContentLocaleForm>
   );
 }
 
@@ -190,17 +200,19 @@ function CollectionSpecificationsPanel({
         const translation = (translations[locale] ?? {}) as CollectionTranslation;
 
         return (
-          <section key={locale} className="grid min-w-0 max-w-full gap-4 border-t border-[#d9dee7] pt-4">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">
-              {getContentLocaleLabel(messages, locale)}
-            </h3>
-            <div className="grid min-w-0 max-w-full gap-4 sm:grid-cols-2">
-              <TextField label={t('form.material')} name={`${locale}.material`} defaultValue={translation.material} editorLocale={locale} />
-              <TextField label={t('form.stones')} name={`${locale}.stones`} defaultValue={translation.stones} editorLocale={locale} />
-              <TextField label={t('form.madeFor')} name={`${locale}.madeFor`} defaultValue={translation.madeFor} editorLocale={locale} />
-              <TextField label={t('form.workInfo')} name={`${locale}.workInfo`} defaultValue={translation.workInfo} editorLocale={locale} />
-            </div>
-          </section>
+          <ContentLocalePanel key={locale} locale={locale}>
+            <section className="grid min-w-0 max-w-full gap-4 border-t border-[#d9dee7] pt-4">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">
+                {getContentLocaleLabel(messages, locale)}
+              </h3>
+              <div className="grid min-w-0 max-w-full gap-4 sm:grid-cols-2">
+                <TextField label={t('form.material')} name={`${locale}.material`} defaultValue={translation.material} editorLocale={locale} />
+                <TextField label={t('form.stones')} name={`${locale}.stones`} defaultValue={translation.stones} editorLocale={locale} />
+                <TextField label={t('form.madeFor')} name={`${locale}.madeFor`} defaultValue={translation.madeFor} editorLocale={locale} />
+                <TextField label={t('form.workInfo')} name={`${locale}.workInfo`} defaultValue={translation.workInfo} editorLocale={locale} />
+              </div>
+            </section>
+          </ContentLocalePanel>
         );
       })}
     </div>

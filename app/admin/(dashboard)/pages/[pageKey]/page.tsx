@@ -43,6 +43,7 @@ import {savePageAction} from '../../../actions';
 import {AdminActionAlert} from '../../../_components/admin-feedback';
 import {AppendableArrayItemsField, ImageUploadField, ResponsiveImageUploadField, SelectField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
 import {PageHeader, Panel} from '../../../_components/admin-shell';
+import {ContentLocaleForm, ContentLocalePanel} from '../../../_components/content-locale-editor';
 import {TechniqueRecordsEditor} from '../../../_components/technique-records-editor';
 
 type Props = {
@@ -134,7 +135,15 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
 
       <AdminActionAlert searchParams={query} title={t('cmsAlert.title')} fallbackMessage={query?.error === 'file' ? t('page.uploadError') : t('cmsAlert.fallback')} />
 
-      <form action={savePageAction} className="grid gap-6 pb-24">
+      <ContentLocaleForm
+        action={savePageAction}
+        className="grid gap-6 pb-24"
+        label={t('contentLocale.editorLabel')}
+        localeLabels={{
+          ko: t('contentLocale.ko'),
+          en: t('contentLocale.en')
+        }}
+      >
         <input type="hidden" name="pageKey" value={page.pageKey} />
 
         <Panel className="p-5">
@@ -193,19 +202,20 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
           />
         ) : null}
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-6">
           {localeData.map((data) => (
-            <PageLocalePanel
-              key={data.locale}
-              locale={data.locale}
-              groups={data.groups}
-              seo={data.seo}
-              definition={definition}
-              adminLocale={adminLocale}
-              mediaItems={mediaItems}
-              messages={messages}
-              excludedFieldPaths={techniqueEditor ? ['records.items'] : []}
-            />
+            <ContentLocalePanel key={data.locale} locale={data.locale}>
+              <PageLocalePanel
+                locale={data.locale}
+                groups={data.groups}
+                seo={data.seo}
+                definition={definition}
+                adminLocale={adminLocale}
+                mediaItems={mediaItems}
+                messages={messages}
+                excludedFieldPaths={techniqueEditor ? ['records.items'] : []}
+              />
+            </ContentLocalePanel>
           ))}
         </div>
 
@@ -222,7 +232,7 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
           </Link>
           <SubmitButton>{t('page.save')}</SubmitButton>
         </div>
-      </form>
+      </ContentLocaleForm>
     </>
   );
 }

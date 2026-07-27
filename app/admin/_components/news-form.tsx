@@ -19,6 +19,7 @@ import {
   type NewsBodyBlock,
   type NewsBlocksEditorLabels
 } from './news-blocks-editor';
+import {ContentLocaleForm, ContentLocalePanel} from './content-locale-editor';
 
 type NewsItem = {
   id: string;
@@ -56,7 +57,15 @@ export function NewsForm({
   const t = createAdminTranslator(messages);
 
   return (
-    <form action={saveNewsAction} className="grid gap-6">
+    <ContentLocaleForm
+      action={saveNewsAction}
+      className="grid gap-6"
+      label={t('contentLocale.editorLabel')}
+      localeLabels={{
+        ko: t('contentLocale.ko'),
+        en: t('contentLocale.en')
+      }}
+    >
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
 
       <Panel className="p-5">
@@ -99,15 +108,16 @@ export function NewsForm({
         </div>
       </Panel>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6">
         {locales.map((locale) => (
-          <TranslationPanel
-            key={locale}
-            locale={locale}
-            mediaItems={mediaItems}
-            messages={messages}
-            translation={getTranslation(item, locale)}
-          />
+          <ContentLocalePanel key={locale} locale={locale}>
+            <TranslationPanel
+              locale={locale}
+              mediaItems={mediaItems}
+              messages={messages}
+              translation={getTranslation(item, locale)}
+            />
+          </ContentLocalePanel>
         ))}
       </div>
 
@@ -117,7 +127,7 @@ export function NewsForm({
         </Link>
         <SubmitButton>{item ? t('form.saveNews') : t('form.createNews')}</SubmitButton>
       </div>
-    </form>
+    </ContentLocaleForm>
   );
 }
 
