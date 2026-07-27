@@ -42,16 +42,15 @@ test('collection form uses an appendable gallery field capped at six images', ()
   assert.ok(galleryFieldSource.includes('rows.length > minImages'), 'remove control should use the configured min row count');
 });
 
-test('collection form exposes a separate editable detail image strip', () => {
-  assert.ok(collectionFormSource.includes('gallery={specs.detailImages}'), 'detail strip images should come from collection specs');
-  assert.ok(collectionFormSource.includes('namePrefix="detailGallery"'), 'detail image strip should use separate form field names');
-  assert.ok(collectionFormSource.includes('maxImages={3}'), 'detail image strip should be capped to the three public strip slots');
+test('collection form no longer exposes the retired detail image strip', () => {
+  assert.equal(collectionFormSource.includes('gallery={specs.detailImages}'), false);
+  assert.equal(collectionFormSource.includes('namePrefix="detailGallery"'), false);
+  assert.equal(collectionFormSource.includes('form.detailGallery'), false);
 });
 
 test('collection image fields show ratio and size guidance', () => {
   assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.collectionCover'\)\}/);
   assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.collectionGallery'\)\}/);
-  assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.collectionDetailGallery'\)\}/);
   assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.seo'\)\}/);
   assert.match(galleryFieldSource, /imageGuide\?: string/);
   assert.match(galleryFieldSource, /imageGuide=\{imageGuide\}/);
@@ -65,11 +64,11 @@ test('collection gallery save reads submitted rows and caps them at six images',
   assert.doesNotMatch(readGallerySource, /for \(let index = 0; index < 6/, 'gallery save should not be hard-coded to six fixed slots');
 });
 
-test('collection save stores detail strip images separately from the gallery', () => {
+test('collection save no longer reads or stores retired detail strip images', () => {
   const saveCollectionSource = extractFunction(actionsSource, 'saveCollectionAction');
-  const readDetailSource = extractFunction(actionsSource, 'readDetailGalleryImages');
 
-  assert.ok(saveCollectionSource.includes('detailImages: await readDetailGalleryImages(formData, editorPath)'), 'detail images should be saved inside collection specs');
-  assert.ok(readDetailSource.includes('detailGallery'), 'detail image reader should read the detailGallery field group');
-  assert.ok(readDetailSource.includes('maxCollectionDetailImages'), 'detail image reader should cap detail images separately from the main gallery');
+  assert.equal(saveCollectionSource.includes('detailImages'), false);
+  assert.equal(actionsSource.includes('readDetailGalleryImages'), false);
+  assert.equal(actionsSource.includes('collectionDetailGalleryIndexes'), false);
+  assert.equal(actionsSource.includes('maxCollectionDetailImages'), false);
 });

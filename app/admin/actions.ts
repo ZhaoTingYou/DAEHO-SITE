@@ -80,7 +80,6 @@ import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 
 const maxCollectionGalleryImages = 6;
-const maxCollectionDetailImages = 3;
 const sitePopupErrorMessageKeys = {
   imageRequired: 'popup.error.imageRequired',
   scheduleRequired: 'popup.error.scheduleRequired',
@@ -257,8 +256,7 @@ export async function saveCollectionAction(formData: FormData) {
       specs: {
         year: stringFromForm(formData, 'specs.year'),
         sportCategory: stringFromForm(formData, 'specs.sportCategory'),
-        linkHref: stringFromForm(formData, 'specs.linkHref'),
-        detailImages: await readDetailGalleryImages(formData, editorPath)
+        linkHref: stringFromForm(formData, 'specs.linkHref')
       },
       isVisible: formData.get('isVisible') !== 'off',
       sortOrder: stringFromForm(formData, 'sortOrder') || '0',
@@ -643,32 +641,8 @@ async function readGalleryImages(formData: FormData, fallbackImage: string, edit
   return images.length > 0 ? images : [fallbackImage].filter(Boolean);
 }
 
-async function readDetailGalleryImages(formData: FormData, editorPath: string) {
-  const images: string[] = [];
-
-  for (const index of collectionDetailGalleryIndexes(formData).slice(0, maxCollectionDetailImages)) {
-    const image = await readUploadedImageOrText(
-      formData,
-      `detailGallery.${index}`,
-      `detailGalleryUpload.${index}`,
-      'ko',
-      editorPath
-    );
-
-    if (image) {
-      images.push(image);
-    }
-  }
-
-  return images;
-}
-
 function collectionGalleryIndexes(formData: FormData) {
   return collectionImageIndexes(formData, /^gallery(?:Upload)?\.(\d+)$/);
-}
-
-function collectionDetailGalleryIndexes(formData: FormData) {
-  return collectionImageIndexes(formData, /^detailGallery(?:Upload)?\.(\d+)$/);
 }
 
 function collectionImageIndexes(formData: FormData, pattern: RegExp) {

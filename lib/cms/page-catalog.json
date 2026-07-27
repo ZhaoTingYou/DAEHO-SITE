@@ -347,9 +347,17 @@
         ]
       },
       {"groupKey": "collectionUi", "path": "categoryBackHref", "label": "分类页返回链接", "type": "link"},
+      {"groupKey": "collectionUi", "path": "detail.back", "label": "作品详情返回文案"},
       {"groupKey": "collectionUi", "path": "detail.backHref", "label": "作品详情返回链接", "type": "link"},
-      {"groupKey": "collectionUi", "path": "detail.processHref", "label": "作品详情工艺按钮链接", "type": "link"},
+      {"groupKey": "collectionUi", "path": "detail.story", "label": "作品故事标签"},
+      {"groupKey": "collectionUi", "path": "detail.commissionEyebrow", "label": "咨询区眉标"},
+      {"groupKey": "collectionUi", "path": "detail.ctaTitle", "label": "咨询区标题"},
+      {"groupKey": "collectionUi", "path": "detail.cta", "label": "咨询按钮文案"},
       {"groupKey": "collectionUi", "path": "detail.ctaHref", "label": "作品详情咨询按钮链接", "type": "link"},
+      {"groupKey": "collectionUi", "path": "detail.related", "label": "相关作品标题"},
+      {"groupKey": "collectionUi", "path": "detail.thumbnailLabel", "label": "图库缩略图辅助文案"},
+      {"groupKey": "collectionUi", "path": "detail.previousImage", "label": "上一张图片辅助文案"},
+      {"groupKey": "collectionUi", "path": "detail.nextImage", "label": "下一张图片辅助文案"},
       {"groupKey": "collectionUi", "path": "chooseLabel", "label": "选择按钮文案"},
       {"groupKey": "collectionUi", "path": "countSuffix", "label": "数量后缀"},
       {"groupKey": "collectionUi", "path": "view", "label": "查看按钮文案"},
@@ -358,8 +366,7 @@
       {"groupKey": "collectionUi", "path": "allCategories", "label": "返回全部分类"},
       {"groupKey": "collectionUi", "path": "finder", "label": "Finder 文案", "type": "json"},
       {"groupKey": "collectionUi", "path": "appointment", "label": "Appointment 分类页文案和图片", "type": "json"},
-      {"groupKey": "collectionUi", "path": "bespoke", "label": "Bespoke 分类页文案和筛选", "type": "json"},
-      {"groupKey": "collectionUi", "path": "detail", "label": "详情页默认文案", "type": "json"}
+      {"groupKey": "collectionUi", "path": "bespoke", "label": "Bespoke 分类页文案和筛选", "type": "json"}
     ]
   },
   {

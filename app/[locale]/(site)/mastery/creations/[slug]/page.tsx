@@ -24,7 +24,7 @@ type Props = {
 
 export const dynamic = 'force-dynamic';
 
-const detailImages = [
+const fallbackGalleryImages = [
   'collection_detail_01.png',
   'collection_detail_02.png',
   'collection_detail_03.png',
@@ -60,22 +60,13 @@ export default async function CollectionDetailPage({params}: Props) {
   }
 
   const text = messages.collectionUi.detail;
-  const galleryImages = item.gallery.length > 0 ? item.gallery : [item.image, ...detailImages];
-  const detailStripImages = item.detailImages.length > 0 ? item.detailImages : galleryImages.slice(1, 4);
+  const galleryImages = item.gallery.length > 0 ? item.gallery : [item.image, ...fallbackGalleryImages];
   const images = galleryImages.map((filename) => ({
     filename,
     alt: `${item.title} ${item.caption}`,
     hasImage: imageExists(filename)
   }));
   const related = (await getCollectionItemsForSite(locale)).filter((entry) => entry.id !== slug).slice(0, 4);
-  const specs = [
-    [text.material, item.material || text.placeholder],
-    [text.stones, item.stones || text.placeholder],
-    [text.year, item.year || '20XX'],
-    [text.madeFor, item.madeFor || text.placeholder],
-    [text.specs, item.workInfo || item.categoryLabel || text.placeholder]
-  ];
-
   return (
     <main className="mobile-page-shell bg-bg text-text">
       <section className="bg-bg pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+20px)] md:pt-28">
@@ -85,86 +76,30 @@ export default async function CollectionDetailPage({params}: Props) {
             ariaLabel={text.back}
             className="mobile-tap-target link-sweep no-underline inline-flex items-center justify-center border-0 bg-transparent p-0 font-body text-[20px] font-semibold leading-none text-primary transition duration-hover ease-brand hover:text-accent"
           />
+          <h1 className="sr-only">{item.title}</h1>
           <div className="mt-8 md:mt-[clamp(40px,5vw,64px)]">
-            <div className="mb-8 space-y-3 lg:hidden">
-              <p className="font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">
-                {item.categoryLabel}
-              </p>
-              <p className="break-words font-heading text-[32px] font-semibold leading-[1.12] text-primary">
-                {item.title}
-              </p>
-            </div>
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.72fr)] lg:items-start lg:gap-16">
-            <Reveal>
-              <CollectionDetailGallery
-                images={images}
-                thumbnailLabel={text.thumbnailLabel}
-                previousLabel={text.previousImage}
-                nextLabel={text.nextImage}
-              />
-            </Reveal>
-            <Reveal className="lg:sticky lg:top-32">
-              <aside className="space-y-8 bg-transparent p-0 shadow-none lg:space-y-9 lg:bg-bg lg:p-6 lg:shadow-[0_18px_70px_rgba(16,29,48,0.06)]">
-                <div className="space-y-4">
-                  <p className="hidden font-body text-eyebrow font-semibold uppercase tracking-[0.26em] text-accent lg:block">
-                    {item.categoryLabel}
-                  </p>
-                  <h1 className="sr-only font-heading text-[clamp(24px,2.8vw,36px)] font-semibold leading-[1.15] text-primary lg:not-sr-only">
-                    {item.title}
-                  </h1>
-                </div>
-                <div className="space-y-1">
-                  {specs.map(([label, value]) => (
-                    <div key={label} className="grid grid-cols-[0.8fr_1.2fr] gap-5 border-t border-hairline py-4 font-body text-[16px] lg:text-[15px]">
-                      <span className="font-semibold uppercase tracking-[0.16em] text-subtext">{label}</span>
-                      <span className="text-right text-primary">{value}</span>
-                    </div>
-                  ))}
-                </div>
-                <p className="mobile-copy break-words whitespace-pre-line font-body text-text lg:hidden">{item.caption}</p>
-                <div className="space-y-3.5 border-l-2 border-accent bg-white px-5 py-5 lg:px-6">
-                  <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.2em] text-accent">
-                    {text.story}
-                  </p>
-                  <p className="mobile-copy break-words whitespace-pre-line font-body text-text lg:text-[14px] lg:leading-7">{item.story || item.caption}</p>
-                </div>
-              </aside>
-            </Reveal>
+              <Reveal>
+                <CollectionDetailGallery
+                  images={images}
+                  thumbnailLabel={text.thumbnailLabel}
+                  previousLabel={text.previousImage}
+                  nextLabel={text.nextImage}
+                />
+              </Reveal>
+              <Reveal className="lg:sticky lg:top-32">
+                <aside>
+                  <div className="space-y-3.5 border-l-2 border-accent bg-white px-5 py-5 lg:px-6">
+                    <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.2em] text-accent">
+                      {text.story}
+                    </p>
+                    <p className="mobile-copy break-words whitespace-pre-line font-body text-text lg:text-[14px] lg:leading-7">{item.story || item.caption}</p>
+                  </div>
+                </aside>
+              </Reveal>
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="bg-bg py-section">
-        <div className="mx-auto max-w-[1280px] space-y-[clamp(40px,4vw,56px)] px-[var(--mobile-page-gutter)] md:px-container">
-          <Reveal>
-            <h2 className="font-heading text-[clamp(22px,2.4vw,32px)] font-semibold leading-[1.2] text-primary">
-              {text.detailStrip}
-            </h2>
-          </Reveal>
-          <div className="grid gap-6 md:grid-cols-3 md:gap-8">
-            {detailStripImages.map((filename, index) => (
-              <Reveal key={`${filename}-${index}`}>
-                <div className="hover-zoom">
-                  <div className="hover-zoom-media">
-                    <SafeImage filename={filename} alt={text.detailStrip} aspect="aspect-[4/3] md:aspect-square" variant="plain" />
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-bg py-section">
-        <Reveal className="mx-auto max-w-3xl space-y-7 px-[var(--mobile-page-gutter)] text-center md:px-container">
-          <p className="font-heading text-[clamp(22px,2.4vw,32px)] font-semibold leading-[1.25] text-primary">
-            {text.processTitle}
-          </p>
-          <Link href={resolveCmsHref(locale, text.processHref, '/mastery/making')} className="link-sweep inline-flex font-body text-[12px] font-semibold uppercase tracking-[0.16em]">
-            {text.processCta}
-          </Link>
-        </Reveal>
       </section>
 
       <section className="bg-bg py-section">
