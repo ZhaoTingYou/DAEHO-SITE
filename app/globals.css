@@ -809,12 +809,6 @@ select {
     visibility 0ms linear 0ms;
 }
 
-.chronicle-page.is-end-nav-visible .chronicle-year-nav {
-  pointer-events: none;
-  opacity: 0;
-  transform: translate3d(-16px, 0, 0);
-}
-
 .chronicle-year-nav::before {
   display: none;
   content: none;
@@ -1939,10 +1933,6 @@ select {
 
   .chronicle-page.is-controls-visible .chronicle-year-nav {
     transform: translate3d(0, 0, 0);
-  }
-
-  .chronicle-page.is-end-nav-visible .chronicle-year-nav {
-    transform: translate3d(0, 10px, 0);
   }
 
   .chronicle-year-nav::before {
