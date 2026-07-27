@@ -4,6 +4,13 @@ export type ChronicleYearReelLayout = {
   visibleRows: number;
 };
 
+export function getChronicleChromeVisibility(controlsVisible: boolean, lineProgress: number) {
+  return {
+    endNavVisible: controlsVisible && lineProgress > 0.92,
+    yearNavVisible: controlsVisible
+  };
+}
+
 export function getChronicleYearReelLayout(
   totalItems: number,
   activeIndex: number,

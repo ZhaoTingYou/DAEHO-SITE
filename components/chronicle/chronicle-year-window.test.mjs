@@ -6,6 +6,7 @@ import ts from 'typescript';
 const sourceUrl = new URL('./chronicle-year-window.ts', import.meta.url);
 const horizontalSource = readFileSync(new URL('./chronicle-horizontal.tsx', import.meta.url), 'utf8');
 const globalsSource = readFileSync(new URL('../../app/globals.css', import.meta.url), 'utf8');
+let getChronicleChromeVisibility;
 let getChronicleYearReelLayout;
 
 if (existsSync(sourceUrl)) {
@@ -17,7 +18,7 @@ if (existsSync(sourceUrl)) {
     }
   });
   const moduleUrl = `data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`;
-  ({getChronicleYearReelLayout} = await import(moduleUrl));
+  ({getChronicleChromeVisibility, getChronicleYearReelLayout} = await import(moduleUrl));
 }
 
 test('exposes the Archive centered year-reel calculation', () => {
@@ -112,4 +113,29 @@ test('desktop Archive keeps one indicator fixed while the year reel moves', () =
   );
   assert.match(globalsSource, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.chronicle-year-nav__list\s*\{[\s\S]*?transition: none/);
   assert.match(globalsSource, /\.chronicle-year-nav__step:disabled/);
+});
+
+test('keeps the year navigation visible when the Archive end navigation appears', () => {
+  assert.equal(typeof getChronicleChromeVisibility, 'function');
+
+  if (!getChronicleChromeVisibility) return;
+
+  assert.deepEqual(getChronicleChromeVisibility(true, 0.95), {
+    endNavVisible: true,
+    yearNavVisible: true
+  });
+  assert.deepEqual(getChronicleChromeVisibility(false, 0.95), {
+    endNavVisible: false,
+    yearNavVisible: false
+  });
+  const endStateYearNavRules =
+    globalsSource.match(/\.chronicle-page\.is-end-nav-visible \.chronicle-year-nav\s*\{[\s\S]*?\}/g) ?? [];
+
+  for (const rule of endStateYearNavRules) {
+    assert.doesNotMatch(
+      rule,
+      /(?:opacity\s*:\s*0|visibility\s*:\s*hidden|pointer-events\s*:\s*none)/,
+      'the end navigation must not hide or disable the year selector'
+    );
+  }
 });

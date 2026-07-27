@@ -5,7 +5,10 @@ import Link from 'next/link';
 import {type CSSProperties, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
 
 import {ChronicleMobile} from './chronicle-mobile';
-import {getChronicleYearReelLayout} from './chronicle-year-window';
+import {
+  getChronicleChromeVisibility,
+  getChronicleYearReelLayout
+} from './chronicle-year-window';
 
 export type ChronicleHorizontalSlide = {
   year: string;
@@ -399,7 +402,7 @@ export function ChronicleHorizontal({
       }) as CSSProperties,
     [progress, slideCount]
   );
-  const endNavVisible = controlsVisible && lineProgress > 0.92;
+  const {endNavVisible, yearNavVisible} = getChronicleChromeVisibility(controlsVisible, lineProgress);
 
   const scrollToChronicleYear = (index: number) => {
     const stage = stageRef.current;
@@ -432,7 +435,7 @@ export function ChronicleHorizontal({
   return (
     <main
       className={`chronicle-page is-day-theme ${stageVisible ? 'is-stage-visible' : ''} ${
-        controlsVisible ? 'is-controls-visible' : ''
+        yearNavVisible ? 'is-controls-visible' : ''
       } ${endNavVisible ? 'is-end-nav-visible' : ''}`}
     >
       <nav className="chronicle-year-nav" aria-label={yearNavAriaLabel}>
