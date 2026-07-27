@@ -328,6 +328,18 @@
       {"key": "main", "title": "Creations 主内容", "sourcePath": "specialtyPages.collection"},
       {"key": "collectionUi", "title": "作品列表、筛选和详情页共用文案", "sourcePath": "collectionUi"}
     ],
+    "retiredFields": [
+      {"groupKey": "collectionUi", "path": "detail.specs"},
+      {"groupKey": "collectionUi", "path": "detail.material"},
+      {"groupKey": "collectionUi", "path": "detail.stones"},
+      {"groupKey": "collectionUi", "path": "detail.year"},
+      {"groupKey": "collectionUi", "path": "detail.madeFor"},
+      {"groupKey": "collectionUi", "path": "detail.placeholder"},
+      {"groupKey": "collectionUi", "path": "detail.detailStrip"},
+      {"groupKey": "collectionUi", "path": "detail.processTitle"},
+      {"groupKey": "collectionUi", "path": "detail.processCta"},
+      {"groupKey": "collectionUi", "path": "detail.processHref"}
+    ],
     "fields": [
       {"groupKey": "main", "path": "hero.title", "label": "Hero 标题", "editor": {"align": "center"}},
       {"groupKey": "main", "path": "hero.subtitle", "label": "Hero 副标题", "type": "textarea", "rows": 3, "editor": {"align": "center"}},
