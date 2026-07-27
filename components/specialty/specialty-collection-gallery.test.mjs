@@ -325,7 +325,7 @@ test('collection edit form uses a fixed category dropdown', () => {
   );
 });
 
-test('collection detail keeps only the work story beside the gallery and removes retired sections', () => {
+test('collection detail keeps the ring name and work story beside the gallery and removes retired sections', () => {
   const retiredDetailKeys = [
     'specs',
     'material',
