@@ -12,6 +12,10 @@ const creationsPageSource = readFileSync(
   new URL('../../app/[locale]/(site)/mastery/creations/page.tsx', import.meta.url),
   'utf8'
 );
+const categoryPageSource = readFileSync(
+  new URL('../../app/[locale]/(site)/mastery/creations/_category-page.tsx', import.meta.url),
+  'utf8'
+);
 const detailGallerySource = readFileSync(new URL('./collection-detail-gallery.tsx', import.meta.url), 'utf8');
 const historyBackButtonUrl = new URL('../navigation/history-back-button.tsx', import.meta.url);
 const historyBackButtonSource = existsSync(historyBackButtonUrl)
@@ -274,7 +278,11 @@ test('Creations keeps its three entry acts while Collection-backed categories us
 
   const emptyGuardIndex = categoryViewSource.indexOf('if (visibleItems.length === 0)');
   const appointmentBranchIndex = categoryViewSource.indexOf("if (categoryId === 'appointment')");
-  const categoryBranchIndex = categoryViewSource.indexOf("if (categoryId === 'champion')");
+  const championBranchIndex = categoryViewSource.indexOf("if (categoryId === 'champion')");
+  const appointmentBranchSource = categoryViewSource.slice(appointmentBranchIndex, emptyGuardIndex);
+  const appointmentViewIndex = source.indexOf('function AppointmentCollectionView');
+  const collectionFinderViewIndex = source.indexOf('function CollectionFinderView');
+  const appointmentViewSource = source.slice(appointmentViewIndex, collectionFinderViewIndex);
 
   assert.ok(emptyGuardIndex >= 0, 'category pages should share an empty Collection guard');
   assert.ok(
@@ -282,8 +290,19 @@ test('Creations keeps its three entry acts while Collection-backed categories us
     'the independent appointment page must render before the Collection empty guard'
   );
   assert.ok(
-    emptyGuardIndex < categoryBranchIndex,
-    'the empty guard must protect Collection-backed category layouts'
+    emptyGuardIndex < championBranchIndex,
+    'the empty guard must still protect Collection-backed category layouts'
+  );
+  assert.doesNotMatch(appointmentBranchSource, /items=\{|empty=\{|filterLabel=\{/, 'appointment rendering must not receive Collection-only props');
+  assert.ok(
+    appointmentViewIndex >= 0 && collectionFinderViewIndex > appointmentViewIndex,
+    'the appointment view source should be inspectable'
+  );
+  assert.doesNotMatch(appointmentViewSource, /\bfilterLabel\b/, 'the independent appointment view must not reference a Collection-only label');
+  assert.match(
+    categoryPageSource,
+    /categoryId === 'appointment'\s*\?\s*\[\]\s*:\s*await getCollectionItemsForSite\(locale\)/,
+    'the appointment route must not query Collection records'
   );
 });
 

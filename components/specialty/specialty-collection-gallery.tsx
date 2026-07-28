@@ -350,7 +350,6 @@ export function SpecialtyCollectionCategory({
   if (categoryId === 'appointment') {
     return (
       <AppointmentCollectionView
-        filterLabel={filterLabel}
         activeLabel={activeFilter.label}
         allLabel={allLabel}
         backHref={backHref}
@@ -1693,14 +1692,12 @@ function CollectionGridView({
 }
 
 function AppointmentCollectionView({
-  filterLabel,
   activeLabel,
   allLabel,
   backHref,
   locale,
   appointment
 }: {
-  filterLabel: string;
   activeLabel: string;
   allLabel: string;
   backHref: string;
@@ -1731,7 +1728,7 @@ function AppointmentCollectionView({
       </div>
 
       <section
-        aria-label={filterLabel}
+        aria-label={activeLabel}
         className="mx-auto flex w-full flex-col items-center px-[var(--mobile-page-gutter)] pt-16 text-center md:px-[clamp(22px,5vw,42px)] md:pt-[clamp(76px,8vw,118px)] lg:w-[60vw] lg:max-w-[980px]"
       >
         <AppointmentTextBlock title={copy.intro.title} lines={copy.intro.lines} />
