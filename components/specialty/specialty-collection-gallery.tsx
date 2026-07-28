@@ -339,6 +339,18 @@ export function SpecialtyCollectionCategory({
     return null;
   }
 
+  if (categoryId === 'appointment') {
+    return (
+      <AppointmentCollectionView
+        activeLabel={activeFilter.label}
+        allLabel={allLabel}
+        backHref={backHref}
+        locale={locale}
+        appointment={appointment}
+      />
+    );
+  }
+
   if (visibleItems.length === 0) {
     return (
       <CollectionGridView
@@ -370,21 +382,6 @@ export function SpecialtyCollectionCategory({
         setFinderOpen={setFinderOpen}
         backHref={backHref}
         locale={locale}
-      />
-    );
-  }
-
-  if (categoryId === 'appointment') {
-    return (
-      <AppointmentCollectionView
-        items={visibleItems}
-        empty={empty}
-        filterLabel={filterLabel}
-        activeLabel={activeFilter.label}
-        allLabel={allLabel}
-        backHref={backHref}
-        locale={locale}
-        appointment={appointment}
       />
     );
   }
@@ -1672,19 +1669,12 @@ function CollectionGridView({
 }
 
 function AppointmentCollectionView({
-  filterLabel,
   activeLabel,
   allLabel,
   backHref,
   locale,
   appointment
 }: {
-  items: SpecialtyCollectionItem[];
-  empty: {
-    title: string;
-    body: string;
-  };
-  filterLabel: string;
   activeLabel: string;
   allLabel: string;
   backHref: string;
@@ -1715,7 +1705,7 @@ function AppointmentCollectionView({
       </div>
 
       <section
-        aria-label={filterLabel}
+        aria-label={activeLabel}
         className="mx-auto flex w-full flex-col items-center px-[var(--mobile-page-gutter)] pt-16 text-center md:px-[clamp(22px,5vw,42px)] md:pt-[clamp(76px,8vw,118px)] lg:w-[60vw] lg:max-w-[980px]"
       >
         <AppointmentTextBlock title={copy.intro.title} lines={copy.intro.lines} />

@@ -58,11 +58,12 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
     mobileBackground: optionalImage(filter, 'mobileBackground'),
     hasImage: Boolean(filter.image && imageExists(filter.image))
   }));
-  const items = await getCollectionItemsForSite(locale);
 
   if (!filters.some((filter) => filter.id === categoryId)) {
     notFound();
   }
+
+  const items = categoryId === 'appointment' ? [] : await getCollectionItemsForSite(locale);
 
   return (
     <main className="mobile-page-shell bg-white pb-[clamp(84px,9vw,132px)] pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+20px)] text-text md:pt-28">
