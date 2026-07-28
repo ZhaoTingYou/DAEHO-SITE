@@ -113,7 +113,15 @@ export default async function AdminCollectionsPage({searchParams}: Props) {
           ) : (
             <Panel className="overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[940px] border-collapse text-left text-sm">
+                <table className="w-full min-w-[1336px] table-fixed border-collapse text-left text-sm">
+                  <colgroup>
+                    <col className="w-[320px]" />
+                    <col className="w-[160px]" />
+                    <col className="w-[160px]" />
+                    <col className="w-[400px]" />
+                    <col className="w-[120px]" />
+                    <col className="w-[176px]" />
+                  </colgroup>
                   <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
                     <tr>
                       <th className="px-4 py-3">{t('collection.item')}</th>
@@ -130,19 +138,25 @@ export default async function AdminCollectionsPage({searchParams}: Props) {
                       const previewSrc = imageSrc(item.imagePath);
                       return (
                         <tr key={item.id} className="align-middle">
-                          <td className="px-4 py-4">
-                            <p className="font-semibold text-[#101827]">{ko.title || item.slug}</p>
-                            <p className="mt-1 font-numeric text-xs text-[#647084]">{item.slug}</p>
+                          <td className="overflow-hidden px-4 py-4">
+                            <p className="truncate font-semibold text-[#101827]" title={ko.title || item.slug}>
+                              {ko.title || item.slug}
+                            </p>
+                            <p className="mt-1 truncate font-numeric text-xs text-[#647084]" title={item.slug}>
+                              {item.slug}
+                            </p>
                           </td>
-                          <td className="px-4 py-4">
-                            <p className="font-semibold text-[#344054]">{getCollectionCategoryDisplay(t, item.category)}</p>
+                          <td className="overflow-hidden px-4 py-4">
+                            <p className="truncate font-semibold text-[#344054]" title={getCollectionCategoryDisplay(t, item.category)}>
+                              {getCollectionCategoryDisplay(t, item.category)}
+                            </p>
                           </td>
-                          <td className="px-4 py-4">
-                            <p className="font-semibold text-[#344054]">{item.sportCategory || '-'}</p>
-                            <p className="mt-1 text-xs text-[#647084]">{ko.sportCategoryLabel}</p>
+                          <td className="overflow-hidden px-4 py-4">
+                            <p className="truncate font-semibold text-[#344054]" title={item.sportCategory || undefined}>{item.sportCategory || '-'}</p>
+                            <p className="mt-1 truncate text-xs text-[#647084]" title={ko.sportCategoryLabel}>{ko.sportCategoryLabel}</p>
                           </td>
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-3">
+                          <td className="overflow-hidden px-4 py-4">
+                            <div className="flex min-w-0 items-center gap-3">
                               <div
                                 className="collection-thumbnail h-16 w-16 shrink-0 rounded-md border border-[#e4e7ec] bg-[#f8fafc] bg-cover bg-center"
                                 style={previewSrc ? {backgroundImage: `url("${previewSrc}")`} : undefined}
@@ -155,7 +169,12 @@ export default async function AdminCollectionsPage({searchParams}: Props) {
                                   </span>
                                 )}
                               </div>
-                              <p className="max-w-[220px] break-all font-numeric text-xs text-[#647084]">{item.imagePath || '-'}</p>
+                              <p
+                                className="min-w-0 flex-1 truncate font-numeric text-xs text-[#647084]"
+                                title={item.imagePath || undefined}
+                              >
+                                {item.imagePath || '-'}
+                              </p>
                             </div>
                           </td>
                           <td className="px-4 py-4">
