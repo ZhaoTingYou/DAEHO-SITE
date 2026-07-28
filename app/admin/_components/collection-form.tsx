@@ -2,12 +2,12 @@ import Link from 'next/link';
 
 import {saveCollectionAction} from '../actions';
 import {createAdminTranslator, getContentLocaleLabel} from '@/lib/admin-i18n';
+import {collectionCategoryValues, isCollectionBackedCategory} from '@/lib/cms/collection-categories';
 import {locales, type Locale} from '@/lib/locales';
 import {
   CheckboxField,
   ImageUploadField,
   type MediaLibraryItem,
-  SecondaryLink,
   SelectField,
   SubmitButton,
   TextAreaField,
@@ -32,13 +32,8 @@ type CollectionItem = {
 
 type CollectionTranslation = {
   title?: string;
-  caption?: string;
   story?: string;
-  categoryLabel?: string;
   sportCategoryLabel?: string;
-  seoTitle?: string;
-  seoDescription?: string;
-  ogImagePath?: string;
 };
 
 export function CollectionForm({
@@ -68,13 +63,14 @@ export function CollectionForm({
 
       <Panel className="min-w-0 p-5">
         <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="ring-01" />
+          <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="ring-01" editorControls={false} />
           <SelectField label={t('form.category')} name="category" defaultValue={normalizeCollectionCategory(item?.category)} options={collectionCategoryOptions(t)} />
-          <TextField label={t('form.sportCategory')} name="sportCategory" defaultValue={item?.sportCategory} placeholder="baseball" />
+          <TextField label={t('form.sportCategory')} name="sportCategory" defaultValue={normalizeSportCategory(item)} placeholder="baseball" editorControls={false} />
+          <TextField label={t('form.year')} name="specs.year" defaultValue={specs.year} editorControls={false} />
           <TextField label={t('common.sortOrder')} name="sortOrder" type="number" defaultValue={item?.sortOrder ?? 0} />
           <CheckboxField label={t('form.visible')} name="isVisible" defaultChecked={item?.isVisible ?? true} />
         </div>
-        <div className="mt-4 grid min-w-0 gap-4 xl:grid-cols-2">
+        <div className="mt-4 grid min-w-0 gap-4">
           <ImageUploadField
             label={t('form.imageFilename')}
             name="imagePath"
@@ -91,10 +87,6 @@ export function CollectionForm({
             mediaLibraryTitle={t('media.libraryTitle')}
             mediaEmptyLabel={t('media.libraryEmpty')}
             mediaSelectedLabel={t('media.selectedExisting')}
-          />
-          <CollectionSpecificationsPanel
-            specs={specs}
-            messages={messages}
           />
         </div>
         <CollectionGalleryField
@@ -123,7 +115,6 @@ export function CollectionForm({
           <ContentLocalePanel key={locale} locale={locale}>
             <TranslationPanel
               locale={locale}
-              mediaItems={mediaItems}
               messages={messages}
               translation={getTranslation(item, locale)}
             />
@@ -141,44 +132,12 @@ export function CollectionForm({
   );
 }
 
-function CollectionSpecificationsPanel({
-  specs,
-  messages
-}: {
-  specs: ReturnType<typeof normalizeSpecs>;
-  messages: Record<string, string>;
-}) {
-  const t = createAdminTranslator(messages);
-
-  return (
-    <div className="grid min-w-0 max-w-full gap-4 overflow-hidden rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-4">
-      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('form.specs')}</p>
-      <div className="grid min-w-0 max-w-full gap-4 sm:grid-cols-2">
-        <TextField label={t('form.year')} name="specs.year" defaultValue={specs.year} />
-        <TextField label={t('form.sportCategory')} name="specs.sportCategory" defaultValue={specs.sportCategory} />
-        <div className="min-w-0 sm:col-span-2">
-          <TextField
-            label={t('form.linkHref')}
-            name="specs.linkHref"
-            defaultValue={specs.linkHref}
-            placeholder="/mastery/creations/slug, https://…"
-            inputMode="url"
-            editorControls={false}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function TranslationPanel({
   locale,
-  mediaItems,
   messages,
   translation
 }: {
   locale: Locale;
-  mediaItems: MediaLibraryItem[];
   messages: Record<string, string>;
   translation: CollectionTranslation;
 }) {
@@ -186,35 +145,13 @@ function TranslationPanel({
 
   return (
     <Panel className="min-w-0 p-5">
-      <div className="mb-4 flex items-center justify-between border-b border-[#e4e7ec] pb-3">
+      <div className="mb-4 border-b border-[#e4e7ec] pb-3">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{getContentLocaleLabel(messages, locale)}</h2>
-        <SecondaryLink href="/admin/media">{t('common.media')}</SecondaryLink>
       </div>
       <div className="grid gap-4">
-        <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required />
-        <TextAreaField label={t('form.caption')} name={`${locale}.caption`} defaultValue={translation.caption} rows={3} />
-        <TextAreaField label={t('form.story')} name={`${locale}.story`} defaultValue={translation.story} rows={5} />
-        <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
-        <TextField label={t('form.sportCategoryLabel')} name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} />
-        <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
-        <TextAreaField label={t('form.seoDescription')} name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
-        <ImageUploadField
-          label={t('form.ogImage')}
-          name={`${locale}.ogImagePath`}
-          uploadName={`${locale}.ogImageUpload`}
-          defaultValue={translation.ogImagePath}
-          uploadLabel={t('page.uploadLocalImage')}
-          uploadHint={t('page.uploadLocalImageHint')}
-          imageGuide={t('imageGuide.seo')}
-          emptyLabel={t('common.noImage')}
-          changedLabel={t('common.changed')}
-          selectedLabel={t('common.imageSelected')}
-          mediaItems={mediaItems}
-          mediaSelectLabel={t('media.selectFromLibrary')}
-          mediaLibraryTitle={t('media.libraryTitle')}
-          mediaEmptyLabel={t('media.libraryEmpty')}
-          mediaSelectedLabel={t('media.selectedExisting')}
-        />
+        <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required editorControls={false} />
+        <TextAreaField label={t('form.story')} name={`${locale}.story`} defaultValue={translation.story} rows={5} editorControls={false} />
+        <TextField label={t('form.sportCategoryLabel')} name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} editorControls={false} />
       </div>
     </Panel>
   );
@@ -224,20 +161,28 @@ function getTranslation(item: CollectionItem | undefined, locale: Locale) {
   return (item?.translations[locale] ?? {}) as CollectionTranslation;
 }
 
-const collectionCategoryValues = ['champion', 'appointment', 'bespoke'] as const;
-
 function collectionCategoryOptions(t: (key: string) => string) {
-  return [
-    {value: 'champion', label: t('collection.categoryChampion')},
-    {value: 'appointment', label: t('collection.categoryAppointment')},
-    {value: 'bespoke', label: t('collection.categoryBespoke')}
-  ];
+  return collectionCategoryValues.map((value) => ({
+    value,
+    label: t(value === 'champion' ? 'collection.categoryChampion' : 'collection.categoryBespoke')
+  }));
 }
 
 function normalizeCollectionCategory(value?: string) {
-  return collectionCategoryValues.includes(value as typeof collectionCategoryValues[number])
-    ? value
-    : 'champion';
+  return isCollectionBackedCategory(value) ? value : 'champion';
+}
+
+function normalizeSportCategory(item?: CollectionItem) {
+  if (item?.sportCategory) {
+    return item.sportCategory;
+  }
+
+  if (!item?.specs || typeof item.specs !== 'object' || Array.isArray(item.specs)) {
+    return '';
+  }
+
+  const legacyValue = (item.specs as Record<string, unknown>).sportCategory;
+  return typeof legacyValue === 'string' ? legacyValue : '';
 }
 
 function normalizeGallery(value: unknown, fallbackImage?: string) {
@@ -251,17 +196,13 @@ function normalizeGallery(value: unknown, fallbackImage?: string) {
 function normalizeSpecs(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {
-      year: '',
-      sportCategory: '',
-      linkHref: ''
+      year: ''
     };
   }
 
   const specs = value as Record<string, unknown>;
 
   return {
-    year: typeof specs.year === 'string' ? specs.year : '',
-    sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : '',
-    linkHref: typeof specs.linkHref === 'string' ? specs.linkHref : ''
+    year: typeof specs.year === 'string' ? specs.year : ''
   };
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {isCollectionBackedCategory} from '@/lib/cms/collection-categories';
 import {listCollections, type CmsCollection} from '@/lib/cms/repositories';
 import {imageSrc} from '@/lib/image-src';
 
@@ -11,7 +12,6 @@ import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
 
 type CollectionTranslation = {
   title?: string;
-  categoryLabel?: string;
   sportCategoryLabel?: string;
 };
 
@@ -19,16 +19,16 @@ type Props = {
   searchParams?: Promise<Record<string, string | undefined>>;
 };
 
-type CollectionCategoryFilter = 'all' | 'champion' | 'appointment' | 'bespoke';
+type CollectionCategoryFilter = 'all' | 'champion' | 'bespoke';
 type CollectionStatusFilter = 'all' | 'visible' | 'hidden';
 
-const collectionCategoryFilters = ['all', 'champion', 'appointment', 'bespoke'] as const;
+const collectionCategoryFilters = ['all', 'champion', 'bespoke'] as const;
 const collectionStatusFilters = ['all', 'visible', 'hidden'] as const;
 
 export default async function AdminCollectionsPage({searchParams}: Props) {
   const {t} = await getAdminI18n();
   const query = await searchParams;
-  const items = await listCollections();
+  const items = (await listCollections()).filter((item) => isCollectionBackedCategory(item.category));
   const searchQuery = normalizeSearchQuery(query?.q);
   const categoryFilter = normalizeCategoryFilter(query?.category);
   const statusFilter = normalizeStatusFilter(query?.status);
@@ -136,7 +136,6 @@ export default async function AdminCollectionsPage({searchParams}: Props) {
                           </td>
                           <td className="px-4 py-4">
                             <p className="font-semibold text-[#344054]">{getCollectionCategoryDisplay(t, item.category)}</p>
-                            <p className="mt-1 text-xs text-[#647084]">{ko.categoryLabel}</p>
                           </td>
                           <td className="px-4 py-4">
                             <p className="font-semibold text-[#344054]">{item.sportCategory || '-'}</p>
@@ -217,8 +216,6 @@ function getCollectionCategoryDisplay(t: (key: string, values?: Record<string, s
   switch (value) {
     case 'champion':
       return t('collection.categoryChampion');
-    case 'appointment':
-      return t('collection.categoryAppointment');
     case 'bespoke':
       return t('collection.categoryBespoke');
     default:
@@ -274,8 +271,6 @@ function getCollectionSearchText(item: CmsCollection) {
       const record = translation as Record<string, unknown>;
       return [
         record.title,
-        record.caption,
-        record.categoryLabel,
         record.sportCategoryLabel
       ].filter((value): value is string => typeof value === 'string');
     })

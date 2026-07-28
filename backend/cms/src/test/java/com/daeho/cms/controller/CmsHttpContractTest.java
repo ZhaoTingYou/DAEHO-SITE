@@ -179,6 +179,13 @@ class CmsHttpContractTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.item.id").value("collection-1"));
 
+    mvc.perform(post("/api/admin/collections")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(collectionPayload().replace("\"category\":\"champion\"", "\"category\":\"appointment\"")))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.issues[0].path").value("category"));
+
     mvc.perform(get("/api/admin/collections/collection-1").header("x-admin-api-key", ADMIN_KEY))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.item.slug").value("champion"));
@@ -615,7 +622,7 @@ class CmsHttpContractTest {
     return """
         {
           "slug":"champion",
-          "category":"ring",
+          "category":"champion",
           "sportCategory":"baseball",
           "imagePath":"ring.png",
           "gallery":["ring.png"],

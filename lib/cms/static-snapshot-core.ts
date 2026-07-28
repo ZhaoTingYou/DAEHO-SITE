@@ -69,7 +69,7 @@ export function listSnapshotPublicCollections(snapshot: CmsStaticSnapshot, local
   const items: Array<Record<string, unknown>> = [];
 
   for (const row of rows(snapshot, 'cms_collections')
-    .filter((row) => booleanValue(row.is_visible, true))
+    .filter((row) => booleanValue(row.is_visible, true) && isCollectionBackedCategory(row.category))
     .sort(compareCollectionSourceRows)) {
     const translation = translations.find(
       (entry) => stringValue(entry.collection_id) === stringValue(row.id) && stringValue(entry.locale) === locale
@@ -127,25 +127,30 @@ function mapPublicNews(row: Record<string, unknown>, translation: Record<string,
 }
 
 function mapPublicCollection(row: Record<string, unknown>, translation: Record<string, unknown>, locale: Locale) {
+  const sourceSpecs = objectJson(row.specs_json);
+  const sportCategory = stringValue(row.sport_category) || stringValue(sourceSpecs.sportCategory);
+  const story = stringValue(translation.story) || stringValue(translation.caption);
+
   return {
     id: stringValue(row.id),
     slug: stringValue(row.slug),
     category: stringValue(row.category),
-    sportCategory: stringValue(row.sport_category),
+    sportCategory,
     imagePath: stringValue(row.image_path),
     gallery: arrayJson(row.gallery_json),
-    specs: objectJson(row.specs_json),
+    specs: {
+      year: stringValue(sourceSpecs.year)
+    },
     sortOrder: numberValue(row.sort_order),
     locale,
     title: stringValue(translation.title),
-    caption: stringValue(translation.caption),
-    story: stringValue(translation.story),
-    categoryLabel: stringValue(translation.category_label),
-    sportCategoryLabel: stringValue(translation.sport_category_label),
-    seoTitle: stringValue(translation.seo_title),
-    seoDescription: stringValue(translation.seo_description),
-    ogImagePath: stringValue(translation.og_image_path)
+    story,
+    sportCategoryLabel: stringValue(translation.sport_category_label)
   };
+}
+
+function isCollectionBackedCategory(value: unknown) {
+  return value === 'champion' || value === 'bespoke';
 }
 
 function rows(snapshot: CmsStaticSnapshot, table: CmsStaticTable) {
@@ -179,9 +184,11 @@ function booleanValue(value: unknown, fallback: boolean) {
   return fallback;
 }
 
-function objectJson(value: unknown) {
+function objectJson(value: unknown): Record<string, unknown> {
   const parsed = parseJson(value, {});
-  return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+    ? parsed as Record<string, unknown>
+    : {};
 }
 
 function arrayJson(value: unknown) {

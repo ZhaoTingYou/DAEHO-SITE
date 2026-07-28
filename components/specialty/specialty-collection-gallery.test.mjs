@@ -267,10 +267,8 @@ test('collections admin list exposes product thumbnails and query filters', () =
     'Collections admin rows should render visual product thumbnails'
   );
   assert.ok(
-    adminCollectionsSource.includes("'champion'") &&
-      adminCollectionsSource.includes("'appointment'") &&
-      adminCollectionsSource.includes("'bespoke'"),
-    'Collections admin filters should use the three public Creations categories'
+    adminCollectionsSource.includes("const collectionCategoryFilters = ['all', 'champion', 'bespoke'] as const"),
+    'Collections admin filters should include only Collection-backed Creations categories'
   );
 });
 

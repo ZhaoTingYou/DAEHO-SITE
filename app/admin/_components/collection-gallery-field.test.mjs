@@ -48,10 +48,10 @@ test('collection form no longer exposes the retired detail image strip', () => {
   assert.equal(collectionFormSource.includes('form.detailGallery'), false);
 });
 
-test('collection image fields show ratio and size guidance', () => {
+test('retained collection image fields show ratio and size guidance', () => {
   assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.collectionCover'\)\}/);
   assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.collectionGallery'\)\}/);
-  assert.match(collectionFormSource, /imageGuide=\{t\('imageGuide\.seo'\)\}/);
+  assert.doesNotMatch(collectionFormSource, /imageGuide=\{t\('imageGuide\.seo'\)\}/);
   assert.match(galleryFieldSource, /imageGuide\?: string/);
   assert.match(galleryFieldSource, /imageGuide=\{imageGuide\}/);
 });

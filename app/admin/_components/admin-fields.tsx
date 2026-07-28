@@ -121,7 +121,8 @@ export function TextAreaField({
   placeholder,
   editorFont,
   editorAlign,
-  editorLocale
+  editorLocale,
+  editorControls = true
 }: {
   label: string;
   name: string;
@@ -132,6 +133,7 @@ export function TextAreaField({
   editorFont?: TextEditorFont;
   editorAlign?: TextEditorAlign;
   editorLocale?: TextEditorLocale;
+  editorControls?: boolean;
 }) {
   const [font, setFont] = useState<TextEditorFont>(() => normalizeTextEditorFont(editorFont, defaultTextEditorFont(defaultValue, editorLocale)));
   const [align, setAlign] = useState<TextEditorAlign>(() => normalizeTextEditorAlign(editorAlign));
@@ -141,7 +143,7 @@ export function TextAreaField({
     <div className="grid min-w-0 max-w-full gap-1.5 text-sm font-semibold text-[#344054]">
       <TextEditorLabel
         label={label}
-        enabled
+        enabled={editorControls}
         font={font}
         align={align}
         onFontChange={setFont}
@@ -154,7 +156,7 @@ export function TextAreaField({
         required={required}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        style={editableStyle}
+        style={editorControls ? editableStyle : undefined}
         className="w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm leading-6 text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
       />
     </div>

@@ -1,6 +1,7 @@
 import {notFound} from 'next/navigation';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {isCollectionBackedCategory} from '@/lib/cms/collection-categories';
 import {getCollection, listMedia} from '@/lib/cms/repositories';
 
 import {AdminActionAlert} from '../../../_components/admin-feedback';
@@ -20,7 +21,7 @@ export default async function AdminCollectionEditPage({params, searchParams}: Pr
   const item = id === 'new' ? undefined : await getCollection(id);
   const mediaItems = await getMediaLibraryItems();
 
-  if (id !== 'new' && !item) {
+  if (id !== 'new' && (!item || !isCollectionBackedCategory(item.category))) {
     notFound();
   }
 

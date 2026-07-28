@@ -113,17 +113,22 @@ export async function getCollectionItemsForSite(locale: Locale): Promise<Special
     return [];
   }
 
+  const categoryLabels = collectionCategoryLabels(await getLocaleMessages(locale));
+
   return cmsItems.map((item) => {
     const specs = normalizeCollectionSpecs(item.specs);
+    const category = String(item.category);
+    const story = String(item.story);
+    const sportCategory = String(item.sportCategory);
     return {
       id: String(item.slug),
-      href: resolveCmsHref(locale, specs.linkHref, `/mastery/creations/${String(item.slug)}`),
+      href: resolveCmsHref(locale, `/mastery/creations/${String(item.slug)}`),
       title: String(item.title),
-      caption: String(item.caption),
-      category: String(item.category),
-      categoryLabel: String(item.categoryLabel),
-      sportCategory: String(item.sportCategory || specs.sportCategory),
-      sportCategoryLabel: String(item.sportCategoryLabel),
+      caption: story,
+      category,
+      categoryLabel: categoryLabels.get(category) ?? category,
+      sportCategory,
+      sportCategoryLabel: String(item.sportCategoryLabel || sportCategory),
       year: specs.year,
       image: cmsImageName(item.imagePath),
       hasImage: imageExists(cmsImageName(item.imagePath))
@@ -137,26 +142,29 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
   if (cmsItem) {
     const specs = normalizeCollectionSpecs(cmsItem.specs);
     const image = cmsImageName(cmsItem.imagePath);
-    const ogImage = cmsImageName(cmsItem.ogImagePath || cmsItem.imagePath);
     const gallery = normalizeGallery(cmsItem.gallery, image);
+    const category = String(cmsItem.category);
+    const story = String(cmsItem.story);
+    const sportCategory = String(cmsItem.sportCategory);
+    const categoryLabels = collectionCategoryLabels(await getLocaleMessages(locale));
 
     return {
       id: String(cmsItem.slug),
-      href: resolveCmsHref(locale, specs.linkHref, `/mastery/creations/${String(cmsItem.slug)}`),
+      href: resolveCmsHref(locale, `/mastery/creations/${String(cmsItem.slug)}`),
       title: String(cmsItem.title),
-      caption: String(cmsItem.caption),
-      story: String(cmsItem.story),
-      category: String(cmsItem.category),
-      categoryLabel: String(cmsItem.categoryLabel),
-      sportCategory: String(cmsItem.sportCategory || specs.sportCategory),
-      sportCategoryLabel: String(cmsItem.sportCategoryLabel),
+      caption: story,
+      story,
+      category,
+      categoryLabel: categoryLabels.get(category) ?? category,
+      sportCategory,
+      sportCategoryLabel: String(cmsItem.sportCategoryLabel || sportCategory),
       year: specs.year,
       image,
       gallery,
       hasImage: imageExists(image),
-      seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
-      seoDescription: String(cmsItem.seoDescription || cmsItem.caption || ''),
-      ogImagePath: ogImage,
+      seoTitle: String(cmsItem.title),
+      seoDescription: story,
+      ogImagePath: image,
       specs
     };
   }
@@ -183,10 +191,15 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
     seoDescription: item.caption,
     ogImagePath: item.image,
     specs: {
-      year: item.year ?? '',
-      sportCategory: item.sportCategory ?? ''
+      year: item.year ?? ''
     }
   };
+}
+
+function collectionCategoryLabels(messages: Awaited<ReturnType<typeof getLocaleMessages>>) {
+  return new Map(
+    messages.specialtyPages.collection.gallery.filters.map((filter) => [filter.id, filter.label])
+  );
 }
 
 function normalizeNewsBody(value: unknown) {
@@ -290,17 +303,13 @@ function newsBlockSpacing(value: unknown): NewsBodyBlock['spacing'] {
 function normalizeCollectionSpecs(value: unknown) {
   if (!value || typeof value !== 'object') {
     return {
-      year: '',
-      sportCategory: '',
-      linkHref: ''
+      year: ''
     };
   }
 
   const specs = value as Record<string, unknown>;
   return {
-    year: typeof specs.year === 'string' ? specs.year : '',
-    sportCategory: typeof specs.sportCategory === 'string' ? specs.sportCategory : '',
-    linkHref: typeof specs.linkHref === 'string' ? specs.linkHref : ''
+    year: typeof specs.year === 'string' ? specs.year : ''
   };
 }
 
