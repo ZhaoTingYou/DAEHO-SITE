@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class RequestValidation {
   public static final List<String> LOCALES = List.of("ko", "en");
   public static final List<String> INQUIRY_STATUSES = List.of("new", "contacted", "in_progress", "done", "spam");
+  public static final List<String> COLLECTION_CATEGORIES = List.of("champion", "bespoke");
   private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
   public ValidatedRequest pagePayload(Map<String, Object> body) {
@@ -49,6 +50,9 @@ public class RequestValidation {
     payload.putIfAbsent("sortOrder", 0);
     payload.putIfAbsent("translations", Map.of());
     requireText(payload, "category", issues);
+    if (!COLLECTION_CATEGORIES.contains(stringValue(payload.get("category")))) {
+      issues.add(issue("category", "Expected Collection category to be champion or bespoke."));
+    }
     validateTranslations(payload, "translations", issues, true);
     return new ValidatedRequest(payload, issues);
   }

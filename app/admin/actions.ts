@@ -241,15 +241,13 @@ export async function saveCollectionAction(formData: FormData) {
       imagePath,
       gallery,
       specs: {
-        year: stringFromForm(formData, 'specs.year'),
-        sportCategory: stringFromForm(formData, 'specs.sportCategory'),
-        linkHref: stringFromForm(formData, 'specs.linkHref')
+        year: stringFromForm(formData, 'specs.year')
       },
       isVisible: formData.get('isVisible') !== 'off',
       sortOrder: stringFromForm(formData, 'sortOrder') || '0',
       translations: {
-        ko: await readCollectionTranslation(formData, 'ko', editorPath),
-        en: await readCollectionTranslation(formData, 'en', editorPath)
+        ko: readCollectionTranslation(formData, 'ko'),
+        en: readCollectionTranslation(formData, 'en')
       }
     });
 
@@ -591,16 +589,11 @@ function newsItemSlug(value: unknown) {
   return typeof slug === 'string' && slug.trim() ? slug.trim() : null;
 }
 
-async function readCollectionTranslation(formData: FormData, locale: Locale, editorPath: string) {
+function readCollectionTranslation(formData: FormData, locale: Locale) {
   return {
     title: stringFromForm(formData, `${locale}.title`),
-    caption: stringFromForm(formData, `${locale}.caption`),
     story: stringFromForm(formData, `${locale}.story`),
-    categoryLabel: stringFromForm(formData, `${locale}.categoryLabel`),
-    sportCategoryLabel: stringFromForm(formData, `${locale}.sportCategoryLabel`),
-    seoTitle: stringFromForm(formData, `${locale}.seoTitle`),
-    seoDescription: stringFromForm(formData, `${locale}.seoDescription`),
-    ogImagePath: await readUploadedImageOrText(formData, `${locale}.ogImagePath`, `${locale}.ogImageUpload`, locale, editorPath)
+    sportCategoryLabel: stringFromForm(formData, `${locale}.sportCategoryLabel`)
   };
 }
 

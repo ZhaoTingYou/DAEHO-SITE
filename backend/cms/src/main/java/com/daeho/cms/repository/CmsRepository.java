@@ -221,11 +221,14 @@ public class CmsRepository {
 
   public List<Map<String, Object>> listPublicCollections(String locale) {
     return jdbc.query("""
-        SELECT c.*, t.locale, t.title, t.caption, t.story, t.category_label, t.sport_category_label,
-          t.seo_title, t.seo_description, t.og_image_path
+        SELECT c.*, t.locale, t.title,
+          COALESCE(NULLIF(t.story, ''), t.caption) AS resolved_story,
+          t.sport_category_label,
+          COALESCE(NULLIF(c.sport_category, ''), c.specs_json ->> 'sportCategory') AS resolved_sport_category
         FROM cms_collections c
         JOIN cms_collection_translations t ON t.collection_id = c.id AND t.locale = ?
         WHERE c.is_visible = true
+          AND c.category IN ('champion', 'bespoke')
         ORDER BY c.sort_order ASC, c.created_at DESC
         """, this::mapPublicCollection, locale);
   }
@@ -241,11 +244,14 @@ public class CmsRepository {
 
   public Map<String, Object> getPublicCollection(String slug, String locale) {
     return jdbc.query("""
-        SELECT c.*, t.locale, t.title, t.caption, t.story, t.category_label, t.sport_category_label,
-          t.seo_title, t.seo_description, t.og_image_path
+        SELECT c.*, t.locale, t.title,
+          COALESCE(NULLIF(t.story, ''), t.caption) AS resolved_story,
+          t.sport_category_label,
+          COALESCE(NULLIF(c.sport_category, ''), c.specs_json ->> 'sportCategory') AS resolved_sport_category
         FROM cms_collections c
         JOIN cms_collection_translations t ON t.collection_id = c.id AND t.locale = ?
         WHERE c.slug = ? AND c.is_visible = true
+          AND c.category IN ('champion', 'bespoke')
         """, this::mapPublicCollection, locale, slug).stream().findFirst().orElse(null);
   }
 
@@ -623,37 +629,31 @@ public class CmsRepository {
       }
       jdbc.update("""
           INSERT INTO cms_collection_translations (
-            collection_id, locale, title, caption, story, category_label, sport_category_label,
-            seo_title, seo_description, og_image_path, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+            collection_id, locale, title, story, sport_category_label, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, now(), now())
           ON CONFLICT(collection_id, locale) DO UPDATE SET
             title = excluded.title,
-            caption = excluded.caption,
             story = excluded.story,
-            category_label = excluded.category_label,
             sport_category_label = excluded.sport_category_label,
-            seo_title = excluded.seo_title,
-            seo_description = excluded.seo_description,
-            og_image_path = excluded.og_image_path,
             updated_at = now()
           """,
           collectionId,
           locale,
           validation.stringValue(translation.get("title")),
-          validation.stringValue(translation.get("caption")),
           validation.stringValue(translation.get("story")),
-          validation.stringValue(translation.get("categoryLabel")),
-          validation.stringValue(translation.get("sportCategoryLabel")),
-          validation.stringValue(translation.get("seoTitle")),
-          validation.stringValue(translation.get("seoDescription")),
-          validation.stringValue(translation.get("ogImagePath"))
+          validation.stringValue(translation.get("sportCategoryLabel"))
       );
     }
   }
 
   private Map<String, Object> getCollectionTranslations(String collectionId) {
     var rows = jdbc.query(
-        "SELECT * FROM cms_collection_translations WHERE collection_id = ?",
+        """
+        SELECT *,
+          COALESCE(NULLIF(story, ''), caption) AS resolved_story
+        FROM cms_collection_translations
+        WHERE collection_id = ?
+        """,
         (rs, rowNum) -> Map.entry(rs.getString("locale"), mapCollectionTranslation(rs)),
         collectionId
     );
@@ -832,14 +832,20 @@ public class CmsRepository {
   }
 
   private Map<String, Object> mapCollection(ResultSet rs, Map<String, Object> translations) throws SQLException {
+    var specs = json.objectOrEmpty(rs.getString("specs_json"));
+    var sportCategory = rs.getString("sport_category");
+    if (sportCategory == null || sportCategory.isBlank()) {
+      sportCategory = validation.stringValue(specs.get("sportCategory"));
+    }
+
     return orderedMap(
         "id", rs.getString("id"),
         "slug", rs.getString("slug"),
         "category", rs.getString("category"),
-        "sportCategory", rs.getString("sport_category"),
+        "sportCategory", sportCategory,
         "imagePath", rs.getString("image_path"),
         "gallery", json.arrayOrEmpty(rs.getString("gallery_json")),
-        "specs", json.objectOrEmpty(rs.getString("specs_json")),
+        "specs", specs,
         "isVisible", rs.getBoolean("is_visible"),
         "sortOrder", rs.getInt("sort_order"),
         "translations", translations,
@@ -851,13 +857,8 @@ public class CmsRepository {
   private Map<String, Object> mapCollectionTranslation(ResultSet rs) throws SQLException {
     return orderedMap(
         "title", rs.getString("title"),
-        "caption", rs.getString("caption"),
-        "story", rs.getString("story"),
-        "categoryLabel", rs.getString("category_label"),
-        "sportCategoryLabel", rs.getString("sport_category_label"),
-        "seoTitle", rs.getString("seo_title"),
-        "seoDescription", rs.getString("seo_description"),
-        "ogImagePath", rs.getString("og_image_path")
+        "story", rs.getString("resolved_story"),
+        "sportCategoryLabel", rs.getString("sport_category_label")
     );
   }
 
@@ -866,7 +867,7 @@ public class CmsRepository {
         "id", rs.getString("id"),
         "slug", rs.getString("slug"),
         "category", rs.getString("category"),
-        "sportCategory", rs.getString("sport_category"),
+        "sportCategory", rs.getString("resolved_sport_category"),
         "imagePath", rs.getString("image_path"),
         "gallery", json.arrayOrEmpty(rs.getString("gallery_json")),
         "specs", json.objectOrEmpty(rs.getString("specs_json")),

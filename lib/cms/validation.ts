@@ -72,18 +72,13 @@ export const newsPayloadSchema = z.object({
 
 const collectionTranslationSchema = z.object({
   title: z.string().trim().min(1),
-  caption: optionalText,
   story: optionalText,
-  categoryLabel: optionalText,
-  sportCategoryLabel: optionalText,
-  seoTitle: optionalText,
-  seoDescription: optionalText,
-  ogImagePath: optionalText
+  sportCategoryLabel: optionalText
 });
 
 export const collectionPayloadSchema = z.object({
   slug: z.string().trim().min(1).optional(),
-  category: z.string().trim().min(1),
+  category: z.enum(['champion', 'bespoke']),
   sportCategory: optionalText,
   imagePath: optionalText,
   gallery: optionalJsonArray,
