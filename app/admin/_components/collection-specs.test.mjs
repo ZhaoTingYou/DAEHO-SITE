@@ -170,30 +170,8 @@ test('Collection admin copy and search do not retain removed Appointment or deri
 });
 
 test('collection metadata and content fields do not show ineffective typography controls', () => {
-  for (const fieldName of ['slug', 'sportCategory', 'specs.year']) {
-    assert.match(
-      formSource,
-      new RegExp(`<TextField[^>]*name="${fieldName.replace('.', '\\.')}"[^>]*editorControls=\\{false\\}`),
-      `${fieldName} should render as a plain input`
-    );
-  }
-
-  for (const localizedField of ['title', 'story', 'sportCategoryLabel']) {
-    assert.match(
-      formSource,
-      new RegExp(`name=\\{\\\`\\$\\{locale\\}\\.${localizedField}\\\`\\}[^>]*editorControls=\\{false\\}`),
-      `${localizedField} should not show font or alignment controls`
-    );
-  }
-
-  assert.match(
-    adminFieldsSource.slice(
-      adminFieldsSource.indexOf('export function TextAreaField('),
-      adminFieldsSource.indexOf('function TextEditorLabel(')
-    ),
-    /editorControls\?: boolean/,
-    'text areas should support disabling typography controls'
-  );
+  assert.doesNotMatch(formSource, /editorControls|editorFont|editorAlign|editorLocale/);
+  assert.doesNotMatch(adminFieldsSource, /TextEditor(Font|Align|Locale|Label)|editorControls/);
 });
 
 test('collection detail and backend transport do not retain retired specification values', () => {

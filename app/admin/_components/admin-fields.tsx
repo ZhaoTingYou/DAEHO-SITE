@@ -30,33 +30,6 @@ export type MediaLibraryItem = {
   alt?: string;
 };
 
-export type TextEditorFont = 'maruburi-semibold' | 'cormorant-garamond-700';
-export type TextEditorAlign = 'left' | 'center' | 'right';
-export type TextEditorLocale = 'ko' | 'en';
-
-const textEditorFonts: Array<{
-  value: TextEditorFont;
-  label: string;
-  style: CSSProperties;
-}> = [
-  {
-    value: 'maruburi-semibold',
-    label: 'MaruBuri SemiBold',
-    style: {fontFamily: '"MaruBuri", serif', fontWeight: 600}
-  },
-  {
-    value: 'cormorant-garamond-700',
-    label: 'Cormorant Garamond 700',
-    style: {fontFamily: '"Cormorant Garamond", serif', fontWeight: 700}
-  }
-];
-
-const textEditorAlignments: Array<{value: TextEditorAlign; label: string}> = [
-  {value: 'left', label: 'L'},
-  {value: 'center', label: 'C'},
-  {value: 'right', label: 'R'}
-];
-
 export function TextField({
   label,
   name,
@@ -64,11 +37,7 @@ export function TextField({
   type = 'text',
   required = false,
   placeholder,
-  editorFont,
-  editorAlign,
-  editorLocale,
-  inputMode,
-  editorControls = true
+  inputMode
 }: {
   label: string;
   name: string;
@@ -76,27 +45,11 @@ export function TextField({
   type?: string;
   required?: boolean;
   placeholder?: string;
-  editorFont?: TextEditorFont;
-  editorAlign?: TextEditorAlign;
-  editorLocale?: TextEditorLocale;
   inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
-  editorControls?: boolean;
 }) {
-  const [font, setFont] = useState<TextEditorFont>(() => normalizeTextEditorFont(editorFont, defaultTextEditorFont(defaultValue, editorLocale)));
-  const [align, setAlign] = useState<TextEditorAlign>(() => normalizeTextEditorAlign(editorAlign));
-  const editableStyle = textEditorStyle(font, align);
-  const hasTextControls = type === 'text' && editorControls;
-
   return (
     <div className="grid min-w-0 max-w-full gap-1.5 text-sm font-semibold text-[#344054]">
-      <TextEditorLabel
-        label={label}
-        enabled={hasTextControls}
-        font={font}
-        align={align}
-        onFontChange={setFont}
-        onAlignChange={setAlign}
-      />
+      <span>{label}</span>
       <input
         name={name}
         type={type}
@@ -105,7 +58,6 @@ export function TextField({
         required={required}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        style={hasTextControls ? editableStyle : undefined}
         className="min-h-10 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3 text-sm text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
       />
     </div>
@@ -118,11 +70,7 @@ export function TextAreaField({
   defaultValue,
   rows = 4,
   required = false,
-  placeholder,
-  editorFont,
-  editorAlign,
-  editorLocale,
-  editorControls = true
+  placeholder
 }: {
   label: string;
   name: string;
@@ -130,25 +78,10 @@ export function TextAreaField({
   rows?: number;
   required?: boolean;
   placeholder?: string;
-  editorFont?: TextEditorFont;
-  editorAlign?: TextEditorAlign;
-  editorLocale?: TextEditorLocale;
-  editorControls?: boolean;
 }) {
-  const [font, setFont] = useState<TextEditorFont>(() => normalizeTextEditorFont(editorFont, defaultTextEditorFont(defaultValue, editorLocale)));
-  const [align, setAlign] = useState<TextEditorAlign>(() => normalizeTextEditorAlign(editorAlign));
-  const editableStyle = textEditorStyle(font, align);
-
   return (
     <div className="grid min-w-0 max-w-full gap-1.5 text-sm font-semibold text-[#344054]">
-      <TextEditorLabel
-        label={label}
-        enabled={editorControls}
-        font={font}
-        align={align}
-        onFontChange={setFont}
-        onAlignChange={setAlign}
-      />
+      <span>{label}</span>
       <textarea
         name={name}
         rows={rows}
@@ -156,102 +89,10 @@ export function TextAreaField({
         required={required}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        style={editorControls ? editableStyle : undefined}
         className="w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3 py-2 text-sm leading-6 text-[#101827] outline-none transition focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
       />
     </div>
   );
-}
-
-function TextEditorLabel({
-  label,
-  enabled,
-  font,
-  align,
-  onFontChange,
-  onAlignChange
-}: {
-  label: string;
-  enabled: boolean;
-  font: TextEditorFont;
-  align: TextEditorAlign;
-  onFontChange: (font: TextEditorFont) => void;
-  onAlignChange: (align: TextEditorAlign) => void;
-}) {
-  if (!enabled) {
-    return <span>{label}</span>;
-  }
-
-  return (
-    <span className="grid min-w-0 max-w-full gap-2">
-      <span>{label}</span>
-      <span className="flex min-w-0 max-w-full flex-wrap items-center gap-2 rounded-md border border-[#e4e7ec] bg-[#f8fafc] p-1.5">
-        <select
-          aria-label={`${label} font`}
-          value={font}
-          onChange={(event) => onFontChange(event.target.value as TextEditorFont)}
-          className="min-h-8 min-w-0 max-w-full flex-[1_1_12rem] rounded border border-[#cbd3df] bg-white px-2 text-xs font-semibold text-[#344054] outline-none focus:border-[#7a2230] focus:ring-2 focus:ring-[#7a2230]/15"
-        >
-          {textEditorFonts.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <span className="inline-flex shrink-0 overflow-hidden rounded border border-[#cbd3df] bg-white">
-          {textEditorAlignments.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-label={`${label} align ${option.value}`}
-              aria-pressed={align === option.value}
-              onClick={() => onAlignChange(option.value)}
-              className={`min-h-8 min-w-8 px-2 text-xs font-semibold transition ${
-                align === option.value ? 'bg-[#7a2230] text-white' : 'text-[#344054] hover:bg-[#f2f4f7]'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </span>
-      </span>
-    </span>
-  );
-}
-
-function textEditorStyle(font: TextEditorFont, align: TextEditorAlign): CSSProperties {
-  const fontStyle = textEditorFonts.find((option) => option.value === font)?.style ?? textEditorFonts[0].style;
-
-  return {
-    ...fontStyle,
-    textAlign: align
-  };
-}
-
-function normalizeTextEditorFont(value: TextEditorFont | undefined, fallback: TextEditorFont): TextEditorFont {
-  return value && textEditorFonts.some((option) => option.value === value) ? value : fallback;
-}
-
-function normalizeTextEditorAlign(value: TextEditorAlign | undefined): TextEditorAlign {
-  return value && textEditorAlignments.some((option) => option.value === value) ? value : 'left';
-}
-
-function defaultTextEditorFont(value: string | number | undefined, locale?: TextEditorLocale): TextEditorFont {
-  if (locale === 'ko') {
-    return 'maruburi-semibold';
-  }
-
-  if (locale === 'en') {
-    return 'cormorant-garamond-700';
-  }
-
-  const text = String(value ?? '');
-
-  if (/[A-Za-z]/.test(text) && !/[가-힣]/.test(text)) {
-    return 'cormorant-garamond-700';
-  }
-
-  return 'maruburi-semibold';
 }
 
 export function SelectField({
@@ -980,9 +821,6 @@ export function AppendableArrayItemsField({
                       name={name}
                       defaultValue=""
                       rows={field.rows ?? 3}
-                      editorFont={field.editor?.font}
-                      editorAlign={field.editor?.align}
-                      editorLocale={locale === 'ko' || locale === 'en' ? locale : undefined}
                     />
                   );
                 }
@@ -995,10 +833,6 @@ export function AppendableArrayItemsField({
                     defaultValue=""
                     placeholder={field.placeholder}
                     inputMode={field.type === 'link' ? 'url' : undefined}
-                    editorControls={field.type !== 'link'}
-                    editorFont={field.editor?.font}
-                    editorAlign={field.editor?.align}
-                    editorLocale={locale === 'ko' || locale === 'en' ? locale : undefined}
                   />
                 );
               })}

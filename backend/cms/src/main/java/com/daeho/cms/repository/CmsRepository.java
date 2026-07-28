@@ -107,8 +107,7 @@ public class CmsRepository {
 
   public List<Map<String, Object>> listPublicNews(String locale) {
     return jdbc.query("""
-        SELECT n.*, t.locale, t.title, t.category_label, t.excerpt, t.body_json, t.tags_json,
-          t.seo_title, t.seo_description, t.og_image_path
+        SELECT n.*, t.locale, t.title, t.category_label, t.excerpt, t.body_json, t.tags_json
         FROM cms_news n
         JOIN cms_news_translations t ON t.news_id = n.id AND t.locale = ?
         WHERE n.is_visible = true
@@ -127,8 +126,7 @@ public class CmsRepository {
 
   public Map<String, Object> getPublicNews(String slug, String locale) {
     return jdbc.query("""
-        SELECT n.*, t.locale, t.title, t.category_label, t.excerpt, t.body_json, t.tags_json,
-          t.seo_title, t.seo_description, t.og_image_path
+        SELECT n.*, t.locale, t.title, t.category_label, t.excerpt, t.body_json, t.tags_json
         FROM cms_news n
         JOIN cms_news_translations t ON t.news_id = n.id AND t.locale = ?
         WHERE n.slug = ? AND n.is_visible = true
@@ -592,18 +590,14 @@ public class CmsRepository {
       }
       jdbc.update("""
           INSERT INTO cms_news_translations (
-            news_id, locale, title, category_label, excerpt, body_json, tags_json,
-            seo_title, seo_description, og_image_path, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+            news_id, locale, title, category_label, excerpt, body_json, tags_json, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, now(), now())
           ON CONFLICT(news_id, locale) DO UPDATE SET
             title = excluded.title,
             category_label = excluded.category_label,
             excerpt = excluded.excerpt,
             body_json = excluded.body_json,
             tags_json = excluded.tags_json,
-            seo_title = excluded.seo_title,
-            seo_description = excluded.seo_description,
-            og_image_path = excluded.og_image_path,
             updated_at = now()
           """,
           newsId,
@@ -612,10 +606,7 @@ public class CmsRepository {
           validation.stringValue(translation.get("categoryLabel")),
           validation.stringValue(translation.get("excerpt")),
           json.jsonb(translation.getOrDefault("body", Map.of())),
-          json.jsonb(translation.getOrDefault("tags", List.of())),
-          validation.stringValue(translation.get("seoTitle")),
-          validation.stringValue(translation.get("seoDescription")),
-          validation.stringValue(translation.get("ogImagePath"))
+          json.jsonb(translation.getOrDefault("tags", List.of()))
       );
     }
   }
@@ -821,10 +812,7 @@ public class CmsRepository {
         "categoryLabel", rs.getString("category_label"),
         "excerpt", rs.getString("excerpt"),
         "body", json.objectOrEmpty(rs.getString("body_json")),
-        "tags", json.arrayOrEmpty(rs.getString("tags_json")),
-        "seoTitle", rs.getString("seo_title"),
-        "seoDescription", rs.getString("seo_description"),
-        "ogImagePath", rs.getString("og_image_path")
+        "tags", json.arrayOrEmpty(rs.getString("tags_json"))
     );
   }
 

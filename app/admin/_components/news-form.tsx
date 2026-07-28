@@ -5,7 +5,6 @@ import {createAdminTranslator, getContentLocaleLabel} from '@/lib/admin-i18n';
 import {locales, type Locale} from '@/lib/locales';
 import {
   CheckboxField,
-  ImageUploadField,
   type MediaLibraryItem,
   ResponsiveImageUploadField,
   SecondaryLink,
@@ -40,9 +39,6 @@ type NewsTranslation = {
   excerpt?: string;
   body?: unknown;
   tags?: string[];
-  seoTitle?: string;
-  seoDescription?: string;
-  ogImagePath?: string;
 };
 
 export function NewsForm({
@@ -149,20 +145,12 @@ function TranslationPanel({
     <Panel className="p-5">
       <div className="mb-4 flex items-center justify-between border-b border-[#e4e7ec] pb-3">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{getContentLocaleLabel(messages, locale)}</h2>
-        <SecondaryLink href={`/admin/media`}>{t('common.media')}</SecondaryLink>
+        <SecondaryLink href="/admin/media">{t('common.media')}</SecondaryLink>
       </div>
       <div className="grid gap-4">
         <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required />
         <TextField label={t('form.categoryLabel')} name={`${locale}.categoryLabel`} defaultValue={translation.categoryLabel} />
         <TextAreaField label={t('form.excerpt')} name={`${locale}.excerpt`} defaultValue={translation.excerpt} rows={3} />
-        <TextField
-          label={t('form.linkHref')}
-          name={`${locale}.body.linkHref`}
-          defaultValue={body.linkHref}
-          placeholder="/news/slug, https://…"
-          inputMode="url"
-          editorControls={false}
-        />
         <NewsBlocksEditor
           locale={locale}
           blocks={body.blocks}
@@ -176,28 +164,8 @@ function TranslationPanel({
           defaultValue={body.ctaHref}
           placeholder="/contact?item={slug}, https://…"
           inputMode="url"
-          editorControls={false}
         />
         <TextField label={t('form.tags')} name={`${locale}.tags`} defaultValue={(translation.tags ?? []).join(', ')} placeholder="tag 1, tag 2" />
-        <TextField label={t('form.seoTitle')} name={`${locale}.seoTitle`} defaultValue={translation.seoTitle} />
-        <TextAreaField label={t('form.seoDescription')} name={`${locale}.seoDescription`} defaultValue={translation.seoDescription} rows={3} />
-        <ImageUploadField
-          label={t('form.ogImage')}
-          name={`${locale}.ogImagePath`}
-          uploadName={`${locale}.ogImageUpload`}
-          defaultValue={translation.ogImagePath}
-          uploadLabel={t('page.uploadLocalImage')}
-          uploadHint={t('page.uploadLocalImageHint')}
-          imageGuide={t('imageGuide.seo')}
-          emptyLabel={t('common.noImage')}
-          changedLabel={t('common.changed')}
-          selectedLabel={t('common.imageSelected')}
-          mediaItems={mediaItems}
-          mediaSelectLabel={t('media.selectFromLibrary')}
-          mediaLibraryTitle={t('media.libraryTitle')}
-          mediaEmptyLabel={t('media.libraryEmpty')}
-          mediaSelectedLabel={t('media.selectedExisting')}
-        />
       </div>
     </Panel>
   );
@@ -210,28 +178,18 @@ function getTranslation(item: NewsItem | undefined, locale: Locale) {
 function newsBody(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {
-      lead: '',
-      paragraphs: [],
       blocks: [],
-      quote: '',
       ctaTitle: '',
-      ctaHref: '',
-      linkHref: ''
+      ctaHref: ''
     };
   }
 
   const body = value as Record<string, unknown>;
 
   return {
-    lead: typeof body.lead === 'string' ? body.lead : '',
-    paragraphs: Array.isArray(body.paragraphs)
-      ? body.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === 'string')
-      : [],
     blocks: normalizeNewsBlocks(body.blocks),
-    quote: typeof body.quote === 'string' ? body.quote : '',
     ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : '',
-    ctaHref: typeof body.ctaHref === 'string' ? body.ctaHref : '',
-    linkHref: typeof body.linkHref === 'string' ? body.linkHref : ''
+    ctaHref: typeof body.ctaHref === 'string' ? body.ctaHref : ''
   };
 }
 

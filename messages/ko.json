@@ -960,7 +960,6 @@
     "masthead": {
       "title": "NEWS",
       "issue": "",
-      "body": "프로젝트 스토리와 제작 현장, 언론/피처, 협업 소식을\n한곳에 모읍니다.",
       "ticker": [
         "최신 제작 사례는 확인 자료가 도착하면 이 지면에 업데이트됩니다.",
         "프로젝트 스토리 · 언론/피처 · 협업 소식을 한곳에 모읍니다.",
@@ -972,7 +971,6 @@
       "category": "TOP STORY",
       "date": "2026.00.00",
       "title": "대호의 다음 기록이 이곳에서 시작됩니다.",
-      "body": "",
       "image": "news_featured.png.png"
     },
     "grid": {
@@ -1679,18 +1677,9 @@
     "detail": {
       "back": "저널 목록",
       "backHref": "/news",
-      "author": "대호 뉴스",
-      "ogImagePath": "news_detail_hero.png",
-      "lead": "",
-      "paragraphs": [],
-      "quote": "",
-      "tags": [],
-      "ctaTitle": "",
       "cta": "문의하기",
-      "ctaHref": "/contact?type=other&source=news&item={slug}",
       "previous": "이전 소식",
-      "next": "다음 소식",
-      "related": "다음 소식"
+      "next": "다음 소식"
     }
   },
   "collectionUi": {

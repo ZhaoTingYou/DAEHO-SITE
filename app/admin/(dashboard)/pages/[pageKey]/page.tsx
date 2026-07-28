@@ -16,7 +16,6 @@ import {
   isImageEditableField,
   type PageArrayItemFieldDefinition,
   type PageDefinition,
-  type PageFieldEditorSettings,
   type PageFieldDefinition,
   type PageFieldOption,
   type PageFieldType
@@ -145,13 +144,13 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
         }}
       >
         <input type="hidden" name="pageKey" value={page.pageKey} />
+        <input type="hidden" name="section" value={page.section} />
+        <input type="hidden" name="sortOrder" value={page.sortOrder} />
 
         <Panel className="p-5">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <ReadOnlyMeta label={t('page.key')} value={page.pageKey} />
             <ReadOnlyMeta label={t('page.route')} value={definition?.href ?? t('common.none')} />
-            <TextField label={t('common.section')} name="section" defaultValue={page.section} required />
-            <TextField label={t('common.sortOrder')} name="sortOrder" type="number" defaultValue={page.sortOrder} />
           </div>
           {definition ? (
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-[#475467]">
@@ -366,8 +365,6 @@ function ContentGroupEditor({
                 options={getLocalizedPageFieldOptions(field, context.adminLocale)}
                 rows={field.rows}
                 fieldType={field.type}
-                editorFont={field.editor?.font}
-                editorAlign={field.editor?.align}
                 maxItems={field.maxItems}
                 mobilePath={field.mobilePath}
                 mobileValue={field.mobilePath ? getObjectValueAtPath(group.content, field.mobilePath) : undefined}
@@ -391,8 +388,6 @@ function EditableNode({
   itemFields,
   options,
   rows,
-  editorFont,
-  editorAlign,
   fieldType,
   maxItems,
   mobilePath,
@@ -407,8 +402,6 @@ function EditableNode({
   itemFields?: PageArrayItemFieldDefinition[];
   options?: PageFieldOption[];
   rows?: number;
-  editorFont?: PageFieldEditorSettings['font'];
-  editorAlign?: PageFieldEditorSettings['align'];
   fieldType?: PageFieldType;
   maxItems?: number;
   mobilePath?: string;
@@ -427,8 +420,6 @@ function EditableNode({
         context={context}
         depth={depth}
         itemFields={itemFields}
-        editorFont={editorFont}
-        editorAlign={editorAlign}
         maxItems={maxItems}
       />
     );
@@ -447,7 +438,6 @@ function EditableNode({
       forceImage={forceImage}
       options={options}
       rows={rows}
-      editor={{font: editorFont, align: editorAlign}}
       fieldType={fieldType}
       mobilePath={mobilePath}
       mobileValue={mobileValue}
@@ -523,8 +513,6 @@ function EditableArray({
   context,
   depth,
   itemFields,
-  editorFont,
-  editorAlign,
   maxItems
 }: {
   path: string;
@@ -533,8 +521,6 @@ function EditableArray({
   context: RenderContext;
   depth: number;
   itemFields?: PageArrayItemFieldDefinition[];
-  editorFont?: PageFieldEditorSettings['font'];
-  editorAlign?: PageFieldEditorSettings['align'];
   maxItems?: number;
 }) {
   if (value.length === 0) {
@@ -577,8 +563,6 @@ function EditableArray({
                 value={item}
                 context={context}
                 depth={depth + 1}
-                editorFont={editorFont}
-                editorAlign={editorAlign}
               />
             )}
           </div>
@@ -704,9 +688,6 @@ function EditableArrayItemFields({
               name={name}
               defaultValue={stringValue(fieldValue)}
               rows={field.rows ?? textareaRows(stringValue(fieldValue))}
-              editorFont={field.editor?.font}
-              editorAlign={field.editor?.align}
-              editorLocale={context.locale}
             />
           );
         }
@@ -735,10 +716,6 @@ function EditableArrayItemFields({
             defaultValue={stringValue(fieldValue)}
             placeholder={field.placeholder}
             inputMode={field.type === 'link' ? 'url' : undefined}
-            editorControls={field.type !== 'link'}
-            editorFont={field.editor?.font}
-            editorAlign={field.editor?.align}
-            editorLocale={context.locale}
           />
         );
       })}
@@ -827,7 +804,6 @@ function EditableLeaf({
   forceImage = false,
   options,
   rows,
-  editor,
   fieldType,
   mobilePath,
   mobileValue
@@ -839,7 +815,6 @@ function EditableLeaf({
   forceImage?: boolean;
   options?: PageFieldOption[];
   rows?: number;
-  editor?: PageFieldEditorSettings;
   fieldType?: PageFieldType;
   mobilePath?: string;
   mobileValue?: unknown;
@@ -948,7 +923,6 @@ function EditableLeaf({
         defaultValue={text}
         placeholder="/contact, https://…, mailto:…"
         inputMode="url"
-        editorControls={false}
       />
     );
   }
@@ -964,9 +938,6 @@ function EditableLeaf({
         name={name}
         defaultValue={text}
         rows={rows ?? textareaRows(text)}
-        editorFont={editor?.font}
-        editorAlign={editor?.align}
-        editorLocale={context.locale}
       />
     );
   }
@@ -976,9 +947,6 @@ function EditableLeaf({
       label={label}
       name={name}
       defaultValue={text}
-      editorFont={editor?.font}
-      editorAlign={editor?.align}
-      editorLocale={context.locale}
     />
   );
 }

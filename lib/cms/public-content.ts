@@ -65,7 +65,6 @@ export async function getHomeNewsCardsForSite(locale: Locale): Promise<HomeNewsP
 }
 
 export async function getNewsDetailForSite(locale: Locale, slug: string): Promise<PublicNewsDetail | null> {
-  const text = (await getLocaleMessages(locale)).newsUi.detail;
   const cmsItem = await readCmsValue(() => getPublicNews(slug, locale), null);
 
   if (cmsItem) {
@@ -75,12 +74,12 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
     return {
       card,
       blocks: body.blocks,
-      tags: Array.isArray(cmsItem.tags) && cmsItem.tags.length > 0 ? cmsItem.tags.filter((tag): tag is string => typeof tag === 'string') : text.tags,
+      tags: Array.isArray(cmsItem.tags) ? cmsItem.tags.filter((tag): tag is string => typeof tag === 'string') : [],
       ctaTitle: body.ctaTitle,
-      ctaHref: resolveCmsHref(locale, body.ctaHref, text.ctaHref, {slug}),
-      seoTitle: String(cmsItem.seoTitle || cmsItem.title || ''),
-      seoDescription: String(cmsItem.seoDescription || body.lead || cmsItem.excerpt || ''),
-      ogImagePath: cmsImageName(cmsItem.ogImagePath || card.image)
+      ctaHref: resolveCmsHref(locale, body.ctaHref, '/contact?type=other&source=news&item={slug}', {slug}),
+      seoTitle: String(cmsItem.title || ''),
+      seoDescription: String(cmsItem.excerpt || cmsItem.title || ''),
+      ogImagePath: card.image
     };
   }
 
@@ -99,7 +98,7 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
     blocks: [],
     tags: [],
     ctaTitle: '',
-    ctaHref: resolveCmsHref(locale, text.ctaHref, '/contact?type=other&source=news&item={slug}', {slug}),
+    ctaHref: resolveCmsHref(locale, '/contact?type=other&source=news&item={slug}', undefined, {slug}),
     seoTitle: card.title,
     seoDescription: card.title,
     ogImagePath: card.image
@@ -205,27 +204,17 @@ function collectionCategoryLabels(messages: Awaited<ReturnType<typeof getLocaleM
 function normalizeNewsBody(value: unknown) {
   if (!value || typeof value !== 'object') {
     return {
-      lead: '',
-      paragraphs: [],
       blocks: [],
-      quote: '',
       ctaTitle: '',
-      ctaHref: '',
-      linkHref: ''
+      ctaHref: ''
     };
   }
 
   const body = value as Record<string, unknown>;
   return {
-    lead: typeof body.lead === 'string' ? body.lead : '',
-    paragraphs: Array.isArray(body.paragraphs)
-      ? body.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === 'string')
-      : [],
     blocks: normalizeNewsBlocks(body.blocks),
-    quote: typeof body.quote === 'string' ? body.quote : '',
     ctaTitle: typeof body.ctaTitle === 'string' ? body.ctaTitle : '',
-    ctaHref: typeof body.ctaHref === 'string' ? body.ctaHref : '',
-    linkHref: typeof body.linkHref === 'string' ? body.linkHref : ''
+    ctaHref: typeof body.ctaHref === 'string' ? body.ctaHref : ''
   };
 }
 
@@ -235,11 +224,10 @@ function firstString(...values: unknown[]) {
 
 function toNewsCard(item: Record<string, unknown>, locale: Locale): NewsCard {
   const image = cmsImageName(item.imagePath);
-  const body = normalizeNewsBody(item.body);
 
   return {
     id: String(item.slug),
-    href: resolveCmsHref(locale, body.linkHref, `/news/${String(item.slug)}`),
+    href: resolveCmsHref(locale, `/news/${String(item.slug)}`),
     category: String(item.category),
     categoryLabel: String(item.categoryLabel),
     date: String(item.publishedAt),

@@ -8,11 +8,6 @@ export type PageFieldOption = {
   labels?: Record<string, string>;
 };
 
-export type PageFieldEditorSettings = {
-  font?: 'maruburi-semibold' | 'cormorant-garamond-700';
-  align?: 'left' | 'center' | 'right';
-};
-
 export type PageArrayItemFieldDefinition = {
   path: string;
   mobilePath?: string;
@@ -23,7 +18,6 @@ export type PageArrayItemFieldDefinition = {
   placeholder?: string;
   fallbackPath?: string;
   options?: PageFieldOption[];
-  editor?: PageFieldEditorSettings;
 };
 
 export type PageFieldDefinition = {
@@ -38,7 +32,6 @@ export type PageFieldDefinition = {
   itemFields?: PageArrayItemFieldDefinition[];
   maxItems?: number;
   options?: PageFieldOption[];
-  editor?: PageFieldEditorSettings;
 };
 
 export type PageContentGroupDefinition = {

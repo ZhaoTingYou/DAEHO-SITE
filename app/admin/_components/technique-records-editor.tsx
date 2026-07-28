@@ -203,8 +203,8 @@ function LocalizedRecordFields({
   return (
     <section className="grid gap-4 rounded-md border border-[#e4e7ec] bg-white p-4">
       <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#647084]">{label}</h3>
-      <TextField label={labels.fieldTitle} name={contentFieldName(locale, index, 'title')} defaultValue={values.title} editorLocale={locale} />
-      <TextAreaField label={labels.fieldBody} name={contentFieldName(locale, index, 'body')} defaultValue={values.body} rows={4} editorLocale={locale} />
+      <TextField label={labels.fieldTitle} name={contentFieldName(locale, index, 'title')} defaultValue={values.title} />
+      <TextAreaField label={labels.fieldBody} name={contentFieldName(locale, index, 'body')} defaultValue={values.body} rows={4} />
     </section>
   );
 }
