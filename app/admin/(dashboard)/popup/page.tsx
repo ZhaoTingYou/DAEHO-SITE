@@ -98,14 +98,12 @@ export default async function AdminPopupPage({searchParams}: AdminPopupPageProps
               name="startsAt"
               type="datetime-local"
               defaultValue={sitePopupIsoToDateTimeInput(config.startsAt)}
-              editorControls={false}
             />
             <TextField
               label={t('popup.endsAt')}
               name="endsAt"
               type="datetime-local"
               defaultValue={sitePopupIsoToDateTimeInput(config.endsAt)}
-              editorControls={false}
             />
           </div>
 

@@ -3,6 +3,10 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 
 const source = readFileSync(new URL('./admin-fields.tsx', import.meta.url), 'utf8');
+const textFieldSource = source.slice(
+  source.indexOf('export function TextField'),
+  source.indexOf('export function TextAreaField')
+);
 const imageUploadSource = source.slice(
   source.indexOf('export function ImageUploadField'),
   source.indexOf('export function AppendableArrayItemsField')
@@ -116,45 +120,19 @@ test('appendable CMS arrays honor field-specific maximum item counts', () => {
   assert.match(appendableArraySource, /disabled=\{!canAddRow\}/);
 });
 
-test('text editors expose only approved brand fonts and alignment controls', () => {
-  assert.match(source, /value: 'maruburi-semibold'/);
-  assert.match(source, /label: 'MaruBuri SemiBold'/);
-  assert.match(source, /fontFamily: '"MaruBuri", serif'/);
-  assert.match(source, /fontWeight: 600/);
-  assert.match(source, /value: 'cormorant-garamond-700'/);
-  assert.match(source, /label: 'Cormorant Garamond 700'/);
-  assert.match(source, /fontFamily: '"Cormorant Garamond", serif'/);
-  assert.match(source, /fontWeight: 700/);
-  assert.match(source, /const textEditorAlignments: Array<\{value: TextEditorAlign; label: string\}> = \[/);
-  assert.match(source, /\{value: 'left', label: 'L'\}/);
-  assert.match(source, /\{value: 'center', label: 'C'\}/);
-  assert.match(source, /\{value: 'right', label: 'R'\}/);
+test('CMS text inputs are plain fields without ineffective font and alignment controls', () => {
+  assert.doesNotMatch(source, /TextEditor(Font|Align|Locale|Label)/);
+  assert.doesNotMatch(source, /textEditor(Fonts|Alignments|Style)/);
+  assert.doesNotMatch(source, /editorControls/);
+  assert.doesNotMatch(pageCatalogSource, /PageFieldEditorSettings|editor\?:/);
+  assert.equal(pageCatalog.some((page) => page.fields.some((field) => field.editor)), false);
+  assert.doesNotMatch(pageEditorSource, /editor(Font|Align|Locale|Controls)/);
 });
 
-test('page text fields read their editor font and alignment preset from the catalog', () => {
-  assert.match(pageCatalogSource, /type PageFieldEditorSettings = \{/);
-  assert.match(pageCatalogSource, /editor\?: PageFieldEditorSettings/);
-  assert.match(source, /editorFont/);
-  assert.match(source, /editorAlign/);
-  assert.match(source, /normalizeTextEditorAlign\(editorAlign\)/);
-  assert.match(pageEditorSource, /editorFont=\{field\.editor\?\.font\}/);
-  assert.match(pageEditorSource, /editorAlign=\{field\.editor\?\.align\}/);
-  assert.match(pageEditorSource, /editorFont=\{editor\?\.font\}/);
-  assert.match(pageEditorSource, /editorAlign=\{editor\?\.align\}/);
+test('plain text inputs cannot overflow their admin card', () => {
+  assert.match(textFieldSource, /className="grid min-w-0 max-w-full gap-1\.5/);
+  assert.match(textFieldSource, /className="min-h-10 w-full min-w-0 max-w-full rounded-md/);
 });
-
-test('known centered page positions are declared as centered editor fields', () => {
-  assert.equal(findField('home', 'main', 'title')?.editor?.align, 'center');
-  assert.equal(findField('home', 'main', 'signature.title')?.editor?.align, 'center');
-  assert.equal(findField('news', 'main', 'masthead.title')?.editor?.align, 'center');
-  assert.equal(findField('contact', 'main', 'hero.title')?.editor?.align, 'center');
-  assert.equal(findField('heritage-achievement', 'main', 'copy.quoteBody')?.editor?.align, 'center');
-});
-
-function findField(pageKey, groupKey, path) {
-  const page = pageCatalog.find((entry) => entry.pageKey === pageKey);
-  return page?.fields.find((field) => (field.groupKey ?? 'main') === groupKey && field.path === path);
-}
 
 function normalizeGuidePath(path) {
   return path.replace(/\.\d+(?=\.|$)/g, '.*');

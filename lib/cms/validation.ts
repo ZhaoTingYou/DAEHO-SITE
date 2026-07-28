@@ -46,10 +46,7 @@ const newsTranslationSchema = z.object({
   categoryLabel: optionalText,
   excerpt: optionalText,
   body: optionalJson,
-  tags: z.array(z.string().trim()).optional().default([]),
-  seoTitle: optionalText,
-  seoDescription: optionalText,
-  ogImagePath: optionalText
+  tags: z.array(z.string().trim()).optional().default([])
 });
 
 export const newsPayloadSchema = z.object({

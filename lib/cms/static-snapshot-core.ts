@@ -124,10 +124,7 @@ function mapPublicNews(row: Record<string, unknown>, translation: Record<string,
     categoryLabel: stringValue(translation.category_label),
     excerpt: stringValue(translation.excerpt),
     body: objectJson(translation.body_json),
-    tags: arrayJson(translation.tags_json),
-    seoTitle: stringValue(translation.seo_title),
-    seoDescription: stringValue(translation.seo_description),
-    ogImagePath: stringValue(translation.og_image_path)
+    tags: arrayJson(translation.tags_json)
   };
 }
 

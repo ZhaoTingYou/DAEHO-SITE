@@ -63,10 +63,10 @@ export function CollectionForm({
 
       <Panel className="min-w-0 p-5">
         <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="ring-01" editorControls={false} />
+          <TextField label={t('form.slug')} name="slug" defaultValue={item?.slug} required placeholder="ring-01" />
           <SelectField label={t('form.category')} name="category" defaultValue={normalizeCollectionCategory(item?.category)} options={collectionCategoryOptions(t)} />
-          <TextField label={t('form.sportCategory')} name="sportCategory" defaultValue={normalizeSportCategory(item)} placeholder="baseball" editorControls={false} />
-          <TextField label={t('form.year')} name="specs.year" defaultValue={specs.year} editorControls={false} />
+          <TextField label={t('form.sportCategory')} name="sportCategory" defaultValue={normalizeSportCategory(item)} placeholder="baseball" />
+          <TextField label={t('form.year')} name="specs.year" defaultValue={specs.year} />
           <TextField label={t('common.sortOrder')} name="sortOrder" type="number" defaultValue={item?.sortOrder ?? 0} />
           <CheckboxField label={t('form.visible')} name="isVisible" defaultChecked={item?.isVisible ?? true} />
         </div>
@@ -149,9 +149,9 @@ function TranslationPanel({
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{getContentLocaleLabel(messages, locale)}</h2>
       </div>
       <div className="grid gap-4">
-        <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required editorControls={false} />
-        <TextAreaField label={t('form.story')} name={`${locale}.story`} defaultValue={translation.story} rows={5} editorControls={false} />
-        <TextField label={t('form.sportCategoryLabel')} name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} editorControls={false} />
+        <TextField label={t('form.title')} name={`${locale}.title`} defaultValue={translation.title} required />
+        <TextAreaField label={t('form.story')} name={`${locale}.story`} defaultValue={translation.story} rows={5} />
+        <TextField label={t('form.sportCategoryLabel')} name={`${locale}.sportCategoryLabel`} defaultValue={translation.sportCategoryLabel} />
       </div>
     </Panel>
   );

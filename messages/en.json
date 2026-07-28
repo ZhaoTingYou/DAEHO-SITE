@@ -963,7 +963,6 @@
     "masthead": {
       "title": "NEWS",
       "issue": "",
-      "body": "Project stories, workshop notes, press features, and collaborations gathered in one news field.",
       "ticker": [
         "New production cases will be updated here when verified materials arrive.",
         "Project stories, press features, and collaborations are gathered in one news field.",
@@ -975,7 +974,6 @@
       "category": "TOP STORY",
       "date": "2026.00.00",
       "title": "The next record from DAEHO begins here.",
-      "body": "",
       "image": "news_featured.png.png"
     },
     "grid": {
@@ -1688,18 +1686,9 @@
     "detail": {
       "back": "Back to news",
       "backHref": "/news",
-      "author": "DAEHO News",
-      "ogImagePath": "news_detail_hero.png",
-      "lead": "",
-      "paragraphs": [],
-      "quote": "",
-      "tags": [],
-      "ctaTitle": "",
       "cta": "Contact us",
-      "ctaHref": "/contact?type=other&source=news&item={slug}",
       "previous": "Previous story",
-      "next": "Next story",
-      "related": "Next stories"
+      "next": "Next story"
     }
   },
   "collectionUi": {

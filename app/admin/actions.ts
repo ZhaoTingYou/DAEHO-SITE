@@ -488,18 +488,11 @@ async function readNewsTranslation(formData: FormData, locale: Locale, editorPat
     categoryLabel: stringFromForm(formData, `${locale}.categoryLabel`),
     excerpt: stringFromForm(formData, `${locale}.excerpt`),
     body: {
-      lead: stringFromForm(formData, `${locale}.body.lead`),
-      paragraphs: parseParagraphs(stringFromForm(formData, `${locale}.body.paragraphs`)),
       blocks: await readNewsBlocks(formData, locale, editorPath),
-      quote: stringFromForm(formData, `${locale}.body.quote`),
       ctaTitle: stringFromForm(formData, `${locale}.body.ctaTitle`),
-      ctaHref: stringFromForm(formData, `${locale}.body.ctaHref`),
-      linkHref: stringFromForm(formData, `${locale}.body.linkHref`)
+      ctaHref: stringFromForm(formData, `${locale}.body.ctaHref`)
     },
-    tags: parseTags(stringFromForm(formData, `${locale}.tags`)),
-    seoTitle: stringFromForm(formData, `${locale}.seoTitle`),
-    seoDescription: stringFromForm(formData, `${locale}.seoDescription`),
-    ogImagePath: await readUploadedImageOrText(formData, `${locale}.ogImagePath`, `${locale}.ogImageUpload`, locale, editorPath)
+    tags: parseTags(stringFromForm(formData, `${locale}.tags`))
   };
 }
 
@@ -1040,13 +1033,6 @@ function parseTags(value: string) {
   return value
     .split(',')
     .map((tag) => tag.trim())
-    .filter(Boolean);
-}
-
-function parseParagraphs(value: string) {
-  return value
-    .split(/\n\s*\n|\n/)
-    .map((paragraph) => paragraph.trim())
     .filter(Boolean);
 }
 

@@ -283,13 +283,6 @@ export default async function AdminFooterPage({searchParams}: AdminFooterPagePro
           ))}
         </div>
 
-        <div className="flex justify-end gap-3">
-          <Link href="/admin" className="inline-flex min-h-10 items-center rounded-md border border-[#cbd3df] bg-white px-4 text-sm font-semibold text-[#344054] transition hover:bg-[#f4f5f7]">
-            {t('common.cancel')}
-          </Link>
-          <SubmitButton>{t('footer.save')}</SubmitButton>
-        </div>
-
         <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-5 z-[80] flex items-center gap-2 rounded-xl border border-[#d9dee7] bg-white/95 p-2 shadow-[0_18px_45px_rgba(16,24,39,.16)] backdrop-blur md:right-8">
           <Link href="/admin" className="inline-flex min-h-10 items-center rounded-md border border-[#cbd3df] bg-white px-4 text-sm font-semibold text-[#344054] transition hover:bg-[#f4f5f7]">
             {t('common.cancel')}
@@ -385,7 +378,7 @@ function FooterField({
   }
 
   if (field.type === 'link') {
-    return <TextField label={label} name={name} defaultValue={text} inputMode="url" editorControls={false} placeholder="/contact, https://…, mailto:…" />;
+    return <TextField label={label} name={name} defaultValue={text} inputMode="url" placeholder="/contact, https://…, mailto:…" />;
   }
 
   if (typeof value === 'boolean') {

@@ -265,7 +265,6 @@ const pageGuideKeys: Record<string, string> = {
   'mastery-creations-bespoke|main|mobileImage': 'mobileCollectionAct',
 
   'news|main|featured.image': 'newsFeatured',
-  'news|newsUi|detail.ogImagePath': 'seo',
 
   'golf|main|hero.image': 'golfHeroProduct',
   'golf|main|hero.gallery.*.image': 'golfHeroProduct',
