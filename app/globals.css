@@ -1375,6 +1375,7 @@ select {
 }
 
 .site-header--ko .site-header-brand {
+  font-size: 20px;
   font-weight: 700;
 }
 
@@ -1385,7 +1386,18 @@ select {
   font-weight: 600;
 }
 
+.site-header--ko .site-header-language-link,
+.site-header--ko .site-header-language-label {
+  opacity: .78;
+}
+
+.site-header--ko .site-header-language-link[aria-current="page"],
+.site-header--ko .site-header-language-label[aria-current="page"] {
+  opacity: 1;
+}
+
 .site-header--ko .consult-cta {
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -1431,6 +1443,12 @@ select {
 
 .site-header--ko .mobile-menu-panel {
   color: var(--primary);
+}
+
+@media (min-width: 1024px) {
+  .site-header--ko .site-header-brand {
+    font-size: 24px;
+  }
 }
 
 .site-nav-link::after {
