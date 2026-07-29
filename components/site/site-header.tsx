@@ -14,7 +14,7 @@ import {
   type ExternalSiteItem
 } from '@/lib/cms/external-sites-core.mjs';
 import {getPublicLocales} from '@/lib/english-visibility-core';
-import {localeShortLabels, locales} from '@/lib/locales';
+import {locales} from '@/lib/locales';
 import {isActivePath, navItems, withLocale} from '@/lib/site-map';
 
 import {ExternalSiteLink} from './external-site-link';
@@ -103,7 +103,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
 
   const languageLinks = getPublicLocales(locales, englishEnabled).map((targetLocale) => ({
     locale: targetLocale,
-    label: localeShortLabels[targetLocale],
+    label: navText(`languageLabels.${targetLocale}`),
     href: withLocale(targetLocale, relativePath === '/' ? '/' : relativePath)
   }));
   const isHome = relativePath === '/';
@@ -418,7 +418,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
       onFocus={() => setHasHeaderFocus(true)}
       onMouseEnter={() => setIsHeaderHovered(true)}
       onMouseLeave={() => setIsHeaderHovered(false)}
-      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter,color] duration-300 ease-brand ${
+      className={`site-header site-header--${locale} fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter,color] duration-300 ease-brand ${
         isSolid
           ? 'border-b border-hairline bg-bg/95 text-primary shadow-[0_18px_60px_rgba(16,29,48,.08)] backdrop-blur-md [text-shadow:none]'
           : isHeroTransparent
@@ -434,10 +434,10 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
         <div className="mx-auto grid h-20 max-w-[1440px] grid-cols-[minmax(150px,1fr)_auto_minmax(150px,1fr)] items-center gap-6 px-container">
           <Link
             href={navigationHref('home', '/')}
-            className="inline-flex min-h-11 items-center font-heading text-[22px] font-semibold tracking-[0.18em]"
+            className="site-header-brand inline-flex min-h-11 items-center font-heading text-[22px] font-semibold tracking-[0.18em]"
             aria-label={navText('logoHome')}
           >
-            DAEHO
+            {navText('brandLabel')}
           </Link>
 
           <motion.nav
@@ -488,7 +488,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
             })}
           </motion.nav>
 
-          <div className="flex min-w-0 items-center justify-end gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
+          <div className="flex min-w-0 items-center justify-end gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em] site-header-actions">
             {englishEnabled ? (
               <>
                 <div className="flex shrink-0 items-center gap-1" aria-label={navText('languageSwitcherLabel')}>
@@ -578,10 +578,10 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
         <Link
           href={navigationHref('home', '/')}
           onClick={() => setIsMenuOpen(false)}
-          className="inline-flex min-h-11 items-center font-heading text-[18px] font-semibold tracking-[0.14em]"
+          className="site-header-brand inline-flex min-h-11 items-center font-heading text-[18px] font-semibold tracking-[0.14em]"
           aria-label={navText('logoHome')}
         >
-          DAEHO
+          {navText('brandLabel')}
         </Link>
 
         {englishEnabled ? (
@@ -596,7 +596,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
                   <Link
                     href={item.href}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`inline-flex min-h-11 min-w-11 items-center justify-center ${
+                    className={`site-header-language-label inline-flex min-h-11 min-w-11 items-center justify-center ${
                     locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-55'
                   }`}
                 >
@@ -625,7 +625,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
             }}
             onMouseEnter={clearMegaCloseTimer}
             onMouseLeave={scheduleMegaClose}
-            className="absolute inset-x-0 top-full hidden origin-top overflow-hidden border-t border-hairline bg-bg text-primary shadow-[0_30px_90px_rgba(16,29,48,.12)] [text-shadow:none] lg:block"
+            className="site-header-mega-menu absolute inset-x-0 top-full hidden origin-top overflow-hidden border border-[#b7bec9] bg-bg text-primary shadow-[0_30px_90px_rgba(16,29,48,.12)] [text-shadow:none] lg:block"
           >
             <motion.div
               className="h-px origin-left bg-accent"
@@ -639,14 +639,14 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
               <div>
                 {currentMegaDetails.eyebrow ? (
                   <p
-                    className={`font-body text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                    className={`site-header-mega-eyebrow font-body text-[11px] font-semibold uppercase tracking-[0.18em] ${
                       currentMegaItem.id === 'legacy' || currentMegaItem.id === 'specialty' ? 'text-accent' : 'text-subtext'
                     }`}
                   >
                     {currentMegaDetails.eyebrow}
                   </p>
                 ) : null}
-                <p className={`${currentMegaDetails.eyebrow ? 'mt-3' : 'pt-[28px]'} max-w-[16rem] font-heading text-[22px] font-semibold leading-none`}>
+                <p className={`site-header-mega-title ${currentMegaDetails.eyebrow ? 'mt-3' : 'pt-[28px]'} max-w-[16rem] font-heading text-[22px] font-semibold leading-none`}>
                   {currentMegaDetails.title}
                 </p>
               </div>
@@ -671,10 +671,10 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
                       className="group grid min-h-16 gap-1 py-3"
                       onClick={() => setOpenMenu(null)}
                     >
-                      <span className="font-body text-sm font-semibold uppercase tracking-[0.14em] transition-colors duration-300 group-hover:text-accent">
+                      <span className="site-header-mega-item-label font-body text-sm font-semibold uppercase tracking-[0.14em] transition-colors duration-300 group-hover:text-accent">
                         {navText(`items.${child.id}`)}
                       </span>
-                      <span className="font-body text-sm leading-6 text-subtext">
+                      <span className="site-header-mega-description font-body text-sm leading-6 text-subtext">
                         {currentMegaDetails.descriptions[child.id]}
                       </span>
                     </Link>
@@ -732,7 +732,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
                           isNavigationItemActive(item) ? 'text-accent' : ''
                         } focus-visible:text-accent focus-visible:outline-none`}
                       >
-                        <span className="font-body text-[15px] font-semibold uppercase leading-none tracking-[0.22em]">
+                        <span className="site-header-mobile-nav-label font-body text-[15px] font-semibold uppercase leading-none tracking-[0.22em]">
                           {itemLabel}
                         </span>
                         <span
@@ -750,7 +750,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
                       <Link
                         href={navigationHref(item.id, item.href)}
                         onClick={() => setIsMenuOpen(false)}
-                        className={`flex min-h-14 items-center font-body text-[15px] font-semibold uppercase leading-none tracking-[0.22em] ${
+                        className={`site-header-mobile-nav-label flex min-h-14 items-center font-body text-[15px] font-semibold uppercase leading-none tracking-[0.22em] ${
                           isNavigationItemActive(item) ? 'text-accent' : ''
                         } focus-visible:text-accent focus-visible:outline-none`}
                       >
@@ -772,9 +772,9 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
                             onClick={() => setIsMenuOpen(false)}
                             className="grid min-h-[52px] gap-1 py-2 font-body text-[12px] font-semibold uppercase tracking-[0.16em] text-subtext transition duration-300 ease-brand hover:text-primary focus-visible:text-accent focus-visible:outline-none"
                           >
-                            <span>{navText(`items.${child.id}`)}</span>
+                            <span className="site-header-mobile-subnav-label">{navText(`items.${child.id}`)}</span>
                             {details ? (
-                              <span className="text-[12px] font-normal normal-case leading-5 tracking-normal text-subtext/80">
+                              <span className="site-header-mega-description text-[12px] font-normal normal-case leading-5 tracking-normal text-subtext/80">
                                 {details.descriptions[child.id]}
                               </span>
                             ) : null}
@@ -797,7 +797,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
 
             {visibleExternalSites.length > 0 ? (
               <div className="mt-12 border-t border-hairline pt-8">
-                <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-subtext">
+                <p className="site-header-mobile-section-label font-body text-xs font-semibold uppercase tracking-[0.18em] text-subtext">
                   {footerText('otherSites')}
                 </p>
                 <div className="mt-5 grid gap-3 text-primary">
