@@ -2,8 +2,9 @@ import type {NextConfig} from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const isFrontendOnlyBuild = process.env.DAEHO_FRONTEND_ONLY === 'true';
-const s3ImageHostname = imageHostname(process.env.CMS_S3_PUBLIC_BASE_URL)
-  ?? 'daeho-prod-media.s3.ap-northeast-2.amazonaws.com';
+const mediaImageOrigin = imageOrigin(
+  process.env.NEXT_PUBLIC_MEDIA_BASE_URL ?? process.env.CMS_S3_PUBLIC_BASE_URL
+);
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -12,8 +13,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: s3ImageHostname
+        protocol: mediaImageOrigin.protocol,
+        hostname: mediaImageOrigin.hostname,
+        port: mediaImageOrigin.port
       }
     ],
     ...(isFrontendOnlyBuild ? {unoptimized: true} : {})
@@ -54,14 +56,26 @@ const withNextIntl = createNextIntlPlugin();
 
 export default withNextIntl(nextConfig);
 
-function imageHostname(value?: string) {
-  if (!value) {
-    return null;
-  }
+function imageOrigin(value?: string) {
+  const fallback = new URL('https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com');
 
   try {
-    return new URL(value).hostname || null;
+    const url = new URL(value || fallback);
+
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new Error('Unsupported media URL protocol');
+    }
+
+    return {
+      protocol: url.protocol.slice(0, -1) as 'http' | 'https',
+      hostname: url.hostname,
+      port: url.port
+    };
   } catch {
-    return null;
+    return {
+      protocol: 'https' as const,
+      hostname: fallback.hostname,
+      port: ''
+    };
   }
 }

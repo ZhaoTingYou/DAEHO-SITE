@@ -1,5 +1,8 @@
+'use client';
+
 import {Reveal} from '@/components/motion/reveal';
 import {ResponsiveCmsImage} from '@/components/responsive-cms-image';
+import {useState} from 'react';
 
 type HeritageHeroProps = {
   body?: string;
@@ -22,23 +25,26 @@ export function HeritageHero({
   lines,
   title
 }: HeritageHeroProps) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const visibleImage = imageFailed ? undefined : image;
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const bodyTextClass = "[font-family:'Pretendard',sans-serif] font-normal";
   const contentLines = lines?.length ? lines : body ? [body] : [];
-  const mobileTitleTextClass = image ? 'max-md:text-white' : '';
-  const mobileSupportingTextClass = image ? 'max-md:text-white/90' : '';
+  const mobileTitleTextClass = visibleImage ? 'max-md:text-white' : '';
+  const mobileSupportingTextClass = visibleImage ? 'max-md:text-white/90' : '';
 
   return (
     <section className="sticky top-0 z-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#f4f1ee] px-container py-[clamp(118px,14vw,188px)] max-md:relative max-md:top-auto max-md:min-h-[78svh] max-md:px-[var(--mobile-page-gutter)] max-md:pb-[80px] max-md:pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+80px)]">
-      {image ? (
+      {visibleImage ? (
         <>
           <ResponsiveCmsImage
-            filename={image}
+            filename={visibleImage}
             mobileFilename={mobileImage}
             alt={imageAlt}
             priority
             sizes="100vw"
             className="object-cover"
+            onDesktopError={() => setImageFailed(true)}
           />
           <div
             aria-hidden="true"
@@ -62,7 +68,7 @@ export function HeritageHero({
           ))}
         </div>
       </Reveal>
-      {!image && imagePlaceholder ? (
+      {!visibleImage && imagePlaceholder ? (
         <p className={`${bodyTextClass} absolute bottom-5 left-5 text-[15px] leading-none text-black`}>
           {imagePlaceholder}
         </p>

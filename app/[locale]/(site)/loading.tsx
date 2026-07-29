@@ -1,11 +1,13 @@
 import Image from 'next/image';
 
+import {imageSrc} from '@/lib/image-src';
+
 export default function Loading() {
   return (
     <main className="grid min-h-[80svh] place-items-center bg-bg px-[var(--mobile-page-gutter)] text-primary md:min-h-dvh md:px-container">
       <div className="space-y-5 text-center">
         <Image
-          src="/images/logo.png"
+          src={imageSrc('logo.png')}
           alt="DAEHO"
           width={381}
           height={339}

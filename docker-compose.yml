@@ -26,7 +26,7 @@ services:
       CMS_ADMIN_PASSWORD: ${CMS_ADMIN_PASSWORD:-replace-with-a-strong-password}
       CMS_UPLOAD_DIR: /data/uploads
       CMS_PUBLIC_UPLOAD_BASE_URL: /uploads
-      CMS_STORAGE_PROVIDER: ${CMS_STORAGE_PROVIDER:-local}
+      CMS_STORAGE_PROVIDER: ${CMS_STORAGE_PROVIDER:-s3}
       CMS_S3_BUCKET: ${CMS_S3_BUCKET:-}
       CMS_S3_REGION: ${CMS_S3_REGION:-ap-northeast-2}
       CMS_S3_ENDPOINT: ${CMS_S3_ENDPOINT:-}
@@ -40,8 +40,6 @@ services:
       SMTP_SECURE: ${SMTP_SECURE:-false}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
-    volumes:
-      - ./public/images:/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,6 +51,7 @@ services:
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
         NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-G-FXQGWE9XZ0}
+        NEXT_PUBLIC_MEDIA_BASE_URL: ${NEXT_PUBLIC_MEDIA_BASE_URL:-https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com}
     restart: unless-stopped
     environment:
       CMS_BACKEND_URL: http://cms-api:8080
@@ -64,8 +63,7 @@ services:
       ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
       NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-G-FXQGWE9XZ0}
-    volumes:
-      - ./public/images:/app/public/images:ro
+      NEXT_PUBLIC_MEDIA_BASE_URL: ${NEXT_PUBLIC_MEDIA_BASE_URL:-https://daeho-prod-media.s3.ap-northeast-2.amazonaws.com}
     depends_on:
       - cms-api
 
@@ -92,7 +90,6 @@ services:
       BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
     volumes:
       - ./docker/backup/run-backup.sh:/backup/run-backup.sh:ro
-      - ./public/images:/data/uploads:ro
       - backups:/backups
     entrypoint: ["/bin/sh", "/backup/run-backup.sh"]
     depends_on:

@@ -4,6 +4,7 @@ import {motion} from 'framer-motion';
 import Image from 'next/image';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import {imageSrc} from '@/lib/image-src';
 
 type LegacyPartnerWallProps = {
   labels: string[];
@@ -32,7 +33,7 @@ export function LegacyPartnerWall({labels}: LegacyPartnerWallProps) {
             className="relative grid aspect-square place-items-center overflow-hidden border border-hairline bg-white/80 p-3 shadow-[0_14px_40px_rgba(16,29,48,0.04)]"
           >
             <Image
-              src="/images/legacy_partner_placeholder.png"
+              src={imageSrc('legacy_partner_placeholder.png')}
               alt=""
               fill
               sizes="(min-width: 1024px) 160px, 33vw"

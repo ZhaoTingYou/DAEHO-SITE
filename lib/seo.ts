@@ -223,7 +223,7 @@ export async function getCmsPageSeoOverride(locale: Locale, cmsPageKey: string):
     return {
       title: stringValue(fields.title),
       description: stringValue(fields.description),
-      image: image ? imageSrc(image) : ''
+      image
     };
   } catch (error) {
     if (!isNextDynamicServerError(error)) {
@@ -257,11 +257,12 @@ export async function getDetailMetadata(
   path: string,
   pageTitle: string,
   description: string,
-  image = '/images/home_hero.png'
+  image = 'home_hero.png'
 ): Promise<Metadata> {
   const title = formatMetadataTitle(locale, pageTitle);
   const brandedDescription = formatMetadataDescription(locale, description);
   const englishEnabled = await isEnglishEnabledForSite();
+  const resolvedImage = imageSrc(image);
 
   return {
     title,
@@ -289,7 +290,7 @@ export async function getDetailMetadata(
       type: 'website',
       images: [
         {
-          url: image,
+          url: resolvedImage,
           alt: 'DAEHO'
         }
       ]
@@ -298,7 +299,7 @@ export async function getDetailMetadata(
       card: 'summary_large_image',
       title,
       description: brandedDescription,
-      images: [image]
+      images: [resolvedImage]
     }
   };
 }

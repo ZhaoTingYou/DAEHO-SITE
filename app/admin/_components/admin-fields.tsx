@@ -12,6 +12,7 @@ import {
 } from 'react';
 
 import type {PageArrayItemFieldDefinition} from '@/lib/cms/page-catalog';
+import {imageSrc} from '@/lib/image-src';
 
 const imageUploadSyncEventName = 'daeho-admin-image-upload-sync';
 
@@ -842,32 +843,6 @@ export function AppendableArrayItemsField({
       </div>
     </section>
   );
-}
-
-function imageSrc(value: string) {
-  const trimmed = value.trim();
-
-  if (!trimmed) {
-    return '';
-  }
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith('/uploads/')) {
-    return `/images/${trimmed.slice('/uploads/'.length)}`;
-  }
-
-  if (trimmed.startsWith('/')) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith('uploads/')) {
-    return `/images/${trimmed.slice('uploads/'.length)}`;
-  }
-
-  return `/images/${trimmed}`;
 }
 
 function mediaFieldValue(item: MediaLibraryItem) {

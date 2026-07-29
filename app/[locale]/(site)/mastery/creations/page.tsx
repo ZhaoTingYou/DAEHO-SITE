@@ -9,6 +9,7 @@ import type {Locale} from '@/i18n/routing';
 import {getCollectionItemsForSite} from '@/lib/cms/public-content';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
+import {imageSrc} from '@/lib/image-src';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {optionalImage} from '@/lib/optional-image';
 import {getPageMetadata} from '@/lib/seo';
@@ -61,7 +62,7 @@ export default async function CollectionPage({params}: Props) {
             <figure className="mt-8 border-y border-primary/15 py-3">
               <div className="relative aspect-[4/5] overflow-hidden bg-white">
                 <Image
-                  src="/images/specialty_collection_hero.png"
+                  src={imageSrc('specialty_collection_hero.png')}
                   alt=""
                   fill
                   sizes="100vw"

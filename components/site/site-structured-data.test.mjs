@@ -23,7 +23,8 @@ test('site structured data declares preferred Google site name and organization 
   assert.match(structuredDataSource, /'championship ring maker'/);
   assert.match(structuredDataSource, /telephone: '\+82-2-765-2737'/);
   assert.match(structuredDataSource, /postalCode: '03139'/);
-  assert.ok(structuredDataSource.includes("logo: absoluteSiteUrl('/images/logo.png')"));
+  assert.ok(structuredDataSource.includes("logo: imageSrc('logo.png')"));
+  assert.ok(structuredDataSource.includes("image: imageSrc('home_hero.png')"));
 });
 
 test('site structured data exposes service entities for high-intent search terms', () => {

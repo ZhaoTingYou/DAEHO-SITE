@@ -36,8 +36,14 @@ test('heritage hero backgrounds are editable through CMS hero image fields', () 
   }
 
   assert.ok(source.includes("import {ResponsiveCmsImage} from '@/components/responsive-cms-image';"));
-  assert.ok(source.includes('filename={image}'));
+  assert.ok(source.includes('filename={visibleImage}'));
   assert.ok(source.includes('mobileFilename={mobileImage}'));
+});
+
+test('heritage hero restores its named placeholder when a Storage image fails', () => {
+  assert.ok(source.includes('const [imageFailed, setImageFailed] = useState(false)'));
+  assert.ok(source.includes('onDesktopError={() => setImageFailed(true)}'));
+  assert.ok(source.includes('!visibleImage && imagePlaceholder'));
 });
 
 test('heritage hero images render without the previous red tint overlay', () => {
@@ -50,8 +56,8 @@ test('heritage hero mobile copy stays readable over dark background images', () 
   assert.ok(source.includes('max-md:from-black/25'));
   assert.ok(source.includes('max-md:via-black/55'));
   assert.ok(source.includes('max-md:to-black/70'));
-  assert.ok(source.includes("const mobileTitleTextClass = image ? 'max-md:text-white' : ''"));
-  assert.ok(source.includes("const mobileSupportingTextClass = image ? 'max-md:text-white/90' : ''"));
+  assert.ok(source.includes("const mobileTitleTextClass = visibleImage ? 'max-md:text-white' : ''"));
+  assert.ok(source.includes("const mobileSupportingTextClass = visibleImage ? 'max-md:text-white/90' : ''"));
   assert.ok(source.includes('className={`${englishTextClass} ${mobileTitleTextClass} mobile-display'));
 });
 

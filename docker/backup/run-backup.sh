@@ -15,7 +15,6 @@ while true; do
     --format=custom \
     --file="${target}/daeho_cms.dump"
 
-  tar -czf "${target}/uploads.tar.gz" -C /data uploads
   echo "Backup written to ${target}"
 
   sleep "$interval"

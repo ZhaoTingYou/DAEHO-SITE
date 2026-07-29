@@ -142,6 +142,24 @@ Inquiry flow:
 - Missing SMTP configuration does not block form submission; Spring records the
   email event as `skipped`.
 
+Media storage:
+
+- Images and videos are served from the public S3 media bucket, not from
+  `public/images` or `public/videos`.
+- CMS image values may be absolute S3 URLs or legacy relative filenames. The
+  shared media resolvers map relative image keys to the bucket root and relative
+  video keys to the bucket's `videos/` prefix.
+- Legacy relative image keys are checked against the migration manifest in
+  `lib/storage-image-keys.mjs`; unknown keys keep the page's named placeholder.
+- Upload new images through the CMS so the database stores their absolute S3
+  URL. Upload videos to the bucket under `videos/` and save either the absolute
+  URL or filename in the Home CMS fields.
+- Keep `CMS_STORAGE_PROVIDER=s3` in every deployed environment. Local filesystem
+  media mounts are intentionally unsupported.
+- Set `NEXT_PUBLIC_MEDIA_BASE_URL` to the public bucket or CDN origin used by
+  the Next.js build. Keep `CMS_S3_PUBLIC_BASE_URL` pointed at that same origin
+  so newly uploaded absolute URLs and legacy relative keys resolve consistently.
+
 Latest verification before this README update:
 
 - `npx tsc --noEmit` passed
@@ -258,7 +276,8 @@ Important files:
 
 Current home decisions:
 
-- Home hero uses video from `public/videos/` when available.
+- Home hero resolves its configured video through the shared Storage media
+  resolver.
 - The white overlay on the video was removed.
 - Hero typography is white over the video.
 - The scroll label is centered.
@@ -287,14 +306,14 @@ Home data:
 - Main structured content: `messages/*.json` under `home`
 - UI labels and recent-news popup copy: `messages/*.json` under `homeUi`
 
-Home video filenames:
+Home video keys:
 
-- `public/videos/home_hero.mp4` or `public/videos/home.mp4`
-- optional `public/videos/home_hero.webm` or `public/videos/home.webm`
-- optional poster: `public/images/home_video_poster.jpg` or
-  `public/images/home_video_poster.png`
+- `videos/home_hero.mp4` or `videos/home.mp4` in the public media bucket
+- optional `videos/home_hero.webm` or `videos/home.webm`
+- posters live at the bucket root, for example `home_video_poster.jpg`
 
-If no video exists, the hero falls back to `home_hero.png`.
+If no video is configured, the hero falls back to the Storage object
+`home_hero.png`.
 
 ## Chronicle Page Status
 
@@ -514,32 +533,34 @@ Fonts:
 
 ## Images And Assets
 
-Place confirmed images in `public/images/` with exact filenames referenced by
-message files and page code.
+Place confirmed images in the public S3 media bucket with the exact keys
+referenced by message files and page code. Do not add runtime media to
+`public/images` or `public/videos`; both directories were retired after the
+Storage migration.
 
 Current important groups:
 
-- Home: `home_hero.png`, `home_ring_01.png` to `home_ring_05.png`,
+- Home bucket keys: `home_hero.png`, `home_ring_01.png` to `home_ring_05.png`,
   `home_stats_bg.png`, `home_pillar_chronicle.png`, `home_pillar_legacy.png`,
   `home_pillar_specialty.png`, `home_pillar_news.png`
-- Chronicle: `chronicle_hero.png`, `chronicle_milestone_01.png` to
+- Chronicle bucket keys: `chronicle_hero.png`, `chronicle_milestone_01.png` to
   `chronicle_milestone_06.png`, `chronicle_detail_01.png` to
   `chronicle_detail_03.png`
-- Legacy: `legacy_hero.png`, `legacy_card_loyalty.png`,
+- Legacy bucket keys: `legacy_hero.png`, `legacy_card_loyalty.png`,
   `legacy_card_credibility.png`, `legacy_card_achievement.png`,
   `legacy_loyalty_hero.png`, `legacy_credibility_hero.png`,
   `legacy_achievement_hero.png`, `legacy_achievement_01.png` to
   `legacy_achievement_04.png`, `legacy_partner_placeholder.png`
-- Specialty: `specialty_hero.png`, `specialty_card_technique.png`,
+- Specialty bucket keys: `specialty_hero.png`, `specialty_card_technique.png`,
   `specialty_card_collection.png`, `specialty_technique_hero.png`,
   `specialty_process_1_sketch.png` to `specialty_process_7_delivery.png`,
   `specialty_detail_01.png` to `specialty_detail_03.png`,
   `specialty_bespoke.png`, `specialty_collection_hero.png`,
   `collection_ring_01.png` to `collection_ring_12.png`,
   `collection_detail_01.png` to `collection_detail_05.png`
-- News: `news_hero.png`, `news_featured.png.png`, `news_card_01.png` to
+- News bucket keys: `news_hero.png`, `news_featured.png.png`, `news_card_01.png` to
   `news_card_06.png`, `news_detail_hero.png`
-- Golf: `golf_hero.png`, `golf_hero_2.png`, `golf_head_ball.png`,
+- Golf bucket keys: `golf_hero.png`, `golf_hero_2.png`, `golf_head_ball.png`,
   `golf_head_iron.png`, `golf_head_putter.png`, `golf_head_wood.png`,
   `golf_shaft_black.png`, `golf_shaft_white.png`,
   `golf_shaft_burgundy.png`, `golf_shaft_navy.png`,

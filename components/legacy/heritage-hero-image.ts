@@ -11,7 +11,7 @@ export function resolveHeritageHeroImage(...values: unknown[]) {
 }
 
 export function resolveHeritageHeroPlaceholder(value: string) {
-  return isImagePath(value) ? '' : value;
+  return value;
 }
 
 function isImagePath(value: unknown): value is string {

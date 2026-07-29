@@ -13,7 +13,7 @@ const imageUploadSource = source.slice(
 );
 const appendableArraySource = source.slice(
   source.indexOf('export function AppendableArrayItemsField'),
-  source.indexOf('function imageSrc')
+  source.indexOf('function mediaFieldValue')
 );
 const pageEditorSource = readFileSync(new URL('../(dashboard)/pages/[pageKey]/page.tsx', import.meta.url), 'utf8');
 const editableArraySource = pageEditorSource.slice(

@@ -1,5 +1,4 @@
-import {existsSync} from 'node:fs';
-import path from 'node:path';
+import {isKnownStorageImageKey} from '@/lib/storage-image-keys.mjs';
 
 export function imageExists(filename: string) {
   const value = filename.trim();
@@ -15,16 +14,16 @@ export function imageExists(filename: string) {
   }
 
   if (assetPath.startsWith('/uploads/') || assetPath.startsWith('uploads/')) {
-    return true;
+    return isKnownStorageImageKey(assetPath);
   }
 
-  if (assetPath.startsWith('/') && !assetPath.startsWith('/images/')) {
+  if (assetPath.startsWith('/images/') || assetPath.startsWith('images/')) {
+    return isKnownStorageImageKey(assetPath);
+  }
+
+  if (assetPath.startsWith('/')) {
     return false;
   }
 
-  if (existsSync(path.join(process.cwd(), 'public', 'images', assetPath.replace(/^\/?images\//, '')))) {
-    return true;
-  }
-
-  return false;
+  return isKnownStorageImageKey(assetPath);
 }

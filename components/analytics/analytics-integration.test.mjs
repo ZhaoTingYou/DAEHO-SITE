@@ -40,6 +40,16 @@ test('Docker build receives the public GA4 measurement ID', () => {
   assert.match(read('.env.example'), /NEXT_PUBLIC_GA_MEASUREMENT_ID=G-FXQGWE9XZ0/);
 });
 
+test('Next build and image allowlist share the configurable public media base URL', () => {
+  assert.match(read('Dockerfile.next'), /ARG NEXT_PUBLIC_MEDIA_BASE_URL/);
+  assert.match(read('docker-compose.yml'), /NEXT_PUBLIC_MEDIA_BASE_URL/);
+  assert.match(
+    read('.env.example'),
+    /NEXT_PUBLIC_MEDIA_BASE_URL=https:\/\/daeho-prod-media\.s3\.ap-northeast-2\.amazonaws\.com/
+  );
+  assert.match(read('next.config.ts'), /process\.env\.NEXT_PUBLIC_MEDIA_BASE_URL/);
+});
+
 test('internal analytics clears denied consent on hydration and mounts independently of GA readiness', () => {
   const provider = read('components/analytics/analytics-provider.tsx');
 

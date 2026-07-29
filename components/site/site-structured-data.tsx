@@ -1,4 +1,5 @@
 import {getPublicLocales} from '@/lib/english-visibility-core';
+import {imageSrc} from '@/lib/image-src';
 import {locales} from '@/lib/locales';
 import {metadataBase} from '@/lib/seo';
 
@@ -61,8 +62,8 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
         alternateName: siteAlternateNames,
         description: organizationDescription,
         url: absoluteSiteUrl('/'),
-        logo: absoluteSiteUrl('/images/logo.png'),
-        image: absoluteSiteUrl('/images/home_hero.png'),
+        logo: imageSrc('logo.png'),
+        image: imageSrc('home_hero.png'),
         slogan: '기억되어야 할 순간을 상징으로 완성합니다.',
         foundingDate: '1988',
         email: 'dhofficial1988@gmail.com',
