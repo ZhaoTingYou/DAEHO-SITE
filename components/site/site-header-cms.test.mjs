@@ -19,6 +19,7 @@ const headerSource = readFileSync(new URL('./site-header.tsx', import.meta.url),
 const globalStyles = readFileSync(new URL('../../app/globals.css', import.meta.url), 'utf8');
 
 const headerTextPaths = [
+  'footer.otherSites',
   'navigation.brandLabel',
   'navigation.primaryLabel',
   'navigation.mobileLabel',
@@ -104,6 +105,18 @@ test('Korean header styles strengthen all copy and the desktop dropdown has a fu
   assert.match(
     globalStyles,
     /\.site-header--ko \.site-nav-link\s*\{[\s\S]*?font-size:\s*14px;[\s\S]*?font-weight:\s*600;/
+  );
+  assert.match(
+    globalStyles,
+    /\.site-header--ko \.site-header-brand\s*\{[\s\S]*?font-size:\s*20px;[\s\S]*?font-weight:\s*700;/
+  );
+  assert.match(
+    globalStyles,
+    /\.site-header--ko \.consult-cta\s*\{[\s\S]*?font-size:\s*14px;[\s\S]*?font-weight:\s*600;/
+  );
+  assert.match(
+    globalStyles,
+    /\.site-header--ko \.site-header-language-link,[\s\S]*?\.site-header--ko \.site-header-language-label\s*\{[\s\S]*?opacity:\s*\.78;/
   );
   assert.match(
     globalStyles,
