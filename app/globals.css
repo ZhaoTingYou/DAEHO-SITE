@@ -1363,6 +1363,70 @@ select {
   min-width: 26px;
 }
 
+.site-header--ko .site-nav-link {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.site-header--ko .site-header-brand {
+  font-weight: 700;
+}
+
+.site-header--ko .site-header-actions,
+.site-header--ko .site-header-external-link,
+.site-header--ko .site-header-language-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.site-header--ko .consult-cta {
+  font-weight: 600;
+}
+
+.site-header--ko .consult-cta--large,
+.site-header--ko .site-header-mobile-nav-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.site-header--ko .mobile-external-site-link {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.site-header--ko .site-header-mega-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.site-header--ko .site-header-mega-title {
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.site-header--ko .site-header-mega-item-label {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.site-header--ko .site-header-mega-description {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(16, 29, 48, .82);
+}
+
+.site-header--ko .site-header-mobile-subnav-label,
+.site-header--ko .site-header-mobile-section-label {
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.site-header--ko .mobile-menu-panel {
+  color: var(--primary);
+}
+
 .site-nav-link::after {
   position: absolute;
   right: 0;

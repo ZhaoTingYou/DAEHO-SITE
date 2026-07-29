@@ -84,6 +84,37 @@ test('every header text value has locale defaults and a CMS field', () => {
   }
 });
 
+test('header renders CMS-managed brand and language labels without hard-coded defaults', () => {
+  assert.doesNotMatch(headerSource, /localeShortLabels/);
+  assert.doesNotMatch(headerSource, />\s*DAEHO\s*</);
+  assert.match(headerSource, /navText\('brandLabel'\)/);
+  assert.match(headerSource, /navText\(`languageLabels\.\$\{targetLocale\}`\)/);
+});
+
+test('Korean header styles strengthen all copy and the desktop dropdown has a full border', () => {
+  assert.match(headerSource, /site-header--\$\{locale\}/);
+  assert.match(headerSource, /site-header-brand/);
+  assert.match(headerSource, /site-header-actions/);
+  assert.match(headerSource, /site-header-mega-eyebrow/);
+  assert.match(headerSource, /site-header-mega-title/);
+  assert.match(headerSource, /site-header-mega-description/);
+  assert.match(headerSource, /site-header-mobile-nav-label/);
+  assert.match(headerSource, /site-header-mega-menu[^"]*\bborder\b/);
+  assert.doesNotMatch(headerSource, /site-header-mega-menu[^"]*\bborder-t\b/);
+  assert.match(
+    globalStyles,
+    /\.site-header--ko \.site-nav-link\s*\{[\s\S]*?font-size:\s*14px;[\s\S]*?font-weight:\s*600;/
+  );
+  assert.match(
+    globalStyles,
+    /\.site-header--ko \.site-header-mega-description\s*\{[\s\S]*?font-size:\s*15px;[\s\S]*?font-weight:\s*500;[\s\S]*?color:\s*rgba\(16,\s*29,\s*48,\s*\.82\);/
+  );
+  assert.match(
+    globalStyles,
+    /\.site-header--ko \.mobile-external-site-link\s*\{[\s\S]*?font-size:\s*14px;[\s\S]*?font-weight:\s*600;/
+  );
+});
+
 function valueAtPath(value, path) {
   return path.split('.').reduce((current, segment) => current?.[segment], value);
 }
@@ -91,6 +122,3 @@ function valueAtPath(value, path) {
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-
-void headerSource;
-void globalStyles;
