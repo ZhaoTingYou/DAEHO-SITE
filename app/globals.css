@@ -1380,9 +1380,9 @@ select {
   font-weight: 600;
 }
 
-.site-header--ko .site-header-language-link,
-.site-header--ko .site-header-language-label {
-  opacity: .78;
+.site-header--ko .site-header-language-link:not([aria-current="page"]),
+.site-header--ko .site-header-language-label:not([aria-current="page"]) {
+  opacity: .92;
 }
 
 .site-header--ko .site-header-language-link[aria-current="page"],

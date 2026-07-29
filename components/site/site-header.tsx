@@ -593,12 +593,13 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
                     /
                   </span>
                 ) : null}
-                  <Link
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`site-header-language-label inline-flex min-h-11 min-w-11 items-center justify-center ${
+                <Link
+                  href={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`site-header-language-label inline-flex min-h-11 min-w-11 items-center justify-center ${
                     locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-55'
                   }`}
+                  aria-current={locale === item.locale ? 'page' : undefined}
                 >
                   {item.label}
                 </Link>

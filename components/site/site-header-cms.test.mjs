@@ -116,7 +116,15 @@ test('Korean header styles strengthen all copy and the desktop dropdown has a fu
   );
   assert.match(
     globalStyles,
-    /\.site-header--ko \.site-header-language-link,[\s\S]*?\.site-header--ko \.site-header-language-label\s*\{[\s\S]*?opacity:\s*\.78;/
+    /\.site-header--ko \.site-header-language-link:not\(\[aria-current="page"\]\),[\s\S]*?\.site-header--ko \.site-header-language-label:not\(\[aria-current="page"\]\)\s*\{[\s\S]*?opacity:\s*\.92;/
+  );
+  assert.match(
+    globalStyles,
+    /\.site-header--ko \.site-header-language-link\[aria-current="page"\],[\s\S]*?\.site-header--ko \.site-header-language-label\[aria-current="page"\]\s*\{[\s\S]*?opacity:\s*1;/
+  );
+  assert.match(
+    headerSource,
+    /site-header-language-label[\s\S]*?aria-current=\{locale === item\.locale \? 'page' : undefined\}/
   );
   assert.match(
     globalStyles,
