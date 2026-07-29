@@ -1256,9 +1256,14 @@
       "golfEnabled": false
     },
     "navigation": {
+      "brandLabel": "DAEHO",
       "primaryLabel": "주요 내비게이션",
       "mobileLabel": "모바일 내비게이션",
       "languageSwitcherLabel": "언어 선택",
+      "languageLabels": {
+        "ko": "KO",
+        "en": "EN"
+      },
       "openMenu": "메뉴 열기",
       "closeMenu": "메뉴 닫기",
       "logoHome": "DAEHO 홈",

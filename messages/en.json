@@ -1256,9 +1256,14 @@
       "golfEnabled": false
     },
     "navigation": {
+      "brandLabel": "DAEHO",
       "primaryLabel": "Primary navigation",
       "mobileLabel": "Mobile navigation",
       "languageSwitcherLabel": "Language switcher",
+      "languageLabels": {
+        "ko": "KO",
+        "en": "EN"
+      },
       "openMenu": "Open menu",
       "closeMenu": "Close menu",
       "logoHome": "DAEHO home",
