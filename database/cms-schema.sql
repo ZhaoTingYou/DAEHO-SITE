@@ -95,6 +95,8 @@ CREATE TABLE IF NOT EXISTS cms_inquiries (
   locale TEXT NOT NULL DEFAULT 'ko',
   name TEXT NOT NULL,
   contact TEXT NOT NULL,
+  phone TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL DEFAULT '',
   organization TEXT NOT NULL DEFAULT '',
   inquiry_type TEXT NOT NULL DEFAULT '',
   team TEXT NOT NULL DEFAULT '',
@@ -121,6 +123,83 @@ CREATE TABLE IF NOT EXISTS cms_email_events (
   error_message TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (inquiry_id) REFERENCES cms_inquiries(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS cms_inquiry_status_events (
+  id TEXT PRIMARY KEY,
+  inquiry_id TEXT NOT NULL,
+  previous_status TEXT NOT NULL,
+  next_status TEXT NOT NULL,
+  actor TEXT NOT NULL DEFAULT 'admin',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (inquiry_id) REFERENCES cms_inquiries(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS cms_notification_settings (
+  id TEXT PRIMARY KEY,
+  internal_email TEXT NOT NULL DEFAULT '',
+  internal_email_enabled INTEGER NOT NULL DEFAULT 0,
+  customer_email_enabled INTEGER NOT NULL DEFAULT 0,
+  kakao_enabled INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS cms_notification_templates (
+  id TEXT PRIMARY KEY,
+  template_key TEXT NOT NULL,
+  channel TEXT NOT NULL,
+  audience TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  inquiry_status TEXT NOT NULL DEFAULT '',
+  locale TEXT NOT NULL DEFAULT 'ko',
+  version INTEGER NOT NULL,
+  subject TEXT NOT NULL DEFAULT '',
+  body TEXT NOT NULL,
+  provider_template_code TEXT NOT NULL DEFAULT '',
+  approval_status TEXT NOT NULL DEFAULT 'draft',
+  is_active INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (template_key, version)
+);
+
+CREATE TABLE IF NOT EXISTS cms_notification_jobs (
+  id TEXT PRIMARY KEY,
+  inquiry_id TEXT NOT NULL,
+  status_event_id TEXT,
+  channel TEXT NOT NULL,
+  audience TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  inquiry_status TEXT NOT NULL DEFAULT '',
+  locale TEXT NOT NULL DEFAULT 'ko',
+  recipient TEXT NOT NULL,
+  subject TEXT NOT NULL DEFAULT '',
+  rendered_body TEXT NOT NULL,
+  template_id TEXT,
+  provider_template_code TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'queued',
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  delivery_check_count INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at TEXT NOT NULL DEFAULT (datetime('now')),
+  provider_message_id TEXT NOT NULL DEFAULT '',
+  last_error TEXT NOT NULL DEFAULT '',
+  dedupe_key TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (inquiry_id) REFERENCES cms_inquiries(id) ON DELETE CASCADE,
+  FOREIGN KEY (status_event_id) REFERENCES cms_inquiry_status_events(id) ON DELETE CASCADE,
+  FOREIGN KEY (template_id) REFERENCES cms_notification_templates(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS cms_notification_attempts (
+  id TEXT PRIMARY KEY,
+  job_id TEXT NOT NULL,
+  attempt_number INTEGER NOT NULL,
+  status TEXT NOT NULL,
+  provider_message_id TEXT NOT NULL DEFAULT '',
+  error_message TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (job_id) REFERENCES cms_notification_jobs(id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_cms_news_visible_sort ON cms_news (is_visible, sort_order, published_at);

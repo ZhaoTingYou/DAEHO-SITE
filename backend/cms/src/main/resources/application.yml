@@ -26,6 +26,7 @@ spring:
           auth: ${SMTP_AUTH:false}
           starttls:
             enable: ${SMTP_STARTTLS:true}
+            required: ${SMTP_STARTTLS_REQUIRED:true}
 
 cms:
   admin-api-key: ${CMS_ADMIN_API_KEY:}
@@ -42,3 +43,12 @@ cms:
   s3-public-base-url: ${CMS_S3_PUBLIC_BASE_URL:}
   s3-access-key-id: ${CMS_S3_ACCESS_KEY_ID:}
   s3-secret-access-key: ${CMS_S3_SECRET_ACCESS_KEY:}
+  notifications:
+    worker-enabled: ${CMS_NOTIFICATION_WORKER_ENABLED:true}
+    worker-delay-ms: ${CMS_NOTIFICATION_WORKER_DELAY_MS:1000}
+    admin-base-url: ${CMS_ADMIN_BASE_URL:http://localhost:3000/admin}
+    kakao-api-base-url: ${KAKAO_API_BASE_URL:https://sens.apigw.ntruss.com}
+    kakao-access-key: ${KAKAO_ACCESS_KEY:}
+    kakao-secret-key: ${KAKAO_SECRET_KEY:}
+    kakao-service-id: ${KAKAO_SERVICE_ID:}
+    kakao-channel-id: ${KAKAO_CHANNEL_ID:}

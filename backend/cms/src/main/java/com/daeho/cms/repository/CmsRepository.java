@@ -26,15 +26,25 @@ public class CmsRepository {
       "cms_collection_translations",
       "cms_media",
       "cms_inquiries",
-      "cms_email_events"
+      "cms_email_events",
+      "cms_inquiry_status_events",
+      "cms_notification_settings",
+      "cms_notification_templates",
+      "cms_notification_jobs",
+      "cms_notification_attempts"
   );
   private static final List<String> DELETE_TABLES = reverseExportTables();
   private static final Set<String> JSON_COLUMNS = Set.of(
       "content_ko", "content_en", "seo_ko", "seo_en", "body_json", "tags_json",
       "gallery_json", "specs_json", "configuration_json"
   );
-  private static final Set<String> BOOLEAN_COLUMNS = Set.of("is_featured", "is_visible");
-  private static final Set<String> TIMESTAMPTZ_COLUMNS = Set.of("created_at", "updated_at");
+  private static final Set<String> BOOLEAN_COLUMNS = Set.of(
+      "is_featured", "is_visible", "internal_email_enabled", "customer_email_enabled",
+      "kakao_enabled", "is_active"
+  );
+  private static final Set<String> TIMESTAMPTZ_COLUMNS = Set.of(
+      "created_at", "updated_at", "next_attempt_at"
+  );
   private static final Set<String> LEGACY_PAGE_COLUMNS = Set.of("content_zh", "seo_zh");
   private static final Set<String> LEGACY_MEDIA_COLUMNS = Set.of("alt_zh");
 
@@ -309,7 +319,7 @@ public class CmsRepository {
         Map.entry("source", "contact"),
         Map.entry("locale", validation.stringValue(payload.get("locale"))),
         Map.entry("name", validation.stringValue(payload.get("name"))),
-        Map.entry("contact", validation.stringValue(payload.get("contact"))),
+        Map.entry("phone", validation.stringValue(payload.get("phone"))),
         Map.entry("email", validation.stringValue(payload.get("email"))),
         Map.entry("organization", validation.stringValue(payload.get("organization"))),
         Map.entry("inquiryType", validation.stringValue(payload.get("type"))),
@@ -331,8 +341,8 @@ public class CmsRepository {
     values.put("source", "golf");
     values.put("locale", validation.stringValue(payload.get("locale")));
     values.put("name", validation.stringValue(payload.get("name")));
-    values.put("contact", validation.stringValue(payload.get("contact")));
-    values.put("email", "");
+    values.put("phone", validation.stringValue(payload.get("phone")));
+    values.put("email", validation.stringValue(payload.get("email")));
     values.put("organization", "");
     values.put("inquiryType", "");
     values.put("team", validation.stringValue(payload.get("team")));
@@ -378,43 +388,15 @@ public class CmsRepository {
         .orElse(null);
   }
 
-  public List<Map<String, Object>> listEmailEventsForInquiry(String inquiryId) {
-    return jdbc.query(
-        "SELECT * FROM cms_email_events WHERE inquiry_id = ? ORDER BY created_at DESC",
-        this::mapEmailEvent,
-        inquiryId
-    );
-  }
-
   @Transactional
-  public Map<String, Object> updateInquiryStatus(String id, Map<String, Object> payload) {
-    jdbc.update(
-        "UPDATE cms_inquiries SET status = ?, updated_at = now() WHERE id = ?",
-        validation.stringValue(payload.get("status")),
-        id
-    );
-    return getInquiry(id);
-  }
-
-  @Transactional
-  public String createEmailEvent(Map<String, Object> event) {
-    var id = UUID.randomUUID().toString();
-    jdbc.update("""
-        INSERT INTO cms_email_events (
-          id, inquiry_id, event_type, recipient, subject, status,
-          provider_message_id, error_message, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, now())
-        """,
+  public Map<String, Object> updateInquiryStatusIfExpected(String id, String expectedStatus, String nextStatus) {
+    var updated = jdbc.update(
+        "UPDATE cms_inquiries SET status = ?, updated_at = now() WHERE id = ? AND status = ?",
+        nextStatus,
         id,
-        event.get("inquiryId"),
-        firstNonBlank(event.get("eventType"), "inquiry_notification"),
-        validation.stringValue(event.get("recipient")),
-        validation.stringValue(event.get("subject")),
-        validation.stringValue(event.get("status")),
-        validation.stringValue(event.get("providerMessageId")),
-        validation.stringValue(event.get("errorMessage"))
+        expectedStatus
     );
-    return id;
+    return updated == 1 ? getInquiry(id) : null;
   }
 
   public List<Map<String, Object>> listMedia() {
@@ -508,11 +490,15 @@ public class CmsRepository {
   public void replaceFromSnapshot(Map<String, Object> snapshot) {
     var tables = validation.objectValue(snapshot.get("tables"));
     for (var table : DELETE_TABLES) {
-      jdbc.update("DELETE FROM " + table);
+      if (tables.containsKey(table)) {
+        jdbc.update("DELETE FROM " + table);
+      }
     }
     for (var table : EXPORT_TABLES) {
-      for (var row : importableExportRows(table, tables.get(table))) {
-        insertExportRow(table, row);
+      if (tables.containsKey(table)) {
+        for (var row : importableExportRows(table, tables.get(table))) {
+          insertExportRow(table, row);
+        }
       }
     }
   }
@@ -547,16 +533,17 @@ public class CmsRepository {
     var id = UUID.randomUUID().toString();
     jdbc.update("""
         INSERT INTO cms_inquiries (
-          id, source, status, locale, name, contact, email, organization, inquiry_type,
+          id, source, status, locale, name, contact, phone, email, organization, inquiry_type,
           team, quantity, due_date, use_case, message, configuration_json,
           page_path, user_agent, ip_address, created_at, updated_at
-        ) VALUES (?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+        ) VALUES (?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
         """,
         id,
         payload.get("source"),
         payload.get("locale"),
         payload.get("name"),
-        payload.get("contact"),
+        payload.get("phone"),
+        payload.get("phone"),
         payload.get("email"),
         payload.get("organization"),
         payload.get("inquiryType"),
@@ -893,6 +880,7 @@ public class CmsRepository {
         "locale", rs.getString("locale"),
         "name", rs.getString("name"),
         "contact", rs.getString("contact"),
+        "phone", rs.getString("phone"),
         "email", rs.getString("email"),
         "organization", rs.getString("organization"),
         "inquiryType", rs.getString("inquiry_type"),
@@ -907,20 +895,6 @@ public class CmsRepository {
         "ipAddress", rs.getString("ip_address"),
         "createdAt", instantString(rs, "created_at"),
         "updatedAt", instantString(rs, "updated_at")
-    );
-  }
-
-  private Map<String, Object> mapEmailEvent(ResultSet rs, int rowNum) throws SQLException {
-    return orderedMap(
-        "id", rs.getString("id"),
-        "inquiryId", rs.getString("inquiry_id"),
-        "eventType", rs.getString("event_type"),
-        "recipient", rs.getString("recipient"),
-        "subject", rs.getString("subject"),
-        "status", rs.getString("status"),
-        "providerMessageId", rs.getString("provider_message_id"),
-        "errorMessage", rs.getString("error_message"),
-        "createdAt", instantString(rs, "created_at")
     );
   }
 

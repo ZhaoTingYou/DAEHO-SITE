@@ -1645,6 +1645,7 @@
     "golfInquiry": {
       "name": "Name",
       "contact": "Contact",
+      "email": "Email",
       "quantity": "Quantity",
       "due": "Desired delivery",
       "team": "Group / Team name",

@@ -8,6 +8,7 @@ import {AdminLanguageSwitcher} from './admin-language-switcher';
 const navItems = [
   {href: '/admin', labelKey: 'nav.overview'},
   {href: '/admin/inquiries', labelKey: 'nav.inquiries'},
+  {href: '/admin/notifications', labelKey: 'nav.notifications'},
   {href: '/admin/news', labelKey: 'nav.news'},
   {href: '/admin/collections', labelKey: 'nav.collections'},
   {href: '/admin/media', labelKey: 'nav.media'},

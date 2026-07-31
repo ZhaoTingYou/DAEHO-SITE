@@ -9,7 +9,12 @@ declare module '@/lib/cms/import-core.mjs' {
     'cms_collection_translations',
     'cms_media',
     'cms_inquiries',
-    'cms_email_events'
+    'cms_email_events',
+    'cms_inquiry_status_events',
+    'cms_notification_settings',
+    'cms_notification_templates',
+    'cms_notification_jobs',
+    'cms_notification_attempts'
   ];
 
   export const cmsImportDeleteTables: readonly string[];
@@ -18,7 +23,7 @@ declare module '@/lib/cms/import-core.mjs' {
   export type CmsImportSnapshot = {
     exportedAt?: string;
     schemaVersion: 1;
-    tables: Record<CmsImportTable, Array<Record<string, string | number | null>>>;
+    tables: Partial<Record<CmsImportTable, Array<Record<string, string | number | null>>>>;
   };
 
   export function readCmsImportSnapshotFromText(value: string): CmsImportSnapshot;

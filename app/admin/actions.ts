@@ -29,14 +29,12 @@ import {
   deleteNews,
   getCollection,
   getMedia,
-  getInquiry,
   getNews,
   getPage,
   listCollections,
   listMedia,
   listNews,
   listPages,
-  resendInquiryNotification,
   updateCollection,
   updateInquiryStatus,
   updateMedia,
@@ -142,7 +140,8 @@ export async function updateInquiryStatusAction(formData: FormData) {
 
   const id = stringFromForm(formData, 'id');
   const parsed = inquiryStatusSchema.safeParse({
-    status: stringFromForm(formData, 'status')
+    status: stringFromForm(formData, 'status'),
+    expectedStatus: stringFromForm(formData, 'expectedStatus') || undefined
   });
 
   if (id && parsed.success) {
@@ -151,19 +150,6 @@ export async function updateInquiryStatusAction(formData: FormData) {
 
   revalidatePath('/admin/inquiries');
   if (id) {
-    revalidatePath(`/admin/inquiries/${id}`);
-  }
-}
-
-export async function resendInquiryNotificationAction(formData: FormData) {
-  await assertAdminSession();
-
-  const id = stringFromForm(formData, 'id');
-  const inquiry = id ? await getInquiry(id) : null;
-
-  if (inquiry) {
-    await resendInquiryNotification(id);
-    revalidatePath('/admin/inquiries');
     revalidatePath(`/admin/inquiries/${id}`);
   }
 }

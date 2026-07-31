@@ -57,16 +57,16 @@ public class RequestValidation {
     var payload = mutableCopy(body);
     payload.putIfAbsent("locale", "ko");
     payload.putIfAbsent("organization", "");
+    normalizeInquiryContacts(payload);
     payload.putIfAbsent("type", "");
     payload.putIfAbsent("message", "");
     payload.putIfAbsent("pagePath", "");
     requireText(payload, "name", issues);
-    requireText(payload, "contact", issues);
-    requireText(payload, "email", issues);
+    requireInquiryContact(payload, issues);
     validateEmail(payload.get("email"), "email", issues);
     validateLocale(payload.get("locale"), "locale", issues);
     maxLength(payload, "name", 120, issues);
-    maxLength(payload, "contact", 180, issues);
+    maxLength(payload, "phone", 180, issues);
     maxLength(payload, "email", 254, issues);
     maxLength(payload, "organization", 160, issues);
     maxLength(payload, "type", 160, issues);
@@ -79,6 +79,7 @@ public class RequestValidation {
     var issues = new ArrayList<Map<String, String>>();
     var payload = mutableCopy(body);
     payload.putIfAbsent("locale", "ko");
+    normalizeInquiryContacts(payload);
     payload.putIfAbsent("due", "");
     payload.putIfAbsent("team", "");
     payload.putIfAbsent("use", "");
@@ -89,10 +90,12 @@ public class RequestValidation {
     payload.putIfAbsent("engravingSample", "");
     payload.putIfAbsent("pagePath", "");
     requireText(payload, "name", issues);
-    requireText(payload, "contact", issues);
+    requireInquiryContact(payload, issues);
+    validateEmail(payload.get("email"), "email", issues);
     validateLocale(payload.get("locale"), "locale", issues);
     maxLength(payload, "name", 120, issues);
-    maxLength(payload, "contact", 180, issues);
+    maxLength(payload, "phone", 180, issues);
+    maxLength(payload, "email", 254, issues);
     maxLength(payload, "due", 160, issues);
     maxLength(payload, "team", 160, issues);
     maxLength(payload, "use", 160, issues);
@@ -119,10 +122,79 @@ public class RequestValidation {
   public ValidatedRequest inquiryStatus(Map<String, Object> body) {
     var issues = new ArrayList<Map<String, String>>();
     var status = stringValue(body.get("status"));
+    var expectedStatus = stringValue(body.get("expectedStatus"));
     if (!INQUIRY_STATUSES.contains(status)) {
       issues.add(issue("status", "Invalid inquiry status."));
     }
-    return new ValidatedRequest(Map.of("status", status), issues);
+    if (!expectedStatus.isBlank() && !INQUIRY_STATUSES.contains(expectedStatus)) {
+      issues.add(issue("expectedStatus", "Invalid expected inquiry status."));
+    }
+    return new ValidatedRequest(Map.of(
+        "status", status,
+        "expectedStatus", expectedStatus
+    ), issues);
+  }
+
+  public ValidatedRequest notificationSettings(Map<String, Object> body) {
+    var issues = new ArrayList<Map<String, String>>();
+    var payload = mutableCopy(body);
+    payload.putIfAbsent("internalEmail", "");
+    payload.putIfAbsent("internalEmailEnabled", false);
+    payload.putIfAbsent("customerEmailEnabled", false);
+    payload.putIfAbsent("kakaoEnabled", false);
+    validateEmail(payload.get("internalEmail"), "internalEmail", issues);
+    if (booleanValue(payload.get("internalEmailEnabled"), false)
+        && stringValue(payload.get("internalEmail")).isBlank()) {
+      issues.add(issue("internalEmail", "Internal email is required when internal notifications are enabled."));
+    }
+    maxLength(payload, "internalEmail", 254, issues);
+    payload.put("internalEmailEnabled", booleanValue(payload.get("internalEmailEnabled"), false));
+    payload.put("customerEmailEnabled", booleanValue(payload.get("customerEmailEnabled"), false));
+    payload.put("kakaoEnabled", booleanValue(payload.get("kakaoEnabled"), false));
+    return new ValidatedRequest(payload, issues);
+  }
+
+  public ValidatedRequest notificationTemplate(Map<String, Object> body) {
+    var issues = new ArrayList<Map<String, String>>();
+    var payload = mutableCopy(body);
+    var approvalStatus = stringValue(payload.get("approvalStatus"));
+    payload.putIfAbsent("subject", "");
+    payload.putIfAbsent("body", "");
+    payload.putIfAbsent("providerTemplateCode", "");
+    payload.putIfAbsent("isActive", false);
+    requireText(payload, "body", issues);
+    if (!List.of("draft", "pending", "approved").contains(approvalStatus)) {
+      issues.add(issue("approvalStatus", "Expected draft, pending, or approved."));
+    }
+    maxLength(payload, "subject", 300, issues);
+    maxLength(payload, "body", 4000, issues);
+    maxLength(payload, "providerTemplateCode", 160, issues);
+    payload.put("approvalStatus", approvalStatus);
+    payload.put("isActive", booleanValue(payload.get("isActive"), false));
+    return new ValidatedRequest(payload, issues);
+  }
+
+  public ValidatedRequest notificationTest(Map<String, Object> body) {
+    var issues = new ArrayList<Map<String, String>>();
+    var channel = stringValue(body.get("channel"));
+    var recipient = stringValue(body.get("recipient"));
+    var templateKey = stringValue(body.get("templateKey"));
+    if (!List.of("email", "kakao").contains(channel)) {
+      issues.add(issue("channel", "Expected email or kakao."));
+    }
+    if (recipient.isBlank()) {
+      issues.add(issue("recipient", "Recipient is required."));
+    } else if ("email".equals(channel)) {
+      validateEmail(recipient, "recipient", issues);
+    }
+    if (templateKey.isBlank()) {
+      issues.add(issue("templateKey", "Template key is required."));
+    }
+    return new ValidatedRequest(Map.of(
+        "channel", channel,
+        "recipient", recipient,
+        "templateKey", templateKey
+    ), issues);
   }
 
   public ValidatedRequest mediaPayload(Map<String, Object> body) {
@@ -221,6 +293,22 @@ public class RequestValidation {
   private void requireText(Map<String, Object> payload, String key, List<Map<String, String>> issues) {
     if (stringValue(payload.get(key)).isBlank()) {
       issues.add(issue(key, "Expected a non-empty value."));
+    }
+  }
+
+  private void normalizeInquiryContacts(Map<String, Object> payload) {
+    var phone = stringValue(payload.get("phone"));
+    if (phone.isBlank()) {
+      phone = stringValue(payload.get("contact"));
+    }
+    payload.put("phone", phone);
+    payload.put("contact", phone);
+    payload.put("email", stringValue(payload.get("email")));
+  }
+
+  private void requireInquiryContact(Map<String, Object> payload, List<Map<String, String>> issues) {
+    if (stringValue(payload.get("phone")).isBlank() && stringValue(payload.get("email")).isBlank()) {
+      issues.add(issue("contact", "Expected at least one email address or phone number."));
     }
   }
 

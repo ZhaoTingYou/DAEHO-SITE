@@ -84,7 +84,7 @@ export default async function AdminOverviewPage() {
               <StatusRow label={t('overview.rowsTracked')} value={tableTotal.toString()} />
               <StatusRow label={t('overview.emailNotify')} value={cmsStatus.email.configured ? t('overview.configured') : t('overview.notConfigured')} tone={cmsStatus.email.configured ? 'ok' : 'warning'} />
               <StatusRow label={t('overview.latestInquiry')} value={cmsStatus.latest.inquiryCreatedAt || t('common.none')} mono />
-              <StatusRow label={t('overview.latestEmailEvent')} value={cmsStatus.latest.emailEventCreatedAt || t('common.none')} mono />
+              <StatusRow label={t('overview.latestEmailEvent')} value={cmsStatus.latest.notificationJobCreatedAt || t('common.none')} mono />
             </div>
           </Panel>
         </div>

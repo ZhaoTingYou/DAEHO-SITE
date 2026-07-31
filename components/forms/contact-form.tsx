@@ -49,12 +49,11 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
       <TextField
         id="contact-contact"
         label={text.contact}
-        name="contact"
+        name="phone"
         type="tel"
         inputMode="tel"
         autoComplete="tel"
         maxLength={180}
-        required
       />
       <TextField
         id="contact-email"
@@ -64,7 +63,6 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         inputMode="email"
         autoComplete="email"
         maxLength={254}
-        required
       />
       <label className="block space-y-2 font-body text-[16px] font-semibold uppercase tracking-[0.08em] text-subtext md:text-sm md:tracking-[0.12em]">
         <span>{text.type}</span>
@@ -124,7 +122,7 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
       body: JSON.stringify({
         name: String(formData.get('name') ?? ''),
         organization: String(formData.get('organization') ?? ''),
-        contact: String(formData.get('contact') ?? ''),
+        phone: String(formData.get('phone') ?? ''),
         email: String(formData.get('email') ?? ''),
         type: String(formData.get('type') ?? ''),
         message: String(formData.get('message') ?? ''),

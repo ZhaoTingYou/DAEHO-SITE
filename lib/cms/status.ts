@@ -27,7 +27,7 @@ export type CmsStatus = {
   };
   latest: {
     inquiryCreatedAt: string;
-    emailEventCreatedAt: string;
+    notificationJobCreatedAt: string;
   };
   tables: Array<{table: string; count: number}>;
 };

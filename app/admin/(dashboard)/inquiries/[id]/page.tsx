@@ -3,32 +3,28 @@ import {notFound} from 'next/navigation';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {
-  getInquiry,
-  listEmailEventsForInquiry
+  getInquiryDetail
 } from '@/lib/cms/repositories';
 
-import {
-  resendInquiryNotificationAction,
-  updateInquiryStatusAction
-} from '../../../actions';
 import {PageHeader, Panel} from '../../../_components/admin-shell';
+import {InquiryStatusBadge, InquiryStatusControl} from '../../../_components/inquiry-status-control';
+import {NotificationTimeline} from '../../../_components/notification-timeline';
 
 type Props = {
   params: Promise<{id: string}>;
 };
 
-const statuses = ['new', 'contacted', 'in_progress', 'done', 'spam'];
-
 export default async function AdminInquiryDetailPage({params}: Props) {
   const {t} = await getAdminI18n();
   const {id} = await params;
-  const inquiry = await getInquiry(id);
+  const detail = await getInquiryDetail(id);
 
-  if (!inquiry) {
+  if (!detail) {
     notFound();
   }
 
-  const emailEvents = await listEmailEventsForInquiry(inquiry.id);
+  const {inquiry, statusEvents, notificationJobs, notificationAttempts} = detail;
+  const statusCopy = inquiryStatusCopy(t);
 
   return (
     <>
@@ -52,10 +48,14 @@ export default async function AdminInquiryDetailPage({params}: Props) {
                 </p>
                 <h2 className="mt-2 font-heading text-[28px] font-semibold text-[#101827]">{inquiry.name}</h2>
               </div>
-              <StatusBadge status={inquiry.status} label={t(`status.${inquiry.status}`)} />
+              <InquiryStatusBadge
+                inquiryId={inquiry.id}
+                initialStatus={inquiry.status}
+                labels={statusCopy.statusLabels}
+              />
             </div>
             <dl className="grid gap-4 md:grid-cols-2">
-              <DetailItem label={t('inquiry.contact')} value={inquiry.contact} />
+              <DetailItem label={t('inquiry.contact')} value={inquiry.phone || inquiry.contact || '-'} />
               <DetailItem label={t('inquiry.email')} value={inquiry.email || '-'} />
               <DetailItem label={t('inquiry.locale')} value={inquiry.locale.toUpperCase()} />
               <DetailItem label={t('inquiry.organization')} value={inquiry.organization || '-'} />
@@ -101,62 +101,51 @@ export default async function AdminInquiryDetailPage({params}: Props) {
             <h2 className="mb-4 border-b border-[#e4e7ec] pb-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">
               {t('inquiry.workflow')}
             </h2>
-            <form action={updateInquiryStatusAction} className="grid gap-3">
-              <input type="hidden" name="id" value={inquiry.id} />
-              <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-                <span>{t('common.status')}</span>
-                <select
-                  name="status"
-                  defaultValue={inquiry.status}
-                  className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054]"
-                >
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>
-                      {t(`status.${status}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button className="admin-on-dark min-h-10 rounded-md bg-[#101827] px-4 text-sm font-semibold text-[#ffffff] transition hover:bg-[#7a2230]">
-                {t('inquiry.updateStatus')}
-              </button>
-            </form>
-            <form action={resendInquiryNotificationAction} className="mt-3">
-              <input type="hidden" name="id" value={inquiry.id} />
-              <button className="min-h-10 w-full rounded-md border border-[#cbd3df] bg-white px-4 text-sm font-semibold text-[#344054] transition hover:bg-[#f4f5f7]">
-                {t('inquiry.resendNotification')}
-              </button>
-            </form>
+            <InquiryStatusControl
+              inquiryId={inquiry.id}
+              initialStatus={inquiry.status}
+              copy={statusCopy}
+            />
           </Panel>
 
           <Panel className="overflow-hidden">
             <div className="border-b border-[#e4e7ec] px-5 py-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('inquiry.emailEvents')}</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('inquiry.statusHistory')}</h2>
             </div>
-            {emailEvents.length === 0 ? (
-              <p className="px-5 py-8 text-sm text-[#647084]">{t('inquiry.noEmailEvent')}</p>
+            {statusEvents.length === 0 ? (
+              <p className="px-5 py-8 text-sm text-[#647084]">{t('inquiry.noStatusHistory')}</p>
             ) : (
-              <div className="divide-y divide-[#e4e7ec]">
-                {emailEvents.map((event) => (
-                  <div key={event.id} className="space-y-2 px-5 py-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <StatusBadge status={event.status} label={t(`status.${event.status}`)} />
-                      <span className="font-numeric text-xs text-[#98a2b3]">{formatDate(event.createdAt)}</span>
+              <ol className="divide-y divide-[#e4e7ec]">
+                {statusEvents.map((event) => (
+                  <li key={event.id} className="px-5 py-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-[#101827]">
+                      <span>{t(`status.${event.previousStatus}`)}</span>
+                      <span aria-hidden="true">→</span>
+                      <span className="text-[#7a2230]">{t(`status.${event.nextStatus}`)}</span>
                     </div>
-                    <p className="break-words text-sm font-semibold text-[#101827]">{event.subject || t('inquiry.noSubject')}</p>
-                    {event.recipient ? <p className="break-words text-xs text-[#647084]">{event.recipient}</p> : null}
-                    {event.providerMessageId ? (
-                      <p className="break-words font-numeric text-xs text-[#647084]">{event.providerMessageId}</p>
-                    ) : null}
-                    {event.errorMessage ? (
-                      <p className="break-words rounded-md bg-[#fff5f5] px-3 py-2 text-xs leading-5 text-[#b42318]">
-                        {event.errorMessage}
-                      </p>
-                    ) : null}
-                  </div>
+                    <p className="mt-1 font-numeric text-xs text-[#98a2b3]">{formatDate(event.createdAt)}</p>
+                  </li>
                 ))}
-              </div>
+              </ol>
             )}
+          </Panel>
+
+          <Panel className="overflow-hidden">
+            <div className="border-b border-[#e4e7ec] px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('inquiry.notificationHistory')}</h2>
+            </div>
+            <NotificationTimeline
+              initialJobs={notificationJobs}
+              attempts={notificationAttempts}
+              copy={{
+                empty: t('inquiry.noNotification'),
+                retry: t('inquiry.retry'),
+                retrying: t('inquiry.retrying'),
+                attempts: t('inquiry.attempts'),
+                recipient: t('inquiry.recipient'),
+                error: t('inquiry.retryError')
+              }}
+            />
           </Panel>
         </aside>
       </div>
@@ -173,23 +162,35 @@ function DetailItem({label, value}: {label: string; value: string}) {
   );
 }
 
-function StatusBadge({status, label}: {status: string; label: string}) {
-  const className =
-    status === 'sent' || status === 'done'
-      ? 'bg-[#ecfdf3] text-[#027a48]'
-      : status === 'failed' || status === 'spam'
-        ? 'bg-[#fff5f5] text-[#b42318]'
-        : status === 'skipped'
-          ? 'bg-[#fffaeb] text-[#b54708]'
-          : 'bg-[#eef2f6] text-[#475467]';
-
-  return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>{label}</span>;
-}
-
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('ko-KR', {
     dateStyle: 'medium',
     timeStyle: 'short',
     timeZone: 'Asia/Seoul'
   }).format(new Date(value));
+}
+
+function inquiryStatusCopy(t: (key: string) => string) {
+  return {
+    statusLabels: {
+      new: t('status.new'),
+      contacted: t('status.contacted'),
+      in_progress: t('status.in_progress'),
+      done: t('status.done'),
+      spam: t('status.spam')
+    },
+    update: t('inquiry.updateStatus'),
+    previewTitle: t('inquiry.previewTitle'),
+    previewDescription: t('inquiry.previewDescription'),
+    previousStatus: t('inquiry.previousStatus'),
+    nextStatus: t('inquiry.nextStatus'),
+    notifications: t('inquiry.notifications'),
+    noNotification: t('inquiry.noNotification'),
+    disabled: t('inquiry.notificationDisabled'),
+    ready: t('inquiry.notificationReady'),
+    cancel: t('common.cancel'),
+    confirm: t('inquiry.confirmChange'),
+    saving: t('inquiry.saving'),
+    error: t('inquiry.updateError')
+  };
 }
