@@ -6,7 +6,9 @@ import {redirect} from 'next/navigation';
 import {getStoredAdminPasswordStatus, verifyStoredAdminPassword} from './admin-password';
 
 const adminSessionCookie = 'daeho_admin_session';
+const adminApiSessionCookie = 'daeho_admin_api_session';
 const adminSessionCookiePath = '/admin';
+const adminApiSessionCookiePath = '/api/admin';
 const sessionMaxAgeSeconds = 60 * 60 * 8;
 const loginAttemptWindowMs = 15 * 60 * 1000;
 const loginLockMs = 15 * 60 * 1000;
@@ -37,17 +39,36 @@ export async function hasAdminSession() {
   return verifySessionValue(value);
 }
 
+export async function hasAdminApiSession() {
+  const cookieStore = await cookies();
+  const value = cookieStore.get(adminApiSessionCookie)?.value;
+
+  if (!value) {
+    return false;
+  }
+
+  return verifySessionValue(value);
+}
+
 export async function createAdminSession(passwordVersion = getLocalPasswordVersion()) {
   const cookieStore = await cookies();
   const issuedAt = Date.now().toString();
   const versionToken = encodeSessionPart(passwordVersion);
   const signature = signValue(`${issuedAt}.${versionToken}`);
+  const value = `${issuedAt}.${versionToken}.${signature}`;
 
-  cookieStore.set(adminSessionCookie, `${issuedAt}.${versionToken}.${signature}`, {
+  cookieStore.set(adminSessionCookie, value, {
     httpOnly: true,
     sameSite: 'lax',
     secure: shouldUseSecureAdminCookie(),
     path: adminSessionCookiePath,
+    maxAge: sessionMaxAgeSeconds
+  });
+  cookieStore.set(adminApiSessionCookie, value, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: shouldUseSecureAdminCookie(),
+    path: adminApiSessionCookiePath,
     maxAge: sessionMaxAgeSeconds
   });
 }
@@ -59,6 +80,14 @@ export async function clearAdminSession() {
     sameSite: 'lax',
     secure: shouldUseSecureAdminCookie(),
     path: adminSessionCookiePath,
+    maxAge: 0,
+    expires: new Date(0)
+  });
+  cookieStore.set(adminApiSessionCookie, '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: shouldUseSecureAdminCookie(),
+    path: adminApiSessionCookiePath,
     maxAge: 0,
     expires: new Date(0)
   });

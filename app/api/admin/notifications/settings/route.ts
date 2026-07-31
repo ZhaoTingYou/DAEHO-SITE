@@ -9,13 +9,13 @@ import {notificationSettingsSchema} from '@/lib/cms/validation';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
   if (unauthorized) return unauthorized;
   return NextResponse.json({settings: await getNotificationSettings()});
 }
 
 export async function PUT(request: NextRequest) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
   if (unauthorized) return unauthorized;
   const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
   if (oversized) return oversized;

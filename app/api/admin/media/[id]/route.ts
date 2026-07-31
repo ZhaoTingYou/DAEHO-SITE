@@ -18,7 +18,7 @@ type RouteContext = {
 };
 
 export async function GET(request: NextRequest, context: RouteContext) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
 
   if (unauthorized) {
     return unauthorized;
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
 
   if (unauthorized) {
     return unauthorized;
@@ -64,7 +64,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
 
   if (unauthorized) {
     return unauthorized;
