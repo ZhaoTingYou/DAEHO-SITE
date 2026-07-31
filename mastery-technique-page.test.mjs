@@ -35,6 +35,7 @@ const techniqueCarouselSource = existsSync(techniqueCarouselPath)
   ? readFileSync(techniqueCarouselPath, 'utf8')
   : '';
 const makingPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/making/page.tsx', import.meta.url), 'utf8');
+const creationsPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/creations/page.tsx', import.meta.url), 'utf8');
 const siteMapSource = readFileSync(new URL('./lib/site-map.ts', import.meta.url), 'utf8');
 const footerSource = readFileSync(new URL('./components/site/site-footer.tsx', import.meta.url), 'utf8');
 const visibilitySource = readFileSync(new URL('./lib/public-page-visibility.ts', import.meta.url), 'utf8');
@@ -64,8 +65,8 @@ test('Mastery has a standalone Technique page separate from Making', () => {
 
 test('Technique Hero title matches the Making title size and color', () => {
   assert.equal(
-    getHeroTitleClassName(techniquePageSource),
-    getHeroTitleClassName(makingPageSource)
+    getHeroTitleClassName(techniquePageSource).replace(/^mt-\[[^\]]+\]\s+/, ''),
+    getHeroTitleClassName(makingPageSource).replace(/^mt-\[[^\]]+\]\s+/, '')
   );
 });
 
@@ -78,6 +79,25 @@ test('Every Technique title uses the Making title size and accent color', () => 
     assert.match(source, new RegExp(makingTitleSize.replaceAll(/[()[\]]/g, '\\$&')));
     assert.match(source, /text-accent/);
   }
+});
+
+test('Mastery Hero titles use one-and-a-half times their previous spacing before the description', () => {
+  assert.match(
+    techniquePageSource,
+    /<h1[^>]*>[\s\S]*?<\/h1>\s*<p className="[^"]*mt-\[27px\][^"]*">/
+  );
+  assert.match(
+    makingPageSource,
+    /<h1[^>]*>[\s\S]*?<\/h1>\s*<p className="[^"]*mt-\[27px\][^"]*">/
+  );
+  assert.match(
+    creationsPageSource,
+    /<p aria-hidden="true" className="[^"]*text-\[clamp\(40px,3\.7vw,58px\)\][^"]*">[\s\S]*?<\/p>\s*<p className="[^"]*mt-\[27px\][^"]*">/
+  );
+  assert.match(
+    creationsPageSource,
+    /className="mobile-display[^"]*">[\s\S]*?<\/p>\s*<p className="[^"]*mt-\[30px\][^"]*">/
+  );
 });
 
 test('Technique is enabled in public navigation before Making and Creations', () => {
