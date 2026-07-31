@@ -17,6 +17,7 @@ public class NotificationWorker {
   private final NotificationRepository repository;
   private final WorkspaceEmailSender email;
   private final NaverSensKakaoClient kakao;
+  private volatile boolean schemaReady;
 
   public NotificationWorker(
       NotificationProperties properties,
@@ -34,6 +35,12 @@ public class NotificationWorker {
   public void processReadyJobs() {
     if (!properties.workerEnabled()) {
       return;
+    }
+    if (!schemaReady) {
+      schemaReady = repository.notificationSchemaReady();
+      if (!schemaReady) {
+        return;
+      }
     }
     for (var index = 0; index < 10; index += 1) {
       var job = repository.claimNextReadyJob();
