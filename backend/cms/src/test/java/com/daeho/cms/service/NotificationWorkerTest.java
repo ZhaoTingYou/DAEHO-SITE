@@ -1,6 +1,7 @@
 package com.daeho.cms.service;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,34 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class NotificationWorkerTest {
+  @Test
+  void scheduledWorkerWaitsUntilNotificationSchemaExists() {
+    var repository = mock(NotificationRepository.class);
+    var email = mock(WorkspaceEmailSender.class);
+    var kakao = mock(NaverSensKakaoClient.class);
+    var worker = new NotificationWorker(properties(), repository, email, kakao);
+    when(repository.notificationSchemaReady()).thenReturn(false);
+
+    worker.processReadyJobs();
+
+    verify(repository, never()).claimNextReadyJob();
+  }
+
+  @Test
+  void scheduledWorkerStartsPollingAfterNotificationSchemaAppears() {
+    var repository = mock(NotificationRepository.class);
+    var email = mock(WorkspaceEmailSender.class);
+    var kakao = mock(NaverSensKakaoClient.class);
+    var worker = new NotificationWorker(properties(), repository, email, kakao);
+    when(repository.notificationSchemaReady()).thenReturn(false, true);
+    when(repository.claimNextReadyJob()).thenReturn(null);
+
+    worker.processReadyJobs();
+    worker.processReadyJobs();
+
+    verify(repository).claimNextReadyJob();
+  }
+
   @Test
   void successfulEmailIsRecordedAndMarkedSent() {
     var repository = mock(NotificationRepository.class);

@@ -22,6 +22,14 @@ public class NotificationRepository {
     this.validation = validation;
   }
 
+  public boolean notificationSchemaReady() {
+    var ready = jdbc.queryForObject(
+        "SELECT to_regclass('public.cms_notification_jobs') IS NOT NULL",
+        Boolean.class
+    );
+    return Boolean.TRUE.equals(ready);
+  }
+
   public Map<String, Object> getSettings(String fallbackInternalEmail) {
     jdbc.update("""
         INSERT INTO cms_notification_settings (
