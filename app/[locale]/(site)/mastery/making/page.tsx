@@ -42,11 +42,11 @@ export default async function TechniquePage({params}: Props) {
     <main className="mobile-page-shell relative isolate overflow-hidden bg-white text-text">
       <section className="relative z-10 pt-28">
         <div className="mx-auto max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)]">
-          <ScrollText className="mx-auto max-w-[720px] space-y-[18px] text-center">
+          <ScrollText className="mx-auto max-w-[720px] text-center">
             <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </h1>
-            <p className="mx-auto max-w-xl whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary">
+            <p className="mx-auto mt-[27px] max-w-xl whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary">
               {content.hero.subtitle}
             </p>
           </ScrollText>

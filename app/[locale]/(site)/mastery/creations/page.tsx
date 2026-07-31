@@ -47,14 +47,14 @@ export default async function CollectionPage({params}: Props) {
         </h1>
         <div className="md:hidden">
           <div className="mx-auto max-w-[520px] px-[var(--mobile-page-gutter)] pb-10 pt-6">
-            <ScrollText className="space-y-5">
+            <ScrollText>
               <p className="font-body text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
                 Curated Works
               </p>
-              <p aria-hidden="true" className="mobile-display break-words [font-family:'Cormorant_Garamond',serif] font-bold uppercase text-primary">
+              <p aria-hidden="true" className="mobile-display mt-5 break-words [font-family:'Cormorant_Garamond',serif] font-bold uppercase text-primary">
                 {content.hero.title}
               </p>
-              <p className="max-w-[28rem] whitespace-pre-line font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
+              <p className="mt-[30px] max-w-[28rem] whitespace-pre-line font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
                 {content.hero.subtitle}
               </p>
             </ScrollText>
@@ -84,11 +84,11 @@ export default async function CollectionPage({params}: Props) {
         </div>
 
         <div className="mx-auto hidden max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)] md:block">
-          <ScrollText className="mx-auto max-w-[720px] space-y-[18px] text-center">
+          <ScrollText className="mx-auto max-w-[720px] text-center">
             <p aria-hidden="true" className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </p>
-            <p className="mx-auto max-w-xl whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary">
+            <p className="mx-auto mt-[27px] max-w-xl whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary">
               {content.hero.subtitle}
             </p>
           </ScrollText>

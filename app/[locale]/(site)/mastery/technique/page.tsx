@@ -43,14 +43,14 @@ export default async function TechniqueRecordPage({params}: Props) {
 
       <section className="relative z-10 pt-28">
         <div className="mx-auto max-w-[1220px] px-container pb-0 pt-[clamp(64px,8vw,116px)]">
-          <ScrollText className="mx-auto max-w-[760px] space-y-[18px] text-center">
+          <ScrollText className="mx-auto max-w-[760px] text-center">
             <p className="font-body text-[11px] font-semibold uppercase leading-none tracking-[0.32em] text-accent">
               {content.hero.eyebrow}
             </p>
-            <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
+            <h1 className="mt-[18px] [font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </h1>
-            <p className="mx-auto max-w-[660px] whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary/82">
+            <p className="mx-auto mt-[27px] max-w-[660px] whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary/82">
               {content.hero.body}
             </p>
           </ScrollText>
