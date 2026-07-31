@@ -1649,6 +1649,7 @@
     "golfInquiry": {
       "name": "이름",
       "contact": "연락처",
+      "email": "이메일",
       "quantity": "수량",
       "due": "희망 납기",
       "team": "단체 / 팀 명",

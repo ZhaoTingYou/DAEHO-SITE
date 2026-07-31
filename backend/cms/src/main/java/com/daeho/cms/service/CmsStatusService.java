@@ -50,7 +50,7 @@ public class CmsStatusService {
         ),
         "latest", Map.of(
             "inquiryCreatedAt", repository.latestCreatedAt("cms_inquiries"),
-            "emailEventCreatedAt", repository.latestCreatedAt("cms_email_events")
+            "notificationJobCreatedAt", repository.latestCreatedAt("cms_notification_jobs")
         ),
         "tables", repository.tableCounts()
     );

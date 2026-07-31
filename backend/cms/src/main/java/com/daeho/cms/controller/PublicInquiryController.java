@@ -1,8 +1,7 @@
 package com.daeho.cms.controller;
 
 import com.daeho.cms.error.ValidationFailedException;
-import com.daeho.cms.repository.CmsRepository;
-import com.daeho.cms.service.EmailNotificationService;
+import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.RequestValidation;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -16,14 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/inquiries")
 public class PublicInquiryController {
-  private final CmsRepository repository;
+  private final InquiryWorkflowService workflow;
   private final RequestValidation validation;
-  private final EmailNotificationService email;
 
-  public PublicInquiryController(CmsRepository repository, RequestValidation validation, EmailNotificationService email) {
-    this.repository = repository;
+  public PublicInquiryController(InquiryWorkflowService workflow, RequestValidation validation) {
+    this.workflow = workflow;
     this.validation = validation;
-    this.email = email;
   }
 
   @PostMapping("/contact")
@@ -33,8 +30,7 @@ public class PublicInquiryController {
     if (!parsed.success()) {
       throw new ValidationFailedException(parsed.issues());
     }
-    var inquiry = repository.createContactInquiry(parsed.data(), requestMeta(request));
-    return Map.of("inquiry", inquiry, "email", email.notifyInquiry(inquiry));
+    return Map.of("inquiry", workflow.createContact(parsed.data(), requestMeta(request)));
   }
 
   @PostMapping("/golf")
@@ -44,8 +40,7 @@ public class PublicInquiryController {
     if (!parsed.success()) {
       throw new ValidationFailedException(parsed.issues());
     }
-    var inquiry = repository.createGolfInquiry(parsed.data(), requestMeta(request));
-    return Map.of("inquiry", inquiry, "email", email.notifyInquiry(inquiry));
+    return Map.of("inquiry", workflow.createGolf(parsed.data(), requestMeta(request)));
   }
 
   private Map<String, String> requestMeta(HttpServletRequest request) {

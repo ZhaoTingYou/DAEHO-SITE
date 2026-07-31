@@ -13,7 +13,7 @@ const repositorySource = readFileSync(
   'utf8'
 );
 const migrationSource = readFileSync(
-  new URL('../../backend/cms/src/main/resources/db/migration/V4__contact_inquiry_email.sql', import.meta.url),
+  new URL('../../backend/cms/src/main/resources/db/migration/V8__inquiry_notifications.sql', import.meta.url),
   'utf8'
 );
 const adminDetailSource = readFileSync(
@@ -23,28 +23,32 @@ const adminDetailSource = readFileSync(
 const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
 const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 
-test('Contact form renders and submits a required semantic email field', () => {
+test('Contact form renders and submits optional semantic email and phone fields', () => {
   assert.match(formSource, /email:\s*string;/);
   assert.match(
     formSource,
-    /<TextField[\s\S]*?id="contact-email"[\s\S]*?name="email"[\s\S]*?type="email"[\s\S]*?inputMode="email"[\s\S]*?autoComplete="email"[\s\S]*?required/
+    /<TextField[\s\S]*?id="contact-email"[\s\S]*?name="email"[\s\S]*?type="email"[\s\S]*?inputMode="email"[\s\S]*?autoComplete="email"/
   );
+  assert.ok(formSource.includes("phone: String(formData.get('phone') ?? '')"));
   assert.ok(formSource.includes("email: String(formData.get('email') ?? '')"));
   assert.equal(koMessages.forms.contact.email, '이메일');
   assert.equal(enMessages.forms.contact.email, 'Email');
 });
 
-test('Contact inquiry APIs require and validate the submitted email address', () => {
-  assert.match(validationSource, /email:\s*z\.string\(\)\.trim\(\)\.email\(\)\.max\(254\)/);
-  assert.ok(springValidationSource.includes('requireText(payload, "email", issues)'));
+test('Contact inquiry APIs accept either email or phone and validate a supplied email address', () => {
+  assert.ok(validationSource.includes('requireEmailOrPhone'));
+  assert.ok(validationSource.includes('Expected at least one email address or phone number.'));
+  assert.ok(springValidationSource.includes('requireInquiryContact(payload, issues)'));
   assert.ok(springValidationSource.includes('validateEmail(payload.get("email"), "email", issues)'));
   assert.ok(springValidationSource.includes('maxLength(payload, "email", 254, issues)'));
 });
 
-test('Contact inquiry email is stored, displayed in CMS, and remains compatible with old rows', () => {
-  assert.match(migrationSource, /ADD COLUMN IF NOT EXISTS email text NOT NULL DEFAULT ''/);
+test('Contact inquiry email and phone are stored, displayed in CMS, and remain compatible with old rows', () => {
+  assert.match(migrationSource, /ADD COLUMN IF NOT EXISTS phone text NOT NULL DEFAULT ''/);
+  assert.match(migrationSource, /SET phone = contact/);
   assert.ok(repositorySource.includes('Map.entry("email", validation.stringValue(payload.get("email")))'));
-  assert.match(repositorySource, /name, contact, email, organization/);
+  assert.match(repositorySource, /name, contact, phone, email, organization/);
+  assert.ok(repositorySource.includes('"phone", rs.getString("phone")'));
   assert.ok(repositorySource.includes('"email", rs.getString("email")'));
   assert.ok(adminDetailSource.includes("<DetailItem label={t('inquiry.email')} value={inquiry.email || '-'} />"));
 });

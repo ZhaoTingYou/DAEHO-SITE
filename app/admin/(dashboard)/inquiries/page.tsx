@@ -3,14 +3,12 @@ import Link from 'next/link';
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {listInquiries} from '@/lib/cms/repositories';
 
-import {updateInquiryStatusAction} from '../../actions';
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
+import {InquiryStatusControl} from '../../_components/inquiry-status-control';
 
 type Props = {
   searchParams?: Promise<{status?: string; source?: string}>;
 };
-
-const statuses = ['new', 'contacted', 'in_progress', 'done', 'spam'];
 
 export default async function AdminInquiriesPage({searchParams}: Props) {
   const {t} = await getAdminI18n();
@@ -19,6 +17,7 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
     status: query?.status,
     source: query?.source
   });
+  const statusCopy = inquiryStatusCopy(t);
 
   return (
     <>
@@ -67,7 +66,7 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                       <p className="mt-1 text-xs text-[#647084]">{item.locale.toUpperCase()}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="font-semibold text-[#101827]">{item.contact}</p>
+                      <p className="font-semibold text-[#101827]">{item.phone || item.contact || '-'}</p>
                       {item.email ? <p className="mt-1 text-xs text-[#647084]">{item.email}</p> : null}
                       {item.organization ? <p className="mt-1 text-xs text-[#647084]">{item.organization}</p> : null}
                     </td>
@@ -83,26 +82,17 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <form action={updateInquiryStatusAction} className="flex items-center gap-2">
-                        <input type="hidden" name="id" value={item.id} />
-                        <select
-                          name="status"
-                          defaultValue={item.status}
-                          className="min-h-9 rounded-md border border-[#cbd3df] bg-white px-2 text-sm font-semibold text-[#344054]"
-                        >
-                          {statuses.map((status) => (
-                            <option key={status} value={status}>
-                              {t(`status.${status}`)}
-                            </option>
-                          ))}
-                        </select>
-                        <button className="admin-on-dark min-h-9 rounded-md bg-[#101827] px-3 text-sm font-semibold text-[#ffffff]">
-                          {t('inquiry.update')}
-                        </button>
+                      <div className="flex items-center gap-2">
+                        <InquiryStatusControl
+                          inquiryId={item.id}
+                          initialStatus={item.status}
+                          copy={statusCopy}
+                          compact
+                        />
                         <Link href={`/admin/inquiries/${item.id}`} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">
                           {t('common.open')}
                         </Link>
-                      </form>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -113,6 +103,31 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
       )}
     </>
   );
+}
+
+function inquiryStatusCopy(t: (key: string) => string) {
+  return {
+    statusLabels: {
+      new: t('status.new'),
+      contacted: t('status.contacted'),
+      in_progress: t('status.in_progress'),
+      done: t('status.done'),
+      spam: t('status.spam')
+    },
+    update: t('inquiry.update'),
+    previewTitle: t('inquiry.previewTitle'),
+    previewDescription: t('inquiry.previewDescription'),
+    previousStatus: t('inquiry.previousStatus'),
+    nextStatus: t('inquiry.nextStatus'),
+    notifications: t('inquiry.notifications'),
+    noNotification: t('inquiry.noNotification'),
+    disabled: t('inquiry.notificationDisabled'),
+    ready: t('inquiry.notificationReady'),
+    cancel: t('common.cancel'),
+    confirm: t('inquiry.confirmChange'),
+    saving: t('inquiry.saving'),
+    error: t('inquiry.updateError')
+  };
 }
 
 function FilterLink({href, label, active}: {href: string; label: string; active: boolean}) {

@@ -9,8 +9,8 @@ import {
   validationError
 } from '@/lib/cms/http';
 import {
-  getInquiry,
-  listEmailEventsForInquiry,
+  CmsBackendError,
+  getInquiryDetail,
   updateInquiryStatus
 } from '@/lib/cms/repositories';
 import {inquiryStatusSchema} from '@/lib/cms/validation';
@@ -29,16 +29,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const inquiry = await getInquiry(id);
+  const detail = await getInquiryDetail(id);
 
-  if (!inquiry) {
+  if (!detail) {
     return NextResponse.json({error: 'Inquiry not found'}, {status: 404});
   }
 
-  return NextResponse.json({
-    inquiry,
-    emailEvents: await listEmailEventsForInquiry(id)
-  });
+  return NextResponse.json(detail);
 }
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
@@ -61,14 +58,15 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   const {id} = await context.params;
-  const inquiry = await updateInquiryStatus(id, parsed.data);
-
-  if (!inquiry) {
-    return NextResponse.json({error: 'Inquiry not found'}, {status: 404});
+  try {
+    const detail = await updateInquiryStatus(id, parsed.data);
+    return detail
+      ? NextResponse.json(detail)
+      : NextResponse.json({error: 'Inquiry not found'}, {status: 404});
+  } catch (error) {
+    if (error instanceof CmsBackendError) {
+      return NextResponse.json(error.payload ?? {error: error.message}, {status: error.status});
+    }
+    throw error;
   }
-
-  return NextResponse.json({
-    inquiry,
-    emailEvents: await listEmailEventsForInquiry(id)
-  });
 }

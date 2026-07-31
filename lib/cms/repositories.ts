@@ -84,6 +84,7 @@ export type CmsInquiry = {
   locale: Locale;
   name: string;
   contact: string;
+  phone: string;
   email: string;
   organization: string;
   inquiryType: string;
@@ -100,16 +101,98 @@ export type CmsInquiry = {
   updatedAt: string;
 };
 
-export type CmsEmailEvent = {
+export type CmsInquiryStatusEvent = {
   id: string;
   inquiryId: string;
-  eventType: string;
+  previousStatus: CmsInquiry['status'];
+  nextStatus: CmsInquiry['status'];
+  actor: string;
+  createdAt: string;
+};
+
+export type CmsNotificationJob = {
+  id: string;
+  inquiryId: string;
+  statusEventId: string | null;
+  channel: 'email' | 'kakao';
+  audience: 'internal' | 'customer';
+  eventType: 'new_inquiry' | 'status_changed';
+  inquiryStatus: string;
+  locale: Locale;
   recipient: string;
   subject: string;
-  status: 'sent' | 'skipped' | 'failed';
+  renderedBody: string;
+  templateId: string | null;
+  providerTemplateCode: string;
+  status: 'queued' | 'processing' | 'provider_pending' | 'sent' | 'failed' | 'needs_attention';
+  attemptCount: number;
+  deliveryCheckCount: number;
+  nextAttemptAt: string;
+  providerMessageId: string;
+  lastError: string;
+  dedupeKey: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CmsNotificationAttempt = {
+  id: string;
+  jobId: string;
+  attemptNumber: number;
+  status: 'accepted' | 'sent' | 'failed';
   providerMessageId: string;
   errorMessage: string;
   createdAt: string;
+};
+
+export type CmsInquiryDetail = {
+  inquiry: CmsInquiry;
+  statusEvents: CmsInquiryStatusEvent[];
+  notificationJobs: CmsNotificationJob[];
+  notificationAttempts: CmsNotificationAttempt[];
+};
+
+export type CmsNotificationSettings = {
+  id: string;
+  internalEmail: string;
+  internalEmailEnabled: boolean;
+  customerEmailEnabled: boolean;
+  kakaoEnabled: boolean;
+  updatedAt: string;
+};
+
+export type CmsNotificationTemplate = {
+  id: string;
+  templateKey: string;
+  channel: 'email' | 'kakao';
+  audience: 'internal' | 'customer';
+  eventType: 'new_inquiry' | 'status_changed';
+  inquiryStatus: string;
+  locale: Locale;
+  version: number;
+  subject: string;
+  body: string;
+  providerTemplateCode: string;
+  approvalStatus: 'draft' | 'pending' | 'approved';
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CmsStatusPreview = {
+  changed: boolean;
+  previousStatus: CmsInquiry['status'];
+  nextStatus: CmsInquiry['status'];
+  notifications: Array<{
+    channel: 'email' | 'kakao';
+    audience: 'internal' | 'customer';
+    maskedRecipient: string;
+    subject: string;
+    renderedBody: string;
+    enabled: boolean;
+    ready: boolean;
+    reason: string;
+  }>;
 };
 
 export const trafficAnalyticsChannels = [
@@ -437,7 +520,7 @@ export async function deleteCollection(idOrSlug: string) {
 }
 
 export async function createContactInquiry(payload: ContactInquiryPayload, requestMeta: RequestMeta) {
-  const response = await cmsFetch<{inquiry: CmsInquiry; email: unknown}>('/api/inquiries/contact', {
+  const response = await cmsFetch<{inquiry: CmsInquiry}>('/api/inquiries/contact', {
     method: 'POST',
     body: payload,
     headers: requestMetaHeaders(requestMeta)
@@ -446,7 +529,7 @@ export async function createContactInquiry(payload: ContactInquiryPayload, reque
 }
 
 export async function createGolfInquiry(payload: GolfInquiryPayload, requestMeta: RequestMeta) {
-  const response = await cmsFetch<{inquiry: CmsInquiry; email: unknown}>('/api/inquiries/golf', {
+  const response = await cmsFetch<{inquiry: CmsInquiry}>('/api/inquiries/golf', {
     method: 'POST',
     body: payload,
     headers: requestMetaHeaders(requestMeta)
@@ -468,36 +551,90 @@ export async function listInquiries(filters: {status?: string; source?: string})
 }
 
 export async function getInquiry(id: string) {
-  const response = await cmsFetch<{inquiry: CmsInquiry; emailEvents: CmsEmailEvent[]}>(`/api/admin/inquiries/${encodeURIComponent(id)}`, {
-    admin: true,
-    notFound: null
-  });
+  const response = await getInquiryDetail(id);
   return response?.inquiry ?? null;
 }
 
-export async function listEmailEventsForInquiry(inquiryId: string) {
-  const response = await cmsFetch<{inquiry: CmsInquiry; emailEvents: CmsEmailEvent[]}>(`/api/admin/inquiries/${encodeURIComponent(inquiryId)}`, {
+export async function getInquiryDetail(id: string) {
+  return cmsFetch<CmsInquiryDetail>(`/api/admin/inquiries/${encodeURIComponent(id)}`, {
     admin: true,
     notFound: null
   });
-  return response?.emailEvents ?? [];
 }
 
 export async function updateInquiryStatus(id: string, payload: InquiryStatusPayload) {
-  const response = await cmsFetch<{inquiry: CmsInquiry; emailEvents: CmsEmailEvent[]}>(`/api/admin/inquiries/${encodeURIComponent(id)}`, {
+  return cmsFetch<CmsInquiryDetail>(`/api/admin/inquiries/${encodeURIComponent(id)}`, {
     admin: true,
     method: 'PATCH',
     body: payload,
     notFound: null
   });
-  return response?.inquiry ?? null;
 }
 
-export async function resendInquiryNotification(id: string) {
-  return cmsFetch<{email: unknown}>(`/api/admin/inquiries/${encodeURIComponent(id)}/notify`, {
+export async function previewInquiryStatus(id: string, payload: InquiryStatusPayload) {
+  return cmsFetch<CmsStatusPreview>(`/api/admin/inquiries/${encodeURIComponent(id)}/status-preview`, {
+    admin: true,
+    method: 'POST',
+    body: payload
+  });
+}
+
+export async function retryNotificationJob(jobId: string) {
+  return cmsFetch<{job: CmsNotificationJob}>(`/api/admin/notifications/jobs/${encodeURIComponent(jobId)}/retry`, {
     admin: true,
     method: 'POST'
   });
+}
+
+export async function getNotificationSettings() {
+  const response = await cmsFetch<{settings: CmsNotificationSettings}>('/api/admin/notifications/settings', {admin: true});
+  return response.settings;
+}
+
+export async function updateNotificationSettings(payload: Omit<CmsNotificationSettings, 'id' | 'updatedAt'>) {
+  const response = await cmsFetch<{settings: CmsNotificationSettings}>('/api/admin/notifications/settings', {
+    admin: true,
+    method: 'PUT',
+    body: payload
+  });
+  return response.settings;
+}
+
+export async function getNotificationHealth() {
+  return cmsFetch<{
+    settings: CmsNotificationSettings;
+    kakaoTemplatesReady: boolean;
+    emailConfigured: boolean;
+    kakaoConfigured: boolean;
+    workerEnabled: boolean;
+  }>('/api/admin/notifications/health', {admin: true});
+}
+
+export async function sendNotificationTest(payload: {
+  channel: 'email' | 'kakao';
+  recipient: string;
+  templateKey: string;
+}) {
+  return cmsFetch<{success: boolean; providerMessageId: string; errorMessage: string}>(
+    '/api/admin/notifications/test',
+    {admin: true, method: 'POST', body: payload}
+  );
+}
+
+export async function listNotificationTemplates() {
+  const response = await cmsFetch<{items: CmsNotificationTemplate[]}>('/api/admin/notifications/templates', {admin: true});
+  return response.items;
+}
+
+export async function createNotificationTemplateVersion(
+  templateKey: string,
+  payload: Pick<CmsNotificationTemplate, 'subject' | 'body' | 'providerTemplateCode' | 'approvalStatus' | 'isActive'>
+) {
+  const response = await cmsFetch<{template: CmsNotificationTemplate}>(
+    `/api/admin/notifications/templates/${encodeURIComponent(templateKey)}/versions`,
+    {admin: true, method: 'POST', body: payload}
+  );
+  return response.template;
 }
 
 export async function listMedia() {
@@ -553,11 +690,6 @@ export async function deleteMedia(id: string) {
     notFound: null
   });
   return Boolean(response?.ok);
-}
-
-export async function createEmailEvent(payload?: unknown) {
-  void payload;
-  return '';
 }
 
 function cmsFetch<T>(path: string, options?: CmsFetchOptions): Promise<T>;

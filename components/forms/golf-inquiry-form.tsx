@@ -18,6 +18,7 @@ type GolfInquiryFormProps = {
 type GolfInquiryFormCopy = {
   name: string;
   contact: string;
+  email: string;
   quantity: string;
   due: string;
   team: string;
@@ -59,12 +60,20 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
       <TextField
         id="golf-contact"
         label={text.contact}
-        name="contact"
+        name="phone"
         type="tel"
         inputMode="tel"
         autoComplete="tel"
         maxLength={180}
-        required
+      />
+      <TextField
+        id="golf-email"
+        label={text.email}
+        name="email"
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        maxLength={254}
       />
       <TextField id="golf-quantity" label={text.quantity} name="quantity" type="number" inputMode="numeric" min="1" />
       <TextField id="golf-due" label={text.due} name="due" type="date" />
@@ -115,7 +124,8 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
       headers: {'content-type': 'application/json'},
       body: JSON.stringify({
         name: String(formData.get('name') ?? ''),
-        contact: String(formData.get('contact') ?? ''),
+        phone: String(formData.get('phone') ?? ''),
+        email: String(formData.get('email') ?? ''),
         quantity: String(formData.get('quantity') ?? ''),
         due: String(formData.get('due') ?? ''),
         team: String(formData.get('team') ?? ''),

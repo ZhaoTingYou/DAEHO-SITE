@@ -138,9 +138,23 @@ npm run cms:export
 Inquiry flow:
 
 - Contact and Golf forms write to PostgreSQL through Spring.
-- Email notification attempts are recorded in `cms_email_events`.
-- Missing SMTP configuration does not block form submission; Spring records the
-  email event as `skipped`.
+- Both forms accept email, phone, or both and keep the legacy `contact` request
+  field compatible during rolling deployment.
+- Status history, notification jobs, and every provider attempt are recorded in
+  the unified notification tables. `cms_email_events` is retained read-only for
+  rollback and old exports.
+- Status writes and notification outbox jobs share one database transaction.
+  SMTP or Kakao failures never roll back the inquiry status.
+- The worker retries after 1, 5, and 30 minutes, then exposes the failed channel
+  for manual retry in the inquiry detail screen.
+- All three channel switches are off after migration. Configure and verify
+  credentials, templates, and test delivery in `/admin/notifications` before
+  enabling them.
+- Gmail uses Google Workspace SMTP Relay with STARTTLS. Kakao uses Naver SENS
+  Alimtalk with SMS fallback hard-disabled.
+
+Production credential and staged rollout details are documented in
+[`docs/operations/inquiry-notifications.md`](docs/operations/inquiry-notifications.md).
 
 Media storage:
 

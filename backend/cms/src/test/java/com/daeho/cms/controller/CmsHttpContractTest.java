@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -19,18 +20,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.daeho.cms.config.CmsProperties;
+import com.daeho.cms.config.NotificationProperties;
 import com.daeho.cms.error.ApiExceptionHandler;
 import com.daeho.cms.error.ValidationFailedException;
 import com.daeho.cms.repository.CmsRepository;
+import com.daeho.cms.repository.NotificationRepository;
 import com.daeho.cms.repository.TrafficAnalyticsRepository;
 import com.daeho.cms.security.AdminAuth;
 import com.daeho.cms.service.AdminPasswordService;
 import com.daeho.cms.service.CmsSnapshotService;
 import com.daeho.cms.service.CmsStatusService;
-import com.daeho.cms.service.EmailNotificationService;
+import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.MediaStorageService;
+import com.daeho.cms.service.NaverSensKakaoClient;
+import com.daeho.cms.service.NotificationPlanner;
+import com.daeho.cms.service.NotificationTemplateRenderer;
+import com.daeho.cms.service.NotificationTestService;
 import com.daeho.cms.service.RequestValidation;
 import com.daeho.cms.service.TrafficAnalyticsService;
+import com.daeho.cms.service.WorkspaceEmailSender;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -50,7 +58,9 @@ class CmsHttpContractTest {
 
   private CmsRepository repository;
   private MediaStorageService mediaStorage;
-  private EmailNotificationService email;
+  private NotificationRepository notifications;
+  private NotificationPlanner notificationPlanner;
+  private InquiryWorkflowService inquiryWorkflow;
   private CmsSnapshotService snapshots;
   private CmsStatusService status;
   private AnalyticsServiceStub analytics;
@@ -60,7 +70,9 @@ class CmsHttpContractTest {
   void setUp() {
     repository = mock(CmsRepository.class);
     mediaStorage = mock(MediaStorageService.class);
-    email = mock(EmailNotificationService.class);
+    notifications = mock(NotificationRepository.class);
+    notificationPlanner = mock(NotificationPlanner.class);
+    inquiryWorkflow = mock(InquiryWorkflowService.class);
     snapshots = mock(CmsSnapshotService.class);
     status = mock(CmsStatusService.class);
     analytics = new AnalyticsServiceStub();
@@ -82,10 +94,27 @@ class CmsHttpContractTest {
         ""
     ));
     var validation = new RequestValidation();
+    var notificationProperties = new NotificationProperties(false, 1000, "", "", "", "", "", "");
     mvc = MockMvcBuilders.standaloneSetup(
-            new AdminCmsController(auth, repository, validation, mediaStorage, email, snapshots, status, mock(AdminPasswordService.class)),
+            new AdminCmsController(
+                auth,
+                repository,
+                validation,
+                mediaStorage,
+                notifications,
+                notificationPlanner,
+                new NotificationTemplateRenderer(notificationProperties),
+                inquiryWorkflow,
+                mock(WorkspaceEmailSender.class),
+                mock(NaverSensKakaoClient.class),
+                notificationProperties,
+                mock(NotificationTestService.class),
+                snapshots,
+                status,
+                mock(AdminPasswordService.class)
+            ),
             new PublicCmsController(repository, validation),
-            new PublicInquiryController(repository, validation, email),
+            new PublicInquiryController(inquiryWorkflow, validation),
             new PublicAnalyticsController(analytics),
             new AdminAnalyticsController(auth, analytics)
         )
@@ -256,9 +285,18 @@ class CmsHttpContractTest {
   void servesAdminInquiryEndpoints() throws Exception {
     when(repository.listInquiries("new", "contact")).thenReturn(List.of(inquiry()));
     when(repository.getInquiry("inquiry-1")).thenReturn(inquiry());
-    when(repository.listEmailEventsForInquiry("inquiry-1")).thenReturn(List.of(emailEvent()));
-    when(repository.updateInquiryStatus(eq("inquiry-1"), anyMap())).thenReturn(inquiry());
-    when(email.notifyInquiry(anyMap())).thenReturn(Map.of("status", "skipped"));
+    when(inquiryWorkflow.detail(anyMap())).thenReturn(Map.of(
+        "inquiry", inquiry(),
+        "statusEvents", List.of(),
+        "notificationJobs", List.of(),
+        "notificationAttempts", List.of()
+    ));
+    when(inquiryWorkflow.changeStatus(eq("inquiry-1"), anyString(), eq("contacted"))).thenReturn(Map.of(
+        "inquiry", inquiry(),
+        "statusEvents", List.of(),
+        "notificationJobs", List.of(),
+        "notificationAttempts", List.of()
+    ));
 
     mvc.perform(get("/api/admin/inquiries?status=new&source=contact").header("x-admin-api-key", ADMIN_KEY))
         .andExpect(status().isOk())
@@ -266,7 +304,7 @@ class CmsHttpContractTest {
 
     mvc.perform(get("/api/admin/inquiries/inquiry-1").header("x-admin-api-key", ADMIN_KEY))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.emailEvents[0].status").value("skipped"));
+        .andExpect(jsonPath("$.notificationJobs").isArray());
 
     mvc.perform(patch("/api/admin/inquiries/inquiry-1")
             .header("x-admin-api-key", ADMIN_KEY)
@@ -274,10 +312,39 @@ class CmsHttpContractTest {
             .content("{\"status\":\"contacted\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.inquiry.id").value("inquiry-1"));
+  }
 
-    mvc.perform(post("/api/admin/inquiries/inquiry-1/notify").header("x-admin-api-key", ADMIN_KEY))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.email.status").value("skipped"));
+  @Test
+  void rejectsUnknownNotificationTemplateVariablesBeforeSaving() throws Exception {
+    when(notifications.getLatestTemplate("customer_done_email_ko")).thenReturn(Map.of(
+        "id", "template-1",
+        "templateKey", "customer_done_email_ko",
+        "channel", "email",
+        "audience", "customer",
+        "eventType", "status_changed",
+        "inquiryStatus", "done",
+        "locale", "ko",
+        "version", 1
+    ));
+
+    mvc.perform(post("/api/admin/notifications/templates/customer_done_email_ko/versions")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "subject":"Status {{status}}",
+                  "body":"Hello {{customer_password}}",
+                  "providerTemplateCode":"",
+                  "approvalStatus":"approved",
+                  "isActive":true
+                }
+                """))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error").value(
+            "Unsupported notification template variables: customer_password"
+        ));
+
+    verify(notifications, never()).createTemplateVersion(anyString(), anyMap(), anyMap());
   }
 
   @Test
@@ -344,20 +411,18 @@ class CmsHttpContractTest {
 
   @Test
   void servesPublicInquiryEndpointsAndValidationShape() throws Exception {
-    when(repository.createContactInquiry(anyMap(), anyMap())).thenReturn(inquiry());
-    when(repository.createGolfInquiry(anyMap(), anyMap())).thenReturn(inquiry());
-    when(email.notifyInquiry(anyMap())).thenReturn(Map.of("status", "skipped"));
+    when(inquiryWorkflow.createContact(anyMap(), anyMap())).thenReturn(inquiry());
+    when(inquiryWorkflow.createGolf(anyMap(), anyMap())).thenReturn(inquiry());
 
     mvc.perform(post("/api/inquiries/contact")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("{\"locale\":\"ko\",\"name\":\"Tester\",\"contact\":\"tester@example.com\",\"email\":\"tester@example.com\",\"message\":\"Hello\"}"))
+            .content("{\"locale\":\"ko\",\"name\":\"Tester\",\"phone\":\"010-1234-5678\",\"email\":\"tester@example.com\",\"message\":\"Hello\"}"))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.inquiry.id").value("inquiry-1"))
-        .andExpect(jsonPath("$.email.status").value("skipped"));
+        .andExpect(jsonPath("$.inquiry.id").value("inquiry-1"));
 
     mvc.perform(post("/api/inquiries/golf")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("{\"locale\":\"ko\",\"name\":\"Tester\",\"contact\":\"tester@example.com\",\"quantity\":2,\"selectedHead\":\"ball\"}"))
+            .content("{\"locale\":\"ko\",\"name\":\"Tester\",\"email\":\"tester@example.com\",\"quantity\":2,\"selectedHead\":\"ball\"}"))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.inquiry.id").value("inquiry-1"));
 
@@ -597,7 +662,7 @@ class CmsHttpContractTest {
         "environment", Map.of("persistence", "configured"),
         "security", Map.of("hasAdminApiKey", true),
         "email", Map.of("configured", false),
-        "latest", Map.of("inquiryCreatedAt", "", "emailEventCreatedAt", ""),
+        "latest", Map.of("inquiryCreatedAt", "", "notificationJobCreatedAt", ""),
         "tables", List.of(Map.of("table", "cms_pages", "count", 1))
     );
   }

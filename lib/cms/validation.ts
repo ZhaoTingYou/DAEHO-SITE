@@ -8,7 +8,16 @@ const optionalText = z.string().trim().optional().default('');
 const optionalJson = z.unknown().optional().default({});
 const optionalJsonArray = z.array(z.unknown()).optional().default([]);
 const inquiryName = z.string().trim().min(1).max(120);
-const inquiryContact = z.string().trim().min(1).max(180);
+const inquiryContact = z.string().trim().max(180).optional().default('');
+const inquiryEmail = z
+  .string()
+  .trim()
+  .max(254)
+  .refine((value) => value === '' || z.string().email().safeParse(value).success, {
+    message: 'Expected a valid email address.'
+  })
+  .optional()
+  .default('');
 const inquiryShortText = z.string().trim().max(160).optional().default('');
 const inquiryMediumText = z.string().trim().max(300).optional().default('');
 const inquiryLongText = z.string().trim().max(3000).optional().default('');
@@ -82,40 +91,88 @@ export const collectionPayloadSchema = z.object({
     .default({})
 });
 
-export const contactInquirySchema = z.object({
-  locale: localeSchema.optional().default('ko'),
-  name: inquiryName,
-  organization: inquiryShortText,
+const contactFields = {
+  phone: inquiryContact,
   contact: inquiryContact,
-  email: z.string().trim().email().max(254),
-  type: inquiryShortText,
-  message: inquiryLongText,
-  pagePath: inquiryMediumText,
-  website: inquiryHoneypot
-});
+  email: inquiryEmail
+};
 
-export const golfInquirySchema = z.object({
-  locale: localeSchema.optional().default('ko'),
-  name: inquiryName,
-  contact: inquiryContact,
-  quantity: z.preprocess(
-    (value) => (value === '' || value === null ? undefined : value),
-    z.coerce.number().int().positive().max(10000).optional()
-  ),
-  due: inquiryShortText,
-  team: inquiryShortText,
-  use: inquiryShortText,
-  message: inquiryLongText,
-  selectedHead: inquiryShortText,
-  selectedShaft: inquiryShortText,
-  selectedStyle: inquiryShortText,
-  engravingSample: inquiryMediumText,
-  pagePath: inquiryMediumText,
-  website: inquiryHoneypot
-});
+function requireEmailOrPhone(
+  value: {phone?: string; contact?: string; email?: string},
+  context: z.RefinementCtx
+) {
+  if (!value.phone?.trim() && !value.contact?.trim() && !value.email?.trim()) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['contact'],
+      message: 'Expected at least one email address or phone number.'
+    });
+  }
+}
+
+export const contactInquirySchema = z
+  .object({
+    locale: localeSchema.optional().default('ko'),
+    name: inquiryName,
+    organization: inquiryShortText,
+    ...contactFields,
+    type: inquiryShortText,
+    message: inquiryLongText,
+    pagePath: inquiryMediumText,
+    website: inquiryHoneypot
+  })
+  .superRefine(requireEmailOrPhone);
+
+export const golfInquirySchema = z
+  .object({
+    locale: localeSchema.optional().default('ko'),
+    name: inquiryName,
+    ...contactFields,
+    quantity: z.preprocess(
+      (value) => (value === '' || value === null ? undefined : value),
+      z.coerce.number().int().positive().max(10000).optional()
+    ),
+    due: inquiryShortText,
+    team: inquiryShortText,
+    use: inquiryShortText,
+    message: inquiryLongText,
+    selectedHead: inquiryShortText,
+    selectedShaft: inquiryShortText,
+    selectedStyle: inquiryShortText,
+    engravingSample: inquiryMediumText,
+    pagePath: inquiryMediumText,
+    website: inquiryHoneypot
+  })
+  .superRefine(requireEmailOrPhone);
 
 export const inquiryStatusSchema = z.object({
-  status: z.enum(['new', 'contacted', 'in_progress', 'done', 'spam'])
+  status: z.enum(['new', 'contacted', 'in_progress', 'done', 'spam']),
+  expectedStatus: z.enum(['new', 'contacted', 'in_progress', 'done', 'spam']).optional()
+});
+
+export const notificationSettingsSchema = z
+  .object({
+    internalEmail: inquiryEmail,
+    internalEmailEnabled: z.boolean(),
+    customerEmailEnabled: z.boolean(),
+    kakaoEnabled: z.boolean()
+  })
+  .superRefine((value, context) => {
+    if (value.internalEmailEnabled && !value.internalEmail) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['internalEmail'],
+        message: 'Internal email is required when internal notifications are enabled.'
+      });
+    }
+  });
+
+export const notificationTemplateSchema = z.object({
+  subject: z.string().trim().max(300),
+  body: z.string().trim().min(1).max(4000),
+  providerTemplateCode: z.string().trim().max(160),
+  approvalStatus: z.enum(['draft', 'pending', 'approved']),
+  isActive: z.boolean()
 });
 
 export const mediaPayloadSchema = z.object({

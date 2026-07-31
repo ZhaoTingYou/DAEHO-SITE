@@ -10,7 +10,12 @@ export const cmsExportTables = [
   'cms_collection_translations',
   'cms_media',
   'cms_inquiries',
-  'cms_email_events'
+  'cms_email_events',
+  'cms_inquiry_status_events',
+  'cms_notification_settings',
+  'cms_notification_templates',
+  'cms_notification_jobs',
+  'cms_notification_attempts'
 ] as const;
 
 export type CmsExportTable = (typeof cmsExportTables)[number];
