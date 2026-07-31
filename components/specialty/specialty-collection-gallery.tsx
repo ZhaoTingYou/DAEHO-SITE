@@ -416,6 +416,7 @@ export function SpecialtyCollectionCategory({
 type BespokeDisplayMode = 'archive' | 'grid';
 type BespokeFilterKey = 'notice' | 'year' | 'period' | 'materials' | 'stones' | 'functions';
 type BespokeSelectedFilters = Record<BespokeFilterKey, string[]>;
+const BESPOKE_GRID_BATCH_SIZE = 12;
 type BespokeFilterOption = {
   id: string;
   label: string;
@@ -848,6 +849,8 @@ function BespokeCreationsView({
   const [displayMode, setDisplayMode] = useState<BespokeDisplayMode>('archive');
   const [shuffleSeed, setShuffleSeed] = useState(0);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [visibleGridCount, setVisibleGridCount] = useState(BESPOKE_GRID_BATCH_SIZE);
+  const gridLoadMoreRef = useRef<HTMLDivElement>(null);
   const [selectedFilters, setSelectedFilters] = useState<BespokeSelectedFilters>({
     notice: [],
     year: [],
@@ -856,6 +859,14 @@ function BespokeCreationsView({
     stones: [],
     functions: []
   });
+  const changeDisplayMode = (mode: BespokeDisplayMode) => {
+    setDisplayMode(mode);
+    setVisibleGridCount(BESPOKE_GRID_BATCH_SIZE);
+  };
+  const changeSelectedFilters = (values: BespokeSelectedFilters) => {
+    setSelectedFilters(values);
+    setVisibleGridCount(BESPOKE_GRID_BATCH_SIZE);
+  };
   const copy = resolveBespokeViewCopy(locale, bespoke);
   const displayItems = useMemo(() => items, [items]);
   const filterSections = useMemo(() => buildBespokeFilterSections(displayItems, copy), [displayItems, copy]);
@@ -876,9 +887,38 @@ function BespokeCreationsView({
     },
     [filteredItems, shuffleSeed]
   );
-  const displayedItems = displayMode === 'archive' ? orderedItems : orderedItems.slice(0, 12);
+  const displayedItems =
+    displayMode === 'archive' ? orderedItems : orderedItems.slice(0, visibleGridCount);
+
+  useEffect(() => {
+    const sentinel = gridLoadMoreRef.current;
+    if (
+      displayMode !== 'grid' ||
+      !sentinel ||
+      visibleGridCount >= orderedItems.length
+    ) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) {
+          return;
+        }
+
+        setVisibleGridCount((current) =>
+          Math.min(current + BESPOKE_GRID_BATCH_SIZE, orderedItems.length)
+        );
+      },
+      {rootMargin: '600px 0px'}
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [displayMode, orderedItems.length, visibleGridCount]);
+
   const clearBespokeFilters = () => {
-    setSelectedFilters({
+    changeSelectedFilters({
       notice: [],
       year: [],
       period: [],
@@ -935,7 +975,7 @@ function BespokeCreationsView({
               copy={copy}
               sections={filterSections}
               selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
+              setSelectedFilters={changeSelectedFilters}
               clearFilters={clearBespokeFilters}
               close={() => setFilterOpen(false)}
             />
@@ -945,7 +985,7 @@ function BespokeCreationsView({
         <div className="flex justify-center border-b border-primary/15 py-5 lg:hidden">
           <BespokeFloatingNav
             displayMode={displayMode}
-            setDisplayMode={setDisplayMode}
+            setDisplayMode={changeDisplayMode}
             floating={false}
           />
         </div>
@@ -963,7 +1003,7 @@ function BespokeCreationsView({
               locale={locale}
               copy={copy}
               shuffle={() => setShuffleSeed((value) => value + 1)}
-              setDisplayMode={setDisplayMode}
+              setDisplayMode={changeDisplayMode}
               displayMode={displayMode}
             />
           ) : (
@@ -973,13 +1013,19 @@ function BespokeCreationsView({
                 locale={locale}
                 mode={displayMode}
               />
-              <BespokeArchivePagination
-                current={1}
-                nextLabel="Next"
-              />
+              {visibleGridCount < orderedItems.length ? (
+                <div
+                  ref={gridLoadMoreRef}
+                  className="h-px"
+                  aria-hidden="true"
+                />
+              ) : null}
+              <p className="sr-only" aria-live="polite">
+                {displayedItems.length} / {orderedItems.length}
+              </p>
               <BespokeFloatingNav
                 displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
+                setDisplayMode={changeDisplayMode}
               />
             </div>
           )}
@@ -1303,37 +1349,6 @@ function BespokeCreationCard({
         </p>
       </div>
     </Link>
-  );
-}
-
-function BespokeArchivePagination({
-  current,
-  nextLabel
-}: {
-  current: number;
-  nextLabel: string;
-}) {
-  return (
-    <nav
-      className="mt-[clamp(64px,8vw,112px)] flex items-center justify-center gap-5 border-t border-primary/15 pt-8 font-body text-[12px] font-semibold uppercase tracking-[0.18em] text-primary"
-      aria-label="Archive pagination"
-    >
-      <span className="border-b border-primary pb-1">{current}</span>
-      {[2, 3, 4, 5, 6].map((page) => (
-        <span key={page} className="text-primary/35">
-          {page}
-        </span>
-      ))}
-      <span className="text-primary/35">...</span>
-      <span className="text-primary/35">19</span>
-      <button
-        type="button"
-        className="ml-2 min-h-11 border border-primary/20 px-4 text-primary/45"
-        disabled
-      >
-        {nextLabel}
-      </button>
-    </nav>
   );
 }
 

@@ -375,6 +375,34 @@ test('bespoke shuffle uses the Collection item pool and repeats only when there 
   );
 });
 
+test('bespoke grid continuously reveals every filtered creation without page navigation', () => {
+  assert.ok(
+    bespokeViewSource.includes('const [visibleGridCount, setVisibleGridCount] = useState(BESPOKE_GRID_BATCH_SIZE)'),
+    'Bespoke grid should track a progressive visible item count'
+  );
+  assert.ok(
+    bespokeViewSource.includes('new IntersectionObserver') &&
+      bespokeViewSource.includes('setVisibleGridCount') &&
+      bespokeViewSource.includes('orderedItems.slice(0, visibleGridCount)'),
+    'reaching the grid sentinel should reveal the next batch from the filtered collection'
+  );
+  assert.ok(
+    bespokeViewSource.includes('visibleGridCount < orderedItems.length') &&
+      bespokeViewSource.includes('ref={gridLoadMoreRef}'),
+    'the load-more sentinel should remain available until every matching item is visible'
+  );
+  assert.equal(
+    source.includes('function BespokeArchivePagination'),
+    false,
+    'Bespoke grid should not render or retain page-number navigation'
+  );
+  assert.equal(
+    bespokeViewSource.includes('nextLabel="Next"'),
+    false,
+    'Bespoke grid should not expose a Next page control'
+  );
+});
+
 test('collection stage product artwork uses the original transparent PNG proportions', () => {
   assert.ok(
     source.includes("{background: 'bg1.jpg', product: 'c1.png', productWidth: 1672, productHeight: 941"),
