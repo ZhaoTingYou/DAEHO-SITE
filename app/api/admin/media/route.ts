@@ -18,7 +18,7 @@ import {mediaPayloadSchema} from '@/lib/cms/validation';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
 
   if (unauthorized) {
     return unauthorized;
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
 
   if (unauthorized) {
     return unauthorized;

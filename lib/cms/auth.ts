@@ -3,7 +3,9 @@ import {timingSafeEqual} from 'node:crypto';
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-export function requireAdmin(request: NextRequest) {
+import {hasAdminApiSession} from './admin-session';
+
+export async function requireAdmin(request: NextRequest) {
   const expectedKey = process.env.CMS_ADMIN_API_KEY || process.env.CMS_BACKEND_API_KEY;
 
   if (!expectedKey && process.env.NODE_ENV !== 'production') {
@@ -25,7 +27,15 @@ export function requireAdmin(request: NextRequest) {
     return null;
   }
 
-  return NextResponse.json({error: 'Unauthorized'}, {status: 401});
+  if (!(await hasAdminApiSession())) {
+    return NextResponse.json({error: 'Unauthorized'}, {status: 401});
+  }
+
+  if (!isSafeMethod(request.method) && !hasSameOrigin(request)) {
+    return NextResponse.json({error: 'Forbidden'}, {status: 403});
+  }
+
+  return null;
 }
 
 function constantTimeEqual(value: string, expected: string) {
@@ -37,4 +47,26 @@ function constantTimeEqual(value: string, expected: string) {
   }
 
   return timingSafeEqual(valueBuffer, expectedBuffer);
+}
+
+function isSafeMethod(method: string) {
+  return method === 'GET' || method === 'HEAD' || method === 'OPTIONS';
+}
+
+function hasSameOrigin(request: NextRequest) {
+  const origin = request.headers.get('origin');
+
+  if (!origin) {
+    return false;
+  }
+
+  try {
+    const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    const expectedOrigin = configuredSiteUrl
+      ? new URL(configuredSiteUrl).origin
+      : request.nextUrl.origin;
+    return new URL(origin).origin === expectedOrigin;
+  } catch {
+    return false;
+  }
 }

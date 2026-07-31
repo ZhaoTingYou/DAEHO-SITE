@@ -8,7 +8,7 @@ import {CmsBackendError, sendNotificationTest} from '@/lib/cms/repositories';
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
-  const unauthorized = requireAdmin(request);
+  const unauthorized = await requireAdmin(request);
   if (unauthorized) return unauthorized;
   const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
   if (oversized) return oversized;
