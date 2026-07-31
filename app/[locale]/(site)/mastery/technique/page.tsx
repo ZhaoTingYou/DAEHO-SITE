@@ -46,7 +46,7 @@ export default async function TechniqueRecordPage({params}: Props) {
             <p className="font-body text-[11px] font-semibold uppercase leading-none tracking-[0.32em] text-accent">
               {content.hero.eyebrow}
             </p>
-            <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(48px,6.2vw,86px)] font-bold uppercase leading-[0.9] tracking-[0.05em] text-primary">
+            <h1 className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
             </h1>
             <p className="mx-auto max-w-[660px] whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary/82">

@@ -46,6 +46,12 @@ const pageCatalog = JSON.parse(readFileSync(new URL('./lib/cms/page-catalog.json
 const koMessages = JSON.parse(readFileSync(new URL('./messages/ko.json', import.meta.url), 'utf8'));
 const enMessages = JSON.parse(readFileSync(new URL('./messages/en.json', import.meta.url), 'utf8'));
 
+function getHeroTitleClassName(source) {
+  const match = source.match(/<h1 className="([^"]+)"/);
+  assert.ok(match, 'the page should render a styled Hero h1');
+  return match[1];
+}
+
 test('Mastery has a standalone Technique page separate from Making', () => {
   assert.equal(existsSync(techniquePagePath), true);
 
@@ -54,6 +60,24 @@ test('Mastery has a standalone Technique page separate from Making', () => {
   assert.doesNotMatch(techniquePageSource, /SpecialtyProcess/);
   assert.match(makingPageSource, /specialtyPages\.technique/);
   assert.match(makingPageSource, /SpecialtyProcess/);
+});
+
+test('Technique Hero title matches the Making title size and color', () => {
+  assert.equal(
+    getHeroTitleClassName(techniquePageSource),
+    getHeroTitleClassName(makingPageSource)
+  );
+});
+
+test('Every Technique title uses the Making title size and accent color', () => {
+  const makingTitleClassName = getHeroTitleClassName(makingPageSource);
+  const makingTitleSize = makingTitleClassName.match(/text-\[clamp\([^)]+\)\]/)?.[0];
+
+  assert.ok(makingTitleSize, 'the Making Hero title should define a responsive size');
+  for (const source of [techniquePageSource, techniqueIntroSource, techniqueCarouselSource]) {
+    assert.match(source, new RegExp(makingTitleSize.replaceAll(/[()[\]]/g, '\\$&')));
+    assert.match(source, /text-accent/);
+  }
 });
 
 test('Technique is enabled in public navigation before Making and Creations', () => {

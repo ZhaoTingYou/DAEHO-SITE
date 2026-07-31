@@ -144,7 +144,7 @@ export function TechniqueCarouselSection({
             exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0, y: -8}}
             transition={{duration: prefersReducedMotion ? 0 : 0.38, ease: [0.16, 1, 0.3, 1]}}
           >
-            <h2 className="break-words font-heading text-[clamp(26px,3vw,42px)] font-semibold leading-[1.22] text-primary">
+            <h2 className="break-words font-heading text-[clamp(40px,3.7vw,58px)] font-semibold leading-[1.22] text-accent">
               {activeItem.title}
             </h2>
             <p className="mobile-copy mx-auto mt-5 max-w-[760px] break-words whitespace-pre-line font-body text-[16px] leading-8 text-text md:mt-6 md:text-[15px]">

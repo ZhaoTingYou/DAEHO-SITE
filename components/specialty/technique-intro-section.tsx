@@ -18,7 +18,7 @@ export function TechniqueIntroSection({title, body}: TechniqueIntroSectionProps)
       <ScrollText className="mx-auto max-w-[780px] text-center">
         <h2
           id="technique-intro-title"
-          className="break-words font-heading text-[clamp(38px,4vw,52px)] font-semibold leading-[1.24] tracking-[-0.025em] text-primary"
+          className="break-words font-heading text-[clamp(40px,3.7vw,58px)] font-semibold leading-[1.24] tracking-[-0.025em] text-accent"
         >
           {title}
         </h2>
