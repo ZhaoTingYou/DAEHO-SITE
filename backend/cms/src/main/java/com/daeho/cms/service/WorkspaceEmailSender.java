@@ -32,7 +32,7 @@ public class WorkspaceEmailSender {
     try {
       var sender = mailSender.getObject();
       var message = sender.createMimeMessage();
-      var helper = new MimeMessageHelper(message, false, "UTF-8");
+      var helper = new MimeMessageHelper(message, true, "UTF-8");
       helper.setFrom(text(properties.smtpFrom()));
       helper.setTo(text(job.get("recipient")));
       helper.setSubject(text(job.get("subject")));
