@@ -44,10 +44,7 @@ export default async function CollectionPage({params}: Props) {
               Objects of distinction
             </p>
             <p aria-hidden="true" className="mt-6 [font-family:'Cormorant_Garamond',serif] text-[clamp(44px,14vw,64px)] font-bold uppercase leading-[0.84] tracking-[-0.045em] text-primary">
-              Three stories.
-              <span className="ml-[10vw] mt-2 block font-normal italic text-accent">
-                One signature.
-              </span>
+              {content.hero.title}
             </p>
             <p className="ml-auto mt-8 max-w-[21rem] whitespace-pre-line font-heading text-[16px] font-semibold leading-[1.75] text-primary/75">
               {content.hero.subtitle}

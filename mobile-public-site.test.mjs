@@ -176,10 +176,13 @@ test('Making mobile process uses readable fixed body copy and 4:3 media', () => 
   assert.match(specialtyProcessSource, /max-md:aspect-\[4\/3\]/);
 });
 
-test('Creations mobile opening establishes Three Acts without a catalogue hero', () => {
+test('Creations mobile opening shares the desktop CMS title without a catalogue hero', () => {
   assert.match(creationsMobileOpening, /mobile-creations-opening/);
-  assert.match(creationsMobileOpening, /Three stories\./);
-  assert.match(creationsMobileOpening, /One signature\./);
+  assert.match(
+    creationsMobileOpening,
+    /<p aria-hidden="true" className="[^"]*text-\[clamp\(44px,14vw,64px\)\][^"]*">\s*\{content\.hero\.title\}\s*<\/p>/
+  );
+  assert.doesNotMatch(creationsMobileOpening, /Three stories\.|One signature\./);
   assert.match(creationsMobileOpening, /String\(filters\.length\)\.padStart\(2, '0'\)/);
   assert.match(creationsPageSource, /min-h-\[68dvh\]/);
   assert.doesNotMatch(creationsMobileOpening, /<figure|specialty_collection_hero|<figcaption/);

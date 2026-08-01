@@ -94,9 +94,10 @@ test('Mastery titles preserve their approved page-specific spacing', () => {
     creationsPageSource,
     /<p aria-hidden="true" className="[^"]*text-\[clamp\(40px,3\.7vw,58px\)\][^"]*">[\s\S]*?<\/p>\s*<p className="[^"]*mt-\[27px\][^"]*">/
   );
-  assert.match(
-    creationsPageSource,
-    /Three stories\.[\s\S]*?<span className="[^"]*mt-2[^"]*">\s*One signature\./
+  assert.equal(
+    (creationsPageSource.match(/\{content\.hero\.title\}/g) ?? []).length,
+    3,
+    'the semantic h1 plus visible mobile and desktop titles should share one localized source'
   );
 });
 
