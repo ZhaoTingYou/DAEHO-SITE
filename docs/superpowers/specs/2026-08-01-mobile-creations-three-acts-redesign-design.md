@@ -41,7 +41,7 @@ It contains:
 
 - A small decorative English eyebrow such as `OBJECTS OF DISTINCTION`.
 - One semantic page `h1`, sourced from the current localized Creations hero title.
-- The approved display statement `THREE STORIES. ONE SIGNATURE.` as brand copy. It may be visually split across two lines, with the second line offset and colored burgundy.
+- One visible display title sourced from the same `content.hero.title` value used by the desktop Creations heading. The mobile title must not hard-code a separate phrase, so CMS title changes remain synchronized across both breakpoints.
 - The existing localized Creations introduction as the readable body copy.
 - A compact `03 CREATIVE WORLDS` cue.
 - A restrained vertical rule or equivalent visual cue leading into Act 01.
@@ -192,7 +192,8 @@ Small mobile-only helpers or data mappings may be extracted inside the collectio
 Automated verification must cover:
 
 - The mobile opening no longer renders the previous catalogue masthead or mobile card list.
-- The opening contains the approved Three Acts structure and exactly one page `h1`.
+- The opening contains exactly one page `h1`, and its visible mobile title uses the same localized `content.hero.title` value as desktop.
+- The retired `THREE STORIES. ONE SIGNATURE.` display statement does not remain in the mobile opening.
 - All three acts render in stable category order as full-section links.
 - Each category receives the correct act-specific art direction.
 - All three acts render complete CSS visual scenes without loading legacy category artwork.
