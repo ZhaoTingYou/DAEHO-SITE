@@ -157,16 +157,18 @@ test('collection mobile entry renders three cinematic acts as full-section links
   assert.doesNotMatch(mobileCollectionSource, /line-clamp/);
 });
 
-test('collection mobile acts keep CSS fallbacks, responsive artwork, and reduced motion', () => {
+test('collection mobile acts use standalone CSS art direction until new portrait artwork is approved', () => {
   assert.match(mobileCollectionSource, /style=\{\{backgroundImage: direction\.backgroundImage\}\}/);
-  assert.match(mobileCollectionSource, /category\.item \?/);
-  assert.match(mobileCollectionSource, /alt=""/);
-  assert.match(mobileCollectionSource, /priority=\{index === 0\}/);
-  assert.match(mobileCollectionSource, /sizes="\(min-width: 1024px\) 0px, 100vw"/);
-  assert.match(mobileCollectionSource, /initial=\{reducedMotion \? false : \{opacity: 0, y: 24\}\}/);
-  assert.match(mobileCollectionSource, /viewport=\{\{once: true, amount: 0\.18\}\}/);
+  assert.doesNotMatch(mobileCollectionSource, /category\.item|<Image/);
+  assert.match(mobileCollectionSource, /<article/);
+  assert.doesNotMatch(
+    mobileCollectionSource,
+    /whileInView|initial=\{|viewport=\{\{/,
+    'mobile acts must never depend on viewport animation to become visible'
+  );
   assert.match(mobileCollectionSource, /motion-reduce:transition-none/);
   assert.match(mobileCollectionSource, /Made to be remembered\./);
+  assert.match(galleryEntrySource, /<motion\.div\s+initial=\{false\}/);
   assert.match(galleryEntrySource, /className="hidden lg:grid"/);
 });
 

@@ -137,7 +137,7 @@ export function SpecialtyCollectionGallery({
 
   return (
     <motion.div
-      initial={prefersReducedMotion ? false : {opacity: 0}}
+      initial={false}
       animate={{opacity: 1}}
       transition={prefersReducedMotion ? {duration: 0} : {duration: 0.3, ease: [0.16, 1, 0.3, 1]}}
     >
@@ -145,7 +145,6 @@ export function SpecialtyCollectionGallery({
         categories={categoryCards}
         locale={locale}
         viewLabel={viewLabel}
-        reducedMotion={prefersReducedMotion}
       />
       <div
         role="group"
@@ -214,8 +213,7 @@ function getMobileCollectionActDirection(categoryId: string): MobileCollectionAc
 function MobileCollectionActs({
   categories,
   locale,
-  viewLabel,
-  reducedMotion
+  viewLabel
 }: {
   categories: Array<
     SpecialtyCollectionFilter & {
@@ -225,7 +223,6 @@ function MobileCollectionActs({
   >;
   locale: Locale;
   viewLabel: string;
-  reducedMotion: boolean;
 }) {
   return (
     <div className="mobile-creations-acts lg:hidden">
@@ -236,7 +233,6 @@ function MobileCollectionActs({
           index={index}
           locale={locale}
           viewLabel={viewLabel}
-          reducedMotion={reducedMotion}
         />
       ))}
       <div className="grid min-h-40 place-items-center bg-primary px-[var(--mobile-page-gutter)] py-10 text-center text-white">
@@ -257,8 +253,7 @@ function MobileCollectionAct({
   category,
   index,
   locale,
-  viewLabel,
-  reducedMotion
+  viewLabel
 }: {
   category: SpecialtyCollectionFilter & {
     item?: CollectionImageSource;
@@ -267,19 +262,12 @@ function MobileCollectionAct({
   index: number;
   locale: Locale;
   viewLabel: string;
-  reducedMotion: boolean;
 }) {
   const direction = getMobileCollectionActDirection(category.id);
   const href = category.href ?? `/${locale}/mastery/creations/${category.id}`;
 
   return (
-    <motion.article
-      initial={reducedMotion ? false : {opacity: 0, y: 24}}
-      whileInView={{opacity: 1, y: 0}}
-      viewport={{once: true, amount: 0.18}}
-      transition={reducedMotion ? {duration: 0} : {duration: 0.3, ease: [0.16, 1, 0.3, 1]}}
-      className={`relative overflow-hidden ${direction.sceneClassName}`}
-    >
+    <article className={`relative overflow-hidden ${direction.sceneClassName}`}>
       <Link
         href={href}
         aria-label={`${category.label} · ${viewLabel}`}
@@ -294,16 +282,6 @@ function MobileCollectionAct({
           aria-hidden="true"
           className={`absolute left-1/2 top-[34%] aspect-[1.8/1] w-[58%] -translate-x-1/2 -translate-y-1/2 -rotate-[14deg] rounded-[50%] border-[clamp(12px,4vw,22px)] opacity-90 shadow-[0_24px_42px_rgba(0,0,0,.32)] ${direction.haloClassName}`}
         />
-        {category.item ? (
-          <Image
-            src={imageSrc(category.item.image)}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 0px, 100vw"
-            className="object-cover object-center transition duration-300 ease-brand group-hover:scale-[1.015] group-active:scale-[1.01] motion-reduce:transform-none motion-reduce:transition-none"
-            priority={index === 0}
-          />
-        ) : null}
         <div aria-hidden="true" className={`absolute inset-0 ${direction.overlayClassName}`} />
 
         <div className="relative z-10 w-full px-[var(--mobile-page-gutter)] pb-[max(32px,env(safe-area-inset-bottom))] pt-28">
@@ -326,7 +304,7 @@ function MobileCollectionAct({
           </div>
         </div>
       </Link>
-    </motion.article>
+    </article>
   );
 }
 

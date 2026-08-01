@@ -8,6 +8,8 @@
 
 **Tech Stack:** Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4, Framer Motion 12, Next Image, Node test runner.
 
+> **Verification amendment (authoritative over the illustrative snippets below):** Real-browser testing showed that the legacy category images break the approved portrait composition and that viewport-entry opacity can leave content hidden in some environments. The completed mobile entry therefore ships with the three CSS scenes only, keeps every opening/act visible by default, and defers image rendering until three new portrait assets are generated and approved. Desktop image behavior remains unchanged.
+
 ## Global Constraints
 
 - Apply the redesign below the existing `lg` breakpoint only; keep the current desktop masthead and `CollectionStagePanel` behavior unchanged.

@@ -184,6 +184,7 @@ test('Creations mobile opening establishes Three Acts without a catalogue hero',
   assert.match(creationsPageSource, /min-h-\[68dvh\]/);
   assert.doesNotMatch(creationsMobileOpening, /<figure|specialty_collection_hero|<figcaption/);
   assert.doesNotMatch(creationsMobileOpening, /mobile-creations-masthead|Curated Works/);
+  assert.doesNotMatch(creationsMobileOpening, /<ScrollText/, 'the above-the-fold mobile opening must be visible before scrolling');
   assert.match(creationsPageSource, /hidden max-w-\[1220px\][^\n]+lg:block/);
 });
 

@@ -57,8 +57,8 @@ Each act is a single, near-full-screen linked section. It contains:
 - Existing localized category description.
 - A short decorative English theme pair.
 - One circular northeast arrow affordance.
-- One portrait artwork layer when available.
-- A CSS atmospheric fallback when artwork is absent.
+- One reserved portrait-artwork zone for future approved assets.
+- A complete CSS atmospheric scene used by the initial release.
 
 The entire act is the link target, not only the arrow. The DOM and accessibility reading order remain act number, heading, description, then link purpose regardless of visual positioning.
 
@@ -119,7 +119,7 @@ Later, the user will provide three generated artworks. Each artwork must follow 
 - Edge-to-edge composition that tolerates `object-cover` cropping at 375px, 430px, and mobile landscape.
 - Lighting and palette aligned with the approved act-specific directions above.
 
-The existing category image field remains the artwork input; no CMS schema change is required. When a valid category image exists, it is rendered as the act artwork above the CSS fallback and beneath the text contrast overlays. The current mobile-specific use of `background` and `product` composition is retired from this entry page, but the desktop artwork path remains unchanged.
+The existing category image field remains the future artwork input; no CMS schema change is required. The initial mobile release deliberately ignores the legacy category images because their crop, resolution, and composition do not meet this portrait contract. Once the three new artworks are generated and approved, they can be enabled above the CSS scenes and beneath the text contrast overlays without changing the layout. The desktop artwork path remains unchanged.
 
 ## Content And Data Flow
 
@@ -127,9 +127,9 @@ The server page continues to:
 
 1. Load localized CMS messages.
 2. Resolve the three fixed Creations category links.
-3. Pass category IDs, labels, descriptions, image values, and availability to the collection gallery.
+3. Pass category IDs, labels, descriptions, image values, and availability to the collection gallery for the preserved desktop path.
 
-The mobile Three Acts view consumes the same category array and keeps its source order. Category identity is mapped by stable ID only for art direction and decorative theme copy. Core category names and descriptions always come from localized content.
+The mobile Three Acts view consumes the same category array and keeps its source order, but currently uses only category IDs, labels, descriptions, and links. Category identity is mapped by stable ID only for art direction and decorative theme copy. Core category names and descriptions always come from localized content.
 
 If a category image is missing, invalid, or unavailable, the act still renders its complete gradient atmosphere, text, and navigation affordance. No empty frame, broken image icon, layout collapse, or skeleton remains after load.
 
@@ -139,14 +139,14 @@ Each act is a full-section link with a minimum 44 × 44 CSS pixel actionable are
 
 Interaction feedback:
 
-- Touch/press: a subtle opacity or artwork-scale response without shifting layout bounds.
+- Touch/press: a subtle arrow or color response without shifting layout bounds.
 - Keyboard focus: a high-contrast visible outline within the act boundary.
 - Hover-capable devices below `lg`: a restrained arrow or text accent change.
 - Route navigation: existing localized category URLs remain unchanged.
 
-Motion is limited to opacity and small vertical transforms. The opening copy may reveal once, and each act may reveal its text as it enters the viewport. Feedback should stay within 150–300ms. There is no parallax, pinned content, animated height, or scroll-linked product movement.
+All opening and act content is visible by default and does not depend on JavaScript, intersection observers, or viewport-entry animation. Interaction feedback may use a 150–300ms opacity, color, or transform transition. There is no parallax, pinned content, animated height, or scroll-linked product movement.
 
-The existing reduced-motion provider remains authoritative. With reduced motion enabled, entry transforms are removed and content is immediately readable.
+The existing reduced-motion treatment remains authoritative for interactive transitions. With reduced motion enabled, optional feedback transforms are removed; content is always immediately readable in either mode.
 
 ## Responsive Behavior
 
@@ -195,10 +195,9 @@ Automated verification must cover:
 - The opening contains the approved Three Acts structure and exactly one page `h1`.
 - All three acts render in stable category order as full-section links.
 - Each category receives the correct act-specific art direction.
-- Missing category artwork retains a complete CSS visual fallback.
-- Only the first mobile act artwork is prioritized.
+- All three acts render complete CSS visual scenes without loading legacy category artwork.
 - The desktop `lg` branch and `CollectionStagePanel` path remain present and unchanged in behavior.
-- Reduced-motion behavior, focus styling, responsive image sizing, and full descriptions remain protected.
+- Default visibility, reduced-motion behavior, focus styling, and full descriptions remain protected.
 
 Run the focused mobile and collection tests, the complete source test suite, ESLint, TypeScript validation, and a production build.
 
@@ -210,8 +209,8 @@ Browser verification must cover:
 - Complete scrolling through all acts and the closing signature.
 - No horizontal overflow or content hidden under the header/footer.
 - Full-act tap targets and correct destination routes.
-- Missing-image fallback presentation.
-- Reduced-motion mode.
+- CSS-only scene presentation with no legacy mobile artwork.
+- Content visibility without viewport-entry animation.
 - Desktop at 1440px to confirm the existing desktop composition is unchanged.
 
 ## Success Criteria

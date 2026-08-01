@@ -39,7 +39,7 @@ export default async function CollectionPage({params}: Props) {
           {content.hero.title}
         </h1>
         <div className="mobile-creations-opening flex flex-1 items-end lg:hidden">
-          <ScrollText className="w-full px-[var(--mobile-page-gutter)] pb-12 pt-10">
+          <div className="w-full px-[var(--mobile-page-gutter)] pb-12 pt-10">
             <p aria-hidden="true" className="font-body text-[10px] font-bold uppercase tracking-[0.28em] text-accent">
               Objects of distinction
             </p>
@@ -59,7 +59,7 @@ export default async function CollectionPage({params}: Props) {
               <span className="pb-1 text-[9px] font-semibold">Creative worlds</span>
             </div>
             <div aria-hidden="true" className="mt-5 h-14 w-px bg-primary/25" />
-          </ScrollText>
+          </div>
         </div>
 
         <div className="mx-auto hidden max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)] lg:block">
