@@ -33,6 +33,14 @@ const stageImageSource = source.slice(
   source.indexOf('function StageImage('),
   source.indexOf('function CollectionImage(')
 );
+const mobileCollectionSource = source.slice(
+  source.indexOf('type MobileCollectionArtDirection'),
+  source.indexOf('export function SpecialtyCollectionCategory(')
+);
+const galleryEntrySource = source.slice(
+  source.indexOf('export function SpecialtyCollectionGallery('),
+  source.indexOf('function MobileCollectionIndex(')
+);
 
 test('bespoke toolbar does not render the active category label beside the filter button', () => {
   assert.equal(
@@ -133,10 +141,27 @@ test('collection stage artwork is exposed through CMS content fields', () => {
   }
 });
 
-test('collection mobile cards preserve stable product media and tap targets', () => {
-  assert.match(source, /mobile-collection-card/);
-  assert.match(source, /mobile-tap-target/);
-  assert.match(source, /aspect-\[4\/5\]/);
+test('collection mobile index renders three editorial art directions as full-card links', () => {
+  assert.match(mobileCollectionSource, /type MobileCollectionArtDirection/);
+  assert.match(mobileCollectionSource, /function getMobileCollectionArtDirection/);
+  assert.match(mobileCollectionSource, /champion:[\s\S]*aspect-\[4\/5\]/);
+  assert.match(mobileCollectionSource, /appointment:[\s\S]*aspect-square/);
+  assert.match(mobileCollectionSource, /bespoke:[\s\S]*aspect-\[5\/6\]/);
+  assert.match(mobileCollectionSource, /mobile-collection-card mobile-collection-chapter/);
+  assert.match(mobileCollectionSource, /aria-label=\{`\$\{category\.label\} · \$\{viewLabel\}`\}/);
+  assert.match(mobileCollectionSource, /<h2[\s\S]*\{category\.label\}[\s\S]*<\/h2>/);
+  assert.match(mobileCollectionSource, /mobile-tap-target/);
+  assert.match(mobileCollectionSource, /<svg[\s\S]*viewBox="0 0 20 20"/);
+  assert.doesNotMatch(mobileCollectionSource, /line-clamp-2/);
+});
+
+test('collection mobile media is stable, responsive, and prioritizes only the first chapter', () => {
+  assert.match(mobileCollectionSource, /priority=\{index === 0\}/);
+  assert.match(mobileCollectionSource, /sizes="\(min-width: 768px\) 520px, calc\(100vw - 40px\)"/);
+  assert.match(mobileCollectionSource, /motion-reduce:transition-none/);
+  assert.match(mobileCollectionSource, /motion-reduce:transform-none/);
+  assert.match(galleryEntrySource, /initial=\{prefersReducedMotion \? false : \{opacity: 0\}\}/);
+  assert.match(galleryEntrySource, /className="hidden lg:grid"/);
 });
 
 test('collection detail gallery keeps reachable working previous and next controls', () => {

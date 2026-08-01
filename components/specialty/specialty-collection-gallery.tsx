@@ -137,9 +137,9 @@ export function SpecialtyCollectionGallery({
 
   return (
     <motion.div
-      initial={{opacity: 0}}
+      initial={prefersReducedMotion ? false : {opacity: 0}}
       animate={{opacity: 1}}
-      transition={{duration: 0.4, ease: [0.16, 1, 0.3, 1]}}
+      transition={prefersReducedMotion ? {duration: 0} : {duration: 0.3, ease: [0.16, 1, 0.3, 1]}}
     >
       <MobileCollectionIndex
         categories={categoryCards}
@@ -174,6 +174,46 @@ export function SpecialtyCollectionGallery({
   );
 }
 
+type MobileCollectionArtDirection = {
+  chapterClassName: string;
+  frameClassName: string;
+  backgroundClassName: string;
+  overlayClassName: string;
+  productClassName: string;
+  captionClassName: string;
+};
+
+const mobileCollectionArtDirections: Record<string, MobileCollectionArtDirection> = {
+  champion: {
+    chapterClassName: '',
+    frameClassName: 'aspect-[4/5] bg-primary',
+    backgroundClassName: 'opacity-95',
+    overlayClassName: 'bg-primary/15',
+    productClassName: 'w-[132%] max-w-none -translate-x-[4%]',
+    captionClassName: 'pr-1'
+  },
+  appointment: {
+    chapterClassName: 'px-5',
+    frameClassName: 'aspect-square bg-bg',
+    backgroundClassName: 'opacity-65 saturate-[.8]',
+    overlayClassName: 'bg-white/25',
+    productClassName: 'w-[108%] max-w-none',
+    captionClassName: '-mx-5 pl-5'
+  },
+  bespoke: {
+    chapterClassName: 'pr-8',
+    frameClassName: 'aspect-[5/6] bg-accent/10',
+    backgroundClassName: 'opacity-80 sepia-[.12]',
+    overlayClassName: 'bg-accent/10 mix-blend-color',
+    productClassName: 'w-[84%] max-w-[280px]',
+    captionClassName: 'pr-2'
+  }
+};
+
+function getMobileCollectionArtDirection(categoryId: string): MobileCollectionArtDirection {
+  return mobileCollectionArtDirections[categoryId] ?? mobileCollectionArtDirections.champion;
+}
+
 function MobileCollectionIndex({
   categories,
   locale,
@@ -190,7 +230,7 @@ function MobileCollectionIndex({
 }) {
   return (
     <div className="bg-white px-[var(--mobile-page-gutter)] pb-[calc(92px+env(safe-area-inset-bottom))] lg:hidden">
-      <div className="mx-auto max-w-[520px] border-t border-primary/15">
+      <div className="mx-auto max-w-[520px]">
         {categories.map((category, index) => (
           <MobileCollectionCard
             key={category.id}
@@ -220,31 +260,37 @@ function MobileCollectionCard({
   viewLabel: string;
 }) {
   const artwork = getCollectionStageArtwork(category, index);
+  const direction = getMobileCollectionArtDirection(category.id);
   const href = category.href ?? `/${locale}/mastery/creations/${category.id}`;
   const copy = getMobileCollectionCopy(locale, category.id);
 
   return (
-    <Link
-      href={href}
-      className="mobile-collection-card group block border-b border-primary/15 py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-    >
-      <div className="flex min-h-11 items-center justify-between gap-4 font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/50">
-        <span className="font-numeric text-accent/85">{String(index + 1).padStart(2, '0')}</span>
-        <span className="transition duration-hover ease-brand group-hover:text-accent">{viewLabel}</span>
-      </div>
+    <article className={`border-t border-primary/15 py-10 first:pt-3 ${direction.chapterClassName}`}>
+      <Link
+        href={href}
+        aria-label={`${category.label} · ${viewLabel}`}
+        className="mobile-collection-card mobile-collection-chapter group block touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+      >
+        <div className="flex min-h-11 items-center justify-between gap-4 font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/52">
+          <span className="font-numeric text-accent">
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <span className="transition duration-200 ease-brand group-hover:text-accent group-focus-visible:text-accent motion-reduce:transition-none">
+            {viewLabel}
+          </span>
+        </div>
 
-      <div className="mt-4 grid gap-5">
-        <div className="relative aspect-[4/5] overflow-hidden border border-primary/10 bg-primary">
+        <figure className={`relative mt-3 overflow-hidden border border-primary/10 ${direction.frameClassName}`}>
           <Image
             src={imageSrc(artwork.background)}
             alt=""
             fill
             sizes="(min-width: 768px) 520px, calc(100vw - 40px)"
-            className="object-cover object-center opacity-95 transition duration-700 ease-brand group-hover:scale-[1.035]"
+            className={`object-cover object-center transition duration-300 ease-brand group-hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none ${direction.backgroundClassName}`}
             priority={index === 0}
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,29,48,.1)_0%,rgba(16,29,48,.36)_100%)]" aria-hidden="true" />
-          <div className="absolute inset-x-6 bottom-7 h-12 bg-black/28 blur-2xl" aria-hidden="true" />
+          <div className={`absolute inset-0 ${direction.overlayClassName}`} aria-hidden="true" />
+          <div className="absolute inset-x-7 bottom-7 h-12 bg-black/25 blur-2xl" aria-hidden="true" />
           <div className="absolute inset-0 flex items-center justify-center px-3 py-7">
             <Image
               src={imageSrc(artwork.product)}
@@ -252,41 +298,30 @@ function MobileCollectionCard({
               width={artwork.productWidth}
               height={artwork.productHeight}
               sizes="(min-width: 768px) 520px, calc(100vw - 40px)"
-              className={`h-auto max-h-full object-contain drop-shadow-[0_24px_42px_rgba(0,0,0,.42)] transition duration-700 ease-brand group-hover:scale-[1.035] ${getMobileCollectionProductClass(category.id)}`}
+              className={`mobile-collection-product h-auto max-h-full object-contain drop-shadow-[0_24px_42px_rgba(0,0,0,.38)] transition duration-300 ease-brand group-hover:scale-[1.025] group-active:scale-[1.015] motion-reduce:transform-none motion-reduce:transition-none ${direction.productClassName}`}
               priority={index === 0}
             />
           </div>
-        </div>
+        </figure>
 
-        <div className="grid grid-cols-[1fr_auto] items-end gap-5">
+        <div className={`mt-6 grid grid-cols-[minmax(0,1fr)_44px] items-end gap-5 ${direction.captionClassName}`}>
           <div className="space-y-3">
-            <h2 className="break-words font-heading text-[32px] font-semibold leading-[1.05] text-primary">
+            <h2 className="break-words font-heading text-[34px] font-semibold leading-[1.05] text-primary">
               {category.label}
             </h2>
-            <p className="mobile-copy line-clamp-2 max-w-[24rem] whitespace-pre-line font-body text-primary/66">
+            <p className="mobile-copy max-w-[24rem] whitespace-pre-line font-body text-primary/68">
               {copy}
             </p>
           </div>
-          <span className="mobile-tap-target grid h-11 w-11 place-items-center border border-primary/18 text-[18px] leading-none text-primary transition duration-hover ease-brand group-hover:border-accent group-hover:text-accent" aria-hidden="true">
-            →
+          <span className="mobile-tap-target grid h-11 w-11 place-items-center border border-primary/20 text-primary transition duration-200 ease-brand group-hover:border-accent group-hover:text-accent group-focus-visible:border-accent group-focus-visible:text-accent motion-reduce:transition-none" aria-hidden="true">
+            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none">
+              <path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </span>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </article>
   );
-}
-
-function getMobileCollectionProductClass(categoryId: string) {
-  switch (categoryId) {
-    case 'champion':
-      return 'w-[126%] max-w-none -translate-x-[3%]';
-    case 'appointment':
-      return 'w-[112%] max-w-none';
-    case 'bespoke':
-      return 'w-[82%] max-w-[280px]';
-    default:
-      return 'w-[108%] max-w-none';
-  }
 }
 
 function getMobileCollectionCopy(locale: Locale, categoryId: string) {
