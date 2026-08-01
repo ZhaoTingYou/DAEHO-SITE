@@ -29,7 +29,8 @@ export default async function CollectionPage({params}: Props) {
   const filters = content.gallery.filters.map((filter) => ({
     ...filter,
     href: resolveCmsHref(locale, filter.href, `/mastery/creations/${filter.id}`),
-    hasImage: Boolean(filter.image && imageExists(filter.image))
+    hasImage: Boolean(filter.image && imageExists(filter.image)),
+    hasMobileImage: Boolean(filter.mobileImage && imageExists(filter.mobileImage))
   }));
 
   return (

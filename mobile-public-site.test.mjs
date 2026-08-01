@@ -189,6 +189,10 @@ test('Creations mobile opening shares the desktop CMS title without a catalogue 
   assert.doesNotMatch(creationsMobileOpening, /mobile-creations-masthead|Curated Works/);
   assert.doesNotMatch(creationsMobileOpening, /<ScrollText/, 'the above-the-fold mobile opening must be visible before scrolling');
   assert.match(creationsPageSource, /hidden max-w-\[1220px\][^\n]+lg:block/);
+  assert.match(
+    creationsPageSource,
+    /hasMobileImage: Boolean\(filter\.mobileImage && imageExists\(filter\.mobileImage\)\)/
+  );
 });
 
 test('News mobile list uses compact landscape cards and fixed display type', () => {

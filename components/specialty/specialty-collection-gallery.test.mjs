@@ -171,9 +171,18 @@ test('collection mobile entry renders three cinematic acts as full-section links
   assert.doesNotMatch(mobileCollectionSource, /line-clamp/);
 });
 
-test('collection mobile acts use standalone CSS art direction until new portrait artwork is approved', () => {
+test('collection mobile acts render CMS portrait artwork over the safe gradient fallback', () => {
   assert.match(mobileCollectionSource, /style=\{\{backgroundImage: direction\.backgroundImage\}\}/);
-  assert.doesNotMatch(mobileCollectionSource, /category\.item|<Image/);
+  assert.match(
+    mobileCollectionSource,
+    /category\.mobileImage &&[\s\S]*category\.hasMobileImage &&[\s\S]*failedMobileImage !== category\.mobileImage/
+  );
+  assert.match(mobileCollectionSource, /src=\{imageSrc\(category\.mobileImage\)\}/);
+  assert.match(mobileCollectionSource, /fill[\s\S]*sizes="100vw"[\s\S]*object-cover object-center/);
+  assert.match(
+    mobileCollectionSource,
+    /onError=\{\(\) => setFailedMobileImage\(category\.mobileImage \?\? null\)\}/
+  );
   assert.match(mobileCollectionSource, /<article/);
   assert.doesNotMatch(
     mobileCollectionSource,

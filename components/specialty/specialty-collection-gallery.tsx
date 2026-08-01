@@ -18,7 +18,9 @@ export type SpecialtyCollectionFilter = {
   image?: string;
   background?: string;
   product?: string;
+  mobileImage?: string;
   hasImage?: boolean;
+  hasMobileImage?: boolean;
 };
 
 type CollectionImageSource = {
@@ -265,6 +267,7 @@ function MobileCollectionAct({
 }) {
   const direction = getMobileCollectionActDirection(category.id);
   const href = category.href ?? `/${locale}/mastery/creations/${category.id}`;
+  const [failedMobileImage, setFailedMobileImage] = useState<string | null>(null);
 
   return (
     <article className={`relative overflow-hidden ${direction.sceneClassName}`}>
@@ -282,6 +285,19 @@ function MobileCollectionAct({
           aria-hidden="true"
           className={`absolute left-1/2 top-[34%] aspect-[1.8/1] w-[58%] -translate-x-1/2 -translate-y-1/2 -rotate-[14deg] rounded-[50%] border-[clamp(12px,4vw,22px)] opacity-90 shadow-[0_24px_42px_rgba(0,0,0,.32)] ${direction.haloClassName}`}
         />
+        {category.mobileImage &&
+        category.hasMobileImage &&
+        failedMobileImage !== category.mobileImage ? (
+          <Image
+            src={imageSrc(category.mobileImage)}
+            alt=""
+            fill
+            sizes="100vw"
+            priority={index === 0}
+            className="object-cover object-center"
+            onError={() => setFailedMobileImage(category.mobileImage ?? null)}
+          />
+        ) : null}
         <div aria-hidden="true" className={`absolute inset-0 ${direction.overlayClassName}`} />
 
         <div className="relative z-10 w-full px-[var(--mobile-page-gutter)] pb-[max(32px,env(safe-area-inset-bottom))] pt-28">
