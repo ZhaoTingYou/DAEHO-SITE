@@ -81,7 +81,7 @@ test('Every Technique title uses the Making title size and accent color', () => 
   }
 });
 
-test('Mastery Hero titles use one-and-a-half times their previous spacing before the description', () => {
+test('Mastery titles preserve their approved page-specific spacing', () => {
   assert.match(
     techniquePageSource,
     /<h1[^>]*>[\s\S]*?<\/h1>\s*<p className="[^"]*mt-\[27px\][^"]*">/
@@ -96,7 +96,7 @@ test('Mastery Hero titles use one-and-a-half times their previous spacing before
   );
   assert.match(
     creationsPageSource,
-    /className="mobile-display[^"]*">[\s\S]*?<\/p>\s*<p className="[^"]*mt-\[30px\][^"]*">/
+    /Three stories\.[\s\S]*?<span className="[^"]*mt-2[^"]*">\s*One signature\./
   );
 });
 

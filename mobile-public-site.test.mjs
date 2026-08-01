@@ -19,8 +19,8 @@ const credibilityPage = readFileSync(new URL('./components/legacy/credibility-co
 const achievementPage = readFileSync(new URL('./components/legacy/achievement-records-page.tsx', import.meta.url), 'utf8');
 const specialtyProcessSource = readFileSync(new URL('./components/specialty/specialty-process.tsx', import.meta.url), 'utf8');
 const creationsPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/creations/page.tsx', import.meta.url), 'utf8');
-const creationsMobileMasthead = creationsPageSource.slice(
-  creationsPageSource.indexOf('<div className="mobile-creations-masthead'),
+const creationsMobileOpening = creationsPageSource.slice(
+  creationsPageSource.indexOf('<div className="mobile-creations-opening'),
   creationsPageSource.indexOf('<div className="mx-auto hidden max-w-[1220px]')
 );
 const newsPageSource = readFileSync(new URL('./app/[locale]/(site)/news/page.tsx', import.meta.url), 'utf8');
@@ -176,13 +176,14 @@ test('Making mobile process uses readable fixed body copy and 4:3 media', () => 
   assert.match(specialtyProcessSource, /max-md:aspect-\[4\/3\]/);
 });
 
-test('Creations mobile masthead is compact and introduces the three collection chapters once', () => {
-  assert.match(creationsMobileMasthead, /mobile-display/);
-  assert.match(creationsMobileMasthead, /mobile-creations-masthead lg:hidden/);
-  assert.match(creationsMobileMasthead, /String\(filters\.length\)\.padStart\(2, '0'\)/);
-  assert.match(creationsMobileMasthead, /\{content\.gallery\.title\}/);
-  assert.doesNotMatch(creationsMobileMasthead, /<figure|specialty_collection_hero|<figcaption/);
-  assert.doesNotMatch(creationsMobileMasthead, /whitespace-nowrap[^\n]+CREATIONS/);
+test('Creations mobile opening establishes Three Acts without a catalogue hero', () => {
+  assert.match(creationsMobileOpening, /mobile-creations-opening/);
+  assert.match(creationsMobileOpening, /Three stories\./);
+  assert.match(creationsMobileOpening, /One signature\./);
+  assert.match(creationsMobileOpening, /String\(filters\.length\)\.padStart\(2, '0'\)/);
+  assert.match(creationsPageSource, /min-h-\[68dvh\]/);
+  assert.doesNotMatch(creationsMobileOpening, /<figure|specialty_collection_hero|<figcaption/);
+  assert.doesNotMatch(creationsMobileOpening, /mobile-creations-masthead|Curated Works/);
   assert.match(creationsPageSource, /hidden max-w-\[1220px\][^\n]+lg:block/);
 });
 
