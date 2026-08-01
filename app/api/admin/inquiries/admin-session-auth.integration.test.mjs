@@ -155,6 +155,51 @@ test('a signed CMS browser session can preview and update an inquiry status', {t
     body: payload
   });
   assert.equal(uiOnlySessionResponse.status, 401);
+
+  const legacySessionValue = createSessionValue(passwordVersion, sessionSecret);
+  const unauthenticatedRecoveryResponse = await fetch(`${baseUrl}/admin/api-session`, {
+    method: 'POST',
+    headers: {origin: baseUrl}
+  });
+  assert.equal(unauthenticatedRecoveryResponse.status, 401);
+
+  const crossSiteRecoveryResponse = await fetch(`${baseUrl}/admin/api-session`, {
+    method: 'POST',
+    headers: {
+      cookie: `daeho_admin_session=${legacySessionValue}`,
+      origin: 'https://attacker.example'
+    }
+  });
+  assert.equal(crossSiteRecoveryResponse.status, 403);
+
+  const recoveryResponse = await fetch(`${baseUrl}/admin/api-session`, {
+    method: 'POST',
+    headers: {
+      cookie: `daeho_admin_session=${legacySessionValue}`,
+      origin: baseUrl
+    }
+  });
+  assert.equal(
+    recoveryResponse.status,
+    204,
+    'A still-valid legacy CMS UI session should be able to restore its API session without another login'
+  );
+
+  const recoveredSetCookie = recoveryResponse.headers.get('set-cookie') ?? '';
+  assert.match(recoveredSetCookie, /^daeho_admin_api_session=/);
+  assert.match(recoveredSetCookie, /Path=\/api\/admin/);
+
+  const recoveredApiCookie = recoveredSetCookie.split(';', 1)[0];
+  const recoveredSessionResponse = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      cookie: recoveredApiCookie,
+      origin: baseUrl
+    },
+    body: payload
+  });
+  assert.equal(recoveredSessionResponse.status, 200);
 });
 
 function createSessionValue(passwordVersion, sessionSecret) {

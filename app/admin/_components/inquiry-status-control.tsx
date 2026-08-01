@@ -3,6 +3,8 @@
 import {useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
 
+import {fetchAdminApi} from '@/lib/cms/admin-api-client.mjs';
+
 type InquiryStatus = 'new' | 'contacted' | 'in_progress' | 'done' | 'spam';
 
 type Preview = {
@@ -78,7 +80,7 @@ export function InquiryStatusControl({
           event.preventDefault();
           setError('');
           setLoading(true);
-          const response = await fetch(`/api/admin/inquiries/${encodeURIComponent(inquiryId)}/status-preview`, {
+          const response = await fetchAdminApi(`/api/admin/inquiries/${encodeURIComponent(inquiryId)}/status-preview`, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
             body: JSON.stringify({status: selectedStatus, expectedStatus: status})
@@ -197,7 +199,7 @@ export function InquiryStatusControl({
     setLoading(true);
     broadcastStatus(inquiryId, next);
 
-    const response = await fetch(`/api/admin/inquiries/${encodeURIComponent(inquiryId)}`, {
+    const response = await fetchAdminApi(`/api/admin/inquiries/${encodeURIComponent(inquiryId)}`, {
       method: 'PATCH',
       headers: {'content-type': 'application/json'},
       body: JSON.stringify({status: next, expectedStatus: previous})

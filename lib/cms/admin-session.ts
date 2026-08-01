@@ -73,6 +73,24 @@ export async function createAdminSession(passwordVersion = getLocalPasswordVersi
   });
 }
 
+export async function restoreAdminApiSession() {
+  const cookieStore = await cookies();
+  const value = cookieStore.get(adminSessionCookie)?.value;
+
+  if (!value || !(await verifySessionValue(value))) {
+    return false;
+  }
+
+  cookieStore.set(adminApiSessionCookie, value, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: shouldUseSecureAdminCookie(),
+    path: adminApiSessionCookiePath,
+    maxAge: sessionMaxAgeSeconds
+  });
+  return true;
+}
+
 export async function clearAdminSession() {
   const cookieStore = await cookies();
   cookieStore.set(adminSessionCookie, '', {

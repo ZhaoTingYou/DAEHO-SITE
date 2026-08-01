@@ -53,7 +53,7 @@ function isSafeMethod(method: string) {
   return method === 'GET' || method === 'HEAD' || method === 'OPTIONS';
 }
 
-function hasSameOrigin(request: NextRequest) {
+export function hasSameOrigin(request: NextRequest) {
   const origin = request.headers.get('origin');
 
   if (!origin) {
