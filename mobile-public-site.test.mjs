@@ -19,6 +19,10 @@ const credibilityPage = readFileSync(new URL('./components/legacy/credibility-co
 const achievementPage = readFileSync(new URL('./components/legacy/achievement-records-page.tsx', import.meta.url), 'utf8');
 const specialtyProcessSource = readFileSync(new URL('./components/specialty/specialty-process.tsx', import.meta.url), 'utf8');
 const creationsPageSource = readFileSync(new URL('./app/[locale]/(site)/mastery/creations/page.tsx', import.meta.url), 'utf8');
+const creationsMobileMasthead = creationsPageSource.slice(
+  creationsPageSource.indexOf('<div className="mobile-creations-masthead'),
+  creationsPageSource.indexOf('<div className="mx-auto hidden max-w-[1220px]')
+);
 const newsPageSource = readFileSync(new URL('./app/[locale]/(site)/news/page.tsx', import.meta.url), 'utf8');
 const newsDetailSource = readFileSync(new URL('./app/[locale]/(site)/news/[slug]/page.tsx', import.meta.url), 'utf8');
 const newsGridSource = readFileSync(new URL('./components/news/news-journal-grid.tsx', import.meta.url), 'utf8');
@@ -172,9 +176,14 @@ test('Making mobile process uses readable fixed body copy and 4:3 media', () => 
   assert.match(specialtyProcessSource, /max-md:aspect-\[4\/3\]/);
 });
 
-test('Creations mobile masthead cannot clip the display title', () => {
-  assert.match(creationsPageSource, /mobile-display/);
-  assert.doesNotMatch(creationsPageSource, /whitespace-nowrap[^\n]+CREATIONS/);
+test('Creations mobile masthead is compact and introduces the three collection chapters once', () => {
+  assert.match(creationsMobileMasthead, /mobile-display/);
+  assert.match(creationsMobileMasthead, /mobile-creations-masthead lg:hidden/);
+  assert.match(creationsMobileMasthead, /String\(filters\.length\)\.padStart\(2, '0'\)/);
+  assert.match(creationsMobileMasthead, /\{content\.gallery\.title\}/);
+  assert.doesNotMatch(creationsMobileMasthead, /<figure|specialty_collection_hero|<figcaption/);
+  assert.doesNotMatch(creationsMobileMasthead, /whitespace-nowrap[^\n]+CREATIONS/);
+  assert.match(creationsPageSource, /hidden max-w-\[1220px\][^\n]+lg:block/);
 });
 
 test('News mobile list uses compact landscape cards and fixed display type', () => {

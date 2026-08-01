@@ -1,5 +1,4 @@
 import type {Metadata} from 'next';
-import Image from 'next/image';
 import {setRequestLocale} from 'next-intl/server';
 
 import {ScrollText} from '@/components/motion/scroll-text';
@@ -35,49 +34,36 @@ export default async function CollectionPage({params}: Props) {
 
   return (
     <main className="mobile-page-shell bg-bg text-text">
-      <section className="relative overflow-hidden bg-white pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+24px)] md:bg-bg md:pt-28">
+      <section className="relative overflow-hidden bg-white pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+24px)] lg:bg-bg lg:pt-28">
         <h1 className="sr-only">
           {content.hero.title}
         </h1>
-        <div className="md:hidden">
-          <div className="mx-auto max-w-[520px] px-[var(--mobile-page-gutter)] pb-10 pt-6">
+        <div className="mobile-creations-masthead lg:hidden">
+          <div className="mx-auto max-w-[520px] px-[var(--mobile-page-gutter)] pb-12 pt-8">
             <ScrollText>
               <p className="font-body text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
                 Curated Works
               </p>
-              <p aria-hidden="true" className="mobile-display mt-5 break-words [font-family:'Cormorant_Garamond',serif] font-bold uppercase text-primary">
+              <p
+                aria-hidden="true"
+                className="mobile-display mt-5 break-words [font-family:'Cormorant_Garamond',serif] font-bold uppercase text-primary"
+              >
                 {content.hero.title}
               </p>
-              <p className="mt-[30px] max-w-[28rem] whitespace-pre-line font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
+              <p className="mt-7 max-w-[28rem] whitespace-pre-line font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
                 {content.hero.subtitle}
               </p>
-            </ScrollText>
-
-            <figure className="mt-8 border-y border-primary/15 py-3">
-              <div className="relative aspect-[4/5] overflow-hidden bg-white">
-                <Image
-                  src="/images/specialty_collection_hero.png"
-                  alt=""
-                  fill
-                  sizes="100vw"
-                  priority
-                  className="object-cover object-[63%_center]"
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0)_52%,rgba(255,255,255,.88)_100%)]" aria-hidden="true" />
+              <div className="mt-10 flex min-h-11 items-center justify-between gap-5 border-t border-primary/15 pt-4 font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/55">
+                <span className="font-numeric text-accent">
+                  {String(filters.length).padStart(2, '0')}
+                </span>
+                <span className="text-right">{content.gallery.title}</span>
               </div>
-              <figcaption className="grid grid-cols-3 divide-x divide-primary/15 border-t border-primary/15 bg-white">
-                {filters.map((filter, index) => (
-                  <span key={filter.id} className="min-h-14 px-3 py-3 font-body text-[10px] font-semibold uppercase leading-[1.35] tracking-[0.12em] text-primary/68">
-                    <span className="block font-numeric text-[10px] text-accent/80">{String(index + 1).padStart(2, '0')}</span>
-                    {filter.label}
-                  </span>
-                ))}
-              </figcaption>
-            </figure>
+            </ScrollText>
           </div>
         </div>
 
-        <div className="mx-auto hidden max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)] md:block">
+        <div className="mx-auto hidden max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)] lg:block">
           <ScrollText className="mx-auto max-w-[720px] text-center">
             <p aria-hidden="true" className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
               {content.hero.title}
