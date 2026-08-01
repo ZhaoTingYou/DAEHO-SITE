@@ -141,10 +141,11 @@ export function SpecialtyCollectionGallery({
       animate={{opacity: 1}}
       transition={prefersReducedMotion ? {duration: 0} : {duration: 0.3, ease: [0.16, 1, 0.3, 1]}}
     >
-      <MobileCollectionIndex
+      <MobileCollectionActs
         categories={categoryCards}
         locale={locale}
         viewLabel={viewLabel}
+        reducedMotion={prefersReducedMotion}
       />
       <div
         role="group"
@@ -174,50 +175,47 @@ export function SpecialtyCollectionGallery({
   );
 }
 
-type MobileCollectionArtDirection = {
-  chapterClassName: string;
-  frameClassName: string;
-  backgroundClassName: string;
+type MobileCollectionActDirection = {
+  themeLabel: string;
+  sceneClassName: string;
+  backgroundImage: string;
   overlayClassName: string;
-  productClassName: string;
-  captionClassName: string;
+  haloClassName: string;
 };
 
-const mobileCollectionArtDirections: Record<string, MobileCollectionArtDirection> = {
+const mobileCollectionActDirections: Record<string, MobileCollectionActDirection> = {
   champion: {
-    chapterClassName: '',
-    frameClassName: 'aspect-[4/5] bg-primary',
-    backgroundClassName: 'opacity-95',
-    overlayClassName: 'bg-primary/15',
-    productClassName: 'w-[132%] max-w-none -translate-x-[4%]',
-    captionClassName: 'pr-1'
+    themeLabel: 'Victory · Legacy',
+    sceneClassName: 'bg-[#07182D] text-white',
+    backgroundImage: 'radial-gradient(circle at 64% 34%, #667884 0%, #26435D 18%, #0A2038 54%, #061426 100%)',
+    overlayClassName: 'bg-gradient-to-b from-transparent via-transparent to-[#061426]/90',
+    haloClassName: 'border-[#C4A474]'
   },
   appointment: {
-    chapterClassName: 'px-5',
-    frameClassName: 'aspect-square bg-bg',
-    backgroundClassName: 'opacity-65 saturate-[.8]',
-    overlayClassName: 'bg-white/25',
-    productClassName: 'w-[108%] max-w-none',
-    captionClassName: '-mx-5 pl-5'
+    themeLabel: 'Memory · Honor',
+    sceneClassName: 'bg-[#EFE8DC] text-primary',
+    backgroundImage: 'radial-gradient(circle at 34% 30%, #FFFFFF 0%, #E3D8C7 28%, #B0A595 78%, #93887B 100%)',
+    overlayClassName: 'bg-gradient-to-b from-white/5 via-transparent to-[#EFE8DC]/95',
+    haloClassName: 'border-[#B49463]'
   },
   bespoke: {
-    chapterClassName: 'pr-8',
-    frameClassName: 'aspect-[5/6] bg-accent/10',
-    backgroundClassName: 'opacity-80 sepia-[.12]',
-    overlayClassName: 'bg-accent/10 mix-blend-color',
-    productClassName: 'w-[84%] max-w-[280px]',
-    captionClassName: 'pr-2'
+    themeLabel: 'Story · Craft',
+    sceneClassName: 'bg-[#1C0E16] text-white',
+    backgroundImage: 'radial-gradient(circle at 68% 34%, #B5827C 0%, #722B3D 27%, #371925 65%, #1C0E16 100%)',
+    overlayClassName: 'bg-gradient-to-b from-transparent via-transparent to-[#1C0E16]/90',
+    haloClassName: 'rounded-[12px_50%_50%_12px] border-[#D2B895]'
   }
 };
 
-function getMobileCollectionArtDirection(categoryId: string): MobileCollectionArtDirection {
-  return mobileCollectionArtDirections[categoryId] ?? mobileCollectionArtDirections.champion;
+function getMobileCollectionActDirection(categoryId: string): MobileCollectionActDirection {
+  return mobileCollectionActDirections[categoryId] ?? mobileCollectionActDirections.champion;
 }
 
-function MobileCollectionIndex({
+function MobileCollectionActs({
   categories,
   locale,
-  viewLabel
+  viewLabel,
+  reducedMotion
 }: {
   categories: Array<
     SpecialtyCollectionFilter & {
@@ -227,29 +225,40 @@ function MobileCollectionIndex({
   >;
   locale: Locale;
   viewLabel: string;
+  reducedMotion: boolean;
 }) {
   return (
-    <div className="bg-white px-[var(--mobile-page-gutter)] pb-[calc(92px+env(safe-area-inset-bottom))] lg:hidden">
-      <div className="mx-auto max-w-[520px]">
-        {categories.map((category, index) => (
-          <MobileCollectionCard
-            key={category.id}
-            category={category}
-            index={index}
-            locale={locale}
-            viewLabel={viewLabel}
-          />
-        ))}
+    <div className="mobile-creations-acts lg:hidden">
+      {categories.map((category, index) => (
+        <MobileCollectionAct
+          key={category.id}
+          category={category}
+          index={index}
+          locale={locale}
+          viewLabel={viewLabel}
+          reducedMotion={reducedMotion}
+        />
+      ))}
+      <div className="grid min-h-40 place-items-center bg-primary px-[var(--mobile-page-gutter)] py-10 text-center text-white">
+        <div>
+          <p className="[font-family:'Cormorant_Garamond',serif] text-[24px] italic text-[#C4A474]">
+            Made to be remembered.
+          </p>
+          <p className="mt-3 font-body text-[9px] font-semibold uppercase tracking-[0.24em] text-white/55">
+            DAEHO · Seoul
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
-function MobileCollectionCard({
+function MobileCollectionAct({
   category,
   index,
   locale,
-  viewLabel
+  viewLabel,
+  reducedMotion
 }: {
   category: SpecialtyCollectionFilter & {
     item?: CollectionImageSource;
@@ -258,87 +267,67 @@ function MobileCollectionCard({
   index: number;
   locale: Locale;
   viewLabel: string;
+  reducedMotion: boolean;
 }) {
-  const artwork = getCollectionStageArtwork(category, index);
-  const direction = getMobileCollectionArtDirection(category.id);
+  const direction = getMobileCollectionActDirection(category.id);
   const href = category.href ?? `/${locale}/mastery/creations/${category.id}`;
-  const copy = getMobileCollectionCopy(locale, category.id);
 
   return (
-    <article className={`border-t border-primary/15 py-10 first:pt-3 ${direction.chapterClassName}`}>
+    <motion.article
+      initial={reducedMotion ? false : {opacity: 0, y: 24}}
+      whileInView={{opacity: 1, y: 0}}
+      viewport={{once: true, amount: 0.18}}
+      transition={reducedMotion ? {duration: 0} : {duration: 0.3, ease: [0.16, 1, 0.3, 1]}}
+      className={`relative overflow-hidden ${direction.sceneClassName}`}
+    >
       <Link
         href={href}
         aria-label={`${category.label} · ${viewLabel}`}
-        className="mobile-collection-card mobile-collection-chapter group block touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+        className="group relative flex min-h-[max(84dvh,560px)] touch-manipulation items-end overflow-hidden focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-current focus-visible:outline-offset-[-5px]"
       >
-        <div className="flex min-h-11 items-center justify-between gap-4 font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/52">
-          <span className="font-numeric text-accent">
-            {String(index + 1).padStart(2, '0')}
-          </span>
-          <span className="transition duration-200 ease-brand group-hover:text-accent group-focus-visible:text-accent motion-reduce:transition-none">
-            {viewLabel}
-          </span>
-        </div>
-
-        <figure className={`relative mt-3 overflow-hidden border border-primary/10 ${direction.frameClassName}`}>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{backgroundImage: direction.backgroundImage}}
+        />
+        <div
+          aria-hidden="true"
+          className={`absolute left-1/2 top-[34%] aspect-[1.8/1] w-[58%] -translate-x-1/2 -translate-y-1/2 -rotate-[14deg] rounded-[50%] border-[clamp(12px,4vw,22px)] opacity-90 shadow-[0_24px_42px_rgba(0,0,0,.32)] ${direction.haloClassName}`}
+        />
+        {category.item ? (
           <Image
-            src={imageSrc(artwork.background)}
+            src={imageSrc(category.item.image)}
             alt=""
             fill
-            sizes="(min-width: 768px) 520px, calc(100vw - 40px)"
-            className={`object-cover object-center transition duration-300 ease-brand group-hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none ${direction.backgroundClassName}`}
+            sizes="(min-width: 1024px) 0px, 100vw"
+            className="object-cover object-center transition duration-300 ease-brand group-hover:scale-[1.015] group-active:scale-[1.01] motion-reduce:transform-none motion-reduce:transition-none"
             priority={index === 0}
           />
-          <div className={`absolute inset-0 ${direction.overlayClassName}`} aria-hidden="true" />
-          <div className="absolute inset-x-7 bottom-7 h-12 bg-black/25 blur-2xl" aria-hidden="true" />
-          <div className="absolute inset-0 flex items-center justify-center px-3 py-7">
-            <Image
-              src={imageSrc(artwork.product)}
-              alt={`${category.label} ${copy}`}
-              width={artwork.productWidth}
-              height={artwork.productHeight}
-              sizes="(min-width: 768px) 520px, calc(100vw - 40px)"
-              className={`mobile-collection-product h-auto max-h-full object-contain drop-shadow-[0_24px_42px_rgba(0,0,0,.38)] transition duration-300 ease-brand group-hover:scale-[1.025] group-active:scale-[1.015] motion-reduce:transform-none motion-reduce:transition-none ${direction.productClassName}`}
-              priority={index === 0}
-            />
-          </div>
-        </figure>
+        ) : null}
+        <div aria-hidden="true" className={`absolute inset-0 ${direction.overlayClassName}`} />
 
-        <div className={`mt-6 grid grid-cols-[minmax(0,1fr)_44px] items-end gap-5 ${direction.captionClassName}`}>
-          <div className="space-y-3">
-            <h2 className="break-words font-heading text-[34px] font-semibold leading-[1.05] text-primary">
+        <div className="relative z-10 w-full px-[var(--mobile-page-gutter)] pb-[max(32px,env(safe-area-inset-bottom))] pt-28">
+          <div aria-hidden="true" className="flex items-center justify-between border-b border-current/45 pb-3 font-body text-[9px] font-semibold uppercase tracking-[0.2em] opacity-70">
+            <span>Act {String(index + 1).padStart(2, '0')}</span>
+            <span>{direction.themeLabel}</span>
+          </div>
+          <div className="relative mt-4 pr-14">
+            <h2 className="break-words [font-family:'Cormorant_Garamond',serif] text-[clamp(40px,12vw,56px)] font-semibold leading-[0.95] tracking-[-0.03em]">
               {category.label}
             </h2>
-            <p className="mobile-copy max-w-[24rem] whitespace-pre-line font-body text-primary/68">
-              {copy}
+            <p className="mt-4 max-w-[19rem] whitespace-pre-line font-body text-[16px] font-medium leading-[1.65] opacity-[.78]">
+              {category.description}
             </p>
+            <span aria-hidden="true" className="mobile-tap-target absolute bottom-0 right-0 grid h-11 w-11 place-items-center rounded-full border border-current/55 transition duration-200 ease-brand group-hover:border-[#C4A474] group-hover:text-[#C4A474] group-focus-visible:border-[#C4A474] group-focus-visible:text-[#C4A474] motion-reduce:transition-none">
+              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none">
+                <path d="M5 15 15 5M8 5h7v7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
           </div>
-          <span className="mobile-tap-target grid h-11 w-11 place-items-center border border-primary/20 text-primary transition duration-200 ease-brand group-hover:border-accent group-hover:text-accent group-focus-visible:border-accent group-focus-visible:text-accent motion-reduce:transition-none" aria-hidden="true">
-            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none">
-              <path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
         </div>
       </Link>
-    </article>
+    </motion.article>
   );
-}
-
-function getMobileCollectionCopy(locale: Locale, categoryId: string) {
-  const copy: Record<Locale, Record<string, string>> = {
-    ko: {
-      champion: '우승의 기록을 상징, 중량, 세공의 균형으로 완성합니다.',
-      appointment: '임관의 순간을 세대가 간직할 기념의 구조로 설계합니다.',
-      bespoke: '개인의 이야기와 착용 장면을 하나의 맞춤 형태로 정리합니다.'
-    },
-    en: {
-      champion: 'Championship records shaped through symbol, weight, and finish.',
-      appointment: 'Appointment moments composed as keepsakes for service and family.',
-      bespoke: 'Personal symbols and wearing rituals arranged into one bespoke form.'
-    }
-  };
-
-  return copy[locale][categoryId] ?? copy.en[categoryId] ?? '';
 }
 
 export function SpecialtyCollectionCategory({

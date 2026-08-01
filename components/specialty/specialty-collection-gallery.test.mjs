@@ -34,12 +34,12 @@ const stageImageSource = source.slice(
   source.indexOf('function CollectionImage(')
 );
 const mobileCollectionSource = source.slice(
-  source.indexOf('type MobileCollectionArtDirection'),
+  source.indexOf('type MobileCollectionActDirection'),
   source.indexOf('export function SpecialtyCollectionCategory(')
 );
 const galleryEntrySource = source.slice(
   source.indexOf('export function SpecialtyCollectionGallery('),
-  source.indexOf('function MobileCollectionIndex(')
+  source.indexOf('function MobileCollectionActs(')
 );
 
 test('bespoke toolbar does not render the active category label beside the filter button', () => {
@@ -141,26 +141,32 @@ test('collection stage artwork is exposed through CMS content fields', () => {
   }
 });
 
-test('collection mobile index renders three editorial art directions as full-card links', () => {
-  assert.match(mobileCollectionSource, /type MobileCollectionArtDirection/);
-  assert.match(mobileCollectionSource, /function getMobileCollectionArtDirection/);
-  assert.match(mobileCollectionSource, /champion:[\s\S]*aspect-\[4\/5\]/);
-  assert.match(mobileCollectionSource, /appointment:[\s\S]*aspect-square/);
-  assert.match(mobileCollectionSource, /bespoke:[\s\S]*aspect-\[5\/6\]/);
-  assert.match(mobileCollectionSource, /mobile-collection-card mobile-collection-chapter/);
+test('collection mobile entry renders three cinematic acts as full-section links', () => {
+  assert.match(mobileCollectionSource, /type MobileCollectionActDirection/);
+  assert.match(mobileCollectionSource, /function getMobileCollectionActDirection/);
+  assert.match(mobileCollectionSource, /champion:[\s\S]*Victory · Legacy/);
+  assert.match(mobileCollectionSource, /appointment:[\s\S]*Memory · Honor/);
+  assert.match(mobileCollectionSource, /bespoke:[\s\S]*Story · Craft/);
+  assert.match(mobileCollectionSource, /min-h-\[max\(84dvh,560px\)\]/);
   assert.match(mobileCollectionSource, /aria-label=\{`\$\{category\.label\} · \$\{viewLabel\}`\}/);
   assert.match(mobileCollectionSource, /<h2[\s\S]*\{category\.label\}[\s\S]*<\/h2>/);
+  assert.match(mobileCollectionSource, /\{category\.description\}/);
   assert.match(mobileCollectionSource, /mobile-tap-target/);
-  assert.match(mobileCollectionSource, /<svg[\s\S]*viewBox="0 0 20 20"/);
-  assert.doesNotMatch(mobileCollectionSource, /line-clamp-2/);
+  assert.match(mobileCollectionSource, /viewBox="0 0 20 20"/);
+  assert.doesNotMatch(mobileCollectionSource, /MobileCollectionCard|mobile-collection-card|frameClassName/);
+  assert.doesNotMatch(mobileCollectionSource, /line-clamp/);
 });
 
-test('collection mobile media is stable, responsive, and prioritizes only the first chapter', () => {
+test('collection mobile acts keep CSS fallbacks, responsive artwork, and reduced motion', () => {
+  assert.match(mobileCollectionSource, /style=\{\{backgroundImage: direction\.backgroundImage\}\}/);
+  assert.match(mobileCollectionSource, /category\.item \?/);
+  assert.match(mobileCollectionSource, /alt=""/);
   assert.match(mobileCollectionSource, /priority=\{index === 0\}/);
-  assert.match(mobileCollectionSource, /sizes="\(min-width: 768px\) 520px, calc\(100vw - 40px\)"/);
+  assert.match(mobileCollectionSource, /sizes="\(min-width: 1024px\) 0px, 100vw"/);
+  assert.match(mobileCollectionSource, /initial=\{reducedMotion \? false : \{opacity: 0, y: 24\}\}/);
+  assert.match(mobileCollectionSource, /viewport=\{\{once: true, amount: 0\.18\}\}/);
   assert.match(mobileCollectionSource, /motion-reduce:transition-none/);
-  assert.match(mobileCollectionSource, /motion-reduce:transform-none/);
-  assert.match(galleryEntrySource, /initial=\{prefersReducedMotion \? false : \{opacity: 0\}\}/);
+  assert.match(mobileCollectionSource, /Made to be remembered\./);
   assert.match(galleryEntrySource, /className="hidden lg:grid"/);
 });
 
