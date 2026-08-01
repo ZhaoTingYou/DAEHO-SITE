@@ -104,6 +104,11 @@ const guideSpecs = {
     ko: '투명 PNG/WebP 제품 이미지 권장. object-contain이며 3%-6% 여백을 남기세요.',
     en: 'Transparent PNG/WebP product image. Object-contain with 3%-6% padding.'
   }),
+  mobileCollectionAct: spec('9:16', '1440 x 2560', {
+    zh: '移动端整屏入口图，object-cover 裁切；主体放在中央偏上，并为底部文字预留空间。',
+    ko: '모바일 전체 화면 입구 이미지입니다. object-cover로 잘리므로 피사체를 중앙보다 약간 위에 두고 하단 문구 공간을 남겨 주세요.',
+    en: 'Full-screen mobile entrance image. Keep the subject slightly above center and leave room for copy at the bottom.'
+  }),
   appointmentHero: spec('约 1.14:1', '1400 x 1220', {
     zh: '透明或浅底产品图，按原图比例显示。',
     ko: '투명/밝은 배경 제품 이미지입니다. 원본 비율로 표시됩니다.',
@@ -200,14 +205,17 @@ const pageGuideKeys: Record<string, string> = {
   'mastery-creations|main|gallery.filters.*.image': 'collectionProduct',
   'mastery-creations|main|gallery.filters.*.background': 'collectionBackground',
   'mastery-creations|main|gallery.filters.*.product': 'collectionStageProduct',
+  'mastery-creations|main|gallery.filters.*.mobileImage': 'mobileCollectionAct',
 
   'mastery-creations-champion|main|image': 'collectionProduct',
   'mastery-creations-champion|main|background': 'collectionBackground',
   'mastery-creations-champion|main|product': 'collectionStageProduct',
+  'mastery-creations-champion|main|mobileImage': 'mobileCollectionAct',
 
   'mastery-creations-appointment|main|image': 'collectionProduct',
   'mastery-creations-appointment|main|background': 'collectionBackground',
   'mastery-creations-appointment|main|product': 'collectionStageProduct',
+  'mastery-creations-appointment|main|mobileImage': 'mobileCollectionAct',
   'mastery-creations-appointment|appointment|heroImage': 'appointmentHero',
   'mastery-creations-appointment|appointment|honor.image': 'appointmentHonor',
   'mastery-creations-appointment|appointment|keepsake.image': 'appointmentKeepsake',
@@ -216,6 +224,7 @@ const pageGuideKeys: Record<string, string> = {
   'mastery-creations-bespoke|main|image': 'collectionProduct',
   'mastery-creations-bespoke|main|background': 'collectionBackground',
   'mastery-creations-bespoke|main|product': 'collectionStageProduct',
+  'mastery-creations-bespoke|main|mobileImage': 'mobileCollectionAct',
 
   'news|main|featured.image': 'newsFeatured',
   'news|newsUi|detail.ogImagePath': 'seo',

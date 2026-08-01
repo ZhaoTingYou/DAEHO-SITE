@@ -355,7 +355,8 @@
           {"path": "description", "label": "分类说明", "type": "textarea", "rows": 3},
           {"path": "image", "label": "分类图片", "type": "image"},
           {"path": "background", "label": "展示背景图", "type": "image"},
-          {"path": "product", "label": "展示产品 PNG", "type": "image"}
+          {"path": "product", "label": "展示产品 PNG", "type": "image"},
+          {"path": "mobileImage", "label": "移动端入口图片", "type": "image"}
         ]
       },
       {"groupKey": "collectionUi", "path": "categoryBackHref", "label": "分类页返回链接", "type": "link"},
@@ -399,6 +400,7 @@
       {"groupKey": "main", "path": "image", "label": "分类图片", "type": "image"},
       {"groupKey": "main", "path": "background", "label": "展示背景图", "type": "image"},
       {"groupKey": "main", "path": "product", "label": "展示产品 PNG", "type": "image"},
+      {"groupKey": "main", "path": "mobileImage", "label": "移动端入口图片", "type": "image"},
       {"groupKey": "finder", "path": "eyebrow", "label": "Finder 眉标"},
       {"groupKey": "finder", "path": "title", "label": "Finder 标题"},
       {"groupKey": "finder", "path": "body", "label": "Finder 正文", "type": "textarea", "rows": 3},
@@ -431,6 +433,7 @@
       {"groupKey": "main", "path": "image", "label": "分类图片", "type": "image"},
       {"groupKey": "main", "path": "background", "label": "展示背景图", "type": "image"},
       {"groupKey": "main", "path": "product", "label": "展示产品 PNG", "type": "image"},
+      {"groupKey": "main", "path": "mobileImage", "label": "移动端入口图片", "type": "image"},
       {"groupKey": "appointment", "path": "heroAlt", "label": "Hero 图片描述"},
       {"groupKey": "appointment", "path": "heroImage", "label": "Hero 图片", "type": "image"},
       {"groupKey": "appointment", "path": "intro.title", "label": "顶部标题"},
@@ -478,6 +481,7 @@
       {"groupKey": "main", "path": "image", "label": "分类图片", "type": "image"},
       {"groupKey": "main", "path": "background", "label": "展示背景图", "type": "image"},
       {"groupKey": "main", "path": "product", "label": "展示产品 PNG", "type": "image"},
+      {"groupKey": "main", "path": "mobileImage", "label": "移动端入口图片", "type": "image"},
       {"groupKey": "bespoke", "path": "period", "label": "期间"},
       {"groupKey": "bespoke", "path": "collectionTitle", "label": "Collection 标题"},
       {"groupKey": "bespoke", "path": "introTitle", "label": "Intro 标题"},

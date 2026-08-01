@@ -813,7 +813,8 @@
             "description": "승리의 순간을 영원의 형태로",
             "image": "c1.png",
             "background": "bg1.jpg",
-            "product": "c1.png"
+            "product": "c1.png",
+            "mobileImage": ""
           },
           {
             "id": "appointment",
@@ -822,7 +823,8 @@
             "description": "소속과 임명의 의미를 담은 반지",
             "image": "c2.png",
             "background": "bg3.jpg",
-            "product": "c2.png"
+            "product": "c2.png",
+            "mobileImage": ""
           },
           {
             "id": "bespoke",
@@ -831,7 +833,8 @@
             "description": "이야기에서 시작되는 맞춤 제작",
             "image": "c3.png",
             "background": "bg2.jpg",
-            "product": "c3.png"
+            "product": "c3.png",
+            "mobileImage": ""
           }
         ],
         "items": [

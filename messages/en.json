@@ -813,7 +813,8 @@
             "description": "The winning moment, made permanent",
             "image": "c1.png",
             "background": "bg1.jpg",
-            "product": "c1.png"
+            "product": "c1.png",
+            "mobileImage": ""
           },
           {
             "id": "appointment",
@@ -822,7 +823,8 @@
             "description": "Rings for belonging and appointment",
             "image": "c2.png",
             "background": "bg3.jpg",
-            "product": "c2.png"
+            "product": "c2.png",
+            "mobileImage": ""
           },
           {
             "id": "bespoke",
@@ -831,7 +833,8 @@
             "description": "Made-to-order works shaped by a story",
             "image": "c3.png",
             "background": "bg2.jpg",
-            "product": "c3.png"
+            "product": "c3.png",
+            "mobileImage": ""
           }
         ],
         "items": [

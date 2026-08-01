@@ -16,6 +16,7 @@ const historyBackButtonSource = existsSync(historyBackButtonUrl)
 const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
 const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 const pageCatalog = JSON.parse(readFileSync(new URL('../../lib/cms/page-catalog.json', import.meta.url), 'utf8'));
+const imageGuidesSource = readFileSync(new URL('../../lib/cms/image-guides.ts', import.meta.url), 'utf8');
 const cmsPreview = JSON.parse(readFileSync(new URL('../../data/cms-preview.json', import.meta.url), 'utf8'));
 const publicContentSource = readFileSync(new URL('../../lib/cms/public-content.ts', import.meta.url), 'utf8');
 const adminActionsSource = readFileSync(new URL('../../app/admin/actions.ts', import.meta.url), 'utf8');
@@ -113,32 +114,45 @@ test('collection stage cards declare separate background and product artwork in 
   ]);
 });
 
-test('collection stage artwork is exposed through CMS content fields', () => {
+test('collection stage and mobile artwork are exposed through CMS content fields', () => {
   assert.ok(
     source.includes('filter.background ?? fallback.background') &&
       source.includes('filter.product ?? filter.image ?? fallback.product'),
-    'stage artwork should prefer CMS background/product fields before falling back'
+    'desktop stage artwork should continue to prefer CMS background/product fields'
   );
 
   for (const messages of [koMessages, enMessages]) {
-    const pairs = messages.specialtyPages.collection.gallery.filters.map(({background, product}) => ({background, product}));
+    const artwork = messages.specialtyPages.collection.gallery.filters.map(
+      ({background, product, mobileImage}) => ({background, product, mobileImage})
+    );
 
-    assert.deepEqual(pairs, [
-      {background: 'bg1.jpg', product: 'c1.png'},
-      {background: 'bg3.jpg', product: 'c2.png'},
-      {background: 'bg2.jpg', product: 'c3.png'}
+    assert.deepEqual(artwork, [
+      {background: 'bg1.jpg', product: 'c1.png', mobileImage: ''},
+      {background: 'bg3.jpg', product: 'c2.png', mobileImage: ''},
+      {background: 'bg2.jpg', product: 'c3.png', mobileImage: ''}
     ]);
   }
 
+  const creationsPage = pageCatalog.find((page) => page.pageKey === 'mastery-creations');
+  const filtersField = creationsPage?.fields.find((field) => field.path === 'gallery.filters');
+  assert.ok(filtersField?.itemFields.some((field) => field.path === 'mobileImage' && field.type === 'image'));
+
   const categoryPages = pageCatalog.filter((page) => page.pageKey.startsWith('mastery-creations-'));
 
-  assert.equal(categoryPages.length, 3, 'each creations category should have its own CMS page entry');
+  assert.equal(categoryPages.length, 3);
   for (const page of categoryPages) {
     const fieldPaths = page.fields.map((field) => field.path);
 
-    assert.ok(fieldPaths.includes('background'), `${page.pageKey} should expose a background image field`);
-    assert.ok(fieldPaths.includes('product'), `${page.pageKey} should expose a product PNG field`);
+    assert.ok(fieldPaths.includes('background'));
+    assert.ok(fieldPaths.includes('product'));
+    assert.ok(fieldPaths.includes('mobileImage'), `${page.pageKey} should expose a mobile entrance image`);
   }
+
+  assert.match(imageGuidesSource, /mobileCollectionAct: spec\('9:16', '1440 x 2560'/);
+  assert.match(
+    imageGuidesSource,
+    /'mastery-creations\|main\|gallery\.filters\.\*\.mobileImage': 'mobileCollectionAct'/
+  );
 });
 
 test('collection mobile entry renders three cinematic acts as full-section links', () => {
