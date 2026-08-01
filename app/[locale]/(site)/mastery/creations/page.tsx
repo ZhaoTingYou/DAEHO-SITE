@@ -46,11 +46,10 @@ export default async function CollectionPage({params}: Props) {
               </p>
               <p
                 aria-hidden="true"
-                className="mobile-display mt-5 break-words [font-family:'Cormorant_Garamond',serif] font-bold uppercase text-primary"
-              >
+                className="mobile-display mt-5 break-words [font-family:'Cormorant_Garamond',serif] font-bold uppercase text-primary">
                 {content.hero.title}
               </p>
-              <p className="mt-7 max-w-[28rem] whitespace-pre-line font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
+              <p className="mt-[30px] max-w-[28rem] whitespace-pre-line font-heading text-[16px] font-semibold leading-[1.75] text-primary/82">
                 {content.hero.subtitle}
               </p>
               <div className="mt-10 flex min-h-11 items-center justify-between gap-5 border-t border-primary/15 pt-4 font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/55">
