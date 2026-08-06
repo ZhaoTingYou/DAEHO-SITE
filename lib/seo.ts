@@ -67,9 +67,9 @@ const pathByPageKey: Record<PageKey, string> = {
 const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>> = {
   ko: {
     home: {
-      title: '대호 우승반지 제작 전문',
+      title: '대호 우승반지·챔피언십 반지·맞춤 트로피 제작',
       description:
-        '대호는 1988년부터 프로스포츠 구단, 학교, 단체의 우승반지와 기념반지를 맞춤 제작합니다.'
+        '대호는 1988년부터 우승반지, 챔피언십 반지, 맞춤 트로피, 스포츠 행사 기념품을 프로스포츠 구단과 학교, 단체에 맞춤 제작합니다.'
     },
     chronicle: {
       title: '대호 1988년 우승반지 제작 아카이브',
