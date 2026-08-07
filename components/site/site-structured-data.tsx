@@ -5,23 +5,51 @@ import {metadataBase} from '@/lib/seo';
 const siteName = '대호';
 const siteAlternateNames = ['DAEHO', '대호반지', '대호 우승반지', 'DAEHO championship rings'];
 const organizationDescription =
-  '대호(DAEHO)는 1988년부터 우승반지, 임관반지, 단체 기념반지와 맞춤 주얼리를 제작하는 한국의 상징물 제작사입니다.';
+  '대호(DAEHO)는 1988년부터 우승반지, 챔피언십 반지, 맞춤 트로피, 스포츠 행사 기념품과 맞춤 주얼리를 제작하는 한국의 상징물 제작사입니다.';
 const serviceItems = [
   {
     id: 'championship-rings',
     name: '우승반지 제작',
-    alternateName: ['챔피언십 링', 'Championship Ring Production', 'Sports Championship Rings'],
+    alternateName: [
+      '챔피언십 반지',
+      '챔피언십 링',
+      'Championship Ring Production',
+      'Sports Championship Rings'
+    ],
     serviceType: 'Custom championship ring production',
     description:
-      '프로스포츠 구단, 학교, 단체의 우승 기록을 담는 맞춤 우승반지와 챔피언십 링을 디자인하고 제작합니다.',
+      '프로스포츠 구단, 학교, 단체의 우승 기록을 담는 맞춤 우승반지와 챔피언십 반지를 디자인하고 제작합니다.',
     url: '/ko/mastery/creations/champion'
   },
   {
-    id: 'appointment-rings',
-    name: '임관반지 제작',
-    alternateName: ['기념반지 제작', 'Appointment Ring Production', 'Commission Rings'],
-    serviceType: 'Custom appointment and commemorative ring production',
-    description: '임관, 진급, 단체 기념의 상징을 반영한 임관반지와 기념반지를 맞춤 제작합니다.',
+    id: 'custom-trophies',
+    name: '맞춤 트로피 제작',
+    alternateName: ['우승 트로피 제작', 'Custom Trophy Production', 'Award Trophies'],
+    serviceType: 'Custom trophy and award object production',
+    description:
+      '대회와 시상식의 성격에 맞춰 형태, 소재, 각인을 설계한 맞춤 트로피와 시상 오브젝트를 제작합니다.',
+    url: '/ko/mastery/creations/bespoke'
+  },
+  {
+    id: 'event-souvenirs',
+    name: '행사 기념품 제작',
+    alternateName: [
+      '스포츠 행사 기념품',
+      '단체 기념품 제작',
+      'Event Commemorative Goods',
+      'Sports Event Awards'
+    ],
+    serviceType: 'Event and sports commemorative goods production',
+    description:
+      '스포츠 행사, 창립 기념, 단체 행사의 목적과 참여 규모에 맞춘 행사 기념품을 기획하고 제작합니다.',
+    url: '/ko/mastery/creations/bespoke'
+  },
+  {
+    id: 'commemorative-rings',
+    name: '단체 기념반지 제작',
+    alternateName: ['기념반지 제작', 'Commemorative Ring Production', 'Group Commemorative Rings'],
+    serviceType: 'Group commemorative ring production',
+    description: '단체와 기관의 기념 순간을 상징으로 남기는 단체 기념반지를 맞춤 제작합니다.',
     url: '/ko/mastery/creations/appointment'
   },
   {
@@ -77,10 +105,21 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
           '대호반지',
           '우승반지 제작',
           '스포츠 우승반지',
-          '임관반지 제작',
+          '챔피언십 반지',
           '챔피언십 링',
           'championship rings',
           'championship ring maker',
+          '맞춤 트로피',
+          '맞춤 트로피 제작',
+          '우승 트로피 제작',
+          'custom trophy production',
+          '행사 기념품',
+          '행사 기념품 제작',
+          '단체 기념품 제작',
+          'event commemorative goods',
+          '스포츠 행사',
+          '스포츠 행사 기념품',
+          'sports event awards',
           '단체 기념반지',
           '맞춤 반지 주문제작',
           '맞춤 주얼리 제작'

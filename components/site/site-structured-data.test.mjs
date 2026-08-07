@@ -18,7 +18,6 @@ test('site structured data declares preferred Google site name and organization 
   assert.doesNotMatch(structuredDataSource, /주식회사 대호/);
   assert.match(structuredDataSource, /knowsAbout: \[/);
   assert.match(structuredDataSource, /'우승반지 제작'/);
-  assert.match(structuredDataSource, /'임관반지 제작'/);
   assert.match(structuredDataSource, /'대호 우승반지'/);
   assert.match(structuredDataSource, /'championship ring maker'/);
   assert.match(structuredDataSource, /telephone: '\+82-2-765-2737'/);
@@ -34,6 +33,23 @@ test('site structured data exposes service entities for high-intent search terms
   assert.match(structuredDataSource, /'@type': 'Service'/);
   assert.match(structuredDataSource, /hasOfferCatalog/);
   assert.match(structuredDataSource, /makesOffer/);
+});
+
+test('site structured data covers every target keyword axis for daeho.works', () => {
+  assert.match(structuredDataSource, /name: '맞춤 트로피 제작'/);
+  assert.match(structuredDataSource, /name: '행사 기념품 제작'/);
+  assert.match(structuredDataSource, /'챔피언십 반지'/);
+  assert.match(structuredDataSource, /'스포츠 행사 기념품'/);
+  assert.match(structuredDataSource, /'Custom Trophy Production'/);
+  assert.match(structuredDataSource, /'Event Commemorative Goods'/);
+});
+
+test('site structured data keeps appointment ring terms reserved for daehogold.com', () => {
+  // daehogold.com이 임관반지 전문 도메인이므로 daeho.works는 해당 신호를 노출하지 않는다.
+  // 단체 기념반지 축으로만 표현해 두 도메인의 키워드 카니발라이제이션을 방지한다.
+  assert.doesNotMatch(structuredDataSource, /임관반지/);
+  assert.doesNotMatch(structuredDataSource, /Appointment Ring/);
+  assert.match(structuredDataSource, /name: '단체 기념반지 제작'/);
 });
 
 test('localized public layout renders site structured data on every locale page', () => {
