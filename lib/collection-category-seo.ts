@@ -18,9 +18,9 @@ const categorySeoByLocale: Record<Locale, Record<string, CategorySeo>> = {
         '대호는 1988년부터 프로스포츠 구단, 학교, 단체를 위한 맞춤 우승반지와 챔피언십 링을 디자인하고 납품해왔습니다.'
     },
     appointment: {
-      title: '대호 임관반지 제작',
+      title: '대호 단체 기념반지 제작',
       description:
-        '대호는 임관, 진급, 단체 기념의 의미를 담은 임관반지를 맞춤 디자인과 안정적인 단체 납품 기준으로 제작합니다.'
+        '대호는 기관과 단체의 기념 순간을 담은 단체 기념반지를 맞춤 디자인과 안정적인 단체 납품 기준으로 제작합니다.'
     },
     bespoke: {
       title: '대호 맞춤 반지 주문제작',

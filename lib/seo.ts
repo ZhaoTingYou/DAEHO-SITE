@@ -69,17 +69,17 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
     home: {
       title: '대호 우승반지·챔피언십 반지·맞춤 트로피 제작',
       description:
-        '대호는 1988년부터 우승반지, 챔피언십 반지, 맞춤 트로피, 스포츠 행사 기념품을 프로스포츠 구단과 학교, 단체에 맞춤 제작합니다.'
+        '대호는 1988년부터 우승반지, 챔피언십 반지, 맞춤 트로피, 스포츠 행사 기념품을 구단과 학교, 단체에 맞춤 제작합니다.'
     },
     chronicle: {
-      title: '대호 1988년 우승반지 제작 아카이브',
+      title: '대호 1988년 우승반지·트로피 제작 아카이브',
       description:
-        '1988년부터 이어진 대호의 우승반지, 임관반지, 단체 기념반지 제작 기록과 한국 시장에서 쌓은 납품 경험을 정리합니다.'
+        '1988년부터 이어진 대호의 우승반지, 챔피언십 반지, 맞춤 트로피, 행사 기념품 제작 기록과 한국 시장에서 쌓은 납품 경험을 정리합니다.'
     },
     loyalty: {
       title: '대호 제작 신의와 장기 고객 관계',
       description:
-        '대호는 반복 의뢰와 장기 고객 관계를 바탕으로 우승반지, 임관반지, 단체 기념 제품 제작의 신의를 쌓아왔습니다.'
+        '대호는 반복 의뢰와 장기 고객 관계를 바탕으로 우승반지, 맞춤 트로피, 스포츠 행사 기념품 제작의 신의를 쌓아왔습니다.'
     },
     credibility: {
       title: '대호 맞춤 반지 제작 신뢰 기준',
@@ -87,14 +87,14 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
         '대호는 디자인, 3D 설계, 세공, 각인, 검수, 포장까지 자체 기준으로 관리해 단체 주문과 맞춤 반지 제작의 신뢰를 높입니다.'
     },
     achievement: {
-      title: '대호 우승반지 제작 실적과 기록',
+      title: '대호 우승반지·챔피언십 반지 제작 실적',
       description:
-        '프로스포츠 구단과 단체 프로젝트에서 쌓은 대호의 챔피언십 링, 임관반지, 기념반지 제작 실적과 시장 기록을 확인합니다.'
+        '프로스포츠 구단과 스포츠 행사 프로젝트에서 쌓은 대호의 우승반지, 챔피언십 반지, 맞춤 트로피 제작 실적과 시장 기록을 확인합니다.'
     },
     technique: {
       title: '우승반지·맞춤 트로피 제작 공정',
       description:
-        '대호는 우승반지, 챔피언십 반지, 맞춤 트로피 제작을 디자인 상담부터 3D 모델링, 주조, 세공, 각인, 검수까지 자체 공정으로 관리합니다.'
+        '대호는 1988년부터 우승반지 제작을 중심으로 챔피언십 반지, 맞춤 트로피, 행사 기념품을 디자인 상담, 3D 모델링, 주조, 세공, 각인, 검수까지 관리합니다.'
     },
     techniqueRecords: {
       title: '대호 기술 기록과 맞춤 트로피·반지 세공 기준',
@@ -102,9 +102,9 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
         '대호의 우승반지, 맞춤 트로피, 행사 기념품 제작 기술과 세공 기준, 표면 처리, 구조 설계 자료를 정리하는 기술 기록 페이지입니다.'
     },
     collection: {
-      title: '대호 우승반지·임관반지·주문제작 컬렉션',
+      title: '대호 우승반지·트로피·기념품 제작 사례',
       description:
-        '대호의 우승반지, 임관반지, 주문제작 반지 사례를 카테고리별로 살펴보고 프로스포츠 구단, 학교, 단체 맞춤 제작 방향을 확인하세요.'
+        '대호의 우승반지, 챔피언십 반지, 맞춤 트로피, 행사 기념품 사례를 카테고리별로 살펴보고 구단, 학교, 단체 맞춤 제작 방향을 확인하세요.'
     },
     news: {
       title: '대호 뉴스와 우승반지 제작 사례',
@@ -117,9 +117,9 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
         '대호는 골프 클럽 형태와 개인 각인을 반영한 맞춤 골프 팔찌를 상담 기반으로 제작해 라운드의 기록과 선물을 오브젝트로 남깁니다.'
     },
     contact: {
-      title: '대호 우승반지 제작 문의',
+      title: '대호 우승반지·맞춤 트로피 제작 문의',
       description:
-        '우승반지, 임관반지, 단체 기념반지, 맞춤 주얼리 제작 상담을 위해 프로젝트 목적, 수량, 일정, 참고 자료를 보내주세요.'
+        '우승반지, 챔피언십 반지, 맞춤 트로피, 행사 기념품 제작 상담을 위해 프로젝트 목적, 수량, 일정, 참고 자료를 보내주세요.'
     },
     golfInquiry: {
       title: '대호 골프 팔찌 상담 신청',
@@ -352,7 +352,7 @@ function formatMetadataTitle(locale: Locale, pageTitle: string) {
 function formatMetadataDescription(locale: Locale, description: string) {
   const fallbackDescription =
     locale === 'ko'
-      ? '대호(DAEHO)는 우승반지, 임관반지, 단체 맞춤 반지를 전문으로 제작합니다.'
+      ? '대호(DAEHO)는 우승반지, 챔피언십 반지, 맞춤 트로피, 행사 기념품을 전문으로 제작합니다.'
       : 'DAEHO (대호) creates championship rings, appointment rings, and custom group rings.';
   let nextDescription = description.trim() || fallbackDescription;
 
