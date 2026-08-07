@@ -349,6 +349,29 @@ function formatMetadataTitle(locale: Locale, pageTitle: string) {
   return /\bDAEHO\b/i.test(titleWithKoreanBrand) ? titleWithKoreanBrand : `${titleWithKoreanBrand} | DAEHO`;
 }
 
+// 검색결과에서 잘리지 않도록 메타 설명 길이를 제한한다.
+// CMS에서 본문을 그대로 넣는 경우 300자를 넘기기도 해 여기서 한 번 더 막는다.
+const MAX_DESCRIPTION_LENGTH = 160;
+
+function clampDescription(value: string) {
+  const singleLine = value.replace(/\s+/g, ' ').trim();
+
+  if (singleLine.length <= MAX_DESCRIPTION_LENGTH) {
+    return singleLine;
+  }
+
+  const sliced = singleLine.slice(0, MAX_DESCRIPTION_LENGTH);
+  const sentenceEnd = Math.max(sliced.lastIndexOf('. '), sliced.lastIndexOf('다. '));
+
+  if (sentenceEnd > MAX_DESCRIPTION_LENGTH * 0.6) {
+    return sliced.slice(0, sentenceEnd + 1).trim();
+  }
+
+  const lastSpace = sliced.lastIndexOf(' ');
+
+  return `${(lastSpace > MAX_DESCRIPTION_LENGTH * 0.6 ? sliced.slice(0, lastSpace) : sliced).trim()}…`;
+}
+
 function formatMetadataDescription(locale: Locale, description: string) {
   const fallbackDescription =
     locale === 'ko'
@@ -368,7 +391,7 @@ function formatMetadataDescription(locale: Locale, description: string) {
       nextDescription = nextDescription.replace('대호', '대호(DAEHO)');
     }
 
-    return nextDescription;
+    return clampDescription(nextDescription);
   }
 
   if (!/\bDAEHO\b/i.test(nextDescription)) {
@@ -379,7 +402,7 @@ function formatMetadataDescription(locale: Locale, description: string) {
     nextDescription = appendSentence(nextDescription, 'Korean brand name: 대호.');
   }
 
-  return nextDescription;
+  return clampDescription(nextDescription);
 }
 
 function appendSentence(value: string, sentence: string) {
