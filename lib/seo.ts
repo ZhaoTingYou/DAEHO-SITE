@@ -68,59 +68,59 @@ const pathByPageKey: Record<PageKey, string> = {
 const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>> = {
   ko: {
     home: {
-      title: '대호 우승반지 제작 전문',
+      title: '대호 우승반지 제작·커스텀 트로피 전문',
       description:
-        '대호는 1988년부터 프로스포츠 구단, 학교, 단체의 우승반지와 기념반지를 맞춤 제작합니다.'
+        '대호는 1988년부터 우승반지 제작을 중심으로 커스텀 트로피, 기업 행사 기념품, 맞춤 주얼리를 제작합니다.'
     },
     chronicle: {
       title: '대호 1988년 우승반지 제작 아카이브',
       description:
-        '1988년부터 이어진 대호의 우승반지, 임관반지, 단체 기념반지 제작 기록과 한국 시장에서 쌓은 납품 경험을 정리합니다.'
+        '1988년부터 이어진 대호의 우승반지 제작 기록과 단체 기념 제품 납품 경험, 국내 시장에서 쌓은 맞춤 제작 사례를 정리합니다.'
     },
     loyalty: {
-      title: '대호 제작 신의와 장기 고객 관계',
+      title: '대호 기업 행사 기념품 제작 신뢰',
       description:
-        '대호는 반복 의뢰와 장기 고객 관계를 바탕으로 우승반지, 임관반지, 단체 기념 제품 제작의 신의를 쌓아왔습니다.'
+        '대호는 프로스포츠 구단, 학교, 기관, 기업의 반복 의뢰를 바탕으로 기업 행사 기념품과 맞춤 제작 프로젝트의 신의를 쌓아왔습니다.'
     },
     credibility: {
-      title: '대호 맞춤 반지 제작 신뢰 기준',
+      title: '대호 맞춤 주얼리 제작 신뢰 기준',
       description:
-        '대호는 디자인, 3D 설계, 세공, 각인, 검수, 포장까지 자체 기준으로 관리해 단체 주문과 맞춤 반지 제작의 신뢰를 높입니다.'
+        '대호는 디자인, 3D 설계, 세공, 각인, 검수, 포장까지 자체 기준으로 관리해 단체 주문과 맞춤 주얼리 제작의 신뢰를 높입니다.'
     },
     achievement: {
       title: '대호 우승반지 제작 실적과 기록',
       description:
-        '프로스포츠 구단과 단체 프로젝트에서 쌓은 대호의 챔피언십 링, 임관반지, 기념반지 제작 실적과 시장 기록을 확인합니다.'
+        '프로스포츠 구단과 단체 프로젝트에서 쌓은 대호의 우승반지, 챔피언십 링, 스포츠 시상 기념품 제작 실적과 시장 기록을 확인합니다.'
     },
     technique: {
-      title: '우승반지 제작 공정과 맞춤 세공',
+      title: '우승반지·커스텀 트로피 제작 공정',
       description:
-        '대호는 1988년부터 축적한 우승반지 제작 경험을 바탕으로 디자인 상담, 3D 모델링, 주조, 세공, 각인, 검수까지 관리합니다.'
+        '대호는 1988년부터 축적한 우승반지 제작 경험을 바탕으로 디자인 상담, 3D 모델링, 주조, 세공, 각인, 검수까지 커스텀 트로피와 기념품 제작 공정을 관리합니다.'
     },
     techniqueRecords: {
-      title: '대호 기술 기록과 맞춤 반지 세공 기준',
+      title: '대호 기술 기록과 맞춤 주얼리 세공 기준',
       description:
-        '대호의 맞춤 반지 제작 기술, 세공 기준, 표면 처리, 구조 설계와 향후 검증 자료를 정리하는 기술 기록 페이지입니다.'
+        '대호의 맞춤 주얼리 제작 기술, 세공 기준, 표면 처리, 구조 설계와 향후 검증 자료를 정리하는 기술 기록 페이지입니다.'
     },
     collection: {
-      title: '대호 우승반지·임관반지·주문제작 컬렉션',
+      title: '대호 우승반지·커스텀 트로피·주문제작 컬렉션',
       description:
-        '대호의 우승반지, 임관반지, 주문제작 반지 사례를 카테고리별로 살펴보고 프로스포츠 구단, 학교, 단체 맞춤 제작 방향을 확인하세요.'
+        '대호의 우승반지, 주문제작 반지, 커스텀 트로피와 기업 행사 기념품 사례를 카테고리별로 살펴보고 단체 맞춤 제작 방향을 확인하세요.'
     },
     news: {
       title: '대호 뉴스와 우승반지 제작 사례',
       description:
-        '대호의 최근 제작 사례, 프로젝트 스토리, 언론/피처, 협업 소식을 통해 우승반지와 맞춤 반지 제작 현장을 전합니다.'
+        '대호의 최근 제작 사례, 프로젝트 스토리, 언론/피처, 협업 소식을 통해 우승반지와 맞춤 주얼리 제작 현장을 전합니다.'
     },
     golf: {
       title: '대호 맞춤 골프 팔찌 제작',
       description:
-        '대호는 골프 클럽 형태와 개인 각인을 반영한 맞춤 골프 팔찌를 상담 기반으로 제작해 라운드의 기록과 선물을 오브젝트로 남깁니다.'
+        '대호는 골프 클럽 형태와 개인 각인을 반영한 맞춤 골프 팔찌를 맞춤 주얼리 제작 기준으로 만들어 라운드의 기록과 기업 행사 선물을 남깁니다.'
     },
     contact: {
-      title: '대호 우승반지 제작 문의',
+      title: '대호 우승반지·커스텀 트로피 제작 문의',
       description:
-        '우승반지, 임관반지, 단체 기념반지, 맞춤 주얼리 제작 상담을 위해 프로젝트 목적, 수량, 일정, 참고 자료를 보내주세요.'
+        '우승반지 제작, 커스텀 트로피, 기업 행사 기념품, 스포츠 시상식 용품, 맞춤 주얼리 제작 상담을 위해 프로젝트 목적, 수량, 일정, 참고 자료를 보내주세요.'
     },
     golfInquiry: {
       title: '대호 골프 팔찌 상담 신청',
@@ -130,59 +130,59 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
   },
   en: {
     home: {
-      title: 'Korean Championship Ring Maker',
+      title: 'Championship Rings and Custom Trophies',
       description:
-        'DAEHO is a Korean maker of championship rings, commission rings, commemorative rings, and bespoke symbolic jewelry since 1988.'
+        'DAEHO is a Korean maker of championship rings, custom trophies, corporate event gifts, and bespoke commemorative jewelry since 1988.'
     },
     chronicle: {
-      title: 'DAEHO Ring Archive Since 1988',
+      title: 'DAEHO Production Archive Since 1988',
       description:
-        'Explore DAEHO records in championship rings, appointment rings, group commemorative rings, and delivery experience since 1988.'
+        'Explore DAEHO records in championship ring production, group commemorative products, and custom delivery experience since 1988.'
     },
     loyalty: {
-      title: 'DAEHO Long-Term Trust in Ring Production',
+      title: 'DAEHO Trust in Corporate Event Gifts',
       description:
-        'DAEHO builds long-term client relationships through repeat championship ring, appointment ring, and group commemorative projects.'
+        'DAEHO builds long-term relationships with sports teams, schools, institutions, and companies through repeat commemorative projects.'
     },
     credibility: {
-      title: 'DAEHO Custom Ring Production Standards',
+      title: 'DAEHO Custom Jewelry Production Standards',
       description:
-        'DAEHO manages design, 3D planning, craft, engraving, inspection, and packing to support reliable group and custom ring production.'
+        'DAEHO manages design, 3D planning, craft, engraving, inspection, and packing to support reliable group and custom jewelry production.'
     },
     achievement: {
       title: 'DAEHO Championship Ring Records',
       description:
-        'Review DAEHO achievements in championship rings, appointment rings, commemorative ring projects, and professional sports production.'
+        'Review DAEHO achievements in championship rings, sports award commemorative products, and professional sports production projects.'
     },
     technique: {
-      title: 'Championship Ring Production Process',
+      title: 'Championship Ring and Trophy Production',
       description:
-        'DAEHO manages championship ring production from consultation, 3D modeling, casting, craft, engraving, and inspection based on experience since 1988.'
+        'DAEHO manages championship ring and custom trophy production from consultation, 3D modeling, casting, craft, engraving, and inspection since 1988.'
     },
     techniqueRecords: {
       title: 'DAEHO Technical Records and Craft Standards',
       description:
-        'A technical record page for DAEHO custom ring craft standards, surface treatment, structure planning, and future verification materials.'
+        'A technical record page for DAEHO custom jewelry craft standards, surface treatment, structure planning, and future verification materials.'
     },
     collection: {
-      title: 'DAEHO Championship, Appointment, and Bespoke Rings',
+      title: 'DAEHO Championship Rings, Trophies, and Bespoke Work',
       description:
-        'Browse DAEHO championship rings, appointment rings, and bespoke ring examples for professional sports teams, schools, and organizations.'
+        'Browse DAEHO championship rings, bespoke rings, custom trophies, and corporate event gifts by category for group production planning.'
     },
     news: {
       title: 'DAEHO News and Ring Production Stories',
       description:
-        'Read DAEHO production stories, project updates, press features, and collaborations around championship rings and custom commemorative work.'
+        'Read DAEHO production stories, project updates, press features, and collaborations around championship rings and custom jewelry work.'
     },
     golf: {
       title: 'DAEHO Custom Golf Bracelet Production',
       description:
-        'DAEHO creates custom golf bracelets shaped from golf club forms, personal engraving, and consultation-based production details.'
+        'DAEHO creates custom golf bracelets shaped from golf club forms, personal engraving, and bespoke jewelry production standards.'
     },
     contact: {
-      title: 'Contact DAEHO for Custom Ring Production',
+      title: 'Contact DAEHO for Custom Production',
       description:
-        'Send project goals, quantity, schedule, and reference materials for championship rings, appointment rings, group commemorative rings, or bespoke jewelry.'
+        'Send project goals, quantity, schedule, and reference materials for championship rings, custom trophies, corporate event gifts, or bespoke jewelry.'
     },
     golfInquiry: {
       title: 'DAEHO Golf Bracelet Inquiry',
@@ -382,8 +382,8 @@ function clampDescription(value: string) {
 function formatMetadataDescription(locale: Locale, description: string) {
   const fallbackDescription =
     locale === 'ko'
-      ? '대호(DAEHO)는 우승반지, 임관반지, 단체 맞춤 반지를 전문으로 제작합니다.'
-      : 'DAEHO (대호) creates championship rings, appointment rings, and custom group rings.';
+      ? '대호(DAEHO)는 우승반지 제작, 커스텀 트로피, 맞춤 주얼리 제작을 전문으로 합니다.'
+      : 'DAEHO (대호) creates championship rings, custom trophies, and bespoke commemorative jewelry.';
   let nextDescription = description.trim() || fallbackDescription;
 
   if (locale === 'ko') {

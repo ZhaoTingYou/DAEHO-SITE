@@ -21,6 +21,31 @@ test('site structured data declares preferred Google site name and organization 
   assert.match(structuredDataSource, /'임관반지 제작'/);
   assert.match(structuredDataSource, /'대호 우승반지'/);
   assert.match(structuredDataSource, /'championship ring maker'/);
+});
+
+test('site structured data covers every target keyword as an entity signal', () => {
+  const targetKeywords = [
+    '우승반지 제작',
+    '커스텀 트로피',
+    '기업 행사 기념품',
+    '스포츠 시상식 용품',
+    '맞춤 주얼리 제작'
+  ];
+
+  for (const keyword of targetKeywords) {
+    assert.ok(
+      structuredDataSource.includes(`'${keyword}'`),
+      `타깃 키워드 '${keyword}'가 구조화 데이터에 없습니다.`
+    );
+  }
+});
+
+test('appointment ring entity stays intact while its site-wide priority drops', () => {
+  // 임관반지는 daehogold.com의 주력 키워드라 우선순위만 낮추고 엔티티는 유지한다.
+  // /ko/mastery/creations/appointment 페이지가 실재하므로 삭제하면 마크업이 실제와 어긋난다.
+  assert.match(structuredDataSource, /id: 'appointment-rings'/);
+  assert.match(structuredDataSource, /url: '\/ko\/mastery\/creations\/appointment'/);
+  assert.doesNotMatch(structuredDataSource, /const organizationDescription =\s*'[^']*임관반지/);
   assert.match(structuredDataSource, /telephone: '\+82-2-765-2737'/);
   assert.match(structuredDataSource, /postalCode: '03139'/);
   assert.ok(structuredDataSource.includes("logo: absoluteSiteUrl('/images/logo.png')"));
