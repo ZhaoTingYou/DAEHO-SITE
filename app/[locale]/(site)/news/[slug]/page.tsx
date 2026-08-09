@@ -4,6 +4,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
 import {Reveal} from '@/components/motion/reveal';
+import {NewsArticleStructuredData} from '@/components/news/news-article-structured-data';
 import {NewsReadingProgress} from '@/components/news/news-reading-progress';
 import {ShareLinkButton} from '@/components/news/share-link-button';
 import {SafeImage} from '@/components/safe-image';
@@ -73,6 +74,7 @@ export default async function NewsDetailPage({params}: Props) {
   return (
     <main className="mobile-page-shell bg-bg text-text">
       <NewsReadingProgress />
+      <NewsArticleStructuredData detail={detail} locale={locale} slug={slug} />
       <article className="bg-bg">
         <section className="news-detail-hero border-b border-primary/10 px-container pb-10 pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+24px)] md:pb-24 md:pt-[calc(var(--header-height,80px)+72px)]">
           <div className="mx-auto max-w-[1440px]">
