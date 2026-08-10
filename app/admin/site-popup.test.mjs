@@ -30,7 +30,7 @@ test('desktop and mobile admin navigation expose popup settings', () => {
   const shell = readText('./_components/admin-shell.tsx');
   const messages = readText('../../lib/admin-i18n.ts');
 
-  assert.ok(shell.includes("{href: '/admin/popup', labelKey: 'nav.popup'}"));
+  assert.ok(shell.includes("{href: '/admin/popup', labelKey: 'nav.popup', capability: 'content:read'}"));
   assert.ok(messages.includes("'nav.popup'"));
 });
 

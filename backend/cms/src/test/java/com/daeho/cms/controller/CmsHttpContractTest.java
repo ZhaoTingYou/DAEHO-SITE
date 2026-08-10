@@ -85,6 +85,7 @@ class CmsHttpContractTest {
         Path.of("/tmp/uploads"),
         "/uploads",
         "",
+        "",
         "local",
         "",
         "",

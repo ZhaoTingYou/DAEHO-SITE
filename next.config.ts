@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
     ...(isFrontendOnlyBuild ? {unoptimized: true} : {})
   },
   experimental: {
+    authInterrupts: !isFrontendOnlyBuild,
     serverActions: {
       bodySizeLimit: '64mb'
     }

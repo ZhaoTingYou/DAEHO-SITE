@@ -1,6 +1,7 @@
 import {notFound} from 'next/navigation';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {getNews, listMedia} from '@/lib/cms/repositories';
 
 import {AdminActionAlert} from '../../../_components/admin-feedback';
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default async function AdminNewsEditPage({params, searchParams}: Props) {
+  await assertAdminCapability('content:read');
   const {messages, t} = await getAdminI18n();
   const {id} = await params;
   const query = await searchParams;

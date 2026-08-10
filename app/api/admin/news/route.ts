@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 import {
   maxAdminJsonBodyBytes,
   parseJsonBody,
@@ -14,7 +14,7 @@ import {newsPayloadSchema} from '@/lib/cms/validation';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'content:read');
 
   if (unauthorized) {
     return unauthorized;
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'content:write');
 
   if (unauthorized) {
     return unauthorized;

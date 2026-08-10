@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 import {maxAdminJsonBodyBytes, parseJsonBody, rejectOversizedRequest, validationError} from '@/lib/cms/http';
 import {CmsBackendError, previewInquiryStatus} from '@/lib/cms/repositories';
 import {inquiryStatusSchema} from '@/lib/cms/validation';
@@ -13,7 +13,7 @@ type RouteContext = {
 };
 
 export async function POST(request: NextRequest, context: RouteContext) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'inquiries:write');
   if (unauthorized) return unauthorized;
 
   const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);

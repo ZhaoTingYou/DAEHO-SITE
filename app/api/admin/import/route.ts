@@ -2,7 +2,7 @@ import {revalidatePath} from 'next/cache';
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 import {maxImportBodyBytes, rejectOversizedRequest} from '@/lib/cms/http';
 import {getCmsBackendBaseUrl} from '@/lib/cms/repositories';
 import {locales} from '@/lib/locales';
@@ -10,7 +10,7 @@ import {locales} from '@/lib/locales';
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'system:manage');
 
   if (unauthorized) {
     return unauthorized;
