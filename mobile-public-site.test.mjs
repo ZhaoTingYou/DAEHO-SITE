@@ -231,6 +231,10 @@ test('Golf selected style reaches the inquiry summary, form payload, and CMS sto
   assert.match(golfInquiryQuerySource, /resolveGolfInquiryQuery\(locationSearch, options\)/);
   assert.match(golfInquiryQuerySource, /<SpecRow label=\{text\.style\} value=\{selection\.style\} \/>/);
   assert.match(golfInquiryQuerySource, /style: selection\.style/);
+  assert.match(golfInquiryQuerySource, /defaultEngraving: golf\.labels\.engravingSample/);
+  assert.doesNotMatch(golfInquiryQuerySource, /BASIC|COLOUR|JUDY KIM/);
+  assert.equal(koMessages.golf.labels.engravingSample, 'JUDY KIM 2026.05.03');
+  assert.equal(enMessages.golf.labels.engravingSample, 'JUDY KIM 2026.05.03');
   assert.match(golfFormSource, /name="selectedStyle" value=\{configuration\.style\}/);
   assert.match(golfFormSource, /selectedStyle: String\(formData\.get\('selectedStyle'\)/);
   assert.match(inquiryValidationSource, /selectedStyle: inquiryShortText/);

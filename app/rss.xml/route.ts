@@ -1,13 +1,37 @@
 import {NextResponse} from 'next/server';
+import {unstable_cache} from 'next/cache';
 
 import {getNewsCardsForSite} from '@/lib/cms/public-content';
+import {publicCmsCacheSeconds, publicNewsListCacheTags} from '@/lib/cms/public-cache';
+import {listPublicNews} from '@/lib/cms/repositories';
 import {metadataBase} from '@/lib/seo';
 
-export const dynamic = 'force-static';
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+
+const getCachedRssCards = unstable_cache(
+  async () => {
+    await listPublicNews('ko');
+    return getNewsCardsForSite('ko');
+  },
+  ['public-rss-cards'],
+  {
+    revalidate: publicCmsCacheSeconds,
+    tags: publicNewsListCacheTags('ko')
+  }
+);
 
 export async function GET() {
-  const cards = await getNewsCardsForSite('ko');
+  let usedFallback = false;
+  let cards: Awaited<ReturnType<typeof getNewsCardsForSite>>;
+
+  try {
+    cards = await getCachedRssCards();
+  } catch (error) {
+    usedFallback = true;
+    console.error('[cms] Serving an uncached fallback RSS feed because CMS read failed.', error);
+    cards = [];
+  }
+
   const buildDate = new Date().toUTCString();
   const items = cards
     .map((card) => {
@@ -44,7 +68,7 @@ export async function GET() {
 
   return new NextResponse(xml, {
     headers: {
-      'cache-control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=60',
+      'cache-control': usedFallback ? 'private, no-store' : 'public, max-age=0, must-revalidate',
       'content-type': 'application/rss+xml; charset=utf-8'
     }
   });

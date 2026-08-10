@@ -655,6 +655,7 @@
       {"path": "labels.previousShaft", "label": "上一张辅助标签"},
       {"path": "labels.nextShaft", "label": "下一张辅助标签"},
       {"path": "labels.styleOptions", "label": "样式选项", "type": "stringList"},
+      {"path": "labels.engravingSample", "label": "默认刻字示例"},
       {"path": "process.packageImageLabel", "label": "流程包装图占位文案"},
       {"path": "process.title", "label": "流程标题"},
       {"path": "process.steps", "label": "流程步骤", "type": "json"}

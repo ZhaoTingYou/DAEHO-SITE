@@ -183,8 +183,10 @@ Latest verification before this README update:
 
 - Do not hardcode visible UI copy in `app/` or `components/`.
 - Put visible content in `messages/ko.json` and `messages/en.json`.
-- Use `getLocaleMessages(locale)` from `lib/locale-messages.ts` in server
-  components and utilities.
+- Public server components and utilities must use
+  `getPublicLocaleMessages(locale, pageKeys)` with only the CMS page keys they
+  render. Admin editors that need the complete real-time CMS dataset use
+  `getLocaleMessages(locale)`.
 - Use `useTranslations(...)` in client components that are inside the
   `NextIntlClientProvider`.
 - The client provider in `app/[locale]/layout.tsx` only receives the `common`

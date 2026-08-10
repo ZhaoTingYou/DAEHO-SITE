@@ -19,9 +19,11 @@ const ownerIdentity = {
 
 test('public CMS reads are cached while failed responses are retried', {timeout: 60_000}, async (t) => {
   const backendCalls = new Map();
-  const pageVersions = new Map([['contact', 1]]);
+  const pageVersions = new Map([['contact', 1], ['common', 1], ['site-popup', 1]]);
   let newsVersion = 1;
+  let newsSlug = 'launch';
   let collectionVersion = 1;
+  let collectionSlug = 'champion';
   const backend = http.createServer((request, response) => {
     const requestUrl = request.url ?? '';
     const callCount = (backendCalls.get(requestUrl) ?? 0) + 1;
@@ -33,8 +35,23 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
       return;
     }
 
-    if (request.method === 'PUT' && requestUrl === '/api/admin/pages/contact') {
-      pageVersions.set('contact', 2);
+    const pageWrite = requestUrl.match(/^\/api\/admin\/pages\/([^?]+)$/);
+    if (request.method === 'PUT' && pageWrite) {
+      const pageKey = pageWrite[1];
+      pageVersions.set(pageKey, (pageVersions.get(pageKey) ?? 1) + 1);
+      response.end(JSON.stringify({page: {
+        pageKey,
+        section: 'site',
+        sortOrder: 0,
+        content: {ko: {}, en: {}},
+        seo: {ko: {}, en: {}},
+        createdAt: '2026-08-10T00:00:00.000Z',
+        updatedAt: '2026-08-10T00:01:00.000Z'
+      }}));
+      return;
+    }
+
+    if (request.method === 'GET' && requestUrl === '/api/admin/pages/contact') {
       response.end(JSON.stringify({page: {
         pageKey: 'contact',
         section: 'site',
@@ -48,24 +65,26 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
     }
 
     if (request.method === 'GET' && requestUrl === '/api/admin/news/launch') {
-      response.end(JSON.stringify({item: adminNews(newsVersion)}));
+      response.end(JSON.stringify({item: adminNews(newsVersion, newsSlug)}));
       return;
     }
 
     if (request.method === 'PUT' && requestUrl === '/api/admin/news/launch') {
       newsVersion = 2;
-      response.end(JSON.stringify({item: adminNews(newsVersion)}));
+      newsSlug = 'launch-v2';
+      response.end(JSON.stringify({item: adminNews(newsVersion, newsSlug)}));
       return;
     }
 
     if (request.method === 'GET' && requestUrl === '/api/admin/collections/champion') {
-      response.end(JSON.stringify({item: adminCollection(collectionVersion)}));
+      response.end(JSON.stringify({item: adminCollection(collectionVersion, collectionSlug)}));
       return;
     }
 
     if (request.method === 'PUT' && requestUrl === '/api/admin/collections/champion') {
       collectionVersion = 2;
-      response.end(JSON.stringify({item: adminCollection(collectionVersion)}));
+      collectionSlug = 'champion-v2';
+      response.end(JSON.stringify({item: adminCollection(collectionVersion, collectionSlug)}));
       return;
     }
 
@@ -88,22 +107,24 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
     }
 
     if (requestUrl === '/api/cms/news?locale=ko') {
-      response.end(JSON.stringify({locale: 'ko', items: [{slug: 'launch', backendCall: callCount, version: newsVersion}]}));
+      response.end(JSON.stringify({locale: 'ko', items: [{slug: newsSlug, backendCall: callCount, version: newsVersion}]}));
       return;
     }
 
-    if (requestUrl === '/api/cms/news/launch?locale=ko') {
-      response.end(JSON.stringify({locale: 'ko', item: {slug: 'launch', backendCall: callCount, version: newsVersion}}));
+    const publicNewsItem = requestUrl.match(/^\/api\/cms\/news\/([^?]+)\?locale=ko$/);
+    if (publicNewsItem && publicNewsItem[1] === newsSlug) {
+      response.end(JSON.stringify({locale: 'ko', item: {slug: newsSlug, backendCall: callCount, version: newsVersion}}));
       return;
     }
 
     if (requestUrl === '/api/cms/collections?locale=ko') {
-      response.end(JSON.stringify({locale: 'ko', items: [{slug: 'champion', backendCall: callCount, version: collectionVersion}]}));
+      response.end(JSON.stringify({locale: 'ko', items: [{slug: collectionSlug, backendCall: callCount, version: collectionVersion}]}));
       return;
     }
 
-    if (requestUrl === '/api/cms/collections/champion?locale=ko') {
-      response.end(JSON.stringify({locale: 'ko', item: {slug: 'champion', backendCall: callCount, version: collectionVersion}}));
+    const publicCollectionItem = requestUrl.match(/^\/api\/cms\/collections\/([^?]+)\?locale=ko$/);
+    if (publicCollectionItem && publicCollectionItem[1] === collectionSlug) {
+      response.end(JSON.stringify({locale: 'ko', item: {slug: collectionSlug, backendCall: callCount, version: collectionVersion}}));
       return;
     }
 
@@ -168,6 +189,10 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.equal((await second.json()).content.backendCall, 1);
   assert.equal(backendCalls.get('/api/cms/pages/contact?locale=ko'), 1);
 
+  await fetch(`${baseUrl}/api/cms/pages/archive?locale=ko`);
+  await fetch(`${baseUrl}/api/cms/pages/archive?locale=ko`);
+  assert.equal(backendCalls.get('/api/cms/pages/archive?locale=ko'), 1);
+
   for (const path of [
     '/api/cms/news?locale=ko',
     '/api/cms/news/launch?locale=ko',
@@ -192,6 +217,13 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.ok(backendCalls.has('/api/cms/pages/common?locale=en'));
   assert.ok(backendCalls.has('/api/cms/pages/site-popup?locale=ko'));
 
+  const rssBeforeSave = await (await fetch(`${baseUrl}/rss.xml`)).text();
+  const sitemapBeforeSave = await (await fetch(`${baseUrl}/sitemap.xml`)).text();
+  assert.match(rssBeforeSave, /\/ko\/news\/launch/);
+  assert.match(sitemapBeforeSave, /\/ko\/news\/launch/);
+  assert.match(sitemapBeforeSave, /\/ko\/mastery\/creations\/champion/);
+  const newsListCallsBeforeSave = backendCalls.get('/api/cms/news?locale=ko') ?? 0;
+
   const sessionValue = createSignedAdminSession(ownerIdentity, sessionSecret, Date.now());
   const adminCookies = `daeho_admin_session=${sessionValue}; daeho_admin_api_session=${sessionValue}`;
   const saveResponse = await fetch(`${baseUrl}/api/admin/pages/contact`, {
@@ -214,6 +246,32 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.equal(afterSave.status, 200);
   assert.equal((await afterSave.json()).content.version, 2);
   assert.equal(backendCalls.get('/api/cms/pages/contact?locale=ko'), 2);
+  await fetch(`${baseUrl}/api/cms/pages/archive?locale=ko`);
+  assert.equal(
+    backendCalls.get('/api/cms/pages/archive?locale=ko'),
+    1,
+    'saving contact must not invalidate an unrelated public page'
+  );
+
+  const commonCallsBeforeSave = backendCalls.get('/api/cms/pages/common?locale=ko') ?? 0;
+  const commonSaveResponse = await fetch(`${baseUrl}/api/admin/pages/common`, {
+    method: 'PUT',
+    headers: {
+      'content-type': 'application/json',
+      cookie: adminCookies,
+      origin: baseUrl
+    },
+    body: JSON.stringify({
+      section: 'settings',
+      sortOrder: 0,
+      content: {ko: {}, en: {}},
+      seo: {ko: {}, en: {}}
+    })
+  });
+  assert.equal(commonSaveResponse.status, 200);
+  const commonAfterSave = await fetch(`${baseUrl}/api/cms/pages/common?locale=ko`);
+  assert.equal((await commonAfterSave.json()).content.version, 2);
+  assert.equal(backendCalls.get('/api/cms/pages/common?locale=ko'), commonCallsBeforeSave + 1);
 
   const newsSaveResponse = await fetch(`${baseUrl}/api/admin/news/launch`, {
     method: 'PUT',
@@ -223,7 +281,7 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
       origin: baseUrl
     },
     body: JSON.stringify({
-      slug: 'launch',
+      slug: 'launch-v2',
       category: 'press',
       translations: {
         ko: {title: '새 소식'},
@@ -234,11 +292,20 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.equal(newsSaveResponse.status, 200);
 
   const newsListAfterSave = await fetch(`${baseUrl}/api/cms/news?locale=ko`);
-  const newsDetailAfterSave = await fetch(`${baseUrl}/api/cms/news/launch?locale=ko`);
+  const oldNewsDetailAfterSave = await fetch(`${baseUrl}/api/cms/news/launch?locale=ko`);
+  const newsDetailAfterSave = await fetch(`${baseUrl}/api/cms/news/launch-v2?locale=ko`);
   assert.equal((await newsListAfterSave.json()).items[0].version, 2);
+  assert.equal(oldNewsDetailAfterSave.status, 404);
   assert.equal((await newsDetailAfterSave.json()).item.version, 2);
-  assert.equal(backendCalls.get('/api/cms/news?locale=ko'), 2);
+  assert.equal(backendCalls.get('/api/cms/news?locale=ko'), newsListCallsBeforeSave + 1);
   assert.equal(backendCalls.get('/api/cms/news/launch?locale=ko'), 2);
+  assert.equal(backendCalls.get('/api/cms/news/launch-v2?locale=ko'), 1);
+  const rssAfterSave = await (await fetch(`${baseUrl}/rss.xml`)).text();
+  const sitemapAfterNewsSave = await (await fetch(`${baseUrl}/sitemap.xml`)).text();
+  assert.match(rssAfterSave, /\/ko\/news\/launch-v2/);
+  assert.doesNotMatch(rssAfterSave, /\/ko\/news\/launch</);
+  assert.match(sitemapAfterNewsSave, /\/ko\/news\/launch-v2/);
+  const collectionListCallsBeforeSave = backendCalls.get('/api/cms/collections?locale=ko') ?? 0;
 
   const collectionSaveResponse = await fetch(`${baseUrl}/api/admin/collections/champion`, {
     method: 'PUT',
@@ -248,7 +315,7 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
       origin: baseUrl
     },
     body: JSON.stringify({
-      slug: 'champion',
+      slug: 'champion-v2',
       category: 'champion',
       translations: {
         ko: {title: '우승 작품'},
@@ -259,11 +326,19 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.equal(collectionSaveResponse.status, 200);
 
   const collectionListAfterSave = await fetch(`${baseUrl}/api/cms/collections?locale=ko`);
-  const collectionDetailAfterSave = await fetch(`${baseUrl}/api/cms/collections/champion?locale=ko`);
+  const oldCollectionDetailAfterSave = await fetch(`${baseUrl}/api/cms/collections/champion?locale=ko`);
+  const collectionDetailAfterSave = await fetch(`${baseUrl}/api/cms/collections/champion-v2?locale=ko`);
   assert.equal((await collectionListAfterSave.json()).items[0].version, 2);
+  assert.equal(oldCollectionDetailAfterSave.status, 404);
   assert.equal((await collectionDetailAfterSave.json()).item.version, 2);
-  assert.equal(backendCalls.get('/api/cms/collections?locale=ko'), 2);
+  assert.equal(
+    backendCalls.get('/api/cms/collections?locale=ko'),
+    collectionListCallsBeforeSave + 1
+  );
   assert.equal(backendCalls.get('/api/cms/collections/champion?locale=ko'), 2);
+  assert.equal(backendCalls.get('/api/cms/collections/champion-v2?locale=ko'), 1);
+  const sitemapAfterCollectionSave = await (await fetch(`${baseUrl}/sitemap.xml`)).text();
+  assert.match(sitemapAfterCollectionSave, /\/ko\/mastery\/creations\/champion-v2/);
 
   const importResponse = await fetch(`${baseUrl}/api/admin/import?replace=1`, {
     method: 'POST',
@@ -293,6 +368,16 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.equal(created.status, 200);
   assert.equal((await created.json()).content.backendCall, 2);
   assert.equal(backendCalls.get('/api/cms/pages/missing?locale=ko'), 2);
+
+  const adminPageCallsBefore = backendCalls.get('/api/admin/pages/contact') ?? 0;
+  const adminPageHeaders = {cookie: adminCookies, origin: baseUrl};
+  assert.equal((await fetch(`${baseUrl}/api/admin/pages/contact`, {headers: adminPageHeaders})).status, 200);
+  assert.equal((await fetch(`${baseUrl}/api/admin/pages/contact`, {headers: adminPageHeaders})).status, 200);
+  assert.equal(
+    backendCalls.get('/api/admin/pages/contact'),
+    adminPageCallsBefore + 2,
+    'admin reads must remain no-store'
+  );
 });
 
 async function waitForNext(baseUrl, nextProcess, processOutput) {
@@ -368,10 +453,10 @@ function signalProcessGroup(pid, signal) {
   }
 }
 
-function adminNews(version) {
+function adminNews(version, slug) {
   return {
     id: 'news-1',
-    slug: 'launch',
+    slug,
     category: 'press',
     imagePath: '',
     mobileImagePath: '',
@@ -385,10 +470,10 @@ function adminNews(version) {
   };
 }
 
-function adminCollection(version) {
+function adminCollection(version, slug) {
   return {
     id: 'collection-1',
-    slug: 'champion',
+    slug,
     category: 'champion',
     sportCategory: '',
     imagePath: '',

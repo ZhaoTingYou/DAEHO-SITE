@@ -24,3 +24,10 @@ test('sitemap does not publish demo Creation detail URLs when the CMS is empty',
     false
   );
 });
+
+test('sitemap caches only successful CMS results and serves failures uncached', () => {
+  assert.match(sitemapSource, /export const dynamic = 'force-dynamic'/);
+  assert.match(sitemapSource, /const getCachedSitemap = unstable_cache/);
+  assert.match(sitemapSource, /revalidate: publicCmsCacheSeconds/);
+  assert.match(sitemapSource, /catch \(error\) \{\s+noStore\(\);/);
+});

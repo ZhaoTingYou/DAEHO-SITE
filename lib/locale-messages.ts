@@ -15,6 +15,7 @@ import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {normalizeTechniquePageVisibility} from '@/lib/public-page-visibility-core';
 import {mergeExternalSitesWithDefaults} from '@/lib/cms/external-sites-core.mjs';
+import {isStaticCmsPreviewEnabled} from '@/lib/cms/static-snapshot';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 
@@ -149,6 +150,9 @@ async function readPublicCmsPages(locale: Locale, pageKeys: readonly string[]): 
       const page = await getPublicPage(pageKey, locale);
 
       if (!page) {
+        if (!isStaticCmsPreviewEnabled()) {
+          throw new Error(`Public CMS page ${pageKey} was not found.`);
+        }
         return null;
       }
 
@@ -159,6 +163,9 @@ async function readPublicCmsPages(locale: Locale, pageKeys: readonly string[]): 
         }
       } satisfies CmsPageOverride;
     } catch (error) {
+      if (!isStaticCmsPreviewEnabled()) {
+        throw error;
+      }
       if (!isNextDynamicServerError(error)) {
         console.error(`[cms] Falling back to static locale messages because public CMS page ${pageKey} could not be read.`, error);
       }

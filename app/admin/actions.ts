@@ -20,6 +20,7 @@ import {createAdminLoginAttemptKey} from '@/lib/cms/admin-login-core.mjs';
 import {isCmsBackendPasswordError} from '@/lib/cms/admin-password';
 import {authenticateAdmin, changeOwnAdminPassword} from '@/lib/cms/admin-users';
 import {appendAdminActionError} from '@/lib/cms/admin-action-error';
+import {revalidatePathsSafely} from '@/lib/cms/public-cache';
 import {
   createCollection,
   createNews,
@@ -55,7 +56,6 @@ import {
   getEditableLeaves,
   getEditableLeavesForPageGroup,
   getManagedPageDefinition,
-  managedPageDefinitions,
   getObjectValueAtPath,
   getPageFieldDefinitionsForGroup,
   getPageContentGroups,
@@ -198,9 +198,7 @@ export async function saveNewsAction(formData: FormData) {
     const nextEditorPath = savedItem?.id ? `/admin/news/${savedItem.id}` : editorPath;
     await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
 
-    revalidatePath('/admin/news');
-    revalidatePath(nextEditorPath);
-    revalidatePublicNewsPaths(previousNews, savedItem);
+    revalidatePathsSafely(['/admin/news', nextEditorPath]);
     redirect(nextEditorPath);
   } catch (error) {
     redirectWithAdminActionError(editorPath, error);
@@ -219,7 +217,7 @@ export async function deleteNewsAction(formData: FormData) {
       await cleanupUnreferencedPublicImages(previousImages);
     }
 
-    revalidatePath('/admin/news');
+    revalidatePathsSafely(['/admin/news']);
   } catch (error) {
     redirectWithAdminActionError('/admin/news', error);
   }
@@ -256,8 +254,7 @@ export async function saveCollectionAction(formData: FormData) {
     const nextEditorPath = savedItem?.id ? `/admin/collections/${savedItem.id}` : editorPath;
     await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
 
-    revalidatePath('/admin/collections');
-    revalidatePath(nextEditorPath);
+    revalidatePathsSafely(['/admin/collections', nextEditorPath]);
     redirect(nextEditorPath);
   } catch (error) {
     redirectWithAdminActionError(editorPath, error);
@@ -276,7 +273,7 @@ export async function deleteCollectionAction(formData: FormData) {
       await cleanupUnreferencedPublicImages(previousImages);
     }
 
-    revalidatePath('/admin/collections');
+    revalidatePathsSafely(['/admin/collections']);
   } catch (error) {
     redirectWithAdminActionError('/admin/collections', error);
   }
@@ -343,17 +340,7 @@ export async function savePageAction(formData: FormData) {
       await cleanupRemovedImages(previousImages, collectImageFilenames(savedPage));
     }
 
-    revalidatePath('/admin/pages');
-    revalidatePath(`/admin/pages/${pageKey}`);
-    revalidatePath(returnTo);
-
-    if (pageKey === 'common') {
-      revalidateManagedPublicPaths();
-    } else if (definition?.href) {
-      for (const locale of locales) {
-        revalidatePath(`/${locale}${definition.href === '/' ? '' : definition.href}`);
-      }
-    }
+    revalidatePathsSafely(['/admin/pages', `/admin/pages/${pageKey}`, returnTo]);
 
     redirect(returnTo);
   } catch (error) {
@@ -404,10 +391,7 @@ export async function saveSitePopupAction(formData: FormData) {
     const savedPage = await upsertPage('site-popup', payload);
 
     await cleanupRemovedImages(previousImages, collectImageFilenames(savedPage));
-    revalidatePath('/admin/pages');
-    revalidatePath('/admin/pages/site-popup');
-    revalidatePath(returnTo);
-    revalidateManagedPublicPaths();
+    revalidatePathsSafely(['/admin/pages', '/admin/pages/site-popup', returnTo]);
     redirect(`${returnTo}?saved=1`);
   } catch (error) {
     redirectWithAdminActionError(returnTo, error);
@@ -560,27 +544,6 @@ function newsBlockWidth(value: string) {
 
 function newsBlockSpacing(value: string) {
   return value === 'compact' || value === 'loose' ? value : 'default';
-}
-
-function revalidatePublicNewsPaths(previousNews: unknown, nextNews: unknown) {
-  const slugs = new Set([newsItemSlug(previousNews), newsItemSlug(nextNews)].filter(isString));
-
-  for (const locale of locales) {
-    revalidatePath(`/${locale}/news`);
-
-    for (const slug of slugs) {
-      revalidatePath(`/${locale}/news/${slug}`);
-    }
-  }
-}
-
-function newsItemSlug(value: unknown) {
-  if (!value || typeof value !== 'object') {
-    return null;
-  }
-
-  const slug = (value as {slug?: unknown}).slug;
-  return typeof slug === 'string' && slug.trim() ? slug.trim() : null;
 }
 
 function readCollectionTranslation(formData: FormData, locale: Locale) {
@@ -1018,16 +981,6 @@ function redirectWithAdminActionError(pathValue: string, error: unknown): never 
   }
 
   redirect(appendAdminActionError(pathValue, error));
-}
-
-function revalidateManagedPublicPaths() {
-  const hrefs = new Set(managedPageDefinitions.map((definition) => definition.href).filter(Boolean));
-
-  for (const href of hrefs) {
-    for (const locale of locales) {
-      revalidatePath(`/${locale}${href === '/' ? '' : href}`);
-    }
-  }
 }
 
 function parseTags(value: string) {

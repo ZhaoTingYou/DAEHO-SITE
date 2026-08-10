@@ -62,8 +62,8 @@ function useGolfInquirySelection(golf: GolfCopy) {
   const options = useMemo(() => ({
     headIds: golf.heads.items.map((item) => item.id),
     shaftIds: golf.shafts.items.map((item) => item.id),
-    styles: golf.labels.styleOptions?.length ? golf.labels.styleOptions : ['BASIC', 'COLOUR'],
-    defaultEngraving: 'JUDY KIM 2026.05.03'
+    styles: golf.labels.styleOptions,
+    defaultEngraving: golf.labels.engravingSample
   }), [golf]);
   const query = useMemo(
     () => resolveGolfInquiryQuery(locationSearch, options),

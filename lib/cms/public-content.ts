@@ -6,6 +6,7 @@ import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
 import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
+import {isStaticCmsPreviewEnabled} from '@/lib/cms/static-snapshot';
 
 import {
   getPublicCollection,
@@ -81,6 +82,10 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
       seoDescription: String(cmsItem.excerpt || cmsItem.title || ''),
       ogImagePath: card.image
     };
+  }
+
+  if (!isStaticCmsPreviewEnabled()) {
+    throw new Error(`Public CMS news item ${slug} was not found.`);
   }
 
   const card = (await getPublicLocaleMessages(locale, ['news'])).news.grid.cards.find((item) => item.id === slug);
@@ -166,6 +171,10 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
       ogImagePath: image,
       specs
     };
+  }
+
+  if (!isStaticCmsPreviewEnabled()) {
+    throw new Error(`Public CMS collection item ${slug} was not found.`);
   }
 
   const item = (await getCollectionItemsForSite(locale)).find((entry) => entry.id === slug);
@@ -342,6 +351,9 @@ async function readCmsValue<T>(reader: () => Promise<T>, fallback: T): Promise<T
   try {
     return await reader();
   } catch (error) {
+    if (!isStaticCmsPreviewEnabled()) {
+      throw error;
+    }
     if (!isNextDynamicServerError(error)) {
       console.error('[cms] Falling back to static content because CMS read failed.', error);
     }
