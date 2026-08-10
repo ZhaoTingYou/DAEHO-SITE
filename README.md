@@ -91,6 +91,7 @@ Required local variables:
 CMS_BACKEND_URL=http://localhost:8080
 CMS_BACKEND_API_KEY=replace-with-a-long-random-key
 CMS_ADMIN_API_KEY=replace-with-the-same-value-as-CMS_BACKEND_API_KEY
+CMS_OWNER_EMAIL=owner@example.com
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/daeho_cms
 SPRING_DATASOURCE_USERNAME=daeho
 SPRING_DATASOURCE_PASSWORD=replace-with-a-strong-database-password
@@ -104,6 +105,23 @@ docker compose up --build
 
 The default compose file exposes HTTP for local smoke tests. Put HTTPS
 termination in Nginx or an upstream load balancer before production launch.
+
+CMS administrators sign in at `/admin/login` with an individual email address
+and password. `CMS_OWNER_EMAIL` is required and identifies the non-expiring
+`OWNER` account bootstrapped from the existing CMS password. The fixed roles
+are:
+
+- `OWNER`: full access, including inquiries, analytics, notifications,
+  import/export, destructive content operations, and `/admin/users`.
+- `EDITOR`: can read and update pages, footer, popup, news, collections, and
+  media, but cannot delete content or access private and system areas.
+
+Owners create editors at `/admin/users`. New editor accounts expire after 30
+days by default and must change their temporary password on first login. The
+owner can disable an account, reset its password, or update its expiration from
+the same page. The previous shared-password authentication endpoints remain for
+one release as rollback compatibility only; the current login page does not use
+them.
 
 Protected import/export/status APIs are still exposed through Next as a BFF:
 
