@@ -8,6 +8,7 @@ import {NewsArticleStructuredData} from '@/components/news/news-article-structur
 import {NewsReadingProgress} from '@/components/news/news-reading-progress';
 import {ShareLinkButton} from '@/components/news/share-link-button';
 import {SafeImage} from '@/components/safe-image';
+import {BreadcrumbStructuredData, breadcrumbLabels} from '@/components/site/breadcrumb-structured-data';
 import type {Locale} from '@/i18n/routing';
 import {routing} from '@/i18n/routing';
 import {getNewsCardsForSite, getNewsDetailForSite, type NewsBodyBlock} from '@/lib/cms/public-content';
@@ -75,6 +76,13 @@ export default async function NewsDetailPage({params}: Props) {
     <main className="mobile-page-shell bg-bg text-text">
       <NewsReadingProgress />
       <NewsArticleStructuredData detail={detail} locale={locale} slug={slug} />
+      <BreadcrumbStructuredData
+        items={[
+          {name: breadcrumbLabels(locale).home, path: `/${locale}`},
+          {name: breadcrumbLabels(locale).news, path: `/${locale}/news`},
+          {name: card.title, path: `/${locale}/news/${slug}`}
+        ]}
+      />
       <article className="bg-bg">
         <section className="news-detail-hero border-b border-primary/10 px-container pb-10 pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+24px)] md:pb-24 md:pt-[calc(var(--header-height,80px)+72px)]">
           <div className="mx-auto max-w-[1440px]">
