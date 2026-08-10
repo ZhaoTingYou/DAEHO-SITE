@@ -9,20 +9,49 @@ import {
   listPages
 } from '@/lib/cms/repositories';
 import {managedPageDefinitions} from '@/lib/cms/page-catalog';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {getCmsStatus} from '@/lib/cms/status';
 
 import {PageHeader, Panel} from '../_components/admin-shell';
 
 export default async function AdminOverviewPage() {
+  const identity = await assertAdminCapability('content:read');
   const {t} = await getAdminI18n();
-  const [inquiries, news, collections, media, pages, cmsStatus] = await Promise.all([
-    listInquiries({}),
+  const [news, collections, media, pages] = await Promise.all([
     listNews(),
     listCollections(),
     listMedia(),
-    listPages(),
-    getCmsStatus()
+    listPages()
   ]);
+
+  if (identity.role === 'EDITOR') {
+    return (
+      <>
+        <PageHeader title={t('overview.title')} description={t('overview.editorDescription')} />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Metric label={t('overview.editablePageGroups')} value={managedPageDefinitions.length || pages.length} href="/admin/pages" />
+          <Metric label={t('overview.metricNews')} value={news.length} href="/admin/news" />
+          <Metric label={t('overview.metricCollections')} value={collections.length} href="/admin/collections" />
+          <Metric label={t('overview.metricMedia')} value={media.length} href="/admin/media" />
+        </div>
+        <div className="mt-6">
+          <Panel>
+            <div className="border-b border-[#e4e7ec] px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('overview.contentInventory')}</h2>
+            </div>
+            <div className="grid gap-3 p-5 md:grid-cols-2">
+              <InventoryRow label={t('overview.visibleNewsItems')} value={news.filter((item) => item.isVisible).length} href="/admin/news" />
+              <InventoryRow label={t('overview.visibleCollections')} value={collections.filter((item) => item.isVisible).length} href="/admin/collections" />
+              <InventoryRow label={t('overview.publicImageRecords')} value={media.filter((item) => item.storageProvider === 'public' || item.storageProvider === 'local').length} href="/admin/media" />
+              <InventoryRow label={t('overview.editablePageGroups')} value={managedPageDefinitions.length || pages.length} href="/admin/pages" />
+            </div>
+          </Panel>
+        </div>
+      </>
+    );
+  }
+
+  const [inquiries, cmsStatus] = await Promise.all([listInquiries({}), getCmsStatus()]);
   const newInquiries = inquiries.filter((item) => item.status === 'new').length;
   const tableTotal = cmsStatus.tables.reduce((total, table) => total + table.count, 0);
 

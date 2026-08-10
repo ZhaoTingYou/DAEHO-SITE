@@ -1,25 +1,27 @@
 import Link from 'next/link';
 
 import type {AdminLocale} from '@/lib/admin-locales';
+import {hasAdminCapability, type AdminCapability} from '@/lib/cms/admin-authorization-core.mjs';
 import type {AdminIdentity} from '@/lib/cms/admin-users';
 
 import {logoutAction} from '../actions';
 import {AdminLanguageSwitcher} from './admin-language-switcher';
 
 const navItems = [
-  {href: '/admin', labelKey: 'nav.overview'},
-  {href: '/admin/inquiries', labelKey: 'nav.inquiries'},
-  {href: '/admin/notifications', labelKey: 'nav.notifications'},
-  {href: '/admin/news', labelKey: 'nav.news'},
-  {href: '/admin/collections', labelKey: 'nav.collections'},
-  {href: '/admin/media', labelKey: 'nav.media'},
-  {href: '/admin/popup', labelKey: 'nav.popup'},
-  {href: '/admin/footer', labelKey: 'nav.footer'},
-  {href: '/admin/pages', labelKey: 'nav.pages'},
-  {href: '/admin/export', labelKey: 'nav.export'},
-  {href: '/admin/analytics', labelKey: 'nav.analytics'},
-  {href: '/admin/account', labelKey: 'nav.account'}
-];
+  {href: '/admin', labelKey: 'nav.overview', capability: 'content:read'},
+  {href: '/admin/inquiries', labelKey: 'nav.inquiries', capability: 'inquiries:read'},
+  {href: '/admin/notifications', labelKey: 'nav.notifications', capability: 'notifications:manage'},
+  {href: '/admin/news', labelKey: 'nav.news', capability: 'content:read'},
+  {href: '/admin/collections', labelKey: 'nav.collections', capability: 'content:read'},
+  {href: '/admin/media', labelKey: 'nav.media', capability: 'content:read'},
+  {href: '/admin/popup', labelKey: 'nav.popup', capability: 'content:read'},
+  {href: '/admin/footer', labelKey: 'nav.footer', capability: 'content:read'},
+  {href: '/admin/pages', labelKey: 'nav.pages', capability: 'content:read'},
+  {href: '/admin/export', labelKey: 'nav.export', capability: 'system:manage'},
+  {href: '/admin/analytics', labelKey: 'nav.analytics', capability: 'analytics:read'},
+  {href: '/admin/users', labelKey: 'nav.users', capability: 'users:manage'},
+  {href: '/admin/account', labelKey: 'nav.account', capability: 'account:self'}
+] satisfies Array<{href: string; labelKey: string; capability: AdminCapability}>;
 
 export function AdminShell({
   children,
@@ -34,7 +36,7 @@ export function AdminShell({
 }) {
   const visibleNavItems = identity.mustChangePassword
     ? navItems.filter((item) => item.href === '/admin/account')
-    : navItems;
+    : navItems.filter((item) => hasAdminCapability(identity.role, item.capability));
   const homeHref = identity.mustChangePassword ? '/admin/account' : '/admin';
 
   return (
