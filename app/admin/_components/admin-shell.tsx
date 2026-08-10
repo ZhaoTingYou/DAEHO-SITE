@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import type {AdminLocale} from '@/lib/admin-locales';
+import type {AdminIdentity} from '@/lib/cms/admin-users';
 
 import {logoutAction} from '../actions';
 import {AdminLanguageSwitcher} from './admin-language-switcher';
@@ -23,21 +24,28 @@ const navItems = [
 export function AdminShell({
   children,
   adminLocale,
+  identity,
   t
 }: {
   children: React.ReactNode;
   adminLocale: AdminLocale;
+  identity: AdminIdentity;
   t: (key: string) => string;
 }) {
+  const visibleNavItems = identity.mustChangePassword
+    ? navItems.filter((item) => item.href === '/admin/account')
+    : navItems;
+  const homeHref = identity.mustChangePassword ? '/admin/account' : '/admin';
+
   return (
     <div className="min-h-dvh bg-[#f4f5f7] text-[#182033]">
       <aside className="admin-on-dark fixed inset-y-0 left-0 hidden w-64 border-r border-[#d9dee7] bg-[#101827] px-4 py-5 text-[#ffffff] lg:block">
-        <Link href="/admin" className="block border-b border-white/10 pb-5">
+        <Link href={homeHref} className="block border-b border-white/10 pb-5">
           <span className="block font-heading text-[22px] font-semibold tracking-[0.16em]">DAEHO</span>
           <span className="mt-1 block font-body text-xs uppercase tracking-[0.18em] text-white/55">{t('shell.subtitle')}</span>
         </Link>
         <nav className="mt-6 grid gap-1">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -59,7 +67,7 @@ export function AdminShell({
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 border-b border-[#d9dee7] bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-4">
-            <Link href="/admin" className="font-heading text-xl font-semibold tracking-[0.16em]">DAEHO</Link>
+            <Link href={homeHref} className="font-heading text-xl font-semibold tracking-[0.16em]">DAEHO</Link>
             <form action={logoutAction}>
               <button className="min-h-10 rounded-md border border-[#cbd3df] px-3 text-sm font-semibold">
                 {t('shell.signOut')}
@@ -67,7 +75,7 @@ export function AdminShell({
             </form>
           </div>
           <nav className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

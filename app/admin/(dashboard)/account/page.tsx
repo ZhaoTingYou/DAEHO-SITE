@@ -2,12 +2,14 @@ import {changeAdminPasswordAction} from '@/app/admin/actions';
 import {SubmitButton, TextField} from '@/app/admin/_components/admin-fields';
 import {PageHeader, Panel} from '@/app/admin/_components/admin-shell';
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 
 type Props = {
-  searchParams?: Promise<{error?: string; status?: string}>;
+  searchParams?: Promise<{error?: string; status?: string; required?: string}>;
 };
 
 export default async function AdminAccountPage({searchParams}: Props) {
+  const identity = await assertAdminCapability('account:self');
   const {t} = await getAdminI18n();
   const query = await searchParams;
   const message = accountMessage(query?.error, query?.status, t);
@@ -15,6 +17,12 @@ export default async function AdminAccountPage({searchParams}: Props) {
   return (
     <>
       <PageHeader title={t('account.title')} description={t('account.description')} />
+
+      {query?.required === '1' || identity.mustChangePassword ? (
+        <div className="mb-6 rounded-md border border-[#fedf89] bg-[#fffaeb] px-4 py-3 text-sm font-semibold text-[#b54708]">
+          {t('account.required')}
+        </div>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,0.8fr)_minmax(280px,0.4fr)]">
         <Panel>
@@ -37,6 +45,18 @@ export default async function AdminAccountPage({searchParams}: Props) {
 
         <Panel>
           <div className="p-5">
+            <dl className="mb-6 grid gap-3 border-b border-[#e4e7ec] pb-5 text-sm">
+              <div>
+                <dt className="font-semibold text-[#647084]">{t('account.email')}</dt>
+                <dd className="mt-1 break-all font-semibold text-[#182033]">{identity.email}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-[#647084]">{t('account.role')}</dt>
+                <dd className="mt-1 font-semibold text-[#182033]">
+                  {t(`account.role.${identity.role.toLowerCase()}`)}
+                </dd>
+              </div>
+            </dl>
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{t('account.rulesTitle')}</h2>
             <ul className="mt-4 grid gap-2 text-sm leading-6 text-[#344054]">
               <li>{t('account.ruleLength')}</li>

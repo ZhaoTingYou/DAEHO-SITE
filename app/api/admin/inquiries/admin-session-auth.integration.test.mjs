@@ -6,17 +6,33 @@ import net from 'node:net';
 import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 
+import {createSignedAdminSession} from '../../../../lib/cms/admin-session-core.mjs';
+
 const projectRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 
 test('a signed CMS browser session can preview and update an inquiry status', {timeout: 60_000}, async (t) => {
   const passwordVersion = 'test-password-version';
   const sessionSecret = 'test-session-secret';
   const adminApiKey = 'test-admin-api-key';
-  const backend = http.createServer((request, response) => {
+  const identity = {
+    id: '00000000-0000-4000-8000-000000000001',
+    email: 'owner@example.com',
+    role: 'OWNER',
+    sessionVersion: 1,
+    expiresAt: null,
+    mustChangePassword: false
+  };
+  const backend = http.createServer(async (request, response) => {
     response.setHeader('content-type', 'application/json');
 
-    if (request.method === 'GET' && request.url === '/api/admin/auth/status') {
-      response.end(JSON.stringify({configured: true, version: passwordVersion}));
+    if (request.method === 'POST' && request.url === '/api/admin/auth/session') {
+      const body = JSON.parse(await readBody(request));
+      if (body.userId === identity.id && body.sessionVersion === identity.sessionVersion) {
+        response.end(JSON.stringify({user: identity}));
+      } else {
+        response.statusCode = 401;
+        response.end(JSON.stringify({error: 'CMS session is no longer valid.'}));
+      }
       return;
     }
 
@@ -83,6 +99,7 @@ test('a signed CMS browser session can preview and update an inquiry status', {t
 
   const baseUrl = `http://127.0.0.1:${nextPort}`;
   await waitForNext(baseUrl, nextProcess, processOutput);
+  const sessionValue = createSignedAdminSession(identity, sessionSecret, Date.now());
 
   const endpoint = `${baseUrl}/api/admin/inquiries/test-inquiry/status-preview`;
   const payload = JSON.stringify({status: 'contacted', expectedStatus: 'new'});
@@ -107,7 +124,7 @@ test('a signed CMS browser session can preview and update an inquiry status', {t
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      cookie: `daeho_admin_api_session=${createSessionValue(passwordVersion, sessionSecret)}`,
+      cookie: `daeho_admin_api_session=${sessionValue}`,
       origin: baseUrl
     },
     body: payload
@@ -125,7 +142,7 @@ test('a signed CMS browser session can preview and update an inquiry status', {t
       method: 'PATCH',
       headers: {
         'content-type': 'application/json',
-        cookie: `daeho_admin_api_session=${createSessionValue(passwordVersion, sessionSecret)}`,
+        cookie: `daeho_admin_api_session=${sessionValue}`,
         origin: baseUrl
       },
       body: payload
@@ -138,7 +155,7 @@ test('a signed CMS browser session can preview and update an inquiry status', {t
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      cookie: `daeho_admin_api_session=${createSessionValue(passwordVersion, sessionSecret)}`,
+      cookie: `daeho_admin_api_session=${sessionValue}`,
       origin: 'https://attacker.example'
     },
     body: payload
@@ -149,14 +166,14 @@ test('a signed CMS browser session can preview and update an inquiry status', {t
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      cookie: `daeho_admin_session=${createSessionValue(passwordVersion, sessionSecret)}`,
+      cookie: `daeho_admin_session=${sessionValue}`,
       origin: baseUrl
     },
     body: payload
   });
   assert.equal(uiOnlySessionResponse.status, 401);
 
-  const legacySessionValue = createSessionValue(passwordVersion, sessionSecret);
+  const legacySessionValue = createLegacySessionValue(passwordVersion, sessionSecret);
   const unauthenticatedRecoveryResponse = await fetch(`${baseUrl}/admin/api-session`, {
     method: 'POST',
     headers: {origin: baseUrl}
@@ -175,14 +192,14 @@ test('a signed CMS browser session can preview and update an inquiry status', {t
   const recoveryResponse = await fetch(`${baseUrl}/admin/api-session`, {
     method: 'POST',
     headers: {
-      cookie: `daeho_admin_session=${legacySessionValue}`,
+      cookie: `daeho_admin_session=${sessionValue}`,
       origin: baseUrl
     }
   });
   assert.equal(
     recoveryResponse.status,
     204,
-    'A still-valid legacy CMS UI session should be able to restore its API session without another login'
+    'A still-valid role CMS UI session should restore its API session without another login'
   );
 
   const recoveredSetCookie = recoveryResponse.headers.get('set-cookie') ?? '';
@@ -200,15 +217,34 @@ test('a signed CMS browser session can preview and update an inquiry status', {t
     body: payload
   });
   assert.equal(recoveredSessionResponse.status, 200);
+
+  const legacyRecoveryResponse = await fetch(`${baseUrl}/admin/api-session`, {
+    method: 'POST',
+    headers: {
+      cookie: `daeho_admin_session=${legacySessionValue}`,
+      origin: baseUrl
+    }
+  });
+  assert.equal(legacyRecoveryResponse.status, 401);
 });
 
-function createSessionValue(passwordVersion, sessionSecret) {
+function createLegacySessionValue(passwordVersion, sessionSecret) {
   const issuedAt = Date.now().toString();
   const versionToken = Buffer.from(passwordVersion, 'utf8').toString('base64url');
   const signature = createHmac('sha256', sessionSecret)
     .update(`${issuedAt}.${versionToken}`)
     .digest('hex');
   return `${issuedAt}.${versionToken}.${signature}`;
+}
+
+function readBody(request) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    request.setEncoding('utf8');
+    request.on('data', (chunk) => { body += chunk; });
+    request.on('end', () => resolve(body));
+    request.on('error', reject);
+  });
 }
 
 async function waitForNext(baseUrl, nextProcess, processOutput) {

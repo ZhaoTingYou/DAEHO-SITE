@@ -13,13 +13,12 @@ import {
   clearAdminSession,
   createAdminSession,
   isAdminLoginRateLimited,
-  recordFailedAdminLogin,
-  verifyAdminPassword
+  recordFailedAdminLogin
 } from '@/lib/cms/admin-session';
-import {
-  changeStoredAdminPassword,
-  isCmsBackendPasswordError
-} from '@/lib/cms/admin-password';
+import {normalizeAdminEmail} from '@/lib/cms/admin-authorization-core.mjs';
+import {createAdminLoginAttemptKey} from '@/lib/cms/admin-login-core.mjs';
+import {isCmsBackendPasswordError} from '@/lib/cms/admin-password';
+import {authenticateAdmin, changeOwnAdminPassword} from '@/lib/cms/admin-users';
 import {appendAdminActionError} from '@/lib/cms/admin-action-error';
 import {
   createCollection,
@@ -87,23 +86,25 @@ const sitePopupErrorMessageKeys = {
 } as const;
 
 export async function loginAction(formData: FormData) {
+  const email = normalizeAdminEmail(stringFromForm(formData, 'email'));
   const password = stringFromForm(formData, 'password');
-  const attemptKey = await getAdminLoginAttemptKey();
+  const attemptKey = await getAdminLoginAttemptKey(email);
 
   if (isAdminLoginRateLimited(attemptKey)) {
     redirect('/admin/login?error=rate');
   }
 
-  const verification = await verifyAdminPassword(password);
-
-  if (!verification.valid) {
+  let identity;
+  try {
+    identity = await authenticateAdmin(email, password);
+  } catch {
     recordFailedAdminLogin(attemptKey);
     redirect('/admin/login?error=1');
   }
 
   clearAdminLoginFailures(attemptKey);
-  await createAdminSession(verification.version);
-  redirect('/admin');
+  await createAdminSession(identity);
+  redirect(identity.mustChangePassword ? '/admin/account?required=1' : '/admin');
 }
 
 export async function logoutAction() {
@@ -112,7 +113,7 @@ export async function logoutAction() {
 }
 
 export async function changeAdminPasswordAction(formData: FormData) {
-  await assertAdminSession();
+  const identity = await assertAdminSession();
 
   const currentPassword = stringFromForm(formData, 'currentPassword');
   const newPassword = rawStringFromForm(formData, 'newPassword');
@@ -123,7 +124,7 @@ export async function changeAdminPasswordAction(formData: FormData) {
   }
 
   try {
-    await changeStoredAdminPassword(currentPassword, newPassword);
+    await changeOwnAdminPassword(identity, currentPassword, newPassword);
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
@@ -1211,11 +1212,12 @@ function isAllowedImageUpload(file: File) {
   return isAllowedCmsImageUpload(file);
 }
 
-async function getAdminLoginAttemptKey() {
+async function getAdminLoginAttemptKey(email: string) {
   const headerStore = await headers();
-  return (
+  const ipAddress = (
     headerStore.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     headerStore.get('x-real-ip') ||
     'local'
   );
+  return createAdminLoginAttemptKey(email, ipAddress);
 }
