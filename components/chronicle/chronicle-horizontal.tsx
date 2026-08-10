@@ -5,6 +5,8 @@ import Link from 'next/link';
 import {type CSSProperties, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
 
 import {ChronicleMobile} from './chronicle-mobile';
+import {ChronicleScrollHint} from './chronicle-scroll-hint';
+import {isChronicleScrollHintVisible} from './chronicle-scroll-hint-visibility';
 import {
   getChronicleChromeVisibility,
   getChronicleYearReelLayout
@@ -403,6 +405,11 @@ export function ChronicleHorizontal({
     [progress, slideCount]
   );
   const {endNavVisible, yearNavVisible} = getChronicleChromeVisibility(controlsVisible, lineProgress);
+  const scrollHintVisible = isChronicleScrollHintVisible(
+    introComplete,
+    controlsVisible,
+    lineProgress
+  );
 
   const scrollToChronicleYear = (index: number) => {
     const stage = stageRef.current;
@@ -545,6 +552,8 @@ export function ChronicleHorizontal({
       <div className="chronicle-progress" aria-hidden="true">
         <i style={{width: `${lineProgress * 100}%`}} />
       </div>
+
+      <ChronicleScrollHint visible={scrollHintVisible} />
 
       <div
         className={`chronicle-intro ${introExiting ? 'is-exiting' : ''} ${

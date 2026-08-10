@@ -1031,6 +1031,51 @@ select {
   transform: scale(1.06);
 }
 
+.chronicle-scroll-hint {
+  position: fixed;
+  top: 50%;
+  right: clamp(28px, 3vw, 60px);
+  z-index: 46;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translate3d(12px, -50%, 0);
+  transition:
+    opacity 480ms var(--chronicle-intro-ease),
+    transform 480ms var(--chronicle-intro-ease),
+    visibility 0ms linear 480ms;
+}
+
+.chronicle-scroll-hint.is-visible {
+  visibility: visible;
+  opacity: 1;
+  transform: translate3d(0, -50%, 0);
+  transition:
+    opacity 480ms var(--chronicle-intro-ease),
+    transform 480ms var(--chronicle-intro-ease),
+    visibility 0ms linear 0ms;
+}
+
+.chronicle-scroll-hint__motion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--chronicle-day-accent);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 14px rgba(122, 34, 48, .12);
+}
+
+.chronicle-scroll-hint__line {
+  width: 1px;
+  height: 40px;
+  background: rgba(122, 34, 48, .62);
+}
+
 .chronicle-progress {
   position: fixed;
   right: 60px;
@@ -2096,6 +2141,12 @@ select {
 
   .chronicle-year-nav__list {
     transition: none;
+  }
+
+  .chronicle-scroll-hint__motion {
+    opacity: 1;
+    animation: none;
+    transform: none;
   }
 }
 
