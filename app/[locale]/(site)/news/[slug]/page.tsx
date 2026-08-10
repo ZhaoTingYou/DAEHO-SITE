@@ -34,7 +34,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const detail = await getNewsDetailForSite(locale, slug);
 
   if (!detail) {
-    return getDetailMetadata(locale, '/news', 'NEWS', '');
+    notFound();
   }
 
   return getDetailMetadata(

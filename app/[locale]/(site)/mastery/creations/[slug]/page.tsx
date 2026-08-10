@@ -48,7 +48,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const item = await getCollectionItemForSite(locale, slug);
 
   if (!item) {
-    return getDetailMetadata(locale, '/mastery/creations', 'COLLECTION', '');
+    notFound();
   }
 
   return getDetailMetadata(

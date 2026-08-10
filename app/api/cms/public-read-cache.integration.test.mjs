@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
+import {rm} from 'node:fs/promises';
 import http from 'node:http';
 import net from 'node:net';
 import {fileURLToPath} from 'node:url';
@@ -17,13 +18,14 @@ const ownerIdentity = {
   mustChangePassword: false
 };
 
-test('public CMS reads are cached while failed responses are retried', {timeout: 60_000}, async (t) => {
+test('public CMS reads and full routes are cached while failed responses are retried', {timeout: 150_000}, async (t) => {
   const backendCalls = new Map();
   const pageVersions = new Map([['contact', 1], ['common', 1], ['site-popup', 1]]);
   let newsVersion = 1;
   let newsSlug = 'launch';
   let collectionVersion = 1;
-  let collectionSlug = 'champion';
+  let collectionSlug = 'ring-one';
+  let contactFailuresRemaining = 0;
   const backend = http.createServer((request, response) => {
     const requestUrl = request.url ?? '';
     const callCount = (backendCalls.get(requestUrl) ?? 0) + 1;
@@ -76,20 +78,21 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
       return;
     }
 
-    if (request.method === 'GET' && requestUrl === '/api/admin/collections/champion') {
+    if (request.method === 'GET' && requestUrl === '/api/admin/collections/ring-one') {
       response.end(JSON.stringify({item: adminCollection(collectionVersion, collectionSlug)}));
       return;
     }
 
-    if (request.method === 'PUT' && requestUrl === '/api/admin/collections/champion') {
+    if (request.method === 'PUT' && requestUrl === '/api/admin/collections/ring-one') {
       collectionVersion = 2;
-      collectionSlug = 'champion-v2';
+      collectionSlug = 'ring-one-v2';
       response.end(JSON.stringify({item: adminCollection(collectionVersion, collectionSlug)}));
       return;
     }
 
     if (request.method === 'POST' && requestUrl === '/api/admin/import?replace=1') {
       pageVersions.set('contact', 3);
+      contactFailuresRemaining = 1;
       response.end(JSON.stringify({replaced: true}));
       return;
     }
@@ -130,13 +133,23 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
 
     const match = requestUrl.match(/^\/api\/cms\/pages\/([^?]+)\?locale=(ko|en)$/);
     if (match) {
+      if (match[1] === 'contact' && match[2] === 'ko' && contactFailuresRemaining > 0) {
+        contactFailuresRemaining -= 1;
+        response.statusCode = 500;
+        response.end(JSON.stringify({error: 'Temporary contact CMS failure'}));
+        return;
+      }
+      const version = pageVersions.get(match[1]) ?? 1;
       response.end(JSON.stringify({
         pageKey: match[1],
         section: 'site',
         locale: match[2],
         content: {
           backendCall: callCount,
-          version: pageVersions.get(match[1]) ?? 1
+          version,
+          ...(match[1] === 'contact'
+            ? {__groups: {main: {hero: {title: `CONTACT VERSION ${version}`}}}}
+            : {})
         },
         seo: {},
         updatedAt: '2026-08-10T00:00:00.000Z'
@@ -155,19 +168,25 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   const nextPort = await findFreePort();
   const sessionSecret = 'test-public-cache-session-secret';
   const adminApiKey = 'test-public-cache-admin-api-key';
+  const nextEnvironment = {
+    ...process.env,
+    CMS_BACKEND_URL: `http://127.0.0.1:${backendAddress.port}`,
+    CMS_ADMIN_SESSION_SECRET: sessionSecret,
+    CMS_BACKEND_API_KEY: adminApiKey,
+    CMS_PREVIEW_STATIC: 'false',
+    NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${nextPort}`,
+    NEXT_TELEMETRY_DISABLED: '1'
+  };
+  await runNextBuild(nextEnvironment);
   const nextProcess = spawn(
     process.execPath,
-    ['node_modules/next/dist/bin/next', 'dev', '--webpack', '--port', String(nextPort)],
+    ['.next/standalone/server.js'],
     {
       cwd: projectRoot,
       env: {
-        ...process.env,
-        CMS_BACKEND_URL: `http://127.0.0.1:${backendAddress.port}`,
-        CMS_ADMIN_SESSION_SECRET: sessionSecret,
-        CMS_BACKEND_API_KEY: adminApiKey,
-        CMS_PREVIEW_STATIC: 'false',
-        NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${nextPort}`,
-        NEXT_TELEMETRY_DISABLED: '1'
+        ...nextEnvironment,
+        HOSTNAME: '127.0.0.1',
+        PORT: String(nextPort)
       },
       detached: true,
       stdio: ['ignore', 'pipe', 'pipe']
@@ -189,6 +208,14 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.equal((await second.json()).content.backendCall, 1);
   assert.equal(backendCalls.get('/api/cms/pages/contact?locale=ko'), 1);
 
+  const firstPublicPage = await fetch(`${baseUrl}/ko/contact`);
+  const firstPublicHtml = await firstPublicPage.text();
+  const warmPublicPage = await fetch(`${baseUrl}/ko/contact`);
+  assert.equal(firstPublicPage.status, 200);
+  assert.match(firstPublicHtml, /CONTACT VERSION 1/);
+  assert.match(await warmPublicPage.text(), /CONTACT VERSION 1/);
+  assert.equal(warmPublicPage.headers.get('x-nextjs-cache'), 'HIT');
+
   await fetch(`${baseUrl}/api/cms/pages/archive?locale=ko`);
   await fetch(`${baseUrl}/api/cms/pages/archive?locale=ko`);
   assert.equal(backendCalls.get('/api/cms/pages/archive?locale=ko'), 1);
@@ -197,15 +224,23 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
     '/api/cms/news?locale=ko',
     '/api/cms/news/launch?locale=ko',
     '/api/cms/collections?locale=ko',
-    '/api/cms/collections/champion?locale=ko'
+    '/api/cms/collections/ring-one?locale=ko'
   ]) {
+    const callsBeforeFirstRequest = backendCalls.get(path) ?? 0;
     assert.equal((await fetch(`${baseUrl}${path}`)).status, 200);
+    const callsAfterFirstRequest = backendCalls.get(path) ?? 0;
     assert.equal((await fetch(`${baseUrl}${path}`)).status, 200);
-    assert.equal(backendCalls.get(path), 1, `${path} should use its public CMS data cache`);
+    assert.ok(
+      callsAfterFirstRequest <= callsBeforeFirstRequest + 1,
+      `${path} should make at most one CMS request when first read at runtime`
+    );
+    assert.equal(
+      backendCalls.get(path) ?? 0,
+      callsAfterFirstRequest,
+      `${path} should use its public CMS data cache on the repeated read`
+    );
   }
 
-  const publicPage = await fetch(`${baseUrl}/ko/contact`);
-  assert.equal(publicPage.status, 200);
   assert.equal(
     [...backendCalls.keys()].some((path) => path.startsWith('/api/admin/pages')),
     false,
@@ -222,6 +257,7 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.match(rssBeforeSave, /\/ko\/news\/launch/);
   assert.match(sitemapBeforeSave, /\/ko\/news\/launch/);
   assert.match(sitemapBeforeSave, /\/ko\/mastery\/creations\/champion/);
+  assert.match(sitemapBeforeSave, /\/ko\/mastery\/creations\/ring-one/);
   const newsListCallsBeforeSave = backendCalls.get('/api/cms/news?locale=ko') ?? 0;
 
   const sessionValue = createSignedAdminSession(ownerIdentity, sessionSecret, Date.now());
@@ -241,6 +277,13 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
     })
   });
   assert.equal(saveResponse.status, 200);
+
+  const pageImmediatelyAfterSave = await fetch(`${baseUrl}/ko/contact`);
+  assert.equal(pageImmediatelyAfterSave.status, 200);
+  assert.match(await pageImmediatelyAfterSave.text(), /CONTACT VERSION 2/);
+  const warmPageAfterSave = await fetch(`${baseUrl}/ko/contact`);
+  assert.match(await warmPageAfterSave.text(), /CONTACT VERSION 2/);
+  assert.equal(warmPageAfterSave.headers.get('x-nextjs-cache'), 'HIT');
 
   const afterSave = await fetch(`${baseUrl}/api/cms/pages/contact?locale=ko`);
   assert.equal(afterSave.status, 200);
@@ -305,9 +348,14 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.match(rssAfterSave, /\/ko\/news\/launch-v2/);
   assert.doesNotMatch(rssAfterSave, /\/ko\/news\/launch</);
   assert.match(sitemapAfterNewsSave, /\/ko\/news\/launch-v2/);
+  const oldNewsPage = await fetch(`${baseUrl}/ko/news/launch`);
+  const oldNewsPageHtml = await oldNewsPage.text();
+  assert.notEqual(oldNewsPage.status, 500);
+  assert.match(oldNewsPageHtml, /noindex/);
+  assert.equal((await fetch(`${baseUrl}/ko/news/launch-v2`)).status, 200);
   const collectionListCallsBeforeSave = backendCalls.get('/api/cms/collections?locale=ko') ?? 0;
 
-  const collectionSaveResponse = await fetch(`${baseUrl}/api/admin/collections/champion`, {
+  const collectionSaveResponse = await fetch(`${baseUrl}/api/admin/collections/ring-one`, {
     method: 'PUT',
     headers: {
       'content-type': 'application/json',
@@ -315,7 +363,7 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
       origin: baseUrl
     },
     body: JSON.stringify({
-      slug: 'champion-v2',
+      slug: 'ring-one-v2',
       category: 'champion',
       translations: {
         ko: {title: '우승 작품'},
@@ -326,8 +374,8 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   assert.equal(collectionSaveResponse.status, 200);
 
   const collectionListAfterSave = await fetch(`${baseUrl}/api/cms/collections?locale=ko`);
-  const oldCollectionDetailAfterSave = await fetch(`${baseUrl}/api/cms/collections/champion?locale=ko`);
-  const collectionDetailAfterSave = await fetch(`${baseUrl}/api/cms/collections/champion-v2?locale=ko`);
+  const oldCollectionDetailAfterSave = await fetch(`${baseUrl}/api/cms/collections/ring-one?locale=ko`);
+  const collectionDetailAfterSave = await fetch(`${baseUrl}/api/cms/collections/ring-one-v2?locale=ko`);
   assert.equal((await collectionListAfterSave.json()).items[0].version, 2);
   assert.equal(oldCollectionDetailAfterSave.status, 404);
   assert.equal((await collectionDetailAfterSave.json()).item.version, 2);
@@ -335,10 +383,15 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
     backendCalls.get('/api/cms/collections?locale=ko'),
     collectionListCallsBeforeSave + 1
   );
-  assert.equal(backendCalls.get('/api/cms/collections/champion?locale=ko'), 2);
-  assert.equal(backendCalls.get('/api/cms/collections/champion-v2?locale=ko'), 1);
+  assert.equal(backendCalls.get('/api/cms/collections/ring-one?locale=ko'), 2);
+  assert.equal(backendCalls.get('/api/cms/collections/ring-one-v2?locale=ko'), 1);
   const sitemapAfterCollectionSave = await (await fetch(`${baseUrl}/sitemap.xml`)).text();
-  assert.match(sitemapAfterCollectionSave, /\/ko\/mastery\/creations\/champion-v2/);
+  assert.match(sitemapAfterCollectionSave, /\/ko\/mastery\/creations\/ring-one-v2/);
+  const oldCollectionPage = await fetch(`${baseUrl}/ko/mastery/creations/ring-one`);
+  const oldCollectionPageHtml = await oldCollectionPage.text();
+  assert.notEqual(oldCollectionPage.status, 500);
+  assert.match(oldCollectionPageHtml, /noindex/);
+  assert.equal((await fetch(`${baseUrl}/ko/mastery/creations/ring-one-v2`)).status, 200);
 
   const importResponse = await fetch(`${baseUrl}/api/admin/import?replace=1`, {
     method: 'POST',
@@ -351,9 +404,18 @@ test('public CMS reads are cached while failed responses are retried', {timeout:
   });
   assert.equal(importResponse.status, 200);
 
+  const responseDuringCmsFailure = await fetch(`${baseUrl}/ko/contact`);
+  assert.ok([200, 500].includes(responseDuringCmsFailure.status));
+  if (responseDuringCmsFailure.status === 200) {
+    assert.match(await responseDuringCmsFailure.text(), /CONTACT VERSION 2/);
+  }
+  const recoveredPublicPage = await fetch(`${baseUrl}/ko/contact`);
+  assert.equal(recoveredPublicPage.status, 200);
+  assert.match(await recoveredPublicPage.text(), /CONTACT VERSION 3/);
+
   const afterImport = await fetch(`${baseUrl}/api/cms/pages/contact?locale=ko`);
   assert.equal((await afterImport.json()).content.version, 3);
-  assert.equal(backendCalls.get('/api/cms/pages/contact?locale=ko'), 3);
+  assert.ok((backendCalls.get('/api/cms/pages/contact?locale=ko') ?? 0) >= 4);
 
   const failed = await fetch(`${baseUrl}/api/cms/pages/flaky?locale=ko`);
   const recovered = await fetch(`${baseUrl}/api/cms/pages/flaky?locale=ko`);
@@ -395,6 +457,31 @@ async function waitForNext(baseUrl, nextProcess, processOutput) {
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
   throw new Error(`Next.js did not become ready:\n${processOutput.join('')}`);
+}
+
+async function runNextBuild(environment) {
+  await rm(new URL('../../../.next/', import.meta.url), {recursive: true, force: true});
+  const output = [];
+  const buildProcess = spawn(
+    process.execPath,
+    ['node_modules/next/dist/bin/next', 'build'],
+    {
+      cwd: projectRoot,
+      env: environment,
+      stdio: ['ignore', 'pipe', 'pipe']
+    }
+  );
+  buildProcess.stdout.on('data', (chunk) => output.push(chunk.toString()));
+  buildProcess.stderr.on('data', (chunk) => output.push(chunk.toString()));
+
+  const exitCode = await new Promise((resolve, reject) => {
+    buildProcess.once('error', reject);
+    buildProcess.once('exit', (code) => resolve(code));
+  });
+
+  if (exitCode !== 0) {
+    throw new Error(`Production build failed:\n${output.join('')}`);
+  }
 }
 
 async function findFreePort() {

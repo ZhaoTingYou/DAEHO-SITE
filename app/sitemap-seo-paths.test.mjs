@@ -25,9 +25,11 @@ test('sitemap does not publish demo Creation detail URLs when the CMS is empty',
   );
 });
 
-test('sitemap caches only successful CMS results and serves failures uncached', () => {
-  assert.match(sitemapSource, /export const dynamic = 'force-dynamic'/);
+test('sitemap uses one-hour full-route caching and only caches successful CMS results', () => {
+  assert.match(sitemapSource, /export const revalidate = 3600/);
+  assert.doesNotMatch(sitemapSource, /force-dynamic/);
+  assert.match(sitemapSource, /if \(!isProductionBuildPhase\(\)\) \{\s+throw error/);
   assert.match(sitemapSource, /const getCachedSitemap = unstable_cache/);
   assert.match(sitemapSource, /revalidate: publicCmsCacheSeconds/);
-  assert.match(sitemapSource, /catch \(error\) \{\s+noStore\(\);/);
+  assert.doesNotMatch(sitemapSource, /Serving an uncached fallback sitemap/);
 });

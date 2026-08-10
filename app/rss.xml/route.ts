@@ -4,9 +4,11 @@ import {unstable_cache} from 'next/cache';
 import {getNewsCardsForSite} from '@/lib/cms/public-content';
 import {publicCmsCacheSeconds, publicNewsListCacheTags} from '@/lib/cms/public-cache';
 import {listPublicNews} from '@/lib/cms/repositories';
+import {isProductionBuildPhase} from '@/lib/next-build-phase';
 import {metadataBase} from '@/lib/seo';
+import koMessages from '@/messages/ko.json';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 const getCachedRssCards = unstable_cache(
   async () => {
@@ -21,17 +23,17 @@ const getCachedRssCards = unstable_cache(
 );
 
 export async function GET() {
-  let usedFallback = false;
   let cards: Awaited<ReturnType<typeof getNewsCardsForSite>>;
 
   try {
     cards = await getCachedRssCards();
   } catch (error) {
-    usedFallback = true;
-    console.error('[cms] Serving an uncached fallback RSS feed because CMS read failed.', error);
-    cards = [];
+    if (!isProductionBuildPhase()) {
+      throw error;
+    }
+    console.warn('[cms] CMS was unavailable while seeding the RSS build cache; using the bundled snapshot.', error);
+    cards = koMessages.news.grid.cards.map((card) => ({...card, hasImage: false}));
   }
-
   const buildDate = new Date().toUTCString();
   const items = cards
     .map((card) => {
@@ -68,7 +70,7 @@ export async function GET() {
 
   return new NextResponse(xml, {
     headers: {
-      'cache-control': usedFallback ? 'private, no-store' : 'public, max-age=0, must-revalidate',
+      'cache-control': 'public, max-age=0, must-revalidate',
       'content-type': 'application/rss+xml; charset=utf-8'
     }
   });

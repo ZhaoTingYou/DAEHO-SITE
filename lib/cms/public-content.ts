@@ -85,7 +85,7 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
   }
 
   if (!isStaticCmsPreviewEnabled()) {
-    throw new Error(`Public CMS news item ${slug} was not found.`);
+    return null;
   }
 
   const card = (await getPublicLocaleMessages(locale, ['news'])).news.grid.cards.find((item) => item.id === slug);
@@ -174,7 +174,7 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
   }
 
   if (!isStaticCmsPreviewEnabled()) {
-    throw new Error(`Public CMS collection item ${slug} was not found.`);
+    return null;
   }
 
   const item = (await getCollectionItemsForSite(locale)).find((entry) => entry.id === slug);

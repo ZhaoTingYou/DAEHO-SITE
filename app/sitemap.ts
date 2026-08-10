@@ -1,5 +1,5 @@
 import type {MetadataRoute} from 'next';
-import {unstable_cache, unstable_noStore as noStore} from 'next/cache';
+import {unstable_cache} from 'next/cache';
 
 import {
   publicCmsCacheSeconds,
@@ -12,12 +12,14 @@ import {getPublicLocales} from '@/lib/english-visibility-core';
 import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {locales} from '@/lib/locales';
+import {isProductionBuildPhase} from '@/lib/next-build-phase';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {metadataBase} from '@/lib/seo';
+import {isStaticCmsPreviewEnabled} from '@/lib/cms/static-snapshot';
 import koMessages from '@/messages/ko.json';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type ChangeFrequency = NonNullable<SitemapEntry['changeFrequency']>;
@@ -70,19 +72,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     return await getCachedSitemap();
   } catch (error) {
-    noStore();
-    console.error('[cms] Serving an uncached fallback sitemap because CMS read failed.', error);
-    return buildSitemap();
+    if (!isProductionBuildPhase()) {
+      throw error;
+    }
+    console.warn('[cms] CMS was unavailable while seeding the sitemap build cache; using bundled routes.', error);
+    return buildSitemap(true);
   }
 }
 
-async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
-  const cmsNews = await readCmsValue(() => listPublicNews('ko'), []);
-  const cmsCollections = await readCmsValue(() => listPublicCollections('ko'), []);
-  const [englishEnabled, golfEnabled] = await Promise.all([
-    readCmsValue(() => isEnglishEnabledForSite(), false),
-    readCmsValue(() => isGolfEnabledForSite(), false)
-  ]);
+async function buildSitemap(allowBuildFallback = false): Promise<MetadataRoute.Sitemap> {
+  const [cmsNews, cmsCollections, englishEnabled, golfEnabled] = allowBuildFallback
+    ? [[], [], false, false] as const
+    : await Promise.all([
+        readCmsValue(() => listPublicNews('ko'), []),
+        readCmsValue(() => listPublicCollections('ko'), []),
+        readCmsValue(() => isEnglishEnabledForSite(), false),
+        readCmsValue(() => isGolfEnabledForSite(), false)
+      ]);
   const staticPaths = [
     ...baseStaticPaths,
     ...(golfEnabled ? ['/golf', '/golf/inquiry'] : [])
@@ -184,11 +190,13 @@ function absoluteUrl(path: string) {
   return new URL(path, metadataBase).toString();
 }
 
-async function readCmsValue<T>(reader: () => Promise<T>, fallback: T): Promise<T> {
+async function readCmsValue<T>(reader: () => Promise<T>, fallback: T, allowBuildFallback = false): Promise<T> {
   try {
     return await reader();
   } catch (error) {
-    noStore();
+    if (!isStaticCmsPreviewEnabled() && !allowBuildFallback) {
+      throw error;
+    }
     if (!isNextDynamicServerError(error)) {
       console.error('[cms] Falling back to static sitemap entries because CMS read failed.', error);
     }
