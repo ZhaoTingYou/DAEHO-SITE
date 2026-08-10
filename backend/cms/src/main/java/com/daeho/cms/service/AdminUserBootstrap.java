@@ -6,10 +6,11 @@ import java.util.Locale;
 import java.util.UUID;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AdminUserBootstrap implements ApplicationRunner {
+public class AdminUserBootstrap implements ApplicationRunner, Ordered {
   private final AdminUserStore users;
   private final AdminPasswordStore legacyPasswords;
   private final AdminPasswordHasher hasher;
@@ -30,6 +31,11 @@ public class AdminUserBootstrap implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) {
     ensureOwner();
+  }
+
+  @Override
+  public int getOrder() {
+    return Ordered.HIGHEST_PRECEDENCE + 1;
   }
 
   void ensureOwner() {
