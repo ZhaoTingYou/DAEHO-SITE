@@ -12,12 +12,14 @@ import {routing, type Locale} from '@/i18n/routing';
 import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 
 type Props = {
   children: React.ReactNode;
   params: Promise<{locale: string}>;
 };
+
+export const revalidate = 3600;
 
 export default async function SiteLayout({children, params}: Props) {
   const {locale} = await params;
@@ -31,7 +33,7 @@ export default async function SiteLayout({children, params}: Props) {
     isEnglishEnabledForSite(),
     isGolfEnabledForSite()
   ]);
-  const messages = await getLocaleMessages(locale as Locale);
+  const messages = await getPublicLocaleMessages(locale as Locale, ['common', 'site-popup']);
   const externalSites = messages.common.footer.externalSites.items;
   const privacyHref = resolveCmsHref(locale, messages.common.navigation.hrefs.privacy, '/privacy');
 

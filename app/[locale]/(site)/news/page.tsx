@@ -6,14 +6,12 @@ import {Reveal} from '@/components/motion/reveal';
 import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
 import {getNewsCardsForSite} from '@/lib/cms/public-content';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 
 type Props = {
   params: Promise<{locale: Locale}>;
 };
-
-export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -23,7 +21,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function NewsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const messages = await getLocaleMessages(locale);
+  const messages = await getPublicLocaleMessages(locale, ['news']);
   const content = messages.news;
   const text = messages.newsUi;
   const cards: NewsCard[] = await getNewsCardsForSite(locale);

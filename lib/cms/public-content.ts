@@ -4,7 +4,7 @@ import type {SpecialtyCollectionItem} from '@/components/specialty/specialty-col
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 
 import {
@@ -42,7 +42,7 @@ export async function getNewsCardsForSite(locale: Locale): Promise<NewsCard[]> {
     return cmsItems.map((item) => toNewsCard(item, locale));
   }
 
-  return (await getLocaleMessages(locale)).news.grid.cards.map((card) => ({
+  return (await getPublicLocaleMessages(locale, ['news'])).news.grid.cards.map((card) => ({
     ...card,
     hasImage: imageExists(card.image)
   }));
@@ -58,7 +58,7 @@ export async function getHomeNewsCardsForSite(locale: Locale): Promise<HomeNewsP
     }));
   }
 
-  return (await getLocaleMessages(locale)).news.grid.cards.slice(0, 4).map((card) => ({
+  return (await getPublicLocaleMessages(locale, ['news'])).news.grid.cards.slice(0, 4).map((card) => ({
     ...card,
     hasImage: imageExists(card.image)
   }));
@@ -83,7 +83,7 @@ export async function getNewsDetailForSite(locale: Locale, slug: string): Promis
     };
   }
 
-  const card = (await getLocaleMessages(locale)).news.grid.cards.find((item) => item.id === slug);
+  const card = (await getPublicLocaleMessages(locale, ['news'])).news.grid.cards.find((item) => item.id === slug);
 
   if (!card) {
     return null;
@@ -112,7 +112,7 @@ export async function getCollectionItemsForSite(locale: Locale): Promise<Special
     return [];
   }
 
-  const categoryLabels = collectionCategoryLabels(await getLocaleMessages(locale));
+  const categoryLabels = collectionCategoryLabels(await getPublicLocaleMessages(locale, ['mastery-creations']));
 
   return cmsItems.map((item) => {
     const specs = normalizeCollectionSpecs(item.specs);
@@ -145,7 +145,7 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
     const category = String(cmsItem.category);
     const story = String(cmsItem.story);
     const sportCategory = String(cmsItem.sportCategory);
-    const categoryLabels = collectionCategoryLabels(await getLocaleMessages(locale));
+    const categoryLabels = collectionCategoryLabels(await getPublicLocaleMessages(locale, ['mastery-creations']));
 
     return {
       id: String(cmsItem.slug),
@@ -195,7 +195,7 @@ export async function getCollectionItemForSite(locale: Locale, slug: string) {
   };
 }
 
-function collectionCategoryLabels(messages: Awaited<ReturnType<typeof getLocaleMessages>>) {
+function collectionCategoryLabels(messages: Awaited<ReturnType<typeof getPublicLocaleMessages>>) {
   return new Map(
     messages.specialtyPages.collection.gallery.filters.map((filter) => [filter.id, filter.label])
   );

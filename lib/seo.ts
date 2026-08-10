@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 
 import type {Locale} from '@/i18n/routing';
-import {getPage} from '@/lib/cms/repositories';
+import {getPublicPage} from '@/lib/cms/repositories';
 import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {imageSrc} from '@/lib/image-src';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
@@ -210,8 +210,8 @@ export async function getCmsPageSeoOverride(locale: Locale, cmsPageKey: string):
   }
 
   try {
-    const page = await getPage(cmsPageKey);
-    const seo = page?.seo?.[locale];
+    const page = await getPublicPage(cmsPageKey, locale);
+    const seo = page?.seo;
 
     if (!seo || typeof seo !== 'object') {
       return emptySeoOverride();

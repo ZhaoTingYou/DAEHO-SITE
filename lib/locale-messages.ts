@@ -8,7 +8,7 @@ import {
   managedPageDefinitions,
   setObjectValueAtPath
 } from '@/lib/cms/page-catalog';
-import {listPages} from '@/lib/cms/repositories';
+import {getPublicPage, listPages} from '@/lib/cms/repositories';
 import {normalizeAchievementFirstRecordsFallback} from '@/lib/achievement-first-records-core';
 import {preserveCollectionCategoryFilters} from '@/lib/collection-category-filters-core';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
@@ -26,11 +26,22 @@ const messagesByLocale: Record<Locale, LocaleMessages> = {
 };
 
 export async function getLocaleMessages(locale: Locale): Promise<LocaleMessages> {
+  return buildLocaleMessages(locale, await readCmsPages());
+}
+
+export async function getPublicLocaleMessages(
+  locale: Locale,
+  pageKeys: readonly string[]
+): Promise<LocaleMessages> {
+  return buildLocaleMessages(locale, await readPublicCmsPages(locale, pageKeys));
+}
+
+async function buildLocaleMessages(locale: Locale, pages: CmsPageOverride[]): Promise<LocaleMessages> {
   const staticMessages = messagesByLocale[locale] ?? koMessages;
   const baseMessages = cloneJson(staticMessages);
 
   const messages = normalizeMasteryNavigationCopy(
-    await applyCmsPageOverrides(baseMessages, locale),
+    applyCmsPageOverrides(baseMessages, locale, pages),
     staticMessages
   );
   messages.specialtyPages.collection.gallery.filters = preserveCollectionCategoryFilters(
@@ -75,9 +86,7 @@ export function normalizeMasteryNavigationCopy(messages: LocaleMessages, staticM
   return messages;
 }
 
-async function applyCmsPageOverrides(messages: LocaleMessages, locale: Locale) {
-  const pages = await readCmsPages();
-
+function applyCmsPageOverrides(messages: LocaleMessages, locale: Locale, pages: CmsPageOverride[]) {
   if (pages.length === 0) {
     return messages;
   }
@@ -132,3 +141,35 @@ async function readCmsPages() {
     return [];
   }
 }
+
+async function readPublicCmsPages(locale: Locale, pageKeys: readonly string[]): Promise<CmsPageOverride[]> {
+  const uniquePageKeys = [...new Set(pageKeys.map((pageKey) => pageKey.trim()).filter(Boolean))];
+  const pages = await Promise.all(uniquePageKeys.map(async (pageKey) => {
+    try {
+      const page = await getPublicPage(pageKey, locale);
+
+      if (!page) {
+        return null;
+      }
+
+      return {
+        pageKey,
+        content: {
+          [locale]: page.content
+        }
+      } satisfies CmsPageOverride;
+    } catch (error) {
+      if (!isNextDynamicServerError(error)) {
+        console.error(`[cms] Falling back to static locale messages because public CMS page ${pageKey} could not be read.`, error);
+      }
+      return null;
+    }
+  }));
+
+  return pages.filter((page): page is CmsPageOverride => page !== null);
+}
+
+type CmsPageOverride = {
+  pageKey: string;
+  content: Partial<Record<Locale, unknown>>;
+};

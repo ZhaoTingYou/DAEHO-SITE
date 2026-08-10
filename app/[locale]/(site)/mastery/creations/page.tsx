@@ -6,14 +6,12 @@ import {SpecialtyCollectionGallery} from '@/components/specialty/specialty-colle
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 
 type Props = {
   params: Promise<{locale: Locale}>;
 };
-
-export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -23,7 +21,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function CollectionPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const messages = await getLocaleMessages(locale);
+  const messages = await getPublicLocaleMessages(locale, ['mastery-creations']);
   const content = messages.specialtyPages.collection;
   const text = messages.collectionUi;
   const filters = content.gallery.filters.map((filter) => ({

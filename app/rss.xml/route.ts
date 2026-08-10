@@ -3,7 +3,8 @@ import {NextResponse} from 'next/server';
 import {getNewsCardsForSite} from '@/lib/cms/public-content';
 import {metadataBase} from '@/lib/seo';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 export async function GET() {
   const cards = await getNewsCardsForSite('ko');
@@ -43,7 +44,7 @@ export async function GET() {
 
   return new NextResponse(xml, {
     headers: {
-      'cache-control': 'public, max-age=0, must-revalidate',
+      'cache-control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=60',
       'content-type': 'application/rss+xml; charset=utf-8'
     }
   });

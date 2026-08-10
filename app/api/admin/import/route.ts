@@ -5,6 +5,7 @@ import type {NextRequest} from 'next/server';
 import {requireAdminCapability} from '@/lib/cms/auth';
 import {maxImportBodyBytes, rejectOversizedRequest} from '@/lib/cms/http';
 import {getCmsBackendBaseUrl} from '@/lib/cms/repositories';
+import {revalidateAllPublicCmsCache} from '@/lib/cms/public-cache';
 import {locales} from '@/lib/locales';
 
 export const runtime = 'nodejs';
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
   const body = await response.text();
 
   if (response.ok && shouldReplace) {
+    revalidateAllPublicCmsCache();
     revalidateCmsPaths();
   }
 

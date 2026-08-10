@@ -29,7 +29,7 @@ const newsGridSource = readFileSync(new URL('./components/news/news-journal-grid
 const contactFormSource = readFileSync(new URL('./components/forms/contact-form.tsx', import.meta.url), 'utf8');
 const golfFormSource = readFileSync(new URL('./components/forms/golf-inquiry-form.tsx', import.meta.url), 'utf8');
 const golfConfiguratorSource = readFileSync(new URL('./components/golf/golf-configurator.tsx', import.meta.url), 'utf8');
-const golfInquiryPageSource = readFileSync(new URL('./app/[locale]/(site)/golf/inquiry/page.tsx', import.meta.url), 'utf8');
+const golfInquiryQuerySource = readFileSync(new URL('./components/golf/golf-inquiry-query.tsx', import.meta.url), 'utf8');
 const collectionGallerySource = readFileSync(new URL('./components/specialty/collection-detail-gallery.tsx', import.meta.url), 'utf8');
 const inquiryValidationSource = readFileSync(new URL('./lib/cms/validation.ts', import.meta.url), 'utf8');
 const backendValidationSource = readFileSync(new URL('./backend/cms/src/main/java/com/daeho/cms/service/RequestValidation.java', import.meta.url), 'utf8');
@@ -228,9 +228,9 @@ test('Golf option controls expose and visibly render their selected state', () =
 test('Golf selected style reaches the inquiry summary, form payload, and CMS storage', () => {
   assert.match(golfConfiguratorSource, /appendCmsQuery\(/);
   assert.match(golfConfiguratorSource, /style: selectedStyleOption/);
-  assert.match(golfInquiryPageSource, /style\?: string/);
-  assert.match(golfInquiryPageSource, /<SpecRow label=\{text\.style\} value=\{selectedStyle\} \/>/);
-  assert.match(golfInquiryPageSource, /style: selectedStyle/);
+  assert.match(golfInquiryQuerySource, /resolveGolfInquiryQuery\(locationSearch, options\)/);
+  assert.match(golfInquiryQuerySource, /<SpecRow label=\{text\.style\} value=\{selection\.style\} \/>/);
+  assert.match(golfInquiryQuerySource, /style: selection\.style/);
   assert.match(golfFormSource, /name="selectedStyle" value=\{configuration\.style\}/);
   assert.match(golfFormSource, /selectedStyle: String\(formData\.get\('selectedStyle'\)/);
   assert.match(inquiryValidationSource, /selectedStyle: inquiryShortText/);

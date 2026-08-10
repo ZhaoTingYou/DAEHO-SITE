@@ -10,7 +10,7 @@ import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {metadataBase} from '@/lib/seo';
 import koMessages from '@/messages/ko.json';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type ChangeFrequency = NonNullable<SitemapEntry['changeFrequency']>;

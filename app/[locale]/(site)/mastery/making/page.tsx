@@ -11,7 +11,7 @@ import {SpecialtyProcess} from '@/components/specialty/specialty-process';
 import type {Locale} from '@/i18n/routing';
 import {imageExists} from '@/lib/image-exists';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 import {optionalImage} from '@/lib/optional-image';
 
@@ -27,7 +27,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function TechniquePage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = (await getLocaleMessages(locale)).specialtyPages.technique;
+  const content = (await getPublicLocaleMessages(locale, ['mastery-making'])).specialtyPages.technique;
   const processSteps = content.process.steps.map((step) => ({
     ...step,
     hasImage: imageExists(step.image)

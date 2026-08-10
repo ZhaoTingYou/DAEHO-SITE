@@ -9,7 +9,7 @@ import {RingDrawingBackground} from '@/components/specialty/ring-drawing-backgro
 import {TechniqueCarouselSection} from '@/components/specialty/technique-carousel-section';
 import {TechniqueIntroSection} from '@/components/specialty/technique-intro-section';
 import type {Locale} from '@/i18n/routing';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {getPageMetadata} from '@/lib/seo';
 import {optionalImage} from '@/lib/optional-image';
@@ -35,7 +35,7 @@ export default async function TechniqueRecordPage({params}: Props) {
 
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = (await getLocaleMessages(locale)).specialtyPages.techniqueRecords;
+  const content = (await getPublicLocaleMessages(locale, ['mastery-technique'])).specialtyPages.techniqueRecords;
 
   return (
     <main className="mobile-page-shell relative isolate overflow-hidden bg-white text-text">
