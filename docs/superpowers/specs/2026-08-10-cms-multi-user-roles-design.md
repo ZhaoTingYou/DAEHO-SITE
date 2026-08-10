@@ -173,6 +173,8 @@ An authenticated editor with `must_change_password=true` can access only:
 
 All other administrator routes redirect to the password-change page. A successful change stores the new hash, clears `must_change_password`, increments `session_version`, clears the current cookie, and requires a fresh login with the new password.
 
+The shared dashboard layout validates the identity and limits first-login navigation to the account page. Each page then calls the capability guard before loading data; that guard redirects a `must_change_password` identity unless the requested capability is `account:self`. This keeps direct content-page requests blocked without relying on request-path inference inside the shared layout.
+
 ## Server Boundaries
 
 Nginx exposes the Next.js application and uploaded media. It does not expose the Spring CMS administrator endpoints directly. Spring continues to accept the internal `CMS_ADMIN_API_KEY` only from the Next.js server-side repository layer.
@@ -180,7 +182,7 @@ Nginx exposes the Next.js application and uploaded media. It does not expose the
 Next.js is therefore the user-facing authorization boundary:
 
 - the dashboard layout validates the current identity;
-- each restricted route requires its capability before data is fetched;
+- every dashboard route, including content routes, requires its capability before data is fetched;
 - every mutation server action requires its capability before parsing or submitting data;
 - every `/api/admin` proxy route requires its capability before forwarding the internal service-key request;
 - destructive content actions require an owner capability even if a crafted request calls them directly.
