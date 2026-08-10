@@ -7,7 +7,8 @@ const rssRouteSource = readFileSync(new URL('./rss.xml/route.ts', import.meta.ur
 test('RSS route exposes Korean news feed for Naver submission', () => {
   assert.match(rssRouteSource, /export const revalidate = 3600/);
   assert.doesNotMatch(rssRouteSource, /force-dynamic/);
-  assert.match(rssRouteSource, /if \(!isProductionBuildPhase\(\)\) \{\s+throw error/);
+  assert.doesNotMatch(rssRouteSource, /isProductionBuildPhase/);
+  assert.doesNotMatch(rssRouteSource, /bundled snapshot/);
   assert.match(rssRouteSource, /const getCachedRssCards = unstable_cache/);
   assert.match(rssRouteSource, /revalidate: publicCmsCacheSeconds/);
   assert.match(rssRouteSource, /tags: publicNewsListCacheTags\('ko'\)/);

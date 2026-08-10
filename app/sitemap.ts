@@ -12,7 +12,6 @@ import {getPublicLocales} from '@/lib/english-visibility-core';
 import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {locales} from '@/lib/locales';
-import {isProductionBuildPhase} from '@/lib/next-build-phase';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {metadataBase} from '@/lib/seo';
@@ -69,26 +68,16 @@ const getCachedSitemap = unstable_cache(
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  try {
-    return await getCachedSitemap();
-  } catch (error) {
-    if (!isProductionBuildPhase()) {
-      throw error;
-    }
-    console.warn('[cms] CMS was unavailable while seeding the sitemap build cache; using bundled routes.', error);
-    return buildSitemap(true);
-  }
+  return getCachedSitemap();
 }
 
-async function buildSitemap(allowBuildFallback = false): Promise<MetadataRoute.Sitemap> {
-  const [cmsNews, cmsCollections, englishEnabled, golfEnabled] = allowBuildFallback
-    ? [[], [], false, false] as const
-    : await Promise.all([
-        readCmsValue(() => listPublicNews('ko'), []),
-        readCmsValue(() => listPublicCollections('ko'), []),
-        readCmsValue(() => isEnglishEnabledForSite(), false),
-        readCmsValue(() => isGolfEnabledForSite(), false)
-      ]);
+async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
+  const [cmsNews, cmsCollections, englishEnabled, golfEnabled] = await Promise.all([
+    readCmsValue(() => listPublicNews('ko'), []),
+    readCmsValue(() => listPublicCollections('ko'), []),
+    readCmsValue(() => isEnglishEnabledForSite(), false),
+    readCmsValue(() => isGolfEnabledForSite(), false)
+  ]);
   const staticPaths = [
     ...baseStaticPaths,
     ...(golfEnabled ? ['/golf', '/golf/inquiry'] : [])
@@ -190,11 +179,11 @@ function absoluteUrl(path: string) {
   return new URL(path, metadataBase).toString();
 }
 
-async function readCmsValue<T>(reader: () => Promise<T>, fallback: T, allowBuildFallback = false): Promise<T> {
+async function readCmsValue<T>(reader: () => Promise<T>, fallback: T): Promise<T> {
   try {
     return await reader();
   } catch (error) {
-    if (!isStaticCmsPreviewEnabled() && !allowBuildFallback) {
+    if (!isStaticCmsPreviewEnabled()) {
       throw error;
     }
     if (!isNextDynamicServerError(error)) {
