@@ -1,14 +1,14 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 import {managedPageDefinitions} from '@/lib/cms/page-catalog';
 import {listPages} from '@/lib/cms/repositories';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'content:read');
 
   if (unauthorized) {
     return unauthorized;

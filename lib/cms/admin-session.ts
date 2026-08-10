@@ -39,8 +39,10 @@ export async function assertAdminSession(): Promise<AdminIdentity> {
 
 export async function assertAdminCapability(capability: AdminCapability): Promise<AdminIdentity> {
   const identity = await assertAdminSession();
-  if ((identity.mustChangePassword && capability !== 'account:self')
-      || !hasAdminCapability(identity.role, capability)) {
+  if (identity.mustChangePassword && capability !== 'account:self') {
+    redirect('/admin/account?required=1');
+  }
+  if (!hasAdminCapability(identity.role, capability)) {
     forbidden();
   }
   return identity;

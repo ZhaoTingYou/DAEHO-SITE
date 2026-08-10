@@ -8,7 +8,7 @@ import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
 
 import {
-  assertAdminSession,
+  assertAdminCapability,
   clearAdminLoginFailures,
   clearAdminSession,
   createAdminSession,
@@ -113,7 +113,7 @@ export async function logoutAction() {
 }
 
 export async function changeAdminPasswordAction(formData: FormData) {
-  const identity = await assertAdminSession();
+  const identity = await assertAdminCapability('account:self');
 
   const currentPassword = stringFromForm(formData, 'currentPassword');
   const newPassword = rawStringFromForm(formData, 'newPassword');
@@ -144,7 +144,7 @@ export async function changeAdminPasswordAction(formData: FormData) {
 }
 
 export async function updateInquiryStatusAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('inquiries:write');
 
   const id = stringFromForm(formData, 'id');
   const parsed = inquiryStatusSchema.safeParse({
@@ -163,7 +163,7 @@ export async function updateInquiryStatusAction(formData: FormData) {
 }
 
 export async function saveNewsAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   const id = stringFromForm(formData, 'id');
   const editorPath = `/admin/news/${id || 'new'}`;
@@ -208,7 +208,7 @@ export async function saveNewsAction(formData: FormData) {
 }
 
 export async function deleteNewsAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:delete');
 
   try {
     const id = stringFromForm(formData, 'id');
@@ -226,7 +226,7 @@ export async function deleteNewsAction(formData: FormData) {
 }
 
 export async function saveCollectionAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   const id = stringFromForm(formData, 'id');
   const editorPath = `/admin/collections/${id || 'new'}`;
@@ -265,7 +265,7 @@ export async function saveCollectionAction(formData: FormData) {
 }
 
 export async function deleteCollectionAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:delete');
 
   try {
     const id = stringFromForm(formData, 'id');
@@ -283,7 +283,7 @@ export async function deleteCollectionAction(formData: FormData) {
 }
 
 export async function savePageAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   const pageKey = stringFromForm(formData, 'pageKey');
   const definition = getManagedPageDefinition(pageKey);
@@ -369,7 +369,7 @@ export async function savePageAction(formData: FormData) {
 }
 
 export async function saveSitePopupAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
   const returnTo = '/admin/popup';
 
   try {
@@ -419,7 +419,7 @@ function techniqueLocaleRecords(value: unknown) {
 }
 
 export async function uploadMediaAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   try {
     const file = formData.get('file');
@@ -445,7 +445,7 @@ export async function uploadMediaAction(formData: FormData) {
 }
 
 export async function updateMediaAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   try {
     const id = stringFromForm(formData, 'id');
@@ -465,7 +465,7 @@ export async function updateMediaAction(formData: FormData) {
 }
 
 export async function deleteMediaAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:delete');
 
   try {
     const id = stringFromForm(formData, 'id');

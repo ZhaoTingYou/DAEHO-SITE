@@ -1,12 +1,14 @@
 import Link from 'next/link';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {getCmsExportCounts, getCmsExportSnapshot} from '@/lib/cms/export';
 
 import {CmsImportPanel} from '../../_components/cms-import-panel';
 import {PageHeader, Panel} from '../../_components/admin-shell';
 
 export default async function AdminExportPage() {
+  await assertAdminCapability('system:manage');
   const {messages, t} = await getAdminI18n();
   const snapshot = await getCmsExportSnapshot();
   const counts = getCmsExportCounts(snapshot);

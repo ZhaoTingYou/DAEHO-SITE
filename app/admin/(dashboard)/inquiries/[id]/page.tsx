@@ -2,6 +2,7 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {
   getInquiryDetail
 } from '@/lib/cms/repositories';
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export default async function AdminInquiryDetailPage({params}: Props) {
+  await assertAdminCapability('inquiries:read');
   const {t} = await getAdminI18n();
   const {id} = await params;
   const detail = await getInquiryDetail(id);

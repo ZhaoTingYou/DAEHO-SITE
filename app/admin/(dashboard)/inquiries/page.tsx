@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {listInquiries} from '@/lib/cms/repositories';
 
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default async function AdminInquiriesPage({searchParams}: Props) {
+  await assertAdminCapability('inquiries:read');
   const {t} = await getAdminI18n();
   const query = await searchParams;
   const inquiries = await listInquiries({

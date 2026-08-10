@@ -1,4 +1,5 @@
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {
   getNotificationHealth,
   listNotificationTemplates
@@ -8,6 +9,7 @@ import {PageHeader} from '../../_components/admin-shell';
 import {NotificationSettingsEditor} from '../../_components/notification-settings-editor';
 
 export default async function AdminNotificationsPage() {
+  await assertAdminCapability('notifications:manage');
   const {t} = await getAdminI18n();
   const [health, templates] = await Promise.all([
     getNotificationHealth(),

@@ -1,4 +1,6 @@
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {hasAdminCapability} from '@/lib/cms/admin-authorization-core.mjs';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {listMedia} from '@/lib/cms/repositories';
 import {imageSrc} from '@/lib/image-src';
 
@@ -20,6 +22,8 @@ type Props = {
 };
 
 export default async function AdminMediaPage({searchParams}: Props) {
+  const identity = await assertAdminCapability('content:read');
+  const canDelete = hasAdminCapability(identity.role, 'content:delete');
   const {t} = await getAdminI18n();
   const query = await searchParams;
   const items = await listMedia();
@@ -117,12 +121,14 @@ export default async function AdminMediaPage({searchParams}: Props) {
                     {t('common.saveAltText')}
                   </button>
                 </form>
-                <form action={deleteMediaAction} className="pt-1">
-                  <input type="hidden" name="id" value={item.id} />
-                  <button className="min-h-9 w-full rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-sm font-semibold text-[#b42318] transition hover:bg-[#fee4e2]">
-                    {t('media.removeRecord')}
-                  </button>
-                </form>
+                {canDelete ? (
+                  <form action={deleteMediaAction} className="pt-1">
+                    <input type="hidden" name="id" value={item.id} />
+                    <button className="min-h-9 w-full rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-sm font-semibold text-[#b42318] transition hover:bg-[#fee4e2]">
+                      {t('media.removeRecord')}
+                    </button>
+                  </form>
+                ) : null}
               </div>
               </Panel>
             ))}

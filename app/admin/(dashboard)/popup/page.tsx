@@ -1,5 +1,6 @@
 import {saveSitePopupAction} from '@/app/admin/actions';
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {listMedia} from '@/lib/cms/repositories';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {
@@ -29,6 +30,7 @@ const statusClassNames = {
 };
 
 export default async function AdminPopupPage({searchParams}: AdminPopupPageProps) {
+  await assertAdminCapability('content:read');
   const {t} = await getAdminI18n();
   const query = await searchParams;
   const [messages, mediaItems] = await Promise.all([

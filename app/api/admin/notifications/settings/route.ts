@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 import {maxAdminJsonBodyBytes, parseJsonBody, rejectOversizedRequest, validationError} from '@/lib/cms/http';
 import {getNotificationSettings, updateNotificationSettings} from '@/lib/cms/repositories';
 import {notificationSettingsSchema} from '@/lib/cms/validation';
@@ -9,13 +9,13 @@ import {notificationSettingsSchema} from '@/lib/cms/validation';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'notifications:manage');
   if (unauthorized) return unauthorized;
   return NextResponse.json({settings: await getNotificationSettings()});
 }
 
 export async function PUT(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'notifications:manage');
   if (unauthorized) return unauthorized;
   const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
   if (oversized) return oversized;

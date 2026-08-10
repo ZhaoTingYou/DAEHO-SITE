@@ -4,6 +4,7 @@ import {notFound} from 'next/navigation';
 import {savePageAction} from '@/app/admin/actions';
 import {getAdminI18n, getContentLocaleLabel} from '@/lib/admin-i18n';
 import type {AdminLocale} from '@/lib/admin-locales';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {
   cloneJson,
   deepMergeJson,
@@ -181,6 +182,7 @@ type AdminFooterPageProps = {
 };
 
 export default async function AdminFooterPage({searchParams}: AdminFooterPageProps) {
+  await assertAdminCapability('content:read');
   const {locale: adminLocale, messages, t} = await getAdminI18n();
   const query = await searchParams;
   const definition = getManagedPageDefinition(commonPageKey);
