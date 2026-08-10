@@ -12,7 +12,7 @@ import {routing} from '@/i18n/routing';
 import {getNewsCardsForSite, getNewsDetailForSite, type NewsBodyBlock} from '@/lib/cms/public-content';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
 import koMessages from '@/messages/ko.json';
 
@@ -20,9 +20,11 @@ type Props = {
   params: Promise<{locale: Locale; slug: string}>;
 };
 
-export const dynamic = 'force-dynamic';
-
 export function generateStaticParams() {
+  if (process.env.DAEHO_FRONTEND_ONLY !== 'true') {
+    return [];
+  }
+
   const slugs = koMessages.news.grid.cards.map((card) => card.id);
   return routing.locales.flatMap((locale) => slugs.map((slug) => ({locale, slug})));
 }
@@ -32,7 +34,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const detail = await getNewsDetailForSite(locale, slug);
 
   if (!detail) {
-    return getDetailMetadata(locale, '/news', 'NEWS', '');
+    notFound();
   }
 
   return getDetailMetadata(
@@ -47,7 +49,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function NewsDetailPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
-  const messages = await getLocaleMessages(locale);
+  const messages = await getPublicLocaleMessages(locale, ['news']);
   const detail = await getNewsDetailForSite(locale, slug);
 
   if (!detail) {

@@ -1,10 +1,11 @@
 import type {Metadata} from 'next';
 
 import type {Locale} from '@/i18n/routing';
-import {getPage} from '@/lib/cms/repositories';
+import {getPublicPage} from '@/lib/cms/repositories';
 import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {imageSrc} from '@/lib/image-src';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
+import {isStaticCmsPreviewEnabled} from '@/lib/cms/static-snapshot';
 
 type PageKey =
   | 'home'
@@ -210,10 +211,13 @@ export async function getCmsPageSeoOverride(locale: Locale, cmsPageKey: string):
   }
 
   try {
-    const page = await getPage(cmsPageKey);
-    const seo = page?.seo?.[locale];
+    const page = await getPublicPage(cmsPageKey, locale);
+    const seo = page?.seo;
 
     if (!seo || typeof seo !== 'object') {
+      if (!page && !isStaticCmsPreviewEnabled()) {
+        throw new Error(`Public CMS SEO page ${cmsPageKey} was not found.`);
+      }
       return emptySeoOverride();
     }
 
@@ -226,6 +230,9 @@ export async function getCmsPageSeoOverride(locale: Locale, cmsPageKey: string):
       image: image ? imageSrc(image) : ''
     };
   } catch (error) {
+    if (!isStaticCmsPreviewEnabled()) {
+      throw error;
+    }
     if (!isNextDynamicServerError(error)) {
       console.error(`[seo] Falling back to page copy because CMS SEO could not be read for ${cmsPageKey}.`, error);
     }

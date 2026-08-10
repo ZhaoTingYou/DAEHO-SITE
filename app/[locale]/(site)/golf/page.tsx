@@ -9,7 +9,7 @@ import {
 import type {Locale} from '@/i18n/routing';
 import {imageExists} from '@/lib/image-exists';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 
 type Props = {
@@ -34,7 +34,7 @@ export default async function GolfPage({params}: Props) {
     notFound();
   }
 
-  const messages = await getLocaleMessages(locale);
+  const messages = await getPublicLocaleMessages(locale, ['golf']);
   const content = messages.golf as GolfConfiguratorContent;
   const filenames = collectGolfImages(content);
   const assets = Object.fromEntries(

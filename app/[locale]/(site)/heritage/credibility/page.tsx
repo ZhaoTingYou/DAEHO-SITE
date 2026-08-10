@@ -3,7 +3,7 @@ import {setRequestLocale} from 'next-intl/server';
 
 import {CredibilityCompliancePage} from '@/components/legacy/credibility-compliance-page';
 import type {Locale} from '@/i18n/routing';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 
 type Props = {
@@ -18,7 +18,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function CredibilityPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const content = (await getLocaleMessages(locale)).legacyPages.credibility;
+  const content = (await getPublicLocaleMessages(locale, ['heritage-credibility'])).legacyPages.credibility;
 
   return <CredibilityCompliancePage locale={locale} content={content} />;
 }

@@ -9,7 +9,7 @@ import {ReducedMotionProvider} from '@/components/motion/reduced-motion-provider
 import {SiteStructuredData} from '@/components/site/site-structured-data';
 import {routing, type Locale} from '@/i18n/routing';
 import {isEnglishEnabledForSite} from '@/lib/english-visibility';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {metadataBase, previewNoindexRobots} from '@/lib/seo';
 
 type Props = {
@@ -18,7 +18,9 @@ type Props = {
 };
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({locale}));
+  return process.env.DAEHO_FRONTEND_ONLY === 'true'
+    ? routing.locales.map((locale) => ({locale}))
+    : [];
 }
 
 export async function generateMetadata({params}: Omit<Props, 'children'>): Promise<Metadata> {
@@ -61,7 +63,7 @@ export default async function LocaleLayout({children, params}: Props) {
 
   setRequestLocale(locale);
   const [messages, englishEnabled] = await Promise.all([
-    getLocaleMessages(locale as Locale),
+    getPublicLocaleMessages(locale as Locale, ['common']),
     isEnglishEnabledForSite()
   ]);
   // Client namespaces are also sourced through the CMS-aware message boundary so

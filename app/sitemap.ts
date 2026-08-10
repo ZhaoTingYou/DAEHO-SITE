@@ -1,6 +1,13 @@
 import type {MetadataRoute} from 'next';
+import {unstable_cache} from 'next/cache';
 
-import {listPublicCollections, listPublicNews} from '@/lib/cms/repositories';
+import {
+  publicCmsCacheSeconds,
+  publicCollectionListCacheTags,
+  publicNewsListCacheTags,
+  publicPageCacheTags
+} from '@/lib/cms/public-cache';
+import {getPublicPage, listPublicCollections, listPublicNews} from '@/lib/cms/repositories';
 import {getPublicLocales} from '@/lib/english-visibility-core';
 import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
@@ -8,9 +15,10 @@ import {locales} from '@/lib/locales';
 import {isNextDynamicServerError} from '@/lib/next-dynamic-error';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {metadataBase} from '@/lib/seo';
+import {isStaticCmsPreviewEnabled} from '@/lib/cms/static-snapshot';
 import koMessages from '@/messages/ko.json';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type ChangeFrequency = NonNullable<SitemapEntry['changeFrequency']>;
@@ -33,12 +41,42 @@ const baseStaticPaths = [
   '/privacy'
 ];
 
+const getCachedSitemap = unstable_cache(
+  async () => {
+    const commonPages = await Promise.all([
+      getPublicPage('common', 'ko'),
+      getPublicPage('common', 'en')
+    ]);
+
+    if (commonPages.some((page) => !page)) {
+      throw new Error('CMS common page is unavailable.');
+    }
+
+    await Promise.all([listPublicNews('ko'), listPublicCollections('ko')]);
+    return buildSitemap();
+  },
+  ['public-sitemap'],
+  {
+    revalidate: publicCmsCacheSeconds,
+    tags: [...new Set([
+      ...publicPageCacheTags('ko', 'common'),
+      ...publicPageCacheTags('en', 'common'),
+      ...publicNewsListCacheTags('ko'),
+      ...publicCollectionListCacheTags('ko')
+    ])]
+  }
+);
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const cmsNews = await readCmsValue(() => listPublicNews('ko'), []);
-  const cmsCollections = await readCmsValue(() => listPublicCollections('ko'), []);
-  const [englishEnabled, golfEnabled] = await Promise.all([
-    isEnglishEnabledForSite(),
-    isGolfEnabledForSite()
+  return getCachedSitemap();
+}
+
+async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
+  const [cmsNews, cmsCollections, englishEnabled, golfEnabled] = await Promise.all([
+    readCmsValue(() => listPublicNews('ko'), []),
+    readCmsValue(() => listPublicCollections('ko'), []),
+    readCmsValue(() => isEnglishEnabledForSite(), false),
+    readCmsValue(() => isGolfEnabledForSite(), false)
   ]);
   const staticPaths = [
     ...baseStaticPaths,
@@ -145,6 +183,9 @@ async function readCmsValue<T>(reader: () => Promise<T>, fallback: T): Promise<T
   try {
     return await reader();
   } catch (error) {
+    if (!isStaticCmsPreviewEnabled()) {
+      throw error;
+    }
     if (!isNextDynamicServerError(error)) {
       console.error('[cms] Falling back to static sitemap entries because CMS read failed.', error);
     }

@@ -1,12 +1,27 @@
 import {NextResponse} from 'next/server';
+import {unstable_cache} from 'next/cache';
 
 import {getNewsCardsForSite} from '@/lib/cms/public-content';
+import {publicCmsCacheSeconds, publicNewsListCacheTags} from '@/lib/cms/public-cache';
+import {listPublicNews} from '@/lib/cms/repositories';
 import {metadataBase} from '@/lib/seo';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
+
+const getCachedRssCards = unstable_cache(
+  async () => {
+    await listPublicNews('ko');
+    return getNewsCardsForSite('ko');
+  },
+  ['public-rss-cards'],
+  {
+    revalidate: publicCmsCacheSeconds,
+    tags: publicNewsListCacheTags('ko')
+  }
+);
 
 export async function GET() {
-  const cards = await getNewsCardsForSite('ko');
+  const cards = await getCachedRssCards();
   const buildDate = new Date().toUTCString();
   const items = cards
     .map((card) => {

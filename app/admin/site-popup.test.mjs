@@ -50,10 +50,14 @@ test('dedicated popup editor exposes one shared image and Seoul schedule', () =>
 
 test('popup save validates once and synchronizes both public locales', () => {
   const actions = readText('./actions.ts');
+  const repositories = readText('../../lib/cms/repositories.ts');
+  const cacheCore = readText('../../lib/cms/public-cache-core.mjs');
 
   assert.ok(actions.includes('export async function saveSitePopupAction'));
   assert.ok(actions.includes('validateSitePopupSubmission'));
   assert.ok(actions.includes('content: {ko: config, en: config}'));
   assert.ok(actions.includes('saveSharedPageImage(upload, returnTo, image)'));
-  assert.ok(actions.includes('revalidateManagedPublicPaths()'));
+  assert.ok(actions.includes("upsertPage('site-popup', payload)"));
+  assert.ok(repositories.includes('revalidatePublicPageCache(pageKey)'));
+  assert.match(cacheCore, /pageKey === 'common' \|\| pageKey === 'site-popup'/);
 });
