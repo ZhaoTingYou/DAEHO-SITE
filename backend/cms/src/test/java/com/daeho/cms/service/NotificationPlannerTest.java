@@ -185,7 +185,7 @@ class NotificationPlannerTest {
   private CmsProperties cmsProperties() {
     return new CmsProperties(
         "", "fallback@example.com", "", false, Path.of("/tmp/uploads"), "/uploads",
-        "", "local", "", "", "", "", "", ""
+        "", "", "local", "", "", "", "", "", ""
     );
   }
 }
