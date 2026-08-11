@@ -182,7 +182,9 @@ Latest verification before this README update:
 ## Important Agent Rules
 
 - Do not hardcode visible UI copy in `app/` or `components/`.
-- Put visible content in `messages/ko.json` and `messages/en.json`.
+- Put public-site content in `messages/ko.json` and `messages/en.json`.
+- Put CMS admin-interface copy for all supported admin languages in
+  `lib/admin-i18n.ts` and pass it into client editors as props.
 - Public server components and utilities must use
   `getPublicLocaleMessages(locale, pageKeys)` with only the CMS page keys they
   render. Admin editors that need the complete real-time CMS dataset use
