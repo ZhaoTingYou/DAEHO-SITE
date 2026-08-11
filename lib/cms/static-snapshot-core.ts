@@ -11,6 +11,7 @@ type CmsStaticTable =
   | 'cms_collections'
   | 'cms_collection_translations'
   | 'cms_media'
+  | 'cms_inquiry_statuses'
   | 'cms_inquiries'
   | 'cms_email_events'
   | 'cms_inquiry_status_events'

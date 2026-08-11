@@ -188,7 +188,13 @@ public class NotificationPlanner {
   ) {
     var template = repository.getActiveTemplate(templateKey);
     var latestTemplate = template == null ? repository.getLatestTemplate(templateKey) : template;
-    var variables = renderer.variables(inquiry, previousStatus, nextStatus);
+    var variables = renderer.variables(
+        inquiry,
+        previousStatus,
+        nextStatus,
+        managedStatusLabel(previousStatus, locale),
+        managedStatusLabel(nextStatus, locale)
+    );
     var subject = "";
     var body = "";
     var templateError = "";
@@ -282,6 +288,19 @@ public class NotificationPlanner {
 
   private String templateKey(String channel, String status, String locale) {
     return "customer_" + status + "_" + channel + "_" + locale;
+  }
+
+  private String managedStatusLabel(String status, String locale) {
+    if (status.isBlank()) {
+      return "";
+    }
+    var definition = repository.getInquiryStatus(status);
+    if (definition == null) {
+      return "";
+    }
+    return "en".equals(locale)
+        ? firstNonBlank(definition.get("labelEn"), definition.get("labelKo"))
+        : text(definition.get("labelKo"));
   }
 
   private String normalizeKoreanPhone(String value) {

@@ -320,6 +320,109 @@ class CmsHttpContractTest {
   }
 
   @Test
+  void managesCmsInquiryStatuses() throws Exception {
+    var customStatus = Map.<String, Object>of(
+        "code", "waiting_for_customer",
+        "labelKo", "고객 회신 대기",
+        "labelEn", "Waiting for customer",
+        "labelZh", "等待客户回复",
+        "color", "purple",
+        "sortOrder", 25,
+        "isActive", true,
+        "isSystem", false,
+        "updatedAt", "2026-08-11T02:00:00Z"
+    );
+    when(repository.listInquiryStatuses()).thenReturn(List.of(customStatus));
+    when(repository.getInquiryStatus("waiting_for_customer")).thenReturn(null, customStatus);
+    when(repository.createInquiryStatus(anyMap())).thenReturn(customStatus);
+    when(repository.updateInquiryStatus(eq("waiting_for_customer"), anyMap())).thenReturn(customStatus);
+
+    mvc.perform(get("/api/admin/inquiry-statuses").header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items[0].code").value("waiting_for_customer"));
+
+    mvc.perform(post("/api/admin/inquiry-statuses")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "code":"waiting_for_customer",
+                  "labelKo":"고객 회신 대기",
+                  "labelEn":"Waiting for customer",
+                  "labelZh":"等待客户回复",
+                  "color":"purple",
+                  "sortOrder":25,
+                  "isActive":true
+                }
+                """))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.item.code").value("waiting_for_customer"));
+
+    mvc.perform(patch("/api/admin/inquiry-statuses/waiting_for_customer")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "labelKo":"고객 회신 대기",
+                  "labelEn":"Waiting for customer",
+                  "labelZh":"等待客户回复",
+                  "color":"purple",
+                  "sortOrder":25,
+                  "isActive":false,
+                  "expectedUpdatedAt":"2026-08-11T02:00:00Z"
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.item.code").value("waiting_for_customer"));
+  }
+
+  @Test
+  void returnsConflictForConcurrentInquiryStatusCreateAndUpdate() throws Exception {
+    var existing = Map.<String, Object>of(
+        "code", "waiting_for_customer",
+        "isSystem", false,
+        "updatedAt", "2026-08-11T02:00:00Z"
+    );
+    when(repository.getInquiryStatus("waiting_for_customer")).thenReturn(null);
+    when(repository.createInquiryStatus(anyMap())).thenReturn(null);
+
+    mvc.perform(post("/api/admin/inquiry-statuses")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "code":"waiting_for_customer",
+                  "labelKo":"고객 회신 대기",
+                  "labelEn":"Waiting for customer",
+                  "labelZh":"等待客户回复",
+                  "color":"purple",
+                  "sortOrder":25,
+                  "isActive":true
+                }
+                """))
+        .andExpect(status().isConflict());
+
+    when(repository.getInquiryStatus("waiting_for_customer")).thenReturn(existing);
+    when(repository.updateInquiryStatus(eq("waiting_for_customer"), anyMap())).thenReturn(null);
+
+    mvc.perform(patch("/api/admin/inquiry-statuses/waiting_for_customer")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "labelKo":"고객 회신 대기",
+                  "labelEn":"Waiting for customer",
+                  "labelZh":"等待客户回复",
+                  "color":"purple",
+                  "sortOrder":25,
+                  "isActive":true,
+                  "expectedUpdatedAt":"2026-08-11T02:00:00Z"
+                }
+                """))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
   void rejectsUnknownNotificationTemplateVariablesBeforeSaving() throws Exception {
     when(notifications.getLatestTemplate("customer_done_email_ko")).thenReturn(Map.of(
         "id", "template-1",

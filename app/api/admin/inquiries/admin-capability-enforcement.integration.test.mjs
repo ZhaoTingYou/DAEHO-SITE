@@ -56,6 +56,19 @@ test('editor capabilities are enforced before restricted backend calls', {timeou
       response.end(JSON.stringify({items: []}));
       return;
     }
+    if (request.method === 'GET' && request.url === '/api/admin/inquiry-statuses') {
+      response.end(JSON.stringify({items: []}));
+      return;
+    }
+    if (request.method === 'POST' && request.url === '/api/admin/inquiry-statuses') {
+      response.statusCode = 201;
+      response.end(JSON.stringify({item: {code: 'waiting_for_customer'}}));
+      return;
+    }
+    if (request.method === 'PATCH' && request.url === '/api/admin/inquiry-statuses/waiting_for_customer') {
+      response.end(JSON.stringify({item: {code: 'waiting_for_customer'}}));
+      return;
+    }
     if (request.method === 'PATCH' && request.url === '/api/admin/inquiries/test-inquiry') {
       response.end(JSON.stringify({inquiry: {id: 'test-inquiry', status: 'contacted'}}));
       return;
@@ -116,6 +129,9 @@ test('editor capabilities are enforced before restricted backend calls', {timeou
     ['PUT', '/api/admin/pages/home', 200, {section: 'site'}],
     ['GET', '/api/admin/inquiries', 403, undefined],
     ['PATCH', '/api/admin/inquiries/test-inquiry', 403, {status: 'contacted'}],
+    ['GET', '/api/admin/inquiry-statuses', 403, undefined],
+    ['POST', '/api/admin/inquiry-statuses', 403, statusDefinition()],
+    ['PATCH', '/api/admin/inquiry-statuses/waiting_for_customer', 403, statusDefinition(false)],
     ['GET', '/api/admin/notifications/settings', 403, undefined],
     ['GET', '/api/admin/status', 403, undefined],
     ['GET', '/api/admin/export', 403, undefined],
@@ -135,6 +151,7 @@ test('editor capabilities are enforced before restricted backend calls', {timeou
 
   for (const [method, pathname, body] of [
     ['GET', '/api/admin/inquiries', undefined],
+    ['GET', '/api/admin/inquiry-statuses', undefined],
     ['DELETE', '/api/admin/news/news-1', undefined]
   ]) {
     const response = await apiRequest(baseUrl, ownerCookie, method, pathname, body);
@@ -175,6 +192,18 @@ test('editor capabilities are enforced before restricted backend calls', {timeou
 
 function identity(id, email, role) {
   return {id, email, role, sessionVersion: 1, expiresAt: null, mustChangePassword: false};
+}
+
+function statusDefinition(includeCode = true) {
+  return {
+    ...(includeCode ? {code: 'waiting_for_customer'} : {}),
+    labelKo: '고객 회신 대기',
+    labelEn: 'Waiting for customer',
+    labelZh: '等待客户回复',
+    color: 'purple',
+    sortOrder: 25,
+    isActive: true
+  };
 }
 
 function apiCookie(currentIdentity, secret) {

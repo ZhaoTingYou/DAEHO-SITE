@@ -4,6 +4,7 @@ import com.daeho.cms.repository.CmsRepository;
 import com.daeho.cms.repository.NotificationRepository;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class InquiryWorkflowService {
+  private static final Set<String> SYSTEM_STATUSES = Set.of("new", "contacted", "in_progress", "done", "spam");
   private final CmsRepository inquiries;
   private final NotificationRepository notifications;
   private final NotificationPlanner planner;
@@ -47,6 +49,7 @@ public class InquiryWorkflowService {
 
   public Map<String, Object> previewStatus(String id, String nextStatus) {
     var inquiry = requireInquiry(id);
+    requireActiveStatus(nextStatus, text(inquiry.get("status")), false);
     return planner.previewStatusChange(inquiry, nextStatus);
   }
 
@@ -66,10 +69,14 @@ public class InquiryWorkflowService {
     if (actualStatus.equals(nextStatus)) {
       return detail(current);
     }
+    requireActiveStatus(nextStatus, actualStatus, true);
 
     var updated = inquiries.updateInquiryStatusIfExpected(id, expected, nextStatus);
     if (updated == null) {
       var latest = requireInquiry(id);
+      if (expected.equals(text(latest.get("status")))) {
+        requireActiveStatus(nextStatus, text(latest.get("status")), true);
+      }
       throw conflict(text(latest.get("status")));
     }
     var event = notifications.createStatusEvent(id, actualStatus, nextStatus);
@@ -99,6 +106,18 @@ public class InquiryWorkflowService {
         HttpStatus.CONFLICT,
         "Inquiry status changed by another administrator. Current status: " + actualStatus
     );
+  }
+
+  private void requireActiveStatus(String nextStatus, String currentStatus, boolean lockForUpdate) {
+    if (nextStatus.equals(currentStatus) || SYSTEM_STATUSES.contains(nextStatus)) {
+      return;
+    }
+    var definition = lockForUpdate
+        ? inquiries.getInquiryStatusForUpdate(nextStatus)
+        : inquiries.getInquiryStatus(nextStatus);
+    if (definition == null || !Boolean.TRUE.equals(definition.get("isActive"))) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Inquiry status is not active");
+    }
   }
 
   private String text(Object value) {

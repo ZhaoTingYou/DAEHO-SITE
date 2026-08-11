@@ -5,7 +5,14 @@ import {useEffect, useState} from 'react';
 
 import {fetchAdminApi} from '@/lib/cms/admin-api-client.mjs';
 
-type InquiryStatus = 'new' | 'contacted' | 'in_progress' | 'done' | 'spam';
+type InquiryStatus = string;
+
+export type InquiryStatusOption = {
+  code: string;
+  label: string;
+  color: 'slate' | 'blue' | 'amber' | 'green' | 'red' | 'purple';
+  isActive: boolean;
+};
 
 type Preview = {
   changed: boolean;
@@ -24,7 +31,6 @@ type Preview = {
 };
 
 type Copy = {
-  statusLabels: Record<InquiryStatus, string>;
   update: string;
   previewTitle: string;
   previewDescription: string;
@@ -40,16 +46,16 @@ type Copy = {
   error: string;
 };
 
-const statuses: InquiryStatus[] = ['new', 'contacted', 'in_progress', 'done', 'spam'];
-
 export function InquiryStatusControl({
   inquiryId,
   initialStatus,
+  statuses,
   copy,
   compact = false
 }: {
   inquiryId: string;
   initialStatus: InquiryStatus;
+  statuses: InquiryStatusOption[];
   copy: Copy;
   compact?: boolean;
 }) {
@@ -59,6 +65,7 @@ export function InquiryStatusControl({
   const [preview, setPreview] = useState<Preview | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const selectableStatuses = statuses.filter((item) => item.isActive || item.code === status);
 
   useEffect(() => {
     const listener = (event: Event) => {
@@ -104,8 +111,8 @@ export function InquiryStatusControl({
             onChange={(event) => setSelectedStatus(event.target.value as InquiryStatus)}
             className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3 text-sm font-semibold text-[#344054]"
           >
-            {statuses.map((item) => (
-              <option key={item} value={item}>{copy.statusLabels[item]}</option>
+            {selectableStatuses.map((item) => (
+              <option key={item.code} value={item.code}>{item.label}</option>
             ))}
           </select>
         </label>
@@ -115,7 +122,7 @@ export function InquiryStatusControl({
         >
           {loading ? copy.saving : copy.update}
         </button>
-        {!compact ? <StatusBadge status={status} label={copy.statusLabels[status]} /> : null}
+        {!compact ? <StatusBadge status={status} statuses={statuses} /> : null}
         {error ? <p className="text-xs leading-5 text-[#b42318]">{error}</p> : null}
       </form>
 
@@ -127,11 +134,11 @@ export function InquiryStatusControl({
             <dl className="mt-5 grid grid-cols-2 gap-4 rounded-md bg-[#f8fafc] p-4">
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#647084]">{copy.previousStatus}</dt>
-                <dd className="mt-1 font-semibold text-[#101827]">{copy.statusLabels[preview.previousStatus]}</dd>
+                <dd className="mt-1 font-semibold text-[#101827]">{statusLabel(statuses, preview.previousStatus)}</dd>
               </div>
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[#647084]">{copy.nextStatus}</dt>
-                <dd className="mt-1 font-semibold text-[#7a2230]">{copy.statusLabels[preview.nextStatus]}</dd>
+                <dd className="mt-1 font-semibold text-[#7a2230]">{statusLabel(statuses, preview.nextStatus)}</dd>
               </div>
             </dl>
             <h3 className="mt-6 text-sm font-semibold uppercase tracking-[0.12em] text-[#647084]">{copy.notifications}</h3>
@@ -220,11 +227,11 @@ export function InquiryStatusControl({
 export function InquiryStatusBadge({
   inquiryId,
   initialStatus,
-  labels
+  statuses
 }: {
   inquiryId: string;
   initialStatus: InquiryStatus;
-  labels: Record<InquiryStatus, string>;
+  statuses: InquiryStatusOption[];
 }) {
   const [status, setStatus] = useState(initialStatus);
   useEffect(() => {
@@ -235,17 +242,29 @@ export function InquiryStatusBadge({
     window.addEventListener('daeho:inquiry-status', listener);
     return () => window.removeEventListener('daeho:inquiry-status', listener);
   }, [inquiryId]);
-  return <StatusBadge status={status} label={labels[status]} />;
+  return <StatusBadge status={status} statuses={statuses} />;
 }
 
-function StatusBadge({status, label}: {status: string; label: string}) {
-  const className =
-    status === 'done'
-      ? 'bg-[#ecfdf3] text-[#027a48]'
-      : status === 'spam'
-        ? 'bg-[#fff5f5] text-[#b42318]'
-        : 'bg-[#eef2f6] text-[#475467]';
-  return <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>{label}</span>;
+function StatusBadge({status, statuses}: {status: string; statuses: InquiryStatusOption[]}) {
+  const option = statuses.find((item) => item.code === status);
+  const color = option?.color ?? 'slate';
+  const className = {
+    slate: 'bg-[#eef2f6] text-[#475467]',
+    blue: 'bg-[#eff8ff] text-[#175cd3]',
+    amber: 'bg-[#fffaeb] text-[#b54708]',
+    green: 'bg-[#ecfdf3] text-[#027a48]',
+    red: 'bg-[#fff5f5] text-[#b42318]',
+    purple: 'bg-[#f4f3ff] text-[#5925dc]'
+  }[color];
+  return (
+    <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>
+      {option?.label || status}
+    </span>
+  );
+}
+
+export function statusLabel(statuses: InquiryStatusOption[], code: string) {
+  return statuses.find((item) => item.code === code)?.label || code;
 }
 
 function broadcastStatus(inquiryId: string, status: InquiryStatus) {

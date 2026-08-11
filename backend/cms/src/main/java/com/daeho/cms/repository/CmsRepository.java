@@ -25,6 +25,7 @@ public class CmsRepository {
       "cms_collections",
       "cms_collection_translations",
       "cms_media",
+      "cms_inquiry_statuses",
       "cms_inquiries",
       "cms_email_events",
       "cms_inquiry_status_events",
@@ -40,7 +41,7 @@ public class CmsRepository {
   );
   private static final Set<String> BOOLEAN_COLUMNS = Set.of(
       "is_featured", "is_visible", "internal_email_enabled", "customer_email_enabled",
-      "kakao_enabled", "is_active", "retry_blocked"
+      "kakao_enabled", "is_active", "is_system", "retry_blocked"
   );
   private static final Set<String> TIMESTAMPTZ_COLUMNS = Set.of(
       "created_at", "updated_at", "next_attempt_at"
@@ -389,6 +390,75 @@ public class CmsRepository {
     );
   }
 
+  public List<Map<String, Object>> listInquiryStatuses() {
+    return jdbc.query(
+        "SELECT * FROM cms_inquiry_statuses ORDER BY sort_order ASC, code ASC",
+        this::mapInquiryStatus
+    );
+  }
+
+  public Map<String, Object> getInquiryStatus(String code) {
+    return jdbc.query(
+        "SELECT * FROM cms_inquiry_statuses WHERE code = ?",
+        this::mapInquiryStatus,
+        code
+    ).stream().findFirst().orElse(null);
+  }
+
+  public Map<String, Object> getInquiryStatusForUpdate(String code) {
+    return jdbc.query(
+        "SELECT * FROM cms_inquiry_statuses WHERE code = ? FOR UPDATE",
+        this::mapInquiryStatus,
+        code
+    ).stream().findFirst().orElse(null);
+  }
+
+  @Transactional
+  public Map<String, Object> createInquiryStatus(Map<String, Object> payload) {
+    var created = jdbc.update("""
+        INSERT INTO cms_inquiry_statuses (
+          code, label_ko, label_en, label_zh, color, sort_order,
+          is_active, is_system, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, false, now(), now())
+        ON CONFLICT (code) DO NOTHING
+        """,
+        validation.stringValue(payload.get("code")),
+        validation.stringValue(payload.get("labelKo")),
+        validation.stringValue(payload.get("labelEn")),
+        validation.stringValue(payload.get("labelZh")),
+        validation.stringValue(payload.get("color")),
+        validation.intValue(payload.get("sortOrder"), 0),
+        validation.booleanValue(payload.get("isActive"), true)
+    );
+    return created == 1 ? getInquiryStatus(validation.stringValue(payload.get("code"))) : null;
+  }
+
+  @Transactional
+  public Map<String, Object> updateInquiryStatus(String code, Map<String, Object> payload) {
+    var updated = jdbc.update("""
+        UPDATE cms_inquiry_statuses SET
+          label_ko = ?,
+          label_en = ?,
+          label_zh = ?,
+          color = ?,
+          sort_order = ?,
+          is_active = CASE WHEN is_system THEN true ELSE ? END,
+          updated_at = now()
+        WHERE code = ?
+          AND updated_at = ?::timestamptz
+        """,
+        validation.stringValue(payload.get("labelKo")),
+        validation.stringValue(payload.get("labelEn")),
+        validation.stringValue(payload.get("labelZh")),
+        validation.stringValue(payload.get("color")),
+        validation.intValue(payload.get("sortOrder"), 0),
+        validation.booleanValue(payload.get("isActive"), true),
+        code,
+        validation.stringValue(payload.get("expectedUpdatedAt"))
+    );
+    return updated == 1 ? getInquiryStatus(code) : null;
+  }
+
   public Map<String, Object> getInquiry(String id) {
     return jdbc.query("SELECT * FROM cms_inquiries WHERE id = ?", this::mapInquiry, id)
         .stream()
@@ -398,11 +468,20 @@ public class CmsRepository {
 
   @Transactional
   public Map<String, Object> updateInquiryStatusIfExpected(String id, String expectedStatus, String nextStatus) {
-    var updated = jdbc.update(
-        "UPDATE cms_inquiries SET status = ?, updated_at = now() WHERE id = ? AND status = ?",
+    var updated = jdbc.update("""
+        UPDATE cms_inquiries
+        SET status = ?, updated_at = now()
+        WHERE id = ?
+          AND status = ?
+          AND EXISTS (
+            SELECT 1 FROM cms_inquiry_statuses
+            WHERE code = ? AND is_active = true
+          )
+        """,
         nextStatus,
         id,
-        expectedStatus
+        expectedStatus,
+        nextStatus
     );
     return updated == 1 ? getInquiry(id) : null;
   }
@@ -913,6 +992,21 @@ public class CmsRepository {
         "pagePath", rs.getString("page_path"),
         "userAgent", rs.getString("user_agent"),
         "ipAddress", rs.getString("ip_address"),
+        "createdAt", instantString(rs, "created_at"),
+        "updatedAt", instantString(rs, "updated_at")
+    );
+  }
+
+  private Map<String, Object> mapInquiryStatus(ResultSet rs, int rowNum) throws SQLException {
+    return orderedMap(
+        "code", rs.getString("code"),
+        "labelKo", rs.getString("label_ko"),
+        "labelEn", rs.getString("label_en"),
+        "labelZh", rs.getString("label_zh"),
+        "color", rs.getString("color"),
+        "sortOrder", rs.getInt("sort_order"),
+        "isActive", rs.getBoolean("is_active"),
+        "isSystem", rs.getBoolean("is_system"),
         "createdAt", instantString(rs, "created_at"),
         "updatedAt", instantString(rs, "updated_at")
     );

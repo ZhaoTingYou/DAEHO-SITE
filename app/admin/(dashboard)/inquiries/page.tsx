@@ -2,7 +2,8 @@ import Link from 'next/link';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {assertAdminCapability} from '@/lib/cms/admin-session';
-import {listInquiries} from '@/lib/cms/repositories';
+import {inquiryStatusOptions} from '@/lib/cms/inquiry-statuses';
+import {listInquiries, listInquiryStatuses} from '@/lib/cms/repositories';
 
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
 import {InquiryStatusControl} from '../../_components/inquiry-status-control';
@@ -13,12 +14,13 @@ type Props = {
 
 export default async function AdminInquiriesPage({searchParams}: Props) {
   await assertAdminCapability('inquiries:read');
-  const {t} = await getAdminI18n();
+  const {locale, t} = await getAdminI18n();
   const query = await searchParams;
-  const inquiries = await listInquiries({
-    status: query?.status,
-    source: query?.source
-  });
+  const [inquiries, statusDefinitions] = await Promise.all([
+    listInquiries({status: query?.status, source: query?.source}),
+    listInquiryStatuses()
+  ]);
+  const statuses = inquiryStatusOptions(statusDefinitions, locale);
   const statusCopy = inquiryStatusCopy(t);
 
   return (
@@ -28,6 +30,7 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
         description={t('inquiry.description')}
         action={
           <div className="flex flex-wrap gap-2">
+            <FilterLink href="/admin/inquiries/statuses" label={t('inquiry.manageStatuses')} active={false} />
             <FilterLink href="/admin/inquiries" label={t('common.all')} active={!query?.status && !query?.source} />
             <FilterLink href="/admin/inquiries?status=new" label={t('status.new')} active={query?.status === 'new'} />
             <FilterLink href="/admin/inquiries?source=contact" label={t('source.contact')} active={query?.source === 'contact'} />
@@ -88,6 +91,7 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                         <InquiryStatusControl
                           inquiryId={item.id}
                           initialStatus={item.status}
+                          statuses={statuses}
                           copy={statusCopy}
                           compact
                         />
@@ -109,13 +113,6 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
 
 function inquiryStatusCopy(t: (key: string) => string) {
   return {
-    statusLabels: {
-      new: t('status.new'),
-      contacted: t('status.contacted'),
-      in_progress: t('status.in_progress'),
-      done: t('status.done'),
-      spam: t('status.spam')
-    },
     update: t('inquiry.update'),
     previewTitle: t('inquiry.previewTitle'),
     previewDescription: t('inquiry.previewDescription'),

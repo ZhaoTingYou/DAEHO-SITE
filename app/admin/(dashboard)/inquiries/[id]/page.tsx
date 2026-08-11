@@ -3,12 +3,14 @@ import {notFound} from 'next/navigation';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {assertAdminCapability} from '@/lib/cms/admin-session';
+import {inquiryStatusOptions} from '@/lib/cms/inquiry-statuses';
 import {
-  getInquiryDetail
+  getInquiryDetail,
+  listInquiryStatuses
 } from '@/lib/cms/repositories';
 
 import {PageHeader, Panel} from '../../../_components/admin-shell';
-import {InquiryStatusBadge, InquiryStatusControl} from '../../../_components/inquiry-status-control';
+import {InquiryStatusBadge, InquiryStatusControl, statusLabel} from '../../../_components/inquiry-status-control';
 import {NotificationTimeline} from '../../../_components/notification-timeline';
 
 type Props = {
@@ -17,15 +19,19 @@ type Props = {
 
 export default async function AdminInquiryDetailPage({params}: Props) {
   await assertAdminCapability('inquiries:read');
-  const {t} = await getAdminI18n();
+  const {locale, t} = await getAdminI18n();
   const {id} = await params;
-  const detail = await getInquiryDetail(id);
+  const [detail, statusDefinitions] = await Promise.all([
+    getInquiryDetail(id),
+    listInquiryStatuses()
+  ]);
 
   if (!detail) {
     notFound();
   }
 
   const {inquiry, statusEvents, notificationJobs, notificationAttempts} = detail;
+  const statuses = inquiryStatusOptions(statusDefinitions, locale);
   const statusCopy = inquiryStatusCopy(t);
 
   return (
@@ -53,7 +59,7 @@ export default async function AdminInquiryDetailPage({params}: Props) {
               <InquiryStatusBadge
                 inquiryId={inquiry.id}
                 initialStatus={inquiry.status}
-                labels={statusCopy.statusLabels}
+                statuses={statuses}
               />
             </div>
             <dl className="grid gap-4 md:grid-cols-2">
@@ -106,6 +112,7 @@ export default async function AdminInquiryDetailPage({params}: Props) {
             <InquiryStatusControl
               inquiryId={inquiry.id}
               initialStatus={inquiry.status}
+              statuses={statuses}
               copy={statusCopy}
             />
           </Panel>
@@ -121,9 +128,9 @@ export default async function AdminInquiryDetailPage({params}: Props) {
                 {statusEvents.map((event) => (
                   <li key={event.id} className="px-5 py-4">
                     <div className="flex items-center gap-2 text-sm font-semibold text-[#101827]">
-                      <span>{t(`status.${event.previousStatus}`)}</span>
+                      <span>{statusLabel(statuses, event.previousStatus)}</span>
                       <span aria-hidden="true">→</span>
-                      <span className="text-[#7a2230]">{t(`status.${event.nextStatus}`)}</span>
+                      <span className="text-[#7a2230]">{statusLabel(statuses, event.nextStatus)}</span>
                     </div>
                     <p className="mt-1 font-numeric text-xs text-[#98a2b3]">{formatDate(event.createdAt)}</p>
                   </li>
@@ -174,13 +181,6 @@ function formatDate(value: string) {
 
 function inquiryStatusCopy(t: (key: string) => string) {
   return {
-    statusLabels: {
-      new: t('status.new'),
-      contacted: t('status.contacted'),
-      in_progress: t('status.in_progress'),
-      done: t('status.done'),
-      spam: t('status.spam')
-    },
     update: t('inquiry.updateStatus'),
     previewTitle: t('inquiry.previewTitle'),
     previewDescription: t('inquiry.previewDescription'),

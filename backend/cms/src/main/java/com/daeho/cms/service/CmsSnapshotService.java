@@ -3,10 +3,12 @@ package com.daeho.cms.service;
 import com.daeho.cms.repository.CmsRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CmsSnapshotService {
+  private static final Set<String> LEGACY_OPTIONAL_TABLES = Set.of("cms_inquiry_statuses");
   private final CmsRepository repository;
   private final RequestValidation validation;
 
@@ -47,10 +49,13 @@ public class CmsSnapshotService {
       throw new IllegalArgumentException("Invalid CMS import file: unexpected tables " + String.join(", ", unexpectedTables));
     }
     for (var table : CmsRepository.EXPORT_TABLES) {
-      var rows = validation.arrayValue(tables.get(table));
       if (!tables.containsKey(table)) {
+        if (LEGACY_OPTIONAL_TABLES.contains(table)) {
+          continue;
+        }
         throw new IllegalArgumentException("Invalid CMS import file: " + table + " must be an array.");
       }
+      var rows = validation.arrayValue(tables.get(table));
       for (var index = 0; index < rows.size(); index += 1) {
         var row = rows.get(index);
         if (!(row instanceof Map<?, ?> map)) {

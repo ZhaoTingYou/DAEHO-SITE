@@ -322,6 +322,69 @@ public class AdminCmsController {
     return Map.of("items", repository.listInquiries(status, source));
   }
 
+  @GetMapping("/inquiry-statuses")
+  public Map<String, Object> inquiryStatuses(HttpServletRequest request) {
+    auth.requireAdmin(request);
+    return Map.of("items", repository.listInquiryStatuses());
+  }
+
+  @PostMapping("/inquiry-statuses")
+  public ResponseEntity<Map<String, Object>> createInquiryStatus(
+      @RequestBody Map<String, Object> body,
+      HttpServletRequest request
+  ) {
+    auth.requireAdmin(request);
+    var parsed = validation.inquiryStatusDefinition(body, true);
+    if (!parsed.success()) {
+      throw new ValidationFailedException(parsed.issues());
+    }
+    var code = validation.stringValue(parsed.data().get("code"));
+    if (repository.getInquiryStatus(code) != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Inquiry status code already exists");
+    }
+    var created = repository.createInquiryStatus(parsed.data());
+    if (created == null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Inquiry status code already exists");
+    }
+    return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("item", created));
+  }
+
+  @PatchMapping("/inquiry-statuses/{code}")
+  public Map<String, Object> updateInquiryStatusDefinition(
+      @PathVariable String code,
+      @RequestBody Map<String, Object> body,
+      HttpServletRequest request
+  ) {
+    auth.requireAdmin(request);
+    var codeValidation = validation.inquiryStatus(Map.of("status", code));
+    var parsed = validation.inquiryStatusDefinition(body, false);
+    if (!codeValidation.success()) {
+      throw new ValidationFailedException(codeValidation.issues());
+    }
+    if (!parsed.success()) {
+      throw new ValidationFailedException(parsed.issues());
+    }
+    var existing = repository.getInquiryStatus(code);
+    if (existing == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Inquiry status not found");
+    }
+    if (validation.booleanValue(existing.get("isSystem"), false)
+        && !validation.booleanValue(parsed.data().get("isActive"), true)) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "System inquiry statuses cannot be disabled");
+    }
+    var updated = repository.updateInquiryStatus(code, parsed.data());
+    if (updated == null) {
+      if (repository.getInquiryStatus(code) == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Inquiry status not found");
+      }
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Inquiry status changed by another administrator. Refresh and try again."
+      );
+    }
+    return Map.of("item", updated);
+  }
+
   @GetMapping("/inquiries/{id}")
   public Map<String, Object> inquiry(@PathVariable String id, HttpServletRequest request) {
     auth.requireAdmin(request);

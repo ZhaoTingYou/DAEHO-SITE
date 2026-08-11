@@ -39,6 +39,23 @@ public class NotificationTemplateRenderer {
       String nextStatus
   ) {
     var locale = text(inquiry.get("locale")).equals("en") ? "en" : "ko";
+    return variables(
+        inquiry,
+        previousStatus,
+        nextStatus,
+        statusLabel(previousStatus, locale),
+        statusLabel(nextStatus, locale)
+    );
+  }
+
+  public Map<String, String> variables(
+      Map<String, Object> inquiry,
+      String previousStatus,
+      String nextStatus,
+      String previousStatusLabel,
+      String nextStatusLabel
+  ) {
+    var locale = text(inquiry.get("locale")).equals("en") ? "en" : "ko";
     var values = new LinkedHashMap<String, String>();
     values.put("inquiry_id", text(inquiry.get("id")));
     values.put("name", text(inquiry.get("name")));
@@ -48,9 +65,9 @@ public class NotificationTemplateRenderer {
     values.put("inquiry_type", text(inquiry.get("inquiryType")));
     values.put("message", text(inquiry.get("message")));
     values.put("previous_status", text(previousStatus));
-    values.put("previous_status_label", statusLabel(previousStatus, locale));
+    values.put("previous_status_label", firstNonBlank(previousStatusLabel, statusLabel(previousStatus, locale)));
     values.put("status", text(nextStatus));
-    values.put("status_label", statusLabel(nextStatus, locale));
+    values.put("status_label", firstNonBlank(nextStatusLabel, statusLabel(nextStatus, locale)));
     values.put(
         "admin_url",
         properties.normalizedAdminBaseUrl() + "/inquiries/" + text(inquiry.get("id"))

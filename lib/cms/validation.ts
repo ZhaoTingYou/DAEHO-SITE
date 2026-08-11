@@ -145,10 +145,29 @@ export const golfInquirySchema = z
   })
   .superRefine(requireEmailOrPhone);
 
+export const inquiryStatusCodeSchema = z
+  .string()
+  .trim()
+  .regex(/^[a-z][a-z0-9_]{0,31}$/, 'Use lowercase letters, numbers, and underscores.');
+
 export const inquiryStatusSchema = z.object({
-  status: z.enum(['new', 'contacted', 'in_progress', 'done', 'spam']),
-  expectedStatus: z.enum(['new', 'contacted', 'in_progress', 'done', 'spam']).optional()
+  status: inquiryStatusCodeSchema,
+  expectedStatus: inquiryStatusCodeSchema.optional()
 });
+
+export const inquiryStatusDefinitionSchema = z.object({
+  code: inquiryStatusCodeSchema,
+  labelKo: z.string().trim().min(1).max(80),
+  labelEn: z.string().trim().max(80).default(''),
+  labelZh: z.string().trim().max(80).default(''),
+  color: z.enum(['slate', 'blue', 'amber', 'green', 'red', 'purple']).default('slate'),
+  sortOrder: z.coerce.number().int().min(0).max(10000).default(0),
+  isActive: z.boolean().default(true)
+});
+
+export const inquiryStatusDefinitionUpdateSchema = inquiryStatusDefinitionSchema
+  .omit({code: true})
+  .extend({expectedUpdatedAt: z.string().trim().datetime()});
 
 export const notificationSettingsSchema = z
   .object({

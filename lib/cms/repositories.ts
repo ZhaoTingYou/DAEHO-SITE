@@ -4,6 +4,8 @@ import type {
   collectionPayloadSchema,
   contactInquirySchema,
   golfInquirySchema,
+  inquiryStatusDefinitionSchema,
+  inquiryStatusDefinitionUpdateSchema,
   inquiryStatusSchema,
   mediaPayloadSchema,
   mediaUpdateSchema,
@@ -30,6 +32,8 @@ type CollectionPayload = z.infer<typeof collectionPayloadSchema>;
 type ContactInquiryPayload = z.infer<typeof contactInquirySchema>;
 type GolfInquiryPayload = z.infer<typeof golfInquirySchema>;
 type InquiryStatusPayload = z.infer<typeof inquiryStatusSchema>;
+type InquiryStatusDefinitionPayload = z.infer<typeof inquiryStatusDefinitionSchema>;
+type InquiryStatusDefinitionUpdatePayload = z.infer<typeof inquiryStatusDefinitionUpdateSchema>;
 type MediaPayload = z.infer<typeof mediaPayloadSchema>;
 type MediaUpdatePayload = z.infer<typeof mediaUpdateSchema>;
 
@@ -91,7 +95,7 @@ export type CmsMedia = {
 export type CmsInquiry = {
   id: string;
   source: 'contact' | 'golf';
-  status: InquiryStatusPayload['status'];
+  status: string;
   locale: Locale;
   name: string;
   contact: string;
@@ -108,6 +112,19 @@ export type CmsInquiry = {
   pagePath: string;
   userAgent: string;
   ipAddress: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CmsInquiryStatusDefinition = {
+  code: string;
+  labelKo: string;
+  labelEn: string;
+  labelZh: string;
+  color: 'slate' | 'blue' | 'amber' | 'green' | 'red' | 'purple';
+  sortOrder: number;
+  isActive: boolean;
+  isSystem: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -587,6 +604,29 @@ export async function listInquiries(filters: {status?: string; source?: string})
   const suffix = params.toString() ? `?${params}` : '';
   const response = await cmsFetch<{items: CmsInquiry[]}>(`/api/admin/inquiries${suffix}`, {admin: true});
   return response.items;
+}
+
+export async function listInquiryStatuses() {
+  const response = await cmsFetch<{items: CmsInquiryStatusDefinition[]}>(
+    '/api/admin/inquiry-statuses',
+    {admin: true}
+  );
+  return response.items;
+}
+
+export async function createInquiryStatus(payload: InquiryStatusDefinitionPayload) {
+  return cmsFetch<{item: CmsInquiryStatusDefinition}>('/api/admin/inquiry-statuses', {
+    admin: true,
+    method: 'POST',
+    body: payload
+  });
+}
+
+export async function updateInquiryStatusDefinition(code: string, payload: InquiryStatusDefinitionUpdatePayload) {
+  return cmsFetch<{item: CmsInquiryStatusDefinition}>(
+    `/api/admin/inquiry-statuses/${encodeURIComponent(code)}`,
+    {admin: true, method: 'PATCH', body: payload}
+  );
 }
 
 export async function getInquiry(id: string) {

@@ -35,6 +35,18 @@ public class NotificationRepository {
     jdbc.query("SELECT pg_advisory_xact_lock(?)", rs -> null, DISPATCH_LOCK_ID);
   }
 
+  public Map<String, Object> getInquiryStatus(String code) {
+    return jdbc.query(
+        "SELECT code, label_ko, label_en FROM cms_inquiry_statuses WHERE code = ?",
+        (rs, rowNum) -> orderedMap(
+            "code", rs.getString("code"),
+            "labelKo", rs.getString("label_ko"),
+            "labelEn", rs.getString("label_en")
+        ),
+        code
+    ).stream().findFirst().orElse(null);
+  }
+
   public Map<String, Object> getSettings(String fallbackInternalEmail) {
     jdbc.update("""
         INSERT INTO cms_notification_settings (

@@ -58,4 +58,17 @@ class NotificationTemplateRendererTest {
         "contacted"
     ).get("status_label"));
   }
+
+  @Test
+  void rendersCmsManagedStatusLabels() {
+    var variables = renderer.variables(
+        Map.of("id", "inquiry-1", "name", "Tester", "locale", "ko"),
+        "new",
+        "waiting_for_customer",
+        "신규",
+        "고객 회신 대기"
+    );
+
+    assertEquals("고객 회신 대기", variables.get("status_label"));
+  }
 }

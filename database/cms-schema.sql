@@ -89,10 +89,32 @@ CREATE TABLE IF NOT EXISTS cms_media (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS cms_inquiry_statuses (
+  code TEXT PRIMARY KEY,
+  label_ko TEXT NOT NULL,
+  label_en TEXT NOT NULL DEFAULT '',
+  label_zh TEXT NOT NULL DEFAULT '',
+  color TEXT NOT NULL DEFAULT 'slate',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  is_system INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+INSERT OR IGNORE INTO cms_inquiry_statuses (
+  code, label_ko, label_en, label_zh, color, sort_order, is_active, is_system
+) VALUES
+  ('new', '신규', 'New', '新提交', 'slate', 0, 1, 1),
+  ('contacted', '연락 완료', 'Contacted', '已联系', 'blue', 10, 1, 1),
+  ('in_progress', '진행 중', 'In progress', '处理中', 'amber', 20, 1, 1),
+  ('done', '처리 완료', 'Completed', '已完成', 'green', 30, 1, 1),
+  ('spam', '스팸', 'Spam', '垃圾信息', 'red', 40, 1, 1);
+
 CREATE TABLE IF NOT EXISTS cms_inquiries (
   id TEXT PRIMARY KEY,
   source TEXT NOT NULL CHECK (source IN ('contact', 'golf')),
-  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'in_progress', 'done', 'spam')),
+  status TEXT NOT NULL DEFAULT 'new',
   locale TEXT NOT NULL DEFAULT 'ko',
   name TEXT NOT NULL,
   contact TEXT NOT NULL,
@@ -110,7 +132,8 @@ CREATE TABLE IF NOT EXISTS cms_inquiries (
   user_agent TEXT NOT NULL DEFAULT '',
   ip_address TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (status) REFERENCES cms_inquiry_statuses(code) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS cms_email_events (
@@ -133,7 +156,9 @@ CREATE TABLE IF NOT EXISTS cms_inquiry_status_events (
   next_status TEXT NOT NULL,
   actor TEXT NOT NULL DEFAULT 'admin',
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (inquiry_id) REFERENCES cms_inquiries(id) ON DELETE CASCADE
+  FOREIGN KEY (inquiry_id) REFERENCES cms_inquiries(id) ON DELETE CASCADE,
+  FOREIGN KEY (previous_status) REFERENCES cms_inquiry_statuses(code) ON UPDATE CASCADE,
+  FOREIGN KEY (next_status) REFERENCES cms_inquiry_statuses(code) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS cms_notification_settings (
@@ -207,3 +232,4 @@ CREATE INDEX IF NOT EXISTS idx_cms_news_visible_sort ON cms_news (is_visible, so
 CREATE INDEX IF NOT EXISTS idx_cms_collections_visible_sort ON cms_collections (is_visible, sort_order);
 CREATE INDEX IF NOT EXISTS idx_cms_inquiries_status_created ON cms_inquiries (status, created_at);
 CREATE INDEX IF NOT EXISTS idx_cms_media_filename ON cms_media (filename);
+CREATE INDEX IF NOT EXISTS idx_cms_inquiry_statuses_active_sort ON cms_inquiry_statuses (is_active, sort_order, code);
