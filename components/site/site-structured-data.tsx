@@ -79,9 +79,9 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
         }
       },
       {
-        // 우승반지, 트로피, 기념품, 시상식 용품을 함께 제작하는 사업 범위라 소매점 하위 유형은
-        // 실제와 맞지 않는다. 상위 유형만 남겨 업종을 좁게 규정하지 않는다.
-        '@type': ['Organization', 'LocalBusiness'],
+        // 트로피, 기념품, 시상식 용품을 함께 제작하는 범위와 맞지 않아 JewelryStore 제거를
+        // 제안했으나 고객사 내부 확인 중이라 현행 유지한다. 회신 후 반영 여부를 결정한다.
+        '@type': ['Organization', 'LocalBusiness', 'JewelryStore'],
         '@id': absoluteSiteUrl('/#organization'),
         name: siteName,
         alternateName: siteAlternateNames,
