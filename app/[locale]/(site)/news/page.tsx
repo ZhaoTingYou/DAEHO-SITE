@@ -27,13 +27,16 @@ export default async function NewsPage({params}: Props) {
   const cards: NewsCard[] = await getNewsCardsForSite(locale);
   const englishTextClass = "[font-family:'Cormorant_Garamond',serif] font-bold";
   const titleTextClass = locale === 'ko' ? "[font-family:'MaruBuri',serif] font-semibold" : englishTextClass;
+  const mastheadTitleClass = locale === 'ko'
+    ? 'md:text-[60px] md:leading-[1.15]'
+    : 'md:text-[clamp(56px,8vw,104px)] md:leading-[0.86]';
 
   return (
     <main className="mobile-page-shell bg-white text-text">
       <section className="overflow-hidden bg-white pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+32px)] md:pt-[clamp(100px,10vw,148px)]">
         <div className="mx-auto max-w-[1240px] px-container pb-8 pt-0 md:pb-[clamp(34px,3.5vw,56px)] md:pt-5">
           <Reveal>
-            <h1 className={`${englishTextClass} mobile-display whitespace-pre-line text-primary md:text-[60px] md:leading-[1.15] md:tracking-[0.025em]`}>
+            <h1 className={`${englishTextClass} mobile-display whitespace-pre-line text-primary ${mastheadTitleClass} md:tracking-[0.025em]`}>
               {content.masthead.title}
             </h1>
           </Reveal>
