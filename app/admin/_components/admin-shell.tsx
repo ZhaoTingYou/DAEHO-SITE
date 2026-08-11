@@ -41,12 +41,12 @@ export function AdminShell({
 
   return (
     <div className="min-h-dvh bg-[#f4f5f7] text-[#182033]">
-      <aside className="admin-on-dark fixed inset-y-0 left-0 hidden w-64 border-r border-[#d9dee7] bg-[#101827] px-4 py-5 text-[#ffffff] lg:block">
-        <Link href={homeHref} className="block border-b border-white/10 pb-5">
+      <aside className="admin-on-dark fixed inset-y-0 left-0 hidden h-dvh w-64 flex-col overflow-hidden border-r border-[#d9dee7] bg-[#101827] px-4 py-5 text-[#ffffff] lg:flex">
+        <Link href={homeHref} className="block shrink-0 border-b border-white/10 pb-5">
           <span className="block font-heading text-[22px] font-semibold tracking-[0.16em]">DAEHO</span>
           <span className="mt-1 block font-body text-xs uppercase tracking-[0.18em] text-white/55">{t('shell.subtitle')}</span>
         </Link>
-        <nav className="mt-6 grid gap-1">
+        <nav className="admin-sidebar-scroll mt-6 grid min-h-0 flex-1 content-start gap-1 overflow-y-auto overscroll-contain pr-1 [scrollbar-gutter:stable]">
           {visibleNavItems.map((item) => (
             <Link
               key={item.href}
@@ -57,14 +57,14 @@ export function AdminShell({
             </Link>
           ))}
         </nav>
-        <div className="absolute bottom-20 left-4 right-4">
+        <div className="shrink-0 space-y-3 border-t border-white/10 pt-4">
           <AdminLanguageSwitcher activeLocale={adminLocale} label={t('shell.interfaceLanguage')} />
+          <form action={logoutAction}>
+            <button className="min-h-10 w-full rounded-md border border-white/15 px-3 text-sm font-semibold text-[rgba(255,255,255,0.72)] transition hover:bg-white/10 hover:text-[#ffffff]">
+              {t('shell.signOut')}
+            </button>
+          </form>
         </div>
-        <form action={logoutAction} className="absolute bottom-5 left-4 right-4">
-          <button className="min-h-10 w-full rounded-md border border-white/15 px-3 text-sm font-semibold text-[rgba(255,255,255,0.72)] transition hover:bg-white/10 hover:text-[#ffffff]">
-            {t('shell.signOut')}
-          </button>
-        </form>
       </aside>
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 border-b border-[#d9dee7] bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
