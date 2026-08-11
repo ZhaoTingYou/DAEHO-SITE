@@ -10,18 +10,15 @@ class RequestValidationNotificationTemplateTest {
   private final RequestValidation validation = new RequestValidation();
 
   @Test
-  void highlightedKakaoTemplatesRequireTypeTitleBodyAndProviderId() {
+  void kakaoTemplatesOnlyKeepTheApprovedProviderId() {
     var missing = validation.notificationTemplate(Map.of(
-        "subject", "",
-        "body", "",
         "providerTemplateCode", "",
-        "kakaoTemplateType", "highlight",
         "approvalStatus", "approved",
         "isActive", true
     ), "kakao");
     var complete = validation.notificationTemplate(Map.of(
-        "subject", "{{name}}님의 문의 안내",
-        "body", "문의 번호 {{inquiry_id}}의 상태는 {{status_label}}입니다.",
+        "subject", "SOLAPI에서 관리하는 제목",
+        "body", "SOLAPI에서 관리하는 본문",
         "providerTemplateCode", "KA01TP000001",
         "kakaoTemplateType", "highlight",
         "approvalStatus", "approved",
@@ -30,27 +27,9 @@ class RequestValidationNotificationTemplateTest {
 
     assertFalse(missing.success());
     assertTrue(complete.success());
-  }
-
-  @Test
-  void basicKakaoTemplatesRequireBodyAndProviderIdButRejectAHighlightTitle() {
-    var titledBasic = validation.notificationTemplate(Map.of(
-        "subject", "강조 제목",
-        "body", "문의 {{inquiry_id}} 안내",
-        "providerTemplateCode", "KA01TP000001",
-        "kakaoTemplateType", "basic",
-        "approvalStatus", "approved"
-    ), "kakao");
-    var completeBasic = validation.notificationTemplate(Map.of(
-        "subject", "",
-        "body", "문의 {{inquiry_id}} 안내",
-        "providerTemplateCode", "KA01TP000001",
-        "kakaoTemplateType", "basic",
-        "approvalStatus", "approved"
-    ), "kakao");
-
-    assertFalse(titledBasic.success());
-    assertTrue(completeBasic.success());
+    assertTrue(validation.stringValue(complete.data().get("subject")).isBlank());
+    assertTrue(validation.stringValue(complete.data().get("body")).isBlank());
+    assertTrue("basic".equals(complete.data().get("kakaoTemplateType")));
   }
 
   @Test

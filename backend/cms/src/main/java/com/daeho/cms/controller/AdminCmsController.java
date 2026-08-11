@@ -505,7 +505,9 @@ public class AdminCmsController {
     return notificationTest.send(
         validation.stringValue(parsed.data().get("channel")),
         validation.stringValue(parsed.data().get("recipient")),
-        validation.stringValue(parsed.data().get("templateKey"))
+        validation.stringValue(parsed.data().get("templateKey")),
+        validation.stringValue(parsed.data().get("customerName")),
+        validation.stringValue(parsed.data().get("inquiryNumber"))
     );
   }
 

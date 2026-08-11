@@ -29,13 +29,12 @@ the server environment.
 
 1. Connect the approved company KakaoTalk Channel to SOLAPI and copy its `pfId`.
 2. Create and approve the three Korean templates for `contacted`, `in_progress`,
-   and `done`. Choose the same presentation in SOLAPI and the CMS: `basic`, or
-   `highlight` with a required title.
+   and `done`. Each template must use the `#{고객명}` and `#{문의번호}` variables.
 3. Copy each approved `KA01TP...` Template ID.
 4. After external approval, create a new template version in
-   `/admin/notifications`, set its approval status to `approved`, enter the
-   SOLAPI Template ID, and activate it. Kakao always uses the Korean template,
-   including for inquiries submitted from the English website.
+   `/admin/notifications`, enter the SOLAPI Template ID, and activate it. Kakao
+   always uses the Korean template, including for inquiries submitted from the
+   English website. The title and body remain managed in SOLAPI.
 5. Configure only the production service:
 
 ```dotenv
@@ -52,19 +51,17 @@ exist in the production server environment. Production requests are restricted
 to the HTTPS `api.solapi.com` endpoint; loopback HTTP is accepted only for local
 automated tests.
 
-CMS titles and bodies may use `{{...}}` inquiry variables. Available business
-fields include the inquiry ID, source, locale, name, phone, email, organization,
-inquiry type, team, quantity, due date, use case, message, Golf configuration,
-page path, received time, and previous/new status labels. A CMS test send uses
-clearly marked sample values. A live status change renders both title and body
-from that current inquiry before the immutable notification job is queued, so a
-later retry keeps the same inquiry snapshot.
+Email titles and bodies may use `{{...}}` inquiry variables. Kakao sends only the
+approved Template ID plus `#{고객명}` and `#{문의번호}`. A CMS Kakao test asks for
+the recipient phone, customer name, and inquiry number. A live status change
+copies those values from the current inquiry into the immutable notification job,
+so a later retry keeps the same inquiry snapshot.
 
 The CMS reports SOLAPI configuration and successful application test delivery
 separately. Kakao cannot be enabled until each of the three approved active
 templates has been successfully test-sent from this CMS and final Kakao delivery
-has been confirmed. Changing a template ID, version, presentation type, highlight
-title, body, channel, or API credential invalidates that template's verification.
+has been confirmed. Changing a template ID, version, channel, or API credential
+invalidates that template's verification.
 Provider-cutover jobs are quarantined and cannot be retried as SOLAPI Template IDs.
 
 Verification is checked again while planning and immediately before a Kakao send.

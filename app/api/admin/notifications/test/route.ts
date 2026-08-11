@@ -16,12 +16,16 @@ export async function POST(request: NextRequest) {
     channel?: 'email' | 'kakao';
     recipient?: string;
     templateKey?: string;
+    customerName?: string;
+    inquiryNumber?: string;
   } | null;
   try {
     return NextResponse.json(await sendNotificationTest({
       channel: body?.channel === 'kakao' ? 'kakao' : 'email',
       recipient: body?.recipient ?? '',
-      templateKey: body?.templateKey ?? ''
+      templateKey: body?.templateKey ?? '',
+      customerName: body?.customerName ?? '',
+      inquiryNumber: body?.inquiryNumber ?? ''
     }));
   } catch (error) {
     if (error instanceof CmsBackendError) {

@@ -189,20 +189,11 @@ export const notificationSettingsSchema = z
 export const notificationTemplateSchema = z
   .object({
     subject: z.string().trim().max(300),
-    body: z.string().trim().min(1).max(4000),
+    body: z.string().trim().max(4000),
     providerTemplateCode: z.string().trim().max(160),
     kakaoTemplateType: z.enum(['basic', 'highlight']),
     approvalStatus: z.enum(['draft', 'pending', 'approved']),
     isActive: z.boolean()
-  })
-  .superRefine((value, context) => {
-    if (value.kakaoTemplateType === 'highlight' && !value.subject) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['subject'],
-        message: 'A highlighted Kakao template requires a title.'
-      });
-    }
   });
 
 export const mediaPayloadSchema = z.object({

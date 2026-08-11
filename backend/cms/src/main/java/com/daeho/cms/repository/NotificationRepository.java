@@ -1,6 +1,7 @@
 package com.daeho.cms.repository;
 
 import com.daeho.cms.service.RequestValidation;
+import com.daeho.cms.service.JsonSupport;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
@@ -17,10 +18,12 @@ public class NotificationRepository {
   public static final long DISPATCH_LOCK_ID = 4_443_393_995_712_001L;
   private final JdbcTemplate jdbc;
   private final RequestValidation validation;
+  private final JsonSupport json;
 
-  public NotificationRepository(JdbcTemplate jdbc, RequestValidation validation) {
+  public NotificationRepository(JdbcTemplate jdbc, RequestValidation validation, JsonSupport json) {
     this.jdbc = jdbc;
     this.validation = validation;
+    this.json = json;
   }
 
   public boolean notificationSchemaReady() {
@@ -250,11 +253,11 @@ public class NotificationRepository {
         INSERT INTO cms_notification_jobs (
           id, inquiry_id, status_event_id, channel, audience, event_type,
           inquiry_status, locale, recipient, subject, rendered_body, template_id,
-          provider_template_code, kakao_template_type, verification_fingerprint, status, attempt_count, delivery_check_count,
+          provider_template_code, kakao_template_type, provider_variables, verification_fingerprint, status, attempt_count, delivery_check_count,
           next_attempt_at, provider_message_id, last_error, dedupe_key,
           created_at, updated_at
         ) VALUES (?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''),
-          ?, ?, ?, ?, 0, 0, now(), '', ?, ?, now(), now())
+          ?, ?, ?::jsonb, ?, ?, 0, 0, now(), '', ?, ?, now(), now())
         ON CONFLICT (dedupe_key) DO NOTHING
         """,
         id,
@@ -271,6 +274,7 @@ public class NotificationRepository {
         validation.stringValue(job.get("templateId")),
         validation.stringValue(job.get("providerTemplateCode")),
         validation.stringValue(job.get("kakaoTemplateType")),
+        json.stringify(job.getOrDefault("providerVariables", Map.of())),
         validation.stringValue(job.get("verificationFingerprint")),
         validation.stringValue(job.getOrDefault("status", "queued")),
         validation.stringValue(job.get("lastError")),
@@ -506,6 +510,7 @@ public class NotificationRepository {
         "templateId", rs.getString("template_id"),
         "providerTemplateCode", rs.getString("provider_template_code"),
         "kakaoTemplateType", rs.getString("kakao_template_type"),
+        "providerVariables", json.objectOrEmpty(rs.getString("provider_variables")),
         "status", rs.getString("status"),
         "retryBlocked", rs.getBoolean("retry_blocked"),
         "attemptCount", rs.getInt("attempt_count"),

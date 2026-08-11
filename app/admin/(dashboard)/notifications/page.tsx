@@ -70,6 +70,8 @@ export default async function AdminNotificationsPage() {
           testSend: t('notification.testSend'),
           testRecipient: t('notification.testRecipient'),
           testTemplate: t('notification.testTemplate'),
+          testCustomerName: t('notification.testCustomerName'),
+          testInquiryNumber: t('notification.testInquiryNumber'),
           testSuccess: t('notification.testSuccess'),
           testError: t('notification.testError')
         }}

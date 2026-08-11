@@ -41,7 +41,13 @@ public class NotificationTestService {
     this.dataSource = dataSource;
   }
 
-  public Map<String, Object> send(String channel, String recipient, String templateKey) {
+  public Map<String, Object> send(
+      String channel,
+      String recipient,
+      String templateKey,
+      String customerName,
+      String inquiryNumber
+  ) {
     var template = repository.getActiveTemplate(templateKey);
     if (template == null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "The selected template is not active.");
@@ -50,11 +56,11 @@ public class NotificationTestService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The template channel does not match the test channel.");
     }
     var sampleInquiry = Map.<String, Object>ofEntries(
-        Map.entry("id", "TEST-INQUIRY"),
+        Map.entry("id", firstNonBlank(inquiryNumber, "TEST-INQUIRY")),
         Map.entry("source", "test"),
         Map.entry("status", "new"),
         Map.entry("locale", text(template.get("locale"))),
-        Map.entry("name", "DAEHO TEST"),
+        Map.entry("name", firstNonBlank(customerName, "DAEHO TEST")),
         Map.entry("phone", "01000000000"),
         Map.entry("email", "test@example.com"),
         Map.entry("organization", "DAEHO"),
@@ -84,6 +90,10 @@ public class NotificationTestService {
     job.put("renderedBody", renderer.render(text(template.get("body")), variables));
     job.put("providerTemplateCode", text(template.get("providerTemplateCode")));
     job.put("kakaoTemplateType", text(template.get("kakaoTemplateType")));
+    job.put("providerVariables", Map.of(
+        "#{고객명}", variables.getOrDefault("name", ""),
+        "#{문의번호}", variables.getOrDefault("inquiry_id", "")
+    ));
 
     if ("email".equals(channel)) {
       var result = email.send(job);

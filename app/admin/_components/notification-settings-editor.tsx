@@ -71,6 +71,8 @@ type Copy = {
   testSend: string;
   testRecipient: string;
   testTemplate: string;
+  testCustomerName: string;
+  testInquiryNumber: string;
   testSuccess: string;
   testError: string;
 };
@@ -210,6 +212,8 @@ function TestNotification({templates, copy}: {templates: Template[]; copy: Copy}
   const [templateKey, setTemplateKey] = useState(active[0]?.templateKey ?? '');
   const selected = active.find((template) => template.templateKey === templateKey);
   const [recipient, setRecipient] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [inquiryNumber, setInquiryNumber] = useState('');
   const [state, setState] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
@@ -217,7 +221,7 @@ function TestNotification({templates, copy}: {templates: Template[]; copy: Copy}
     <section className="rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{copy.testSend}</h2>
       <form
-        className="mt-4 grid gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
+        className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5 xl:items-end"
         onSubmit={async (event) => {
           event.preventDefault();
           if (!selected) return;
@@ -229,7 +233,9 @@ function TestNotification({templates, copy}: {templates: Template[]; copy: Copy}
             body: JSON.stringify({
               channel: selected.channel,
               recipient,
-              templateKey: selected.templateKey
+              templateKey: selected.templateKey,
+              customerName,
+              inquiryNumber
             })
           }).catch(() => null);
           const payload = await response?.json().catch(() => null) as {
@@ -271,6 +277,32 @@ function TestNotification({templates, copy}: {templates: Template[]; copy: Copy}
             className="min-h-11 rounded-md border border-[#cbd3df] px-3"
           />
         </label>
+        {selected?.channel === 'kakao' ? (
+          <>
+            <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+              <span>{copy.testCustomerName}</span>
+              <input
+                required
+                maxLength={120}
+                value={customerName}
+                onChange={(event) => setCustomerName(event.target.value)}
+                placeholder="홍길동"
+                className="min-h-11 rounded-md border border-[#cbd3df] px-3"
+              />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+              <span>{copy.testInquiryNumber}</span>
+              <input
+                required
+                maxLength={160}
+                value={inquiryNumber}
+                onChange={(event) => setInquiryNumber(event.target.value)}
+                placeholder="INQ-001"
+                className="min-h-11 rounded-md border border-[#cbd3df] px-3"
+              />
+            </label>
+          </>
+        ) : null}
         <button
           disabled={!selected || state === 'sending'}
           className="admin-on-dark min-h-11 rounded-md bg-[#101827] px-4 text-sm font-semibold text-white disabled:opacity-50"
@@ -296,11 +328,11 @@ function TemplateEditor({
   onSave: (draft: Pick<Template, 'subject' | 'body' | 'providerTemplateCode' | 'kakaoTemplateType' | 'approvalStatus' | 'isActive'>) => Promise<void>;
 }) {
   const [draft, setDraft] = useState({
-    subject: template.subject,
-    body: template.body,
+    subject: template.channel === 'kakao' ? '' : template.subject,
+    body: template.channel === 'kakao' ? '' : template.body,
     providerTemplateCode: template.providerTemplateCode,
-    kakaoTemplateType: template.kakaoTemplateType || 'basic',
-    approvalStatus: template.approvalStatus,
+    kakaoTemplateType: 'basic' as const,
+    approvalStatus: template.channel === 'kakao' ? 'approved' as const : template.approvalStatus,
     isActive: template.isActive
   });
 
@@ -333,49 +365,19 @@ function TemplateEditor({
           />
         </label>
       ) : null}
-      {template.channel === 'kakao' ? (
-        <>
-          <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-            <span>{copy.kakaoTemplateType}</span>
-            <select
-              required
-              value={draft.kakaoTemplateType}
-              onChange={(event) => setDraft((current) => ({
-                ...current,
-                kakaoTemplateType: event.target.value as Template['kakaoTemplateType'],
-                subject: event.target.value === 'highlight' ? current.subject : ''
-              }))}
-              className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3"
-            >
-              <option value="basic">{copy.kakaoTemplateBasic}</option>
-              <option value="highlight">{copy.kakaoTemplateHighlight}</option>
-            </select>
-          </label>
-          {draft.kakaoTemplateType === 'highlight' ? (
-            <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-              <span>{copy.kakaoHighlightTitle}</span>
-              <input
-                required
-                maxLength={300}
-                value={draft.subject}
-                onChange={(event) => setDraft((current) => ({...current, subject: event.target.value}))}
-                className="min-h-10 rounded-md border border-[#cbd3df] px-3"
-              />
-            </label>
-          ) : null}
-        </>
+      {template.channel === 'email' ? (
+        <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+          <span>{copy.body}</span>
+          <textarea
+            required
+            rows={7}
+            maxLength={4000}
+            value={draft.body}
+            onChange={(event) => setDraft((current) => ({...current, body: event.target.value}))}
+            className="rounded-md border border-[#cbd3df] p-3 font-mono text-xs leading-6"
+          />
+        </label>
       ) : null}
-      <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-        <span>{copy.body}</span>
-        <textarea
-          required
-          rows={7}
-          maxLength={4000}
-          value={draft.body}
-          onChange={(event) => setDraft((current) => ({...current, body: event.target.value}))}
-          className="rounded-md border border-[#cbd3df] p-3 font-mono text-xs leading-6"
-        />
-      </label>
       {template.channel === 'kakao' ? (
         <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
           <span>{copy.providerCode}</span>
@@ -388,23 +390,27 @@ function TemplateEditor({
           />
         </label>
       ) : null}
-      <p className="text-xs leading-5 text-[#647084]">{copy.templateVariables}</p>
+      {template.channel === 'email' ? (
+        <p className="text-xs leading-5 text-[#647084]">{copy.templateVariables}</p>
+      ) : null}
       <div className="grid gap-3 md:grid-cols-2">
-        <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-          <span>{copy.approval}</span>
-          <select
-            value={draft.approvalStatus}
-            onChange={(event) => setDraft((current) => ({
-              ...current,
-              approvalStatus: event.target.value as Template['approvalStatus']
-            }))}
-            className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3"
-          >
-            <option value="draft">draft</option>
-            <option value="pending">pending</option>
-            <option value="approved">approved</option>
-          </select>
-        </label>
+        {template.channel === 'email' ? (
+          <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+            <span>{copy.approval}</span>
+            <select
+              value={draft.approvalStatus}
+              onChange={(event) => setDraft((current) => ({
+                ...current,
+                approvalStatus: event.target.value as Template['approvalStatus']
+              }))}
+              className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3"
+            >
+              <option value="draft">draft</option>
+              <option value="pending">pending</option>
+              <option value="approved">approved</option>
+            </select>
+          </label>
+        ) : null}
         <Toggle
           label={copy.active}
           checked={draft.isActive}

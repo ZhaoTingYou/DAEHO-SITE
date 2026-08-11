@@ -80,23 +80,29 @@ class SolapiKakaoClientTest {
 
     assertTrue(body.contains("\"pfId\":\"KA01PF000001\""));
     assertTrue(body.contains("\"templateId\":\"KA01TP000001\""));
-    assertTrue(body.contains("\"text\":\"홍길동님, 문의가 처리 중입니다.\""));
+    assertFalse(body.contains("\"text\""));
     assertTrue(body.contains("\"disableSms\":true"));
     assertFalse(body.contains("\"highlight\""));
     assertFalse(body.contains("\"from\""));
   }
 
   @Test
-  void highlightedKakaoRequestIncludesTheRenderedTemplateTitle() {
+  void approvedKakaoTemplateRequestOnlySendsTemplateVariables() {
     var body = client().requestBody(Map.of(
         "providerTemplateCode", "KA01TP000001",
         "recipient", "01012345678",
-        "renderedBody", "홍길동님, 문의가 처리 중입니다.",
-        "kakaoTemplateType", "highlight",
-        "subject", "홍길동님의 문의 진행 안내"
+        "providerVariables", Map.of(
+            "#{고객명}", "홍길동",
+            "#{문의번호}", "INQ-001"
+        )
     ));
 
-    assertTrue(body.contains("\"highlight\":{\"title\":\"홍길동님의 문의 진행 안내\"}"));
+    assertTrue(body.contains("\"variables\""));
+    assertTrue(body.contains("\"#{고객명}\":\"홍길동\""));
+    assertTrue(body.contains("\"#{문의번호}\":\"INQ-001\""));
+    assertFalse(body.contains("\"text\""));
+    assertFalse(body.contains("\"title\""));
+    assertFalse(body.contains("\"highlight\""));
   }
 
   @Test

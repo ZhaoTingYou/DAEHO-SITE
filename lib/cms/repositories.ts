@@ -696,6 +696,8 @@ export async function sendNotificationTest(payload: {
   channel: 'email' | 'kakao';
   recipient: string;
   templateKey: string;
+  customerName: string;
+  inquiryNumber: string;
 }) {
   return cmsFetch<{success: boolean; providerMessageId: string; errorMessage: string}>(
     '/api/admin/notifications/test',

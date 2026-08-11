@@ -108,7 +108,7 @@ class NotificationPlannerTest {
   }
 
   @Test
-  void rendersHighlightedKakaoContentFromTheCurrentInquirySnapshot() {
+  void capturesOnlyTheApprovedKakaoVariablesFromTheCurrentInquiry() {
     var template = Map.<String, Object>of(
         "id", "template-customer_done_kakao_ko",
         "templateKey", "customer_done_kakao_ko",
@@ -139,12 +139,10 @@ class NotificationPlannerTest {
         .filter(job -> "kakao".equals(job.get("channel")))
         .findFirst()
         .orElseThrow();
-    assertEquals("highlight", kakao.get("kakaoTemplateType"));
-    assertEquals("홍길동님의 문의 inquiry-1", kakao.get("subject"));
-    assertEquals(
-        "010-1234-5678|customer@example.com|대호 스포츠|trophy|시상식 트로피 상담|진행 중|처리 완료",
-        kakao.get("renderedBody")
-    );
+    assertEquals(Map.of(
+        "#{고객명}", "홍길동",
+        "#{문의번호}", "inquiry-1"
+    ), kakao.get("providerVariables"));
   }
 
   @Test

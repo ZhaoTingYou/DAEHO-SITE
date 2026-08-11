@@ -125,7 +125,6 @@ public class SolapiKakaoClient {
     return json.stringify(Map.of(
         "messages", List.of(Map.of(
             "to", text(job.get("recipient")),
-            "text", text(job.get("renderedBody")),
             "kakaoOptions", kakaoOptions(job)
         )),
         "showMessageList", true,
@@ -139,10 +138,17 @@ public class SolapiKakaoClient {
     options.put("pfId", text(properties.solapiPfId()));
     options.put("templateId", text(job.get("providerTemplateCode")));
     options.put("disableSms", true);
-    if ("highlight".equals(text(job.get("kakaoTemplateType")))) {
-      options.put("highlight", Map.of("title", text(job.get("subject"))));
-    }
+    options.put("variables", providerVariables(job));
     return options;
+  }
+
+  private Map<String, String> providerVariables(Map<String, Object> job) {
+    if (!(job.get("providerVariables") instanceof Map<?, ?> variables)) {
+      return Map.of();
+    }
+    var normalized = new java.util.LinkedHashMap<String, String>();
+    variables.forEach((key, value) -> normalized.put(text(key), text(value)));
+    return Map.copyOf(normalized);
   }
 
   public DeliveryStatus getDeliveryStatus(String messageId) {

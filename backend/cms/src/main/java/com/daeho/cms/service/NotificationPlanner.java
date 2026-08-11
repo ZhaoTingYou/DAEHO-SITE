@@ -230,6 +230,12 @@ public class NotificationPlanner {
     } else if (!approved) {
       reason = "The Kakao template is not approved and active.";
     }
+    var providerVariables = "kakao".equals(channel)
+        ? Map.of(
+            "#{고객명}", variables.getOrDefault("name", ""),
+            "#{문의번호}", variables.getOrDefault("inquiry_id", "")
+        )
+        : Map.<String, String>of();
     return orderedMap(
         "inquiryId", inquiry.get("id"),
         "statusEventId", statusEventId,
@@ -247,6 +253,7 @@ public class NotificationPlanner {
         "templateVersion", latestTemplate == null ? 0 : latestTemplate.get("version"),
         "providerTemplateCode", latestTemplate == null ? "" : latestTemplate.get("providerTemplateCode"),
         "kakaoTemplateType", latestTemplate == null ? "basic" : latestTemplate.get("kakaoTemplateType"),
+        "providerVariables", providerVariables,
         "verificationFingerprint", verificationFingerprint,
         "enabled", enabled,
         "ready", ready,

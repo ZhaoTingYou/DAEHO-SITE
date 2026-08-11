@@ -224,20 +224,16 @@ public class RequestValidation {
     payload.putIfAbsent("providerTemplateCode", "");
     payload.putIfAbsent("kakaoTemplateType", "basic");
     payload.putIfAbsent("isActive", false);
-    requireText(payload, "body", issues);
     if ("email".equals(normalizedChannel)) {
       requireText(payload, "subject", issues);
+      requireText(payload, "body", issues);
     }
     var kakaoTemplateType = stringValue(payload.get("kakaoTemplateType"));
     if ("kakao".equals(normalizedChannel)) {
       requireText(payload, "providerTemplateCode", issues);
-      if (!List.of("basic", "highlight").contains(kakaoTemplateType)) {
-        issues.add(issue("kakaoTemplateType", "Expected a basic or highlighted Kakao template."));
-      } else if ("highlight".equals(kakaoTemplateType)) {
-        requireText(payload, "subject", issues);
-      } else if (!stringValue(payload.get("subject")).isBlank()) {
-        issues.add(issue("subject", "A basic Kakao template cannot include a highlight title."));
-      }
+      payload.put("subject", "");
+      payload.put("body", "");
+      kakaoTemplateType = "basic";
     } else {
       kakaoTemplateType = "basic";
     }
@@ -258,6 +254,8 @@ public class RequestValidation {
     var channel = stringValue(body.get("channel"));
     var recipient = stringValue(body.get("recipient"));
     var templateKey = stringValue(body.get("templateKey"));
+    var customerName = stringValue(body.get("customerName"));
+    var inquiryNumber = stringValue(body.get("inquiryNumber"));
     if (!List.of("email", "kakao").contains(channel)) {
       issues.add(issue("channel", "Expected email or kakao."));
     }
@@ -269,10 +267,26 @@ public class RequestValidation {
     if (templateKey.isBlank()) {
       issues.add(issue("templateKey", "Template key is required."));
     }
+    if ("kakao".equals(channel)) {
+      if (customerName.isBlank()) {
+        issues.add(issue("customerName", "Customer name is required for a Kakao test."));
+      }
+      if (inquiryNumber.isBlank()) {
+        issues.add(issue("inquiryNumber", "Inquiry number is required for a Kakao test."));
+      }
+    }
+    if (customerName.length() > 120) {
+      issues.add(issue("customerName", "Expected at most 120 characters."));
+    }
+    if (inquiryNumber.length() > 160) {
+      issues.add(issue("inquiryNumber", "Expected at most 160 characters."));
+    }
     return new ValidatedRequest(Map.of(
         "channel", channel,
         "recipient", recipient,
-        "templateKey", templateKey
+        "templateKey", templateKey,
+        "customerName", customerName,
+        "inquiryNumber", inquiryNumber
     ), issues);
   }
 

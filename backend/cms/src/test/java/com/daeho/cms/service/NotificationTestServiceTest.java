@@ -36,7 +36,9 @@ class NotificationTestServiceTest {
     var result = service(repository, kakao).send(
         "kakao",
         "01012345678",
-        "customer_in_progress_kakao_ko"
+        "customer_in_progress_kakao_ko",
+        "DAEHO TEST",
+        "TEST-INQUIRY"
     );
 
     assertEquals(true, result.get("success"));
@@ -51,7 +53,9 @@ class NotificationTestServiceTest {
     when(repository.getActiveTemplate("customer_in_progress_kakao_ko")).thenReturn(template());
     when(kakao.send(anyMap())).thenReturn(SolapiKakaoClient.SendResult.failed("rejected"));
 
-    service(repository, kakao).send("kakao", "01012345678", "customer_in_progress_kakao_ko");
+    service(repository, kakao).send(
+        "kakao", "01012345678", "customer_in_progress_kakao_ko", "DAEHO TEST", "TEST-INQUIRY"
+    );
 
     verify(repository, never()).markKakaoTemplateVerified(
         org.mockito.ArgumentMatchers.anyString(),
@@ -60,7 +64,7 @@ class NotificationTestServiceTest {
   }
 
   @Test
-  void kakaoTestRendersTheHighlightedTitleFromTheSameTemplateVariables() {
+  void kakaoTestUsesTheSameTwoProviderVariablesAsRealInquiries() {
     var repository = mock(NotificationRepository.class);
     var kakao = mock(SolapiKakaoClient.class);
     var template = Map.<String, Object>of(
@@ -84,11 +88,15 @@ class NotificationTestServiceTest {
     service(repository, kakao).send(
         "kakao",
         "01012345678",
-        "customer_in_progress_kakao_ko"
+        "customer_in_progress_kakao_ko",
+        "테스트 고객",
+        "TEST-123"
     );
 
-    assertEquals("highlight", sentJob.get().get("kakaoTemplateType"));
-    assertEquals("DAEHO TEST님의 문의 TEST-INQUIRY", sentJob.get().get("subject"));
+    assertEquals(Map.of(
+        "#{고객명}", "테스트 고객",
+        "#{문의번호}", "TEST-123"
+    ), sentJob.get().get("providerVariables"));
   }
 
   @Test
@@ -117,7 +125,9 @@ class NotificationTestServiceTest {
     service(repository, kakao, dataSource).send(
         "kakao",
         "01012345678",
-        "customer_in_progress_kakao_ko"
+        "customer_in_progress_kakao_ko",
+        "DAEHO TEST",
+        "TEST-INQUIRY"
     );
 
     var ordered = inOrder(connection, kakao, repository);
