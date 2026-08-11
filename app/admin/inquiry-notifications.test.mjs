@@ -46,6 +46,15 @@ test('notification settings keep Kakao approval and provider codes separate from
   assert.match(settings, /\/api\/admin\/notifications\/test/);
 });
 
+test('Kakao templates require their presentation fields before creating a version', () => {
+  assert.match(settings, /kakaoTemplateType/);
+  assert.match(settings, /value="basic"/);
+  assert.match(settings, /value="highlight"/);
+  assert.match(settings, /draft\.kakaoTemplateType === 'highlight'/);
+  assert.match(settings, /copy\.providerCode[\s\S]*?<input\s+required/);
+  assert.match(settings, /<textarea[\s\S]*required/);
+});
+
 test('inquiry statuses are CMS-managed and immediately available to the workflow control', () => {
   assert.match(statusControl, /selectableStatuses/);
   assert.match(statusControl, /statuses\.filter/);

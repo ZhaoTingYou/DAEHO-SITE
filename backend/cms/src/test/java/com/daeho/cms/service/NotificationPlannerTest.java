@@ -108,6 +108,46 @@ class NotificationPlannerTest {
   }
 
   @Test
+  void rendersHighlightedKakaoContentFromTheCurrentInquirySnapshot() {
+    var template = Map.<String, Object>of(
+        "id", "template-customer_done_kakao_ko",
+        "templateKey", "customer_done_kakao_ko",
+        "channel", "kakao",
+        "version", 3,
+        "subject", "{{name}}님의 문의 {{inquiry_id}}",
+        "body", "{{phone}}|{{email}}|{{organization}}|{{inquiry_type}}|{{message}}|{{previous_status_label}}|{{status_label}}",
+        "providerTemplateCode", "KA01TP-DONE",
+        "kakaoTemplateType", "highlight",
+        "approvalStatus", "approved",
+        "isActive", true
+    );
+    when(repository.getActiveTemplate("customer_done_kakao_ko")).thenReturn(template);
+    when(repository.getLatestTemplate("customer_done_kakao_ko")).thenReturn(template);
+    var inquiry = new LinkedHashMap<String, Object>(inquiry("customer@example.com", "010-1234-5678"));
+    inquiry.put("name", "홍길동");
+    inquiry.put("organization", "대호 스포츠");
+    inquiry.put("inquiryType", "trophy");
+    inquiry.put("message", "시상식 트로피 상담");
+
+    planner.queueStatusChange(inquiry, Map.of(
+        "id", "event-done",
+        "previousStatus", "in_progress",
+        "nextStatus", "done"
+    ));
+
+    var kakao = createdJobs.stream()
+        .filter(job -> "kakao".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow();
+    assertEquals("highlight", kakao.get("kakaoTemplateType"));
+    assertEquals("홍길동님의 문의 inquiry-1", kakao.get("subject"));
+    assertEquals(
+        "010-1234-5678|customer@example.com|대호 스포츠|trophy|시상식 트로피 상담|진행 중|처리 완료",
+        kakao.get("renderedBody")
+    );
+  }
+
+  @Test
   void healthOnlyRequiresTheThreeApprovedKoreanKakaoTemplates() {
     when(repository.getActiveTemplate("customer_contacted_kakao_en")).thenReturn(null);
     when(repository.getActiveTemplate("customer_in_progress_kakao_en")).thenReturn(null);

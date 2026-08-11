@@ -526,7 +526,10 @@ public class AdminCmsController {
     if (base == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification template not found");
     }
-    var parsed = validation.notificationTemplate(body);
+    var parsed = validation.notificationTemplate(
+        body,
+        validation.stringValue(base.get("channel"))
+    );
     if (!parsed.success()) {
       throw new ValidationFailedException(parsed.issues());
     }

@@ -214,15 +214,33 @@ public class RequestValidation {
     return new ValidatedRequest(payload, issues);
   }
 
-  public ValidatedRequest notificationTemplate(Map<String, Object> body) {
+  public ValidatedRequest notificationTemplate(Map<String, Object> body, String channel) {
     var issues = new ArrayList<Map<String, String>>();
     var payload = mutableCopy(body);
     var approvalStatus = stringValue(payload.get("approvalStatus"));
+    var normalizedChannel = stringValue(channel);
     payload.putIfAbsent("subject", "");
     payload.putIfAbsent("body", "");
     payload.putIfAbsent("providerTemplateCode", "");
+    payload.putIfAbsent("kakaoTemplateType", "basic");
     payload.putIfAbsent("isActive", false);
     requireText(payload, "body", issues);
+    if ("email".equals(normalizedChannel)) {
+      requireText(payload, "subject", issues);
+    }
+    var kakaoTemplateType = stringValue(payload.get("kakaoTemplateType"));
+    if ("kakao".equals(normalizedChannel)) {
+      requireText(payload, "providerTemplateCode", issues);
+      if (!List.of("basic", "highlight").contains(kakaoTemplateType)) {
+        issues.add(issue("kakaoTemplateType", "Expected a basic or highlighted Kakao template."));
+      } else if ("highlight".equals(kakaoTemplateType)) {
+        requireText(payload, "subject", issues);
+      } else if (!stringValue(payload.get("subject")).isBlank()) {
+        issues.add(issue("subject", "A basic Kakao template cannot include a highlight title."));
+      }
+    } else {
+      kakaoTemplateType = "basic";
+    }
     if (!List.of("draft", "pending", "approved").contains(approvalStatus)) {
       issues.add(issue("approvalStatus", "Expected draft, pending, or approved."));
     }
@@ -230,6 +248,7 @@ public class RequestValidation {
     maxLength(payload, "body", 4000, issues);
     maxLength(payload, "providerTemplateCode", 160, issues);
     payload.put("approvalStatus", approvalStatus);
+    payload.put("kakaoTemplateType", kakaoTemplateType);
     payload.put("isActive", booleanValue(payload.get("isActive"), false));
     return new ValidatedRequest(payload, issues);
   }

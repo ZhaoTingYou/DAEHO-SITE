@@ -190,9 +190,9 @@ public class NotificationRepository {
     jdbc.update("""
         INSERT INTO cms_notification_templates (
           id, template_key, channel, audience, event_type, inquiry_status, locale,
-          version, subject, body, provider_template_code, approval_status,
+          version, subject, body, provider_template_code, kakao_template_type, approval_status,
           is_active, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
         """,
         id,
         templateKey,
@@ -205,6 +205,7 @@ public class NotificationRepository {
         validation.stringValue(payload.get("subject")),
         validation.stringValue(payload.get("body")),
         validation.stringValue(payload.get("providerTemplateCode")),
+        validation.stringValue(payload.get("kakaoTemplateType")),
         approvalStatus,
         activate
     );
@@ -249,11 +250,11 @@ public class NotificationRepository {
         INSERT INTO cms_notification_jobs (
           id, inquiry_id, status_event_id, channel, audience, event_type,
           inquiry_status, locale, recipient, subject, rendered_body, template_id,
-          provider_template_code, verification_fingerprint, status, attempt_count, delivery_check_count,
+          provider_template_code, kakao_template_type, verification_fingerprint, status, attempt_count, delivery_check_count,
           next_attempt_at, provider_message_id, last_error, dedupe_key,
           created_at, updated_at
         ) VALUES (?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''),
-          ?, ?, ?, 0, 0, now(), '', ?, ?, now(), now())
+          ?, ?, ?, ?, 0, 0, now(), '', ?, ?, now(), now())
         ON CONFLICT (dedupe_key) DO NOTHING
         """,
         id,
@@ -269,6 +270,7 @@ public class NotificationRepository {
         validation.stringValue(job.get("renderedBody")),
         validation.stringValue(job.get("templateId")),
         validation.stringValue(job.get("providerTemplateCode")),
+        validation.stringValue(job.get("kakaoTemplateType")),
         validation.stringValue(job.get("verificationFingerprint")),
         validation.stringValue(job.getOrDefault("status", "queued")),
         validation.stringValue(job.get("lastError")),
@@ -469,6 +471,7 @@ public class NotificationRepository {
         "subject", rs.getString("subject"),
         "body", rs.getString("body"),
         "providerTemplateCode", rs.getString("provider_template_code"),
+        "kakaoTemplateType", rs.getString("kakao_template_type"),
         "approvalStatus", rs.getString("approval_status"),
         "isActive", rs.getBoolean("is_active"),
         "createdAt", instantString(rs, "created_at"),
@@ -502,6 +505,7 @@ public class NotificationRepository {
         "renderedBody", rs.getString("rendered_body"),
         "templateId", rs.getString("template_id"),
         "providerTemplateCode", rs.getString("provider_template_code"),
+        "kakaoTemplateType", rs.getString("kakao_template_type"),
         "status", rs.getString("status"),
         "retryBlocked", rs.getBoolean("retry_blocked"),
         "attemptCount", rs.getInt("attempt_count"),

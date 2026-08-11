@@ -152,6 +152,7 @@ export type CmsNotificationJob = {
   renderedBody: string;
   templateId: string | null;
   providerTemplateCode: string;
+  kakaoTemplateType: 'basic' | 'highlight';
   status: 'queued' | 'processing' | 'provider_pending' | 'sent' | 'failed' | 'needs_attention';
   retryBlocked: boolean;
   attemptCount: number;
@@ -202,6 +203,7 @@ export type CmsNotificationTemplate = {
   subject: string;
   body: string;
   providerTemplateCode: string;
+  kakaoTemplateType: 'basic' | 'highlight';
   approvalStatus: 'draft' | 'pending' | 'approved';
   isActive: boolean;
   createdAt: string;
@@ -708,7 +710,7 @@ export async function listNotificationTemplates() {
 
 export async function createNotificationTemplateVersion(
   templateKey: string,
-  payload: Pick<CmsNotificationTemplate, 'subject' | 'body' | 'providerTemplateCode' | 'approvalStatus' | 'isActive'>
+  payload: Pick<CmsNotificationTemplate, 'subject' | 'body' | 'providerTemplateCode' | 'kakaoTemplateType' | 'approvalStatus' | 'isActive'>
 ) {
   const response = await cmsFetch<{template: CmsNotificationTemplate}>(
     `/api/admin/notifications/templates/${encodeURIComponent(templateKey)}/versions`,

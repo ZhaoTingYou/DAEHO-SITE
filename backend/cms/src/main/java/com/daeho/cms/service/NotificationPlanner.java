@@ -246,6 +246,7 @@ public class NotificationPlanner {
         "templateKey", templateKey,
         "templateVersion", latestTemplate == null ? 0 : latestTemplate.get("version"),
         "providerTemplateCode", latestTemplate == null ? "" : latestTemplate.get("providerTemplateCode"),
+        "kakaoTemplateType", latestTemplate == null ? "basic" : latestTemplate.get("kakaoTemplateType"),
         "verificationFingerprint", verificationFingerprint,
         "enabled", enabled,
         "ready", ready,

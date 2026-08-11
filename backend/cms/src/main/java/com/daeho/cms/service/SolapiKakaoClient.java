@@ -126,16 +126,23 @@ public class SolapiKakaoClient {
         "messages", List.of(Map.of(
             "to", text(job.get("recipient")),
             "text", text(job.get("renderedBody")),
-            "kakaoOptions", Map.of(
-                "pfId", text(properties.solapiPfId()),
-                "templateId", text(job.get("providerTemplateCode")),
-                "disableSms", true
-            )
+            "kakaoOptions", kakaoOptions(job)
         )),
         "showMessageList", true,
         "strict", true,
         "allowDuplicates", false
     ));
+  }
+
+  private Map<String, Object> kakaoOptions(Map<String, Object> job) {
+    var options = new java.util.LinkedHashMap<String, Object>();
+    options.put("pfId", text(properties.solapiPfId()));
+    options.put("templateId", text(job.get("providerTemplateCode")));
+    options.put("disableSms", true);
+    if ("highlight".equals(text(job.get("kakaoTemplateType")))) {
+      options.put("highlight", Map.of("title", text(job.get("subject"))));
+    }
+    return options;
   }
 
   public DeliveryStatus getDeliveryStatus(String messageId) {
@@ -203,6 +210,24 @@ public class SolapiKakaoClient {
       String providerTemplateCode,
       String templateBody
   ) {
+    return verificationFingerprint(
+        templateKey,
+        templateVersion,
+        providerTemplateCode,
+        "basic",
+        "",
+        templateBody
+    );
+  }
+
+  public String verificationFingerprint(
+      String templateKey,
+      String templateVersion,
+      String providerTemplateCode,
+      String kakaoTemplateType,
+      String templateTitle,
+      String templateBody
+  ) {
     try {
       var source = String.join("\n", List.of(
           text(properties.normalizedSolapiApiBaseUrl()),
@@ -212,6 +237,8 @@ public class SolapiKakaoClient {
           text(templateKey),
           text(templateVersion),
           text(providerTemplateCode),
+          text(kakaoTemplateType),
+          text(templateTitle),
           text(templateBody)
       ));
       var digest = MessageDigest.getInstance("SHA-256").digest(source.getBytes(StandardCharsets.UTF_8));

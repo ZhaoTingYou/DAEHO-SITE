@@ -49,16 +49,29 @@ public class NotificationTestService {
     if (!channel.equals(text(template.get("channel")))) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The template channel does not match the test channel.");
     }
-    var sampleInquiry = Map.<String, Object>of(
-        "id", "TEST-INQUIRY",
-        "status", "new",
-        "locale", text(template.get("locale")),
-        "name", "DAEHO TEST",
-        "phone", "01000000000",
-        "email", "test@example.com",
-        "organization", "DAEHO",
-        "inquiryType", "test",
-        "message", "Notification connection test"
+    var sampleInquiry = Map.<String, Object>ofEntries(
+        Map.entry("id", "TEST-INQUIRY"),
+        Map.entry("source", "test"),
+        Map.entry("status", "new"),
+        Map.entry("locale", text(template.get("locale"))),
+        Map.entry("name", "DAEHO TEST"),
+        Map.entry("phone", "01000000000"),
+        Map.entry("email", "test@example.com"),
+        Map.entry("organization", "DAEHO"),
+        Map.entry("inquiryType", "test"),
+        Map.entry("team", "DAEHO TEST TEAM"),
+        Map.entry("quantity", 1),
+        Map.entry("dueDate", "2099-12-31"),
+        Map.entry("useCase", "Notification test"),
+        Map.entry("message", "Notification connection test"),
+        Map.entry("configuration", Map.of(
+            "selectedHead", "TEST HEAD",
+            "selectedShaft", "TEST SHAFT",
+            "selectedStyle", "TEST STYLE",
+            "engravingSample", "DAEHO TEST"
+        )),
+        Map.entry("pagePath", "/admin/notifications/test"),
+        Map.entry("createdAt", "2099-01-01T00:00:00Z")
     );
     var variables = renderer.variables(
         sampleInquiry,
@@ -70,6 +83,7 @@ public class NotificationTestService {
     job.put("subject", renderer.render(text(template.get("subject")), variables));
     job.put("renderedBody", renderer.render(text(template.get("body")), variables));
     job.put("providerTemplateCode", text(template.get("providerTemplateCode")));
+    job.put("kakaoTemplateType", text(template.get("kakaoTemplateType")));
 
     if ("email".equals(channel)) {
       var result = email.send(job);
@@ -189,6 +203,8 @@ public class NotificationTestService {
         templateKey,
         text(template.get("version")),
         text(template.get("providerTemplateCode")),
+        text(template.get("kakaoTemplateType")),
+        text(template.get("subject")),
         text(template.get("body"))
     );
   }

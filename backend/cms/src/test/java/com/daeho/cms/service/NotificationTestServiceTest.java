@@ -26,6 +26,8 @@ class NotificationTestServiceTest {
         "customer_in_progress_kakao_ko",
         "1",
         "KA01TP000001",
+        "basic",
+        "",
         template().get("body").toString()
     )).thenReturn("fingerprint-1");
     when(kakao.send(anyMap())).thenReturn(SolapiKakaoClient.SendResult.accepted("message-1"));
@@ -58,6 +60,38 @@ class NotificationTestServiceTest {
   }
 
   @Test
+  void kakaoTestRendersTheHighlightedTitleFromTheSameTemplateVariables() {
+    var repository = mock(NotificationRepository.class);
+    var kakao = mock(SolapiKakaoClient.class);
+    var template = Map.<String, Object>of(
+        "channel", "kakao",
+        "locale", "ko",
+        "inquiryStatus", "in_progress",
+        "version", 1,
+        "subject", "{{name}}님의 문의 {{inquiry_id}}",
+        "body", "{{name}}님, 문의 {{inquiry_id}} 처리 중입니다.",
+        "providerTemplateCode", "KA01TP000001",
+        "kakaoTemplateType", "highlight",
+        "approvalStatus", "approved"
+    );
+    when(repository.getActiveTemplate("customer_in_progress_kakao_ko")).thenReturn(template);
+    var sentJob = new java.util.concurrent.atomic.AtomicReference<Map<String, Object>>();
+    when(kakao.send(anyMap())).thenAnswer(invocation -> {
+      sentJob.set(new java.util.LinkedHashMap<>(invocation.getArgument(0)));
+      return SolapiKakaoClient.SendResult.failed("expected test stop");
+    });
+
+    service(repository, kakao).send(
+        "kakao",
+        "01012345678",
+        "customer_in_progress_kakao_ko"
+    );
+
+    assertEquals("highlight", sentJob.get().get("kakaoTemplateType"));
+    assertEquals("DAEHO TEST님의 문의 TEST-INQUIRY", sentJob.get().get("subject"));
+  }
+
+  @Test
   void kakaoTestAndVerificationAreSerializedWithRestoreAndTemplateChanges() throws Exception {
     var repository = mock(NotificationRepository.class);
     var kakao = mock(SolapiKakaoClient.class);
@@ -70,6 +104,8 @@ class NotificationTestServiceTest {
         "customer_in_progress_kakao_ko",
         "1",
         "KA01TP000001",
+        "basic",
+        "",
         template().get("body").toString()
     )).thenReturn("fingerprint-1");
     when(kakao.send(anyMap())).thenReturn(SolapiKakaoClient.SendResult.accepted("message-1"));
@@ -106,11 +142,11 @@ class NotificationTestServiceTest {
     when(repository.getActiveTemplate("customer_contacted_kakao_ko")).thenReturn(contacted);
     when(repository.getActiveTemplate("customer_in_progress_kakao_ko")).thenReturn(progress);
     when(repository.getActiveTemplate("customer_done_kakao_ko")).thenReturn(done);
-    when(kakao.verificationFingerprint("customer_contacted_kakao_ko", "2", "KA01TP-C", contacted.get("body").toString()))
+    when(kakao.verificationFingerprint("customer_contacted_kakao_ko", "2", "KA01TP-C", "basic", "", contacted.get("body").toString()))
         .thenReturn("fingerprint-c");
-    when(kakao.verificationFingerprint("customer_in_progress_kakao_ko", "3", "KA01TP-P", progress.get("body").toString()))
+    when(kakao.verificationFingerprint("customer_in_progress_kakao_ko", "3", "KA01TP-P", "basic", "", progress.get("body").toString()))
         .thenReturn("fingerprint-p");
-    when(kakao.verificationFingerprint("customer_done_kakao_ko", "4", "KA01TP-D", done.get("body").toString()))
+    when(kakao.verificationFingerprint("customer_done_kakao_ko", "4", "KA01TP-D", "basic", "", done.get("body").toString()))
         .thenReturn("fingerprint-d");
     when(repository.kakaoTemplateVerified("customer_contacted_kakao_ko", "fingerprint-c")).thenReturn(true);
     when(repository.kakaoTemplateVerified("customer_in_progress_kakao_ko", "fingerprint-p")).thenReturn(true);
@@ -130,11 +166,11 @@ class NotificationTestServiceTest {
     when(repository.getActiveTemplate("customer_contacted_kakao_ko")).thenReturn(contacted);
     when(repository.getActiveTemplate("customer_in_progress_kakao_ko")).thenReturn(progress);
     when(repository.getActiveTemplate("customer_done_kakao_ko")).thenReturn(done);
-    when(kakao.verificationFingerprint("customer_contacted_kakao_ko", "2", "KA01TP-C", contacted.get("body").toString()))
+    when(kakao.verificationFingerprint("customer_contacted_kakao_ko", "2", "KA01TP-C", "basic", "", contacted.get("body").toString()))
         .thenReturn("fingerprint-c");
-    when(kakao.verificationFingerprint("customer_in_progress_kakao_ko", "3", "KA01TP-P", progress.get("body").toString()))
+    when(kakao.verificationFingerprint("customer_in_progress_kakao_ko", "3", "KA01TP-P", "basic", "", progress.get("body").toString()))
         .thenReturn("fingerprint-p");
-    when(kakao.verificationFingerprint("customer_done_kakao_ko", "4", "KA01TP-D", done.get("body").toString()))
+    when(kakao.verificationFingerprint("customer_done_kakao_ko", "4", "KA01TP-D", "basic", "", done.get("body").toString()))
         .thenReturn("fingerprint-d");
     when(repository.kakaoTemplateVerified("customer_contacted_kakao_ko", "fingerprint-c")).thenReturn(true);
     when(repository.kakaoTemplateVerified("customer_in_progress_kakao_ko", "fingerprint-p")).thenReturn(true);
@@ -175,6 +211,7 @@ class NotificationTestServiceTest {
         "subject", "",
         "body", "{{name}}님, 문의 {{inquiry_id}} 처리 중입니다.",
         "providerTemplateCode", providerCode,
+        "kakaoTemplateType", "basic",
         "approvalStatus", "approved"
     );
   }

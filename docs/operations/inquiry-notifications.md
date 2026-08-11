@@ -29,7 +29,8 @@ the server environment.
 
 1. Connect the approved company KakaoTalk Channel to SOLAPI and copy its `pfId`.
 2. Create and approve the three Korean templates for `contacted`, `in_progress`,
-   and `done`. The external variables are `#{고객명}` and `#{문의번호}`.
+   and `done`. Choose the same presentation in SOLAPI and the CMS: `basic`, or
+   `highlight` with a required title.
 3. Copy each approved `KA01TP...` Template ID.
 4. After external approval, create a new template version in
    `/admin/notifications`, set its approval status to `approved`, enter the
@@ -51,12 +52,20 @@ exist in the production server environment. Production requests are restricted
 to the HTTPS `api.solapi.com` endpoint; loopback HTTP is accepted only for local
 automated tests.
 
+CMS titles and bodies may use `{{...}}` inquiry variables. Available business
+fields include the inquiry ID, source, locale, name, phone, email, organization,
+inquiry type, team, quantity, due date, use case, message, Golf configuration,
+page path, received time, and previous/new status labels. A CMS test send uses
+clearly marked sample values. A live status change renders both title and body
+from that current inquiry before the immutable notification job is queued, so a
+later retry keeps the same inquiry snapshot.
+
 The CMS reports SOLAPI configuration and successful application test delivery
 separately. Kakao cannot be enabled until each of the three approved active
 templates has been successfully test-sent from this CMS and final Kakao delivery
-has been confirmed. Changing a template ID, version, body, channel, or API
-credential invalidates that template's verification. Provider-cutover jobs are
-quarantined and cannot be retried as SOLAPI Template IDs.
+has been confirmed. Changing a template ID, version, presentation type, highlight
+title, body, channel, or API credential invalidates that template's verification.
+Provider-cutover jobs are quarantined and cannot be retried as SOLAPI Template IDs.
 
 Verification is checked again while planning and immediately before a Kakao send.
 Activating a new Kakao template atomically disables Kakao and quarantines unfinished

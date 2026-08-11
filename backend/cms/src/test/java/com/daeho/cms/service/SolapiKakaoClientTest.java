@@ -41,6 +41,18 @@ class SolapiKakaoClientTest {
   }
 
   @Test
+  void verificationFingerprintChangesWithTheKakaoPresentationAndTitle() {
+    assertNotEquals(
+        client().verificationFingerprint(
+            "customer_done_kakao_ko", "1", "KA01TP000001", "basic", "", "본문"
+        ),
+        client().verificationFingerprint(
+            "customer_done_kakao_ko", "1", "KA01TP000001", "highlight", "{{name}}님 안내", "본문"
+        )
+    );
+  }
+
+  @Test
   void verificationFingerprintChangesWithTheProviderEndpoint() {
     assertNotEquals(
         client("https://api.solapi.com").verificationFingerprint(
@@ -70,7 +82,21 @@ class SolapiKakaoClientTest {
     assertTrue(body.contains("\"templateId\":\"KA01TP000001\""));
     assertTrue(body.contains("\"text\":\"홍길동님, 문의가 처리 중입니다.\""));
     assertTrue(body.contains("\"disableSms\":true"));
+    assertFalse(body.contains("\"highlight\""));
     assertFalse(body.contains("\"from\""));
+  }
+
+  @Test
+  void highlightedKakaoRequestIncludesTheRenderedTemplateTitle() {
+    var body = client().requestBody(Map.of(
+        "providerTemplateCode", "KA01TP000001",
+        "recipient", "01012345678",
+        "renderedBody", "홍길동님, 문의가 처리 중입니다.",
+        "kakaoTemplateType", "highlight",
+        "subject", "홍길동님의 문의 진행 안내"
+    ));
+
+    assertTrue(body.contains("\"highlight\":{\"title\":\"홍길동님의 문의 진행 안내\"}"));
   }
 
   @Test

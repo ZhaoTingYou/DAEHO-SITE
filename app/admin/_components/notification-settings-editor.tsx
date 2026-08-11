@@ -28,6 +28,7 @@ type Template = {
   subject: string;
   body: string;
   providerTemplateCode: string;
+  kakaoTemplateType: 'basic' | 'highlight';
   approvalStatus: 'draft' | 'pending' | 'approved';
   isActive: boolean;
 };
@@ -54,6 +55,11 @@ type Copy = {
   templates: string;
   version: string;
   subject: string;
+  kakaoTemplateType: string;
+  kakaoTemplateBasic: string;
+  kakaoTemplateHighlight: string;
+  kakaoHighlightTitle: string;
+  templateVariables: string;
   body: string;
   providerCode: string;
   approval: string;
@@ -125,6 +131,7 @@ export function NotificationSettingsEditor({
             <span>{copy.internalEmail}</span>
             <input
               type="email"
+              required={settings.internalEmailEnabled}
               maxLength={254}
               value={settings.internalEmail}
               onChange={(event) => setSettings((current) => ({...current, internalEmail: event.target.value}))}
@@ -286,12 +293,13 @@ function TemplateEditor({
   template: Template;
   state?: 'saving' | 'saved' | 'error';
   copy: Copy;
-  onSave: (draft: Pick<Template, 'subject' | 'body' | 'providerTemplateCode' | 'approvalStatus' | 'isActive'>) => Promise<void>;
+  onSave: (draft: Pick<Template, 'subject' | 'body' | 'providerTemplateCode' | 'kakaoTemplateType' | 'approvalStatus' | 'isActive'>) => Promise<void>;
 }) {
   const [draft, setDraft] = useState({
     subject: template.subject,
     body: template.body,
     providerTemplateCode: template.providerTemplateCode,
+    kakaoTemplateType: template.kakaoTemplateType || 'basic',
     approvalStatus: template.approvalStatus,
     isActive: template.isActive
   });
@@ -317,6 +325,7 @@ function TemplateEditor({
         <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
           <span>{copy.subject}</span>
           <input
+            required
             maxLength={300}
             value={draft.subject}
             onChange={(event) => setDraft((current) => ({...current, subject: event.target.value}))}
@@ -324,9 +333,42 @@ function TemplateEditor({
           />
         </label>
       ) : null}
+      {template.channel === 'kakao' ? (
+        <>
+          <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+            <span>{copy.kakaoTemplateType}</span>
+            <select
+              required
+              value={draft.kakaoTemplateType}
+              onChange={(event) => setDraft((current) => ({
+                ...current,
+                kakaoTemplateType: event.target.value as Template['kakaoTemplateType'],
+                subject: event.target.value === 'highlight' ? current.subject : ''
+              }))}
+              className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3"
+            >
+              <option value="basic">{copy.kakaoTemplateBasic}</option>
+              <option value="highlight">{copy.kakaoTemplateHighlight}</option>
+            </select>
+          </label>
+          {draft.kakaoTemplateType === 'highlight' ? (
+            <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+              <span>{copy.kakaoHighlightTitle}</span>
+              <input
+                required
+                maxLength={300}
+                value={draft.subject}
+                onChange={(event) => setDraft((current) => ({...current, subject: event.target.value}))}
+                className="min-h-10 rounded-md border border-[#cbd3df] px-3"
+              />
+            </label>
+          ) : null}
+        </>
+      ) : null}
       <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
         <span>{copy.body}</span>
         <textarea
+          required
           rows={7}
           maxLength={4000}
           value={draft.body}
@@ -338,6 +380,7 @@ function TemplateEditor({
         <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
           <span>{copy.providerCode}</span>
           <input
+            required
             maxLength={160}
             value={draft.providerTemplateCode}
             onChange={(event) => setDraft((current) => ({...current, providerTemplateCode: event.target.value}))}
@@ -345,6 +388,7 @@ function TemplateEditor({
           />
         </label>
       ) : null}
+      <p className="text-xs leading-5 text-[#647084]">{copy.templateVariables}</p>
       <div className="grid gap-3 md:grid-cols-2">
         <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
           <span>{copy.approval}</span>
