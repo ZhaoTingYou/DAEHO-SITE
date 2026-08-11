@@ -95,9 +95,9 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
                           copy={statusCopy}
                           compact
                         />
-                        <Link href={`/admin/inquiries/${item.id}`} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">
+                        <a href={`/admin/inquiries/${item.id}`} className="inline-flex min-h-9 items-center rounded-md border border-[#cbd3df] px-3 text-sm font-semibold text-[#344054] hover:bg-[#f8fafc]">
                           {t('common.open')}
-                        </Link>
+                        </a>
                       </div>
                     </td>
                   </tr>
