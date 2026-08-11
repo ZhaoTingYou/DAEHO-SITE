@@ -27,7 +27,9 @@ export function NewsArticleStructuredData({detail, locale, slug}: Props) {
     },
     url: pageUrl,
     // 발행일 형식이 CMS 입력에 따라 달라질 수 있어, 파싱에 실패하면 잘못된 값 대신 생략한다.
-    ...(datePublished ? {datePublished, dateModified: datePublished} : {}),
+    // CMS에 수정일 필드가 없어 dateModified는 넣지 않는다. 발행일로 대신 채우면 본문이 수정돼도
+    // 값이 그대로 남아 실제와 어긋난 신선도 신호를 보내게 된다.
+    ...(datePublished ? {datePublished} : {}),
     ...(image ? {image: [image]} : {}),
     ...(detail.card.categoryLabel ? {articleSection: detail.card.categoryLabel} : {}),
     ...(detail.tags.length > 0 ? {keywords: detail.tags} : {}),

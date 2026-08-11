@@ -1255,6 +1255,11 @@
   },
   "common": {
     "skipLink": "Skip to main content",
+    "breadcrumb": {
+      "home": "Home",
+      "news": "News",
+      "creations": "Creations"
+    },
     "features": {
       "englishEnabled": false,
       "golfEnabled": false

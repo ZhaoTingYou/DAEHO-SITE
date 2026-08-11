@@ -1255,6 +1255,11 @@
   },
   "common": {
     "skipLink": "본문으로 건너뛰기",
+    "breadcrumb": {
+      "home": "홈",
+      "news": "뉴스",
+      "creations": "제작 사례"
+    },
     "features": {
       "englishEnabled": false,
       "golfEnabled": false

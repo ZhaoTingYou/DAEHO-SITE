@@ -11,6 +11,8 @@ const collectionDetailSource = readFileSync(
   new URL('../../app/[locale]/(site)/mastery/creations/[slug]/page.tsx', import.meta.url),
   'utf8'
 );
+const koMessages = JSON.parse(readFileSync(new URL('../../messages/ko.json', import.meta.url), 'utf8'));
+const enMessages = JSON.parse(readFileSync(new URL('../../messages/en.json', import.meta.url), 'utf8'));
 
 test('breadcrumb schema follows the shape Google expects', () => {
   assert.match(componentSource, /'@type': 'BreadcrumbList'/);
@@ -35,16 +37,27 @@ test('detail pages declare their hierarchy path', () => {
   ]) {
     assert.match(
       source,
-      /import \{BreadcrumbStructuredData, breadcrumbLabels\} from '@\/components\/site\/breadcrumb-structured-data';/,
+      /import \{BreadcrumbStructuredData\} from '@\/components\/site\/breadcrumb-structured-data';/,
       `${label} 페이지가 브레드크럼 컴포넌트를 import 하지 않습니다.`
     );
     assert.match(source, /<BreadcrumbStructuredData/, `${label} 페이지가 브레드크럼을 렌더하지 않습니다.`);
-    assert.match(source, /breadcrumbLabels\(locale\)\.home/, `${label} 페이지 경로가 홈에서 시작하지 않습니다.`);
+    assert.match(
+      source,
+      /messages\.common\.breadcrumb\.home/,
+      `${label} 페이지 경로가 홈에서 시작하지 않습니다.`
+    );
   }
 });
 
-test('breadcrumb labels stay localized for both public locales', () => {
-  assert.match(componentSource, /locale === 'ko'/);
-  assert.match(componentSource, /home: '홈', news: '뉴스', creations: '제작 사례'/);
-  assert.match(componentSource, /home: 'Home', news: 'News', creations: 'Creations'/);
+test('breadcrumb labels come from the shared message files, not the component', () => {
+  // 라벨을 컴포넌트에 박아두면 프로젝트의 다국어 구조를 벗어나고 CMS에서도 손댈 수 없다.
+  assert.doesNotMatch(componentSource, /breadcrumbLabels/);
+  assert.doesNotMatch(componentSource, /제작 사례/);
+
+  for (const [label, messages, expected] of [
+    ['한국어', koMessages, {home: '홈', news: '뉴스', creations: '제작 사례'}],
+    ['영어', enMessages, {home: 'Home', news: 'News', creations: 'Creations'}]
+  ]) {
+    assert.deepEqual(messages.common.breadcrumb, expected, `${label} 브레드크럼 라벨이 다릅니다.`);
+  }
 });

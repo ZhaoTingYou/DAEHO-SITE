@@ -8,7 +8,7 @@ import {NewsArticleStructuredData} from '@/components/news/news-article-structur
 import {NewsReadingProgress} from '@/components/news/news-reading-progress';
 import {ShareLinkButton} from '@/components/news/share-link-button';
 import {SafeImage} from '@/components/safe-image';
-import {BreadcrumbStructuredData, breadcrumbLabels} from '@/components/site/breadcrumb-structured-data';
+import {BreadcrumbStructuredData} from '@/components/site/breadcrumb-structured-data';
 import type {Locale} from '@/i18n/routing';
 import {routing} from '@/i18n/routing';
 import {getNewsCardsForSite, getNewsDetailForSite, type NewsBodyBlock} from '@/lib/cms/public-content';
@@ -78,8 +78,8 @@ export default async function NewsDetailPage({params}: Props) {
       <NewsArticleStructuredData detail={detail} locale={locale} slug={slug} />
       <BreadcrumbStructuredData
         items={[
-          {name: breadcrumbLabels(locale).home, path: `/${locale}`},
-          {name: breadcrumbLabels(locale).news, path: `/${locale}/news`},
+          {name: messages.common.breadcrumb.home, path: `/${locale}`},
+          {name: messages.common.breadcrumb.news, path: `/${locale}/news`},
           {name: card.title, path: `/${locale}/news/${slug}`}
         ]}
       />

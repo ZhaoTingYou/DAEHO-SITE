@@ -6,7 +6,7 @@ import {notFound} from 'next/navigation';
 import {Reveal} from '@/components/motion/reveal';
 import {HistoryBackButton} from '@/components/navigation/history-back-button';
 import {SafeImage} from '@/components/safe-image';
-import {BreadcrumbStructuredData, breadcrumbLabels} from '@/components/site/breadcrumb-structured-data';
+import {BreadcrumbStructuredData} from '@/components/site/breadcrumb-structured-data';
 import {CollectionDetailGallery} from '@/components/specialty/collection-detail-gallery';
 import {routing, type Locale} from '@/i18n/routing';
 import {
@@ -84,8 +84,8 @@ export default async function CollectionDetailPage({params}: Props) {
     <main className="mobile-page-shell bg-bg text-text">
       <BreadcrumbStructuredData
         items={[
-          {name: breadcrumbLabels(locale).home, path: `/${locale}`},
-          {name: breadcrumbLabels(locale).creations, path: `/${locale}/mastery/creations`},
+          {name: messages.common.breadcrumb.home, path: `/${locale}`},
+          {name: messages.common.breadcrumb.creations, path: `/${locale}/mastery/creations`},
           {name: item.title, path: `/${locale}/mastery/creations/${slug}`}
         ]}
       />

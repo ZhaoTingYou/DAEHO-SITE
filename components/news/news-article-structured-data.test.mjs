@@ -48,7 +48,9 @@ test('Article schema declares the fields Google requires for news results', () =
   assert.match(structuredDataSource, /'@type': 'Article'/);
   assert.match(structuredDataSource, /headline: detail\.seoTitle \|\| detail\.card\.title/);
   assert.match(structuredDataSource, /mainEntityOfPage/);
-  assert.match(structuredDataSource, /datePublished, dateModified: datePublished/);
+  assert.match(structuredDataSource, /\.\.\.\(datePublished \? \{datePublished\} : \{\}\)/);
+  // CMS에 수정일 필드가 없어 dateModified를 발행일로 채우면 시간이 지날수록 사실과 어긋난다.
+  assert.doesNotMatch(structuredDataSource, /dateModified:/);
   assert.match(structuredDataSource, /publisher: \{/);
   assert.match(structuredDataSource, /author: \{/);
   // 사이트 전역 Organization 노드를 @id로 참조해 발행처 정보가 중복 정의되지 않게 한다.

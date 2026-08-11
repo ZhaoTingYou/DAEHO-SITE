@@ -33,12 +33,6 @@ export function BreadcrumbStructuredData({items}: {items: Crumb[]}) {
   );
 }
 
-export function breadcrumbLabels(locale: string) {
-  return locale === 'ko'
-    ? {home: '홈', news: '뉴스', creations: '제작 사례'}
-    : {home: 'Home', news: 'News', creations: 'Creations'};
-}
-
 function absoluteUrl(path: string) {
   return new URL(path, metadataBase).toString();
 }
