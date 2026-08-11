@@ -62,7 +62,7 @@ export default async function CollectionPage({params}: Props) {
 
         <div className="mx-auto hidden max-w-[1220px] px-container pb-[clamp(80px,8vw,132px)] pt-[clamp(70px,8vw,122px)] lg:block">
           <ScrollText className="mx-auto max-w-[720px] text-center">
-            <p aria-hidden="true" className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-none tracking-[0.04em] text-accent">
+            <p aria-hidden="true" className="[font-family:'Cormorant_Garamond',serif] text-[clamp(40px,3.7vw,58px)] font-bold uppercase leading-[1.22] tracking-[0.04em] text-accent">
               {content.hero.title}
             </p>
             <p className="mx-auto mt-[27px] max-w-xl whitespace-pre-line font-heading text-[15px] font-semibold leading-[1.85] text-primary">

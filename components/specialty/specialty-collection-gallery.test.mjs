@@ -59,6 +59,14 @@ const categoryViewSource = source.slice(
   source.indexOf('type BespokeDisplayMode')
 );
 
+test('desktop creations hero title keeps comfortable spacing between wrapped lines', () => {
+  assert.match(
+    creationsPageSource,
+    /text-\[clamp\(40px,3\.7vw,58px\)\][^\"]*leading-\[1\.22\]/,
+    'the desktop creations title should leave visible breathing room between its lines'
+  );
+});
+
 test('bespoke toolbar does not render the active category label beside the filter button', () => {
   assert.equal(
     bespokeViewSource.includes('activeLabel'),
