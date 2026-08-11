@@ -16,6 +16,7 @@ const ownerIdentity = {
   expiresAt: null,
   mustChangePassword: false
 };
+const inquiryId = '00000000-0000-4000-8000-000000000048';
 
 test('role session renders admin pages, restores API cookie, and rejects stale versions', {timeout: 60_000}, async (t) => {
   const sessionSecret = 'test-role-session-secret';
@@ -42,6 +43,56 @@ test('role session renders admin pages, restores API cookie, and rejects stale v
       '/api/admin/pages'
     ].includes(request.url)) {
       response.end(JSON.stringify({items: []}));
+      return;
+    }
+
+    if (request.method === 'GET' && request.url === '/api/admin/inquiry-statuses') {
+      response.end(JSON.stringify({
+        items: [
+          inquiryStatus('new', '신규', 'New', '新建', 'blue', 10),
+          inquiryStatus('contacted', '연락 완료', 'Contacted', '已联系', 'green', 20)
+        ]
+      }));
+      return;
+    }
+
+    if (request.method === 'GET' && request.url === `/api/admin/inquiries/${inquiryId}`) {
+      const timestamp = '2026-08-11T04:45:00.000Z';
+      response.end(JSON.stringify({
+        inquiry: {
+          id: inquiryId,
+          source: 'contact',
+          status: 'contacted',
+          locale: 'ko',
+          name: '테스트 고객',
+          contact: '01012345678',
+          phone: '01012345678',
+          email: 'customer@example.com',
+          organization: '',
+          inquiryType: '',
+          team: '',
+          quantity: null,
+          dueDate: '',
+          useCase: '',
+          message: '상태 변경 후에도 열려야 합니다.',
+          configuration: {},
+          pagePath: '/ko/contact',
+          userAgent: 'integration-test',
+          ipAddress: '127.0.0.1',
+          createdAt: timestamp,
+          updatedAt: timestamp
+        },
+        statusEvents: [{
+          id: '00000000-0000-4000-8000-000000000010',
+          inquiryId,
+          previousStatus: 'new',
+          nextStatus: 'contacted',
+          actor: ownerIdentity.email,
+          createdAt: timestamp
+        }],
+        notificationJobs: [],
+        notificationAttempts: []
+      }));
       return;
     }
 
@@ -98,6 +149,14 @@ test('role session renders admin pages, restores API cookie, and rejects stale v
 
   assert.equal((await fetch(`${baseUrl}/admin`, {headers: {cookie: ownerCookies}})).status, 200);
   assert.equal((await fetch(`${baseUrl}/admin/account`, {headers: {cookie: ownerCookies}})).status, 200);
+  const inquiryDetail = await fetch(`${baseUrl}/admin/inquiries/${inquiryId}`, {
+    headers: {cookie: ownerCookies}
+  });
+  assert.equal(
+    inquiryDetail.status,
+    200,
+    `A detail page with status history must render after a status change.\n${processOutput.join('')}`
+  );
 
   const recovery = await fetch(`${baseUrl}/admin/api-session`, {
     method: 'POST',
@@ -124,6 +183,22 @@ test('role session renders admin pages, restores API cookie, and rejects stale v
   });
   assert.equal(staleRecovery.status, 401);
 });
+
+function inquiryStatus(code, labelKo, labelEn, labelZh, color, sortOrder) {
+  const timestamp = '2026-08-11T00:00:00.000Z';
+  return {
+    code,
+    labelKo,
+    labelEn,
+    labelZh,
+    color,
+    sortOrder,
+    isActive: true,
+    isSystem: true,
+    createdAt: timestamp,
+    updatedAt: timestamp
+  };
+}
 
 function readBody(request) {
   return new Promise((resolve, reject) => {

@@ -3,6 +3,7 @@ import {notFound} from 'next/navigation';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {assertAdminCapability} from '@/lib/cms/admin-session';
+import {statusLabel} from '@/lib/cms/inquiry-status-label';
 import {inquiryStatusOptions} from '@/lib/cms/inquiry-statuses';
 import {
   getInquiryDetail,
@@ -10,7 +11,7 @@ import {
 } from '@/lib/cms/repositories';
 
 import {PageHeader, Panel} from '../../../_components/admin-shell';
-import {InquiryStatusBadge, InquiryStatusControl, statusLabel} from '../../../_components/inquiry-status-control';
+import {InquiryStatusBadge, InquiryStatusControl} from '../../../_components/inquiry-status-control';
 import {NotificationTimeline} from '../../../_components/notification-timeline';
 
 type Props = {

@@ -4,6 +4,7 @@ import {useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
 
 import {fetchAdminApi} from '@/lib/cms/admin-api-client.mjs';
+import {statusLabel} from '@/lib/cms/inquiry-status-label';
 
 type InquiryStatus = string;
 
@@ -261,10 +262,6 @@ function StatusBadge({status, statuses}: {status: string; statuses: InquiryStatu
       {option?.label || status}
     </span>
   );
-}
-
-export function statusLabel(statuses: InquiryStatusOption[], code: string) {
-  return statuses.find((item) => item.code === code)?.label || code;
 }
 
 function broadcastStatus(inquiryId: string, status: InquiryStatus) {
