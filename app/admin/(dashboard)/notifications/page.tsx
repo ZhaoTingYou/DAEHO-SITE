@@ -42,6 +42,7 @@ export default async function AdminNotificationsPage() {
           worker: t('notification.worker'),
           emailConnection: t('notification.emailConnection'),
           kakaoConnection: t('notification.kakaoConnection'),
+          kakaoVerification: t('notification.kakaoVerification'),
           kakaoTemplates: t('notification.kakaoTemplates'),
           configured: t('overview.configured'),
           notConfigured: t('overview.notConfigured'),

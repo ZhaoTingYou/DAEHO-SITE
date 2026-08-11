@@ -15,15 +15,18 @@ public class NotificationPlanner {
   private final CmsProperties cmsProperties;
   private final NotificationRepository repository;
   private final NotificationTemplateRenderer renderer;
+  private final NotificationTestService notificationTest;
 
   public NotificationPlanner(
       CmsProperties cmsProperties,
       NotificationRepository repository,
-      NotificationTemplateRenderer renderer
+      NotificationTemplateRenderer renderer,
+      NotificationTestService notificationTest
   ) {
     this.cmsProperties = cmsProperties;
     this.repository = repository;
     this.renderer = renderer;
+    this.notificationTest = notificationTest;
   }
 
   public Map<String, Object> previewStatusChange(Map<String, Object> inquiry, String nextStatus) {
@@ -142,6 +145,8 @@ public class NotificationPlanner {
 
     var originalPhone = firstNonBlank(inquiry.get("phone"), inquiry.get("contact"));
     if (!originalPhone.isBlank()) {
+      var kakaoEnabled = validationBoolean(settings.get("kakaoEnabled"))
+          && notificationTest.kakaoVerified();
       var normalizedPhone = normalizeKoreanPhone(originalPhone);
       var recipient = normalizedPhone.isBlank() ? digits(originalPhone) : normalizedPhone;
       var plan = buildPlan(
@@ -154,7 +159,7 @@ public class NotificationPlanner {
           "status_changed",
           "ko",
           recipient,
-          validationBoolean(settings.get("kakaoEnabled")),
+          kakaoEnabled,
           templateKey("kakao", nextStatus, "ko"),
           text(inquiry.get("id")) + ":" + eventPart + ":customer:kakao"
       );
@@ -206,6 +211,9 @@ public class NotificationPlanner {
         && !recipient.isBlank()
         && approved
         && templateError.isBlank();
+    var verificationFingerprint = "kakao".equals(channel) && latestTemplate != null
+        ? notificationTest.verificationFingerprint(templateKey, latestTemplate)
+        : "";
     var reason = "";
     if (recipient.isBlank()) {
       reason = "Recipient is not configured.";
@@ -232,6 +240,7 @@ public class NotificationPlanner {
         "templateKey", templateKey,
         "templateVersion", latestTemplate == null ? 0 : latestTemplate.get("version"),
         "providerTemplateCode", latestTemplate == null ? "" : latestTemplate.get("providerTemplateCode"),
+        "verificationFingerprint", verificationFingerprint,
         "enabled", enabled,
         "ready", ready,
         "reason", reason,

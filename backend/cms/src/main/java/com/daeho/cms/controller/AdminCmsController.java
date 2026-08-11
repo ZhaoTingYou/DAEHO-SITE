@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -366,6 +367,12 @@ public class AdminCmsController {
     if (job == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification job not found");
     }
+    if (validation.booleanValue(job.get("retryBlocked"), false)) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "This notification was quarantined during the provider cutover and cannot be retried."
+      );
+    }
     var jobStatus = validation.stringValue(job.get("status"));
     if (!jobStatus.equals("failed") && !jobStatus.equals("needs_attention")) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Only failed notifications can be retried.");
@@ -380,6 +387,7 @@ public class AdminCmsController {
   }
 
   @PutMapping("/notifications/settings")
+  @Transactional
   public Map<String, Object> updateNotificationSettings(
       @RequestBody Map<String, Object> body,
       HttpServletRequest request
@@ -388,6 +396,24 @@ public class AdminCmsController {
     var parsed = validation.notificationSettings(body);
     if (!parsed.success()) {
       throw new ValidationFailedException(parsed.issues());
+    }
+    if (validation.booleanValue(parsed.data().get("kakaoEnabled"), false)) {
+      notifications.lockNotificationDispatch();
+      if (!kakao.configured()) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "SOLAPI credentials are not configured.");
+      }
+      if (!notificationTest.kakaoVerified()) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Send a successful Kakao test from this CMS before enabling notifications."
+        );
+      }
+      if (!validation.booleanValue(notificationPlanner.health().get("kakaoTemplatesReady"), false)) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "All three Korean Kakao templates must be approved and active."
+        );
+      }
     }
     return Map.of("settings", notifications.updateSettings(parsed.data()));
   }
@@ -398,6 +424,7 @@ public class AdminCmsController {
     var health = new java.util.LinkedHashMap<String, Object>(notificationPlanner.health());
     health.put("emailConfigured", workspaceEmail.configured());
     health.put("kakaoConfigured", kakao.configured());
+    health.put("kakaoVerified", notificationTest.kakaoVerified());
     health.put("workerEnabled", notificationProperties.workerEnabled());
     return health;
   }

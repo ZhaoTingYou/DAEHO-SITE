@@ -47,7 +47,31 @@ SOLAPI_PF_ID=
 The client always sends `"disableSms": true`, omits the SMS sender number, and
 rejects an unexpected replacement result. Invalid or non-Korean mobile numbers
 become `needs_attention` jobs for manual contact. SOLAPI API secrets must only
-exist in the production server environment.
+exist in the production server environment. Production requests are restricted
+to the HTTPS `api.solapi.com` endpoint; loopback HTTP is accepted only for local
+automated tests.
+
+The CMS reports SOLAPI configuration and successful application test delivery
+separately. Kakao cannot be enabled until each of the three approved active
+templates has been successfully test-sent from this CMS and final Kakao delivery
+has been confirmed. Changing a template ID, version, body, channel, or API
+credential invalidates that template's verification. Provider-cutover jobs are
+quarantined and cannot be retried as SOLAPI Template IDs.
+
+Verification is checked again while planning and immediately before a Kakao send.
+Activating a new Kakao template atomically disables Kakao and quarantines unfinished
+Kakao jobs. Each queued Kakao job also stores a non-exported verification fingerprint;
+the worker compares it with the delivered template verification before sending. A
+changed template, endpoint, or credential therefore cannot bypass the CMS enable gate.
+
+Template verification is deliberately excluded from CMS backups. After a backup
+restore, Kakao is disabled, unfinished restored Kakao jobs are quarantined, and
+all three active Kakao templates must be tested again before enabling Kakao. A
+shared database dispatch lock prevents the restore from racing an in-flight send.
+The worker first commits a `processing` claim, then holds a PostgreSQL session lock
+for one external send at a time. External I/O is not inside a rollbackable batch.
+If the process is interrupted after dispatch, the uncertain `processing` job is
+quarantined for manual review instead of being sent again automatically.
 
 ## Safe rollout
 
@@ -55,8 +79,9 @@ exist in the production server environment.
 2. Configure Workspace Relay and use the CMS test-send form.
 3. Enable internal email, submit a test inquiry, and confirm arrival within 60 seconds.
 4. Enable customer email and test each customer status.
-5. Enable Kakao only after all three Korean templates are externally approved and the
-   connection health screen reports ready.
+5. Test-send each of the three Korean templates from the CMS and confirm final delivery.
+6. Enable Kakao only after all three templates are approved, active, and the
+   connection health screen reports verified.
 
 If a provider is unavailable, the CMS status still changes immediately. Review
 the inquiry notification timeline for queued attempts, retry times, provider IDs,

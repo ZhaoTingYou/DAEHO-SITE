@@ -40,13 +40,14 @@ public class CmsRepository {
   );
   private static final Set<String> BOOLEAN_COLUMNS = Set.of(
       "is_featured", "is_visible", "internal_email_enabled", "customer_email_enabled",
-      "kakao_enabled", "is_active"
+      "kakao_enabled", "is_active", "retry_blocked"
   );
   private static final Set<String> TIMESTAMPTZ_COLUMNS = Set.of(
       "created_at", "updated_at", "next_attempt_at"
   );
   private static final Set<String> LEGACY_PAGE_COLUMNS = Set.of("content_zh", "seo_zh");
   private static final Set<String> LEGACY_MEDIA_COLUMNS = Set.of("alt_zh");
+  private static final Set<String> NON_EXPORTABLE_JOB_COLUMNS = Set.of("verification_fingerprint");
 
   private final JdbcTemplate jdbc;
   private final JsonSupport json;
@@ -495,6 +496,11 @@ public class CmsRepository {
 
   @Transactional
   public void replaceFromSnapshot(Map<String, Object> snapshot) {
+    jdbc.query(
+        "SELECT pg_advisory_xact_lock(?)",
+        rs -> null,
+        NotificationRepository.DISPATCH_LOCK_ID
+    );
     var tables = validation.objectValue(snapshot.get("tables"));
     for (var table : DELETE_TABLES) {
       if (tables.containsKey(table)) {
@@ -508,6 +514,22 @@ public class CmsRepository {
         }
       }
     }
+    // Provider credentials and final-delivery verification are intentionally
+    // outside CMS content backups. A restore must require fresh live tests.
+    jdbc.update("DELETE FROM cms_kakao_template_verifications");
+    jdbc.update("UPDATE cms_notification_settings SET kakao_enabled = false, updated_at = now()");
+    jdbc.update("""
+        UPDATE cms_notification_jobs
+        SET status = 'needs_attention',
+          retry_blocked = true,
+          last_error = CASE
+            WHEN last_error = '' THEN 'Restored Kakao job requires manual review and cannot be retried.'
+            ELSE last_error || ' | Restored Kakao job requires manual review and cannot be retried.'
+          END,
+          updated_at = now()
+        WHERE channel = 'kakao'
+          AND status IN ('queued', 'processing', 'provider_pending', 'failed', 'needs_attention')
+        """);
   }
 
   public List<Map<String, Object>> tableCounts() {
@@ -680,7 +702,8 @@ public class CmsRepository {
       for (var index = 1; index <= meta.getColumnCount(); index += 1) {
         var column = meta.getColumnName(index);
         if ((table.equals("cms_pages") && LEGACY_PAGE_COLUMNS.contains(column))
-            || (table.equals("cms_media") && LEGACY_MEDIA_COLUMNS.contains(column))) {
+            || (table.equals("cms_media") && LEGACY_MEDIA_COLUMNS.contains(column))
+            || (table.equals("cms_notification_jobs") && NON_EXPORTABLE_JOB_COLUMNS.contains(column))) {
           continue;
         }
         if (JSON_COLUMNS.contains(column)) {
@@ -706,7 +729,10 @@ public class CmsRepository {
     if (!unknown.isEmpty()) {
       throw new IllegalArgumentException("Cannot import " + table + ": unknown columns " + String.join(", ", unknown));
     }
-    var columns = row.keySet().stream().filter(tableColumns::contains).toList();
+    var columns = row.keySet().stream()
+        .filter(tableColumns::contains)
+        .filter(column -> !table.equals("cms_notification_jobs") || !NON_EXPORTABLE_JOB_COLUMNS.contains(column))
+        .toList();
     if (columns.isEmpty()) {
       return;
     }

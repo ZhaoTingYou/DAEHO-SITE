@@ -12,6 +12,7 @@ type Settings = {
 type Health = {
   emailConfigured: boolean;
   kakaoConfigured: boolean;
+  kakaoVerified: boolean;
   workerEnabled: boolean;
   kakaoTemplatesReady: boolean;
 };
@@ -41,6 +42,7 @@ type Copy = {
   worker: string;
   emailConnection: string;
   kakaoConnection: string;
+  kakaoVerification: string;
   kakaoTemplates: string;
   configured: string;
   notConfigured: string;
@@ -91,6 +93,7 @@ export function NotificationSettingsEditor({
           <HealthItem label={copy.worker} ready={health.workerEnabled} copy={copy} />
           <HealthItem label={copy.emailConnection} ready={health.emailConfigured} copy={copy} />
           <HealthItem label={copy.kakaoConnection} ready={health.kakaoConfigured} copy={copy} />
+          <HealthItem label={copy.kakaoVerification} ready={health.kakaoVerified} copy={copy} />
           <HealthItem label={copy.kakaoTemplates} ready={health.kakaoTemplatesReady} copy={copy} />
         </div>
       </section>

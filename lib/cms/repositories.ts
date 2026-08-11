@@ -136,6 +136,7 @@ export type CmsNotificationJob = {
   templateId: string | null;
   providerTemplateCode: string;
   status: 'queued' | 'processing' | 'provider_pending' | 'sent' | 'failed' | 'needs_attention';
+  retryBlocked: boolean;
   attemptCount: number;
   deliveryCheckCount: number;
   nextAttemptAt: string;
@@ -644,6 +645,7 @@ export async function getNotificationHealth() {
     kakaoTemplatesReady: boolean;
     emailConfigured: boolean;
     kakaoConfigured: boolean;
+    kakaoVerified: boolean;
     workerEnabled: boolean;
   }>('/api/admin/notifications/health', {admin: true});
 }

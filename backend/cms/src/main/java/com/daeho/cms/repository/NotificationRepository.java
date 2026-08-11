@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class NotificationRepository {
+  public static final long DISPATCH_LOCK_ID = 4_443_393_995_712_001L;
   private final JdbcTemplate jdbc;
   private final RequestValidation validation;
 
@@ -28,6 +29,10 @@ public class NotificationRepository {
         Boolean.class
     );
     return Boolean.TRUE.equals(ready);
+  }
+
+  public void lockNotificationDispatch() {
+    jdbc.query("SELECT pg_advisory_xact_lock(?)", rs -> null, DISPATCH_LOCK_ID);
   }
 
   public Map<String, Object> getSettings(String fallbackInternalEmail) {
@@ -71,6 +76,43 @@ public class NotificationRepository {
     ).stream().findFirst().orElse(Map.of());
   }
 
+  public boolean kakaoTemplateVerified(String templateKey, String fingerprint) {
+    var verified = jdbc.queryForObject("""
+        SELECT EXISTS (
+          SELECT 1
+          FROM cms_kakao_template_verifications
+          WHERE template_key = ? AND verification_fingerprint = ?
+        )
+        """, Boolean.class, validation.stringValue(templateKey), validation.stringValue(fingerprint));
+    return Boolean.TRUE.equals(verified);
+  }
+
+  public void markKakaoTemplateVerified(String templateKey, String fingerprint) {
+    jdbc.update("""
+        INSERT INTO cms_kakao_template_verifications (
+          template_key, verification_fingerprint, verified_at
+        ) VALUES (?, ?, now())
+        ON CONFLICT (template_key) DO UPDATE SET
+          verification_fingerprint = excluded.verification_fingerprint,
+          verified_at = now()
+        """, validation.stringValue(templateKey), validation.stringValue(fingerprint));
+  }
+
+  public boolean kakaoJobTemplateVerified(String jobId) {
+    var verified = jdbc.queryForObject("""
+        SELECT EXISTS (
+          SELECT 1
+          FROM cms_notification_jobs job
+          INNER JOIN cms_notification_templates template ON template.id = job.template_id
+          INNER JOIN cms_kakao_template_verifications verification
+            ON verification.template_key = template.template_key
+           AND verification.verification_fingerprint = job.verification_fingerprint
+          WHERE job.id = ? AND job.verification_fingerprint <> ''
+        )
+        """, Boolean.class, validation.stringValue(jobId));
+    return Boolean.TRUE.equals(verified);
+  }
+
   public List<Map<String, Object>> listTemplates() {
     return jdbc.query("""
         SELECT * FROM cms_notification_templates
@@ -106,6 +148,27 @@ public class NotificationRepository {
     var id = UUID.randomUUID().toString();
     var approvalStatus = validation.stringValue(payload.get("approvalStatus"));
     var activate = validation.booleanValue(payload.get("isActive"), false);
+    var kakaoActivation = activate && "kakao".equals(validation.stringValue(base.get("channel")));
+    if (kakaoActivation) {
+      lockNotificationDispatch();
+      jdbc.update("UPDATE cms_notification_settings SET kakao_enabled = false, updated_at = now()");
+      jdbc.update(
+          "DELETE FROM cms_kakao_template_verifications WHERE template_key = ?",
+          templateKey
+      );
+      jdbc.update("""
+          UPDATE cms_notification_jobs
+          SET status = 'needs_attention',
+            retry_blocked = true,
+            last_error = CASE
+              WHEN last_error = '' THEN 'Kakao template changed; this queued job cannot be retried.'
+              ELSE last_error || ' | Kakao template changed; this queued job cannot be retried.'
+            END,
+            updated_at = now()
+          WHERE channel = 'kakao'
+            AND status IN ('queued', 'processing', 'provider_pending', 'failed', 'needs_attention')
+          """);
+    }
     if (activate) {
       jdbc.update(
           "UPDATE cms_notification_templates SET is_active = false, updated_at = now() WHERE template_key = ?",
@@ -174,11 +237,11 @@ public class NotificationRepository {
         INSERT INTO cms_notification_jobs (
           id, inquiry_id, status_event_id, channel, audience, event_type,
           inquiry_status, locale, recipient, subject, rendered_body, template_id,
-          provider_template_code, status, attempt_count, delivery_check_count,
+          provider_template_code, verification_fingerprint, status, attempt_count, delivery_check_count,
           next_attempt_at, provider_message_id, last_error, dedupe_key,
           created_at, updated_at
         ) VALUES (?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''),
-          ?, ?, 0, 0, now(), '', ?, ?, now(), now())
+          ?, ?, ?, 0, 0, now(), '', ?, ?, now(), now())
         ON CONFLICT (dedupe_key) DO NOTHING
         """,
         id,
@@ -194,6 +257,7 @@ public class NotificationRepository {
         validation.stringValue(job.get("renderedBody")),
         validation.stringValue(job.get("templateId")),
         validation.stringValue(job.get("providerTemplateCode")),
+        validation.stringValue(job.get("verificationFingerprint")),
         validation.stringValue(job.getOrDefault("status", "queued")),
         validation.stringValue(job.get("lastError")),
         job.get("dedupeKey")
@@ -242,6 +306,7 @@ public class NotificationRepository {
           SELECT id, status AS claimed_from_status
           FROM cms_notification_jobs
           WHERE status IN ('queued', 'failed', 'provider_pending')
+            AND retry_blocked = false
             AND next_attempt_at <= now()
           ORDER BY next_attempt_at ASC, created_at ASC
           FOR UPDATE SKIP LOCKED
@@ -257,6 +322,22 @@ public class NotificationRepository {
       job.put("claimedFromStatus", rs.getString("claimed_from_status"));
       return job;
     }).stream().findFirst().orElse(null);
+  }
+
+  @Transactional
+  public void quarantineStaleProcessingJobs() {
+    jdbc.update("""
+        UPDATE cms_notification_jobs
+        SET status = 'needs_attention',
+          retry_blocked = true,
+          last_error = CASE
+            WHEN last_error = '' THEN 'Dispatch result is uncertain after an interrupted worker; manual review is required.'
+            ELSE last_error || ' | Dispatch result is uncertain after an interrupted worker; manual review is required.'
+          END,
+          updated_at = now()
+        WHERE status = 'processing'
+          AND updated_at < now() - interval '5 minutes'
+        """);
   }
 
   @Transactional
@@ -305,13 +386,17 @@ public class NotificationRepository {
   @Transactional
   public void scheduleDeliveryCheck(String id, int deliveryCheckCount) {
     var nextStatus = deliveryCheckCount >= 20 ? "needs_attention" : "provider_pending";
-    var error = deliveryCheckCount >= 20 ? "Kakao delivery result did not complete within the polling window." : "";
+    var retryBlocked = deliveryCheckCount >= 20;
+    var error = retryBlocked
+        ? "Kakao delivery result is uncertain; manual review is required and this message cannot be resent."
+        : "";
     jdbc.update("""
         UPDATE cms_notification_jobs
-        SET status = ?, delivery_check_count = ?, last_error = ?,
+        SET status = ?, delivery_check_count = ?, retry_blocked = CASE WHEN ? THEN true ELSE retry_blocked END,
+          last_error = ?,
           next_attempt_at = now() + interval '5 seconds', updated_at = now()
         WHERE id = ?
-        """, nextStatus, deliveryCheckCount, error, id);
+        """, nextStatus, deliveryCheckCount, retryBlocked, error, id);
   }
 
   @Transactional
@@ -326,13 +411,24 @@ public class NotificationRepository {
   }
 
   @Transactional
+  public void quarantineJob(String id, String errorMessage) {
+    jdbc.update("""
+        UPDATE cms_notification_jobs
+        SET status = 'needs_attention', retry_blocked = true, last_error = ?, updated_at = now()
+        WHERE id = ?
+        """, validation.stringValue(errorMessage), id);
+  }
+
+  @Transactional
   public Map<String, Object> retryJob(String id) {
     jdbc.update("""
         UPDATE cms_notification_jobs
         SET status = 'queued', attempt_count = 0, delivery_check_count = 0,
           next_attempt_at = now(), provider_message_id = '', last_error = '',
           updated_at = now()
-        WHERE id = ? AND status IN ('failed', 'needs_attention')
+        WHERE id = ?
+          AND status IN ('failed', 'needs_attention')
+          AND retry_blocked = false
         """, id);
     return getJob(id);
   }
@@ -395,6 +491,7 @@ public class NotificationRepository {
         "templateId", rs.getString("template_id"),
         "providerTemplateCode", rs.getString("provider_template_code"),
         "status", rs.getString("status"),
+        "retryBlocked", rs.getBoolean("retry_blocked"),
         "attemptCount", rs.getInt("attempt_count"),
         "deliveryCheckCount", rs.getInt("delivery_check_count"),
         "nextAttemptAt", instantString(rs, "next_attempt_at"),

@@ -22,12 +22,16 @@ import org.junit.jupiter.api.Test;
 
 class NotificationPlannerTest {
   private NotificationRepository repository;
+  private NotificationTestService notificationTest;
   private NotificationPlanner planner;
   private List<Map<String, Object>> createdJobs;
 
   @BeforeEach
   void setUp() {
     repository = mock(NotificationRepository.class);
+    notificationTest = mock(NotificationTestService.class);
+    when(notificationTest.kakaoVerified()).thenReturn(true);
+    when(notificationTest.verificationFingerprint(anyString(), anyMap())).thenReturn("verified-fingerprint");
     createdJobs = new ArrayList<>();
     when(repository.getSettings(anyString())).thenReturn(Map.of(
         "internalEmail", "internal@example.com",
@@ -52,7 +56,8 @@ class NotificationPlannerTest {
         repository,
         new NotificationTemplateRenderer(new NotificationProperties(
             true, 1000, "https://daeho.works/admin", "", "", "", ""
-        ))
+        )),
+        notificationTest
     );
   }
 
@@ -77,6 +82,7 @@ class NotificationPlannerTest {
         "customer".equals(job.get("audience"))
             && "kakao".equals(job.get("channel"))
             && "01012345678".equals(job.get("recipient"))
+            && "verified-fingerprint".equals(job.get("verificationFingerprint"))
     ));
   }
 
@@ -144,6 +150,19 @@ class NotificationPlannerTest {
         .orElseThrow();
     assertEquals("needs_attention", kakao.get("status"));
     assertTrue(kakao.get("lastError").toString().contains("Korean mobile"));
+  }
+
+  @Test
+  void doesNotQueueKakaoWhenTheCurrentProviderAndTemplatesAreUnverified() {
+    when(notificationTest.kakaoVerified()).thenReturn(false);
+
+    planner.queueStatusChange(inquiry("", "010-1234-5678"), Map.of(
+        "id", "event-unverified",
+        "previousStatus", "new",
+        "nextStatus", "contacted"
+    ));
+
+    assertTrue(createdJobs.stream().noneMatch(job -> "kakao".equals(job.get("channel"))));
   }
 
   @Test

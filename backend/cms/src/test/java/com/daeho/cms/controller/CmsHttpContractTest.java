@@ -60,6 +60,8 @@ class CmsHttpContractTest {
   private MediaStorageService mediaStorage;
   private NotificationRepository notifications;
   private NotificationPlanner notificationPlanner;
+  private SolapiKakaoClient kakao;
+  private NotificationTestService notificationTest;
   private InquiryWorkflowService inquiryWorkflow;
   private CmsSnapshotService snapshots;
   private CmsStatusService status;
@@ -72,6 +74,8 @@ class CmsHttpContractTest {
     mediaStorage = mock(MediaStorageService.class);
     notifications = mock(NotificationRepository.class);
     notificationPlanner = mock(NotificationPlanner.class);
+    kakao = mock(SolapiKakaoClient.class);
+    notificationTest = mock(NotificationTestService.class);
     inquiryWorkflow = mock(InquiryWorkflowService.class);
     snapshots = mock(CmsSnapshotService.class);
     status = mock(CmsStatusService.class);
@@ -107,9 +111,9 @@ class CmsHttpContractTest {
                 new NotificationTemplateRenderer(notificationProperties),
                 inquiryWorkflow,
                 mock(WorkspaceEmailSender.class),
-                mock(SolapiKakaoClient.class),
+                kakao,
                 notificationProperties,
-                mock(NotificationTestService.class),
+                notificationTest,
                 snapshots,
                 status,
                 mock(AdminPasswordService.class)
@@ -346,6 +350,45 @@ class CmsHttpContractTest {
         ));
 
     verify(notifications, never()).createTemplateVersion(anyString(), anyMap(), anyMap());
+  }
+
+  @Test
+  void refusesToEnableKakaoBeforeAnApplicationTestSendSucceeds() throws Exception {
+    when(kakao.configured()).thenReturn(true);
+    when(notificationTest.kakaoVerified()).thenReturn(false);
+    when(notificationPlanner.health()).thenReturn(Map.of("kakaoTemplatesReady", true));
+    when(notifications.updateSettings(anyMap())).thenReturn(Map.of("kakaoEnabled", true));
+
+    mvc.perform(put("/api/admin/notifications/settings")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "internalEmail":"internal@example.com",
+                  "internalEmailEnabled":true,
+                  "customerEmailEnabled":true,
+                  "kakaoEnabled":true
+                }
+                """))
+        .andExpect(status().isConflict());
+
+    verify(notifications, never()).updateSettings(anyMap());
+  }
+
+  @Test
+  void refusesToRetryJobsQuarantinedDuringTheProviderCutover() throws Exception {
+    when(notifications.getJob("legacy-job")).thenReturn(Map.of(
+        "id", "legacy-job",
+        "status", "needs_attention",
+        "retryBlocked", true
+    ));
+    when(notifications.retryJob("legacy-job")).thenReturn(Map.of("id", "legacy-job"));
+
+    mvc.perform(post("/api/admin/notifications/jobs/legacy-job/retry")
+            .header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isConflict());
+
+    verify(notifications, never()).retryJob("legacy-job");
   }
 
   @Test

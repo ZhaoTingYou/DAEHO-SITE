@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.security.MessageDigest;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ public class SolapiKakaoClient {
   private final HttpClient client;
   private final Clock clock;
   private final Supplier<String> saltSupplier;
+  private final boolean allowLoopbackEndpoint;
 
   @Autowired
   public SolapiKakaoClient(NotificationProperties properties, JsonSupport json) {
@@ -37,7 +39,8 @@ public class SolapiKakaoClient {
         json,
         HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build(),
         Clock.systemUTC(),
-        () -> UUID.randomUUID().toString().replace("-", "")
+        () -> UUID.randomUUID().toString().replace("-", ""),
+        false
     );
   }
 
@@ -48,15 +51,27 @@ public class SolapiKakaoClient {
       Clock clock,
       Supplier<String> saltSupplier
   ) {
+    this(properties, json, client, clock, saltSupplier, true);
+  }
+
+  private SolapiKakaoClient(
+      NotificationProperties properties,
+      JsonSupport json,
+      HttpClient client,
+      Clock clock,
+      Supplier<String> saltSupplier,
+      boolean allowLoopbackEndpoint
+  ) {
     this.properties = properties;
     this.json = json;
     this.client = client;
     this.clock = clock;
     this.saltSupplier = saltSupplier;
+    this.allowLoopbackEndpoint = allowLoopbackEndpoint;
   }
 
   public SendResult send(Map<String, Object> job) {
-    if (!properties.kakaoConfigured()) {
+    if (!configured()) {
       return SendResult.failed("SOLAPI Kakao credentials are not configured.");
     }
     if (text(job.get("providerTemplateCode")).isBlank()) {
@@ -69,6 +84,11 @@ public class SolapiKakaoClient {
       );
       var payload = json.objectOrEmpty(response.body());
       if (response.statusCode() < 200 || response.statusCode() >= 300) {
+        if (response.statusCode() == 408 || response.statusCode() >= 500) {
+          return SendResult.uncertain(
+              "SOLAPI returned an ambiguous HTTP " + response.statusCode() + " response; request acceptance is unknown."
+          );
+        }
         return SendResult.failed(providerError(payload, response.statusCode()));
       }
       var failures = payload.get("failedMessageList") instanceof List<?> list ? list : List.of();
@@ -77,7 +97,7 @@ public class SolapiKakaoClient {
       }
       var messages = payload.get("messageList") instanceof List<?> list ? list : List.of();
       if (messages.isEmpty() || !(messages.get(0) instanceof Map<?, ?> rawMessage)) {
-        return SendResult.failed("SOLAPI did not return a Kakao message result.");
+        return SendResult.uncertain("SOLAPI accepted the request but did not return a Kakao message result.");
       }
       var message = stringMap(rawMessage);
       var statusCode = text(message.get("statusCode"));
@@ -89,11 +109,15 @@ public class SolapiKakaoClient {
         ));
       }
       var messageId = text(message.get("messageId"));
-      return messageId.isBlank()
-          ? SendResult.failed("SOLAPI did not return a Kakao message ID.")
-          : SendResult.accepted(messageId);
+      if (messageId.isBlank()) {
+        return SendResult.uncertain("SOLAPI accepted the request but did not return a Kakao message ID.");
+      }
+      return SendResult.accepted(messageId);
+    } catch (InterruptedException error) {
+      Thread.currentThread().interrupt();
+      return SendResult.uncertain("The SOLAPI request was interrupted and its acceptance is unknown.");
     } catch (Exception error) {
-      return SendResult.failed(error.getMessage() == null ? "Unknown SOLAPI Kakao error." : error.getMessage());
+      return SendResult.uncertain("The SOLAPI response was not received; request acceptance is unknown.");
     }
   }
 
@@ -115,7 +139,7 @@ public class SolapiKakaoClient {
   }
 
   public DeliveryStatus getDeliveryStatus(String messageId) {
-    if (!properties.kakaoConfigured()) {
+    if (!configured()) {
       return DeliveryStatus.failed("SOLAPI Kakao credentials are not configured.");
     }
     try {
@@ -145,7 +169,7 @@ public class SolapiKakaoClient {
 
   DeliveryStatus deliveryStatus(Map<String, Object> message) {
     if (booleanValue(message.get("replacement"))) {
-      return DeliveryStatus.failed(firstNonBlank(
+      return DeliveryStatus.replacement(firstNonBlank(
           message.get("reason"),
           "SOLAPI unexpectedly replaced the Kakao message with another channel."
       ));
@@ -170,7 +194,35 @@ public class SolapiKakaoClient {
   }
 
   public boolean configured() {
-    return properties.kakaoConfigured();
+    return properties.kakaoConfigured() && trustedEndpoint();
+  }
+
+  public String verificationFingerprint(
+      String templateKey,
+      String templateVersion,
+      String providerTemplateCode,
+      String templateBody
+  ) {
+    try {
+      var source = String.join("\n", List.of(
+          text(properties.normalizedSolapiApiBaseUrl()),
+          text(properties.solapiApiKey()),
+          text(properties.solapiApiSecret()),
+          text(properties.solapiPfId()),
+          text(templateKey),
+          text(templateVersion),
+          text(providerTemplateCode),
+          text(templateBody)
+      ));
+      var digest = MessageDigest.getInstance("SHA-256").digest(source.getBytes(StandardCharsets.UTF_8));
+      var hex = new StringBuilder(digest.length * 2);
+      for (var value : digest) {
+        hex.append(String.format("%02x", value & 0xff));
+      }
+      return hex.toString();
+    } catch (Exception error) {
+      throw new IllegalStateException("Unable to fingerprint the SOLAPI configuration.", error);
+    }
   }
 
   String authorization(String date, String salt) {
@@ -192,6 +244,21 @@ public class SolapiKakaoClient {
     return "POST".equals(method)
         ? builder.POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8)).build()
         : builder.GET().build();
+  }
+
+  private boolean trustedEndpoint() {
+    try {
+      var endpoint = URI.create(properties.normalizedSolapiApiBaseUrl());
+      var host = text(endpoint.getHost()).toLowerCase(java.util.Locale.ROOT);
+      if ("https".equalsIgnoreCase(endpoint.getScheme()) && "api.solapi.com".equals(host)) {
+        return true;
+      }
+      return allowLoopbackEndpoint
+          && "http".equalsIgnoreCase(endpoint.getScheme())
+          && ("127.0.0.1".equals(host) || "localhost".equals(host));
+    } catch (IllegalArgumentException error) {
+      return false;
+    }
   }
 
   private String hmacSha256Hex(String message, String secret) {
@@ -233,7 +300,13 @@ public class SolapiKakaoClient {
   }
 
   private boolean booleanValue(Object value) {
-    return value instanceof Boolean bool ? bool : "true".equalsIgnoreCase(text(value));
+    if (value instanceof Boolean bool) {
+      return bool;
+    }
+    if (value instanceof Number number) {
+      return number.intValue() != 0;
+    }
+    return "true".equalsIgnoreCase(text(value)) || "1".equals(text(value));
   }
 
   private String firstNonBlank(Object... values) {
@@ -250,13 +323,17 @@ public class SolapiKakaoClient {
     return value == null ? "" : value.toString().trim();
   }
 
-  public record SendResult(boolean accepted, String messageId, String errorMessage) {
+  public record SendResult(boolean accepted, boolean uncertain, String messageId, String errorMessage) {
     public static SendResult accepted(String messageId) {
-      return new SendResult(true, messageId, "");
+      return new SendResult(true, false, messageId, "");
     }
 
     public static SendResult failed(String errorMessage) {
-      return new SendResult(false, "", errorMessage);
+      return new SendResult(false, false, "", errorMessage);
+    }
+
+    public static SendResult uncertain(String errorMessage) {
+      return new SendResult(false, true, "", errorMessage);
     }
   }
 
@@ -271,6 +348,10 @@ public class SolapiKakaoClient {
 
     public static DeliveryStatus failed(String errorMessage) {
       return new DeliveryStatus("failed", errorMessage);
+    }
+
+    public static DeliveryStatus replacement(String errorMessage) {
+      return new DeliveryStatus("replacement", errorMessage);
     }
 
     public static DeliveryStatus unknown(String errorMessage) {

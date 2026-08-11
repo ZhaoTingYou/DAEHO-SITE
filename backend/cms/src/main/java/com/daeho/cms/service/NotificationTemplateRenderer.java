@@ -93,7 +93,7 @@ public class NotificationTemplateRenderer {
     if ("en".equals(locale)) {
       return switch (text(status)) {
         case "new" -> "New";
-        case "contacted" -> "Reviewed";
+        case "contacted" -> "Contacted";
         case "in_progress" -> "In progress";
         case "done" -> "Completed";
         case "spam" -> "Spam";

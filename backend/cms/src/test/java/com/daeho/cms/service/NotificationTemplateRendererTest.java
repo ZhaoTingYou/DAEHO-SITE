@@ -44,4 +44,18 @@ class NotificationTemplateRendererTest {
         renderer.validateVariables("{{customer_password}} {{ customer_password }}")
     );
   }
+
+  @Test
+  void rendersContactedAsAnAlreadyCompletedContactInBothLanguages() {
+    assertEquals("연락 완료", renderer.variables(
+        Map.of("id", "inquiry-1", "locale", "ko"),
+        "new",
+        "contacted"
+    ).get("status_label"));
+    assertEquals("Contacted", renderer.variables(
+        Map.of("id", "inquiry-1", "locale", "en"),
+        "new",
+        "contacted"
+    ).get("status_label"));
+  }
 }
