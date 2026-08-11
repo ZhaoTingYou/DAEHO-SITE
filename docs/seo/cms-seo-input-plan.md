@@ -258,7 +258,7 @@ HERITAGE · LOYALTY        ← 작은 라벨 (기존 구조, 그대로 유지)
 | 항목 | 처리 내용 |
 |---|---|
 | 구조화 데이터 | 전 118페이지에 서비스 엔티티 5개, `knowsAbout` 26개 출력. CMS 오버라이드를 받지 않음 |
-| 업종 유형 | **보류.** `JewelryStore` 하위 유형 제거를 제안했으나 고객사 내부 확인 중이라 현행 유지. 회신 후 반영 |
+| 업종 유형 | `JewelryStore` 하위 유형 제거 (2026-08-11 고객사 승인). 트로피·기념품·시상식 용품을 함께 제작하는 실제 범위와 맞추기 위함 |
 | 뉴스 Article 스키마 | 뉴스 상세 페이지에 `headline`·`datePublished`·`publisher` 등 출력. `dateModified`는 CMS에 수정일 필드가 없어 넣지 않음 |
 | 브레드크럼 | 뉴스·작품 상세에 `BreadcrumbList` 출력. 라벨은 `messages/*.json`의 `common.breadcrumb`에서 관리 |
 | 메타 설명 길이 상한 | CMS에 긴 설명을 넣어도 160자에서 문장 단위로 잘라 검색결과 잘림 방지 |
