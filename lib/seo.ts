@@ -70,22 +70,22 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
     home: {
       title: '대호 우승반지 제작·커스텀 트로피 전문',
       description:
-        '대호는 1988년부터 우승반지 제작을 중심으로 커스텀 트로피, 기업 행사 기념품, 맞춤 주얼리를 제작합니다.'
+        '대호는 1988년부터 우승반지, 커스텀 트로피, 기업 행사 기념품, 스포츠 시상식 용품, 커스텀 디자인을 제작합니다.'
     },
     chronicle: {
       title: '대호 1988년 우승반지 제작 아카이브',
       description:
-        '1988년부터 이어진 대호의 우승반지 제작 기록과 단체 기념 제품 납품 경험, 국내 시장에서 쌓은 맞춤 제작 사례를 정리합니다.'
+        '1988년부터 이어진 대호의 우승반지 제작 기록과 단체 기념 제품 납품 경험, 국내 시장에서 쌓은 커스텀 제작 사례를 정리합니다.'
     },
     loyalty: {
-      title: '대호 기업 행사 기념품 제작 신뢰',
+      title: '기업 행사 기념품 제작, 대호의 약속',
       description:
-        '대호는 프로스포츠 구단, 학교, 기관, 기업의 반복 의뢰를 바탕으로 기업 행사 기념품과 맞춤 제작 프로젝트의 신의를 쌓아왔습니다.'
+        '대호는 프로스포츠 구단, 학교, 기관, 기업의 반복 의뢰를 바탕으로 기업 행사 기념품과 커스텀 제작 프로젝트의 신의를 쌓아왔습니다.'
     },
     credibility: {
-      title: '대호 맞춤 주얼리 제작 신뢰 기준',
+      title: '대호 커스텀 디자인 제작 기준',
       description:
-        '대호는 디자인, 3D 설계, 세공, 각인, 검수, 포장까지 자체 기준으로 관리해 단체 주문과 맞춤 주얼리 제작의 신뢰를 높입니다.'
+        '대호는 디자인, 3D 설계, 세공, 각인, 검수, 포장까지 자체 기준으로 관리해 단체 주문과 커스텀 디자인 제작의 신뢰를 높입니다.'
     },
     achievement: {
       title: '대호 우승반지 제작 실적과 기록',
@@ -98,41 +98,41 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
         '대호는 1988년부터 축적한 우승반지 제작 경험을 바탕으로 디자인 상담, 3D 모델링, 주조, 세공, 각인, 검수까지 커스텀 트로피와 기념품 제작 공정을 관리합니다.'
     },
     techniqueRecords: {
-      title: '대호 기술 기록과 맞춤 주얼리 세공 기준',
+      title: '대호 커스텀 디자인 세공 기술력',
       description:
-        '대호의 맞춤 주얼리 제작 기술, 세공 기준, 표면 처리, 구조 설계와 향후 검증 자료를 정리하는 기술 기록 페이지입니다.'
+        '대호의 커스텀 디자인 제작 기술, 세공 기준, 표면 처리, 구조 설계와 향후 검증 자료를 정리하는 기술 기록 페이지입니다.'
     },
     collection: {
       title: '대호 우승반지·커스텀 트로피·주문제작 컬렉션',
       description:
-        '대호의 우승반지, 주문제작 반지, 커스텀 트로피와 기업 행사 기념품 사례를 카테고리별로 살펴보고 단체 맞춤 제작 방향을 확인하세요.'
+        '대호의 우승반지, 주문제작 반지, 커스텀 트로피와 기업 행사 기념품 사례를 카테고리별로 살펴보고 단체 커스텀 제작 방향을 확인하세요.'
     },
     news: {
       title: '대호 뉴스와 우승반지 제작 사례',
       description:
-        '대호의 최근 제작 사례, 프로젝트 스토리, 언론/피처, 협업 소식을 통해 우승반지와 맞춤 주얼리 제작 현장을 전합니다.'
+        '대호의 최근 제작 사례, 프로젝트 스토리, 언론/피처, 협업 소식을 통해 우승반지와 커스텀 디자인 제작 현장을 전합니다.'
     },
     golf: {
-      title: '대호 맞춤 골프 팔찌 제작',
+      title: '대호 커스텀 골프 팔찌 제작',
       description:
-        '대호는 골프 클럽 형태와 개인 각인을 반영한 맞춤 골프 팔찌를 맞춤 주얼리 제작 기준으로 만들어 라운드의 기록과 기업 행사 선물을 남깁니다.'
+        '대호는 골프 클럽 형태와 개인 각인을 반영한 커스텀 골프 팔찌를 커스텀 디자인 제작 기준으로 만들어 라운드의 기록과 기업 행사 선물을 남깁니다.'
     },
     contact: {
       title: '대호 우승반지·커스텀 트로피 제작 문의',
       description:
-        '우승반지 제작, 커스텀 트로피, 기업 행사 기념품, 스포츠 시상식 용품, 맞춤 주얼리 제작 상담을 위해 프로젝트 목적, 수량, 일정, 참고 자료를 보내주세요.'
+        '우승반지 제작, 커스텀 트로피, 기업 행사 기념품, 스포츠 시상식 용품, 커스텀 디자인 제작 상담을 위해 프로젝트 목적, 수량, 일정, 참고 자료를 보내주세요.'
     },
     golfInquiry: {
       title: '대호 골프 팔찌 상담 신청',
       description:
-        '맞춤 골프 팔찌 제작을 위한 구성, 수량, 희망 일정, 각인 정보를 보내면 대호가 상담과 제작 가능 여부를 확인합니다.'
+        '커스텀 골프 팔찌 제작을 위한 구성, 수량, 희망 일정, 각인 정보를 보내면 대호가 상담과 제작 가능 여부를 확인합니다.'
     }
   },
   en: {
     home: {
       title: 'Championship Rings and Custom Trophies',
       description:
-        'DAEHO is a Korean maker of championship rings, custom trophies, corporate event gifts, and bespoke commemorative jewelry since 1988.'
+        'DAEHO is a Korean maker of championship rings, custom trophies, corporate event gifts, sports award goods, and custom design work since 1988.'
     },
     chronicle: {
       title: 'DAEHO Production Archive Since 1988',
@@ -145,9 +145,9 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
         'DAEHO builds long-term relationships with sports teams, schools, institutions, and companies through repeat commemorative projects.'
     },
     credibility: {
-      title: 'DAEHO Custom Jewelry Production Standards',
+      title: 'DAEHO Custom Design Production Standards',
       description:
-        'DAEHO manages design, 3D planning, craft, engraving, inspection, and packing to support reliable group and custom jewelry production.'
+        'DAEHO manages design, 3D planning, craft, engraving, inspection, and packing to support reliable group and custom design production.'
     },
     achievement: {
       title: 'DAEHO Championship Ring Records',
@@ -160,9 +160,9 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
         'DAEHO manages championship ring and custom trophy production from consultation, 3D modeling, casting, craft, engraving, and inspection since 1988.'
     },
     techniqueRecords: {
-      title: 'DAEHO Technical Records and Craft Standards',
+      title: 'DAEHO Design and Craft Technical Records',
       description:
-        'A technical record page for DAEHO custom jewelry craft standards, surface treatment, structure planning, and future verification materials.'
+        'A technical record page for DAEHO custom design craft standards, surface treatment, structure planning, and future verification materials.'
     },
     collection: {
       title: 'DAEHO Championship Rings, Trophies, and Bespoke Work',
@@ -172,17 +172,17 @@ const defaultSeoByLocale: Record<Locale, Record<PageKey, Omit<PageSeo, 'path'>>>
     news: {
       title: 'DAEHO News and Ring Production Stories',
       description:
-        'Read DAEHO production stories, project updates, press features, and collaborations around championship rings and custom jewelry work.'
+        'Read DAEHO production stories, project updates, press features, and collaborations around championship rings and custom design work.'
     },
     golf: {
       title: 'DAEHO Custom Golf Bracelet Production',
       description:
-        'DAEHO creates custom golf bracelets shaped from golf club forms, personal engraving, and bespoke jewelry production standards.'
+        'DAEHO creates custom golf bracelets shaped from golf club forms, personal engraving, and custom design production standards.'
     },
     contact: {
       title: 'Contact DAEHO for Custom Production',
       description:
-        'Send project goals, quantity, schedule, and reference materials for championship rings, custom trophies, corporate event gifts, or bespoke jewelry.'
+        'Send project goals, quantity, schedule, and reference materials for championship rings, custom trophies, corporate event gifts, or custom design work.'
     },
     golfInquiry: {
       title: 'DAEHO Golf Bracelet Inquiry',

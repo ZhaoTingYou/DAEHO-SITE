@@ -5,7 +5,7 @@ import {metadataBase} from '@/lib/seo';
 const siteName = '대호';
 const siteAlternateNames = ['DAEHO', '대호반지', '대호 우승반지', 'DAEHO championship rings'];
 const organizationDescription =
-  '대호(DAEHO)는 1988년부터 우승반지 제작을 중심으로 커스텀 트로피, 기업 행사 기념품, 맞춤 주얼리 제작을 이어온 한국의 상징물 제작사입니다.';
+  '대호(DAEHO)는 1988년부터 우승반지 제작을 중심으로 커스텀 트로피, 기업 행사 기념품, 스포츠 시상식 용품, 커스텀 디자인 제작을 이어온 한국의 상징물 제작사입니다.';
 const serviceItems = [
   {
     id: 'championship-rings',
@@ -19,13 +19,13 @@ const serviceItems = [
     ],
     serviceType: 'Custom championship ring production',
     description:
-      '프로스포츠 구단, 학교, 단체의 우승 기록을 담는 맞춤 우승반지와 챔피언십 반지를 디자인하고 제작합니다.',
+      '프로스포츠 구단, 학교, 단체의 우승 기록을 담는 커스텀 우승반지와 챔피언십 반지를 디자인하고 제작합니다.',
     url: '/ko/mastery/creations/champion'
   },
   {
     id: 'custom-trophies',
     name: '커스텀 트로피 제작',
-    alternateName: ['맞춤 트로피', '시상 트로피 제작', 'Custom Trophy Production', 'Award Trophies'],
+    alternateName: ['커스텀 트로피', '시상 트로피 제작', 'Custom Trophy Production', 'Award Trophies'],
     serviceType: 'Custom trophy and award object production',
     description:
       '시상식과 수여식의 목적, 로고, 각인, 수량을 반영한 커스텀 트로피와 시상 오브젝트를 상담부터 납품까지 제작합니다.',
@@ -50,10 +50,10 @@ const serviceItems = [
   },
   {
     id: 'bespoke-rings',
-    name: '맞춤 주얼리 제작',
-    alternateName: ['맞춤 반지 주문제작', '주문제작 반지', 'Bespoke Jewelry', 'Custom Group Rings'],
-    serviceType: 'Bespoke ring and commemorative jewelry production',
-    description: '브랜드, 행사, 이름, 기록을 반영한 주문제작 반지와 맞춤 주얼리를 상담부터 납품까지 관리합니다.',
+    name: '커스텀 디자인 제작',
+    alternateName: ['커스텀 디자인 반지', '주문제작 반지', 'Custom Design Production', 'Custom Group Rings'],
+    serviceType: 'Custom design and commemorative object production',
+    description: '브랜드, 행사, 이름, 기록을 반영한 주문제작 반지와 기념 오브젝트를 디자인 상담부터 납품까지 관리합니다.',
     url: '/ko/mastery/creations/bespoke'
   }
 ];
@@ -79,7 +79,9 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
         }
       },
       {
-        '@type': ['Organization', 'LocalBusiness', 'JewelryStore'],
+        // 우승반지, 트로피, 기념품, 시상식 용품을 함께 제작하는 사업 범위라 소매점 하위 유형은
+        // 실제와 맞지 않는다. 상위 유형만 남겨 업종을 좁게 규정하지 않는다.
+        '@type': ['Organization', 'LocalBusiness'],
         '@id': absoluteSiteUrl('/#organization'),
         name: siteName,
         alternateName: siteAlternateNames,
@@ -106,7 +108,7 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
           'championship rings',
           'championship ring maker',
           '커스텀 트로피',
-          '맞춤 트로피 제작',
+          '커스텀 트로피 제작',
           '시상 트로피',
           'custom trophy',
           '기업 행사 기념품',
@@ -116,9 +118,9 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
           '스포츠 시상식 용품',
           '시상식 기념품',
           'sports award goods',
-          '맞춤 주얼리 제작',
+          '커스텀 디자인 제작',
           '주문제작 반지',
-          'bespoke jewelry',
+          'custom design production',
           '단체 기념반지',
           '임관반지 제작'
         ],

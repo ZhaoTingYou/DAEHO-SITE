@@ -14,7 +14,7 @@ test('site structured data declares preferred Google site name and organization 
   );
   assert.match(structuredDataSource, /name: siteName/);
   assert.match(structuredDataSource, /alternateName: siteAlternateNames/);
-  assert.match(structuredDataSource, /'@type': \['Organization', 'LocalBusiness', 'JewelryStore'\]/);
+  assert.match(structuredDataSource, /'@type': \['Organization', 'LocalBusiness'\]/);
   assert.doesNotMatch(structuredDataSource, /주식회사 대호/);
   assert.match(structuredDataSource, /knowsAbout: \[/);
   assert.match(structuredDataSource, /'우승반지 제작'/);
@@ -29,7 +29,7 @@ test('site structured data covers every target keyword as an entity signal', () 
     '커스텀 트로피',
     '기업 행사 기념품',
     '스포츠 시상식 용품',
-    '맞춤 주얼리 제작'
+    '커스텀 디자인 제작'
   ];
 
   for (const keyword of targetKeywords) {
@@ -38,6 +38,17 @@ test('site structured data covers every target keyword as an entity signal', () 
       `타깃 키워드 '${keyword}'가 구조화 데이터에 없습니다.`
     );
   }
+});
+
+test('structured data avoids jewelry positioning and legacy 맞춤 wording', () => {
+  // 고객사 지침: '맞춤'은 '커스텀'으로 통일하고 주얼리 연관성은 노출하지 않는다.
+  // 임관반지 엔티티의 기존 문구는 유지 대상이라 검사에서 제외한다.
+  const appointmentEntity = /\{\s*id: 'appointment-rings',[\s\S]*?\},/.exec(structuredDataSource)?.[0] ?? '';
+  const auditedSource = structuredDataSource.replace(appointmentEntity, '');
+
+  assert.doesNotMatch(auditedSource, /맞춤/);
+  assert.doesNotMatch(auditedSource, /주얼리/);
+  assert.doesNotMatch(auditedSource, /[Jj]ewelry/);
 });
 
 test('appointment ring entity stays intact while its site-wide priority drops', () => {

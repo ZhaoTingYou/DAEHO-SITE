@@ -15,7 +15,7 @@ const categorySeoByLocale: Record<Locale, Record<string, CategorySeo>> = {
     champion: {
       title: '대호 우승반지 제작',
       description:
-        '대호는 1988년부터 프로스포츠 구단, 학교, 단체를 위한 맞춤 우승반지와 챔피언십 링을 디자인하고 납품해왔습니다.'
+        '대호는 1988년부터 프로스포츠 구단, 학교, 단체를 위한 커스텀 우승반지와 챔피언십 링을 디자인하고 납품해왔습니다.'
     },
     appointment: {
       title: '대호 임관반지 제작',
@@ -23,9 +23,9 @@ const categorySeoByLocale: Record<Locale, Record<string, CategorySeo>> = {
         '대호는 임관, 진급, 단체 기념의 의미를 담은 임관반지를 맞춤 디자인과 안정적인 단체 납품 기준으로 제작합니다.'
     },
     bespoke: {
-      title: '대호 맞춤 반지 주문제작',
+      title: '대호 커스텀 디자인 주문제작',
       description:
-        '대호는 이름, 기록, 상징, 행사 목적을 반영한 맞춤 반지와 기념 주얼리를 상담부터 디자인, 제작, 납품까지 관리합니다.'
+        '대호는 이름, 기록, 상징, 행사 목적을 반영한 커스텀 반지와 기념 오브젝트를 상담부터 디자인, 제작, 납품까지 관리합니다.'
     }
   },
   en: {
@@ -42,7 +42,7 @@ const categorySeoByLocale: Record<Locale, Record<string, CategorySeo>> = {
     bespoke: {
       title: 'DAEHO Bespoke Ring Production',
       description:
-        'DAEHO manages custom rings and commemorative jewelry from consultation to design, production, and delivery for names, records, and symbols.'
+        'DAEHO manages custom rings and commemorative pieces from consultation to design, production, and delivery for names, records, and symbols.'
     }
   }
 };
