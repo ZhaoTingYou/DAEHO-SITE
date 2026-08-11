@@ -35,7 +35,7 @@ export default async function NewsPage({params}: Props) {
       <section className="overflow-hidden bg-white pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+32px)] md:pt-[clamp(100px,10vw,148px)]">
         <div className="mx-auto max-w-[1240px] px-container pb-8 pt-0 md:pb-[clamp(34px,3.5vw,56px)] md:pt-5">
           <Reveal>
-            <h1 className={`${englishTextClass} mobile-display text-primary md:text-[clamp(56px,8vw,104px)] md:leading-[0.86] md:tracking-[0.025em]`}>
+            <h1 className={`${englishTextClass} mobile-display whitespace-pre-line text-primary md:text-[60px] md:leading-[1.15] md:tracking-[0.025em]`}>
               {content.masthead.title}
             </h1>
           </Reveal>

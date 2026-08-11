@@ -535,7 +535,7 @@
       {"key": "newsUi", "title": "News 筛选、分享和详情页共用文案", "sourcePath": "newsUi"}
     ],
     "fields": [
-      {"groupKey": "main", "path": "masthead.title", "label": "页头标题"},
+      {"groupKey": "main", "path": "masthead.title", "label": "页头标题", "type": "textarea", "rows": 2},
       {"groupKey": "main", "path": "featured.eyebrow", "label": "主推标签"},
       {"groupKey": "main", "path": "featured.category", "label": "主推分类"},
       {"groupKey": "main", "path": "featured.date", "label": "主推日期"},
