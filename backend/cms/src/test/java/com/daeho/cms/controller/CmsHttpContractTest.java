@@ -32,7 +32,7 @@ import com.daeho.cms.service.CmsSnapshotService;
 import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.MediaStorageService;
-import com.daeho.cms.service.NaverSensKakaoClient;
+import com.daeho.cms.service.SolapiKakaoClient;
 import com.daeho.cms.service.NotificationPlanner;
 import com.daeho.cms.service.NotificationTemplateRenderer;
 import com.daeho.cms.service.NotificationTestService;
@@ -95,7 +95,7 @@ class CmsHttpContractTest {
         ""
     ));
     var validation = new RequestValidation();
-    var notificationProperties = new NotificationProperties(false, 1000, "", "", "", "", "", "");
+    var notificationProperties = new NotificationProperties(false, 1000, "", "", "", "", "");
     mvc = MockMvcBuilders.standaloneSetup(
             new AdminCmsController(
                 auth,
@@ -107,7 +107,7 @@ class CmsHttpContractTest {
                 new NotificationTemplateRenderer(notificationProperties),
                 inquiryWorkflow,
                 mock(WorkspaceEmailSender.class),
-                mock(NaverSensKakaoClient.class),
+                mock(SolapiKakaoClient.class),
                 notificationProperties,
                 mock(NotificationTestService.class),
                 snapshots,

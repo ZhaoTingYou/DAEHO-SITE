@@ -51,7 +51,7 @@ class NotificationPlannerTest {
         cmsProperties(),
         repository,
         new NotificationTemplateRenderer(new NotificationProperties(
-            true, 1000, "https://daeho.works/admin", "", "", "", "", ""
+            true, 1000, "https://daeho.works/admin", "", "", "", ""
         ))
     );
   }
@@ -78,6 +78,36 @@ class NotificationPlannerTest {
             && "kakao".equals(job.get("channel"))
             && "01012345678".equals(job.get("recipient"))
     ));
+  }
+
+  @Test
+  void alwaysUsesTheApprovedKoreanKakaoTemplateForEnglishInquiries() {
+    var englishInquiry = new LinkedHashMap<String, Object>(
+        inquiry("customer@example.com", "010-1234-5678")
+    );
+    englishInquiry.put("locale", "en");
+
+    planner.queueStatusChange(englishInquiry, Map.of(
+        "id", "event-en",
+        "previousStatus", "contacted",
+        "nextStatus", "in_progress"
+    ));
+
+    var kakao = createdJobs.stream()
+        .filter(job -> "kakao".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow();
+    assertEquals("ko", kakao.get("locale"));
+    assertEquals("customer_in_progress_kakao_ko", kakao.get("templateKey"));
+  }
+
+  @Test
+  void healthOnlyRequiresTheThreeApprovedKoreanKakaoTemplates() {
+    when(repository.getActiveTemplate("customer_contacted_kakao_en")).thenReturn(null);
+    when(repository.getActiveTemplate("customer_in_progress_kakao_en")).thenReturn(null);
+    when(repository.getActiveTemplate("customer_done_kakao_en")).thenReturn(null);
+
+    assertEquals(true, planner.health().get("kakaoTemplatesReady"));
   }
 
   @Test

@@ -11,13 +11,13 @@ import org.springframework.web.server.ResponseStatusException;
 public class NotificationTestService {
   private final NotificationRepository repository;
   private final WorkspaceEmailSender email;
-  private final NaverSensKakaoClient kakao;
+  private final SolapiKakaoClient kakao;
   private final NotificationTemplateRenderer renderer;
 
   public NotificationTestService(
       NotificationRepository repository,
       WorkspaceEmailSender email,
-      NaverSensKakaoClient kakao,
+      SolapiKakaoClient kakao,
       NotificationTemplateRenderer renderer
   ) {
     this.repository = repository;

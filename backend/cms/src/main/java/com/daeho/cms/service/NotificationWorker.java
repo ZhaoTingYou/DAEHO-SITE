@@ -16,14 +16,14 @@ public class NotificationWorker {
   private final NotificationProperties properties;
   private final NotificationRepository repository;
   private final WorkspaceEmailSender email;
-  private final NaverSensKakaoClient kakao;
+  private final SolapiKakaoClient kakao;
   private volatile boolean schemaReady;
 
   public NotificationWorker(
       NotificationProperties properties,
       NotificationRepository repository,
       WorkspaceEmailSender email,
-      NaverSensKakaoClient kakao
+      SolapiKakaoClient kakao
   ) {
     this.properties = properties;
     this.repository = repository;

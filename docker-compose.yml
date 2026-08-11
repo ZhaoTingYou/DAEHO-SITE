@@ -47,11 +47,10 @@ services:
       SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-true}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
-      KAKAO_API_BASE_URL: ${KAKAO_API_BASE_URL:-https://sens.apigw.ntruss.com}
-      KAKAO_ACCESS_KEY: ${KAKAO_ACCESS_KEY:-}
-      KAKAO_SECRET_KEY: ${KAKAO_SECRET_KEY:-}
-      KAKAO_SERVICE_ID: ${KAKAO_SERVICE_ID:-}
-      KAKAO_CHANNEL_ID: ${KAKAO_CHANNEL_ID:-}
+      SOLAPI_API_BASE_URL: ${SOLAPI_API_BASE_URL:-https://api.solapi.com}
+      SOLAPI_API_KEY: ${SOLAPI_API_KEY:-}
+      SOLAPI_API_SECRET: ${SOLAPI_API_SECRET:-}
+      SOLAPI_PF_ID: ${SOLAPI_PF_ID:-}
     volumes:
       - ./public/images:/data/uploads
     depends_on:

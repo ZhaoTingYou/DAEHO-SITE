@@ -15,7 +15,7 @@ class NotificationWorkerTest {
   void scheduledWorkerWaitsUntilNotificationSchemaExists() {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
-    var kakao = mock(NaverSensKakaoClient.class);
+    var kakao = mock(SolapiKakaoClient.class);
     var worker = new NotificationWorker(properties(), repository, email, kakao);
     when(repository.notificationSchemaReady()).thenReturn(false);
 
@@ -28,7 +28,7 @@ class NotificationWorkerTest {
   void scheduledWorkerStartsPollingAfterNotificationSchemaAppears() {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
-    var kakao = mock(NaverSensKakaoClient.class);
+    var kakao = mock(SolapiKakaoClient.class);
     var worker = new NotificationWorker(properties(), repository, email, kakao);
     when(repository.notificationSchemaReady()).thenReturn(false, true);
     when(repository.claimNextReadyJob()).thenReturn(null);
@@ -43,7 +43,7 @@ class NotificationWorkerTest {
   void successfulEmailIsRecordedAndMarkedSent() {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
-    var kakao = mock(NaverSensKakaoClient.class);
+    var kakao = mock(SolapiKakaoClient.class);
     var worker = new NotificationWorker(properties(), repository, email, kakao);
     var job = job("email", 0, "queued");
     when(email.send(job)).thenReturn(WorkspaceEmailSender.DeliveryResult.sent("smtp-1"));
@@ -58,7 +58,7 @@ class NotificationWorkerTest {
   void fourthFailureMovesThroughTheFinalThirtyMinuteRetryBoundary() {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
-    var kakao = mock(NaverSensKakaoClient.class);
+    var kakao = mock(SolapiKakaoClient.class);
     var worker = new NotificationWorker(properties(), repository, email, kakao);
     var job = job("email", 3, "failed");
     when(email.send(job)).thenReturn(WorkspaceEmailSender.DeliveryResult.failed("relay unavailable"));
@@ -73,16 +73,16 @@ class NotificationWorkerTest {
   void acceptedKakaoMessageIsPolledBeforeBeingMarkedSent() {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
-    var kakao = mock(NaverSensKakaoClient.class);
+    var kakao = mock(SolapiKakaoClient.class);
     var worker = new NotificationWorker(properties(), repository, email, kakao);
     var sendJob = job("kakao", 0, "queued");
-    when(kakao.send(sendJob)).thenReturn(NaverSensKakaoClient.SendResult.accepted("kakao-1"));
+    when(kakao.send(sendJob)).thenReturn(SolapiKakaoClient.SendResult.accepted("kakao-1"));
     worker.process(sendJob);
     verify(repository).markProviderPending("job-1", 1, "kakao-1");
 
     var pollJob = new java.util.LinkedHashMap<String, Object>(job("kakao", 1, "provider_pending"));
     pollJob.put("providerMessageId", "kakao-1");
-    when(kakao.getDeliveryStatus("kakao-1")).thenReturn(NaverSensKakaoClient.DeliveryStatus.sent());
+    when(kakao.getDeliveryStatus("kakao-1")).thenReturn(SolapiKakaoClient.DeliveryStatus.sent());
     worker.process(pollJob);
     verify(repository).markSent("job-1", 1, "kakao-1");
   }
@@ -99,6 +99,6 @@ class NotificationWorkerTest {
   }
 
   private NotificationProperties properties() {
-    return new NotificationProperties(true, 1000, "", "", "", "", "", "");
+    return new NotificationProperties(true, 1000, "", "", "", "", "");
   }
 }

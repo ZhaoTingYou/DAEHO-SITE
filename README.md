@@ -168,8 +168,8 @@ Inquiry flow:
 - All three channel switches are off after migration. Configure and verify
   credentials, templates, and test delivery in `/admin/notifications` before
   enabling them.
-- Gmail uses Google Workspace SMTP Relay with STARTTLS. Kakao uses Naver SENS
-  Alimtalk with SMS fallback hard-disabled.
+- Gmail uses Google Workspace SMTP Relay with STARTTLS. Kakao uses SOLAPI
+  Alimtalk with SMS fallback hard-disabled in every request.
 
 Production credential and staged rollout details are documented in
 [`docs/operations/inquiry-notifications.md`](docs/operations/inquiry-notifications.md).

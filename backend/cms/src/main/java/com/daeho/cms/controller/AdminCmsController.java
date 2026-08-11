@@ -10,7 +10,7 @@ import com.daeho.cms.service.CmsSnapshotService;
 import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.MediaStorageService;
-import com.daeho.cms.service.NaverSensKakaoClient;
+import com.daeho.cms.service.SolapiKakaoClient;
 import com.daeho.cms.service.NotificationPlanner;
 import com.daeho.cms.service.NotificationTemplateRenderer;
 import com.daeho.cms.service.NotificationTestService;
@@ -51,7 +51,7 @@ public class AdminCmsController {
   private final NotificationTemplateRenderer notificationTemplateRenderer;
   private final InquiryWorkflowService inquiryWorkflow;
   private final WorkspaceEmailSender workspaceEmail;
-  private final NaverSensKakaoClient kakao;
+  private final SolapiKakaoClient kakao;
   private final NotificationProperties notificationProperties;
   private final NotificationTestService notificationTest;
   private final CmsSnapshotService snapshots;
@@ -68,7 +68,7 @@ public class AdminCmsController {
       NotificationTemplateRenderer notificationTemplateRenderer,
       InquiryWorkflowService inquiryWorkflow,
       WorkspaceEmailSender workspaceEmail,
-      NaverSensKakaoClient kakao,
+      SolapiKakaoClient kakao,
       NotificationProperties notificationProperties,
       NotificationTestService notificationTest,
       CmsSnapshotService snapshots,

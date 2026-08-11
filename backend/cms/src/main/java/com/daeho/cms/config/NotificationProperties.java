@@ -7,26 +7,24 @@ public record NotificationProperties(
     boolean workerEnabled,
     long workerDelayMs,
     String adminBaseUrl,
-    String kakaoApiBaseUrl,
-    String kakaoAccessKey,
-    String kakaoSecretKey,
-    String kakaoServiceId,
-    String kakaoChannelId
+    String solapiApiBaseUrl,
+    String solapiApiKey,
+    String solapiApiSecret,
+    String solapiPfId
 ) {
   public String normalizedAdminBaseUrl() {
     return trimTrailingSlash(text(adminBaseUrl));
   }
 
-  public String normalizedKakaoApiBaseUrl() {
-    var value = text(kakaoApiBaseUrl);
-    return trimTrailingSlash(value.isBlank() ? "https://sens.apigw.ntruss.com" : value);
+  public String normalizedSolapiApiBaseUrl() {
+    var value = text(solapiApiBaseUrl);
+    return trimTrailingSlash(value.isBlank() ? "https://api.solapi.com" : value);
   }
 
   public boolean kakaoConfigured() {
-    return !text(kakaoAccessKey).isBlank()
-        && !text(kakaoSecretKey).isBlank()
-        && !text(kakaoServiceId).isBlank()
-        && !text(kakaoChannelId).isBlank();
+    return !text(solapiApiKey).isBlank()
+        && !text(solapiApiSecret).isBlank()
+        && !text(solapiPfId).isBlank();
   }
 
   private String trimTrailingSlash(String value) {

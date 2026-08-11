@@ -73,7 +73,6 @@ public class NotificationPlanner {
     var settings = settings();
     var kakaoTemplatesReady = CUSTOMER_STATUSES.stream().allMatch(status ->
         repository.getActiveTemplate(templateKey("kakao", status, "ko")) != null
-            && repository.getActiveTemplate(templateKey("kakao", status, "en")) != null
     );
     return orderedMap(
         "settings", settings,
@@ -153,10 +152,10 @@ public class NotificationPlanner {
           "kakao",
           "customer",
           "status_changed",
-          locale,
+          "ko",
           recipient,
           validationBoolean(settings.get("kakaoEnabled")),
-          templateKey("kakao", nextStatus, locale),
+          templateKey("kakao", nextStatus, "ko"),
           text(inquiry.get("id")) + ":" + eventPart + ":customer:kakao"
       );
       if (normalizedPhone.isBlank()) {

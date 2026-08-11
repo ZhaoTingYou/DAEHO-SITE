@@ -102,7 +102,7 @@ public class NotificationTemplateRenderer {
     }
     return switch (text(status)) {
       case "new" -> "신규";
-      case "contacted" -> "확인 완료";
+      case "contacted" -> "연락 완료";
       case "in_progress" -> "진행 중";
       case "done" -> "처리 완료";
       case "spam" -> "스팸";
