@@ -17,7 +17,7 @@ test('Contact direct-phone notice omits empty copy and accents only the phone', 
   assert.ok(componentSource.includes("{copy.before && copy.phone ? ' ' : null}"));
   assert.match(
     componentSource,
-    /\{copy\.phone \? <span className="text-accent">\{copy\.phone\}<\/span> : null\}/
+    /\{copy\.phone \? <span className="text-accent whitespace-nowrap">\{copy\.phone\}<\/span> : null\}/
   );
   assert.match(componentSource, /text-\[16px\][^"]*md:text-\[14px\]/);
 });
