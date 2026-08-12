@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import {setRequestLocale} from 'next-intl/server';
 
+import {ContactDirectPhoneNotice} from '@/components/forms/contact-direct-phone-notice';
 import {ContactForm} from '@/components/forms/contact-form';
 import {Reveal} from '@/components/motion/reveal';
 import {SectionIntro} from '@/components/section-intro';
@@ -32,7 +33,8 @@ export default async function ContactPage({params}: Props) {
               {text.hero.body ? <p>{text.hero.body}</p> : null}
             </SectionIntro>
           </Reveal>
-          <Reveal className="bg-bg p-4 shadow-[0_24px_80px_rgba(16,29,48,0.08)] md:p-8">
+          <Reveal className="space-y-5 bg-bg p-4 shadow-[0_24px_80px_rgba(16,29,48,0.08)] md:space-y-6 md:p-8">
+            <ContactDirectPhoneNotice copy={text.directPhone} />
             <ContactForm copy={messages.forms.contact} />
           </Reveal>
         </div>
