@@ -1603,6 +1603,11 @@
       "title": "Shape the meaning of victory",
       "body": "For appointment, championship, and bespoke inquiries, leave only contactable project information. No payment or card information is collected."
     },
+    "directPhone": {
+      "before": "B2B orders and corporate customers can also reach us directly at",
+      "phone": "010 4325 0369",
+      "after": "."
+    },
     "infoTitle": "Direct contact",
     "address": "Address to be confirmed",
     "phone": "Phone to be confirmed",
