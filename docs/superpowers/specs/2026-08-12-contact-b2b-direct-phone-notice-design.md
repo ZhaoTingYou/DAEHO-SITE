@@ -26,13 +26,13 @@ This split guarantees that the phone number remains red while allowing editors t
 
 Default Korean content:
 
-- Before: `B2B 주문 및 기업 고객은 직통전화 `
+- Before: `B2B 주문 및 기업 고객은 직통전화`
 - Phone: `010 4325 0369`
 - After: `로도 상담하실 수 있습니다.`
 
 Default English content:
 
-- Before: `B2B orders and corporate customers can also reach us directly at `
+- Before: `B2B orders and corporate customers can also reach us directly at`
 - Phone: `010 4325 0369`
 - After: `.`
 
@@ -40,7 +40,7 @@ The fields will be registered in the CMS page catalog so administrators can edit
 
 ## Rendering behavior
 
-The Contact page will pass the three localized values to a small `ContactDirectPhoneNotice` presentation component in `components/forms/contact-direct-phone-notice.tsx`. The component will output the fragments in order and wrap only the phone fragment in the accent-red style.
+The Contact page will pass the three localized values to a small `ContactDirectPhoneNotice` presentation component in `components/forms/contact-direct-phone-notice.tsx`. The component will output the fragments in order, insert one space between a non-empty before fragment and phone number, and wrap only the phone fragment in the accent-red style. The renderer owns this space because the existing CMS save path trims text-field values.
 
 Empty values remain valid:
 
