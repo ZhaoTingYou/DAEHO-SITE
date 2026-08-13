@@ -6,6 +6,7 @@ import {notFound} from 'next/navigation';
 import {Reveal} from '@/components/motion/reveal';
 import {HistoryBackButton} from '@/components/navigation/history-back-button';
 import {SafeImage} from '@/components/safe-image';
+import {BreadcrumbStructuredData} from '@/components/site/breadcrumb-structured-data';
 import {CollectionDetailGallery} from '@/components/specialty/collection-detail-gallery';
 import {routing, type Locale} from '@/i18n/routing';
 import {
@@ -81,6 +82,13 @@ export default async function CollectionDetailPage({params}: Props) {
 
   return (
     <main className="mobile-page-shell bg-bg text-text">
+      <BreadcrumbStructuredData
+        items={[
+          {name: messages.common.breadcrumb.home, path: `/${locale}`},
+          {name: messages.common.breadcrumb.creations, path: `/${locale}/mastery/creations`},
+          {name: item.title, path: `/${locale}/mastery/creations/${slug}`}
+        ]}
+      />
       <section className="bg-bg pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+20px)] md:pt-28">
         <div className="mx-auto max-w-[1280px] px-[var(--mobile-page-gutter)] pb-section pt-6 md:px-container md:pt-[clamp(40px,5vw,72px)]">
           <HistoryBackButton
