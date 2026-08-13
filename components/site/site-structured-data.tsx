@@ -112,7 +112,16 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
           email: 'dhofficial1988@gmail.com',
           telephone: '+82-2-765-2737',
           availableLanguage: ['ko', 'en']
-        }
+        },
+        // 푸터에 실제로 걸려 있는 공식 채널만 넣는다. 흩어진 채널을 한 사업체로 묶는 신호다.
+        // 링크가 비어 있던 X 계정은 제외한다.
+        sameAs: [
+          'https://blog.naver.com/daehovriano',
+          'https://instagram.com/dhofficial_1988',
+          'https://www.youtube.com/@dhofficial1988',
+          'https://www.facebook.com/profile.php?id=61591806238655',
+          'https://daehogold.com/'
+        ]
       },
       ...serviceItems.map((item) => ({
         '@type': 'Service',

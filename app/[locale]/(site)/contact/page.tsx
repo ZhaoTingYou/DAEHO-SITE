@@ -45,9 +45,9 @@ export default async function ContactPage({params}: Props) {
       <section className="bg-bg py-[var(--mobile-section-space)] md:py-section">
         <div className="mx-auto max-w-3xl px-[var(--mobile-page-gutter)] md:px-container">
           <Reveal className="space-y-5">
-            <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-subtext">
+            <h2 className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-subtext">
               {text.faqTitle}
-            </p>
+            </h2>
             {text.faqs.map((item) => (
               <details key={item.question} className="group bg-white p-4 shadow-[0_12px_44px_rgba(16,29,48,0.05)] md:p-5">
                 <summary className="cursor-pointer font-body text-[16px] font-semibold leading-6 text-primary md:text-base">
