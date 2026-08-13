@@ -2031,9 +2031,11 @@ function CollectionProductGrid({
               sizes={finder ? '(min-width: 1280px) 280px, (min-width: 768px) 38vw, 100vw' : '(min-width: 1024px) 340px, 100vw'}
             />
             <div className={finder ? 'space-y-1 px-1 pt-4' : 'space-y-1.5 px-1 pt-5'}>
-              <h3 className="font-heading text-[clamp(15px,1.3vw,18px)] font-semibold leading-snug text-primary">
+              {/* 카테고리 페이지는 h1 바로 다음에 이 카드 제목이 온다. h3를 쓰면 헤딩 단계가
+                  건너뛰어져 문서 구조가 끊기므로 h2로 둔다. 크기는 클래스가 정한다. */}
+              <h2 className="font-heading text-[clamp(15px,1.3vw,18px)] font-semibold leading-snug text-primary">
                 {item.title}
-              </h3>
+              </h2>
               <p className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
                 {item.categoryLabel}
               </p>
