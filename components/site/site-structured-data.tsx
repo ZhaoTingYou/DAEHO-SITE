@@ -5,7 +5,7 @@ import {metadataBase} from '@/lib/seo';
 const siteName = '대호';
 const siteAlternateNames = ['DAEHO', '대호반지', '대호 우승반지', 'DAEHO championship rings'];
 const organizationDescription =
-  '대호(DAEHO)는 1988년부터 우승반지 제작을 중심으로 커스텀 트로피, 기업 행사 기념품, 스포츠 시상식 용품, 커스텀 디자인 제작을 이어온 한국의 상징물 제작사입니다.';
+  '대호(DAEHO)는 1988년부터 우승반지를 제작해 왔으며, 현재 커스텀 트로피, 기업 행사 기념품, 스포츠 시상식 용품, 커스텀 디자인도 제작하는 한국의 상징물 제작사입니다.';
 const serviceItems = [
   {
     id: 'championship-rings',
@@ -13,7 +13,6 @@ const serviceItems = [
     alternateName: [
       '챔피언십 반지',
       '챔피언십 링',
-      '스포츠 시상식 용품',
       'Championship Ring Production',
       'Sports Championship Rings'
     ],
@@ -38,6 +37,15 @@ const serviceItems = [
     serviceType: 'Corporate event and commemorative gift production',
     description:
       '창립 기념식, 은퇴식, 수여식 등 기업과 기관 행사 일정에 맞춰 기념품을 기획하고 단체 수량으로 납품합니다.',
+    url: '/ko/contact'
+  },
+  {
+    id: 'sports-award-goods',
+    name: '스포츠 시상식 용품 제작',
+    alternateName: ['시상식 기념품', '메달·상패 제작', 'Sports Award Goods', 'Award Ceremony Supplies'],
+    serviceType: 'Sports award ceremony goods production',
+    description:
+      '스포츠 시상식의 목적과 종목, 로고, 수상 기록을 반영한 메달, 상패와 기념 오브젝트를 제작합니다.',
     url: '/ko/contact'
   },
   {

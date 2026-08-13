@@ -67,6 +67,10 @@ test('site structured data exposes service entities for high-intent search terms
   assert.match(structuredDataSource, /name: '우승반지 제작'/);
   assert.match(structuredDataSource, /'Championship Ring Production'/);
   assert.match(structuredDataSource, /url: '\/ko\/mastery\/creations\/champion'/);
+  assert.match(structuredDataSource, /id: 'sports-award-goods'/);
+  assert.match(structuredDataSource, /name: '스포츠 시상식 용품 제작'/);
+  const championshipEntity = /\{\s*id: 'championship-rings',[\s\S]*?\n  \},/.exec(structuredDataSource)?.[0] ?? '';
+  assert.doesNotMatch(championshipEntity, /'스포츠 시상식 용품'/);
   assert.match(structuredDataSource, /'@type': 'Service'/);
   assert.match(structuredDataSource, /hasOfferCatalog/);
   assert.match(structuredDataSource, /makesOffer/);
