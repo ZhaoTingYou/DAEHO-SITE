@@ -10,6 +10,7 @@ import {SiteStructuredData} from '@/components/site/site-structured-data';
 import {routing, type Locale} from '@/i18n/routing';
 import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {getPublicLocaleMessages} from '@/lib/locale-messages';
+import {getOrganizationSameAs} from '@/lib/organization-same-as.mjs';
 import {metadataBase, previewNoindexRobots} from '@/lib/seo';
 
 type Props = {
@@ -73,11 +74,12 @@ export default async function LocaleLayout({children, params}: Props) {
     notFound: messages.notFound
   };
   const localeClass = locale === 'ko' ? 'locale-ko' : 'locale-en';
+  const organizationSameAs = getOrganizationSameAs(messages.common.footer);
 
   return (
     <html lang={locale} className={localeClass}>
       <body className="bg-bg text-text font-body">
-        <SiteStructuredData englishEnabled={englishEnabled} />
+        <SiteStructuredData englishEnabled={englishEnabled} sameAs={organizationSameAs} />
         <a href="#main-content" className="skip-link">
           {messages.common.skipLink}
         </a>

@@ -34,7 +34,13 @@ const serviceItems = [
   }
 ];
 
-export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) {
+export function SiteStructuredData({
+  englishEnabled,
+  sameAs
+}: {
+  englishEnabled: boolean;
+  sameAs: string[];
+}) {
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -113,15 +119,8 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
           telephone: '+82-2-765-2737',
           availableLanguage: ['ko', 'en']
         },
-        // 푸터에 실제로 걸려 있는 공식 채널만 넣는다. 흩어진 채널을 한 사업체로 묶는 신호다.
-        // 링크가 비어 있던 X 계정은 제외한다.
-        sameAs: [
-          'https://blog.naver.com/daehovriano',
-          'https://instagram.com/dhofficial_1988',
-          'https://www.youtube.com/@dhofficial1988',
-          'https://www.facebook.com/profile.php?id=61591806238655',
-          'https://daehogold.com/'
-        ]
+        // CMS Footer에 실제로 활성화된 공식 채널만 동일한 조직 식별자로 연결한다.
+        ...(sameAs.length > 0 ? {sameAs} : {})
       },
       ...serviceItems.map((item) => ({
         '@type': 'Service',

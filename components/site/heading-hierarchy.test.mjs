@@ -13,28 +13,28 @@ test('contact page introduces the FAQ section with a heading, not a paragraph', 
   assert.doesNotMatch(contactPage, /<p[^>]*>\s*\{text\.faqTitle\}\s*<\/p>/);
 });
 
-test('every public page keeps exactly one h1', () => {
-  for (const [label, source] of [['문의', contactPage]]) {
-    const h1Count = (source.match(/<h1[\s>]/g) ?? []).length;
-    assert.ok(h1Count <= 1, `${label} 페이지에 h1 이 ${h1Count}개 있습니다.`);
-  }
+test('contact page delegates exactly one h1 to SectionIntro', () => {
+  assert.match(
+    contactPage,
+    /<SectionIntro[^>]*headingLevel="h1"[^>]*>/,
+    '문의 페이지의 대표 SectionIntro가 h1을 렌더해야 합니다.'
+  );
+  assert.equal(
+    (contactPage.match(/headingLevel="h1"/g) ?? []).length,
+    1,
+    '문의 페이지에는 h1을 요청하는 SectionIntro가 하나여야 합니다.'
+  );
 });
 
-test('organization structured data links the official channels that exist in the footer', () => {
-  // 흩어진 공식 채널을 한 사업체로 묶는 신호다. 실제 운영 중인 링크만 넣는다.
+test('organization structured data receives official channels from CMS-backed footer data', () => {
   const structuredData = readFileSync(
     new URL('./site-structured-data.tsx', import.meta.url),
     'utf8'
   );
-  assert.match(structuredData, /sameAs: \[/);
-  for (const url of [
-    'https://blog.naver.com/daehovriano',
-    'https://instagram.com/dhofficial_1988',
-    'https://www.youtube.com/@dhofficial1988',
-    'https://daehogold.com/'
-  ]) {
-    assert.ok(structuredData.includes(`'${url}'`), `sameAs 에 ${url} 이 없습니다.`);
-  }
-  // 링크가 비어 있던 계정을 넣으면 실제와 어긋난다.
-  assert.doesNotMatch(structuredData, /sameAs: \[[^\]]*'https:\/\/twitter\.com\/'/);
+  const layout = readFileSync(new URL('../../app/[locale]/layout.tsx', import.meta.url), 'utf8');
+
+  assert.match(layout, /getOrganizationSameAs\(messages\.common\.footer\)/);
+  assert.match(layout, /<SiteStructuredData englishEnabled=\{englishEnabled\} sameAs=\{organizationSameAs\} \/>/);
+  assert.match(structuredData, /sameAs\.length > 0 \? \{sameAs\} : \{\}/);
+  assert.doesNotMatch(structuredData, /https:\/\/(?:blog\.naver|instagram|www\.youtube|www\.facebook|daehogold)/);
 });
