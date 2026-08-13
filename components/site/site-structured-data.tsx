@@ -66,7 +66,13 @@ const serviceItems = [
   }
 ];
 
-export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) {
+export function SiteStructuredData({
+  englishEnabled,
+  sameAs
+}: {
+  englishEnabled: boolean;
+  sameAs: string[];
+}) {
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -159,7 +165,9 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
           email: 'dhofficial1988@gmail.com',
           telephone: '+82-2-765-2737',
           availableLanguage: ['ko', 'en']
-        }
+        },
+        // CMS Footer에 실제로 활성화된 공식 채널만 동일한 조직 식별자로 연결한다.
+        ...(sameAs.length > 0 ? {sameAs} : {})
       },
       ...serviceItems.map((item) => ({
         '@type': 'Service',
