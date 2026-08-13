@@ -46,10 +46,39 @@ const copy = {
   }
 } as const;
 
+// 배너가 뜬 뒤 웹폰트가 교체되면 글자 높이가 달라진다. 배너는 화면 하단에 고정돼 있어서
+// 높이가 줄면 내용이 그만큼 아래로 밀리고, 그게 레이아웃 이동으로 잡힌다.
+// 글꼴이 확정된 뒤에 한 번만 그리면 이동이 생기지 않는다.
+const FONT_SETTLE_TIMEOUT_MS = 3000;
+
 export function AnalyticsProvider({children, locale, privacyHref}: AnalyticsProviderProps) {
   const [consent, setConsent] = useState<AnalyticsConsent>('unknown');
   const [bannerOpen, setBannerOpen] = useState(false);
   const [analyticsReady, setAnalyticsReady] = useState(false);
+  const [fontsSettled, setFontsSettled] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const settle = () => {
+      if (active) {
+        setFontsSettled(true);
+      }
+    };
+
+    // 글꼴 로딩이 실패하거나 지연되어도 동의 배너가 영영 안 뜨는 일은 없어야 한다.
+    const timer = window.setTimeout(settle, FONT_SETTLE_TIMEOUT_MS);
+    const fonts = document.fonts;
+    if (fonts?.ready) {
+      fonts.ready.then(settle).catch(settle);
+    } else {
+      settle();
+    }
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   useEffect(() => {
     const storedConsent = parseAnalyticsConsent(document.cookie);
@@ -148,7 +177,7 @@ export function AnalyticsProvider({children, locale, privacyHref}: AnalyticsProv
           <InternalAnalyticsTracker enabled={consent === 'granted'} locale={locale} />
         ) : null}
       </Suspense>
-      {bannerOpen && validMeasurementId ? (
+      {bannerOpen && validMeasurementId && fontsSettled ? (
           <ConsentBanner
             locale={locale}
             privacyHref={privacyHref}
