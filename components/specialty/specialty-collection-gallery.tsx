@@ -1952,13 +1952,20 @@ function CollectionFinderView({
             <EmptyState title={empty.title} body={empty.body} />
           </div>
         ) : (
-          <CollectionProductGrid
-            items={filteredItems}
-            filterLabel={filterLabel}
-            locale={locale}
-            columns="sm:grid-cols-2 lg:grid-cols-4"
-            finder
-          />
+          // h1 바로 뒤에 카드 h3가 오면서 헤딩 레벨이 건너뛰던 구간이다.
+          // 화면에는 보이지 않는 h2를 넣어 h1 → h2 → h3 순서를 복구한다.
+          <section aria-labelledby="collection-finder-results">
+            <h2 id="collection-finder-results" className="sr-only">
+              {filterLabel}
+            </h2>
+            <CollectionProductGrid
+              items={filteredItems}
+              filterLabel={filterLabel}
+              locale={locale}
+              columns="sm:grid-cols-2 lg:grid-cols-4"
+              finder
+            />
+          </section>
         )}
       </div>
 

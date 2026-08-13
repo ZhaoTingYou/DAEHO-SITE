@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   output: isFrontendOnlyBuild ? 'export' : 'standalone',
   images: {
+    // 원본이 대부분 PNG라 전송량이 크다. AVIF·WebP를 우선 협상해 LCP 이미지 용량을 줄인다.
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',

@@ -7,10 +7,13 @@ import {SpecialtyCollectionCategory} from '@/components/specialty/specialty-coll
 import type {Locale} from '@/i18n/routing';
 import {getCollectionItemsForSite} from '@/lib/cms/public-content';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
-import {getCollectionCategorySeoFallback} from '@/lib/collection-category-seo';
 import {imageExists} from '@/lib/image-exists';
 import {getPublicLocaleMessages} from '@/lib/locale-messages';
-import {getCmsPageSeoOverride, getDetailMetadata} from '@/lib/seo';
+import {
+  getCmsPageSeoOverride,
+  getCollectionCategorySeoFallback,
+  getDetailMetadata
+} from '@/lib/seo';
 
 export type CollectionCategoryId = 'champion' | 'appointment' | 'bespoke';
 

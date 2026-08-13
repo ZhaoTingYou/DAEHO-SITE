@@ -5,16 +5,48 @@ import {metadataBase} from '@/lib/seo';
 const siteName = '대호';
 const siteAlternateNames = ['DAEHO', '대호반지', '대호 우승반지', 'DAEHO championship rings'];
 const organizationDescription =
-  '대호(DAEHO)는 1988년부터 우승반지, 임관반지, 단체 기념반지와 맞춤 주얼리를 제작하는 한국의 상징물 제작사입니다.';
+  '대호(DAEHO)는 1988년부터 우승반지를 제작해 왔으며, 현재 커스텀 트로피, 기업 행사 기념품, 스포츠 시상식 용품, 커스텀 디자인도 제작하는 한국의 상징물 제작사입니다.';
 const serviceItems = [
   {
     id: 'championship-rings',
     name: '우승반지 제작',
-    alternateName: ['챔피언십 링', 'Championship Ring Production', 'Sports Championship Rings'],
+    alternateName: [
+      '챔피언십 반지',
+      '챔피언십 링',
+      'Championship Ring Production',
+      'Sports Championship Rings'
+    ],
     serviceType: 'Custom championship ring production',
     description:
-      '프로스포츠 구단, 학교, 단체의 우승 기록을 담는 맞춤 우승반지와 챔피언십 링을 디자인하고 제작합니다.',
+      '프로스포츠 구단, 학교, 단체의 우승 기록을 담는 커스텀 우승반지와 챔피언십 반지를 디자인하고 제작합니다.',
     url: '/ko/mastery/creations/champion'
+  },
+  {
+    id: 'custom-trophies',
+    name: '커스텀 트로피 제작',
+    alternateName: ['커스텀 트로피', '시상 트로피 제작', 'Custom Trophy Production', 'Award Trophies'],
+    serviceType: 'Custom trophy and award object production',
+    description:
+      '시상식과 수여식의 목적, 로고, 각인, 수량을 반영한 커스텀 트로피와 시상 오브젝트를 상담부터 납품까지 제작합니다.',
+    url: '/ko/contact'
+  },
+  {
+    id: 'corporate-event-gifts',
+    name: '기업 행사 기념품 제작',
+    alternateName: ['행사 기념품', '창립 기념품 제작', 'Corporate Event Gifts', 'Commemorative Goods'],
+    serviceType: 'Corporate event and commemorative gift production',
+    description:
+      '창립 기념식, 은퇴식, 수여식 등 기업과 기관 행사 일정에 맞춰 기념품을 기획하고 단체 수량으로 납품합니다.',
+    url: '/ko/contact'
+  },
+  {
+    id: 'sports-award-goods',
+    name: '스포츠 시상식 용품 제작',
+    alternateName: ['시상식 기념품', '메달·상패 제작', 'Sports Award Goods', 'Award Ceremony Supplies'],
+    serviceType: 'Sports award ceremony goods production',
+    description:
+      '스포츠 시상식의 목적과 종목, 로고, 수상 기록을 반영한 메달, 상패와 기념 오브젝트를 제작합니다.',
+    url: '/ko/contact'
   },
   {
     id: 'appointment-rings',
@@ -26,10 +58,10 @@ const serviceItems = [
   },
   {
     id: 'bespoke-rings',
-    name: '맞춤 반지 주문제작',
-    alternateName: ['주문제작 반지', 'Bespoke Rings', 'Custom Group Rings'],
-    serviceType: 'Bespoke ring and commemorative jewelry production',
-    description: '브랜드, 행사, 이름, 기록을 반영한 주문제작 반지와 맞춤 주얼리를 상담부터 납품까지 관리합니다.',
+    name: '커스텀 디자인 제작',
+    alternateName: ['커스텀 디자인 반지', '주문제작 반지', 'Custom Design Production', 'Custom Group Rings'],
+    serviceType: 'Custom design and commemorative object production',
+    description: '브랜드, 행사, 이름, 기록을 반영한 주문제작 반지와 기념 오브젝트를 디자인 상담부터 납품까지 관리합니다.',
     url: '/ko/mastery/creations/bespoke'
   }
 ];
@@ -55,7 +87,9 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
         }
       },
       {
-        '@type': ['Organization', 'LocalBusiness', 'JewelryStore'],
+        // 우승반지, 트로피, 기념품, 시상식 용품을 함께 제작하는 사업 범위라 소매점 하위 유형은
+        // 실제와 맞지 않는다. 상위 유형만 남겨 업종을 좁게 규정하지 않는다.
+        '@type': ['Organization', 'LocalBusiness'],
         '@id': absoluteSiteUrl('/#organization'),
         name: siteName,
         alternateName: siteAlternateNames,
@@ -77,20 +111,33 @@ export function SiteStructuredData({englishEnabled}: {englishEnabled: boolean}) 
           '대호반지',
           '우승반지 제작',
           '스포츠 우승반지',
-          '임관반지 제작',
+          '챔피언십 반지',
           '챔피언십 링',
           'championship rings',
           'championship ring maker',
+          '커스텀 트로피',
+          '커스텀 트로피 제작',
+          '시상 트로피',
+          'custom trophy',
+          '기업 행사 기념품',
+          '행사 기념품 제작',
+          '창립 기념품',
+          'corporate event gifts',
+          '스포츠 시상식 용품',
+          '시상식 기념품',
+          'sports award goods',
+          '커스텀 디자인 제작',
+          '주문제작 반지',
+          'custom design production',
           '단체 기념반지',
-          '맞춤 반지 주문제작',
-          '맞춤 주얼리 제작'
+          '임관반지 제작'
         ],
         makesOffer: serviceItems.map((item) => ({
           '@id': absoluteSiteUrl(`/#service-${item.id}`)
         })),
         hasOfferCatalog: {
           '@type': 'OfferCatalog',
-          name: '대호 맞춤 반지 제작 서비스',
+          name: '대호 우승반지·커스텀 트로피·기념품 제작 서비스',
           itemListElement: serviceItems.map((item, index) => ({
             '@type': 'Offer',
             position: index + 1,
