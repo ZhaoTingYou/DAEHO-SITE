@@ -352,7 +352,7 @@ git commit -m "perf: preload responsive hero images"
 - Consumes: pinned Google Fonts CSS endpoint and Pretendard v1.3.9 variable dynamic-subset CSS.
 - Produces: one application-bundled `styles/vendor-fonts.css`; `FontLinks()` becomes font-file resource hints only.
 
-- [ ] **Step 1: Replace the old font-link tests with local-bundle requirements**
+- [x] **Step 1: Replace the old font-link tests with local-bundle requirements**
 
 Update `components/site/font-links.test.mjs` to read `font-links.tsx`, `app/globals.css`, and the generated CSS when it exists:
 
@@ -398,7 +398,7 @@ test('local Pretendard uses the pinned variable subset with one face per Unicode
 });
 ```
 
-- [ ] **Step 2: Run the font tests and verify the old external loading fails them**
+- [x] **Step 2: Run the font tests and verify the old external loading fails them**
 
 Run:
 
@@ -408,7 +408,7 @@ node --test components/site/font-links.test.mjs
 
 Expected: FAIL because `globals.css` has no vendor import, `FontLinks` still renders external stylesheets, and the generated file does not exist.
 
-- [ ] **Step 3: Add a reproducible font CSS synchronization script**
+- [x] **Step 3: Add a reproducible font CSS synchronization script**
 
 Create `scripts/sync-font-css.mjs`:
 
@@ -474,7 +474,7 @@ function assertIncludes(value, expected, label) {
 }
 ```
 
-- [ ] **Step 4: Generate and inspect the local font CSS**
+- [x] **Step 4: Generate and inspect the local font CSS**
 
 Run:
 
@@ -487,7 +487,7 @@ rg -c 'font-weight: 45 920' styles/vendor-fonts.css
 
 Expected: the script exits 0; both Pretendard counts are 92; the file includes license attribution and only absolute Pretendard font URLs.
 
-- [ ] **Step 5: Import the local CSS and remove external stylesheet links**
+- [x] **Step 5: Import the local CSS and remove external stylesheet links**
 
 Add this import with the existing top-level imports in `app/globals.css`:
 
@@ -513,7 +513,7 @@ export function FontLinks() {
 
 Do not change the existing MaruBuri `@font-face` declarations.
 
-- [ ] **Step 6: Run font, type, and lint checks**
+- [x] **Step 6: Run font, type, and lint checks**
 
 Run:
 
