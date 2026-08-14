@@ -30,6 +30,8 @@ const koMessages = JSON.parse(read('../../messages/ko.json'));
 const enMessages = JSON.parse(read('../../messages/en.json'));
 const contactTriggerClasses = classTemplateContaining(component, '[clip-path:inset(');
 const contactTriggerTokens = classTokens(contactTriggerClasses);
+const contactLabelClasses = classTemplateContaining(component, 'translate-x-3 opacity-0');
+const contactLabelTokens = classTokens(contactLabelClasses);
 
 test('all public pages mount the contact seal while admin pages stay unchanged', () => {
   assert.match(publicLayout, /<SiteFloatingActions/);
@@ -65,6 +67,20 @@ test('one inset clip reveal keeps one shared signet instead of crossfading shell
   }
 
   assert.equal((component.match(/<KakaoJewelrySignet\s*\/>/g) ?? []).length, 1);
+});
+
+test('contact reveal uses one fixed timeline independent of scroll state', () => {
+  assert.equal(contactTriggerTokens.has('duration-[280ms]'), true);
+  assert.deepEqual(
+    contactTriggerClasses.match(/duration-\[\d+ms\]/g),
+    ['duration-[280ms]']
+  );
+
+  assert.equal(contactLabelTokens.has('duration-[280ms]'), true);
+  assert.deepEqual(
+    contactLabelClasses.match(/duration-\[\d+ms\]/g),
+    ['duration-[280ms]']
+  );
 });
 
 test('floating actions share one safe-area rail with a twelve-pixel gap', () => {

@@ -178,10 +178,10 @@ export function KakaoContactButton({copy, onActivate}: KakaoContactButtonProps) 
         aria-expanded={state.noticeOpen}
         aria-controls={noticeId}
         onClick={handleActivate}
-        className={`group pointer-events-auto absolute bottom-0 right-0 z-10 h-14 w-[13.5rem] cursor-pointer touch-manipulation select-none text-left transition-[clip-path,transform] ease-[cubic-bezier(.16,1,.3,1)] [clip-path:inset(0_0_0_var(--kakao-contact-inset)_round_var(--kakao-contact-radius))] active:translate-y-px focus-visible:outline-none motion-reduce:transition-none md:h-16 md:w-[15.5rem] ${
+        className={`group pointer-events-auto absolute bottom-0 right-0 z-10 h-14 w-[13.5rem] cursor-pointer touch-manipulation select-none text-left transition-[clip-path,transform] duration-[280ms] ease-[cubic-bezier(.16,1,.3,1)] [clip-path:inset(0_0_0_var(--kakao-contact-inset)_round_var(--kakao-contact-radius))] active:translate-y-px focus-visible:outline-none motion-reduce:transition-none md:h-16 md:w-[15.5rem] ${
           expanded
-            ? 'duration-[300ms] [--kakao-contact-inset:0px] [--kakao-contact-radius:10px]'
-            : 'duration-[240ms] [--kakao-contact-inset:160px] [--kakao-contact-radius:999px] md:[--kakao-contact-inset:184px]'
+            ? '[--kakao-contact-inset:0px] [--kakao-contact-radius:10px]'
+            : '[--kakao-contact-inset:160px] [--kakao-contact-radius:999px] md:[--kakao-contact-inset:184px]'
         }`}
       >
         <span
@@ -191,10 +191,10 @@ export function KakaoContactButton({copy, onActivate}: KakaoContactButtonProps) 
 
         <span
           aria-hidden="true"
-          className={`absolute inset-y-0 left-0 right-14 flex min-w-0 items-center pl-5 pr-2 transition-[opacity,transform] ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none md:right-16 md:pl-6 md:pr-3 ${
+          className={`absolute inset-y-0 left-0 right-14 flex min-w-0 items-center pl-5 pr-2 transition-[opacity,transform] duration-[280ms] ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none md:right-16 md:pl-6 md:pr-3 ${
             expanded
-              ? 'translate-x-0 opacity-100 duration-[300ms]'
-              : 'translate-x-3 opacity-0 duration-[240ms]'
+              ? 'translate-x-0 opacity-100'
+              : 'translate-x-3 opacity-0'
           }`}
         >
           <span className="min-w-0">
