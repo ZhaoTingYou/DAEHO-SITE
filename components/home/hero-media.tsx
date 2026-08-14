@@ -87,8 +87,14 @@ export function HeroMedia({
   const resolvedVideoPoster = selectedVideoPoster ? imageSrc(selectedVideoPoster) : undefined;
   const resolvedVideoSrc = resolveVideoSource(videoSrc);
   const resolvedWebmSrc = resolveVideoSource(webmSrc);
+  // 좁은 화면에서는 영상을 받지 않고 대표 이미지만 보여준다. mobileViewport는 측정 전까지
+  // null이라, false일 때만 재생하면 화면 폭을 알기 전에 영상을 내려받는 일도 없다.
   const shouldRenderVideo =
-    Boolean(resolvedVideoSrc || resolvedWebmSrc) && !prefersReducedMotion && !saveData && !videoFailed;
+    Boolean(resolvedVideoSrc || resolvedWebmSrc) &&
+    mobileViewport === false &&
+    !prefersReducedMotion &&
+    !saveData &&
+    !videoFailed;
   const shouldAnimate = !prefersReducedMotion && !coarsePointer && !saveData;
 
   useEffect(() => {
