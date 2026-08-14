@@ -330,7 +330,7 @@ npx tsc --noEmit
 
 Expected: all focused tests pass and TypeScript exits 0.
 
-- [ ] **Step 9: Commit the image preload fix**
+- [x] **Step 9: Commit the image preload fix**
 
 ```bash
 git add lib/responsive-image-preload.mjs lib/responsive-image-preload.d.mts lib/responsive-image-preload.test.mjs components/responsive-cms-image.tsx
@@ -525,7 +525,7 @@ npm run lint
 
 Expected: all commands exit 0.
 
-- [ ] **Step 7: Commit the local font loading change**
+- [x] **Step 7: Commit the local font loading change**
 
 ```bash
 git add scripts/sync-font-css.mjs styles/vendor-fonts.css app/globals.css components/site/font-links.tsx components/site/font-links.test.mjs
@@ -543,7 +543,7 @@ git commit -m "perf: bundle font css locally"
 - Consumes: the completed responsive preload and bundled font CSS behavior.
 - Produces: documented maintenance rules plus a verified Docker image and HTML resource graph.
 
-- [ ] **Step 1: Document the new conventions**
+- [x] **Step 1: Document the new conventions**
 
 Extend the `README.md` typography and image sections with these rules:
 
@@ -564,7 +564,11 @@ Priority responsive images:
 - Below-the-fold callers remain lazy and must not emit preload hints.
 ```
 
-- [ ] **Step 2: Run the complete source verification suite**
+- [x] **Step 2: Diagnose and fix the remaining streamed-route layout shift**
+
+Use a throttled browser `LayoutShift` trace after the first production build. If the footer shifts when the route loading fallback is replaced, add a failing regression assertion to `mobile-public-site.test.mjs`, change the mobile loading fallback from `80svh` to `100svh`, and verify the focused test passes.
+
+- [x] **Step 3: Run the complete source verification suite**
 
 Run:
 
@@ -577,7 +581,7 @@ git diff --check
 
 Expected: at least the 497 baseline tests plus the new tests pass with 0 failures; TypeScript, ESLint, and diff checks exit 0.
 
-- [ ] **Step 3: Build the exact AWS Next.js Docker target**
+- [x] **Step 4: Build the exact AWS Next.js Docker target**
 
 Run:
 
@@ -587,7 +591,7 @@ docker build -f Dockerfile.next -t daeho-mobile-lcp-font-verify .
 
 Expected: `npm run build` completes inside `Dockerfile.next` and the final standalone image is created.
 
-- [ ] **Step 4: Start the production image and wait for the Korean home page**
+- [x] **Step 5: Start the production image and wait for the Korean home page**
 
 Run:
 
@@ -608,7 +612,7 @@ curl -fsS -o /dev/null -w 'status=%{http_code}\n' http://127.0.0.1:18140/ko
 
 Expected: status 200 within 30 seconds.
 
-- [ ] **Step 5: Verify generated HTML resource hints**
+- [x] **Step 6: Verify generated HTML resource hints**
 
 Run:
 
@@ -635,7 +639,7 @@ process.stdin.on("end", () => {
 
 Expected: both conditional preloads are true, external font CSS is false, and high-priority Hero is true.
 
-- [ ] **Step 6: Run throttled Lighthouse smoke measurements**
+- [x] **Step 7: Run throttled Lighthouse smoke measurements**
 
 Run:
 
@@ -660,13 +664,13 @@ NODE
 
 Expected: the trace contains no external font stylesheet request; record LCP and CLS for comparison rather than treating local latency as the AWS result.
 
-- [ ] **Step 7: Stop the verification container**
+- [x] **Step 8: Stop the verification container**
 
 ```bash
 docker stop daeho-mobile-lcp-font-verify
 ```
 
-- [ ] **Step 8: Commit the documentation**
+- [x] **Step 9: Commit the documentation**
 
 ```bash
 git add README.md

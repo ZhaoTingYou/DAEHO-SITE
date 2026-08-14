@@ -4,7 +4,7 @@ Date: 2026-08-14
 
 ## Goal
 
-Reduce mobile Largest Contentful Paint without merging the CMS-managed mobile and desktop Hero images, while removing the slow-network layout shift introduced by fragmented font loading.
+Reduce mobile Largest Contentful Paint without merging the CMS-managed mobile and desktop Hero images, while removing the slow-network layout shift seen during streamed route loading and font replacement.
 
 The work must preserve:
 
@@ -34,7 +34,17 @@ The locale and admin layouts render external stylesheets for Google Fonts and Pr
 
 ### Pretendard uses too many independent faces
 
-The current Pretendard dynamic subset declares 828 faces: 92 Unicode subsets for each of nine fixed weights. A representative page requested 27 font chunks. Under slow-network conditions, those chunks become available at different times and cause repeated font swaps. That aligns with the observed slow-network CLS increase from 0.106 to 0.195.
+The current Pretendard dynamic subset declares 828 faces: 92 Unicode subsets for each of nine fixed weights. A representative page requested 27 font chunks. Under slow-network conditions, those chunks become available at different times and cause repeated font swaps.
+
+### The route loading fallback exposes the footer before streamed content arrives
+
+Post-build Lighthouse and a browser `LayoutShift` trace showed that font replacement contributes about 0.005 CLS, not the reported 0.195. The dominant 0.200 shift happens when the mobile loading fallback is replaced by the streamed page:
+
+- `loading.tsx` reserves only `80svh`;
+- the footer is therefore visible in the bottom 20% of the viewport;
+- when the full route arrives, the footer is pushed below several page sections in one step.
+
+The original font-only explanation was incomplete. The loading fallback must reserve the full mobile viewport so the footer never enters the initial viewport.
 
 ## Approved Approach
 
@@ -77,6 +87,10 @@ Use the official Pretendard v1.3.9 variable dynamic subset:
 
 This reduces independent font downloads and swap events while preserving the same Pretendard outlines and weight range. `font-display: optional` is intentionally not used because it can leave first-time slow-network visitors on a fallback font for the entire page view.
 
+### 4. Reserve a full viewport during streamed route loading
+
+Change the shared site loading fallback from `80svh` to `100svh` on mobile. Desktop already reserves a full dynamic viewport. This does not delay route content or alter the finished page; it only keeps the footer outside the viewport until the streamed route is ready.
+
 ## Error And Fallback Behavior
 
 - If the mobile image fails, the component continues to remove the mobile source and retry the desktop image.
@@ -94,6 +108,7 @@ This reduces independent font downloads and swap events while preserving the sam
 - A missing mobile source preloads only the desktop source.
 - Font CSS is imported locally and no external font stylesheet remains in `FontLinks`.
 - Pretendard remains pinned to v1.3.9, uses one variable face per Unicode range, covers weights 45–920, and preserves `font-display: swap`.
+- The site route loading fallback reserves `100svh` on mobile so streamed content cannot shift a visible footer.
 - Existing mobile image fallback tests remain green.
 
 ### Build and browser verification
