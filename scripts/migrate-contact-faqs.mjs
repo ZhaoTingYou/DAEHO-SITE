@@ -3,10 +3,13 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
-import {migrateContactFaqContents} from '../lib/cms/contact-faq-migration-core.mjs';
+import {
+  migrateContactFaqContents,
+  parseContactFaqMigrationArguments
+} from '../lib/cms/contact-faq-migration-core.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const apply = process.argv.includes('--apply');
+const {apply, migrationOptions} = parseContactFaqMigrationArguments(process.argv.slice(2));
 
 try {
   loadEnvFile(path.join(root, '.env'));
@@ -24,7 +27,7 @@ try {
   const result = migrateContactFaqContents({
     ko: row.content_ko,
     en: row.content_en
-  }, canonical);
+  }, canonical, migrationOptions);
 
   if (!apply) {
     console.log(JSON.stringify({
@@ -32,7 +35,10 @@ try {
       changed: result.changed,
       matched: result.matched
     }, null, 2));
-    console.log('Run npm run cms:contact-faqs:migrate -- --apply to back up and update the Contact FAQ content.');
+    const replacementFlag = migrationOptions.replaceIncompleteEnglishCount === 2
+      ? ' --replace-incomplete-en'
+      : '';
+    console.log(`Run npm run cms:contact-faqs:migrate -- --apply${replacementFlag} to back up and update the Contact FAQ content.`);
   } else if (!result.changed) {
     console.log(JSON.stringify({
       applied: false,
