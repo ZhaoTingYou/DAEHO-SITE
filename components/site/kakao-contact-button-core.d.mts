@@ -12,7 +12,7 @@ export type KakaoContactEvent =
   | {type: 'toggle-notice'}
   | {type: 'dismiss'};
 
-export function shouldCollapseKakaoContact(scrollY: number): boolean;
+export function shouldCollapseKakaoContact(scrollY: number, currentlyCollapsed: boolean): boolean;
 export function createKakaoContactState(): KakaoContactState;
 export function reduceKakaoContactState(
   state: KakaoContactState,

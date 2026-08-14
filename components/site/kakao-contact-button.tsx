@@ -33,8 +33,13 @@ export function KakaoContactButton({copy, onActivate}: KakaoContactButtonProps) 
   );
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const collapsedRef = useRef(state.collapsed);
   const noticeId = useId();
   const expanded = isKakaoContactExpanded(state);
+
+  useEffect(() => {
+    collapsedRef.current = state.collapsed;
+  }, [state.collapsed]);
 
   useEffect(() => {
     let frame = 0;
@@ -44,7 +49,7 @@ export function KakaoContactButton({copy, onActivate}: KakaoContactButtonProps) 
       frame = requestAnimationFrame(() => {
         dispatch({
           type: 'scroll',
-          collapsed: shouldCollapseKakaoContact(window.scrollY)
+          collapsed: shouldCollapseKakaoContact(window.scrollY, collapsedRef.current)
         });
       });
     };

@@ -1,7 +1,10 @@
 const COLLAPSE_SCROLL_THRESHOLD = 160;
+const EXPAND_SCROLL_THRESHOLD = 120;
 
-export function shouldCollapseKakaoContact(scrollY) {
-  return Number.isFinite(scrollY) && scrollY > COLLAPSE_SCROLL_THRESHOLD;
+export function shouldCollapseKakaoContact(scrollY, currentlyCollapsed) {
+  if (!Number.isFinite(scrollY)) return currentlyCollapsed;
+  if (currentlyCollapsed) return scrollY > EXPAND_SCROLL_THRESHOLD;
+  return scrollY > COLLAPSE_SCROLL_THRESHOLD;
 }
 
 export function createKakaoContactState() {
