@@ -42,6 +42,8 @@ test('server action validates the bilingual payload and replaces only Contact FA
   assert.match(actionsSource, /setObjectValueAtPath\(contentEn, `\$\{mainPath\}\.faqCategories`/);
   assert.match(actionsSource, /setObjectValueAtPath\(contentKo, `\$\{mainPath\}\.faqCategoryLabels`/);
   assert.match(actionsSource, /setObjectValueAtPath\(contentEn, `\$\{mainPath\}\.faqs`/);
+  assert.match(actionsSource, /typeof koOtherLabel === 'string'/);
+  assert.match(actionsSource, /typeof enOtherLabel === 'string'/);
 });
 
 test('generic Contact catalog does not duplicate the dedicated FAQ fields', () => {

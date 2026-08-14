@@ -13,6 +13,7 @@
     "cms:export": "node scripts/cms-db-export.mjs",
     "cms:preview-export": "node scripts/cms-db-export.mjs --output=data/cms-preview.json",
     "cms:import": "node scripts/cms-db-import.mjs",
+    "cms:contact-faqs:migrate": "node scripts/migrate-contact-faqs.mjs",
     "cms:media:migrate-s3": "node scripts/migrate-media-to-s3.mjs",
     "cms:media:migrate-s3:apply": "node scripts/migrate-media-to-s3.mjs --apply --prune-unused"
   },

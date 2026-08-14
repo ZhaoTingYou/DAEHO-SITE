@@ -343,11 +343,19 @@ export async function savePageAction(formData: FormData) {
         stringFromForm(formData, 'contactFaq.payload')
       );
       const mainPath = `${pageContentGroupsKey}.main`;
+      const koOtherLabel = getObjectValueAtPath(contentKo, `${mainPath}.faqCategoryLabels.other`);
+      const enOtherLabel = getObjectValueAtPath(contentEn, `${mainPath}.faqCategoryLabels.other`);
 
       setObjectValueAtPath(contentKo, `${mainPath}.faqCategories`, contactFaq.ko.faqCategories);
       setObjectValueAtPath(contentEn, `${mainPath}.faqCategories`, contactFaq.en.faqCategories);
-      setObjectValueAtPath(contentKo, `${mainPath}.faqCategoryLabels`, contactFaq.ko.faqCategoryLabels);
-      setObjectValueAtPath(contentEn, `${mainPath}.faqCategoryLabels`, contactFaq.en.faqCategoryLabels);
+      setObjectValueAtPath(contentKo, `${mainPath}.faqCategoryLabels`, {
+        ...contactFaq.ko.faqCategoryLabels,
+        ...(typeof koOtherLabel === 'string' ? {other: koOtherLabel} : {})
+      });
+      setObjectValueAtPath(contentEn, `${mainPath}.faqCategoryLabels`, {
+        ...contactFaq.en.faqCategoryLabels,
+        ...(typeof enOtherLabel === 'string' ? {other: enOtherLabel} : {})
+      });
       setObjectValueAtPath(contentKo, `${mainPath}.faqs`, contactFaq.ko.faqs);
       setObjectValueAtPath(contentEn, `${mainPath}.faqs`, contactFaq.en.faqs);
     }

@@ -1608,14 +1608,119 @@
     "email": "Email to be confirmed",
     "hours": "Hours to be confirmed",
     "faqTitle": "FAQ",
+    "faqCategoryLabels": {
+      "consultation": "Consultation · Quote",
+      "design": "Design · Materials",
+      "business": "Business · Organizations",
+      "sports": "Sports · Merchandise",
+      "other": "Other"
+    },
+    "faqCategories": [
+      {"id": "consultation", "label": "Consultation · Quote"},
+      {"id": "design", "label": "Design · Materials"},
+      {"id": "business", "label": "Business · Organizations"},
+      {"id": "sports", "label": "Sports · Merchandise"}
+    ],
     "faqs": [
       {
-        "question": "How are timelines and minimum quantities set?",
-        "answer": "They are confirmed after reviewing the project scope and production specifications."
+        "category": "consultation",
+        "question": "How does the custom production process work?",
+        "answer": "DAEHO's custom production process proceeds through consultation → budget and requirements review → material and production method proposal → design → design approval → production → inspection → delivery. Depending on the product's purpose and budget—including championship rings, commemorative rings, group rings, corporate gifts, trophies, plaques, and fan merchandise—we recommend suitable materials and production methods, and systematically handle the entire process from design through production and inspection in-house."
       },
       {
-        "question": "What should I prepare for bespoke work?",
-        "answer": "Bring the symbols, records, budget range, and preferred timing. We will shape the rest together."
+        "category": "consultation",
+        "question": "How long does custom production take?",
+        "answer": "Depending on the product type, design complexity, materials, and order quantity, production can take from approximately three weeks up to three months. Timelines may vary for products such as championship rings, trophies, and corporate or organizational gifts that require separate design, mold making, casting, plating, assembly, or other processes. If you have an event date or preferred delivery date, please let us know during consultation so we can advise on a feasible schedule."
+      },
+      {
+        "category": "consultation",
+        "question": "How is the cost of custom production determined?",
+        "answer": "Custom production costs are determined by the material, product size and weight, order quantity, design complexity, mold and processing methods, plating, gemstones or stones, finishing, and packaging configuration. Even products with the same form can vary in price depending on materials such as gold, silver, or brass and the chosen production method. After consultation, we propose production specifications and a quotation suited to the purpose and budget."
+      },
+      {
+        "category": "consultation",
+        "question": "Can I order a small quantity or even a single item?",
+        "answer": "Yes. Depending on the product, a single item or a small-quantity order may be possible. Custom products still require initial processes such as design, 3D modeling, programming, master model preparation, and mold making regardless of quantity, so the cost per item may be higher for small runs. If you share the quantity and budget, we can suggest suitable production methods and alternatives."
+      },
+      {
+        "category": "consultation",
+        "question": "Can you produce an item within a set budget?",
+        "answer": "Yes. Because custom production costs can be adjusted substantially through the choice of material, size, design, and production method, a product can be planned and produced around the client's target budget. If you share your budget and target quantity, we can propose an appropriate production plan by adjusting the material, size, structure, and finishing while preserving the design's essential characteristics as much as possible."
+      },
+      {
+        "category": "design",
+        "question": "Can I request custom production without a finished design?",
+        "answer": "Yes. You can request production without a completed design. If you provide the purpose, idea, reference images, desired mood, or the meaning you want to express, DAEHO can review the product form and production feasibility and proceed with the design. For championship rings, commemorative rings, group rings, trophies, and commemorative products in particular, the symbols and stories of a team, company, school, or event can be reflected in the product design."
+      },
+      {
+        "category": "design",
+        "question": "Can you produce an item using my own design or logo?",
+        "answer": "Yes. Custom production can incorporate company logos, sports team emblems, school logos, characters, text, and designs you have created. However, converting a flat graphic into a physical metal product may introduce constraints related to thickness, strength, molds, casting, and machining. We aim to preserve the original design as closely as possible, but elements that are difficult to produce may be adjusted into a production-ready form after prior consultation. ※ Trademarks, characters, and copyrighted works can be produced only when you hold the usage rights or have permission from the rights holder."
+      },
+      {
+        "category": "design",
+        "question": "Can you work with materials other than metal?",
+        "answer": "Yes. Depending on the product's use and design, production can combine metals such as gold, silver, and brass with acrylic, crystal, wood, and a range of additional materials. For trophies, plaques, display stands, commemorative gifts, and other products that combine multiple materials, we recommend suitable materials and production methods through consultation."
+      },
+      {
+        "category": "business",
+        "question": "Can companies or organizations place bulk orders?",
+        "answer": "Yes. DAEHO provides custom production and mass production for companies, sports teams, schools, institutions, and organizations. Projects can be managed from product design and sample production through manufacturing, inspection, and delivery, with a production plan developed around the order quantity and delivery schedule."
+      },
+      {
+        "category": "business",
+        "question": "Can you produce commemorative gifts or merchandise for companies and brands?",
+        "answer": "Yes. We can custom-produce corporate gifts, brand merchandise, VIP gifts, anniversary gifts, award gifts, and limited-edition merchandise. Using a company or brand's logo and identity, these can be developed into jewelry, metal objects, trophies, plaques, key rings, badges, figures, and a range of commemorative products."
+      },
+      {
+        "category": "business",
+        "question": "How are ring sizes measured and collected?",
+        "answer": "When ring sizes need to be collected from multiple people for group rings, championship rings, or commissioning rings, they can be managed using DAEHO's ring sizing method and size collection form. We recommend measuring each wearer's actual ring size for accurate production, and provide separate guidance for collecting sizes for group orders."
+      },
+      {
+        "category": "business",
+        "question": "What kinds of products can be custom-made?",
+        "answer": "DAEHO designs and produces a wide range of products, from custom championship rings, commissioning rings, graduation rings, and group rings to trophies, plaques, commemorative gifts, commemorative objects, exhibition display stands, and sports or brand fan merchandise. We can also produce products that combine metalworking with materials such as acrylic, crystal, and wood."
+      },
+      {
+        "category": "sports",
+        "question": "Can you produce championship rings and sports commemorative products?",
+        "answer": "Yes. DAEHO designs and produces championship rings and a variety of championship commemorative products for professional sports and esports. A team's emblem, championship year, competition name, player name, number, championship record, and season story can be incorporated into a distinctive team championship ring. Related championship trophies, display stands, commemorative objects, and fan-sale products can also be planned together. * Approval through a licensing agreement with the team is required."
+      },
+      {
+        "category": "sports",
+        "question": "Can you produce fan merchandise and official products for sports teams?",
+        "answer": "Yes. We can design, develop, and produce sports fan merchandise and official products using a team's logo, emblem, mascot, and championship records. Products can range from jewelry such as rings, necklaces, and bracelets to metal badges, key rings, decorative charms, commemorative objects, figures, and limited-edition championship products. * Approval through a licensing agreement with the team is required."
+      },
+      {
+        "category": "sports",
+        "question": "Can championship rings be developed as products for fan sales?",
+        "answer": "Yes. In addition to official championship rings presented to players and staff, fan versions can be developed as limited editions, replicas, or commemorative products. Materials, size, stones, and production methods can be adjusted for the price range and target customer while preserving the symbolic character of the official product. * Approval through a licensing agreement with the team is required."
+      },
+      {
+        "category": "business",
+        "question": "Can design and production be handled in one place?",
+        "answer": "Yes. DAEHO integrates the processes required for product development, beginning with planning and design and continuing through 3D modeling, production, machining, craftsmanship, finishing, inspection, and delivery. Because production feasibility can be considered from the design stage without moving between multiple vendors, complex custom production projects can be managed efficiently."
+      },
+      {
+        "category": "design",
+        "question": "Can you produce custom items in precious metals such as gold and silver?",
+        "answer": "Yes. Depending on the purpose and budget, custom jewelry and commemorative products can be produced using precious metals such as gold and silver. Product weight, structure, production method, and quotation vary by material, so we recommend suitable specifications through consultation."
+      },
+      {
+        "category": "design",
+        "question": "Can you develop a new product based on an existing product or reference image?",
+        "answer": "Yes. If you have a product or image you would like to reference, we can discuss the desired size, material, structure, and design direction based on it. Direct reproduction of another company's design, character, logo, or other intellectual property may be restricted. When necessary, the concept can be reinterpreted as an original design for production."
+      },
+      {
+        "category": "design",
+        "question": "Can I review a design or proof before production?",
+        "answer": "Yes. Before full production begins, the product form and key design elements are reviewed and discussed through a design proof. Depending on the product type, 2D design or 3D modeling may be used, and production begins after the final design is approved."
+      },
+      {
+        "category": "business",
+        "question": "Is custom production consultation available nationwide?",
+        "answer": "Yes. DAEHO is located in Jongno-gu, Seoul, and provides custom production consultation and delivery for companies, sports teams, schools, institutions, and organizations throughout Korea, not only in Seoul. If you send the project details and reference materials online, we can advise on production feasibility, the expected schedule, and a quotation."
       }
     ]
   },
