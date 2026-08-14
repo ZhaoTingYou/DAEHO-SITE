@@ -709,7 +709,7 @@ git log --oneline origin/main..HEAD
 
 Expected: only the design/plan docs, preload helper/component, generated font CSS/script, font resource hints/tests, globals import, and README are changed.
 
-- [ ] **Step 3: Push and open the PR**
+- [x] **Step 3: Push and open the PR**
 
 ```bash
 git push -u origin codex/mobile-lcp-font-render
