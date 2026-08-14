@@ -67,6 +67,10 @@ import {
 } from '@/lib/cms/page-catalog';
 import {getAdminI18n} from '@/lib/admin-i18n';
 import {pruneObjectPaths} from '@/lib/cms/page-content-pruning-core.mjs';
+import {
+  ContactFaqEditorValidationError,
+  parseContactFaqEditorSubmission
+} from '@/lib/cms/contact-faq-editor-core.mjs';
 import type {TechniqueLocaleRecord} from '@/lib/cms/technique-records-core.mjs';
 import {
   getExternalSiteValidationMessageKey,
@@ -85,6 +89,16 @@ const sitePopupErrorMessageKeys = {
   invalidDate: 'popup.error.invalidDate',
   endAfterStart: 'popup.error.endAfterStart'
 } as const;
+const contactFaqErrorMessageKeys: Record<string, string> = {
+  INVALID_JSON: 'contactFaq.error.invalidJson',
+  CATEGORIES_REQUIRED: 'contactFaq.error.categoriesRequired',
+  CATEGORY_ID_INVALID: 'contactFaq.error.categoryIdInvalid',
+  CATEGORY_ID_DUPLICATE: 'contactFaq.error.categoryIdDuplicate',
+  CATEGORY_LABEL_REQUIRED: 'contactFaq.error.categoryLabelRequired',
+  FAQ_CATEGORY_INVALID: 'contactFaq.error.faqCategoryInvalid',
+  FAQ_COPY_REQUIRED: 'contactFaq.error.faqCopyRequired',
+  FAQ_QUESTION_DUPLICATE: 'contactFaq.error.faqQuestionDuplicate'
+};
 
 export async function loginAction(formData: FormData) {
   const password = stringFromForm(formData, 'password');
@@ -324,6 +338,20 @@ export async function savePageAction(formData: FormData) {
       setObjectValueAtPath(contentEn, 'records.items', normalizedRecords.en);
     }
 
+    if (pageKey === 'contact' && formData.has('contactFaq.payload')) {
+      const contactFaq = parseContactFaqEditorSubmission(
+        stringFromForm(formData, 'contactFaq.payload')
+      );
+      const mainPath = `${pageContentGroupsKey}.main`;
+
+      setObjectValueAtPath(contentKo, `${mainPath}.faqCategories`, contactFaq.ko.faqCategories);
+      setObjectValueAtPath(contentEn, `${mainPath}.faqCategories`, contactFaq.en.faqCategories);
+      setObjectValueAtPath(contentKo, `${mainPath}.faqCategoryLabels`, contactFaq.ko.faqCategoryLabels);
+      setObjectValueAtPath(contentEn, `${mainPath}.faqCategoryLabels`, contactFaq.en.faqCategoryLabels);
+      setObjectValueAtPath(contentKo, `${mainPath}.faqs`, contactFaq.ko.faqs);
+      setObjectValueAtPath(contentEn, `${mainPath}.faqs`, contactFaq.en.faqs);
+    }
+
     const payload = pagePayloadSchema.parse({
       section: stringFromForm(formData, 'section') || definition?.section || 'site',
       sortOrder: stringFromForm(formData, 'sortOrder') || definition?.sortOrder || '0',
@@ -361,6 +389,14 @@ export async function savePageAction(formData: FormData) {
     if (externalSiteErrorKey) {
       const {t} = await getAdminI18n();
       redirectWithAdminActionError(returnTo, new Error(t(externalSiteErrorKey)));
+    }
+
+    if (error instanceof ContactFaqEditorValidationError) {
+      const {t} = await getAdminI18n();
+      redirectWithAdminActionError(
+        returnTo,
+        new Error(t(contactFaqErrorMessageKeys[error.code] ?? 'contactFaq.error.invalidJson'))
+      );
     }
 
     redirectWithAdminActionError(returnTo, error);

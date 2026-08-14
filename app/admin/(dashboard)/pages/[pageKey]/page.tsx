@@ -32,6 +32,10 @@ import {
 import {getAdminImageGuide, getPageImageGuide} from '@/lib/cms/image-guides';
 import {getPage, listMedia} from '@/lib/cms/repositories';
 import {
+  pairContactFaqEditorDrafts,
+  type ContactFaqEditorDraft
+} from '@/lib/cms/contact-faq-editor-core.mjs';
+import {
   pairTechniqueRecords,
   type TechniqueLocaleRecord
 } from '@/lib/cms/technique-records-core.mjs';
@@ -43,6 +47,7 @@ import {AdminActionAlert} from '../../../_components/admin-feedback';
 import {AppendableArrayItemsField, ImageUploadField, ResponsiveImageUploadField, SelectField, SubmitButton, TextAreaField, TextField, type MediaLibraryItem} from '../../../_components/admin-fields';
 import {PageHeader, Panel} from '../../../_components/admin-shell';
 import {ContentLocaleForm, ContentLocalePanel} from '../../../_components/content-locale-editor';
+import {ContactFaqEditor} from '../../../_components/contact-faq-editor';
 import {TechniqueRecordsEditor} from '../../../_components/technique-records-editor';
 
 type Props = {
@@ -106,12 +111,19 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
   const localeData = locales.map((locale) => getPageLocaleData(locale, definition, row, localeMessages[locale], adminLocale));
   const title = definition ? getLocalizedPageTitle(definition, adminLocale) : page.pageKey;
   const techniqueEditor = pageKey === 'mastery-technique';
+  const contactFaqEditor = pageKey === 'contact';
   const techniqueDrafts = techniqueEditor
     ? pairTechniqueRecords(
         techniqueRecordItems(localeData, 'ko'),
         techniqueRecordItems(localeData, 'en')
       )
     : [];
+  const contactFaqDraft: ContactFaqEditorDraft | null = contactFaqEditor
+    ? pairContactFaqEditorDrafts(
+        pageMainContent(localeData, 'ko'),
+        pageMainContent(localeData, 'en')
+      )
+    : null;
 
   return (
     <>
@@ -197,6 +209,37 @@ export default async function AdminPageEditor({params, searchParams}: Props) {
               mediaLibraryTitle: t('media.libraryTitle'),
               mediaEmptyLabel: t('media.libraryEmpty'),
               mediaSelectedLabel: t('media.selectedExisting')
+            }}
+          />
+        ) : null}
+
+        {contactFaqDraft ? (
+          <ContactFaqEditor
+            draft={contactFaqDraft}
+            labels={{
+              title: t('contactFaq.title'),
+              hint: t('contactFaq.hint'),
+              categories: t('contactFaq.categories'),
+              addCategory: t('contactFaq.addCategory'),
+              categoryId: t('contactFaq.categoryId'),
+              categoryKo: t('contactFaq.categoryKo'),
+              categoryEn: t('contactFaq.categoryEn'),
+              categoryInUse: t('contactFaq.categoryInUse'),
+              minimumCategory: t('contactFaq.minimumCategory'),
+              faqs: t('contactFaq.faqs'),
+              addFaq: t('contactFaq.addFaq'),
+              category: t('contactFaq.category'),
+              koQuestion: t('contactFaq.koQuestion'),
+              koAnswer: t('contactFaq.koAnswer'),
+              enQuestion: t('contactFaq.enQuestion'),
+              enAnswer: t('contactFaq.enAnswer'),
+              moveUp: t('contactFaq.moveUp'),
+              moveDown: t('contactFaq.moveDown'),
+              delete: t('contactFaq.delete'),
+              confirmDeleteCategory: t('contactFaq.confirmDeleteCategory'),
+              confirmDeleteFaq: t('contactFaq.confirmDeleteFaq'),
+              expand: t('contactFaq.expand'),
+              collapse: t('contactFaq.collapse')
             }}
           />
         ) : null}
@@ -317,6 +360,12 @@ function techniqueRecordItems(localeData: PageLocaleData[], locale: Locale) {
   const records = getObjectValueAtPath(group?.content ?? {}, 'records.items');
 
   return Array.isArray(records) ? records as TechniqueLocaleRecord[] : [];
+}
+
+function pageMainContent(localeData: PageLocaleData[], locale: Locale) {
+  return localeData.find((item) => item.locale === locale)
+    ?.groups.find((item) => item.key === 'main')
+    ?.content ?? {};
 }
 
 function ContentGroupEditor({

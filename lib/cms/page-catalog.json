@@ -711,7 +711,7 @@
       {"groupKey": "main", "path": "hero.title", "label": "Hero 标题"},
       {"groupKey": "main", "path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4},
       {"groupKey": "main", "path": "faqTitle", "label": "FAQ 标题"},
-      {"groupKey": "main", "path": "faqs", "label": "FAQ 列表", "type": "json"},
+      {"groupKey": "main", "path": "faqCategoryLabels.other", "label": "其他分类名称", "labels": {"ko": "기타 분류명", "en": "Other label", "zh": "其他分类名称"}},
       {"groupKey": "form", "path": "name", "label": "姓名标签"},
       {"groupKey": "form", "path": "organization", "label": "公司/团队标签"},
       {"groupKey": "form", "path": "contact", "label": "联系方式标签"},
