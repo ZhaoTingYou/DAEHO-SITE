@@ -688,7 +688,7 @@ git commit -m "docs: record responsive preload and font rules"
 - Consumes: all commits from Tasks 1–3.
 - Produces: a reviewable pull request; AWS remains unchanged until explicit merge/deploy approval.
 
-- [ ] **Step 1: Rebase the branch on the latest remote main and rerun focused checks**
+- [x] **Step 1: Rebase the branch on the latest remote main and rerun focused checks**
 
 ```bash
 git fetch origin main
@@ -699,7 +699,7 @@ npx tsc --noEmit
 
 Expected: rebase completes without losing the font or preload changes; all focused checks pass.
 
-- [ ] **Step 2: Review the final diff and commit list**
+- [x] **Step 2: Review the final diff and commit list**
 
 ```bash
 git diff --check origin/main...HEAD
