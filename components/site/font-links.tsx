@@ -10,8 +10,12 @@ const GOOGLE_FONTS_CSS =
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap';
 
 // @latest는 CDN이 장기 캐시를 걸 수 없고 상위 버전이 올라오면 서체가 바뀔 수 있어 버전을 고정한다.
+//
+// 통짜 pretendard.css는 굵기 9종을 한글 전체가 담긴 파일로 받아 굵기 하나가 760KB에 이른다.
+// dynamic-subset은 같은 서체를 unicode-range로 쪼갠 것이라, 화면에 실제 쓰인 글자가 든
+// 조각만 내려받는다. 서체와 굵기가 같은 원본에서 나오므로 보이는 결과는 달라지지 않는다.
 const PRETENDARD_CSS =
-  'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css';
+  'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css';
 
 export function FontLinks() {
   return (
