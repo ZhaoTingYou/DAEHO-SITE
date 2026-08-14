@@ -66,6 +66,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body:has([data-analytics-consent-banner]) [data-site-floating-actions] {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+
+@keyframes kakao-contact-notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 html.is-chronicle-intro-locked,
 html.is-chronicle-intro-locked body,
 body.is-chronicle-intro-locked {

@@ -1264,6 +1264,16 @@
       "englishEnabled": false,
       "golfEnabled": false
     },
+    "kakaoContact": {
+      "label": "카카오톡 1:1 상담",
+      "compactLabel": "카카오톡 상담",
+      "descriptor": "PRIVATE CONSULTATION",
+      "noticeEyebrow": "KAKAO CONCIERGE",
+      "comingSoonTitle": "카카오톡 상담을 준비 중입니다",
+      "comingSoonBody": "더 나은 1:1 상담 경험으로 곧 찾아뵙겠습니다.",
+      "closeLabel": "닫기",
+      "ariaLabel": "카카오톡 1:1 상담 — 준비 중"
+    },
     "navigation": {
       "brandLabel": "DAEHO",
       "primaryLabel": "주요 내비게이션",

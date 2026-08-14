@@ -92,7 +92,7 @@ export function BackToTopButton({label}: {label: string}) {
       onPointerDown={handlePointerDown}
       onTouchStart={handleTouchStart}
       onClick={handleClick}
-      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[90] grid h-12 w-12 touch-none select-none place-items-center rounded-full border border-primary/20 bg-white/95 text-primary shadow-[0_12px_32px_rgba(16,29,48,0.16)] backdrop-blur transition duration-hover ease-brand hover:-translate-y-1 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:bottom-8 md:right-8 ${
+      className={`relative grid h-12 w-12 touch-none select-none place-items-center rounded-full border border-primary/20 bg-white/95 text-primary shadow-[0_12px_32px_rgba(16,29,48,0.16)] backdrop-blur transition duration-hover ease-brand hover:-translate-y-1 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
         isVisible
           ? 'pointer-events-auto translate-y-0 opacity-100'
           : 'pointer-events-none translate-y-3 opacity-0'

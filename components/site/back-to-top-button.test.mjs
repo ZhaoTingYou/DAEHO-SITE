@@ -6,8 +6,8 @@ const source = readFileSync(new URL('./back-to-top-button.tsx', import.meta.url)
 const layoutSource = readFileSync(new URL('../../app/[locale]/(site)/layout.tsx', import.meta.url), 'utf8');
 
 test('public site layout includes a localized back-to-top control', () => {
-  assert.match(layoutSource, /import \{BackToTopButton\}/);
-  assert.match(layoutSource, /<BackToTopButton label=\{locale === 'ko' \? '맨 위로' : 'Back to top'\} \/>/);
+  assert.match(layoutSource, /import \{SiteFloatingActions\}/);
+  assert.match(layoutSource, /backToTopLabel=\{locale === 'ko' \? '맨 위로' : 'Back to top'\}/);
 });
 
 test('back-to-top control starts a controlled return on the first pointer press', () => {

@@ -1264,6 +1264,16 @@
       "englishEnabled": false,
       "golfEnabled": false
     },
+    "kakaoContact": {
+      "label": "KakaoTalk Concierge",
+      "compactLabel": "KakaoTalk",
+      "descriptor": "1:1 PRIVATE CONSULTATION",
+      "noticeEyebrow": "KAKAO CONCIERGE",
+      "comingSoonTitle": "KakaoTalk consultation is coming soon",
+      "comingSoonBody": "We’re preparing a better private consultation experience.",
+      "closeLabel": "Close",
+      "ariaLabel": "KakaoTalk consultation — coming soon"
+    },
     "navigation": {
       "brandLabel": "DAEHO",
       "primaryLabel": "Primary navigation",

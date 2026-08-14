@@ -231,6 +231,7 @@ function ConsentBanner({
 
   return (
     <section
+      data-analytics-consent-banner
       className="fixed inset-x-0 bottom-0 z-[100] border-t border-hairline bg-white px-container py-4 shadow-[0_-12px_32px_rgba(13,30,46,0.08)] md:py-5"
       role="dialog"
       aria-modal="false"
