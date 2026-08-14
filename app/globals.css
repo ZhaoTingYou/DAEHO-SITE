@@ -1,8 +1,8 @@
-/* 외부 폰트 CSS는 components/site/font-links.tsx 에서 HTML head로 직접 링크한다.
-   여기서 @import 하면 이 파일을 모두 받은 뒤에야 폰트 요청이 시작되어 렌더링이 밀린다. */
+/* 폰트 선언은 빌드 시 앱 CSS에 합쳐 외부 CSS 요청이 렌더링을 막지 않게 한다. */
 @import "../styles/tokens.css";
 @import "tailwindcss";
 @import "../styles/mobile.css";
+@import "../styles/vendor-fonts.css";
 
 @font-face {
   font-family: "MaruBuri";

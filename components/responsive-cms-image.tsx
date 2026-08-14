@@ -2,8 +2,10 @@
 
 import {getImageProps} from 'next/image';
 import {useMemo, useState, type SyntheticEvent} from 'react';
+import {preload} from 'react-dom';
 
 import {imageSrc} from '@/lib/image-src';
+import {getResponsiveImagePreloads} from '@/lib/responsive-image-preload.mjs';
 
 type ResponsiveCmsImageProps = {
   filename: string;
@@ -38,16 +40,17 @@ export function ResponsiveCmsImage({
       getImageProps({
         src: desktopSource,
         alt,
-        fill: true,
-        sizes,
-        className,
-        ...(priority ? {priority: true} : {loading})
-      }).props,
-    [alt, className, desktopSource, loading, priority, sizes]
-  );
-  const mobileSrcSet = useMemo(() => {
+            fill: true,
+            sizes,
+            className,
+            fetchPriority: priority ? 'high' : undefined,
+            loading: priority ? 'eager' : loading
+          }).props,
+        [alt, className, desktopSource, loading, priority, sizes]
+      );
+  const mobileProps = useMemo(() => {
     if (!mobileSource || mobileFailed) {
-      return '';
+      return undefined;
     }
 
     return getImageProps({
@@ -56,9 +59,18 @@ export function ResponsiveCmsImage({
       fill: true,
       sizes: mobileSizes,
       className,
-      ...(priority ? {priority: true} : {loading})
-    }).props.srcSet;
+      fetchPriority: priority ? 'high' : undefined,
+      loading: priority ? 'eager' : loading
+    }).props;
   }, [alt, className, loading, mobileFailed, mobileSizes, mobileSource, priority]);
+  const mobileSrcSet = mobileProps?.srcSet ?? '';
+
+  const preloadHints = getResponsiveImagePreloads({
+    priority,
+    desktop: desktopProps,
+    ...(mobileProps ? {mobile: mobileProps} : {})
+  });
+  preloadHints.forEach((hint) => preload(hint.href, hint.options));
 
   if (!desktopSource) {
     return null;

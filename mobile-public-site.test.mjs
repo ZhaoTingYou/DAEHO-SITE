@@ -13,6 +13,7 @@ const chronicleMobile = readFileSync(new URL('./components/chronicle/chronicle-m
 const contactPageSource = readFileSync(new URL('./app/[locale]/(site)/contact/page.tsx', import.meta.url), 'utf8');
 const collectionDetailSource = readFileSync(new URL('./app/[locale]/(site)/mastery/creations/[slug]/page.tsx', import.meta.url), 'utf8');
 const homePage = readFileSync(new URL('./app/[locale]/(site)/page.tsx', import.meta.url), 'utf8');
+const siteLoading = readFileSync(new URL('./app/[locale]/(site)/loading.tsx', import.meta.url), 'utf8');
 const heritageHero = readFileSync(new URL('./components/legacy/heritage-hero.tsx', import.meta.url), 'utf8');
 const loyaltyPage = readFileSync(new URL('./components/legacy/loyalty-commitment-page.tsx', import.meta.url), 'utf8');
 const credibilityPage = readFileSync(new URL('./components/legacy/credibility-compliance-page.tsx', import.meta.url), 'utf8');
@@ -78,6 +79,11 @@ test('Home mobile hero wraps copy and uses a controlled viewport height', () => 
   assert.match(homeHero, /min-h-\[80svh\]/);
   assert.doesNotMatch(homeHero, /className="block max-w-full overflow-visible whitespace-nowrap"/);
   assert.match(homeNews, /mobile-home-news-row/);
+});
+
+test('route loading reserves the full mobile viewport so streamed content cannot shift the footer', () => {
+  assert.match(siteLoading, /min-h-\[100svh\]/);
+  assert.doesNotMatch(siteLoading, /min-h-\[80svh\]/);
 });
 
 test('Home news modal retains its launcher and traps keyboard focus', () => {

@@ -1,24 +1,39 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 import test from 'node:test';
 
 const fontLinks = readFileSync(new URL('./font-links.tsx', import.meta.url), 'utf8');
+const globalsCss = readFileSync(new URL('../../app/globals.css', import.meta.url), 'utf8');
+const vendorFontUrl = new URL('../../styles/vendor-fonts.css', import.meta.url);
 
-test('Pretendard is loaded as a unicode-range subset', () => {
-  // 통짜 파일은 굵기 하나가 760KB다. 서브셋은 화면에 쓰인 글자가 든 조각만 받는다.
-  assert.match(fontLinks, /pretendard-dynamic-subset\.css/);
-  assert.doesNotMatch(fontLinks, /static\/pretendard\.css/);
+test('font-face CSS is bundled locally instead of using external stylesheets', () => {
+  assert.match(globalsCss, /@import "\.\.\/styles\/vendor-fonts\.css";/);
+  assert.doesNotMatch(fontLinks, /rel="stylesheet"/);
+  assert.doesNotMatch(fontLinks, /fonts\.googleapis\.com/);
+  assert.doesNotMatch(fontLinks, /pretendard-dynamic-subset\.css/);
+  assert.equal(existsSync(vendorFontUrl), true);
 });
 
-test('the Pretendard version stays pinned', () => {
-  // 상위 버전이 올라오면 서체가 바뀔 수 있고 CDN이 장기 캐시를 걸지 못한다.
-  assert.match(fontLinks, /pretendard@v\d+\.\d+\.\d+\//);
-  assert.doesNotMatch(fontLinks, /pretendard@latest/);
+test('remaining font-file origins are preconnected', () => {
+  assert.match(fontLinks, /https:\/\/fonts\.gstatic\.com/);
+  assert.match(fontLinks, /https:\/\/cdn\.jsdelivr\.net/);
+  assert.match(fontLinks, /https:\/\/hangeul\.pstatic\.net/);
 });
 
-test('font stylesheets stay in the document head with preconnect', () => {
-  // globals.css의 @import로 옮기면 요청이 직렬로 쌓여 첫 텍스트 렌더링이 밀린다.
-  assert.match(fontLinks, /<link rel="preconnect" href="https:\/\/cdn\.jsdelivr\.net"/);
-  assert.match(fontLinks, /<link rel="stylesheet" href=\{PRETENDARD_CSS\} \/>/);
-  assert.match(fontLinks, /<link rel="stylesheet" href=\{GOOGLE_FONTS_CSS\} \/>/);
+test('local Pretendard uses the pinned variable subset with one face per Unicode range', () => {
+  assert.equal(existsSync(vendorFontUrl), true);
+  const css = readFileSync(vendorFontUrl, 'utf8');
+  const faces = css.match(/@font-face\s*\{[^}]*font-family:\s*'Pretendard'[^}]*\}/g) ?? [];
+
+  assert.equal(faces.length, 92);
+  faces.forEach((face) => {
+    assert.match(face, /font-weight:\s*45 920/);
+    assert.match(face, /font-display:\s*swap/);
+    assert.match(face, /unicode-range:/);
+    assert.match(face, /pretendard@v1\.3\.9/);
+  });
+  assert.doesNotMatch(css, /Pretendard Variable/);
+  assert.doesNotMatch(css, /\.\.\/\.\.\/\.\.\/packages/);
+  assert.match(css, /font-family:\s*'Cormorant Garamond'/);
+  assert.match(css, /font-family:\s*'Inter'/);
 });
