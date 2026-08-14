@@ -63,6 +63,13 @@ test('Contact FAQ category labels are localized for the public section and CMS f
   });
 });
 
+test('Contact FAQ reveal controls have Korean and English copy', () => {
+  assert.equal(koMessages.contact.faqShowMore, '더 보기 {count}');
+  assert.equal(koMessages.contact.faqShowLess, '접기');
+  assert.equal(enMessages.contact.faqShowMore, 'View {count} more');
+  assert.equal(enMessages.contact.faqShowLess, 'Show less');
+});
+
 test('Contact CMS delegates category and FAQ content to the dedicated bilingual editor', () => {
   const contactPage = pageCatalog.find((page) => page.pageKey === 'contact');
   const paths = contactPage.fields.map((field) => field.path);

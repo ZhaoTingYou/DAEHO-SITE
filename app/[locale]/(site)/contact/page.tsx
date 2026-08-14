@@ -45,6 +45,8 @@ export default async function ContactPage({params}: Props) {
 
       <ContactFaqSection
         title={text.faqTitle}
+        showMoreLabel={text.faqShowMore}
+        showLessLabel={text.faqShowLess}
         categories={text.faqCategories}
         otherLabel={text.faqCategoryLabels.other}
         faqs={text.faqs}

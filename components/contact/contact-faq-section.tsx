@@ -15,12 +15,23 @@ import {
 
 type ContactFaqSectionProps = {
   title: string;
+  showMoreLabel: string;
+  showLessLabel: string;
   categories: ContactFaqCategory[];
   otherLabel: string;
   faqs: ContactFaqSourceItem[];
 };
 
-export function ContactFaqSection({title, categories, otherLabel, faqs}: ContactFaqSectionProps) {
+const DEFAULT_VISIBLE_FAQ_COUNT = 3;
+
+export function ContactFaqSection({
+  title,
+  showMoreLabel,
+  showLessLabel,
+  categories,
+  otherLabel,
+  faqs
+}: ContactFaqSectionProps) {
   const instanceId = useId().replace(/:/g, '');
   const groups = useMemo(
     () => groupContactFaqs(faqs, categories, otherLabel),
@@ -51,8 +62,11 @@ export function ContactFaqSection({title, categories, otherLabel, faqs}: Contact
             const categoryPanelId = `contact-faq-${instanceId}-${group.id}-panel`;
             const categoryButtonId = `contact-faq-${instanceId}-${group.id}-button`;
             const indexedItems = group.items.map((item, index) => ({item, index}));
-            const splitAt = Math.ceil(indexedItems.length / 2);
-            const columns = [indexedItems.slice(0, splitAt), indexedItems.slice(splitAt)];
+            const firstItems = indexedItems.slice(0, DEFAULT_VISIBLE_FAQ_COUNT);
+            const extraItems = indexedItems.slice(DEFAULT_VISIBLE_FAQ_COUNT);
+            const listExpanded = state.expandedCategories.includes(group.id);
+            const extraPanelId = `contact-faq-${instanceId}-${group.id}-extra`;
+            const hiddenQuestions = extraItems.map(({index}) => `${group.id}-${index}`);
 
             return (
               <article key={group.id} className="border-t border-primary/70 last:border-b">
@@ -101,25 +115,70 @@ export function ContactFaqSection({title, categories, otherLabel, faqs}: Contact
                         </div>
                       </div>
 
-                      <div className="grid min-w-0 gap-x-10 md:grid-cols-2 lg:gap-x-14">
-                        {columns.map((column, columnIndex) => (
-                          <div key={`${group.id}-column-${columnIndex}`} className="min-w-0">
-                            {column.map(({item, index}) => (
-                              <FaqQuestion
+                      <div className="min-w-0">
+                        {firstItems.map(({item, index}) => (
+                          <FaqQuestion
+                            key={`${group.id}-${item.question}`}
+                            instanceId={instanceId}
+                            groupId={group.id}
+                            item={item}
+                            index={index}
+                            open={state.openQuestion === `${group.id}-${index}`}
+                            onToggle={() => dispatch({
+                              type: 'toggleQuestion',
+                              question: `${group.id}-${index}`
+                            })}
+                          />
+                        ))}
+
+                        {extraItems.length > 0 ? (
+                          <div
+                            id={extraPanelId}
+                            data-contact-faq-extra-panel={group.id}
+                            hidden={!listExpanded}
+                          >
+                            {extraItems.map(({item, index}) => (
+                              <div
                                 key={`${group.id}-${item.question}`}
-                                instanceId={instanceId}
-                                groupId={group.id}
-                                item={item}
-                                index={index}
-                                open={state.openQuestion === `${group.id}-${index}`}
-                                onToggle={() => dispatch({
-                                  type: 'toggleQuestion',
-                                  question: `${group.id}-${index}`
-                                })}
-                              />
+                                data-contact-faq-extra-question={`${group.id}-${index}`}
+                              >
+                                <FaqQuestion
+                                  instanceId={instanceId}
+                                  groupId={group.id}
+                                  item={item}
+                                  index={index}
+                                  open={state.openQuestion === `${group.id}-${index}`}
+                                  onToggle={() => dispatch({
+                                    type: 'toggleQuestion',
+                                    question: `${group.id}-${index}`
+                                  })}
+                                />
+                              </div>
                             ))}
                           </div>
-                        ))}
+                        ) : null}
+
+                        {extraItems.length > 0 ? (
+                          <button
+                            type="button"
+                            data-contact-faq-reveal={group.id}
+                            aria-expanded={listExpanded}
+                            aria-controls={extraPanelId}
+                            className="mobile-tap-target mt-3 flex min-h-12 w-full items-center justify-end gap-3 border-b border-hairline py-3 text-right font-body text-[12px] font-semibold uppercase tracking-[0.16em] text-accent"
+                            onClick={() => dispatch({
+                              type: 'toggleCategoryQuestions',
+                              category: group.id,
+                              hiddenQuestions
+                            })}
+                          >
+                            <span>
+                              {listExpanded
+                                ? showLessLabel
+                                : showMoreLabel.replace('{count}', itemCount(extraItems.length))}
+                            </span>
+                            <AccordionMark open={listExpanded} />
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                   </div>

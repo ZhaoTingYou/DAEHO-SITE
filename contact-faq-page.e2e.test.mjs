@@ -61,9 +61,15 @@ test('Contact renders the categorized C plus C1 FAQ structure with all answer co
   assert.equal(response.status, 200);
   assert.equal((html.match(/data-contact-faq-category=/g) ?? []).length, 4);
   assert.equal((html.match(/data-contact-faq-question=/g) ?? []).length, 20);
-  assert.equal((html.match(/aria-controls="contact-faq-/g) ?? []).length, 24);
+  assert.equal((html.match(/data-contact-faq-reveal=/g) ?? []).length, 3);
+  assert.equal((html.match(/data-contact-faq-extra-panel=/g) ?? []).length, 3);
+  assert.equal((html.match(/data-contact-faq-extra-question=/g) ?? []).length, 8);
+  assert.equal((html.match(/aria-controls="contact-faq-/g) ?? []).length, 27);
   assert.match(html, /data-contact-faq-category="consultation"[^>]*aria-expanded="true"/);
   assert.match(html, /data-contact-faq-category="design"[^>]*aria-expanded="false"/);
+  assert.match(html, /data-contact-faq-reveal="consultation"[^>]*aria-expanded="false"/);
+  assert.match(html, /더 보기 02/);
+  assert.match(html, /더 보기 03/);
   assert.match(html, /상담 · 견적/);
   assert.match(html, /디자인 · 소재/);
   assert.match(html, /기업 · 단체/);

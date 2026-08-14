@@ -1619,6 +1619,8 @@
     "email": "Email to be confirmed",
     "hours": "Hours to be confirmed",
     "faqTitle": "FAQ",
+    "faqShowMore": "View {count} more",
+    "faqShowLess": "Show less",
     "faqCategoryLabels": {
       "consultation": "Consultation · Quote",
       "design": "Design · Materials",

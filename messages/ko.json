@@ -1619,6 +1619,8 @@
     "email": "이메일 확인 예정",
     "hours": "영업시간 확인 예정",
     "faqTitle": "자주 묻는 질문",
+    "faqShowMore": "더 보기 {count}",
+    "faqShowLess": "접기",
     "faqCategoryLabels": {
       "consultation": "상담 · 견적",
       "design": "디자인 · 소재",
