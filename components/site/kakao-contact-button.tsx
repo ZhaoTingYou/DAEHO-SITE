@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import {useCallback, useEffect, useId, useReducer, useRef} from 'react';
 
 import {
@@ -112,7 +113,7 @@ export function KakaoContactButton({copy, onActivate}: KakaoContactButtonProps) 
   return (
     <div
       ref={rootRef}
-      className="pointer-events-none relative h-14 w-[min(13.5rem,calc(100vw-2rem))] md:h-16 md:w-[15.5rem]"
+      className="pointer-events-none relative h-14 w-[13.5rem] md:h-16 md:w-[15.5rem]"
       onPointerEnter={() => dispatch({type: 'hover', active: true})}
       onPointerLeave={() => dispatch({type: 'hover', active: false})}
       onFocus={() => dispatch({type: 'focus', active: true})}
@@ -128,29 +129,45 @@ export function KakaoContactButton({copy, onActivate}: KakaoContactButtonProps) 
           id={noticeId}
           role="status"
           aria-live="polite"
-          className="pointer-events-auto absolute bottom-[calc(100%+0.75rem)] right-0 z-20 w-[min(19rem,calc(100vw-2rem))] origin-bottom-right rounded-xl border border-white/20 bg-[#101D30]/[0.98] px-5 py-4 pr-14 text-white shadow-[0_20px_52px_rgba(5,12,22,0.32)] backdrop-blur-xl [animation:kakao-contact-notice-in_260ms_cubic-bezier(.16,1,.3,1)_both] motion-reduce:animate-none"
+          className="pointer-events-auto absolute bottom-[calc(100%+0.75rem)] right-0 z-20 w-[min(19rem,calc(100vw-2rem))] max-w-[19rem] origin-bottom-right rounded-[10px] border border-[#C6AE78] bg-[#F7F3EA] px-5 py-4 pr-14 text-[#101D30] shadow-[0_18px_44px_rgba(16,29,48,0.18)] [animation:kakao-contact-notice-in_260ms_cubic-bezier(.16,1,.3,1)_both] motion-reduce:animate-none"
         >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
+          >
+            <Image
+              src="/images/logo.png"
+              alt=""
+              width={381}
+              height={339}
+              className="absolute -bottom-7 right-7 h-auto w-24 opacity-[0.06]"
+            />
+          </span>
           <button
             type="button"
             aria-label={copy.closeLabel}
             onClick={() => dismissNotice()}
-            className="absolute right-2 top-2 grid size-11 place-items-center rounded-full border border-white/15 text-[20px] font-light leading-none text-white/75 transition-[background-color,color,transform] duration-200 hover:bg-white/10 hover:text-white active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7A2230] motion-reduce:transition-none"
+            className="absolute right-2 top-2 z-10 grid size-11 place-items-center rounded-full border border-[#C6AE78] bg-[#F7F3EA] text-[20px] font-light leading-none text-[#101D30] transition-[background-color,color,transform] duration-200 hover:bg-[#C6AE78]/20 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7A2230] motion-reduce:transition-none"
           >
             <span aria-hidden="true">×</span>
           </button>
-          <p className="font-body text-[9px] font-semibold uppercase tracking-[0.18em] text-[#C6AE78]">
+          <p className="relative z-[1] font-body text-[9px] font-semibold uppercase tracking-[0.18em] text-[#7A2230]">
             {copy.noticeEyebrow}
           </p>
-          <p className="mt-2 pr-2 font-heading text-[17px] font-semibold leading-snug text-white">
+          <p className="relative z-[1] mt-2 pr-2 font-heading text-[17px] font-semibold leading-snug text-[#101D30]">
             {copy.comingSoonTitle}
           </p>
-          <p className="mt-2 font-body text-[12px] leading-[1.65] text-white/65">
+          <p className="relative z-[1] mt-2 font-body text-[12px] leading-[1.65] text-[#101D30]/70">
             {copy.comingSoonBody}
           </p>
           <span
+            data-kakao-certificate-connector
             aria-hidden="true"
-            className="absolute -bottom-[6px] right-6 size-3 rotate-45 border-b border-r border-white/20 bg-[#101D30]"
-          />
+            className="pointer-events-none absolute -bottom-3 right-7 flex h-3 w-3 justify-center"
+          >
+            <span className="h-3 w-px bg-[#C6AE78]" />
+            <span className="absolute -bottom-0.5 size-1 rounded-full bg-[#C6AE78]" />
+          </span>
         </div>
       ) : null}
 
@@ -161,61 +178,65 @@ export function KakaoContactButton({copy, onActivate}: KakaoContactButtonProps) 
         aria-expanded={state.noticeOpen}
         aria-controls={noticeId}
         onClick={handleActivate}
-        className={`pointer-events-auto absolute bottom-0 right-0 z-10 h-14 overflow-visible rounded-full touch-manipulation select-none text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7A2230] md:h-16 ${
+        className={`group pointer-events-auto absolute bottom-0 right-0 z-10 h-14 w-[13.5rem] cursor-pointer touch-manipulation select-none text-left transition-[clip-path,transform] ease-[cubic-bezier(.16,1,.3,1)] [clip-path:inset(0_0_0_var(--kakao-contact-inset)_round_var(--kakao-contact-radius))] active:translate-y-px focus-visible:outline-none motion-reduce:transition-none md:h-16 md:w-[15.5rem] ${
           expanded
-            ? 'w-[min(13.5rem,calc(100vw-2rem))] md:w-[15.5rem]'
-            : 'w-14 md:w-16'
+            ? 'duration-[300ms] [--kakao-contact-inset:0px] [--kakao-contact-radius:10px]'
+            : 'duration-[240ms] [--kakao-contact-inset:160px] [--kakao-contact-radius:999px] md:[--kakao-contact-inset:184px]'
         }`}
       >
         <span
           aria-hidden="true"
-          className={`absolute inset-0 flex items-center rounded-full border border-white/20 bg-[#101D30]/[0.96] p-[5px] text-white shadow-[0_16px_42px_rgba(5,12,22,0.3)] backdrop-blur-xl transition-[opacity,transform] duration-[260ms] ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none ${
+          className="absolute inset-y-0 left-0 right-7 bg-[#101D30] shadow-[0_14px_34px_rgba(16,29,48,0.24)] ring-1 ring-inset ring-[#C6AE78]/35 [clip-path:polygon(10px_0,100%_0,100%_100%,10px_100%,0_calc(100%-10px),0_10px)] group-focus-visible:ring-2 group-focus-visible:ring-[#F7F3EA] md:right-8"
+        />
+
+        <span
+          aria-hidden="true"
+          className={`absolute inset-y-0 left-0 right-14 flex min-w-0 items-center pl-5 pr-2 transition-[opacity,transform] ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none md:right-16 md:pl-6 md:pr-3 ${
             expanded
-              ? 'translate-x-0 scale-100 opacity-100'
-              : 'pointer-events-none translate-x-2 scale-95 opacity-0'
+              ? 'translate-x-0 opacity-100 duration-[300ms]'
+              : 'translate-x-3 opacity-0 duration-[240ms]'
           }`}
         >
-          <KakaoTalkSealMark className="size-[46px] shrink-0 md:size-[54px]" />
-          <span className="min-w-0 px-3 md:px-4">
+          <span className="min-w-0">
             <span className="block truncate font-heading text-[13px] font-semibold leading-tight tracking-[0.02em] md:text-[15px]">
-              <span className="md:hidden">{copy.compactLabel}</span>
-              <span className="hidden md:inline">{copy.label}</span>
+              <span className="text-white md:hidden">{copy.compactLabel}</span>
+              <span className="hidden text-white md:inline">{copy.label}</span>
             </span>
-            <span className="mt-1 block truncate font-body text-[7px] font-semibold uppercase tracking-[0.16em] text-white/55 md:text-[8px]">
+            <span className="mt-1 block truncate font-body text-[7px] font-semibold uppercase tracking-[0.16em] text-[#C6AE78] md:text-[8px]">
               {copy.descriptor}
             </span>
           </span>
         </span>
 
-        <span
-          aria-hidden="true"
-          className={`absolute bottom-0 right-0 grid size-14 place-items-center rounded-full border border-white/20 bg-[#101D30]/[0.96] p-[5px] shadow-[0_16px_42px_rgba(5,12,22,0.3)] backdrop-blur-xl transition-[opacity,transform] duration-[240ms] ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none md:size-16 ${
-            expanded
-              ? 'pointer-events-none translate-x-2 scale-90 opacity-0'
-              : 'translate-x-0 scale-100 opacity-100'
-          }`}
-        >
-          <span className="absolute -inset-1 -rotate-[28deg] rounded-full border border-[#C6AE78]/80 [clip-path:polygon(0_0,72%_0,72%_100%,0_100%)]" />
-          <KakaoTalkSealMark className="size-[46px] md:size-[54px]" />
-        </span>
+        <KakaoJewelrySignet />
       </button>
     </div>
   );
 }
 
-function KakaoTalkSealMark({className}: {className: string}) {
+function KakaoJewelrySignet() {
   return (
     <span
-      className={`relative grid place-items-center overflow-hidden rounded-full bg-[#FEE500] text-[#191600] shadow-[inset_0_0_0_1px_rgba(25,22,0,0.08)] ${className}`}
+      aria-hidden="true"
+      className="absolute bottom-0 right-0 grid size-14 place-items-center rounded-full bg-[#101D30] shadow-[0_14px_34px_rgba(16,29,48,0.24)] ring-inset group-focus-visible:ring-2 group-focus-visible:ring-[#F7F3EA] md:size-16"
     >
-      <svg viewBox="0 0 52 52" className="absolute inset-0 size-full" aria-hidden="true">
-        <path
-          fill="currentColor"
-          d="M26 10C16.6 10 9 15.8 9 23c0 4.6 3.1 8.7 7.9 11l-2 7 8.2-4.9c.9.1 1.9.2 2.9.2 9.4 0 17-5.8 17-13.1C43 15.8 35.4 10 26 10Z"
+      <span className="absolute inset-1 rounded-full bg-[#C6AE78] md:inset-[5px]" />
+      <span className="absolute inset-[7px] grid place-items-center rounded-full bg-[#F7F3EA] md:inset-2">
+        <Image
+          src="/images/logo.png"
+          alt=""
+          width={381}
+          height={339}
+          className="h-[22px] w-[25px] object-contain md:h-[25px] md:w-[28px]"
         />
-      </svg>
-      <span className="relative mt-[-2px] font-body text-[7px] font-bold tracking-[-0.04em] text-[#FEE500] md:text-[8px]">
-        TALK
+      </span>
+      <span className="absolute bottom-0 right-0 grid size-4 place-items-center rounded-full bg-[#FEE500] shadow-[0_2px_7px_rgba(16,29,48,0.25)] ring-1 ring-[#101D30] md:size-[18px]">
+        <svg viewBox="0 0 18 18" className="size-[11px] text-[#101D30] md:size-3">
+          <path
+            fill="currentColor"
+            d="M9 3.2c-3.3 0-6 2.1-6 4.8 0 1.7 1.1 3.2 2.8 4.1l-.7 2.5 2.8-1.7c.4.1.7.1 1.1.1 3.3 0 6-2.1 6-4.9 0-2.7-2.7-4.9-6-4.9Z"
+          />
+        </svg>
       </span>
     </span>
   );

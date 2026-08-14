@@ -40,6 +40,44 @@ test('contact seal exposes an accessible temporary notice with every close path'
   assert.doesNotMatch(component, /Kakao\.init|Kakao\.Channel|kakao_js_sdk|<script/i);
 });
 
+test('contact trigger uses one clipped fixed canvas and one anchored signet', () => {
+  assert.match(component, /h-14 w-\[13\.5rem\][^\"]*md:h-16 md:w-\[15\.5rem\]/);
+  assert.equal((component.match(/\[clip-path:inset\(/g) ?? []).length, 1);
+  assert.match(component, /\[--kakao-contact-inset:160px\]/);
+  assert.match(component, /md:\[--kakao-contact-inset:184px\]/);
+  assert.match(component, /duration-\[300ms\]/);
+  assert.match(component, /duration-\[240ms\]/);
+  assert.match(component, /ease-\[cubic-bezier\(\.16,1,\.3,1\)\]/);
+  assert.match(component, /transition-\[clip-path,transform\]/);
+  assert.match(component, /motion-reduce:transition-none/);
+  assert.match(component, /translate-x-3 opacity-0/);
+  assert.equal((component.match(/<KakaoJewelrySignet/g) ?? []).length, 1);
+  assert.doesNotMatch(component, /expanded\s*\?\s*'w-/);
+});
+
+test('jewelry signet uses the approved monogram and restrained material palette', () => {
+  assert.match(component, /src="\/images\/logo\.png"/);
+  assert.match(component, /bg-\[#101D30\]/);
+  assert.match(component, /bg-\[#C6AE78\]/);
+  assert.match(component, /bg-\[#F7F3EA\]/);
+  assert.match(component, /bg-\[#FEE500\]/);
+  assert.match(component, /size-4[^\"]*md:size-\[18px\]/);
+  assert.match(component, /group-focus-visible:ring-2/);
+  assert.doesNotMatch(component, /KakaoTalkSealMark|TALK|backdrop-blur|loop|shine/i);
+});
+
+test('temporary notice is an ivory concierge certificate with a gold connector', () => {
+  assert.match(
+    component,
+    /role="status"[\s\S]*?max-w-\[19rem\][\s\S]*?border-\[#C6AE78\][\s\S]*?bg-\[#F7F3EA\][\s\S]*?text-\[#101D30\]/
+  );
+  assert.match(component, /text-\[#7A2230\][\s\S]*?\{copy\.noticeEyebrow\}/);
+  assert.match(component, /aria-hidden="true"[\s\S]*?src="\/images\/logo\.png"[\s\S]*?opacity-\[0\.06\]/);
+  assert.match(component, /aria-label=\{copy\.closeLabel\}[\s\S]*?size-11/);
+  assert.match(component, /data-kakao-certificate-connector/);
+  assert.doesNotMatch(component, /rotate-45/);
+});
+
 test('floating actions share one safe-area rail with a twelve-pixel gap', () => {
   assert.match(floatingActions, /data-site-floating-actions/);
   assert.match(floatingActions, /gap-3/);
