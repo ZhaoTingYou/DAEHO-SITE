@@ -3,14 +3,17 @@
 import {type FormEvent, useState} from 'react';
 
 import {currentAnalyticsPagePath, trackAnalyticsEvent} from '@/lib/analytics';
+import {
+  resolveContactInquiryType,
+  type ContactInquiryType
+} from '@/lib/inquiry-query-core.mjs';
 import {isLocale} from '@/lib/locales';
+import {useLocationSearch} from '@/lib/use-location-search';
 
 type ContactFormProps = {
   copy: ContactFormCopy;
-  defaultType?: InquiryType;
+  defaultType?: ContactInquiryType;
 };
-
-type InquiryType = 'appointment' | 'championship' | 'bespoke' | 'other';
 
 type ContactFormCopy = {
   name: string;
@@ -27,6 +30,11 @@ type ContactFormCopy = {
 
 export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFormProps) {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const locationSearch = useLocationSearch();
+  const [selectedInquiryType, setSelectedInquiryType] = useState<ContactInquiryType | null>(null);
+  const inquiryType = selectedInquiryType ?? (
+    locationSearch ? resolveContactInquiryType(locationSearch) : defaultType
+  );
   const isSubmitted = status === 'success';
 
   return (
@@ -68,7 +76,8 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         <span>{text.type}</span>
         <select
           name="type"
-          defaultValue={defaultType}
+          value={inquiryType}
+          onChange={(event) => setSelectedInquiryType(event.target.value as ContactInquiryType)}
           className="min-h-[52px] w-full border-b border-primary/30 bg-transparent py-3 text-[16px] normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent md:min-h-12 md:text-base"
         >
           {text.options.map((option) => (

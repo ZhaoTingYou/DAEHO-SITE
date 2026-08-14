@@ -10,7 +10,7 @@ import com.daeho.cms.service.CmsSnapshotService;
 import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.MediaStorageService;
-import com.daeho.cms.service.NaverSensKakaoClient;
+import com.daeho.cms.service.SolapiKakaoClient;
 import com.daeho.cms.service.NotificationPlanner;
 import com.daeho.cms.service.NotificationTemplateRenderer;
 import com.daeho.cms.service.NotificationTestService;
@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -51,7 +52,7 @@ public class AdminCmsController {
   private final NotificationTemplateRenderer notificationTemplateRenderer;
   private final InquiryWorkflowService inquiryWorkflow;
   private final WorkspaceEmailSender workspaceEmail;
-  private final NaverSensKakaoClient kakao;
+  private final SolapiKakaoClient kakao;
   private final NotificationProperties notificationProperties;
   private final NotificationTestService notificationTest;
   private final CmsSnapshotService snapshots;
@@ -68,7 +69,7 @@ public class AdminCmsController {
       NotificationTemplateRenderer notificationTemplateRenderer,
       InquiryWorkflowService inquiryWorkflow,
       WorkspaceEmailSender workspaceEmail,
-      NaverSensKakaoClient kakao,
+      SolapiKakaoClient kakao,
       NotificationProperties notificationProperties,
       NotificationTestService notificationTest,
       CmsSnapshotService snapshots,
@@ -321,6 +322,69 @@ public class AdminCmsController {
     return Map.of("items", repository.listInquiries(status, source));
   }
 
+  @GetMapping("/inquiry-statuses")
+  public Map<String, Object> inquiryStatuses(HttpServletRequest request) {
+    auth.requireAdmin(request);
+    return Map.of("items", repository.listInquiryStatuses());
+  }
+
+  @PostMapping("/inquiry-statuses")
+  public ResponseEntity<Map<String, Object>> createInquiryStatus(
+      @RequestBody Map<String, Object> body,
+      HttpServletRequest request
+  ) {
+    auth.requireAdmin(request);
+    var parsed = validation.inquiryStatusDefinition(body, true);
+    if (!parsed.success()) {
+      throw new ValidationFailedException(parsed.issues());
+    }
+    var code = validation.stringValue(parsed.data().get("code"));
+    if (repository.getInquiryStatus(code) != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Inquiry status code already exists");
+    }
+    var created = repository.createInquiryStatus(parsed.data());
+    if (created == null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Inquiry status code already exists");
+    }
+    return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("item", created));
+  }
+
+  @PatchMapping("/inquiry-statuses/{code}")
+  public Map<String, Object> updateInquiryStatusDefinition(
+      @PathVariable String code,
+      @RequestBody Map<String, Object> body,
+      HttpServletRequest request
+  ) {
+    auth.requireAdmin(request);
+    var codeValidation = validation.inquiryStatus(Map.of("status", code));
+    var parsed = validation.inquiryStatusDefinition(body, false);
+    if (!codeValidation.success()) {
+      throw new ValidationFailedException(codeValidation.issues());
+    }
+    if (!parsed.success()) {
+      throw new ValidationFailedException(parsed.issues());
+    }
+    var existing = repository.getInquiryStatus(code);
+    if (existing == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Inquiry status not found");
+    }
+    if (validation.booleanValue(existing.get("isSystem"), false)
+        && !validation.booleanValue(parsed.data().get("isActive"), true)) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "System inquiry statuses cannot be disabled");
+    }
+    var updated = repository.updateInquiryStatus(code, parsed.data());
+    if (updated == null) {
+      if (repository.getInquiryStatus(code) == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Inquiry status not found");
+      }
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Inquiry status changed by another administrator. Refresh and try again."
+      );
+    }
+    return Map.of("item", updated);
+  }
+
   @GetMapping("/inquiries/{id}")
   public Map<String, Object> inquiry(@PathVariable String id, HttpServletRequest request) {
     auth.requireAdmin(request);
@@ -366,6 +430,12 @@ public class AdminCmsController {
     if (job == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification job not found");
     }
+    if (validation.booleanValue(job.get("retryBlocked"), false)) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "This notification was quarantined during the provider cutover and cannot be retried."
+      );
+    }
     var jobStatus = validation.stringValue(job.get("status"));
     if (!jobStatus.equals("failed") && !jobStatus.equals("needs_attention")) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Only failed notifications can be retried.");
@@ -380,6 +450,7 @@ public class AdminCmsController {
   }
 
   @PutMapping("/notifications/settings")
+  @Transactional
   public Map<String, Object> updateNotificationSettings(
       @RequestBody Map<String, Object> body,
       HttpServletRequest request
@@ -388,6 +459,24 @@ public class AdminCmsController {
     var parsed = validation.notificationSettings(body);
     if (!parsed.success()) {
       throw new ValidationFailedException(parsed.issues());
+    }
+    if (validation.booleanValue(parsed.data().get("kakaoEnabled"), false)) {
+      notifications.lockNotificationDispatch();
+      if (!kakao.configured()) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "SOLAPI credentials are not configured.");
+      }
+      if (!notificationTest.kakaoVerified()) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Send a successful Kakao test from this CMS before enabling notifications."
+        );
+      }
+      if (!validation.booleanValue(notificationPlanner.health().get("kakaoTemplatesReady"), false)) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "All three Korean Kakao templates must be approved and active."
+        );
+      }
     }
     return Map.of("settings", notifications.updateSettings(parsed.data()));
   }
@@ -398,6 +487,7 @@ public class AdminCmsController {
     var health = new java.util.LinkedHashMap<String, Object>(notificationPlanner.health());
     health.put("emailConfigured", workspaceEmail.configured());
     health.put("kakaoConfigured", kakao.configured());
+    health.put("kakaoVerified", notificationTest.kakaoVerified());
     health.put("workerEnabled", notificationProperties.workerEnabled());
     return health;
   }
@@ -415,7 +505,9 @@ public class AdminCmsController {
     return notificationTest.send(
         validation.stringValue(parsed.data().get("channel")),
         validation.stringValue(parsed.data().get("recipient")),
-        validation.stringValue(parsed.data().get("templateKey"))
+        validation.stringValue(parsed.data().get("templateKey")),
+        validation.stringValue(parsed.data().get("customerName")),
+        validation.stringValue(parsed.data().get("inquiryNumber"))
     );
   }
 
@@ -436,7 +528,10 @@ public class AdminCmsController {
     if (base == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification template not found");
     }
-    var parsed = validation.notificationTemplate(body);
+    var parsed = validation.notificationTemplate(
+        body,
+        validation.stringValue(base.get("channel"))
+    );
     if (!parsed.success()) {
       throw new ValidationFailedException(parsed.issues());
     }

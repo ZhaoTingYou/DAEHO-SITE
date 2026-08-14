@@ -1,15 +1,20 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {hasAdminSession} from '@/lib/cms/admin-session';
+import {hasAdminCapability} from '@/lib/cms/admin-authorization-core.mjs';
+import {getAdminIdentity} from '@/lib/cms/admin-session';
 import {getCmsExportFilename, getCmsExportSnapshot} from '@/lib/cms/export';
 import {getExternalUrl} from '@/lib/request-origin';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  if (!(await hasAdminSession())) {
+  const identity = await getAdminIdentity();
+  if (!identity) {
     return NextResponse.redirect(getExternalUrl(request, '/admin/login'));
+  }
+  if (identity.mustChangePassword || !hasAdminCapability(identity.role, 'system:manage')) {
+    return NextResponse.json({error: 'Forbidden'}, {status: 403});
   }
 
   const snapshot = await getCmsExportSnapshot();

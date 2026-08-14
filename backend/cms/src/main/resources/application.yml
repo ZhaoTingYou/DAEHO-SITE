@@ -31,6 +31,7 @@ spring:
 cms:
   admin-api-key: ${CMS_ADMIN_API_KEY:}
   admin-password: ${CMS_ADMIN_PASSWORD:}
+  owner-email: ${CMS_OWNER_EMAIL:}
   notify-to: ${CMS_NOTIFY_TO:}
   smtp-from: ${SMTP_FROM:}
   smtp-secure: ${SMTP_SECURE:false}
@@ -47,8 +48,7 @@ cms:
     worker-enabled: ${CMS_NOTIFICATION_WORKER_ENABLED:true}
     worker-delay-ms: ${CMS_NOTIFICATION_WORKER_DELAY_MS:1000}
     admin-base-url: ${CMS_ADMIN_BASE_URL:http://localhost:3000/admin}
-    kakao-api-base-url: ${KAKAO_API_BASE_URL:https://sens.apigw.ntruss.com}
-    kakao-access-key: ${KAKAO_ACCESS_KEY:}
-    kakao-secret-key: ${KAKAO_SECRET_KEY:}
-    kakao-service-id: ${KAKAO_SERVICE_ID:}
-    kakao-channel-id: ${KAKAO_CHANNEL_ID:}
+    solapi-api-base-url: ${SOLAPI_API_BASE_URL:https://api.solapi.com}
+    solapi-api-key: ${SOLAPI_API_KEY:}
+    solapi-api-secret: ${SOLAPI_API_SECRET:}
+    solapi-pf-id: ${SOLAPI_PF_ID:}

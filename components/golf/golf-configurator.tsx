@@ -89,6 +89,7 @@ export type GolfConfiguratorContent = {
     previousShaft: string;
     nextShaft: string;
     styleOptions: string[];
+    engravingSample: string;
   };
   process: {
     packageImageLabel: string;
@@ -122,7 +123,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   const prefersReducedMotion = usePrefersReducedMotion();
   const [selectedHeadId, setSelectedHeadId] = useState(content.heads.items[0]?.id ?? '');
   const [selectedStyleOption, setSelectedStyleOption] = useState(
-    content.labels.styleOptions?.[0] ?? 'BASIC'
+    content.labels.styleOptions[0] ?? ''
   );
   const [heroSlideIndex, setHeroSlideIndex] = useState(0);
 
@@ -158,7 +159,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
     alt: content.hero.subtitle,
     imageClass: 'object-contain object-center origin-center scale-100'
   };
-  const engravingSample = 'JUDY KIM 2026.05.03';
+  const engravingSample = content.labels.engravingSample;
   const inquiryHref = appendCmsQuery(
     resolveCmsHref(locale, content.labels.inquiryHref, '/golf/inquiry'),
     {
@@ -170,7 +171,7 @@ export function GolfConfigurator({assets, content, locale}: GolfConfiguratorProp
   );
   const labels = content.labels;
   const process = content.process;
-  const styleOptions = labels.styleOptions?.length ? labels.styleOptions : ['BASIC', 'COLOUR'];
+  const styleOptions = labels.styleOptions;
   const lifestyleImages = [
     content.lifestyle.imageBox,
     content.lifestyle.imageLifestyle,

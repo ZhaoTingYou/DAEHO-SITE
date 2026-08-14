@@ -13,7 +13,7 @@ import type {Locale} from '@/i18n/routing';
 import {getHomeNewsCardsForSite} from '@/lib/cms/public-content';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 import {resolveVideoSource} from '@/lib/video-src';
 import {optionalImage} from '@/lib/optional-image';
@@ -22,8 +22,6 @@ import koMessages from '@/messages/ko.json';
 type Props = {
   params: Promise<{locale: Locale}>;
 };
-
-export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -34,7 +32,7 @@ export default async function HomePage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const messages = await getLocaleMessages(locale);
+  const messages = await getPublicLocaleMessages(locale, ['home']);
   const content = messages.home;
   const homeUi = messages.homeUi;
   const latestNews: HomeNewsPopupCard[] = await getHomeNewsCardsForSite(locale);

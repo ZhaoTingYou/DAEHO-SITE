@@ -45,6 +45,7 @@ class WorkspaceEmailSenderTest {
         Path.of("."),
         "/uploads",
         "admin-password",
+        "",
         "local",
         "",
         "",

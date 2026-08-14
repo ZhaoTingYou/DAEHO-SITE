@@ -7,10 +7,13 @@ import {SpecialtyCollectionCategory} from '@/components/specialty/specialty-coll
 import type {Locale} from '@/i18n/routing';
 import {getCollectionItemsForSite} from '@/lib/cms/public-content';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
-import {getCollectionCategorySeoFallback} from '@/lib/collection-category-seo';
 import {imageExists} from '@/lib/image-exists';
-import {getLocaleMessages} from '@/lib/locale-messages';
-import {getCmsPageSeoOverride, getDetailMetadata} from '@/lib/seo';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
+import {
+  getCmsPageSeoOverride,
+  getCollectionCategorySeoFallback,
+  getDetailMetadata
+} from '@/lib/seo';
 
 export type CollectionCategoryId = 'champion' | 'appointment' | 'bespoke';
 
@@ -19,14 +22,12 @@ type CategoryPageProps = {
   categoryId: CollectionCategoryId;
 };
 
-export const dynamic = 'force-dynamic';
-
 export async function getCollectionCategoryMetadata({
   params,
   categoryId
 }: CategoryPageProps): Promise<Metadata> {
   const {locale} = await params;
-  const messages = await getLocaleMessages(locale);
+  const messages = await getCategoryMessages(locale, categoryId);
   const category = messages.specialtyPages.collection.gallery.filters.find((filter) => filter.id === categoryId);
 
   if (!category) {
@@ -48,7 +49,7 @@ export async function getCollectionCategoryMetadata({
 export async function CollectionCategoryPage({params, categoryId}: CategoryPageProps) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const messages = await getLocaleMessages(locale);
+  const messages = await getCategoryMessages(locale, categoryId);
   const content = messages.specialtyPages.collection;
   const text = messages.collectionUi;
   const filters = content.gallery.filters.map((filter) => ({
@@ -92,4 +93,11 @@ export async function CollectionCategoryPage({params, categoryId}: CategoryPageP
       />
     </main>
   );
+}
+
+function getCategoryMessages(locale: Locale, categoryId: CollectionCategoryId) {
+  return getPublicLocaleMessages(locale, [
+    'mastery-creations',
+    `mastery-creations-${categoryId}`
+  ]);
 }

@@ -1,14 +1,14 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 import {maxAdminJsonBodyBytes, rejectOversizedRequest} from '@/lib/cms/http';
 import {CmsBackendError, sendNotificationTest} from '@/lib/cms/repositories';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'notifications:manage');
   if (unauthorized) return unauthorized;
   const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
   if (oversized) return oversized;
@@ -16,12 +16,16 @@ export async function POST(request: NextRequest) {
     channel?: 'email' | 'kakao';
     recipient?: string;
     templateKey?: string;
+    customerName?: string;
+    inquiryNumber?: string;
   } | null;
   try {
     return NextResponse.json(await sendNotificationTest({
       channel: body?.channel === 'kakao' ? 'kakao' : 'email',
       recipient: body?.recipient ?? '',
-      templateKey: body?.templateKey ?? ''
+      templateKey: body?.templateKey ?? '',
+      customerName: body?.customerName ?? '',
+      inquiryNumber: body?.inquiryNumber ?? ''
     }));
   } catch (error) {
     if (error instanceof CmsBackendError) {

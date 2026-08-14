@@ -6,8 +6,9 @@ import {notFound} from 'next/navigation';
 import {Reveal} from '@/components/motion/reveal';
 import {HistoryBackButton} from '@/components/navigation/history-back-button';
 import {SafeImage} from '@/components/safe-image';
+import {BreadcrumbStructuredData} from '@/components/site/breadcrumb-structured-data';
 import {CollectionDetailGallery} from '@/components/specialty/collection-detail-gallery';
-import type {Locale} from '@/i18n/routing';
+import {routing, type Locale} from '@/i18n/routing';
 import {
   getCollectionItemForSite,
   getCollectionItemsForSite
@@ -15,14 +16,12 @@ import {
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageExists} from '@/lib/image-exists';
 import {imageSrc} from '@/lib/image-src';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
 
 type Props = {
   params: Promise<{locale: Locale; slug: string}>;
 };
-
-export const dynamic = 'force-dynamic';
 
 const fallbackGalleryImages = [
   'collection_detail_01.png',
@@ -32,12 +31,25 @@ const fallbackGalleryImages = [
   'collection_detail_05.png'
 ];
 
+export async function generateStaticParams({params}: {params: {locale: string; slug: string}}) {
+  if (process.env.DAEHO_FRONTEND_ONLY !== 'true') {
+    return [];
+  }
+
+  if (!routing.locales.includes(params.locale as Locale)) {
+    return [];
+  }
+
+  const items = await getCollectionItemsForSite(params.locale as Locale);
+  return items.map((item) => ({slug: item.id}));
+}
+
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
   const item = await getCollectionItemForSite(locale, slug);
 
   if (!item) {
-    return getDetailMetadata(locale, '/mastery/creations', 'COLLECTION', '');
+    notFound();
   }
 
   return getDetailMetadata(
@@ -52,7 +64,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function CollectionDetailPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
-  const messages = await getLocaleMessages(locale);
+  const messages = await getPublicLocaleMessages(locale, ['mastery-creations']);
   const item = await getCollectionItemForSite(locale, slug);
 
   if (!item) {
@@ -70,6 +82,13 @@ export default async function CollectionDetailPage({params}: Props) {
 
   return (
     <main className="mobile-page-shell bg-bg text-text">
+      <BreadcrumbStructuredData
+        items={[
+          {name: messages.common.breadcrumb.home, path: `/${locale}`},
+          {name: messages.common.breadcrumb.creations, path: `/${locale}/mastery/creations`},
+          {name: item.title, path: `/${locale}/mastery/creations/${slug}`}
+        ]}
+      />
       <section className="bg-bg pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+20px)] md:pt-28">
         <div className="mx-auto max-w-[1280px] px-[var(--mobile-page-gutter)] pb-section pt-6 md:px-container md:pt-[clamp(40px,5vw,72px)]">
           <HistoryBackButton

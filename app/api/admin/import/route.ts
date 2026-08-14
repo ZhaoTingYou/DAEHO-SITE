@@ -1,16 +1,15 @@
-import {revalidatePath} from 'next/cache';
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 import {maxImportBodyBytes, rejectOversizedRequest} from '@/lib/cms/http';
 import {getCmsBackendBaseUrl} from '@/lib/cms/repositories';
-import {locales} from '@/lib/locales';
+import {revalidateAllPublicCmsCache, revalidatePathsSafely} from '@/lib/cms/public-cache';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'system:manage');
 
   if (unauthorized) {
     return unauthorized;
@@ -35,6 +34,7 @@ export async function POST(request: NextRequest) {
   const body = await response.text();
 
   if (response.ok && shouldReplace) {
+    revalidateAllPublicCmsCache();
     revalidateCmsPaths();
   }
 
@@ -48,23 +48,13 @@ export async function POST(request: NextRequest) {
 }
 
 function revalidateCmsPaths() {
-  const localizedPaths = locales.flatMap((locale) => [
-    `/${locale}`,
-    `/${locale}/news`,
-    `/${locale}/mastery/creations`
-  ]);
-
-  for (const path of [
+  revalidatePathsSafely([
     '/admin',
     '/admin/collections',
     '/admin/export',
     '/admin/inquiries',
     '/admin/media',
     '/admin/news',
-    '/admin/pages',
-    ...localizedPaths,
-    '/sitemap.xml'
-  ]) {
-    revalidatePath(path);
-  }
+    '/admin/pages'
+  ]);
 }

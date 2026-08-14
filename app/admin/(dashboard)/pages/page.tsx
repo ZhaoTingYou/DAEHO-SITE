@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {listPages} from '@/lib/cms/repositories';
 import {
   deepMergeJson,
@@ -21,6 +22,7 @@ import {getLocaleMessages} from '@/lib/locale-messages';
 import {EmptyState, PageHeader, Panel} from '../../_components/admin-shell';
 
 export default async function AdminPagesPage() {
+  await assertAdminCapability('content:read');
   const {locale: adminLocale, t} = await getAdminI18n();
   const pages = await listPages();
   const koMessages = await getLocaleMessages('ko');

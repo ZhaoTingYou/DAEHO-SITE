@@ -14,6 +14,10 @@ const settings = readFileSync(
   new URL('./_components/notification-settings-editor.tsx', import.meta.url),
   'utf8'
 );
+const statusManager = readFileSync(
+  new URL('./_components/inquiry-status-manager.tsx', import.meta.url),
+  'utf8'
+);
 
 test('inquiry status changes preview recipients and content before confirmation', () => {
   assert.match(statusControl, /\/status-preview/);
@@ -40,4 +44,19 @@ test('notification settings keep Kakao approval and provider codes separate from
   assert.match(settings, /providerTemplateCode/);
   assert.match(settings, /isActive/);
   assert.match(settings, /\/api\/admin\/notifications\/test/);
+});
+
+test('Kakao template setup only asks for the provider ID and test variables', () => {
+  assert.match(settings, /copy\.providerCode[\s\S]*?<input\s+required/);
+  assert.match(settings, /customerName/);
+  assert.match(settings, /inquiryNumber/);
+  assert.doesNotMatch(settings, /value="highlight"/);
+});
+
+test('inquiry statuses are CMS-managed and immediately available to the workflow control', () => {
+  assert.match(statusControl, /selectableStatuses/);
+  assert.match(statusControl, /statuses\.filter/);
+  assert.match(statusManager, /POST/);
+  assert.match(statusManager, /PATCH/);
+  assert.match(statusManager, /\/api\/admin\/inquiry-statuses/);
 });

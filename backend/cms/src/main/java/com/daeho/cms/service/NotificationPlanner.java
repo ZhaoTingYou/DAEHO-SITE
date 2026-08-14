@@ -15,15 +15,18 @@ public class NotificationPlanner {
   private final CmsProperties cmsProperties;
   private final NotificationRepository repository;
   private final NotificationTemplateRenderer renderer;
+  private final NotificationTestService notificationTest;
 
   public NotificationPlanner(
       CmsProperties cmsProperties,
       NotificationRepository repository,
-      NotificationTemplateRenderer renderer
+      NotificationTemplateRenderer renderer,
+      NotificationTestService notificationTest
   ) {
     this.cmsProperties = cmsProperties;
     this.repository = repository;
     this.renderer = renderer;
+    this.notificationTest = notificationTest;
   }
 
   public Map<String, Object> previewStatusChange(Map<String, Object> inquiry, String nextStatus) {
@@ -73,7 +76,6 @@ public class NotificationPlanner {
     var settings = settings();
     var kakaoTemplatesReady = CUSTOMER_STATUSES.stream().allMatch(status ->
         repository.getActiveTemplate(templateKey("kakao", status, "ko")) != null
-            && repository.getActiveTemplate(templateKey("kakao", status, "en")) != null
     );
     return orderedMap(
         "settings", settings,
@@ -143,6 +145,8 @@ public class NotificationPlanner {
 
     var originalPhone = firstNonBlank(inquiry.get("phone"), inquiry.get("contact"));
     if (!originalPhone.isBlank()) {
+      var kakaoEnabled = validationBoolean(settings.get("kakaoEnabled"))
+          && notificationTest.kakaoVerified();
       var normalizedPhone = normalizeKoreanPhone(originalPhone);
       var recipient = normalizedPhone.isBlank() ? digits(originalPhone) : normalizedPhone;
       var plan = buildPlan(
@@ -153,10 +157,10 @@ public class NotificationPlanner {
           "kakao",
           "customer",
           "status_changed",
-          locale,
+          "ko",
           recipient,
-          validationBoolean(settings.get("kakaoEnabled")),
-          templateKey("kakao", nextStatus, locale),
+          kakaoEnabled,
+          templateKey("kakao", nextStatus, "ko"),
           text(inquiry.get("id")) + ":" + eventPart + ":customer:kakao"
       );
       if (normalizedPhone.isBlank()) {
@@ -184,7 +188,13 @@ public class NotificationPlanner {
   ) {
     var template = repository.getActiveTemplate(templateKey);
     var latestTemplate = template == null ? repository.getLatestTemplate(templateKey) : template;
-    var variables = renderer.variables(inquiry, previousStatus, nextStatus);
+    var variables = renderer.variables(
+        inquiry,
+        previousStatus,
+        nextStatus,
+        managedStatusLabel(previousStatus, locale),
+        managedStatusLabel(nextStatus, locale)
+    );
     var subject = "";
     var body = "";
     var templateError = "";
@@ -207,6 +217,9 @@ public class NotificationPlanner {
         && !recipient.isBlank()
         && approved
         && templateError.isBlank();
+    var verificationFingerprint = "kakao".equals(channel) && latestTemplate != null
+        ? notificationTest.verificationFingerprint(templateKey, latestTemplate)
+        : "";
     var reason = "";
     if (recipient.isBlank()) {
       reason = "Recipient is not configured.";
@@ -217,6 +230,12 @@ public class NotificationPlanner {
     } else if (!approved) {
       reason = "The Kakao template is not approved and active.";
     }
+    var providerVariables = "kakao".equals(channel)
+        ? Map.of(
+            "#{고객명}", variables.getOrDefault("name", ""),
+            "#{문의번호}", variables.getOrDefault("inquiry_id", "")
+        )
+        : Map.<String, String>of();
     return orderedMap(
         "inquiryId", inquiry.get("id"),
         "statusEventId", statusEventId,
@@ -233,6 +252,9 @@ public class NotificationPlanner {
         "templateKey", templateKey,
         "templateVersion", latestTemplate == null ? 0 : latestTemplate.get("version"),
         "providerTemplateCode", latestTemplate == null ? "" : latestTemplate.get("providerTemplateCode"),
+        "kakaoTemplateType", latestTemplate == null ? "basic" : latestTemplate.get("kakaoTemplateType"),
+        "providerVariables", providerVariables,
+        "verificationFingerprint", verificationFingerprint,
         "enabled", enabled,
         "ready", ready,
         "reason", reason,
@@ -274,6 +296,19 @@ public class NotificationPlanner {
 
   private String templateKey(String channel, String status, String locale) {
     return "customer_" + status + "_" + channel + "_" + locale;
+  }
+
+  private String managedStatusLabel(String status, String locale) {
+    if (status.isBlank()) {
+      return "";
+    }
+    var definition = repository.getInquiryStatus(status);
+    if (definition == null) {
+      return "";
+    }
+    return "en".equals(locale)
+        ? firstNonBlank(definition.get("labelEn"), definition.get("labelKo"))
+        : text(definition.get("labelKo"));
   }
 
   private String normalizeKoreanPhone(String value) {

@@ -90,6 +90,42 @@ class InquiryWorkflowServiceTest {
     verify(planner).queueNewInquiry(inquiry);
   }
 
+  @Test
+  void changesToAnActiveCmsManagedStatus() {
+    var current = inquiry("new");
+    var updated = inquiry("waiting_for_customer");
+    var event = Map.<String, Object>of(
+        "id", "event-custom",
+        "previousStatus", "new",
+        "nextStatus", "waiting_for_customer"
+    );
+    when(inquiries.getInquiry("inquiry-1")).thenReturn(current);
+    when(inquiries.getInquiryStatusForUpdate("waiting_for_customer")).thenReturn(Map.of("isActive", true));
+    when(inquiries.updateInquiryStatusIfExpected("inquiry-1", "new", "waiting_for_customer")).thenReturn(updated);
+    when(notifications.createStatusEvent("inquiry-1", "new", "waiting_for_customer")).thenReturn(event);
+    when(notifications.listStatusEvents("inquiry-1")).thenReturn(java.util.List.of(event));
+    when(notifications.listJobsForInquiry("inquiry-1")).thenReturn(java.util.List.of());
+    when(notifications.listAttemptsForInquiry("inquiry-1")).thenReturn(java.util.List.of());
+
+    var result = workflow.changeStatus("inquiry-1", "new", "waiting_for_customer");
+
+    assertEquals("waiting_for_customer", ((Map<?, ?>) result.get("inquiry")).get("status"));
+  }
+
+  @Test
+  void rejectsAnInactiveCmsManagedStatus() {
+    when(inquiries.getInquiry("inquiry-1")).thenReturn(inquiry("new"));
+    when(inquiries.getInquiryStatusForUpdate("paused")).thenReturn(Map.of("isActive", false));
+
+    var error = assertThrows(
+        ResponseStatusException.class,
+        () -> workflow.changeStatus("inquiry-1", "new", "paused")
+    );
+
+    assertEquals(422, error.getStatusCode().value());
+    verify(inquiries, never()).updateInquiryStatusIfExpected("inquiry-1", "new", "paused");
+  }
+
   private Map<String, Object> inquiry(String status) {
     return Map.of(
         "id", "inquiry-1",

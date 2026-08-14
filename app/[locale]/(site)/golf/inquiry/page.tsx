@@ -3,18 +3,19 @@ import Link from 'next/link';
 import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
-import {GolfInquiryForm} from '@/components/forms/golf-inquiry-form';
+import {
+  GolfInquiryFormFromQuery,
+  GolfInquirySummary
+} from '@/components/golf/golf-inquiry-query';
 import {Reveal} from '@/components/motion/reveal';
-import {SafeImage} from '@/components/safe-image';
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getPageMetadata} from '@/lib/seo';
 
 type Props = {
   params: Promise<{locale: Locale}>;
-  searchParams: Promise<{head?: string; shaft?: string; style?: string; engraving?: string}>;
 };
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
@@ -27,25 +28,17 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return getPageMetadata(locale, 'golfInquiry');
 }
 
-export default async function GolfInquiryPage({params, searchParams}: Props) {
+export default async function GolfInquiryPage({params}: Props) {
   const {locale} = await params;
-  const query = await searchParams;
   setRequestLocale(locale);
 
   if (!(await isGolfEnabledForSite())) {
     notFound();
   }
 
-  const messages = await getLocaleMessages(locale);
+  const messages = await getPublicLocaleMessages(locale, ['golf-inquiry']);
   const text = messages.golfInquiry;
   const golf = messages.golf;
-  const selectedHead = golf.heads.items.find((item) => item.id === query.head) ?? golf.heads.items[0];
-  const selectedShaft =
-    golf.shafts.items.find((item) => item.id === query.shaft) ?? golf.shafts.items[0];
-  const styleOptions = golf.labels.styleOptions?.length ? golf.labels.styleOptions : ['BASIC', 'COLOUR'];
-  const selectedStyle =
-    styleOptions.find((option) => option === query.style?.trim()) ?? styleOptions[0] ?? 'BASIC';
-  const engravingSample = query.engraving?.trim().slice(0, 80) || 'JUDY KIM 2026.05.03';
 
   return (
     <main className="mobile-page-shell bg-bg text-text">
@@ -64,22 +57,7 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
             </Link>
           </Reveal>
           <Reveal className="grid gap-4 bg-bg p-4 shadow-[0_24px_86px_rgba(16,29,48,0.08)] md:gap-5 md:p-7">
-            <SafeImage
-              filename={selectedShaft.image}
-              alt={`${selectedHead.label} ${selectedShaft.label}`}
-              aspect="aspect-[4/3]"
-              variant="plain"
-              priority
-            />
-            <div className="space-y-4 bg-white p-4 md:p-5">
-              <p className="font-body text-eyebrow font-semibold uppercase tracking-[0.22em] text-accent">
-                {text.summary}
-              </p>
-              <SpecRow label={text.head} value={selectedHead.label} />
-              <SpecRow label={text.shaft} value={selectedShaft.label} />
-              <SpecRow label={text.style} value={selectedStyle} />
-              <SpecRow label={text.engraving} value={engravingSample} />
-            </div>
+            <GolfInquirySummary golf={golf} text={text} />
           </Reveal>
         </div>
       </section>
@@ -87,27 +65,10 @@ export default async function GolfInquiryPage({params, searchParams}: Props) {
       <section className="bg-bg py-[var(--mobile-section-space)] md:py-section">
         <div className="mx-auto max-w-5xl px-[var(--mobile-page-gutter)] md:px-container">
           <Reveal className="bg-white p-4 shadow-[0_24px_86px_rgba(16,29,48,0.07)] md:p-8">
-            <GolfInquiryForm
-              copy={messages.forms.golfInquiry}
-              configuration={{
-                head: selectedHead.label,
-                shaft: selectedShaft.label,
-                style: selectedStyle,
-                engraving: engravingSample
-              }}
-            />
+            <GolfInquiryFormFromQuery golf={golf} copy={messages.forms.golfInquiry} />
           </Reveal>
         </div>
       </section>
     </main>
-  );
-}
-
-function SpecRow({label, value}: {label: string; value: string}) {
-  return (
-    <div className="flex flex-col gap-1 border-t border-hairline pt-4 font-body text-[16px] leading-6 md:flex-row md:items-center md:justify-between md:gap-5 md:text-sm">
-      <span className="font-semibold uppercase tracking-[0.08em] text-subtext md:tracking-[0.14em]">{label}</span>
-      <span className="break-words font-semibold text-primary md:text-right">{value}</span>
-    </div>
   );
 }

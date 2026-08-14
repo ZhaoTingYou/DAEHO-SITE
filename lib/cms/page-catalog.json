@@ -655,6 +655,7 @@
       {"path": "labels.previousShaft", "label": "上一张辅助标签"},
       {"path": "labels.nextShaft", "label": "下一张辅助标签"},
       {"path": "labels.styleOptions", "label": "样式选项", "type": "stringList"},
+      {"path": "labels.engravingSample", "label": "默认刻字示例"},
       {"path": "process.packageImageLabel", "label": "流程包装图占位文案"},
       {"path": "process.title", "label": "流程标题"},
       {"path": "process.steps", "label": "流程步骤", "type": "json"}
@@ -710,6 +711,9 @@
       {"groupKey": "main", "path": "hero.eyebrow", "label": "Hero 眉标"},
       {"groupKey": "main", "path": "hero.title", "label": "Hero 标题"},
       {"groupKey": "main", "path": "hero.body", "label": "Hero 正文", "type": "textarea", "rows": 4},
+      {"groupKey": "main", "path": "directPhone.before", "label": "B2B 直通电话前文案"},
+      {"groupKey": "main", "path": "directPhone.phone", "label": "B2B 直通电话号码"},
+      {"groupKey": "main", "path": "directPhone.after", "label": "B2B 直通电话后文案"},
       {"groupKey": "main", "path": "faqTitle", "label": "FAQ 标题"},
       {"groupKey": "main", "path": "faqCategoryLabels.other", "label": "其他分类名称", "labels": {"ko": "기타 분류명", "en": "Other label", "zh": "其他分类名称"}},
       {"groupKey": "form", "path": "name", "label": "姓名标签"},

@@ -1,0 +1,31 @@
+import {NextResponse} from 'next/server';
+import type {NextRequest} from 'next/server';
+
+import {requireAdminCapability} from '@/lib/cms/auth';
+import {maxAdminJsonBodyBytes, parseJsonBody, rejectOversizedRequest, validationError} from '@/lib/cms/http';
+import {CmsBackendError, updateInquiryStatusDefinition} from '@/lib/cms/repositories';
+import {inquiryStatusCodeSchema, inquiryStatusDefinitionUpdateSchema} from '@/lib/cms/validation';
+
+export const runtime = 'nodejs';
+
+type RouteContext = {params: Promise<{code: string}>};
+
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  const unauthorized = await requireAdminCapability(request, 'inquiries:write');
+  if (unauthorized) return unauthorized;
+  const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
+  if (oversized) return oversized;
+  const {code} = await context.params;
+  const parsedCode = inquiryStatusCodeSchema.safeParse(code);
+  if (!parsedCode.success) return validationError(parsedCode.error);
+  const parsed = await parseJsonBody(request, inquiryStatusDefinitionUpdateSchema);
+  if (!parsed.success) return validationError(parsed.error);
+  try {
+    return NextResponse.json(await updateInquiryStatusDefinition(parsedCode.data, parsed.data));
+  } catch (error) {
+    if (error instanceof CmsBackendError) {
+      return NextResponse.json(error.payload ?? {error: error.message}, {status: error.status});
+    }
+    throw error;
+  }
+}

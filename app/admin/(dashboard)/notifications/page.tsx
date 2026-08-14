@@ -1,4 +1,5 @@
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {
   getNotificationHealth,
   listNotificationTemplates
@@ -8,6 +9,7 @@ import {PageHeader} from '../../_components/admin-shell';
 import {NotificationSettingsEditor} from '../../_components/notification-settings-editor';
 
 export default async function AdminNotificationsPage() {
+  await assertAdminCapability('notifications:manage');
   const {t} = await getAdminI18n();
   const [health, templates] = await Promise.all([
     getNotificationHealth(),
@@ -40,6 +42,7 @@ export default async function AdminNotificationsPage() {
           worker: t('notification.worker'),
           emailConnection: t('notification.emailConnection'),
           kakaoConnection: t('notification.kakaoConnection'),
+          kakaoVerification: t('notification.kakaoVerification'),
           kakaoTemplates: t('notification.kakaoTemplates'),
           configured: t('overview.configured'),
           notConfigured: t('overview.notConfigured'),
@@ -51,6 +54,11 @@ export default async function AdminNotificationsPage() {
           templates: t('notification.templates'),
           version: t('notification.version'),
           subject: t('notification.subject'),
+          kakaoTemplateType: t('notification.kakaoTemplateType'),
+          kakaoTemplateBasic: t('notification.kakaoTemplateBasic'),
+          kakaoTemplateHighlight: t('notification.kakaoTemplateHighlight'),
+          kakaoHighlightTitle: t('notification.kakaoHighlightTitle'),
+          templateVariables: t('notification.templateVariables'),
           body: t('notification.body'),
           providerCode: t('notification.providerCode'),
           approval: t('notification.approval'),
@@ -62,6 +70,8 @@ export default async function AdminNotificationsPage() {
           testSend: t('notification.testSend'),
           testRecipient: t('notification.testRecipient'),
           testTemplate: t('notification.testTemplate'),
+          testCustomerName: t('notification.testCustomerName'),
+          testInquiryNumber: t('notification.testInquiryNumber'),
           testSuccess: t('notification.testSuccess'),
           testError: t('notification.testError')
         }}

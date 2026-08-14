@@ -8,19 +8,19 @@ import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
 
 import {
-  assertAdminSession,
+  assertAdminCapability,
   clearAdminLoginFailures,
   clearAdminSession,
   createAdminSession,
   isAdminLoginRateLimited,
-  recordFailedAdminLogin,
-  verifyAdminPassword
+  recordFailedAdminLogin
 } from '@/lib/cms/admin-session';
-import {
-  changeStoredAdminPassword,
-  isCmsBackendPasswordError
-} from '@/lib/cms/admin-password';
+import {normalizeAdminEmail} from '@/lib/cms/admin-authorization-core.mjs';
+import {createAdminLoginAttemptKey} from '@/lib/cms/admin-login-core.mjs';
+import {isCmsBackendPasswordError} from '@/lib/cms/admin-password';
+import {authenticateAdmin, changeOwnAdminPassword} from '@/lib/cms/admin-users';
 import {appendAdminActionError} from '@/lib/cms/admin-action-error';
+import {revalidatePathsSafely} from '@/lib/cms/public-cache';
 import {
   createCollection,
   createNews,
@@ -56,7 +56,6 @@ import {
   getEditableLeaves,
   getEditableLeavesForPageGroup,
   getManagedPageDefinition,
-  managedPageDefinitions,
   getObjectValueAtPath,
   getPageFieldDefinitionsForGroup,
   getPageContentGroups,
@@ -101,23 +100,25 @@ const contactFaqErrorMessageKeys: Record<string, string> = {
 };
 
 export async function loginAction(formData: FormData) {
+  const email = normalizeAdminEmail(stringFromForm(formData, 'email'));
   const password = stringFromForm(formData, 'password');
-  const attemptKey = await getAdminLoginAttemptKey();
+  const attemptKey = await getAdminLoginAttemptKey(email);
 
   if (isAdminLoginRateLimited(attemptKey)) {
     redirect('/admin/login?error=rate');
   }
 
-  const verification = await verifyAdminPassword(password);
-
-  if (!verification.valid) {
+  let identity;
+  try {
+    identity = await authenticateAdmin(email, password);
+  } catch {
     recordFailedAdminLogin(attemptKey);
     redirect('/admin/login?error=1');
   }
 
   clearAdminLoginFailures(attemptKey);
-  await createAdminSession(verification.version);
-  redirect('/admin');
+  await createAdminSession(identity);
+  redirect(identity.mustChangePassword ? '/admin/account?required=1' : '/admin');
 }
 
 export async function logoutAction() {
@@ -126,7 +127,7 @@ export async function logoutAction() {
 }
 
 export async function changeAdminPasswordAction(formData: FormData) {
-  await assertAdminSession();
+  const identity = await assertAdminCapability('account:self');
 
   const currentPassword = stringFromForm(formData, 'currentPassword');
   const newPassword = rawStringFromForm(formData, 'newPassword');
@@ -137,7 +138,7 @@ export async function changeAdminPasswordAction(formData: FormData) {
   }
 
   try {
-    await changeStoredAdminPassword(currentPassword, newPassword);
+    await changeOwnAdminPassword(identity, currentPassword, newPassword);
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
@@ -157,7 +158,7 @@ export async function changeAdminPasswordAction(formData: FormData) {
 }
 
 export async function updateInquiryStatusAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('inquiries:write');
 
   const id = stringFromForm(formData, 'id');
   const parsed = inquiryStatusSchema.safeParse({
@@ -176,7 +177,7 @@ export async function updateInquiryStatusAction(formData: FormData) {
 }
 
 export async function saveNewsAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   const id = stringFromForm(formData, 'id');
   const editorPath = `/admin/news/${id || 'new'}`;
@@ -211,9 +212,7 @@ export async function saveNewsAction(formData: FormData) {
     const nextEditorPath = savedItem?.id ? `/admin/news/${savedItem.id}` : editorPath;
     await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
 
-    revalidatePath('/admin/news');
-    revalidatePath(nextEditorPath);
-    revalidatePublicNewsPaths(previousNews, savedItem);
+    revalidatePathsSafely(['/admin/news', nextEditorPath]);
     redirect(nextEditorPath);
   } catch (error) {
     redirectWithAdminActionError(editorPath, error);
@@ -221,7 +220,7 @@ export async function saveNewsAction(formData: FormData) {
 }
 
 export async function deleteNewsAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:delete');
 
   try {
     const id = stringFromForm(formData, 'id');
@@ -232,14 +231,14 @@ export async function deleteNewsAction(formData: FormData) {
       await cleanupUnreferencedPublicImages(previousImages);
     }
 
-    revalidatePath('/admin/news');
+    revalidatePathsSafely(['/admin/news']);
   } catch (error) {
     redirectWithAdminActionError('/admin/news', error);
   }
 }
 
 export async function saveCollectionAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   const id = stringFromForm(formData, 'id');
   const editorPath = `/admin/collections/${id || 'new'}`;
@@ -269,8 +268,7 @@ export async function saveCollectionAction(formData: FormData) {
     const nextEditorPath = savedItem?.id ? `/admin/collections/${savedItem.id}` : editorPath;
     await cleanupRemovedImages(previousImages, collectImageFilenames(savedItem));
 
-    revalidatePath('/admin/collections');
-    revalidatePath(nextEditorPath);
+    revalidatePathsSafely(['/admin/collections', nextEditorPath]);
     redirect(nextEditorPath);
   } catch (error) {
     redirectWithAdminActionError(editorPath, error);
@@ -278,7 +276,7 @@ export async function saveCollectionAction(formData: FormData) {
 }
 
 export async function deleteCollectionAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:delete');
 
   try {
     const id = stringFromForm(formData, 'id');
@@ -289,14 +287,14 @@ export async function deleteCollectionAction(formData: FormData) {
       await cleanupUnreferencedPublicImages(previousImages);
     }
 
-    revalidatePath('/admin/collections');
+    revalidatePathsSafely(['/admin/collections']);
   } catch (error) {
     redirectWithAdminActionError('/admin/collections', error);
   }
 }
 
 export async function savePageAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   const pageKey = stringFromForm(formData, 'pageKey');
   const definition = getManagedPageDefinition(pageKey);
@@ -378,17 +376,7 @@ export async function savePageAction(formData: FormData) {
       await cleanupRemovedImages(previousImages, collectImageFilenames(savedPage));
     }
 
-    revalidatePath('/admin/pages');
-    revalidatePath(`/admin/pages/${pageKey}`);
-    revalidatePath(returnTo);
-
-    if (pageKey === 'common') {
-      revalidateManagedPublicPaths();
-    } else if (definition?.href) {
-      for (const locale of locales) {
-        revalidatePath(`/${locale}${definition.href === '/' ? '' : definition.href}`);
-      }
-    }
+    revalidatePathsSafely(['/admin/pages', `/admin/pages/${pageKey}`, returnTo]);
 
     redirect(returnTo);
   } catch (error) {
@@ -412,7 +400,7 @@ export async function savePageAction(formData: FormData) {
 }
 
 export async function saveSitePopupAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
   const returnTo = '/admin/popup';
 
   try {
@@ -447,10 +435,7 @@ export async function saveSitePopupAction(formData: FormData) {
     const savedPage = await upsertPage('site-popup', payload);
 
     await cleanupRemovedImages(previousImages, collectImageFilenames(savedPage));
-    revalidatePath('/admin/pages');
-    revalidatePath('/admin/pages/site-popup');
-    revalidatePath(returnTo);
-    revalidateManagedPublicPaths();
+    revalidatePathsSafely(['/admin/pages', '/admin/pages/site-popup', returnTo]);
     redirect(`${returnTo}?saved=1`);
   } catch (error) {
     redirectWithAdminActionError(returnTo, error);
@@ -462,7 +447,7 @@ function techniqueLocaleRecords(value: unknown) {
 }
 
 export async function uploadMediaAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   try {
     const file = formData.get('file');
@@ -488,7 +473,7 @@ export async function uploadMediaAction(formData: FormData) {
 }
 
 export async function updateMediaAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:write');
 
   try {
     const id = stringFromForm(formData, 'id');
@@ -508,7 +493,7 @@ export async function updateMediaAction(formData: FormData) {
 }
 
 export async function deleteMediaAction(formData: FormData) {
-  await assertAdminSession();
+  await assertAdminCapability('content:delete');
 
   try {
     const id = stringFromForm(formData, 'id');
@@ -603,27 +588,6 @@ function newsBlockWidth(value: string) {
 
 function newsBlockSpacing(value: string) {
   return value === 'compact' || value === 'loose' ? value : 'default';
-}
-
-function revalidatePublicNewsPaths(previousNews: unknown, nextNews: unknown) {
-  const slugs = new Set([newsItemSlug(previousNews), newsItemSlug(nextNews)].filter(isString));
-
-  for (const locale of locales) {
-    revalidatePath(`/${locale}/news`);
-
-    for (const slug of slugs) {
-      revalidatePath(`/${locale}/news/${slug}`);
-    }
-  }
-}
-
-function newsItemSlug(value: unknown) {
-  if (!value || typeof value !== 'object') {
-    return null;
-  }
-
-  const slug = (value as {slug?: unknown}).slug;
-  return typeof slug === 'string' && slug.trim() ? slug.trim() : null;
 }
 
 function readCollectionTranslation(formData: FormData, locale: Locale) {
@@ -1063,16 +1027,6 @@ function redirectWithAdminActionError(pathValue: string, error: unknown): never 
   redirect(appendAdminActionError(pathValue, error));
 }
 
-function revalidateManagedPublicPaths() {
-  const hrefs = new Set(managedPageDefinitions.map((definition) => definition.href).filter(Boolean));
-
-  for (const href of hrefs) {
-    for (const locale of locales) {
-      revalidatePath(`/${locale}${href === '/' ? '' : href}`);
-    }
-  }
-}
-
 function parseTags(value: string) {
   return value
     .split(',')
@@ -1255,11 +1209,12 @@ function isAllowedImageUpload(file: File) {
   return isAllowedCmsImageUpload(file);
 }
 
-async function getAdminLoginAttemptKey() {
+async function getAdminLoginAttemptKey(email: string) {
   const headerStore = await headers();
-  return (
+  const ipAddress = (
     headerStore.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     headerStore.get('x-real-ip') ||
     'local'
   );
+  return createAdminLoginAttemptKey(email, ipAddress);
 }

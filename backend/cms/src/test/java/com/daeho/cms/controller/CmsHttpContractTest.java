@@ -32,7 +32,7 @@ import com.daeho.cms.service.CmsSnapshotService;
 import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.MediaStorageService;
-import com.daeho.cms.service.NaverSensKakaoClient;
+import com.daeho.cms.service.SolapiKakaoClient;
 import com.daeho.cms.service.NotificationPlanner;
 import com.daeho.cms.service.NotificationTemplateRenderer;
 import com.daeho.cms.service.NotificationTestService;
@@ -60,6 +60,8 @@ class CmsHttpContractTest {
   private MediaStorageService mediaStorage;
   private NotificationRepository notifications;
   private NotificationPlanner notificationPlanner;
+  private SolapiKakaoClient kakao;
+  private NotificationTestService notificationTest;
   private InquiryWorkflowService inquiryWorkflow;
   private CmsSnapshotService snapshots;
   private CmsStatusService status;
@@ -72,6 +74,8 @@ class CmsHttpContractTest {
     mediaStorage = mock(MediaStorageService.class);
     notifications = mock(NotificationRepository.class);
     notificationPlanner = mock(NotificationPlanner.class);
+    kakao = mock(SolapiKakaoClient.class);
+    notificationTest = mock(NotificationTestService.class);
     inquiryWorkflow = mock(InquiryWorkflowService.class);
     snapshots = mock(CmsSnapshotService.class);
     status = mock(CmsStatusService.class);
@@ -85,6 +89,7 @@ class CmsHttpContractTest {
         Path.of("/tmp/uploads"),
         "/uploads",
         "",
+        "",
         "local",
         "",
         "",
@@ -94,7 +99,7 @@ class CmsHttpContractTest {
         ""
     ));
     var validation = new RequestValidation();
-    var notificationProperties = new NotificationProperties(false, 1000, "", "", "", "", "", "");
+    var notificationProperties = new NotificationProperties(false, 1000, "", "", "", "", "");
     mvc = MockMvcBuilders.standaloneSetup(
             new AdminCmsController(
                 auth,
@@ -106,9 +111,9 @@ class CmsHttpContractTest {
                 new NotificationTemplateRenderer(notificationProperties),
                 inquiryWorkflow,
                 mock(WorkspaceEmailSender.class),
-                mock(NaverSensKakaoClient.class),
+                kakao,
                 notificationProperties,
-                mock(NotificationTestService.class),
+                notificationTest,
                 snapshots,
                 status,
                 mock(AdminPasswordService.class)
@@ -315,6 +320,109 @@ class CmsHttpContractTest {
   }
 
   @Test
+  void managesCmsInquiryStatuses() throws Exception {
+    var customStatus = Map.<String, Object>of(
+        "code", "waiting_for_customer",
+        "labelKo", "고객 회신 대기",
+        "labelEn", "Waiting for customer",
+        "labelZh", "等待客户回复",
+        "color", "purple",
+        "sortOrder", 25,
+        "isActive", true,
+        "isSystem", false,
+        "updatedAt", "2026-08-11T02:00:00Z"
+    );
+    when(repository.listInquiryStatuses()).thenReturn(List.of(customStatus));
+    when(repository.getInquiryStatus("waiting_for_customer")).thenReturn(null, customStatus);
+    when(repository.createInquiryStatus(anyMap())).thenReturn(customStatus);
+    when(repository.updateInquiryStatus(eq("waiting_for_customer"), anyMap())).thenReturn(customStatus);
+
+    mvc.perform(get("/api/admin/inquiry-statuses").header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items[0].code").value("waiting_for_customer"));
+
+    mvc.perform(post("/api/admin/inquiry-statuses")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "code":"waiting_for_customer",
+                  "labelKo":"고객 회신 대기",
+                  "labelEn":"Waiting for customer",
+                  "labelZh":"等待客户回复",
+                  "color":"purple",
+                  "sortOrder":25,
+                  "isActive":true
+                }
+                """))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.item.code").value("waiting_for_customer"));
+
+    mvc.perform(patch("/api/admin/inquiry-statuses/waiting_for_customer")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "labelKo":"고객 회신 대기",
+                  "labelEn":"Waiting for customer",
+                  "labelZh":"等待客户回复",
+                  "color":"purple",
+                  "sortOrder":25,
+                  "isActive":false,
+                  "expectedUpdatedAt":"2026-08-11T02:00:00Z"
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.item.code").value("waiting_for_customer"));
+  }
+
+  @Test
+  void returnsConflictForConcurrentInquiryStatusCreateAndUpdate() throws Exception {
+    var existing = Map.<String, Object>of(
+        "code", "waiting_for_customer",
+        "isSystem", false,
+        "updatedAt", "2026-08-11T02:00:00Z"
+    );
+    when(repository.getInquiryStatus("waiting_for_customer")).thenReturn(null);
+    when(repository.createInquiryStatus(anyMap())).thenReturn(null);
+
+    mvc.perform(post("/api/admin/inquiry-statuses")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "code":"waiting_for_customer",
+                  "labelKo":"고객 회신 대기",
+                  "labelEn":"Waiting for customer",
+                  "labelZh":"等待客户回复",
+                  "color":"purple",
+                  "sortOrder":25,
+                  "isActive":true
+                }
+                """))
+        .andExpect(status().isConflict());
+
+    when(repository.getInquiryStatus("waiting_for_customer")).thenReturn(existing);
+    when(repository.updateInquiryStatus(eq("waiting_for_customer"), anyMap())).thenReturn(null);
+
+    mvc.perform(patch("/api/admin/inquiry-statuses/waiting_for_customer")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "labelKo":"고객 회신 대기",
+                  "labelEn":"Waiting for customer",
+                  "labelZh":"等待客户回复",
+                  "color":"purple",
+                  "sortOrder":25,
+                  "isActive":true,
+                  "expectedUpdatedAt":"2026-08-11T02:00:00Z"
+                }
+                """))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
   void rejectsUnknownNotificationTemplateVariablesBeforeSaving() throws Exception {
     when(notifications.getLatestTemplate("customer_done_email_ko")).thenReturn(Map.of(
         "id", "template-1",
@@ -345,6 +453,45 @@ class CmsHttpContractTest {
         ));
 
     verify(notifications, never()).createTemplateVersion(anyString(), anyMap(), anyMap());
+  }
+
+  @Test
+  void refusesToEnableKakaoBeforeAnApplicationTestSendSucceeds() throws Exception {
+    when(kakao.configured()).thenReturn(true);
+    when(notificationTest.kakaoVerified()).thenReturn(false);
+    when(notificationPlanner.health()).thenReturn(Map.of("kakaoTemplatesReady", true));
+    when(notifications.updateSettings(anyMap())).thenReturn(Map.of("kakaoEnabled", true));
+
+    mvc.perform(put("/api/admin/notifications/settings")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "internalEmail":"internal@example.com",
+                  "internalEmailEnabled":true,
+                  "customerEmailEnabled":true,
+                  "kakaoEnabled":true
+                }
+                """))
+        .andExpect(status().isConflict());
+
+    verify(notifications, never()).updateSettings(anyMap());
+  }
+
+  @Test
+  void refusesToRetryJobsQuarantinedDuringTheProviderCutover() throws Exception {
+    when(notifications.getJob("legacy-job")).thenReturn(Map.of(
+        "id", "legacy-job",
+        "status", "needs_attention",
+        "retryBlocked", true
+    ));
+    when(notifications.retryJob("legacy-job")).thenReturn(Map.of("id", "legacy-job"));
+
+    mvc.perform(post("/api/admin/notifications/jobs/legacy-job/retry")
+            .header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isConflict());
+
+    verify(notifications, never()).retryJob("legacy-job");
   }
 
   @Test

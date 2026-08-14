@@ -10,6 +10,7 @@ type Job = {
   subject: string;
   renderedBody: string;
   status: string;
+  retryBlocked: boolean;
   attemptCount: number;
   providerMessageId: string;
   lastError: string;
@@ -81,7 +82,7 @@ export function NotificationTimeline({
                 </div>
               </details>
             ) : null}
-            {job.status === 'failed' || job.status === 'needs_attention' ? (
+            {!job.retryBlocked && (job.status === 'failed' || job.status === 'needs_attention') ? (
               <button
                 type="button"
                 disabled={retrying === job.id}

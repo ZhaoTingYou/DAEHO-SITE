@@ -2,12 +2,12 @@ import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
 import {getCmsExportFilename, getCmsExportSnapshot} from '@/lib/cms/export';
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'system:manage');
 
   if (unauthorized) {
     return unauthorized;

@@ -4,6 +4,8 @@ import type {
   collectionPayloadSchema,
   contactInquirySchema,
   golfInquirySchema,
+  inquiryStatusDefinitionSchema,
+  inquiryStatusDefinitionUpdateSchema,
   inquiryStatusSchema,
   mediaPayloadSchema,
   mediaUpdateSchema,
@@ -11,6 +13,17 @@ import type {
   pagePayloadSchema
 } from './validation';
 import type {Locale} from '@/lib/locales';
+import {
+  publicCmsCacheSeconds,
+  publicCollectionItemCacheTags,
+  publicCollectionListCacheTags,
+  publicNewsItemCacheTags,
+  publicNewsListCacheTags,
+  publicPageCacheTags,
+  revalidatePublicCollectionCache,
+  revalidatePublicNewsCache,
+  revalidatePublicPageCache
+} from '@/lib/cms/public-cache';
 import {z} from 'zod';
 
 type PagePayload = z.infer<typeof pagePayloadSchema>;
@@ -19,6 +32,8 @@ type CollectionPayload = z.infer<typeof collectionPayloadSchema>;
 type ContactInquiryPayload = z.infer<typeof contactInquirySchema>;
 type GolfInquiryPayload = z.infer<typeof golfInquirySchema>;
 type InquiryStatusPayload = z.infer<typeof inquiryStatusSchema>;
+type InquiryStatusDefinitionPayload = z.infer<typeof inquiryStatusDefinitionSchema>;
+type InquiryStatusDefinitionUpdatePayload = z.infer<typeof inquiryStatusDefinitionUpdateSchema>;
 type MediaPayload = z.infer<typeof mediaPayloadSchema>;
 type MediaUpdatePayload = z.infer<typeof mediaUpdateSchema>;
 
@@ -80,7 +95,7 @@ export type CmsMedia = {
 export type CmsInquiry = {
   id: string;
   source: 'contact' | 'golf';
-  status: InquiryStatusPayload['status'];
+  status: string;
   locale: Locale;
   name: string;
   contact: string;
@@ -97,6 +112,19 @@ export type CmsInquiry = {
   pagePath: string;
   userAgent: string;
   ipAddress: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CmsInquiryStatusDefinition = {
+  code: string;
+  labelKo: string;
+  labelEn: string;
+  labelZh: string;
+  color: 'slate' | 'blue' | 'amber' | 'green' | 'red' | 'purple';
+  sortOrder: number;
+  isActive: boolean;
+  isSystem: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -124,7 +152,9 @@ export type CmsNotificationJob = {
   renderedBody: string;
   templateId: string | null;
   providerTemplateCode: string;
+  kakaoTemplateType: 'basic' | 'highlight';
   status: 'queued' | 'processing' | 'provider_pending' | 'sent' | 'failed' | 'needs_attention';
+  retryBlocked: boolean;
   attemptCount: number;
   deliveryCheckCount: number;
   nextAttemptAt: string;
@@ -173,6 +203,7 @@ export type CmsNotificationTemplate = {
   subject: string;
   body: string;
   providerTemplateCode: string;
+  kakaoTemplateType: 'basic' | 'highlight';
   approvalStatus: 'draft' | 'pending' | 'approved';
   isActive: boolean;
   createdAt: string;
@@ -318,6 +349,7 @@ type RequestMeta = {
 type CmsFetchOptions = {
   admin?: boolean;
   body?: unknown;
+  cacheTags?: string[];
   headers?: HeadersInit;
   method?: string;
 };
@@ -379,6 +411,7 @@ export async function upsertPage(pageKey: string, payload: PagePayload) {
     method: 'PUT',
     body: payload
   });
+  revalidatePublicPageCache(pageKey);
   return response.page;
 }
 
@@ -393,7 +426,9 @@ export async function listPublicNews(locale: Locale) {
     return staticItems;
   }
 
-  const response = await cmsFetch<{items: Array<Record<string, unknown>>}>(`/api/cms/news?locale=${locale}`);
+  const response = await cmsFetch<{items: Array<Record<string, unknown>>}>(`/api/cms/news?locale=${locale}`, {
+    cacheTags: publicNewsListCacheTags(locale)
+  });
   return response.items;
 }
 
@@ -404,6 +439,7 @@ export async function getPublicPage(pageKey: string, locale: Locale) {
   }
 
   return cmsFetch<Record<string, unknown>>(`/api/cms/pages/${encodeURIComponent(pageKey)}?locale=${locale}`, {
+    cacheTags: publicPageCacheTags(locale, pageKey),
     notFound: null
   });
 }
@@ -423,6 +459,7 @@ export async function getPublicNews(slug: string, locale: Locale) {
   }
 
   const response = await cmsFetch<{item: Record<string, unknown>}>(`/api/cms/news/${encodeURIComponent(slug)}?locale=${locale}`, {
+    cacheTags: publicNewsItemCacheTags(locale, slug),
     notFound: null
   });
   return response?.item ?? null;
@@ -434,25 +471,34 @@ export async function createNews(payload: NewsPayload) {
     method: 'POST',
     body: payload
   });
+  revalidatePublicNewsCache(null, response.item.slug);
   return response.item;
 }
 
 export async function updateNews(idOrSlug: string, payload: NewsPayload) {
+  const previousItem = await getNews(idOrSlug);
   const response = await cmsFetch<{item: CmsNews}>(`/api/admin/news/${encodeURIComponent(idOrSlug)}`, {
     admin: true,
     method: 'PUT',
     body: payload,
     notFound: null
   });
+  if (response?.item) {
+    revalidatePublicNewsCache(previousItem?.slug, response.item.slug);
+  }
   return response?.item ?? null;
 }
 
 export async function deleteNews(idOrSlug: string) {
+  const previousItem = await getNews(idOrSlug);
   const response = await cmsFetch<{ok: boolean}>(`/api/admin/news/${encodeURIComponent(idOrSlug)}`, {
     admin: true,
     method: 'DELETE',
     notFound: null
   });
+  if (response?.ok) {
+    revalidatePublicNewsCache(previousItem?.slug, null);
+  }
   return Boolean(response?.ok);
 }
 
@@ -467,7 +513,9 @@ export async function listPublicCollections(locale: Locale) {
     return staticItems;
   }
 
-  const response = await cmsFetch<{items: Array<Record<string, unknown>>}>(`/api/cms/collections?locale=${locale}`);
+  const response = await cmsFetch<{items: Array<Record<string, unknown>>}>(`/api/cms/collections?locale=${locale}`, {
+    cacheTags: publicCollectionListCacheTags(locale)
+  });
   return response.items;
 }
 
@@ -486,6 +534,7 @@ export async function getPublicCollection(slug: string, locale: Locale) {
   }
 
   const response = await cmsFetch<{item: Record<string, unknown>}>(`/api/cms/collections/${encodeURIComponent(slug)}?locale=${locale}`, {
+    cacheTags: publicCollectionItemCacheTags(locale, slug),
     notFound: null
   });
   return response?.item ?? null;
@@ -497,25 +546,34 @@ export async function createCollection(payload: CollectionPayload) {
     method: 'POST',
     body: payload
   });
+  revalidatePublicCollectionCache(null, response.item.slug);
   return response.item;
 }
 
 export async function updateCollection(idOrSlug: string, payload: CollectionPayload) {
+  const previousItem = await getCollection(idOrSlug);
   const response = await cmsFetch<{item: CmsCollection}>(`/api/admin/collections/${encodeURIComponent(idOrSlug)}`, {
     admin: true,
     method: 'PUT',
     body: payload,
     notFound: null
   });
+  if (response?.item) {
+    revalidatePublicCollectionCache(previousItem?.slug, response.item.slug);
+  }
   return response?.item ?? null;
 }
 
 export async function deleteCollection(idOrSlug: string) {
+  const previousItem = await getCollection(idOrSlug);
   const response = await cmsFetch<{ok: boolean}>(`/api/admin/collections/${encodeURIComponent(idOrSlug)}`, {
     admin: true,
     method: 'DELETE',
     notFound: null
   });
+  if (response?.ok) {
+    revalidatePublicCollectionCache(previousItem?.slug, null);
+  }
   return Boolean(response?.ok);
 }
 
@@ -548,6 +606,29 @@ export async function listInquiries(filters: {status?: string; source?: string})
   const suffix = params.toString() ? `?${params}` : '';
   const response = await cmsFetch<{items: CmsInquiry[]}>(`/api/admin/inquiries${suffix}`, {admin: true});
   return response.items;
+}
+
+export async function listInquiryStatuses() {
+  const response = await cmsFetch<{items: CmsInquiryStatusDefinition[]}>(
+    '/api/admin/inquiry-statuses',
+    {admin: true}
+  );
+  return response.items;
+}
+
+export async function createInquiryStatus(payload: InquiryStatusDefinitionPayload) {
+  return cmsFetch<{item: CmsInquiryStatusDefinition}>('/api/admin/inquiry-statuses', {
+    admin: true,
+    method: 'POST',
+    body: payload
+  });
+}
+
+export async function updateInquiryStatusDefinition(code: string, payload: InquiryStatusDefinitionUpdatePayload) {
+  return cmsFetch<{item: CmsInquiryStatusDefinition}>(
+    `/api/admin/inquiry-statuses/${encodeURIComponent(code)}`,
+    {admin: true, method: 'PATCH', body: payload}
+  );
 }
 
 export async function getInquiry(id: string) {
@@ -606,6 +687,7 @@ export async function getNotificationHealth() {
     kakaoTemplatesReady: boolean;
     emailConfigured: boolean;
     kakaoConfigured: boolean;
+    kakaoVerified: boolean;
     workerEnabled: boolean;
   }>('/api/admin/notifications/health', {admin: true});
 }
@@ -614,6 +696,8 @@ export async function sendNotificationTest(payload: {
   channel: 'email' | 'kakao';
   recipient: string;
   templateKey: string;
+  customerName: string;
+  inquiryNumber: string;
 }) {
   return cmsFetch<{success: boolean; providerMessageId: string; errorMessage: string}>(
     '/api/admin/notifications/test',
@@ -628,7 +712,7 @@ export async function listNotificationTemplates() {
 
 export async function createNotificationTemplateVersion(
   templateKey: string,
-  payload: Pick<CmsNotificationTemplate, 'subject' | 'body' | 'providerTemplateCode' | 'approvalStatus' | 'isActive'>
+  payload: Pick<CmsNotificationTemplate, 'subject' | 'body' | 'providerTemplateCode' | 'kakaoTemplateType' | 'approvalStatus' | 'isActive'>
 ) {
   const response = await cmsFetch<{template: CmsNotificationTemplate}>(
     `/api/admin/notifications/templates/${encodeURIComponent(templateKey)}/versions`,
@@ -720,7 +804,15 @@ async function cmsFetch<T>(
       : options.body === undefined
         ? undefined
         : JSON.stringify(options.body),
-    cache: 'no-store'
+    cache: options.cacheTags ? 'force-cache' : 'no-store',
+    ...(options.cacheTags
+      ? {
+          next: {
+            revalidate: publicCmsCacheSeconds,
+            tags: options.cacheTags
+          }
+        }
+      : {})
   });
 
   const text = await response.text();

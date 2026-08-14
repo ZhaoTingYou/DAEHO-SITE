@@ -22,12 +22,16 @@ import org.junit.jupiter.api.Test;
 
 class NotificationPlannerTest {
   private NotificationRepository repository;
+  private NotificationTestService notificationTest;
   private NotificationPlanner planner;
   private List<Map<String, Object>> createdJobs;
 
   @BeforeEach
   void setUp() {
     repository = mock(NotificationRepository.class);
+    notificationTest = mock(NotificationTestService.class);
+    when(notificationTest.kakaoVerified()).thenReturn(true);
+    when(notificationTest.verificationFingerprint(anyString(), anyMap())).thenReturn("verified-fingerprint");
     createdJobs = new ArrayList<>();
     when(repository.getSettings(anyString())).thenReturn(Map.of(
         "internalEmail", "internal@example.com",
@@ -51,8 +55,9 @@ class NotificationPlannerTest {
         cmsProperties(),
         repository,
         new NotificationTemplateRenderer(new NotificationProperties(
-            true, 1000, "https://daeho.works/admin", "", "", "", "", ""
-        ))
+            true, 1000, "https://daeho.works/admin", "", "", "", ""
+        )),
+        notificationTest
     );
   }
 
@@ -77,7 +82,76 @@ class NotificationPlannerTest {
         "customer".equals(job.get("audience"))
             && "kakao".equals(job.get("channel"))
             && "01012345678".equals(job.get("recipient"))
+            && "verified-fingerprint".equals(job.get("verificationFingerprint"))
     ));
+  }
+
+  @Test
+  void alwaysUsesTheApprovedKoreanKakaoTemplateForEnglishInquiries() {
+    var englishInquiry = new LinkedHashMap<String, Object>(
+        inquiry("customer@example.com", "010-1234-5678")
+    );
+    englishInquiry.put("locale", "en");
+
+    planner.queueStatusChange(englishInquiry, Map.of(
+        "id", "event-en",
+        "previousStatus", "contacted",
+        "nextStatus", "in_progress"
+    ));
+
+    var kakao = createdJobs.stream()
+        .filter(job -> "kakao".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow();
+    assertEquals("ko", kakao.get("locale"));
+    assertEquals("customer_in_progress_kakao_ko", kakao.get("templateKey"));
+  }
+
+  @Test
+  void capturesOnlyTheApprovedKakaoVariablesFromTheCurrentInquiry() {
+    var template = Map.<String, Object>of(
+        "id", "template-customer_done_kakao_ko",
+        "templateKey", "customer_done_kakao_ko",
+        "channel", "kakao",
+        "version", 3,
+        "subject", "{{name}}님의 문의 {{inquiry_id}}",
+        "body", "{{phone}}|{{email}}|{{organization}}|{{inquiry_type}}|{{message}}|{{previous_status_label}}|{{status_label}}",
+        "providerTemplateCode", "KA01TP-DONE",
+        "kakaoTemplateType", "highlight",
+        "approvalStatus", "approved",
+        "isActive", true
+    );
+    when(repository.getActiveTemplate("customer_done_kakao_ko")).thenReturn(template);
+    when(repository.getLatestTemplate("customer_done_kakao_ko")).thenReturn(template);
+    var inquiry = new LinkedHashMap<String, Object>(inquiry("customer@example.com", "010-1234-5678"));
+    inquiry.put("name", "홍길동");
+    inquiry.put("organization", "대호 스포츠");
+    inquiry.put("inquiryType", "trophy");
+    inquiry.put("message", "시상식 트로피 상담");
+
+    planner.queueStatusChange(inquiry, Map.of(
+        "id", "event-done",
+        "previousStatus", "in_progress",
+        "nextStatus", "done"
+    ));
+
+    var kakao = createdJobs.stream()
+        .filter(job -> "kakao".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow();
+    assertEquals(Map.of(
+        "#{고객명}", "홍길동",
+        "#{문의번호}", "inquiry-1"
+    ), kakao.get("providerVariables"));
+  }
+
+  @Test
+  void healthOnlyRequiresTheThreeApprovedKoreanKakaoTemplates() {
+    when(repository.getActiveTemplate("customer_contacted_kakao_en")).thenReturn(null);
+    when(repository.getActiveTemplate("customer_in_progress_kakao_en")).thenReturn(null);
+    when(repository.getActiveTemplate("customer_done_kakao_en")).thenReturn(null);
+
+    assertEquals(true, planner.health().get("kakaoTemplatesReady"));
   }
 
   @Test
@@ -114,6 +188,19 @@ class NotificationPlannerTest {
         .orElseThrow();
     assertEquals("needs_attention", kakao.get("status"));
     assertTrue(kakao.get("lastError").toString().contains("Korean mobile"));
+  }
+
+  @Test
+  void doesNotQueueKakaoWhenTheCurrentProviderAndTemplatesAreUnverified() {
+    when(notificationTest.kakaoVerified()).thenReturn(false);
+
+    planner.queueStatusChange(inquiry("", "010-1234-5678"), Map.of(
+        "id", "event-unverified",
+        "previousStatus", "new",
+        "nextStatus", "contacted"
+    ));
+
+    assertTrue(createdJobs.stream().noneMatch(job -> "kakao".equals(job.get("channel"))));
   }
 
   @Test
@@ -185,7 +272,7 @@ class NotificationPlannerTest {
   private CmsProperties cmsProperties() {
     return new CmsProperties(
         "", "fallback@example.com", "", false, Path.of("/tmp/uploads"), "/uploads",
-        "", "local", "", "", "", "", "", ""
+        "", "", "local", "", "", "", "", "", ""
     );
   }
 }

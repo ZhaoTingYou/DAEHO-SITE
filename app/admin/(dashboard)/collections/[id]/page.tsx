@@ -1,6 +1,7 @@
 import {notFound} from 'next/navigation';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {isCollectionBackedCategory} from '@/lib/cms/collection-categories';
 import {getCollection, listMedia} from '@/lib/cms/repositories';
 
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export default async function AdminCollectionEditPage({params, searchParams}: Props) {
+  await assertAdminCapability('content:read');
   const {messages, t} = await getAdminI18n();
   const {id} = await params;
   const query = await searchParams;

@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-import {requireAdmin} from '@/lib/cms/auth';
+import {requireAdminCapability} from '@/lib/cms/auth';
 import {CmsBackendError, retryNotificationJob} from '@/lib/cms/repositories';
 
 export const runtime = 'nodejs';
@@ -11,7 +11,7 @@ type RouteContext = {
 };
 
 export async function POST(request: NextRequest, context: RouteContext) {
-  const unauthorized = await requireAdmin(request);
+  const unauthorized = await requireAdminCapability(request, 'notifications:manage');
   if (unauthorized) return unauthorized;
   const {jobId} = await context.params;
   try {

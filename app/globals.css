@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap");
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.css");
+/* 외부 폰트 CSS는 components/site/font-links.tsx 에서 HTML head로 직접 링크한다.
+   여기서 @import 하면 이 파일을 모두 받은 뒤에야 폰트 요청이 시작되어 렌더링이 밀린다. */
 @import "../styles/tokens.css";
 @import "tailwindcss";
 @import "../styles/mobile.css";
@@ -2179,6 +2179,31 @@ select {
 
 .archive-drag-hint__arrow--right {
   animation: archive-drag-arrow-right 2.4s var(--ease) infinite;
+}
+
+.admin-sidebar-scroll {
+  scrollbar-color: rgba(255, 255, 255, .38) transparent;
+  scrollbar-width: thin;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .38);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, .56);
+  background-clip: padding-box;
 }
 
 .achievement-pentagon__layer,

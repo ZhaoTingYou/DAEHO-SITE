@@ -1,5 +1,7 @@
 package com.daeho.cms.service;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class RequestValidation {
   public static final List<String> LOCALES = List.of("ko", "en");
-  public static final List<String> INQUIRY_STATUSES = List.of("new", "contacted", "in_progress", "done", "spam");
   public static final List<String> COLLECTION_CATEGORIES = List.of("champion", "bespoke");
   private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+  private static final Pattern INQUIRY_STATUS_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{0,31}$");
 
   public ValidatedRequest pagePayload(Map<String, Object> body) {
     var issues = new ArrayList<Map<String, String>>();
@@ -128,16 +130,69 @@ public class RequestValidation {
     var issues = new ArrayList<Map<String, String>>();
     var status = stringValue(body.get("status"));
     var expectedStatus = stringValue(body.get("expectedStatus"));
-    if (!INQUIRY_STATUSES.contains(status)) {
+    if (!INQUIRY_STATUS_PATTERN.matcher(status).matches()) {
       issues.add(issue("status", "Invalid inquiry status."));
     }
-    if (!expectedStatus.isBlank() && !INQUIRY_STATUSES.contains(expectedStatus)) {
+    if (!expectedStatus.isBlank() && !INQUIRY_STATUS_PATTERN.matcher(expectedStatus).matches()) {
       issues.add(issue("expectedStatus", "Invalid expected inquiry status."));
     }
     return new ValidatedRequest(Map.of(
         "status", status,
         "expectedStatus", expectedStatus
     ), issues);
+  }
+
+  public ValidatedRequest inquiryStatusDefinition(Map<String, Object> body, boolean requireCode) {
+    var issues = new ArrayList<Map<String, String>>();
+    var payload = mutableCopy(body);
+    payload.putIfAbsent("code", "");
+    payload.putIfAbsent("labelKo", "");
+    payload.putIfAbsent("labelEn", "");
+    payload.putIfAbsent("labelZh", "");
+    payload.putIfAbsent("color", "slate");
+    payload.putIfAbsent("sortOrder", 0);
+    payload.putIfAbsent("isActive", true);
+    payload.putIfAbsent("expectedUpdatedAt", "");
+
+    var code = stringValue(payload.get("code"));
+    if (requireCode && !INQUIRY_STATUS_PATTERN.matcher(code).matches()) {
+      issues.add(issue("code", "Use lowercase letters, numbers, and underscores (maximum 32 characters)."));
+    }
+    requireText(payload, "labelKo", issues);
+    maxLength(payload, "labelKo", 80, issues);
+    maxLength(payload, "labelEn", 80, issues);
+    maxLength(payload, "labelZh", 80, issues);
+
+    var color = stringValue(payload.get("color"));
+    if (!List.of("slate", "blue", "amber", "green", "red", "purple").contains(color)) {
+      issues.add(issue("color", "Invalid inquiry status color."));
+    }
+    var sortOrder = intValue(payload.get("sortOrder"), -1);
+    if (sortOrder < 0 || sortOrder > 10000) {
+      issues.add(issue("sortOrder", "Expected a number from 0 to 10000."));
+    }
+    if (!requireCode) {
+      requireText(payload, "expectedUpdatedAt", issues);
+      maxLength(payload, "expectedUpdatedAt", 80, issues);
+      var expectedUpdatedAt = stringValue(payload.get("expectedUpdatedAt"));
+      if (!expectedUpdatedAt.isBlank()) {
+        try {
+          OffsetDateTime.parse(expectedUpdatedAt);
+        } catch (DateTimeParseException exception) {
+          issues.add(issue("expectedUpdatedAt", "Expected an ISO-8601 timestamp with an offset."));
+        }
+      }
+    }
+
+    payload.put("code", code);
+    payload.put("labelKo", stringValue(payload.get("labelKo")));
+    payload.put("labelEn", stringValue(payload.get("labelEn")));
+    payload.put("labelZh", stringValue(payload.get("labelZh")));
+    payload.put("color", color);
+    payload.put("sortOrder", sortOrder);
+    payload.put("isActive", booleanValue(payload.get("isActive"), true));
+    payload.put("expectedUpdatedAt", stringValue(payload.get("expectedUpdatedAt")));
+    return new ValidatedRequest(payload, issues);
   }
 
   public ValidatedRequest notificationSettings(Map<String, Object> body) {
@@ -159,15 +214,29 @@ public class RequestValidation {
     return new ValidatedRequest(payload, issues);
   }
 
-  public ValidatedRequest notificationTemplate(Map<String, Object> body) {
+  public ValidatedRequest notificationTemplate(Map<String, Object> body, String channel) {
     var issues = new ArrayList<Map<String, String>>();
     var payload = mutableCopy(body);
     var approvalStatus = stringValue(payload.get("approvalStatus"));
+    var normalizedChannel = stringValue(channel);
     payload.putIfAbsent("subject", "");
     payload.putIfAbsent("body", "");
     payload.putIfAbsent("providerTemplateCode", "");
+    payload.putIfAbsent("kakaoTemplateType", "basic");
     payload.putIfAbsent("isActive", false);
-    requireText(payload, "body", issues);
+    if ("email".equals(normalizedChannel)) {
+      requireText(payload, "subject", issues);
+      requireText(payload, "body", issues);
+    }
+    var kakaoTemplateType = stringValue(payload.get("kakaoTemplateType"));
+    if ("kakao".equals(normalizedChannel)) {
+      requireText(payload, "providerTemplateCode", issues);
+      payload.put("subject", "");
+      payload.put("body", "");
+      kakaoTemplateType = "basic";
+    } else {
+      kakaoTemplateType = "basic";
+    }
     if (!List.of("draft", "pending", "approved").contains(approvalStatus)) {
       issues.add(issue("approvalStatus", "Expected draft, pending, or approved."));
     }
@@ -175,6 +244,7 @@ public class RequestValidation {
     maxLength(payload, "body", 4000, issues);
     maxLength(payload, "providerTemplateCode", 160, issues);
     payload.put("approvalStatus", approvalStatus);
+    payload.put("kakaoTemplateType", kakaoTemplateType);
     payload.put("isActive", booleanValue(payload.get("isActive"), false));
     return new ValidatedRequest(payload, issues);
   }
@@ -184,6 +254,8 @@ public class RequestValidation {
     var channel = stringValue(body.get("channel"));
     var recipient = stringValue(body.get("recipient"));
     var templateKey = stringValue(body.get("templateKey"));
+    var customerName = stringValue(body.get("customerName"));
+    var inquiryNumber = stringValue(body.get("inquiryNumber"));
     if (!List.of("email", "kakao").contains(channel)) {
       issues.add(issue("channel", "Expected email or kakao."));
     }
@@ -195,10 +267,26 @@ public class RequestValidation {
     if (templateKey.isBlank()) {
       issues.add(issue("templateKey", "Template key is required."));
     }
+    if ("kakao".equals(channel)) {
+      if (customerName.isBlank()) {
+        issues.add(issue("customerName", "Customer name is required for a Kakao test."));
+      }
+      if (inquiryNumber.isBlank()) {
+        issues.add(issue("inquiryNumber", "Inquiry number is required for a Kakao test."));
+      }
+    }
+    if (customerName.length() > 120) {
+      issues.add(issue("customerName", "Expected at most 120 characters."));
+    }
+    if (inquiryNumber.length() > 160) {
+      issues.add(issue("inquiryNumber", "Expected at most 160 characters."));
+    }
     return new ValidatedRequest(Map.of(
         "channel", channel,
         "recipient", recipient,
-        "templateKey", templateKey
+        "templateKey", templateKey,
+        "customerName", customerName,
+        "inquiryNumber", inquiryNumber
     ), issues);
   }
 

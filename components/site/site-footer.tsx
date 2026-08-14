@@ -8,7 +8,7 @@ import {
   getVisibleExternalSites,
   type ExternalSiteItem
 } from '@/lib/cms/external-sites-core.mjs';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {localeShortLabels, locales} from '@/lib/locales';
 import {isTechniquePageVisible} from '@/lib/public-page-visibility';
 import {withLocale} from '@/lib/site-map';
@@ -44,7 +44,7 @@ const socialLinkItems = [
 type SocialLinkKey = (typeof socialLinkItems)[number]['key'];
 
 export async function SiteFooter({locale, englishEnabled, golfEnabled, externalSites}: SiteFooterProps) {
-  const text = (await getLocaleMessages(locale)).common;
+  const text = (await getPublicLocaleMessages(locale, ['common'])).common;
   const navLabels = text.navigation.items;
   const navHrefs = text.navigation.hrefs;
   const navHref = (id: keyof typeof navHrefs, fallback: string) =>

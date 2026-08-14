@@ -1192,7 +1192,8 @@
       "styleOptions": [
         "BASIC",
         "COLOUR"
-      ]
+      ],
+      "engravingSample": "JUDY KIM 2026.05.03"
     },
     "process": {
       "packageImageLabel": "패키지 사진",
@@ -1254,6 +1255,11 @@
   },
   "common": {
     "skipLink": "본문으로 건너뛰기",
+    "breadcrumb": {
+      "home": "홈",
+      "news": "뉴스",
+      "creations": "제작 사례"
+    },
     "features": {
       "englishEnabled": false,
       "golfEnabled": false
@@ -1601,6 +1607,11 @@
       "eyebrow": "의뢰",
       "title": "기념을 영원한 상징으로",
       "body": ""
+    },
+    "directPhone": {
+      "before": "B2B 주문 및 기업 고객은 직통전화",
+      "phone": "010 4325 0369",
+      "after": "로도 상담하실 수 있습니다."
     },
     "infoTitle": "직접 문의",
     "address": "주소 확인 예정",

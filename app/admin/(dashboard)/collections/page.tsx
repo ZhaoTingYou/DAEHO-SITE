@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
 import {getAdminI18n} from '@/lib/admin-i18n';
+import {hasAdminCapability} from '@/lib/cms/admin-authorization-core.mjs';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {isCollectionBackedCategory} from '@/lib/cms/collection-categories';
 import {listCollections, type CmsCollection} from '@/lib/cms/repositories';
 import {imageSrc} from '@/lib/image-src';
@@ -26,6 +28,8 @@ const collectionCategoryFilters = ['all', 'champion', 'bespoke'] as const;
 const collectionStatusFilters = ['all', 'visible', 'hidden'] as const;
 
 export default async function AdminCollectionsPage({searchParams}: Props) {
+  const identity = await assertAdminCapability('content:read');
+  const canDelete = hasAdminCapability(identity.role, 'content:delete');
   const {t} = await getAdminI18n();
   const query = await searchParams;
   const items = (await listCollections()).filter((item) => isCollectionBackedCategory(item.category));
@@ -187,10 +191,12 @@ export default async function AdminCollectionsPage({searchParams}: Props) {
                               <Link href={`/admin/collections/${item.id}`} className="inline-flex min-h-11 w-16 items-center justify-center whitespace-nowrap rounded-md border border-[#cbd3df] px-3 text-sm font-semibold leading-none text-[#344054] hover:bg-[#f8fafc]">
                                 {t('common.edit')}
                               </Link>
-                              <form action={deleteCollectionAction}>
-                                <input type="hidden" name="id" value={item.id} />
-                                <DangerButton>{t('common.delete')}</DangerButton>
-                              </form>
+                              {canDelete ? (
+                                <form action={deleteCollectionAction}>
+                                  <input type="hidden" name="id" value={item.id} />
+                                  <DangerButton>{t('common.delete')}</DangerButton>
+                                </form>
+                              ) : null}
                             </div>
                           </td>
                         </tr>

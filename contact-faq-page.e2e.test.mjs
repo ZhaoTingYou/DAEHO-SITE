@@ -1,13 +1,25 @@
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
-import {createServer} from 'node:net';
+import {readFileSync} from 'node:fs';
+import {createServer as createHttpServer} from 'node:http';
+import {createServer as createNetServer} from 'node:net';
 import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 
 const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+const localeMessages = {
+  ko: JSON.parse(readFileSync(new URL('./messages/ko.json', import.meta.url), 'utf8')),
+  en: JSON.parse(readFileSync(new URL('./messages/en.json', import.meta.url), 'utf8'))
+};
 
 test('Contact renders the categorized C plus C1 FAQ structure with all answer copy in SSR HTML', {timeout: 30_000}, async (t) => {
+  const backend = createContactCmsBackend();
+  backend.listen(0, '127.0.0.1');
+  await once(backend, 'listening');
+  t.after(() => backend.close());
+  const backendAddress = backend.address();
+  assert.ok(backendAddress && typeof backendAddress !== 'string');
   const port = await availablePort();
   const server = spawn(
     process.execPath,
@@ -22,7 +34,8 @@ test('Contact renders the categorized C plus C1 FAQ structure with all answer co
       cwd: projectRoot,
       env: {
         ...process.env,
-        CMS_BACKEND_URL: 'http://127.0.0.1:1'
+        CMS_BACKEND_URL: `http://127.0.0.1:${backendAddress.port}`,
+        CMS_PREVIEW_STATIC: 'false'
       },
       stdio: ['ignore', 'pipe', 'pipe']
     }
@@ -60,7 +73,7 @@ test('Contact renders the categorized C plus C1 FAQ structure with all answer co
 });
 
 async function availablePort() {
-  const server = createServer();
+  const server = createNetServer();
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const address = server.address();
@@ -72,6 +85,36 @@ async function availablePort() {
   }
 
   return address.port;
+}
+
+function createContactCmsBackend() {
+  return createHttpServer((request, response) => {
+    const url = new URL(request.url ?? '/', 'http://127.0.0.1');
+    const match = /^\/api\/cms\/pages\/([^/]+)$/.exec(url.pathname);
+
+    if (!match) {
+      response.statusCode = 404;
+      response.end(JSON.stringify({error: 'Not found'}));
+      return;
+    }
+
+    const pageKey = decodeURIComponent(match[1]);
+    const locale = url.searchParams.get('locale') === 'en' ? 'en' : 'ko';
+    const messages = localeMessages[locale];
+    const content = pageKey === 'contact'
+      ? {__groups: {main: messages.contact, form: messages.forms.contact}}
+      : {};
+
+    response.setHeader('content-type', 'application/json');
+    response.end(JSON.stringify({
+      pageKey,
+      section: 'site',
+      locale,
+      content,
+      seo: {},
+      updatedAt: '2026-08-14T00:00:00.000Z'
+    }));
+  });
 }
 
 async function waitForPage(url, server, readOutput) {

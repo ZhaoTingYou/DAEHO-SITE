@@ -19,6 +19,7 @@ import {
 } from '@/lib/admin-analytics-core.mjs';
 import {getAdminI18n} from '@/lib/admin-i18n';
 import type {AdminLocale} from '@/lib/admin-locales';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {
   getTrafficAnalyticsSummary,
   listTrafficAnalyticsVisits,
@@ -37,6 +38,7 @@ type Props = {
 const presetDays = [7, 30, 90];
 
 export default async function AdminAnalyticsPage({searchParams}: Props) {
+  await assertAdminCapability('analytics:read');
   const {locale, t} = await getAdminI18n();
   const today = nowInSeoul();
   const filters = normalizeAnalyticsFilters(await searchParams, today);

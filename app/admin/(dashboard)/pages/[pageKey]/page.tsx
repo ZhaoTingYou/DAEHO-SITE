@@ -3,6 +3,7 @@ import {notFound, redirect} from 'next/navigation';
 
 import {createAdminTranslator, getAdminI18n, getContentLocaleLabel} from '@/lib/admin-i18n';
 import type {AdminLocale} from '@/lib/admin-locales';
+import {assertAdminCapability} from '@/lib/cms/admin-session';
 import {
   cloneJson,
   getPageContentGroupOverride,
@@ -80,6 +81,7 @@ type RenderContext = {
 const hiddenKeys = new Set(['id']);
 
 export default async function AdminPageEditor({params, searchParams}: Props) {
+  await assertAdminCapability('content:read');
   const {pageKey} = await params;
 
   if (pageKey === 'common') {

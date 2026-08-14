@@ -12,6 +12,7 @@ public record CmsProperties(
     Path uploadDir,
     String publicUploadBaseUrl,
     String adminPassword,
+    String ownerEmail,
     String storageProvider,
     String s3Bucket,
     String s3Region,

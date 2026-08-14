@@ -4,15 +4,17 @@ import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 
 import {Reveal} from '@/components/motion/reveal';
+import {NewsArticleStructuredData} from '@/components/news/news-article-structured-data';
 import {NewsReadingProgress} from '@/components/news/news-reading-progress';
 import {ShareLinkButton} from '@/components/news/share-link-button';
 import {SafeImage} from '@/components/safe-image';
+import {BreadcrumbStructuredData} from '@/components/site/breadcrumb-structured-data';
 import type {Locale} from '@/i18n/routing';
 import {routing} from '@/i18n/routing';
 import {getNewsCardsForSite, getNewsDetailForSite, type NewsBodyBlock} from '@/lib/cms/public-content';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {imageSrc} from '@/lib/image-src';
-import {getLocaleMessages} from '@/lib/locale-messages';
+import {getPublicLocaleMessages} from '@/lib/locale-messages';
 import {getDetailMetadata} from '@/lib/seo';
 import koMessages from '@/messages/ko.json';
 
@@ -20,9 +22,11 @@ type Props = {
   params: Promise<{locale: Locale; slug: string}>;
 };
 
-export const dynamic = 'force-dynamic';
-
 export function generateStaticParams() {
+  if (process.env.DAEHO_FRONTEND_ONLY !== 'true') {
+    return [];
+  }
+
   const slugs = koMessages.news.grid.cards.map((card) => card.id);
   return routing.locales.flatMap((locale) => slugs.map((slug) => ({locale, slug})));
 }
@@ -32,7 +36,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const detail = await getNewsDetailForSite(locale, slug);
 
   if (!detail) {
-    return getDetailMetadata(locale, '/news', 'NEWS', '');
+    notFound();
   }
 
   return getDetailMetadata(
@@ -47,7 +51,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function NewsDetailPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
-  const messages = await getLocaleMessages(locale);
+  const messages = await getPublicLocaleMessages(locale, ['news']);
   const detail = await getNewsDetailForSite(locale, slug);
 
   if (!detail) {
@@ -71,6 +75,14 @@ export default async function NewsDetailPage({params}: Props) {
   return (
     <main className="mobile-page-shell bg-bg text-text">
       <NewsReadingProgress />
+      <NewsArticleStructuredData detail={detail} locale={locale} slug={slug} />
+      <BreadcrumbStructuredData
+        items={[
+          {name: messages.common.breadcrumb.home, path: `/${locale}`},
+          {name: messages.common.breadcrumb.news, path: `/${locale}/news`},
+          {name: card.title, path: `/${locale}/news/${slug}`}
+        ]}
+      />
       <article className="bg-bg">
         <section className="news-detail-hero border-b border-primary/10 px-container pb-10 pt-[calc(var(--mobile-header-height)+env(safe-area-inset-top)+24px)] md:pb-24 md:pt-[calc(var(--header-height,80px)+72px)]">
           <div className="mx-auto max-w-[1440px]">

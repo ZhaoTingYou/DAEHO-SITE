@@ -20,6 +20,7 @@ class AdminAuthTest {
       Path.of("/tmp/uploads"),
       "/uploads",
       "",
+      "",
       "local",
       "",
       "",

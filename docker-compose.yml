@@ -24,6 +24,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
       CMS_ADMIN_API_KEY: ${CMS_BACKEND_API_KEY:-replace-with-a-long-random-key}
       CMS_ADMIN_PASSWORD: ${CMS_ADMIN_PASSWORD:-replace-with-a-strong-password}
+      CMS_OWNER_EMAIL: ${CMS_OWNER_EMAIL:-}
       CMS_UPLOAD_DIR: /data/uploads
       CMS_PUBLIC_UPLOAD_BASE_URL: /uploads
       CMS_STORAGE_PROVIDER: ${CMS_STORAGE_PROVIDER:-local}
@@ -46,11 +47,10 @@ services:
       SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-true}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
-      KAKAO_API_BASE_URL: ${KAKAO_API_BASE_URL:-https://sens.apigw.ntruss.com}
-      KAKAO_ACCESS_KEY: ${KAKAO_ACCESS_KEY:-}
-      KAKAO_SECRET_KEY: ${KAKAO_SECRET_KEY:-}
-      KAKAO_SERVICE_ID: ${KAKAO_SERVICE_ID:-}
-      KAKAO_CHANNEL_ID: ${KAKAO_CHANNEL_ID:-}
+      SOLAPI_API_BASE_URL: ${SOLAPI_API_BASE_URL:-https://api.solapi.com}
+      SOLAPI_API_KEY: ${SOLAPI_API_KEY:-}
+      SOLAPI_API_SECRET: ${SOLAPI_API_SECRET:-}
+      SOLAPI_PF_ID: ${SOLAPI_PF_ID:-}
     volumes:
       - ./public/images:/data/uploads
     depends_on:
@@ -64,6 +64,7 @@ services:
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
         NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-G-FXQGWE9XZ0}
+        CMS_BUILD_BACKEND_URL: ${CMS_BUILD_BACKEND_URL:-https://daeho.works}
     restart: unless-stopped
     environment:
       CMS_BACKEND_URL: http://cms-api:8080
