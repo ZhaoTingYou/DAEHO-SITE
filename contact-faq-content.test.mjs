@@ -5,7 +5,7 @@ import test from 'node:test';
 const koMessages = readJson('./messages/ko.json');
 const enMessages = readJson('./messages/en.json');
 const pageCatalog = readJson('./lib/cms/page-catalog.json');
-const expectedCounts = {consultation: 5, design: 6, business: 6, sports: 3};
+const expectedCounts = {consultation: 5, design: 6, business: 5, sports: 4};
 
 test('Korean and English Contact copy expose twenty complete categorized FAQ items', () => {
   for (const [locale, messages] of [['ko', koMessages], ['en', enMessages]]) {
@@ -19,6 +19,18 @@ test('Korean and English Contact copy expose twenty complete categorized FAQ ite
     assert.equal(new Set(faqs.map((item) => item.question)).size, 20, `${locale} questions must stay unique`);
     assert.deepEqual(counts, expectedCounts);
     assert.equal(faqs.every((item) => item.question.trim() && item.answer.trim()), true);
+  }
+});
+
+test('the custom product range question belongs to Sports · Merchandise in both locales', () => {
+  const expectedQuestions = {
+    ko: '어떤 제품까지 주문제작이 가능한가요?',
+    en: 'What kinds of products can be custom-made?'
+  };
+
+  for (const [locale, messages] of [['ko', koMessages], ['en', enMessages]]) {
+    const faq = messages.contact.faqs.find(({question}) => question === expectedQuestions[locale]);
+    assert.equal(faq?.category, 'sports');
   }
 });
 
