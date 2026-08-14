@@ -48,7 +48,7 @@
 - Consumes: optimized `src`, `srcSet`, and `sizes` returned by Next.js `getImageProps`.
 - Produces: `getResponsiveImagePreloads(input): ResponsiveImagePreload[]` and priority `<img>` props used by every existing `ResponsiveCmsImage` caller.
 
-- [ ] **Step 1: Write the preload behavior test before the helper exists**
+- [x] **Step 1: Write the preload behavior test before the helper exists**
 
 Create `lib/responsive-image-preload.test.mjs`:
 
@@ -56,11 +56,11 @@ Create `lib/responsive-image-preload.test.mjs`:
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import {
-  DESKTOP_IMAGE_MEDIA,
-  MOBILE_IMAGE_MEDIA,
-  getResponsiveImagePreloads
-} from './responsive-image-preload.mjs';
+async function loadHelper() {
+  const helper = await import('./responsive-image-preload.mjs').catch(() => null);
+  assert.ok(helper, 'responsive image preload helper must exist');
+  return helper;
+}
 
 const desktop = {
   src: '/_next/image?url=desktop&w=3840&q=75',
@@ -74,7 +74,13 @@ const mobile = {
   sizes: '100vw'
 };
 
-test('priority art direction preloads one viewport-matched source at high priority', () => {
+test('priority art direction preloads one viewport-matched source at high priority', async () => {
+  const {
+    DESKTOP_IMAGE_MEDIA,
+    MOBILE_IMAGE_MEDIA,
+    getResponsiveImagePreloads
+  } = await loadHelper();
+
   assert.deepEqual(getResponsiveImagePreloads({priority: true, desktop, mobile}), [
     {
       href: mobile.src,
@@ -99,7 +105,9 @@ test('priority art direction preloads one viewport-matched source at high priori
   ]);
 });
 
-test('a priority desktop-only image has one unconditional preload', () => {
+test('a priority desktop-only image has one unconditional preload', async () => {
+  const {getResponsiveImagePreloads} = await loadHelper();
+
   assert.deepEqual(getResponsiveImagePreloads({priority: true, desktop}), [
     {
       href: desktop.src,
@@ -113,12 +121,14 @@ test('a priority desktop-only image has one unconditional preload', () => {
   ]);
 });
 
-test('lazy images do not create resource hints', () => {
+test('lazy images do not create resource hints', async () => {
+  const {getResponsiveImagePreloads} = await loadHelper();
+
   assert.deepEqual(getResponsiveImagePreloads({priority: false, desktop, mobile}), []);
 });
 ```
 
-- [ ] **Step 2: Run the new test and verify the missing feature is detected**
+- [x] **Step 2: Run the new test and verify the missing feature is detected**
 
 Run:
 
@@ -126,9 +136,9 @@ Run:
 node --test lib/responsive-image-preload.test.mjs
 ```
 
-Expected: FAIL because `responsive-image-preload.mjs` does not exist.
+Expected: FAIL with the assertion `responsive image preload helper must exist`.
 
-- [ ] **Step 3: Add the pure preload descriptor helper**
+- [x] **Step 3: Add the pure preload descriptor helper**
 
 Create `lib/responsive-image-preload.mjs`:
 
@@ -195,7 +205,7 @@ export function getResponsiveImagePreloads(input: {
 }): ResponsiveImagePreload[];
 ```
 
-- [ ] **Step 4: Run the helper tests and verify they pass**
+- [x] **Step 4: Run the helper tests and verify they pass**
 
 Run:
 
@@ -205,7 +215,7 @@ node --test lib/responsive-image-preload.test.mjs
 
 Expected: 3 tests pass, 0 fail.
 
-- [ ] **Step 5: Extend the test to require production component wiring**
+- [x] **Step 5: Extend the test to require production component wiring**
 
 Add `readFileSync` to the imports at the top of `lib/responsive-image-preload.test.mjs`:
 
@@ -230,7 +240,7 @@ test('ResponsiveCmsImage invokes React preloads and marks the selected image eag
 });
 ```
 
-- [ ] **Step 6: Run the focused test and verify component wiring is absent**
+- [x] **Step 6: Run the focused test and verify component wiring is absent**
 
 Run:
 
@@ -240,7 +250,7 @@ node --test lib/responsive-image-preload.test.mjs
 
 Expected: the first 3 tests pass and the component-wiring test fails on the missing React DOM preload import.
 
-- [ ] **Step 7: Wire optimized props and viewport-qualified preloads into the component**
+- [x] **Step 7: Wire optimized props and viewport-qualified preloads into the component**
 
 Modify `components/responsive-cms-image.tsx`:
 
@@ -309,7 +319,7 @@ preloadHints.forEach((hint) => preload(hint.href, hint.options));
 
 Keep the existing `<picture>`, `handleError`, and state transitions unchanged.
 
-- [ ] **Step 8: Run image regression tests and type checking**
+- [x] **Step 8: Run image regression tests and type checking**
 
 Run:
 
