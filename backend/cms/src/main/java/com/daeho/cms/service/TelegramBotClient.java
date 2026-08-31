@@ -171,7 +171,8 @@ public class TelegramBotClient {
     for (var cause = error; cause != null; cause = cause.getCause()) {
       if (cause instanceof java.net.ConnectException
           || cause instanceof java.net.http.HttpConnectTimeoutException
-          || cause instanceof java.nio.channels.UnresolvedAddressException) {
+          || cause instanceof java.nio.channels.UnresolvedAddressException
+          || cause instanceof javax.net.ssl.SSLHandshakeException) {
         return true;
       }
     }

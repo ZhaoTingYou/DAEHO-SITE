@@ -14,6 +14,10 @@ const settings = readFileSync(
   new URL('./_components/notification-settings-editor.tsx', import.meta.url),
   'utf8'
 );
+const settingsRoute = readFileSync(
+  new URL('../api/admin/notifications/settings/route.ts', import.meta.url),
+  'utf8'
+);
 const statusManager = readFileSync(
   new URL('./_components/inquiry-status-manager.tsx', import.meta.url),
   'utf8'
@@ -60,6 +64,15 @@ test('Telegram credentials are entered in CMS without hydrating the saved token'
   assert.match(settings, /telegramTokenConfigured/);
   assert.match(settings, /clearTelegramBotToken/);
   assert.match(settings, /telegramBotToken: ''/);
+});
+
+test('Telegram settings and tests refresh health and surface backend validation errors', () => {
+  assert.match(settings, /refreshHealth/);
+  assert.match(settings, /onSuccess={refreshHealth}/);
+  assert.match(settings, /settingsMessage/);
+  assert.match(settings, /payload\?\.error/);
+  assert.match(settingsRoute, /CmsBackendError/);
+  assert.match(settingsRoute, /status: error\.status/);
 });
 
 test('Kakao template setup only asks for the provider ID and test variables', () => {

@@ -3,14 +3,20 @@ package com.daeho.cms.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.daeho.cms.config.NotificationProperties;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.net.ssl.SSLHandshakeException;
 import org.junit.jupiter.api.Test;
 
 class TelegramBotClientTest {
@@ -63,6 +69,23 @@ class TelegramBotClientTest {
   }
 
   @Test
+  void tlsHandshakeFailuresRemainRetryableBecauseNoHttpBodyWasSent() throws Exception {
+    var http = mock(HttpClient.class);
+    when(http.send(
+        any(HttpRequest.class),
+        org.mockito.ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()
+    )).thenThrow(new SSLHandshakeException("certificate validation failed"));
+
+    var result = client("https://api.telegram.org", http).send(Map.of(
+        "recipient", "-1001234567890",
+        "renderedBody", "retryable inquiry"
+    ));
+
+    assertFalse(result.success());
+    assertFalse(result.uncertain());
+  }
+
+  @Test
   void ambiguousProviderResponsesAreQuarantinedInsteadOfRetried() throws Exception {
     var missingOk = resultFor(200, "{}");
     var ambiguousServerError = resultFor(500, "upstream response lost");
@@ -103,6 +126,10 @@ class TelegramBotClientTest {
   }
 
   private TelegramBotClient client(String apiBaseUrl) {
+    return client(apiBaseUrl, HttpClient.newHttpClient());
+  }
+
+  private TelegramBotClient client(String apiBaseUrl, HttpClient http) {
     var properties = new NotificationProperties(
         true,
         1000,
@@ -114,15 +141,15 @@ class TelegramBotClientTest {
         apiBaseUrl,
         ""
     );
-    var credentials = org.mockito.Mockito.mock(TelegramCredentialService.class);
-    org.mockito.Mockito.when(credentials.current()).thenReturn(
+    var credentials = mock(TelegramCredentialService.class);
+    when(credentials.current()).thenReturn(
         new TelegramCredentialService.Credentials("test-token", "-1001234567890")
     );
     return new TelegramBotClient(
         properties,
         credentials,
         new JsonSupport(),
-        HttpClient.newHttpClient()
+        http
     );
   }
 }

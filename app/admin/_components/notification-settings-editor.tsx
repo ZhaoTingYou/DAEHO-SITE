@@ -115,27 +115,35 @@ export function NotificationSettingsEditor({
     clearTelegramBotToken: false
   });
   const [templates, setTemplates] = useState(initialTemplates);
+  const [currentHealth, setCurrentHealth] = useState(health);
   const [settingsState, setSettingsState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [settingsMessage, setSettingsMessage] = useState('');
   const [templateState, setTemplateState] = useState<Record<string, 'saving' | 'saved' | 'error'>>({});
+
+  const refreshHealth = async () => {
+    const response = await fetch('/api/admin/notifications/health', {cache: 'no-store'}).catch(() => null);
+    if (!response?.ok) return;
+    setCurrentHealth(await response.json() as Health);
+  };
 
   return (
     <div className="grid gap-6">
       <section className="rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{copy.health}</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <HealthItem label={copy.worker} ready={health.workerEnabled} copy={copy} />
-          <HealthItem label={copy.emailConnection} ready={health.emailConfigured} copy={copy} />
-          <HealthItem label={copy.kakaoConnection} ready={health.kakaoConfigured} copy={copy} />
-          <HealthItem label={copy.kakaoVerification} ready={health.kakaoVerified} copy={copy} />
-          <HealthItem label={copy.kakaoTemplates} ready={health.kakaoTemplatesReady} copy={copy} />
-          <HealthItem label={copy.telegramConnection} ready={health.telegramConfigured} copy={copy} />
-          <HealthItem label={copy.telegramEncryption} ready={health.telegramEncryptionConfigured} copy={copy} />
-          <HealthItem label={copy.telegramVerification} ready={health.telegramVerified} copy={copy} />
-          <HealthItem label={copy.telegramTemplate} ready={health.telegramTemplateReady} copy={copy} />
+          <HealthItem label={copy.worker} ready={currentHealth.workerEnabled} copy={copy} />
+          <HealthItem label={copy.emailConnection} ready={currentHealth.emailConfigured} copy={copy} />
+          <HealthItem label={copy.kakaoConnection} ready={currentHealth.kakaoConfigured} copy={copy} />
+          <HealthItem label={copy.kakaoVerification} ready={currentHealth.kakaoVerified} copy={copy} />
+          <HealthItem label={copy.kakaoTemplates} ready={currentHealth.kakaoTemplatesReady} copy={copy} />
+          <HealthItem label={copy.telegramConnection} ready={currentHealth.telegramConfigured} copy={copy} />
+          <HealthItem label={copy.telegramEncryption} ready={currentHealth.telegramEncryptionConfigured} copy={copy} />
+          <HealthItem label={copy.telegramVerification} ready={currentHealth.telegramVerified} copy={copy} />
+          <HealthItem label={copy.telegramTemplate} ready={currentHealth.telegramTemplateReady} copy={copy} />
         </div>
       </section>
 
-      <TestNotification templates={templates} copy={copy} />
+      <TestNotification templates={templates} copy={copy} onSuccess={refreshHealth} />
 
       <section className="rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{copy.settings}</h2>
@@ -144,22 +152,42 @@ export function NotificationSettingsEditor({
           onSubmit={async (event) => {
             event.preventDefault();
             setSettingsState('saving');
+            setSettingsMessage('');
             const response = await fetch('/api/admin/notifications/settings', {
               method: 'PUT',
               headers: {'content-type': 'application/json'},
               body: JSON.stringify(settings)
             }).catch(() => null);
+            const payload = await response?.json().catch(() => null) as {
+              settings?: Settings;
+              error?: string;
+              detail?: string;
+              message?: string;
+              issues?: Array<{message?: string}>;
+            } | null;
             if (!response?.ok) {
               setSettingsState('error');
+              setSettingsMessage(
+                payload?.detail
+                  || payload?.error
+                  || payload?.message
+                  || payload?.issues?.find((issue) => issue.message)?.message
+                  || copy.saveError
+              );
               return;
             }
-            const payload = await response.json() as {settings: Settings};
+            if (!payload?.settings) {
+              setSettingsState('error');
+              setSettingsMessage(copy.saveError);
+              return;
+            }
             setSettings({
               ...payload.settings,
               telegramBotToken: '',
               clearTelegramBotToken: false
             });
             setSettingsState('saved');
+            await refreshHealth();
           }}
         >
           <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
@@ -262,7 +290,7 @@ export function NotificationSettingsEditor({
               {copy.save}
             </button>
             {settingsState === 'saved' ? <p className="text-sm text-[#027a48]">{copy.saved}</p> : null}
-            {settingsState === 'error' ? <p className="text-sm text-[#b42318]">{copy.saveError}</p> : null}
+            {settingsState === 'error' ? <p className="text-sm text-[#b42318]">{settingsMessage || copy.saveError}</p> : null}
           </div>
         </form>
       </section>
@@ -298,6 +326,7 @@ export function NotificationSettingsEditor({
                   item.templateKey === template.templateKey ? payload.template : item
                 ));
                 setTemplateState((current) => ({...current, [template.templateKey]: 'saved'}));
+                await refreshHealth();
               }}
             />
           ))}
@@ -307,7 +336,15 @@ export function NotificationSettingsEditor({
   );
 }
 
-function TestNotification({templates, copy}: {templates: Template[]; copy: Copy}) {
+function TestNotification({
+  templates,
+  copy,
+  onSuccess
+}: {
+  templates: Template[];
+  copy: Copy;
+  onSuccess: () => Promise<void>;
+}) {
   const active = templates.filter((template) => template.isActive);
   const [templateKey, setTemplateKey] = useState(active[0]?.templateKey ?? '');
   const selected = active.find((template) => template.templateKey === templateKey);
@@ -351,6 +388,7 @@ function TestNotification({templates, copy}: {templates: Template[]; copy: Copy}
           }
           setState('success');
           setMessage(payload.providerMessageId || copy.testSuccess);
+          await onSuccess();
         }}
       >
         <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
