@@ -116,7 +116,7 @@ export default async function NewsDetailPage({params}: Props) {
                   </Link>
                 </Reveal>
               ) : null}
-              <NewsArticleFooter tags={detail.tags} shareCopy={messages.newsUi.share} />
+              <NewsArticleFooter tags={detail.tags} tagsLabel={text.tagsLabel} shareCopy={messages.newsUi.share} />
             </div>
           </div>
         </section>
@@ -150,13 +150,15 @@ export default async function NewsDetailPage({params}: Props) {
 
 function NewsArticleFooter({
   tags,
+  tagsLabel,
   shareCopy
 }: {
   tags: string[];
-  shareCopy: {label: string; copied: string};
+  tagsLabel: string;
+  shareCopy: {label: string; copied: string; shared: string};
 }) {
   return (
-    <Reveal className="mx-auto mt-[clamp(48px,7vw,96px)] max-w-[880px]">
+    <Reveal className="mx-auto mt-[clamp(24px,3vw,48px)] max-w-[880px]">
       <footer
         data-news-article-footer
         className="relative border-y border-primary/15 py-8 before:absolute before:-top-px before:left-0 before:h-[2px] before:w-16 before:bg-accent md:py-10"
@@ -168,7 +170,7 @@ function NewsArticleFooter({
                 id="news-detail-tags-label"
                 className="font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-accent"
               >
-                Tags
+                {tagsLabel}
               </p>
               <ul aria-labelledby="news-detail-tags-label" className="mt-4 flex flex-wrap gap-2.5">
                 {tags.map((tag) => (

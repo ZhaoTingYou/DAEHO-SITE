@@ -2,9 +2,10 @@
 
 import {useState} from 'react';
 
-export function ShareLinkButton({copy}: {copy: {label: string; copied: string}}) {
-  const [isCompleted, setIsCompleted] = useState(false);
+export function ShareLinkButton({copy}: {copy: {label: string; copied: string; shared: string}}) {
+  const [completionMessage, setCompletionMessage] = useState('');
   const [isSharing, setIsSharing] = useState(false);
+  const isCompleted = completionMessage.length > 0;
 
   async function handleShare() {
     if (isSharing) {
@@ -17,16 +18,17 @@ export function ShareLinkButton({copy}: {copy: {label: string; copied: string}})
     try {
       if (navigator.share) {
         await navigator.share({url});
+        setCompletionMessage(copy.shared);
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url);
+        setCompletionMessage(copy.copied);
       } else {
         throw new Error('Sharing is not supported');
       }
 
-      setIsCompleted(true);
-      window.setTimeout(() => setIsCompleted(false), 3200);
+      window.setTimeout(() => setCompletionMessage(''), 3200);
     } catch {
-      setIsCompleted(false);
+      setCompletionMessage('');
     } finally {
       setIsSharing(false);
     }
@@ -38,14 +40,10 @@ export function ShareLinkButton({copy}: {copy: {label: string; copied: string}})
       onClick={handleShare}
       disabled={isSharing}
       aria-busy={isSharing}
-      className={`group inline-flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-8 border px-4 pl-5 font-body text-[13px] font-semibold uppercase tracking-[0.14em] text-white transition duration-200 ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-reduce:transition-none disabled:cursor-wait disabled:opacity-70 md:w-auto md:min-w-[190px] ${
-        isCompleted
-          ? 'border-accent bg-accent'
-          : 'border-primary bg-primary hover:border-accent hover:bg-accent'
-      }`}
+      className={`group inline-flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-6 font-body text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-reduce:transition-none disabled:cursor-wait disabled:opacity-70 md:w-auto md:min-w-[170px] ${isCompleted ? 'text-accent' : 'text-primary hover:text-accent'}`}
     >
-      <span aria-live="polite">{isCompleted ? copy.copied : copy.label}</span>
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/25 bg-white/10 transition duration-200 ease-brand group-hover:border-white/45 group-hover:bg-white/15 motion-reduce:transition-none">
+      <span aria-live="polite">{completionMessage || copy.label}</span>
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-white transition-colors duration-200 ease-brand group-hover:bg-primary motion-reduce:transition-none">
         {isCompleted ? (
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-none stroke-current" strokeWidth="1.8">
             <path d="m6.75 12.25 3.35 3.35 7.15-7.2" strokeLinecap="round" strokeLinejoin="round" />
