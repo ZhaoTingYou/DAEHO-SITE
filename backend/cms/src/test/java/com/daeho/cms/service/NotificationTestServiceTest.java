@@ -18,6 +18,53 @@ import org.junit.jupiter.api.Test;
 
 class NotificationTestServiceTest {
   @Test
+  void telegramTestUsesTheConfiguredGroupAndRenderedTemplate() {
+    var repository = mock(NotificationRepository.class);
+    var kakao = mock(SolapiKakaoClient.class);
+    var telegram = mock(TelegramBotClient.class);
+    var template = Map.<String, Object>of(
+        "channel", "telegram",
+        "locale", "ko",
+        "inquiryStatus", "",
+        "version", 1,
+        "subject", "",
+        "body", "새 문의: {{name}} / {{inquiry_id}} / {{admin_url}}",
+        "providerTemplateCode", "",
+        "kakaoTemplateType", "basic",
+        "approvalStatus", "approved"
+    );
+    when(repository.getActiveTemplate("internal_new_telegram_ko")).thenReturn(template);
+    when(telegram.configuredChatId()).thenReturn("-1001234567890");
+    var sentJob = new java.util.concurrent.atomic.AtomicReference<Map<String, Object>>();
+    when(telegram.send(anyMap())).thenAnswer(invocation -> {
+      sentJob.set(new java.util.LinkedHashMap<>(invocation.getArgument(0)));
+      return TelegramBotClient.SendResult.sent("42");
+    });
+    var properties = new NotificationProperties(
+        true, 1000, "https://daeho.works/admin", "", "", "", "", "", "", ""
+    );
+    var service = new NotificationTestService(
+        repository,
+        mock(WorkspaceEmailSender.class),
+        kakao,
+        telegram,
+        new NotificationTemplateRenderer(properties),
+        null
+    );
+
+    var result = service.send(
+        "telegram", "", "internal_new_telegram_ko", "테스트 고객", "TEST-123"
+    );
+
+    assertEquals(true, result.get("success"));
+    assertEquals("-1001234567890", sentJob.get().get("recipient"));
+    assertEquals(
+        "새 문의: 테스트 고객 / TEST-123 / https://daeho.works/admin/inquiries/TEST-123",
+        sentJob.get().get("renderedBody")
+    );
+  }
+
+  @Test
   void persistsKakaoVerificationOnlyAfterTheCmsTestIsAccepted() {
     var repository = mock(NotificationRepository.class);
     var kakao = mock(SolapiKakaoClient.class);
@@ -198,11 +245,12 @@ class NotificationTestServiceTest {
       SolapiKakaoClient kakao,
       DataSource dataSource
   ) {
-    var properties = new NotificationProperties(true, 1000, "", "", "", "", "");
+    var properties = new NotificationProperties(true, 1000, "", "", "", "", "", "", "", "");
     return new NotificationTestService(
         repository,
         mock(WorkspaceEmailSender.class),
         kakao,
+        mock(TelegramBotClient.class),
         new NotificationTemplateRenderer(properties),
         dataSource
     );

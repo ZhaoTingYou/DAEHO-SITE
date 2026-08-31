@@ -24,6 +24,7 @@ public class NotificationTestService {
   private final NotificationRepository repository;
   private final WorkspaceEmailSender email;
   private final SolapiKakaoClient kakao;
+  private final TelegramBotClient telegram;
   private final NotificationTemplateRenderer renderer;
   private final DataSource dataSource;
 
@@ -31,12 +32,14 @@ public class NotificationTestService {
       NotificationRepository repository,
       WorkspaceEmailSender email,
       SolapiKakaoClient kakao,
+      TelegramBotClient telegram,
       NotificationTemplateRenderer renderer,
       DataSource dataSource
   ) {
     this.repository = repository;
     this.email = email;
     this.kakao = kakao;
+    this.telegram = telegram;
     this.renderer = renderer;
     this.dataSource = dataSource;
   }
@@ -85,7 +88,10 @@ public class NotificationTestService {
         firstNonBlank(template.get("inquiryStatus"), "contacted")
     );
     var job = new LinkedHashMap<String, Object>();
-    job.put("recipient", recipient);
+    job.put(
+        "recipient",
+        "telegram".equals(channel) ? firstNonBlank(recipient, telegram.configuredChatId()) : recipient
+    );
     job.put("subject", renderer.render(text(template.get("subject")), variables));
     job.put("renderedBody", renderer.render(text(template.get("body")), variables));
     job.put("providerTemplateCode", text(template.get("providerTemplateCode")));
@@ -100,6 +106,15 @@ public class NotificationTestService {
       return Map.of(
           "success", result.success(),
           "providerMessageId", result.providerMessageId(),
+          "errorMessage", result.errorMessage()
+      );
+    }
+
+    if ("telegram".equals(channel)) {
+      var result = telegram.send(job);
+      return Map.of(
+          "success", result.success(),
+          "providerMessageId", result.messageId(),
           "errorMessage", result.errorMessage()
       );
     }

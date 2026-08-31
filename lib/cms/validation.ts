@@ -174,7 +174,8 @@ export const notificationSettingsSchema = z
     internalEmail: inquiryEmail,
     internalEmailEnabled: z.boolean(),
     customerEmailEnabled: z.boolean(),
-    kakaoEnabled: z.boolean()
+    kakaoEnabled: z.boolean(),
+    telegramEnabled: z.boolean()
   })
   .superRefine((value, context) => {
     if (value.internalEmailEnabled && !value.internalEmail) {

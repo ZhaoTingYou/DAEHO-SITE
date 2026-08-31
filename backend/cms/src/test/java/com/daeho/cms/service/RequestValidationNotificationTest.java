@@ -29,4 +29,30 @@ class RequestValidationNotificationTest {
     assertTrue(missingVariables.issues().stream().anyMatch(issue -> "inquiryNumber".equals(issue.get("path"))));
     assertTrue(complete.success());
   }
+
+  @Test
+  void telegramTestUsesTheServerConfiguredGroupWithoutARecipientInput() {
+    var result = validation.notificationTest(Map.of(
+        "channel", "telegram",
+        "recipient", "",
+        "templateKey", "internal_new_telegram_ko",
+        "customerName", "",
+        "inquiryNumber", ""
+    ));
+
+    assertTrue(result.success());
+  }
+
+  @Test
+  void telegramNotificationSettingDefaultsToDisabled() {
+    var result = validation.notificationSettings(Map.of(
+        "internalEmail", "",
+        "internalEmailEnabled", false,
+        "customerEmailEnabled", false,
+        "kakaoEnabled", false
+    ));
+
+    assertTrue(result.success());
+    assertTrue(Boolean.FALSE.equals(result.data().get("telegramEnabled")));
+  }
 }

@@ -11,6 +11,7 @@ import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.MediaStorageService;
 import com.daeho.cms.service.SolapiKakaoClient;
+import com.daeho.cms.service.TelegramBotClient;
 import com.daeho.cms.service.NotificationPlanner;
 import com.daeho.cms.service.NotificationTemplateRenderer;
 import com.daeho.cms.service.NotificationTestService;
@@ -53,6 +54,7 @@ public class AdminCmsController {
   private final InquiryWorkflowService inquiryWorkflow;
   private final WorkspaceEmailSender workspaceEmail;
   private final SolapiKakaoClient kakao;
+  private final TelegramBotClient telegram;
   private final NotificationProperties notificationProperties;
   private final NotificationTestService notificationTest;
   private final CmsSnapshotService snapshots;
@@ -70,6 +72,7 @@ public class AdminCmsController {
       InquiryWorkflowService inquiryWorkflow,
       WorkspaceEmailSender workspaceEmail,
       SolapiKakaoClient kakao,
+      TelegramBotClient telegram,
       NotificationProperties notificationProperties,
       NotificationTestService notificationTest,
       CmsSnapshotService snapshots,
@@ -86,6 +89,7 @@ public class AdminCmsController {
     this.inquiryWorkflow = inquiryWorkflow;
     this.workspaceEmail = workspaceEmail;
     this.kakao = kakao;
+    this.telegram = telegram;
     this.notificationProperties = notificationProperties;
     this.notificationTest = notificationTest;
     this.snapshots = snapshots;
@@ -478,6 +482,20 @@ public class AdminCmsController {
         );
       }
     }
+    if (validation.booleanValue(parsed.data().get("telegramEnabled"), false)) {
+      if (!telegram.configured()) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Telegram Bot credentials or group Chat ID are not configured."
+        );
+      }
+      if (!validation.booleanValue(notificationPlanner.health().get("telegramTemplateReady"), false)) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "The Telegram new-inquiry template must be active."
+        );
+      }
+    }
     return Map.of("settings", notifications.updateSettings(parsed.data()));
   }
 
@@ -488,6 +506,7 @@ public class AdminCmsController {
     health.put("emailConfigured", workspaceEmail.configured());
     health.put("kakaoConfigured", kakao.configured());
     health.put("kakaoVerified", notificationTest.kakaoVerified());
+    health.put("telegramConfigured", telegram.configured());
     health.put("workerEnabled", notificationProperties.workerEnabled());
     return health;
   }

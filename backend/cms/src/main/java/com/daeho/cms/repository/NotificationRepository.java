@@ -53,8 +53,9 @@ public class NotificationRepository {
   public Map<String, Object> getSettings(String fallbackInternalEmail) {
     jdbc.update("""
         INSERT INTO cms_notification_settings (
-          id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled, updated_at
-        ) VALUES ('default', ?, false, false, false, now())
+          id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled,
+          telegram_enabled, updated_at
+        ) VALUES ('default', ?, false, false, false, false, now())
         ON CONFLICT (id) DO UPDATE SET
           internal_email = CASE
             WHEN cms_notification_settings.internal_email = '' THEN excluded.internal_email
@@ -71,19 +72,22 @@ public class NotificationRepository {
   public Map<String, Object> updateSettings(Map<String, Object> payload) {
     jdbc.update("""
         INSERT INTO cms_notification_settings (
-          id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled, updated_at
-        ) VALUES ('default', ?, ?, ?, ?, now())
+          id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled,
+          telegram_enabled, updated_at
+        ) VALUES ('default', ?, ?, ?, ?, ?, now())
         ON CONFLICT (id) DO UPDATE SET
           internal_email = excluded.internal_email,
           internal_email_enabled = excluded.internal_email_enabled,
           customer_email_enabled = excluded.customer_email_enabled,
           kakao_enabled = excluded.kakao_enabled,
+          telegram_enabled = excluded.telegram_enabled,
           updated_at = now()
         """,
         validation.stringValue(payload.get("internalEmail")),
         validation.booleanValue(payload.get("internalEmailEnabled"), false),
         validation.booleanValue(payload.get("customerEmailEnabled"), false),
-        validation.booleanValue(payload.get("kakaoEnabled"), false)
+        validation.booleanValue(payload.get("kakaoEnabled"), false),
+        validation.booleanValue(payload.get("telegramEnabled"), false)
     );
     return jdbc.query(
         "SELECT * FROM cms_notification_settings WHERE id = 'default'",
@@ -458,6 +462,7 @@ public class NotificationRepository {
         "internalEmailEnabled", rs.getBoolean("internal_email_enabled"),
         "customerEmailEnabled", rs.getBoolean("customer_email_enabled"),
         "kakaoEnabled", rs.getBoolean("kakao_enabled"),
+        "telegramEnabled", rs.getBoolean("telegram_enabled"),
         "updatedAt", instantString(rs, "updated_at")
     );
   }

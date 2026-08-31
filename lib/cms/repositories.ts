@@ -142,7 +142,7 @@ export type CmsNotificationJob = {
   id: string;
   inquiryId: string;
   statusEventId: string | null;
-  channel: 'email' | 'kakao';
+  channel: 'email' | 'kakao' | 'telegram';
   audience: 'internal' | 'customer';
   eventType: 'new_inquiry' | 'status_changed';
   inquiryStatus: string;
@@ -188,13 +188,14 @@ export type CmsNotificationSettings = {
   internalEmailEnabled: boolean;
   customerEmailEnabled: boolean;
   kakaoEnabled: boolean;
+  telegramEnabled: boolean;
   updatedAt: string;
 };
 
 export type CmsNotificationTemplate = {
   id: string;
   templateKey: string;
-  channel: 'email' | 'kakao';
+  channel: 'email' | 'kakao' | 'telegram';
   audience: 'internal' | 'customer';
   eventType: 'new_inquiry' | 'status_changed';
   inquiryStatus: string;
@@ -215,7 +216,7 @@ export type CmsStatusPreview = {
   previousStatus: CmsInquiry['status'];
   nextStatus: CmsInquiry['status'];
   notifications: Array<{
-    channel: 'email' | 'kakao';
+    channel: 'email' | 'kakao' | 'telegram';
     audience: 'internal' | 'customer';
     maskedRecipient: string;
     subject: string;
@@ -688,12 +689,14 @@ export async function getNotificationHealth() {
     emailConfigured: boolean;
     kakaoConfigured: boolean;
     kakaoVerified: boolean;
+    telegramConfigured: boolean;
     workerEnabled: boolean;
+    telegramTemplateReady: boolean;
   }>('/api/admin/notifications/health', {admin: true});
 }
 
 export async function sendNotificationTest(payload: {
-  channel: 'email' | 'kakao';
+  channel: 'email' | 'kakao' | 'telegram';
   recipient: string;
   templateKey: string;
   customerName: string;

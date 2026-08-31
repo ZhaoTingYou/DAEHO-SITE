@@ -46,6 +46,13 @@ test('notification settings keep Kakao approval and provider codes separate from
   assert.match(settings, /\/api\/admin\/notifications\/test/);
 });
 
+test('notification settings and history expose Telegram as a first-class channel', () => {
+  assert.match(settings, /telegramEnabled/);
+  assert.match(settings, /telegramConfigured/);
+  assert.match(settings, /selected\?\.channel === 'telegram'/);
+  assert.match(timeline, /channel === 'telegram'/);
+});
+
 test('Kakao template setup only asks for the provider ID and test variables', () => {
   assert.match(settings, /copy\.providerCode[\s\S]*?<input\s+required/);
   assert.match(settings, /customerName/);

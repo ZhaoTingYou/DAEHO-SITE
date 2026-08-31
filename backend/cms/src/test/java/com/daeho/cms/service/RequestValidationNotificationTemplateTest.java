@@ -42,4 +42,21 @@ class RequestValidationNotificationTemplateTest {
 
     assertFalse(missingSubject.success());
   }
+
+  @Test
+  void telegramTemplatesRequireABodyButNoSubjectOrProviderCode() {
+    var missingBody = validation.notificationTemplate(Map.of(
+        "body", "",
+        "approvalStatus", "approved",
+        "isActive", true
+    ), "telegram");
+    var complete = validation.notificationTemplate(Map.of(
+        "body", "새 문의: {{name}} / {{admin_url}}",
+        "approvalStatus", "approved",
+        "isActive", true
+    ), "telegram");
+
+    assertFalse(missingBody.success());
+    assertTrue(complete.success());
+  }
 }

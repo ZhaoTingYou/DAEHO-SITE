@@ -21,7 +21,9 @@ class NotificationWorkerTest {
     var email = mock(WorkspaceEmailSender.class);
     var kakao = mock(SolapiKakaoClient.class);
     var verification = verifiedKakao();
-    var worker = new NotificationWorker(properties(), repository, email, kakao, verification);
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, mock(TelegramBotClient.class), verification
+    );
     when(repository.notificationSchemaReady()).thenReturn(false);
 
     worker.processReadyJobs();
@@ -35,7 +37,9 @@ class NotificationWorkerTest {
     var email = mock(WorkspaceEmailSender.class);
     var kakao = mock(SolapiKakaoClient.class);
     var verification = verifiedKakao();
-    var worker = new NotificationWorker(properties(), repository, email, kakao, verification);
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, mock(TelegramBotClient.class), verification
+    );
     when(repository.notificationSchemaReady()).thenReturn(false, true);
     when(repository.claimNextReadyJob()).thenReturn(null);
 
@@ -60,6 +64,7 @@ class NotificationWorkerTest {
         repository,
         mock(WorkspaceEmailSender.class),
         mock(SolapiKakaoClient.class),
+        mock(TelegramBotClient.class),
         verifiedKakao(),
         dataSource
     );
@@ -81,7 +86,9 @@ class NotificationWorkerTest {
     var email = mock(WorkspaceEmailSender.class);
     var kakao = mock(SolapiKakaoClient.class);
     var verification = verifiedKakao();
-    var worker = new NotificationWorker(properties(), repository, email, kakao, verification);
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, mock(TelegramBotClient.class), verification
+    );
     var job = job("email", 0, "queued");
     when(email.send(job)).thenReturn(WorkspaceEmailSender.DeliveryResult.sent("smtp-1"));
 
@@ -92,12 +99,75 @@ class NotificationWorkerTest {
   }
 
   @Test
+  void successfulTelegramMessageIsRecordedAndMarkedSent() {
+    var repository = mock(NotificationRepository.class);
+    var email = mock(WorkspaceEmailSender.class);
+    var kakao = mock(SolapiKakaoClient.class);
+    var telegram = mock(TelegramBotClient.class);
+    var verification = verifiedKakao();
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, telegram, verification
+    );
+    var job = job("telegram", 0, "queued");
+    when(telegram.send(job)).thenReturn(TelegramBotClient.SendResult.sent("42"));
+
+    worker.process(job);
+
+    verify(repository).recordAttempt("job-1", 1, "sent", "42", "");
+    verify(repository).markSent("job-1", 1, "42");
+  }
+
+  @Test
+  void rejectedTelegramMessageUsesTheExistingRetrySchedule() {
+    var repository = mock(NotificationRepository.class);
+    var telegram = mock(TelegramBotClient.class);
+    var worker = new NotificationWorker(
+        properties(), repository, mock(WorkspaceEmailSender.class), mock(SolapiKakaoClient.class),
+        telegram, verifiedKakao()
+    );
+    var job = job("telegram", 0, "queued");
+    when(telegram.send(job)).thenReturn(TelegramBotClient.SendResult.failed("group unavailable"));
+
+    worker.process(job);
+
+    verify(repository).recordAttempt("job-1", 1, "failed", "", "group unavailable");
+    verify(repository).scheduleRetry("job-1", 1, "group unavailable", 1);
+  }
+
+  @Test
+  void uncertainTelegramResultIsQuarantinedToAvoidADuplicateGroupPost() {
+    var repository = mock(NotificationRepository.class);
+    var telegram = mock(TelegramBotClient.class);
+    var worker = new NotificationWorker(
+        properties(), repository, mock(WorkspaceEmailSender.class), mock(SolapiKakaoClient.class),
+        telegram, verifiedKakao()
+    );
+    var job = job("telegram", 0, "queued");
+    when(telegram.send(job)).thenReturn(TelegramBotClient.SendResult.uncertain("response lost"));
+
+    worker.process(job);
+
+    verify(repository).quarantineJob(
+        "job-1",
+        "Telegram send result is uncertain; manual review is required before any resend. response lost"
+    );
+    verify(repository, never()).scheduleRetry(
+        org.mockito.ArgumentMatchers.anyString(),
+        org.mockito.ArgumentMatchers.anyInt(),
+        org.mockito.ArgumentMatchers.anyString(),
+        org.mockito.ArgumentMatchers.anyInt()
+    );
+  }
+
+  @Test
   void fourthFailureMovesThroughTheFinalThirtyMinuteRetryBoundary() {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
     var kakao = mock(SolapiKakaoClient.class);
     var verification = verifiedKakao();
-    var worker = new NotificationWorker(properties(), repository, email, kakao, verification);
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, mock(TelegramBotClient.class), verification
+    );
     var job = job("email", 3, "failed");
     when(email.send(job)).thenReturn(WorkspaceEmailSender.DeliveryResult.failed("relay unavailable"));
 
@@ -113,7 +183,9 @@ class NotificationWorkerTest {
     var email = mock(WorkspaceEmailSender.class);
     var kakao = mock(SolapiKakaoClient.class);
     var verification = verifiedKakao();
-    var worker = new NotificationWorker(properties(), repository, email, kakao, verification);
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, mock(TelegramBotClient.class), verification
+    );
     var sendJob = job("kakao", 0, "queued");
     when(kakao.send(sendJob)).thenReturn(SolapiKakaoClient.SendResult.accepted("kakao-1"));
     worker.process(sendJob);
@@ -131,7 +203,9 @@ class NotificationWorkerTest {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
     var kakao = mock(SolapiKakaoClient.class);
-    var worker = new NotificationWorker(properties(), repository, email, kakao, verifiedKakao());
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, mock(TelegramBotClient.class), verifiedKakao()
+    );
     var job = job("kakao", 0, "queued");
     when(kakao.send(job)).thenReturn(SolapiKakaoClient.SendResult.uncertain("response lost"));
 
@@ -155,7 +229,8 @@ class NotificationWorkerTest {
     var repository = mock(NotificationRepository.class);
     var kakao = mock(SolapiKakaoClient.class);
     var worker = new NotificationWorker(
-        properties(), repository, mock(WorkspaceEmailSender.class), kakao, verifiedKakao()
+        properties(), repository, mock(WorkspaceEmailSender.class), kakao,
+        mock(TelegramBotClient.class), verifiedKakao()
     );
     var job = new java.util.LinkedHashMap<String, Object>(job("kakao", 1, "provider_pending"));
     job.put("providerMessageId", "kakao-1");
@@ -185,7 +260,9 @@ class NotificationWorkerTest {
     var kakao = mock(SolapiKakaoClient.class);
     var verification = mock(NotificationTestService.class);
     when(verification.kakaoJobVerified(job("kakao", 0, "queued"))).thenReturn(false);
-    var worker = new NotificationWorker(properties(), repository, email, kakao, verification);
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, mock(TelegramBotClient.class), verification
+    );
     var job = job("kakao", 0, "queued");
 
     worker.process(job);
@@ -202,7 +279,9 @@ class NotificationWorkerTest {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
     var kakao = mock(SolapiKakaoClient.class);
-    var worker = new NotificationWorker(properties(), repository, email, kakao, verifiedKakao());
+    var worker = new NotificationWorker(
+        properties(), repository, email, kakao, mock(TelegramBotClient.class), verifiedKakao()
+    );
     var job = job("email", 0, "queued");
     when(repository.notificationSchemaReady()).thenReturn(true);
     when(repository.claimNextReadyJob()).thenReturn(job, null);
@@ -241,6 +320,6 @@ class NotificationWorkerTest {
   }
 
   private NotificationProperties properties() {
-    return new NotificationProperties(true, 1000, "", "", "", "", "");
+    return new NotificationProperties(true, 1000, "", "", "", "", "", "", "", "");
   }
 }

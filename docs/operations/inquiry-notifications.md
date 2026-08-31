@@ -79,6 +79,28 @@ for one external send at a time. External I/O is not inside a rollbackable batch
 If the process is interrupted after dispatch, the uncertain `processing` job is
 quarantined for manual review instead of being sent again automatically.
 
+## Telegram group alerts
+
+1. Create a bot with `@BotFather` and immediately revoke any token that has been
+   pasted into chat, source code, an issue, or another persistent record.
+2. Add the bot to the internal inquiry group and send one ordinary group message.
+3. Read the update with Telegram `getUpdates` and copy `message.chat.id`. Group
+   and supergroup IDs are typically negative; keep the complete signed value.
+4. Configure only the production service:
+
+```dotenv
+TELEGRAM_API_BASE_URL=https://api.telegram.org
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+```
+
+Telegram is used only for internal `new_inquiry` notifications. The immutable
+job contains the configured group ID and rendered inquiry snapshot. A successful
+Bot API `sendMessage` response records its `message_id`. Explicit provider
+rejections follow the normal retry schedule; an interrupted request with an
+unknown result is quarantined to avoid posting a duplicate inquiry to the group.
+Production requests are restricted to the HTTPS `api.telegram.org` endpoint.
+
 ## Safe rollout
 
 1. Deploy the database migration and compatible APIs. Leave all CMS switches off.
@@ -88,6 +110,8 @@ quarantined for manual review instead of being sent again automatically.
 5. Test-send each of the three Korean templates from the CMS and confirm final delivery.
 6. Enable Kakao only after all three templates are approved, active, and the
    connection health screen reports verified.
+7. Add the Telegram bot to the target group, send a successful CMS test, then
+   enable Telegram and submit one test inquiry.
 
 If a provider is unavailable, the CMS status still changes immediately. Review
 the inquiry notification timeline for queued attempts, retry times, provider IDs,

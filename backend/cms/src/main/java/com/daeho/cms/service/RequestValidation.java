@@ -202,6 +202,7 @@ public class RequestValidation {
     payload.putIfAbsent("internalEmailEnabled", false);
     payload.putIfAbsent("customerEmailEnabled", false);
     payload.putIfAbsent("kakaoEnabled", false);
+    payload.putIfAbsent("telegramEnabled", false);
     validateEmail(payload.get("internalEmail"), "internalEmail", issues);
     if (booleanValue(payload.get("internalEmailEnabled"), false)
         && stringValue(payload.get("internalEmail")).isBlank()) {
@@ -211,6 +212,7 @@ public class RequestValidation {
     payload.put("internalEmailEnabled", booleanValue(payload.get("internalEmailEnabled"), false));
     payload.put("customerEmailEnabled", booleanValue(payload.get("customerEmailEnabled"), false));
     payload.put("kakaoEnabled", booleanValue(payload.get("kakaoEnabled"), false));
+    payload.put("telegramEnabled", booleanValue(payload.get("telegramEnabled"), false));
     return new ValidatedRequest(payload, issues);
   }
 
@@ -227,6 +229,11 @@ public class RequestValidation {
     if ("email".equals(normalizedChannel)) {
       requireText(payload, "subject", issues);
       requireText(payload, "body", issues);
+    }
+    if ("telegram".equals(normalizedChannel)) {
+      requireText(payload, "body", issues);
+      payload.put("subject", "");
+      payload.put("providerTemplateCode", "");
     }
     var kakaoTemplateType = stringValue(payload.get("kakaoTemplateType"));
     if ("kakao".equals(normalizedChannel)) {
@@ -256,10 +263,10 @@ public class RequestValidation {
     var templateKey = stringValue(body.get("templateKey"));
     var customerName = stringValue(body.get("customerName"));
     var inquiryNumber = stringValue(body.get("inquiryNumber"));
-    if (!List.of("email", "kakao").contains(channel)) {
-      issues.add(issue("channel", "Expected email or kakao."));
+    if (!List.of("email", "kakao", "telegram").contains(channel)) {
+      issues.add(issue("channel", "Expected email, kakao, or telegram."));
     }
-    if (recipient.isBlank()) {
+    if (recipient.isBlank() && !"telegram".equals(channel)) {
       issues.add(issue("recipient", "Recipient is required."));
     } else if ("email".equals(channel)) {
       validateEmail(recipient, "recipient", issues);

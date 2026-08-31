@@ -37,7 +37,8 @@ class NotificationPlannerTest {
         "internalEmail", "internal@example.com",
         "internalEmailEnabled", true,
         "customerEmailEnabled", true,
-        "kakaoEnabled", true
+        "kakaoEnabled", true,
+        "telegramEnabled", true
     ));
     when(repository.getActiveTemplate(anyString())).thenAnswer(invocation ->
         template(invocation.getArgument(0), true)
@@ -53,12 +54,53 @@ class NotificationPlannerTest {
     });
     planner = new NotificationPlanner(
         cmsProperties(),
+        new NotificationProperties(
+            true, 1000, "https://daeho.works/admin", "", "", "", "",
+            "https://api.telegram.org", "test-token", "-1001234567890"
+        ),
         repository,
         new NotificationTemplateRenderer(new NotificationProperties(
-            true, 1000, "https://daeho.works/admin", "", "", "", ""
+            true, 1000, "https://daeho.works/admin", "", "", "", "",
+            "https://api.telegram.org", "test-token", "-1001234567890"
         )),
         notificationTest
     );
+  }
+
+  @Test
+  void queuesTelegramForNewInquiryAlongsideInternalEmail() {
+    planner.queueNewInquiry(inquiry("customer@example.com", "010-1234-5678"));
+
+    assertEquals(2, createdJobs.size());
+    assertTrue(createdJobs.stream().anyMatch(job ->
+        "internal".equals(job.get("audience"))
+            && "telegram".equals(job.get("channel"))
+            && "inquiry-1:new_inquiry:internal:telegram".equals(job.get("dedupeKey"))
+    ));
+  }
+
+  @Test
+  void missingTelegramCredentialsBecomeManualWorkWithoutBlockingTheInquiry() {
+    var missingToken = new NotificationProperties(
+        true, 1000, "https://daeho.works/admin", "", "", "", "",
+        "https://api.telegram.org", "", "-1001234567890"
+    );
+    var plannerWithoutToken = new NotificationPlanner(
+        cmsProperties(),
+        missingToken,
+        repository,
+        new NotificationTemplateRenderer(missingToken),
+        notificationTest
+    );
+
+    plannerWithoutToken.queueNewInquiry(inquiry("customer@example.com", "010-1234-5678"));
+
+    var telegram = createdJobs.stream()
+        .filter(job -> "telegram".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow();
+    assertEquals("needs_attention", telegram.get("status"));
+    assertTrue(telegram.get("lastError").toString().contains("credentials"));
   }
 
   @Test
@@ -204,11 +246,11 @@ class NotificationPlannerTest {
   }
 
   @Test
-  void newInquiryOnlyQueuesTheInternalEmail() {
+  void newInquiryOnlyQueuesInternalNotifications() {
     planner.queueNewInquiry(inquiry("customer@example.com", "010-1234-5678"));
-    assertEquals(1, createdJobs.size());
-    assertEquals("internal", createdJobs.get(0).get("audience"));
-    assertEquals("new_inquiry", createdJobs.get(0).get("eventType"));
+    assertEquals(2, createdJobs.size());
+    assertTrue(createdJobs.stream().allMatch(job -> "internal".equals(job.get("audience"))));
+    assertTrue(createdJobs.stream().allMatch(job -> "new_inquiry".equals(job.get("eventType"))));
   }
 
   @Test

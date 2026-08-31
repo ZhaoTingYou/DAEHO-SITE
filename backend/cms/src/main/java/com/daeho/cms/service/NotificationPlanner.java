@@ -1,6 +1,7 @@
 package com.daeho.cms.service;
 
 import com.daeho.cms.config.CmsProperties;
+import com.daeho.cms.config.NotificationProperties;
 import com.daeho.cms.repository.NotificationRepository;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -13,17 +14,20 @@ public class NotificationPlanner {
   private static final List<String> CUSTOMER_STATUSES = List.of("contacted", "in_progress", "done");
 
   private final CmsProperties cmsProperties;
+  private final NotificationProperties notificationProperties;
   private final NotificationRepository repository;
   private final NotificationTemplateRenderer renderer;
   private final NotificationTestService notificationTest;
 
   public NotificationPlanner(
       CmsProperties cmsProperties,
+      NotificationProperties notificationProperties,
       NotificationRepository repository,
       NotificationTemplateRenderer renderer,
       NotificationTestService notificationTest
   ) {
     this.cmsProperties = cmsProperties;
+    this.notificationProperties = notificationProperties;
     this.repository = repository;
     this.renderer = renderer;
     this.notificationTest = notificationTest;
@@ -59,6 +63,25 @@ public class NotificationPlanner {
         "internal_new_email_ko",
         text(inquiry.get("id")) + ":new_inquiry:internal:email"
     ));
+    var telegramPlan = buildPlan(
+        inquiry,
+        "",
+        "new",
+        "",
+        "telegram",
+        "internal",
+        "new_inquiry",
+        "ko",
+        text(notificationProperties.telegramChatId()),
+        validationBoolean(settings.get("telegramEnabled")),
+        "internal_new_telegram_ko",
+        text(inquiry.get("id")) + ":new_inquiry:internal:telegram"
+    );
+    if (!notificationProperties.telegramConfigured()) {
+      telegramPlan.put("ready", false);
+      telegramPlan.put("reason", "Telegram Bot credentials or group Chat ID are not configured.");
+    }
+    plans.add(telegramPlan);
     return queueEnabled(plans);
   }
 
@@ -79,7 +102,8 @@ public class NotificationPlanner {
     );
     return orderedMap(
         "settings", settings,
-        "kakaoTemplatesReady", kakaoTemplatesReady
+        "kakaoTemplatesReady", kakaoTemplatesReady,
+        "telegramTemplateReady", repository.getActiveTemplate("internal_new_telegram_ko") != null
     );
   }
 

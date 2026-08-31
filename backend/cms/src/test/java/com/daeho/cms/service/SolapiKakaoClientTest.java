@@ -233,7 +233,10 @@ class SolapiKakaoClientTest {
         apiBaseUrl,
         "api-key",
         "secret-key",
-        "KA01PF000001"
+        "KA01PF000001",
+        "",
+        "",
+        ""
     );
   }
 }

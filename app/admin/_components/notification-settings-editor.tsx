@@ -7,20 +7,23 @@ type Settings = {
   internalEmailEnabled: boolean;
   customerEmailEnabled: boolean;
   kakaoEnabled: boolean;
+  telegramEnabled: boolean;
 };
 
 type Health = {
   emailConfigured: boolean;
   kakaoConfigured: boolean;
   kakaoVerified: boolean;
+  telegramConfigured: boolean;
   workerEnabled: boolean;
   kakaoTemplatesReady: boolean;
+  telegramTemplateReady: boolean;
 };
 
 type Template = {
   id: string;
   templateKey: string;
-  channel: 'email' | 'kakao';
+  channel: 'email' | 'kakao' | 'telegram';
   audience: 'internal' | 'customer';
   inquiryStatus: string;
   locale: 'ko' | 'en';
@@ -40,11 +43,14 @@ type Copy = {
   internalEmailEnabled: string;
   customerEmailEnabled: string;
   kakaoEnabled: string;
+  telegramEnabled: string;
   worker: string;
   emailConnection: string;
   kakaoConnection: string;
   kakaoVerification: string;
   kakaoTemplates: string;
+  telegramConnection: string;
+  telegramTemplate: string;
   configured: string;
   notConfigured: string;
   enabled: string;
@@ -75,6 +81,7 @@ type Copy = {
   testInquiryNumber: string;
   testSuccess: string;
   testError: string;
+  telegramTestTarget: string;
 };
 
 export function NotificationSettingsEditor({
@@ -103,6 +110,8 @@ export function NotificationSettingsEditor({
           <HealthItem label={copy.kakaoConnection} ready={health.kakaoConfigured} copy={copy} />
           <HealthItem label={copy.kakaoVerification} ready={health.kakaoVerified} copy={copy} />
           <HealthItem label={copy.kakaoTemplates} ready={health.kakaoTemplatesReady} copy={copy} />
+          <HealthItem label={copy.telegramConnection} ready={health.telegramConfigured} copy={copy} />
+          <HealthItem label={copy.telegramTemplate} ready={health.telegramTemplateReady} copy={copy} />
         </div>
       </section>
 
@@ -140,7 +149,7 @@ export function NotificationSettingsEditor({
               className="min-h-11 rounded-md border border-[#cbd3df] px-3"
             />
           </label>
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <Toggle
               label={copy.internalEmailEnabled}
               checked={settings.internalEmailEnabled}
@@ -155,6 +164,11 @@ export function NotificationSettingsEditor({
               label={copy.kakaoEnabled}
               checked={settings.kakaoEnabled}
               onChange={(checked) => setSettings((current) => ({...current, kakaoEnabled: checked}))}
+            />
+            <Toggle
+              label={copy.telegramEnabled}
+              checked={settings.telegramEnabled}
+              onChange={(checked) => setSettings((current) => ({...current, telegramEnabled: checked}))}
             />
           </div>
           <div className="flex items-center gap-3">
@@ -267,16 +281,22 @@ function TestNotification({templates, copy}: {templates: Template[]; copy: Copy}
             ))}
           </select>
         </label>
-        <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
-          <span>{copy.testRecipient}</span>
-          <input
-            required
-            value={recipient}
-            onChange={(event) => setRecipient(event.target.value)}
-            placeholder={selected?.channel === 'kakao' ? '01012345678' : 'name@example.com'}
-            className="min-h-11 rounded-md border border-[#cbd3df] px-3"
-          />
-        </label>
+        {selected?.channel === 'telegram' ? (
+          <div className="rounded-md border border-[#d9dee7] bg-[#f8fafc] px-3 py-2 text-sm text-[#475467]">
+            {copy.telegramTestTarget}
+          </div>
+        ) : (
+          <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+            <span>{copy.testRecipient}</span>
+            <input
+              required
+              value={recipient}
+              onChange={(event) => setRecipient(event.target.value)}
+              placeholder={selected?.channel === 'kakao' ? '01012345678' : 'name@example.com'}
+              className="min-h-11 rounded-md border border-[#cbd3df] px-3"
+            />
+          </label>
+        )}
         {selected?.channel === 'kakao' ? (
           <>
             <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
@@ -328,11 +348,11 @@ function TemplateEditor({
   onSave: (draft: Pick<Template, 'subject' | 'body' | 'providerTemplateCode' | 'kakaoTemplateType' | 'approvalStatus' | 'isActive'>) => Promise<void>;
 }) {
   const [draft, setDraft] = useState({
-    subject: template.channel === 'kakao' ? '' : template.subject,
+    subject: template.channel === 'email' ? template.subject : '',
     body: template.channel === 'kakao' ? '' : template.body,
     providerTemplateCode: template.providerTemplateCode,
     kakaoTemplateType: 'basic' as const,
-    approvalStatus: template.channel === 'kakao' ? 'approved' as const : template.approvalStatus,
+    approvalStatus: template.channel === 'email' ? template.approvalStatus : 'approved' as const,
     isActive: template.isActive
   });
 
@@ -365,7 +385,7 @@ function TemplateEditor({
           />
         </label>
       ) : null}
-      {template.channel === 'email' ? (
+      {template.channel !== 'kakao' ? (
         <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
           <span>{copy.body}</span>
           <textarea
@@ -390,7 +410,7 @@ function TemplateEditor({
           />
         </label>
       ) : null}
-      {template.channel === 'email' ? (
+      {template.channel !== 'kakao' ? (
         <p className="text-xs leading-5 text-[#647084]">{copy.templateVariables}</p>
       ) : null}
       <div className="grid gap-3 md:grid-cols-2">

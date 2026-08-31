@@ -39,11 +39,14 @@ export default async function AdminNotificationsPage() {
           internalEmailEnabled: t('notification.internalEmailEnabled'),
           customerEmailEnabled: t('notification.customerEmailEnabled'),
           kakaoEnabled: t('notification.kakaoEnabled'),
+          telegramEnabled: t('notification.telegramEnabled'),
           worker: t('notification.worker'),
           emailConnection: t('notification.emailConnection'),
           kakaoConnection: t('notification.kakaoConnection'),
           kakaoVerification: t('notification.kakaoVerification'),
           kakaoTemplates: t('notification.kakaoTemplates'),
+          telegramConnection: t('notification.telegramConnection'),
+          telegramTemplate: t('notification.telegramTemplate'),
           configured: t('overview.configured'),
           notConfigured: t('overview.notConfigured'),
           enabled: t('notification.enabled'),
@@ -73,7 +76,8 @@ export default async function AdminNotificationsPage() {
           testCustomerName: t('notification.testCustomerName'),
           testInquiryNumber: t('notification.testInquiryNumber'),
           testSuccess: t('notification.testSuccess'),
-          testError: t('notification.testError')
+          testError: t('notification.testError'),
+          telegramTestTarget: t('notification.telegramTestTarget')
         }}
       />
     </>

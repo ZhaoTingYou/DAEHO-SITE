@@ -21,6 +21,7 @@ public class NotificationWorker {
   private final NotificationRepository repository;
   private final WorkspaceEmailSender email;
   private final SolapiKakaoClient kakao;
+  private final TelegramBotClient telegram;
   private final NotificationTestService notificationTest;
   private final DataSource dataSource;
   private volatile boolean schemaReady;
@@ -31,6 +32,7 @@ public class NotificationWorker {
       NotificationRepository repository,
       WorkspaceEmailSender email,
       SolapiKakaoClient kakao,
+      TelegramBotClient telegram,
       NotificationTestService notificationTest,
       DataSource dataSource
   ) {
@@ -38,6 +40,7 @@ public class NotificationWorker {
     this.repository = repository;
     this.email = email;
     this.kakao = kakao;
+    this.telegram = telegram;
     this.notificationTest = notificationTest;
     this.dataSource = dataSource;
   }
@@ -47,12 +50,14 @@ public class NotificationWorker {
       NotificationRepository repository,
       WorkspaceEmailSender email,
       SolapiKakaoClient kakao,
+      TelegramBotClient telegram,
       NotificationTestService notificationTest
   ) {
     this.properties = properties;
     this.repository = repository;
     this.email = email;
     this.kakao = kakao;
+    this.telegram = telegram;
     this.notificationTest = notificationTest;
     this.dataSource = null;
   }
@@ -134,6 +139,10 @@ public class NotificationWorker {
       sendKakao(job);
       return;
     }
+    if ("telegram".equals(text(job.get("channel")))) {
+      sendTelegram(job);
+      return;
+    }
     fail(job, "Unsupported notification channel.");
   }
 
@@ -180,6 +189,32 @@ public class NotificationWorker {
       }
       fail(job, result.errorMessage());
     }
+  }
+
+  private void sendTelegram(Map<String, Object> job) {
+    var result = telegram.send(job);
+    var attemptNumber = intValue(job.get("attemptCount")) + 1;
+    if (result.success()) {
+      repository.recordAttempt(
+          text(job.get("id")),
+          attemptNumber,
+          "sent",
+          result.messageId(),
+          ""
+      );
+      repository.markSent(text(job.get("id")), attemptNumber, result.messageId());
+      return;
+    }
+    repository.recordAttempt(text(job.get("id")), attemptNumber, "failed", "", result.errorMessage());
+    if (result.uncertain()) {
+      repository.quarantineJob(
+          text(job.get("id")),
+          "Telegram send result is uncertain; manual review is required before any resend. "
+              + result.errorMessage()
+      );
+      return;
+    }
+    fail(job, result.errorMessage());
   }
 
   private void pollKakao(Map<String, Object> job) {
