@@ -91,11 +91,11 @@ public class TelegramCredentialService {
   String fingerprint(Credentials credentials) {
     try {
       var digest = MessageDigest.getInstance("SHA-256");
-      var value = text(credentials.botToken())
-          + "\u0000"
-          + text(credentials.chatId())
-          + "\u0000"
-          + text(credentials.messageThreadId());
+      var value = text(credentials.botToken()) + "\u0000" + text(credentials.chatId());
+      var messageThreadId = text(credentials.messageThreadId());
+      if (!messageThreadId.isBlank()) {
+        value += "\u0000" + messageThreadId;
+      }
       return Base64.getUrlEncoder().withoutPadding().encodeToString(
           digest.digest(value.getBytes(StandardCharsets.UTF_8))
       );

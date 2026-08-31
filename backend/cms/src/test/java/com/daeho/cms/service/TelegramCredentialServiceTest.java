@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import com.daeho.cms.config.NotificationProperties;
 import com.daeho.cms.repository.NotificationRepository;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,6 +103,21 @@ class TelegramCredentialServiceTest {
     credentials.markVerified(current);
 
     org.mockito.Mockito.verify(repository).markTelegramTestVerified(fingerprint);
+  }
+
+  @Test
+  void blankTopicKeepsTheLegacyFingerprintForSafeUpgrades() throws Exception {
+    var legacyValue = "saved-token\u0000-100-current";
+    var legacyFingerprint = Base64.getUrlEncoder().withoutPadding().encodeToString(
+        MessageDigest.getInstance("SHA-256").digest(legacyValue.getBytes(StandardCharsets.UTF_8))
+    );
+
+    assertEquals(
+        legacyFingerprint,
+        credentials.fingerprint(new TelegramCredentialService.Credentials(
+            "saved-token", "-100-current", ""
+        ))
+    );
   }
 
   @Test
