@@ -203,16 +203,28 @@ public class RequestValidation {
     payload.putIfAbsent("customerEmailEnabled", false);
     payload.putIfAbsent("kakaoEnabled", false);
     payload.putIfAbsent("telegramEnabled", false);
+    payload.putIfAbsent("telegramBotToken", "");
+    payload.putIfAbsent("telegramChatId", "");
+    payload.putIfAbsent("clearTelegramBotToken", false);
     validateEmail(payload.get("internalEmail"), "internalEmail", issues);
     if (booleanValue(payload.get("internalEmailEnabled"), false)
         && stringValue(payload.get("internalEmail")).isBlank()) {
       issues.add(issue("internalEmail", "Internal email is required when internal notifications are enabled."));
     }
     maxLength(payload, "internalEmail", 254, issues);
+    maxLength(payload, "telegramBotToken", 512, issues);
+    maxLength(payload, "telegramChatId", 80, issues);
+    if (booleanValue(payload.get("telegramEnabled"), false)
+        && stringValue(payload.get("telegramChatId")).isBlank()) {
+      issues.add(issue("telegramChatId", "Telegram Chat ID is required when Telegram notifications are enabled."));
+    }
     payload.put("internalEmailEnabled", booleanValue(payload.get("internalEmailEnabled"), false));
     payload.put("customerEmailEnabled", booleanValue(payload.get("customerEmailEnabled"), false));
     payload.put("kakaoEnabled", booleanValue(payload.get("kakaoEnabled"), false));
     payload.put("telegramEnabled", booleanValue(payload.get("telegramEnabled"), false));
+    payload.put("telegramBotToken", stringValue(payload.get("telegramBotToken")));
+    payload.put("telegramChatId", stringValue(payload.get("telegramChatId")));
+    payload.put("clearTelegramBotToken", booleanValue(payload.get("clearTelegramBotToken"), false));
     return new ValidatedRequest(payload, issues);
   }
 

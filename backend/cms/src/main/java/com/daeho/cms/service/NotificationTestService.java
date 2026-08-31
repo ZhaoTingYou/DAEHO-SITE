@@ -25,6 +25,7 @@ public class NotificationTestService {
   private final WorkspaceEmailSender email;
   private final SolapiKakaoClient kakao;
   private final TelegramBotClient telegram;
+  private final TelegramCredentialService telegramCredentials;
   private final NotificationTemplateRenderer renderer;
   private final DataSource dataSource;
 
@@ -33,6 +34,7 @@ public class NotificationTestService {
       WorkspaceEmailSender email,
       SolapiKakaoClient kakao,
       TelegramBotClient telegram,
+      TelegramCredentialService telegramCredentials,
       NotificationTemplateRenderer renderer,
       DataSource dataSource
   ) {
@@ -40,6 +42,7 @@ public class NotificationTestService {
     this.email = email;
     this.kakao = kakao;
     this.telegram = telegram;
+    this.telegramCredentials = telegramCredentials;
     this.renderer = renderer;
     this.dataSource = dataSource;
   }
@@ -112,6 +115,9 @@ public class NotificationTestService {
 
     if ("telegram".equals(channel)) {
       var result = telegram.send(job);
+      if (result.success()) {
+        telegramCredentials.markCurrentVerified();
+      }
       return Map.of(
           "success", result.success(),
           "providerMessageId", result.messageId(),

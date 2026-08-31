@@ -320,6 +320,6 @@ class NotificationWorkerTest {
   }
 
   private NotificationProperties properties() {
-    return new NotificationProperties(true, 1000, "", "", "", "", "", "", "", "");
+    return new NotificationProperties(true, 1000, "", "", "", "", "", "", "");
   }
 }

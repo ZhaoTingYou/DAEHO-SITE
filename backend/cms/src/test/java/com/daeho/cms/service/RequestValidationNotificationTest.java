@@ -1,6 +1,7 @@
 package com.daeho.cms.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
@@ -54,5 +55,41 @@ class RequestValidationNotificationTest {
 
     assertTrue(result.success());
     assertTrue(Boolean.FALSE.equals(result.data().get("telegramEnabled")));
+  }
+
+  @Test
+  void telegramCredentialsCanBeEnteredInCmsWithoutRequiringTheSavedTokenToBeReturned() {
+    var result = validation.notificationSettings(Map.of(
+        "internalEmail", "",
+        "internalEmailEnabled", false,
+        "customerEmailEnabled", false,
+        "kakaoEnabled", false,
+        "telegramEnabled", true,
+        "telegramBotToken", "123456:abc_DEF-ghi",
+        "telegramChatId", "-1001234567890",
+        "clearTelegramBotToken", false
+    ));
+
+    assertTrue(result.success());
+    assertEquals("123456:abc_DEF-ghi", result.data().get("telegramBotToken"));
+    assertEquals("-1001234567890", result.data().get("telegramChatId"));
+    assertEquals(false, result.data().get("clearTelegramBotToken"));
+  }
+
+  @Test
+  void telegramChatIdIsRequiredWhenTelegramNotificationsAreEnabled() {
+    var result = validation.notificationSettings(Map.of(
+        "internalEmail", "",
+        "internalEmailEnabled", false,
+        "customerEmailEnabled", false,
+        "kakaoEnabled", false,
+        "telegramEnabled", true,
+        "telegramBotToken", "123456:abc_DEF-ghi",
+        "telegramChatId", "",
+        "clearTelegramBotToken", false
+    ));
+
+    assertFalse(result.success());
+    assertTrue(result.issues().stream().anyMatch(issue -> "telegramChatId".equals(issue.get("path"))));
   }
 }

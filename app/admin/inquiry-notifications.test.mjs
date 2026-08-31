@@ -53,6 +53,15 @@ test('notification settings and history expose Telegram as a first-class channel
   assert.match(timeline, /channel === 'telegram'/);
 });
 
+test('Telegram credentials are entered in CMS without hydrating the saved token', () => {
+  assert.match(settings, /type="password"/);
+  assert.match(settings, /autoComplete="new-password"/);
+  assert.match(settings, /telegramChatId/);
+  assert.match(settings, /telegramTokenConfigured/);
+  assert.match(settings, /clearTelegramBotToken/);
+  assert.match(settings, /telegramBotToken: ''/);
+});
+
 test('Kakao template setup only asks for the provider ID and test variables', () => {
   assert.match(settings, /copy\.providerCode[\s\S]*?<input\s+required/);
   assert.match(settings, /customerName/);

@@ -12,8 +12,7 @@ public record NotificationProperties(
     String solapiApiSecret,
     String solapiPfId,
     String telegramApiBaseUrl,
-    String telegramBotToken,
-    String telegramChatId
+    String telegramEncryptionKey
 ) {
   public String normalizedAdminBaseUrl() {
     return trimTrailingSlash(text(adminBaseUrl));
@@ -33,10 +32,6 @@ public record NotificationProperties(
   public String normalizedTelegramApiBaseUrl() {
     var value = text(telegramApiBaseUrl);
     return trimTrailingSlash(value.isBlank() ? "https://api.telegram.org" : value);
-  }
-
-  public boolean telegramConfigured() {
-    return !text(telegramBotToken).isBlank() && !text(telegramChatId).isBlank();
   }
 
   private String trimTrailingSlash(String value) {

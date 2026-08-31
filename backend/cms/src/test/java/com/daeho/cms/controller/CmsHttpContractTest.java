@@ -100,7 +100,7 @@ class CmsHttpContractTest {
         ""
     ));
     var validation = new RequestValidation();
-    var notificationProperties = new NotificationProperties(false, 1000, "", "", "", "", "", "", "", "");
+    var notificationProperties = new NotificationProperties(false, 1000, "", "", "", "", "", "", "");
     mvc = MockMvcBuilders.standaloneSetup(
             new AdminCmsController(
                 auth,
@@ -114,6 +114,7 @@ class CmsHttpContractTest {
                 mock(WorkspaceEmailSender.class),
                 kakao,
                 mock(TelegramBotClient.class),
+                mock(com.daeho.cms.service.TelegramCredentialService.class),
                 notificationProperties,
                 notificationTest,
                 snapshots,

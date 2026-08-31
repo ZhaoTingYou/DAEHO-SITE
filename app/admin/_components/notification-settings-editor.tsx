@@ -8,6 +8,8 @@ type Settings = {
   customerEmailEnabled: boolean;
   kakaoEnabled: boolean;
   telegramEnabled: boolean;
+  telegramChatId: string;
+  telegramTokenConfigured: boolean;
 };
 
 type Health = {
@@ -15,6 +17,8 @@ type Health = {
   kakaoConfigured: boolean;
   kakaoVerified: boolean;
   telegramConfigured: boolean;
+  telegramEncryptionConfigured: boolean;
+  telegramVerified: boolean;
   workerEnabled: boolean;
   kakaoTemplatesReady: boolean;
   telegramTemplateReady: boolean;
@@ -44,6 +48,15 @@ type Copy = {
   customerEmailEnabled: string;
   kakaoEnabled: string;
   telegramEnabled: string;
+  telegramBotToken: string;
+  telegramBotTokenHint: string;
+  telegramChatId: string;
+  telegramChatIdHint: string;
+  telegramTokenSaved: string;
+  telegramTokenMissing: string;
+  clearTelegramBotToken: string;
+  telegramEncryption: string;
+  telegramVerification: string;
   worker: string;
   emailConnection: string;
   kakaoConnection: string;
@@ -95,7 +108,11 @@ export function NotificationSettingsEditor({
   initialTemplates: Template[];
   copy: Copy;
 }) {
-  const [settings, setSettings] = useState(initialSettings);
+  const [settings, setSettings] = useState({
+    ...initialSettings,
+    telegramBotToken: '',
+    clearTelegramBotToken: false
+  });
   const [templates, setTemplates] = useState(initialTemplates);
   const [settingsState, setSettingsState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [templateState, setTemplateState] = useState<Record<string, 'saving' | 'saved' | 'error'>>({});
@@ -111,6 +128,8 @@ export function NotificationSettingsEditor({
           <HealthItem label={copy.kakaoVerification} ready={health.kakaoVerified} copy={copy} />
           <HealthItem label={copy.kakaoTemplates} ready={health.kakaoTemplatesReady} copy={copy} />
           <HealthItem label={copy.telegramConnection} ready={health.telegramConfigured} copy={copy} />
+          <HealthItem label={copy.telegramEncryption} ready={health.telegramEncryptionConfigured} copy={copy} />
+          <HealthItem label={copy.telegramVerification} ready={health.telegramVerified} copy={copy} />
           <HealthItem label={copy.telegramTemplate} ready={health.telegramTemplateReady} copy={copy} />
         </div>
       </section>
@@ -134,7 +153,11 @@ export function NotificationSettingsEditor({
               return;
             }
             const payload = await response.json() as {settings: Settings};
-            setSettings(payload.settings);
+            setSettings({
+              ...payload.settings,
+              telegramBotToken: '',
+              clearTelegramBotToken: false
+            });
             setSettingsState('saved');
           }}
         >
@@ -149,6 +172,63 @@ export function NotificationSettingsEditor({
               className="min-h-11 rounded-md border border-[#cbd3df] px-3"
             />
           </label>
+          <div className="grid gap-4 rounded-md border border-[#d9dee7] bg-[#f8fafc] p-4 md:grid-cols-2">
+            <div className="grid content-start gap-1.5 text-sm font-semibold text-[#344054]">
+              <label htmlFor="telegram-bot-token" className="flex flex-wrap items-center gap-2">
+                {copy.telegramBotToken}
+                <span className={`rounded-full px-2 py-0.5 text-xs ${
+                  settings.telegramTokenConfigured
+                    ? 'bg-[#ecfdf3] text-[#027a48]'
+                    : 'bg-[#fef3f2] text-[#b42318]'
+                }`}>
+                  {settings.telegramTokenConfigured ? copy.telegramTokenSaved : copy.telegramTokenMissing}
+                </span>
+              </label>
+              <input
+                id="telegram-bot-token"
+                type="password"
+                autoComplete="new-password"
+                maxLength={512}
+                value={settings.telegramBotToken}
+                disabled={settings.clearTelegramBotToken}
+                onChange={(event) => setSettings((current) => ({
+                  ...current,
+                  telegramBotToken: event.target.value,
+                  clearTelegramBotToken: false
+                }))}
+                className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3 disabled:bg-[#eef2f6]"
+              />
+              <span className="font-normal leading-5 text-[#647084]">{copy.telegramBotTokenHint}</span>
+              <label className="mt-1 flex items-center gap-2 font-normal text-[#475467]">
+                <input
+                  type="checkbox"
+                  checked={settings.clearTelegramBotToken}
+                  disabled={!settings.telegramTokenConfigured && !settings.telegramBotToken}
+                  onChange={(event) => setSettings((current) => ({
+                    ...current,
+                    telegramBotToken: '',
+                    clearTelegramBotToken: event.target.checked
+                  }))}
+                />
+                <span>{copy.clearTelegramBotToken}</span>
+              </label>
+            </div>
+            <label className="grid content-start gap-1.5 text-sm font-semibold text-[#344054]">
+              <span>{copy.telegramChatId}</span>
+              <input
+                required={settings.telegramEnabled}
+                maxLength={80}
+                value={settings.telegramChatId}
+                onChange={(event) => setSettings((current) => ({
+                  ...current,
+                  telegramChatId: event.target.value
+                }))}
+                placeholder="-1001234567890"
+                className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
+              />
+              <span className="font-normal leading-5 text-[#647084]">{copy.telegramChatIdHint}</span>
+            </label>
+          </div>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <Toggle
               label={copy.internalEmailEnabled}

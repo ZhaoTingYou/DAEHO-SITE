@@ -1,7 +1,6 @@
 package com.daeho.cms.service;
 
 import com.daeho.cms.config.CmsProperties;
-import com.daeho.cms.config.NotificationProperties;
 import com.daeho.cms.repository.NotificationRepository;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,20 +13,20 @@ public class NotificationPlanner {
   private static final List<String> CUSTOMER_STATUSES = List.of("contacted", "in_progress", "done");
 
   private final CmsProperties cmsProperties;
-  private final NotificationProperties notificationProperties;
+  private final TelegramCredentialService telegramCredentials;
   private final NotificationRepository repository;
   private final NotificationTemplateRenderer renderer;
   private final NotificationTestService notificationTest;
 
   public NotificationPlanner(
       CmsProperties cmsProperties,
-      NotificationProperties notificationProperties,
+      TelegramCredentialService telegramCredentials,
       NotificationRepository repository,
       NotificationTemplateRenderer renderer,
       NotificationTestService notificationTest
   ) {
     this.cmsProperties = cmsProperties;
-    this.notificationProperties = notificationProperties;
+    this.telegramCredentials = telegramCredentials;
     this.repository = repository;
     this.renderer = renderer;
     this.notificationTest = notificationTest;
@@ -63,6 +62,7 @@ public class NotificationPlanner {
         "internal_new_email_ko",
         text(inquiry.get("id")) + ":new_inquiry:internal:email"
     ));
+    var telegramConfiguration = telegramCredentials.current();
     var telegramPlan = buildPlan(
         inquiry,
         "",
@@ -72,14 +72,17 @@ public class NotificationPlanner {
         "internal",
         "new_inquiry",
         "ko",
-        text(notificationProperties.telegramChatId()),
+        text(telegramConfiguration.chatId()),
         validationBoolean(settings.get("telegramEnabled")),
         "internal_new_telegram_ko",
         text(inquiry.get("id")) + ":new_inquiry:internal:telegram"
     );
-    if (!notificationProperties.telegramConfigured()) {
+    if (!telegramConfiguration.configured()) {
       telegramPlan.put("ready", false);
       telegramPlan.put("reason", "Telegram Bot credentials or group Chat ID are not configured.");
+    } else if (!telegramCredentials.verified()) {
+      telegramPlan.put("ready", false);
+      telegramPlan.put("reason", "Send a successful Telegram test from this CMS before enabling notifications.");
     }
     plans.add(telegramPlan);
     return queueEnabled(plans);

@@ -1,6 +1,7 @@
 package com.daeho.cms.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.daeho.cms.config.NotificationProperties;
@@ -45,6 +46,22 @@ class TelegramBotClientTest {
     }
   }
 
+  @Test
+  void connectionFailuresRemainRetryableBecauseNoRequestReachedTelegram() throws Exception {
+    var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    var endpoint = "http://127.0.0.1:" + server.getAddress().getPort();
+    server.start();
+    server.stop(0);
+
+    var result = client(endpoint).send(Map.of(
+        "recipient", "-1001234567890",
+        "renderedBody", "retryable inquiry"
+    ));
+
+    assertFalse(result.success());
+    assertFalse(result.uncertain());
+  }
+
   private TelegramBotClient client(String apiBaseUrl) {
     var properties = new NotificationProperties(
         true,
@@ -55,9 +72,17 @@ class TelegramBotClientTest {
         "",
         "",
         apiBaseUrl,
-        "test-token",
-        "-1001234567890"
+        ""
     );
-    return new TelegramBotClient(properties, new JsonSupport(), HttpClient.newHttpClient());
+    var credentials = org.mockito.Mockito.mock(TelegramCredentialService.class);
+    org.mockito.Mockito.when(credentials.current()).thenReturn(
+        new TelegramCredentialService.Credentials("test-token", "-1001234567890")
+    );
+    return new TelegramBotClient(
+        properties,
+        credentials,
+        new JsonSupport(),
+        HttpClient.newHttpClient()
+    );
   }
 }

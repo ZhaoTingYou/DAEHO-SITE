@@ -21,7 +21,7 @@ SMTP_FROM=no-reply@company-domain.example
 CMS_NOTIFY_TO=inquiries@company-domain.example
 ```
 
-Do not put credentials in Git or CMS records. If the Workspace policy requires
+Do not put email credentials in Git or CMS records. If the Workspace policy requires
 authentication, supply `SMTP_USER`, `SMTP_PASS`, and set `SMTP_AUTH=true` only in
 the server environment.
 
@@ -86,13 +86,24 @@ quarantined for manual review instead of being sent again automatically.
 2. Add the bot to the internal inquiry group and send one ordinary group message.
 3. Read the update with Telegram `getUpdates` and copy `message.chat.id`. Group
    and supergroup IDs are typically negative; keep the complete signed value.
-4. Configure only the production service:
+4. Generate and configure one stable server-side encryption key. This key is not
+   the Bot Token and must be preserved when restoring database backups:
 
 ```dotenv
 TELEGRAM_API_BASE_URL=https://api.telegram.org
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
+CMS_TELEGRAM_ENCRYPTION_KEY=<output of: openssl rand -base64 32>
 ```
+
+5. Open `/admin/notifications`, enter the regenerated Bot Token and group Chat ID,
+   and save. The CMS never returns the saved token: an empty Token field preserves
+   it, a new value replaces it, and the explicit clear checkbox removes it.
+6. Send a Telegram test from the same CMS page, then enable group alerts.
+
+The Bot Token is encrypted with AES-256-GCM before it is written to PostgreSQL.
+Only the encrypted value is stored; it is never included in CMS responses or
+application logs. Keep `CMS_TELEGRAM_ENCRYPTION_KEY` outside the database backup
+and preserve it securely. If that key is lost or changed, clear and re-enter the
+Bot Token in CMS.
 
 Telegram is used only for internal `new_inquiry` notifications. The immutable
 job contains the configured group ID and rendered inquiry snapshot. A successful
@@ -110,8 +121,8 @@ Production requests are restricted to the HTTPS `api.telegram.org` endpoint.
 5. Test-send each of the three Korean templates from the CMS and confirm final delivery.
 6. Enable Kakao only after all three templates are approved, active, and the
    connection health screen reports verified.
-7. Add the Telegram bot to the target group, send a successful CMS test, then
-   enable Telegram and submit one test inquiry.
+7. Add the Telegram bot to the target group, save its new token and Chat ID in
+   CMS, send a successful CMS test, then enable Telegram and submit one test inquiry.
 
 If a provider is unavailable, the CMS status still changes immediately. Review
 the inquiry notification timeline for queued attempts, retry times, provider IDs,

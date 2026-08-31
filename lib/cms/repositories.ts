@@ -189,6 +189,8 @@ export type CmsNotificationSettings = {
   customerEmailEnabled: boolean;
   kakaoEnabled: boolean;
   telegramEnabled: boolean;
+  telegramChatId: string;
+  telegramTokenConfigured: boolean;
   updatedAt: string;
 };
 
@@ -673,7 +675,13 @@ export async function getNotificationSettings() {
   return response.settings;
 }
 
-export async function updateNotificationSettings(payload: Omit<CmsNotificationSettings, 'id' | 'updatedAt'>) {
+export async function updateNotificationSettings(payload: Omit<
+  CmsNotificationSettings,
+  'id' | 'updatedAt' | 'telegramTokenConfigured'
+> & {
+  telegramBotToken: string;
+  clearTelegramBotToken: boolean;
+}) {
   const response = await cmsFetch<{settings: CmsNotificationSettings}>('/api/admin/notifications/settings', {
     admin: true,
     method: 'PUT',
@@ -690,6 +698,8 @@ export async function getNotificationHealth() {
     kakaoConfigured: boolean;
     kakaoVerified: boolean;
     telegramConfigured: boolean;
+    telegramEncryptionConfigured: boolean;
+    telegramVerified: boolean;
     workerEnabled: boolean;
     telegramTemplateReady: boolean;
   }>('/api/admin/notifications/health', {admin: true});

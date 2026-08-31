@@ -14,38 +14,52 @@ import org.springframework.stereotype.Service;
 @Service
 public class TelegramBotClient {
   private final NotificationProperties properties;
+  private final TelegramCredentialService credentials;
   private final JsonSupport json;
   private final HttpClient client;
   private final boolean allowLoopbackEndpoint;
 
   @Autowired
-  public TelegramBotClient(NotificationProperties properties, JsonSupport json) {
+  public TelegramBotClient(
+      NotificationProperties properties,
+      TelegramCredentialService credentials,
+      JsonSupport json
+  ) {
     this(
         properties,
+        credentials,
         json,
         HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build(),
         false
     );
   }
 
-  TelegramBotClient(NotificationProperties properties, JsonSupport json, HttpClient client) {
-    this(properties, json, client, true);
+  TelegramBotClient(
+      NotificationProperties properties,
+      TelegramCredentialService credentials,
+      JsonSupport json,
+      HttpClient client
+  ) {
+    this(properties, credentials, json, client, true);
   }
 
   private TelegramBotClient(
       NotificationProperties properties,
+      TelegramCredentialService credentials,
       JsonSupport json,
       HttpClient client,
       boolean allowLoopbackEndpoint
   ) {
     this.properties = properties;
+    this.credentials = credentials;
     this.json = json;
     this.client = client;
     this.allowLoopbackEndpoint = allowLoopbackEndpoint;
   }
 
   public SendResult send(Map<String, Object> job) {
-    if (!configured()) {
+    var configuration = credentials.current();
+    if (!configuration.configured() || !trustedEndpoint()) {
       return SendResult.failed("Telegram Bot credentials or group Chat ID are not configured.");
     }
     var recipient = text(job.get("recipient"));
@@ -58,7 +72,7 @@ public class TelegramBotClient {
     }
     try {
       var response = client.send(
-          request(json.stringify(Map.of("chat_id", recipient, "text", body))),
+          request(configuration.botToken(), json.stringify(Map.of("chat_id", recipient, "text", body))),
           HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
       );
       var payload = json.objectOrEmpty(response.body());
@@ -80,24 +94,27 @@ public class TelegramBotClient {
       Thread.currentThread().interrupt();
       return SendResult.uncertain("The Telegram request was interrupted and its result is unknown.");
     } catch (Exception error) {
+      if (requestDefinitelyNotSent(error)) {
+        return SendResult.failed("Unable to connect to the Telegram Bot API.");
+      }
       return SendResult.uncertain("The Telegram response was not received; the send result is unknown.");
     }
   }
 
   public boolean configured() {
-    return properties.telegramConfigured() && trustedEndpoint();
+    return credentials.current().configured() && trustedEndpoint();
   }
 
   public String configuredChatId() {
-    return text(properties.telegramChatId());
+    return text(credentials.current().chatId());
   }
 
-  private HttpRequest request(String body) {
+  private HttpRequest request(String botToken, String body) {
     return HttpRequest.newBuilder()
         .uri(URI.create(
             properties.normalizedTelegramApiBaseUrl()
                 + "/bot"
-                + text(properties.telegramBotToken())
+                + text(botToken)
                 + "/sendMessage"
         ))
         .timeout(Duration.ofSeconds(12))
@@ -119,6 +136,17 @@ public class TelegramBotClient {
     } catch (IllegalArgumentException error) {
       return false;
     }
+  }
+
+  private boolean requestDefinitelyNotSent(Throwable error) {
+    for (var cause = error; cause != null; cause = cause.getCause()) {
+      if (cause instanceof java.net.ConnectException
+          || cause instanceof java.net.http.HttpConnectTimeoutException
+          || cause instanceof java.nio.channels.UnresolvedAddressException) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean booleanValue(Object value) {

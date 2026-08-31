@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 class NotificationPlannerTest {
   private NotificationRepository repository;
   private NotificationTestService notificationTest;
+  private TelegramCredentialService telegramCredentials;
   private NotificationPlanner planner;
   private List<Map<String, Object>> createdJobs;
 
@@ -30,6 +31,11 @@ class NotificationPlannerTest {
   void setUp() {
     repository = mock(NotificationRepository.class);
     notificationTest = mock(NotificationTestService.class);
+    telegramCredentials = mock(TelegramCredentialService.class);
+    when(telegramCredentials.current()).thenReturn(
+        new TelegramCredentialService.Credentials("test-token", "-1001234567890")
+    );
+    when(telegramCredentials.verified()).thenReturn(true);
     when(notificationTest.kakaoVerified()).thenReturn(true);
     when(notificationTest.verificationFingerprint(anyString(), anyMap())).thenReturn("verified-fingerprint");
     createdJobs = new ArrayList<>();
@@ -54,14 +60,11 @@ class NotificationPlannerTest {
     });
     planner = new NotificationPlanner(
         cmsProperties(),
-        new NotificationProperties(
-            true, 1000, "https://daeho.works/admin", "", "", "", "",
-            "https://api.telegram.org", "test-token", "-1001234567890"
-        ),
+        telegramCredentials,
         repository,
         new NotificationTemplateRenderer(new NotificationProperties(
             true, 1000, "https://daeho.works/admin", "", "", "", "",
-            "https://api.telegram.org", "test-token", "-1001234567890"
+            "https://api.telegram.org", ""
         )),
         notificationTest
     );
@@ -81,15 +84,18 @@ class NotificationPlannerTest {
 
   @Test
   void missingTelegramCredentialsBecomeManualWorkWithoutBlockingTheInquiry() {
-    var missingToken = new NotificationProperties(
-        true, 1000, "https://daeho.works/admin", "", "", "", "",
-        "https://api.telegram.org", "", "-1001234567890"
+    var missingCredentials = mock(TelegramCredentialService.class);
+    when(missingCredentials.current()).thenReturn(
+        new TelegramCredentialService.Credentials("", "-1001234567890")
     );
     var plannerWithoutToken = new NotificationPlanner(
         cmsProperties(),
-        missingToken,
+        missingCredentials,
         repository,
-        new NotificationTemplateRenderer(missingToken),
+        new NotificationTemplateRenderer(new NotificationProperties(
+            true, 1000, "https://daeho.works/admin", "", "", "", "",
+            "https://api.telegram.org", ""
+        )),
         notificationTest
     );
 
@@ -101,6 +107,20 @@ class NotificationPlannerTest {
         .orElseThrow();
     assertEquals("needs_attention", telegram.get("status"));
     assertTrue(telegram.get("lastError").toString().contains("credentials"));
+  }
+
+  @Test
+  void unverifiedTelegramCredentialsBecomeManualWorkWithoutSending() {
+    when(telegramCredentials.verified()).thenReturn(false);
+
+    planner.queueNewInquiry(inquiry("customer@example.com", "010-1234-5678"));
+
+    var telegram = createdJobs.stream()
+        .filter(job -> "telegram".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow();
+    assertEquals("needs_attention", telegram.get("status"));
+    assertTrue(telegram.get("lastError").toString().contains("test"));
   }
 
   @Test

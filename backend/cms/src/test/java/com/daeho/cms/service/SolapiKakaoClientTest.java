@@ -235,7 +235,6 @@ class SolapiKakaoClientTest {
         "secret-key",
         "KA01PF000001",
         "",
-        "",
         ""
     );
   }

@@ -22,6 +22,7 @@ class NotificationTestServiceTest {
     var repository = mock(NotificationRepository.class);
     var kakao = mock(SolapiKakaoClient.class);
     var telegram = mock(TelegramBotClient.class);
+    var telegramCredentials = mock(TelegramCredentialService.class);
     var template = Map.<String, Object>of(
         "channel", "telegram",
         "locale", "ko",
@@ -41,13 +42,14 @@ class NotificationTestServiceTest {
       return TelegramBotClient.SendResult.sent("42");
     });
     var properties = new NotificationProperties(
-        true, 1000, "https://daeho.works/admin", "", "", "", "", "", "", ""
+        true, 1000, "https://daeho.works/admin", "", "", "", "", "", ""
     );
     var service = new NotificationTestService(
         repository,
         mock(WorkspaceEmailSender.class),
         kakao,
         telegram,
+        telegramCredentials,
         new NotificationTemplateRenderer(properties),
         null
     );
@@ -62,6 +64,7 @@ class NotificationTestServiceTest {
         "새 문의: 테스트 고객 / TEST-123 / https://daeho.works/admin/inquiries/TEST-123",
         sentJob.get().get("renderedBody")
     );
+    verify(telegramCredentials).markCurrentVerified();
   }
 
   @Test
@@ -245,12 +248,13 @@ class NotificationTestServiceTest {
       SolapiKakaoClient kakao,
       DataSource dataSource
   ) {
-    var properties = new NotificationProperties(true, 1000, "", "", "", "", "", "", "", "");
+    var properties = new NotificationProperties(true, 1000, "", "", "", "", "", "", "");
     return new NotificationTestService(
         repository,
         mock(WorkspaceEmailSender.class),
         kakao,
         mock(TelegramBotClient.class),
+        mock(TelegramCredentialService.class),
         new NotificationTemplateRenderer(properties),
         dataSource
     );
