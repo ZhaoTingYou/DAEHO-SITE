@@ -192,6 +192,13 @@ public class NotificationWorker {
   }
 
   private void sendTelegram(Map<String, Object> job) {
+    if (!notificationTest.telegramJobVerified(job)) {
+      repository.quarantineJob(
+          text(job.get("id")),
+          "The queued Telegram credentials or group are no longer verified; this job cannot be retried."
+      );
+      return;
+    }
     var result = telegram.send(job);
     var attemptNumber = intValue(job.get("attemptCount")) + 1;
     if (result.success()) {

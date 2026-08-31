@@ -160,6 +160,27 @@ class NotificationWorkerTest {
   }
 
   @Test
+  void refusesToSendQueuedTelegramWhenCredentialsOrGroupChanged() {
+    var repository = mock(NotificationRepository.class);
+    var telegram = mock(TelegramBotClient.class);
+    var verification = mock(NotificationTestService.class);
+    var worker = new NotificationWorker(
+        properties(), repository, mock(WorkspaceEmailSender.class), mock(SolapiKakaoClient.class),
+        telegram, verification
+    );
+    var job = job("telegram", 0, "queued");
+    when(verification.telegramJobVerified(job)).thenReturn(false);
+
+    worker.process(job);
+
+    verify(telegram, never()).send(job);
+    verify(repository).quarantineJob(
+        "job-1",
+        "The queued Telegram credentials or group are no longer verified; this job cannot be retried."
+    );
+  }
+
+  @Test
   void fourthFailureMovesThroughTheFinalThirtyMinuteRetryBoundary() {
     var repository = mock(NotificationRepository.class);
     var email = mock(WorkspaceEmailSender.class);
@@ -305,6 +326,7 @@ class NotificationWorkerTest {
     var verification = mock(NotificationTestService.class);
     when(verification.kakaoVerified()).thenReturn(true);
     when(verification.kakaoJobVerified(org.mockito.ArgumentMatchers.anyMap())).thenReturn(true);
+    when(verification.telegramJobVerified(org.mockito.ArgumentMatchers.anyMap())).thenReturn(true);
     return verification;
   }
 

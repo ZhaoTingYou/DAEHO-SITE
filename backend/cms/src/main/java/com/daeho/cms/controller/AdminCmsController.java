@@ -468,8 +468,8 @@ public class AdminCmsController {
     if (!parsed.success()) {
       throw new ValidationFailedException(parsed.issues());
     }
+    notifications.lockNotificationDispatch();
     if (validation.booleanValue(parsed.data().get("kakaoEnabled"), false)) {
-      notifications.lockNotificationDispatch();
       if (!kakao.configured()) {
         throw new ResponseStatusException(HttpStatus.CONFLICT, "SOLAPI credentials are not configured.");
       }

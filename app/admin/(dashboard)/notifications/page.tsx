@@ -71,6 +71,7 @@ export default async function AdminNotificationsPage() {
           kakaoTemplateHighlight: t('notification.kakaoTemplateHighlight'),
           kakaoHighlightTitle: t('notification.kakaoHighlightTitle'),
           templateVariables: t('notification.templateVariables'),
+          telegramTemplateVariables: t('notification.telegramTemplateVariables'),
           body: t('notification.body'),
           providerCode: t('notification.providerCode'),
           approval: t('notification.approval'),

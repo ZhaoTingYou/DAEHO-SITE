@@ -79,6 +79,7 @@ type Copy = {
   kakaoTemplateHighlight: string;
   kakaoHighlightTitle: string;
   templateVariables: string;
+  telegramTemplateVariables: string;
   body: string;
   providerCode: string;
   approval: string;
@@ -194,7 +195,8 @@ export function NotificationSettingsEditor({
                 onChange={(event) => setSettings((current) => ({
                   ...current,
                   telegramBotToken: event.target.value,
-                  clearTelegramBotToken: false
+                  clearTelegramBotToken: false,
+                  telegramEnabled: event.target.value ? false : current.telegramEnabled
                 }))}
                 className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3 disabled:bg-[#eef2f6]"
               />
@@ -207,7 +209,8 @@ export function NotificationSettingsEditor({
                   onChange={(event) => setSettings((current) => ({
                     ...current,
                     telegramBotToken: '',
-                    clearTelegramBotToken: event.target.checked
+                    clearTelegramBotToken: event.target.checked,
+                    telegramEnabled: event.target.checked ? false : current.telegramEnabled
                   }))}
                 />
                 <span>{copy.clearTelegramBotToken}</span>
@@ -221,7 +224,10 @@ export function NotificationSettingsEditor({
                 value={settings.telegramChatId}
                 onChange={(event) => setSettings((current) => ({
                   ...current,
-                  telegramChatId: event.target.value
+                  telegramChatId: event.target.value,
+                  telegramEnabled: event.target.value === current.telegramChatId
+                    ? current.telegramEnabled
+                    : false
                 }))}
                 placeholder="-1001234567890"
                 className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
@@ -491,7 +497,9 @@ function TemplateEditor({
         </label>
       ) : null}
       {template.channel !== 'kakao' ? (
-        <p className="text-xs leading-5 text-[#647084]">{copy.templateVariables}</p>
+        <p className="text-xs leading-5 text-[#647084]">
+          {template.channel === 'telegram' ? copy.telegramTemplateVariables : copy.templateVariables}
+        </p>
       ) : null}
       <div className="grid gap-3 md:grid-cols-2">
         {template.channel === 'email' ? (

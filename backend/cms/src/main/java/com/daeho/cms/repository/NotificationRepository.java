@@ -113,6 +113,26 @@ public class NotificationRepository {
     );
   }
 
+  public boolean telegramJobCredentialsMatch(String jobId, String fingerprint, String chatId) {
+    var matches = jdbc.queryForObject(
+        """
+        SELECT EXISTS (
+          SELECT 1
+          FROM cms_notification_jobs
+          WHERE id = ?
+            AND channel = 'telegram'
+            AND verification_fingerprint = ?
+            AND recipient = ?
+        )
+        """,
+        Boolean.class,
+        validation.stringValue(jobId),
+        validation.stringValue(fingerprint),
+        validation.stringValue(chatId)
+    );
+    return Boolean.TRUE.equals(matches);
+  }
+
   @Transactional
   public Map<String, Object> updateSettings(Map<String, Object> payload) {
     jdbc.update("""

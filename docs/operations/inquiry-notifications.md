@@ -106,11 +106,23 @@ and preserve it securely. If that key is lost or changed, clear and re-enter the
 Bot Token in CMS.
 
 Telegram is used only for internal `new_inquiry` notifications. The immutable
-job contains the configured group ID and rendered inquiry snapshot. A successful
-Bot API `sendMessage` response records its `message_id`. Explicit provider
-rejections follow the normal retry schedule; an interrupted request with an
-unknown result is quarantined to avoid posting a duplicate inquiry to the group.
-Production requests are restricted to the HTTPS `api.telegram.org` endpoint.
+job contains the configured group ID, rendered inquiry snapshot, and the tested
+credential fingerprint. Changing the Bot Token or Chat ID turns alerts off and
+invalidates the prior test. Pending jobs from a different tested credential/group
+snapshot are quarantined instead of being redirected to a new group.
+
+An active Telegram template must contain each required variable exactly once and
+cannot add other placeholders: `inquiry_id`, `inquiry_type`, `name`,
+`organization`, `team`, `phone`, `email`, `quantity`, `due_date`, `use_case`,
+`message`, and `admin_url`. Oversized inquiry values are shortened safely before
+rendering so every required field remains present and the CMS detail link is
+preserved within Telegram's 4096-character message limit.
+
+A successful Bot API `sendMessage` response records its `message_id`. Explicit
+provider rejections follow the normal retry schedule; an interrupted or ambiguous
+request result is quarantined to avoid posting a duplicate inquiry to the group.
+Production requests are restricted to the exact `https://api.telegram.org`
+origin.
 
 ## Safe rollout
 

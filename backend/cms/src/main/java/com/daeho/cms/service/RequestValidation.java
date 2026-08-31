@@ -12,8 +12,24 @@ import org.springframework.stereotype.Component;
 public class RequestValidation {
   public static final List<String> LOCALES = List.of("ko", "en");
   public static final List<String> COLLECTION_CATEGORIES = List.of("champion", "bespoke");
+  private static final List<String> REQUIRED_TELEGRAM_VARIABLES = List.of(
+      "inquiry_id",
+      "inquiry_type",
+      "name",
+      "organization",
+      "team",
+      "phone",
+      "email",
+      "quantity",
+      "due_date",
+      "use_case",
+      "message",
+      "admin_url"
+  );
   private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
   private static final Pattern INQUIRY_STATUS_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{0,31}$");
+  private static final Pattern TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{\\{\\s*([^{}]+?)\\s*}}");
+  private static final int TELEGRAM_TEMPLATE_LITERAL_LIMIT = 200;
 
   public ValidatedRequest pagePayload(Map<String, Object> body) {
     var issues = new ArrayList<Map<String, String>>();
@@ -244,6 +260,46 @@ public class RequestValidation {
     }
     if ("telegram".equals(normalizedChannel)) {
       requireText(payload, "body", issues);
+      if (booleanValue(payload.get("isActive"), false)) {
+        var templateBody = stringValue(payload.get("body"));
+        var missingVariables = REQUIRED_TELEGRAM_VARIABLES.stream()
+            .filter(variable -> !containsTemplateVariable(templateBody, variable))
+            .toList();
+        if (!missingVariables.isEmpty()) {
+          issues.add(issue(
+              "body",
+              "Active Telegram templates must include: " + String.join(", ", missingVariables) + "."
+          ));
+        }
+        var duplicateVariables = REQUIRED_TELEGRAM_VARIABLES.stream()
+            .filter(variable -> countTemplateVariable(templateBody, variable) > 1)
+            .toList();
+        if (!duplicateVariables.isEmpty()) {
+          issues.add(issue(
+              "body",
+              "Active Telegram templates must use each required variable once: "
+                  + String.join(", ", duplicateVariables) + "."
+          ));
+        }
+        var extraVariables = templateVariables(templateBody).stream()
+            .filter(variable -> !REQUIRED_TELEGRAM_VARIABLES.contains(variable))
+            .distinct()
+            .toList();
+        if (!extraVariables.isEmpty()) {
+          issues.add(issue(
+              "body",
+              "Active Telegram templates only support the required variables: "
+                  + String.join(", ", extraVariables) + "."
+          ));
+        }
+        var literal = TEMPLATE_VARIABLE_PATTERN.matcher(templateBody).replaceAll("");
+        if (literal.codePointCount(0, literal.length()) > TELEGRAM_TEMPLATE_LITERAL_LIMIT) {
+          issues.add(issue(
+              "body",
+              "Active Telegram template labels and spacing must use at most 200 characters."
+          ));
+        }
+      }
       payload.put("subject", "");
       payload.put("providerTemplateCode", "");
     }
@@ -266,6 +322,23 @@ public class RequestValidation {
     payload.put("kakaoTemplateType", kakaoTemplateType);
     payload.put("isActive", booleanValue(payload.get("isActive"), false));
     return new ValidatedRequest(payload, issues);
+  }
+
+  private boolean containsTemplateVariable(String template, String variable) {
+    return countTemplateVariable(template, variable) > 0;
+  }
+
+  private long countTemplateVariable(String template, String variable) {
+    return templateVariables(template).stream().filter(variable::equals).count();
+  }
+
+  private List<String> templateVariables(String template) {
+    var variables = new ArrayList<String>();
+    var matcher = TEMPLATE_VARIABLE_PATTERN.matcher(template);
+    while (matcher.find()) {
+      variables.add(matcher.group(1).trim());
+    }
+    return List.copyOf(variables);
   }
 
   public ValidatedRequest notificationTest(Map<String, Object> body) {

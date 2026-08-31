@@ -93,7 +93,7 @@ public class NotificationTestService {
     var job = new LinkedHashMap<String, Object>();
     job.put(
         "recipient",
-        "telegram".equals(channel) ? firstNonBlank(recipient, telegram.configuredChatId()) : recipient
+        "telegram".equals(channel) ? "" : recipient
     );
     job.put("subject", renderer.render(text(template.get("subject")), variables));
     job.put("renderedBody", renderer.render(text(template.get("body")), variables));
@@ -114,15 +114,7 @@ public class NotificationTestService {
     }
 
     if ("telegram".equals(channel)) {
-      var result = telegram.send(job);
-      if (result.success()) {
-        telegramCredentials.markCurrentVerified();
-      }
-      return Map.of(
-          "success", result.success(),
-          "providerMessageId", result.messageId(),
-          "errorMessage", result.errorMessage()
-      );
+      return sendTelegramTestWithLock(job);
     }
 
     if (!"approved".equals(text(template.get("approvalStatus")))
@@ -131,6 +123,48 @@ public class NotificationTestService {
     }
     var testedFingerprint = verificationFingerprint(templateKey, template);
     return sendKakaoTestWithLock(templateKey, testedFingerprint, job);
+  }
+
+  public boolean telegramJobVerified(Map<String, Object> job) {
+    return telegramCredentials.jobVerified(job);
+  }
+
+  private Map<String, Object> sendTelegramTestWithLock(Map<String, Object> job) {
+    if (dataSource == null) {
+      return sendTelegramTest(job);
+    }
+    try (var connection = dataSource.getConnection()) {
+      advisoryLock(connection, true);
+      try {
+        return sendTelegramTest(job);
+      } finally {
+        try {
+          advisoryLock(connection, false);
+        } catch (SQLException error) {
+          log.error("Unable to explicitly release the Telegram test lock; closing the connection will release it.", error);
+        }
+      }
+    } catch (SQLException error) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE,
+          "Unable to serialize the Telegram connection test with notification configuration changes."
+      );
+    }
+  }
+
+  private Map<String, Object> sendTelegramTest(Map<String, Object> job) {
+    var credentialSnapshot = telegramCredentials.current();
+    var testedJob = new LinkedHashMap<String, Object>(job);
+    testedJob.put("recipient", credentialSnapshot.chatId());
+    var result = telegram.send(testedJob, credentialSnapshot);
+    if (result.success()) {
+      telegramCredentials.markVerified(credentialSnapshot);
+    }
+    return Map.of(
+        "success", result.success(),
+        "providerMessageId", result.messageId(),
+        "errorMessage", result.errorMessage()
+    );
   }
 
   private Map<String, Object> sendKakaoTestWithLock(

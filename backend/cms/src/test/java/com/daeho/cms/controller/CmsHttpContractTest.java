@@ -479,6 +479,7 @@ class CmsHttpContractTest {
         .andExpect(status().isConflict());
 
     verify(notifications, never()).updateSettings(anyMap());
+    verify(notifications).lockNotificationDispatch();
   }
 
   @Test

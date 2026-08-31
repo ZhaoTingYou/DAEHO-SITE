@@ -86,9 +86,56 @@ class TelegramCredentialServiceTest {
     when(repository.telegramTestVerified(fingerprint)).thenReturn(true);
 
     assertTrue(credentials.verified());
-    credentials.markCurrentVerified();
+    credentials.markVerified(credentials.current());
 
     org.mockito.Mockito.verify(repository).markTelegramTestVerified(fingerprint);
+  }
+
+  @Test
+  void reenteringTheSameTokenPreservesCiphertextAndVerification() {
+    var encrypted = cipher.encrypt("same-token");
+    when(repository.getTelegramCredentials()).thenReturn(Map.of(
+        "telegramBotTokenCiphertext", encrypted,
+        "telegramChatId", "-100-current"
+    ));
+    var fingerprint = credentials.fingerprint(
+        new TelegramCredentialService.Credentials("same-token", "-100-current")
+    );
+    when(repository.telegramTestVerified(fingerprint)).thenReturn(true);
+
+    var prepared = credentials.prepareUpdate(Map.of(
+        "telegramEnabled", true,
+        "telegramBotToken", "same-token",
+        "telegramChatId", "-100-current",
+        "clearTelegramBotToken", false
+    ));
+
+    assertEquals(encrypted, prepared.payload().get("telegramBotTokenCiphertext"));
+    assertTrue(prepared.verified());
+  }
+
+  @Test
+  void queuedJobsAreVerifiedAgainstTheCurrentFingerprintAndConfiguredGroup() {
+    var encrypted = cipher.encrypt("saved-token");
+    when(repository.getTelegramCredentials()).thenReturn(Map.of(
+        "telegramBotTokenCiphertext", encrypted,
+        "telegramChatId", "-100-current"
+    ));
+    var current = credentials.current();
+    var fingerprint = credentials.fingerprint(current);
+    when(repository.telegramTestVerified(fingerprint)).thenReturn(true);
+    when(repository.telegramJobCredentialsMatch("job-current", fingerprint, "-100-current"))
+        .thenReturn(true);
+
+    assertTrue(credentials.jobVerified(Map.of(
+        "id", "job-current"
+    )));
+    assertFalse(credentials.jobVerified(Map.of(
+        "id", "job-old-group"
+    )));
+    assertFalse(credentials.jobVerified(Map.of(
+        "id", "job-old-fingerprint"
+    )));
   }
 
   private NotificationProperties properties() {

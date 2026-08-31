@@ -25,11 +25,12 @@ public class TelegramCredentialService {
   public PreparedUpdate prepareUpdate(Map<String, Object> input) {
     var current = repository.getTelegramCredentials();
     var tokenCiphertext = text(current.get("telegramBotTokenCiphertext"));
+    var currentToken = cipher.decrypt(tokenCiphertext).orElse("");
     var tokenInput = text(input.get("telegramBotToken"));
     var clearToken = booleanValue(input.get("clearTelegramBotToken"));
     if (clearToken) {
       tokenCiphertext = "";
-    } else if (!tokenInput.isBlank()) {
+    } else if (!tokenInput.isBlank() && !tokenInput.equals(currentToken)) {
       tokenCiphertext = cipher.encrypt(tokenInput);
     }
     var chatId = text(input.get("telegramChatId"));
@@ -60,11 +61,24 @@ public class TelegramCredentialService {
     return credentials.configured() && repository.telegramTestVerified(fingerprint(credentials));
   }
 
-  public void markCurrentVerified() {
-    var credentials = current();
+  public void markVerified(Credentials credentials) {
     if (credentials.configured()) {
       repository.markTelegramTestVerified(fingerprint(credentials));
     }
+  }
+
+  public boolean jobVerified(Map<String, Object> job) {
+    var credentials = current();
+    if (!credentials.configured()) {
+      return false;
+    }
+    var fingerprint = fingerprint(credentials);
+    return repository.telegramTestVerified(fingerprint)
+        && repository.telegramJobCredentialsMatch(
+            text(job.get("id")),
+            fingerprint,
+            text(credentials.chatId())
+        );
   }
 
   String fingerprint(Credentials credentials) {

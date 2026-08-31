@@ -62,6 +62,46 @@ class TelegramBotClientTest {
     assertFalse(result.uncertain());
   }
 
+  @Test
+  void ambiguousProviderResponsesAreQuarantinedInsteadOfRetried() throws Exception {
+    var missingOk = resultFor(200, "{}");
+    var ambiguousServerError = resultFor(500, "upstream response lost");
+    var explicitRejection = resultFor(400, "{\"ok\":false,\"description\":\"Bad Request\"}");
+
+    assertTrue(missingOk.uncertain());
+    assertTrue(ambiguousServerError.uncertain());
+    assertFalse(explicitRejection.uncertain());
+  }
+
+  @Test
+  void productionEndpointMustBeTheExactTelegramApiOrigin() {
+    assertTrue(client("https://api.telegram.org").configured());
+    assertFalse(client("https://api.telegram.org:444").configured());
+    assertFalse(client("https://api.telegram.org/custom-path").configured());
+    assertFalse(client("https://api.telegram.org?proxy=true").configured());
+    assertFalse(client("https://user@api.telegram.org").configured());
+  }
+
+  private TelegramBotClient.SendResult resultFor(int status, String payload) throws Exception {
+    var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    server.createContext("/bottest-token/sendMessage", exchange -> {
+      var response = payload.getBytes(StandardCharsets.UTF_8);
+      exchange.sendResponseHeaders(status, response.length);
+      try (var output = exchange.getResponseBody()) {
+        output.write(response);
+      }
+    });
+    server.start();
+    try {
+      return client("http://127.0.0.1:" + server.getAddress().getPort()).send(Map.of(
+          "recipient", "-1001234567890",
+          "renderedBody", "test inquiry"
+      ));
+    } finally {
+      server.stop(0);
+    }
+  }
+
   private TelegramBotClient client(String apiBaseUrl) {
     var properties = new NotificationProperties(
         true,

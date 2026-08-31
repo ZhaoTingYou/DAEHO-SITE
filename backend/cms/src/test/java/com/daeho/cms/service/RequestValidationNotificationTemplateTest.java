@@ -51,12 +51,31 @@ class RequestValidationNotificationTemplateTest {
         "isActive", true
     ), "telegram");
     var complete = validation.notificationTemplate(Map.of(
-        "body", "새 문의: {{name}} / {{admin_url}}",
+        "body", requiredTelegramBody(),
         "approvalStatus", "approved",
         "isActive", true
     ), "telegram");
 
     assertFalse(missingBody.success());
     assertTrue(complete.success());
+  }
+
+  @Test
+  void telegramTemplatesCannotOmitAnyRequiredInquiryField() {
+    var missingMessage = validation.notificationTemplate(Map.of(
+        "body", requiredTelegramBody().replace("{{message}}", ""),
+        "approvalStatus", "approved",
+        "isActive", true
+    ), "telegram");
+
+    assertFalse(missingMessage.success());
+    assertTrue(missingMessage.issues().stream().anyMatch(issue -> "body".equals(issue.get("path"))));
+  }
+
+  private String requiredTelegramBody() {
+    return """
+        {{inquiry_id}} {{inquiry_type}} {{name}} {{organization}} {{team}} {{phone}}
+        {{email}} {{quantity}} {{due_date}} {{use_case}} {{message}} {{admin_url}}
+        """;
   }
 }

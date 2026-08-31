@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TelegramBotClient {
+  private static final int MESSAGE_LIMIT = 4096;
   private final NotificationProperties properties;
   private final TelegramCredentialService credentials;
   private final JsonSupport json;
@@ -58,7 +59,13 @@ public class TelegramBotClient {
   }
 
   public SendResult send(Map<String, Object> job) {
-    var configuration = credentials.current();
+    return send(job, credentials.current());
+  }
+
+  public SendResult send(
+      Map<String, Object> job,
+      TelegramCredentialService.Credentials configuration
+  ) {
     if (!configuration.configured() || !trustedEndpoint()) {
       return SendResult.failed("Telegram Bot credentials or group Chat ID are not configured.");
     }
@@ -70,18 +77,29 @@ public class TelegramBotClient {
     if (body.isBlank()) {
       return SendResult.failed("Telegram message body is empty.");
     }
+    if (body.codePointCount(0, body.length()) > MESSAGE_LIMIT) {
+      return SendResult.failed("Telegram message body exceeds the 4096-character limit.");
+    }
     try {
       var response = client.send(
           request(configuration.botToken(), json.stringify(Map.of("chat_id", recipient, "text", body))),
           HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
       );
       var payload = json.objectOrEmpty(response.body());
-      if (response.statusCode() < 200 || response.statusCode() >= 300
-          || !booleanValue(payload.get("ok"))) {
+      var explicitRejection = payload.get("ok") instanceof Boolean ok
+          && !ok
+          && !text(payload.get("description")).isBlank();
+      if (explicitRejection) {
         return SendResult.failed(firstNonBlank(
             payload.get("description"),
             "Telegram Bot API request failed with HTTP " + response.statusCode() + "."
         ));
+      }
+      if (response.statusCode() < 200 || response.statusCode() >= 300
+          || !booleanValue(payload.get("ok"))) {
+        return SendResult.uncertain(
+            "Telegram returned an ambiguous response; manual review is required before any resend."
+        );
       }
       if (!(payload.get("result") instanceof Map<?, ?> result)) {
         return SendResult.uncertain("Telegram accepted the request but did not return a message result.");
@@ -127,12 +145,23 @@ public class TelegramBotClient {
     try {
       var endpoint = URI.create(properties.normalizedTelegramApiBaseUrl());
       var host = text(endpoint.getHost()).toLowerCase(java.util.Locale.ROOT);
-      if ("https".equalsIgnoreCase(endpoint.getScheme()) && "api.telegram.org".equals(host)) {
+      var exactTelegramOrigin = "https".equalsIgnoreCase(endpoint.getScheme())
+          && "api.telegram.org".equals(host)
+          && endpoint.getPort() == -1
+          && endpoint.getRawUserInfo() == null
+          && (text(endpoint.getRawPath()).isBlank() || "/".equals(endpoint.getRawPath()))
+          && endpoint.getRawQuery() == null
+          && endpoint.getRawFragment() == null;
+      if (exactTelegramOrigin) {
         return true;
       }
       return allowLoopbackEndpoint
           && "http".equalsIgnoreCase(endpoint.getScheme())
-          && ("127.0.0.1".equals(host) || "localhost".equals(host));
+          && ("127.0.0.1".equals(host) || "localhost".equals(host))
+          && endpoint.getRawUserInfo() == null
+          && (text(endpoint.getRawPath()).isBlank() || "/".equals(endpoint.getRawPath()))
+          && endpoint.getRawQuery() == null
+          && endpoint.getRawFragment() == null;
     } catch (IllegalArgumentException error) {
       return false;
     }
