@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 class NotificationPlannerTest {
   private NotificationRepository repository;
   private NotificationTestService notificationTest;
+  private TelegramCredentialService telegramCredentials;
   private NotificationPlanner planner;
   private List<Map<String, Object>> createdJobs;
 
@@ -30,6 +31,13 @@ class NotificationPlannerTest {
   void setUp() {
     repository = mock(NotificationRepository.class);
     notificationTest = mock(NotificationTestService.class);
+    telegramCredentials = mock(TelegramCredentialService.class);
+    when(telegramCredentials.current()).thenReturn(
+        new TelegramCredentialService.Credentials("test-token", "-1001234567890")
+    );
+    when(telegramCredentials.verified()).thenReturn(true);
+    when(telegramCredentials.fingerprint(org.mockito.ArgumentMatchers.any()))
+        .thenReturn("telegram-fingerprint");
     when(notificationTest.kakaoVerified()).thenReturn(true);
     when(notificationTest.verificationFingerprint(anyString(), anyMap())).thenReturn("verified-fingerprint");
     createdJobs = new ArrayList<>();
@@ -37,7 +45,8 @@ class NotificationPlannerTest {
         "internalEmail", "internal@example.com",
         "internalEmailEnabled", true,
         "customerEmailEnabled", true,
-        "kakaoEnabled", true
+        "kakaoEnabled", true,
+        "telegramEnabled", true
     ));
     when(repository.getActiveTemplate(anyString())).thenAnswer(invocation ->
         template(invocation.getArgument(0), true)
@@ -53,12 +62,110 @@ class NotificationPlannerTest {
     });
     planner = new NotificationPlanner(
         cmsProperties(),
+        telegramCredentials,
         repository,
         new NotificationTemplateRenderer(new NotificationProperties(
-            true, 1000, "https://daeho.works/admin", "", "", "", ""
+            true, 1000, "https://daeho.works/admin", "", "", "", "",
+            "https://api.telegram.org", ""
         )),
         notificationTest
     );
+  }
+
+  @Test
+  void queuesTelegramForNewInquiryAlongsideInternalEmail() {
+    planner.queueNewInquiry(inquiry("customer@example.com", "010-1234-5678"));
+
+    assertEquals(2, createdJobs.size());
+    assertTrue(createdJobs.stream().anyMatch(job ->
+        "internal".equals(job.get("audience"))
+            && "telegram".equals(job.get("channel"))
+            && "inquiry-1:new_inquiry:internal:telegram".equals(job.get("dedupeKey"))
+            && "telegram-fingerprint".equals(job.get("verificationFingerprint"))
+    ));
+  }
+
+  @Test
+  void telegramMessageIsBoundedAndAlwaysKeepsTheCmsLink() {
+    var telegramTemplate = Map.<String, Object>ofEntries(
+        Map.entry("id", "template-internal-new-telegram-ko"),
+        Map.entry("templateKey", "internal_new_telegram_ko"),
+        Map.entry("channel", "telegram"),
+        Map.entry("version", 1),
+        Map.entry("subject", ""),
+        Map.entry("body", "{{inquiry_id}} {{inquiry_type}} {{name}} {{organization}} {{team}} {{phone}} {{email}} {{quantity}} {{due_date}} {{use_case}} {{message}} {{admin_url}}"),
+        Map.entry("providerTemplateCode", ""),
+        Map.entry("approvalStatus", "approved"),
+        Map.entry("isActive", true)
+    );
+    when(repository.getActiveTemplate("internal_new_telegram_ko")).thenReturn(telegramTemplate);
+    when(repository.getLatestTemplate("internal_new_telegram_ko")).thenReturn(telegramTemplate);
+    var longInquiry = new LinkedHashMap<String, Object>();
+    longInquiry.put("id", "inquiry-1");
+    longInquiry.put("status", "new");
+    longInquiry.put("locale", "ko");
+    longInquiry.put("name", "이".repeat(120));
+    longInquiry.put("organization", "회".repeat(160));
+    longInquiry.put("team", "팀".repeat(160));
+    longInquiry.put("phone", "1".repeat(180));
+    longInquiry.put("email", "a".repeat(242) + "@example.com");
+    longInquiry.put("inquiryType", "유".repeat(160));
+    longInquiry.put("quantity", 999999);
+    longInquiry.put("dueDate", "일".repeat(160));
+    longInquiry.put("useCase", "용".repeat(160));
+    longInquiry.put("message", "문".repeat(3000));
+
+    planner.queueNewInquiry(longInquiry);
+
+    var body = createdJobs.stream()
+        .filter(job -> "telegram".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow()
+        .get("renderedBody")
+        .toString();
+    assertTrue(body.codePointCount(0, body.length()) <= 4096);
+    assertTrue(body.endsWith("https://daeho.works/admin/inquiries/inquiry-1"));
+  }
+
+  @Test
+  void missingTelegramCredentialsBecomeManualWorkWithoutBlockingTheInquiry() {
+    var missingCredentials = mock(TelegramCredentialService.class);
+    when(missingCredentials.current()).thenReturn(
+        new TelegramCredentialService.Credentials("", "-1001234567890")
+    );
+    var plannerWithoutToken = new NotificationPlanner(
+        cmsProperties(),
+        missingCredentials,
+        repository,
+        new NotificationTemplateRenderer(new NotificationProperties(
+            true, 1000, "https://daeho.works/admin", "", "", "", "",
+            "https://api.telegram.org", ""
+        )),
+        notificationTest
+    );
+
+    plannerWithoutToken.queueNewInquiry(inquiry("customer@example.com", "010-1234-5678"));
+
+    var telegram = createdJobs.stream()
+        .filter(job -> "telegram".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow();
+    assertEquals("needs_attention", telegram.get("status"));
+    assertTrue(telegram.get("lastError").toString().contains("credentials"));
+  }
+
+  @Test
+  void unverifiedTelegramCredentialsBecomeManualWorkWithoutSending() {
+    when(telegramCredentials.verified()).thenReturn(false);
+
+    planner.queueNewInquiry(inquiry("customer@example.com", "010-1234-5678"));
+
+    var telegram = createdJobs.stream()
+        .filter(job -> "telegram".equals(job.get("channel")))
+        .findFirst()
+        .orElseThrow();
+    assertEquals("needs_attention", telegram.get("status"));
+    assertTrue(telegram.get("lastError").toString().contains("test"));
   }
 
   @Test
@@ -204,11 +311,11 @@ class NotificationPlannerTest {
   }
 
   @Test
-  void newInquiryOnlyQueuesTheInternalEmail() {
+  void newInquiryOnlyQueuesInternalNotifications() {
     planner.queueNewInquiry(inquiry("customer@example.com", "010-1234-5678"));
-    assertEquals(1, createdJobs.size());
-    assertEquals("internal", createdJobs.get(0).get("audience"));
-    assertEquals("new_inquiry", createdJobs.get(0).get("eventType"));
+    assertEquals(2, createdJobs.size());
+    assertTrue(createdJobs.stream().allMatch(job -> "internal".equals(job.get("audience"))));
+    assertTrue(createdJobs.stream().allMatch(job -> "new_inquiry".equals(job.get("eventType"))));
   }
 
   @Test

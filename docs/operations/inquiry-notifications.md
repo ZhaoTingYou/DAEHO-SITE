@@ -21,7 +21,7 @@ SMTP_FROM=no-reply@company-domain.example
 CMS_NOTIFY_TO=inquiries@company-domain.example
 ```
 
-Do not put credentials in Git or CMS records. If the Workspace policy requires
+Do not put email credentials in Git or CMS records. If the Workspace policy requires
 authentication, supply `SMTP_USER`, `SMTP_PASS`, and set `SMTP_AUTH=true` only in
 the server environment.
 
@@ -79,6 +79,51 @@ for one external send at a time. External I/O is not inside a rollbackable batch
 If the process is interrupted after dispatch, the uncertain `processing` job is
 quarantined for manual review instead of being sent again automatically.
 
+## Telegram group alerts
+
+1. Create a bot with `@BotFather` and immediately revoke any token that has been
+   pasted into chat, source code, an issue, or another persistent record.
+2. Add the bot to the internal inquiry group and send one ordinary group message.
+3. Read the update with Telegram `getUpdates` and copy `message.chat.id`. Group
+   and supergroup IDs are typically negative; keep the complete signed value.
+4. Generate and configure one stable server-side encryption key. This key is not
+   the Bot Token and must be preserved when restoring database backups:
+
+```dotenv
+TELEGRAM_API_BASE_URL=https://api.telegram.org
+CMS_TELEGRAM_ENCRYPTION_KEY=<output of: openssl rand -base64 32>
+```
+
+5. Open `/admin/notifications`, enter the regenerated Bot Token and group Chat ID,
+   and save. The CMS never returns the saved token: an empty Token field preserves
+   it, a new value replaces it, and the explicit clear checkbox removes it.
+6. Send a Telegram test from the same CMS page, then enable group alerts.
+
+The Bot Token is encrypted with AES-256-GCM before it is written to PostgreSQL.
+Only the encrypted value is stored; it is never included in CMS responses or
+application logs. Keep `CMS_TELEGRAM_ENCRYPTION_KEY` outside the database backup
+and preserve it securely. If that key is lost or changed, clear and re-enter the
+Bot Token in CMS.
+
+Telegram is used only for internal `new_inquiry` notifications. The immutable
+job contains the configured group ID, rendered inquiry snapshot, and the tested
+credential fingerprint. Changing the Bot Token or Chat ID turns alerts off and
+invalidates the prior test. Pending jobs from a different tested credential/group
+snapshot are quarantined instead of being redirected to a new group.
+
+An active Telegram template must contain each required variable exactly once and
+cannot add other placeholders: `inquiry_id`, `inquiry_type`, `name`,
+`organization`, `team`, `phone`, `email`, `quantity`, `due_date`, `use_case`,
+`message`, and `admin_url`. Oversized inquiry values are shortened safely before
+rendering so every required field remains present and the CMS detail link is
+preserved within Telegram's 4096-character message limit.
+
+A successful Bot API `sendMessage` response records its `message_id`. Explicit
+provider rejections follow the normal retry schedule; an interrupted or ambiguous
+request result is quarantined to avoid posting a duplicate inquiry to the group.
+Production requests are restricted to the exact `https://api.telegram.org`
+origin.
+
 ## Safe rollout
 
 1. Deploy the database migration and compatible APIs. Leave all CMS switches off.
@@ -88,6 +133,8 @@ quarantined for manual review instead of being sent again automatically.
 5. Test-send each of the three Korean templates from the CMS and confirm final delivery.
 6. Enable Kakao only after all three templates are approved, active, and the
    connection health screen reports verified.
+7. Add the Telegram bot to the target group, save its new token and Chat ID in
+   CMS, send a successful CMS test, then enable Telegram and submit one test inquiry.
 
 If a provider is unavailable, the CMS status still changes immediately. Review
 the inquiry notification timeline for queued attempts, retry times, provider IDs,

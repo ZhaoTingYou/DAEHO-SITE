@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const oversized = rejectOversizedRequest(request, maxAdminJsonBodyBytes);
   if (oversized) return oversized;
   const body = await request.json().catch(() => null) as {
-    channel?: 'email' | 'kakao';
+    channel?: 'email' | 'kakao' | 'telegram';
     recipient?: string;
     templateKey?: string;
     customerName?: string;
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   } | null;
   try {
     return NextResponse.json(await sendNotificationTest({
-      channel: body?.channel === 'kakao' ? 'kakao' : 'email',
+      channel: body?.channel === 'kakao' || body?.channel === 'telegram' ? body.channel : 'email',
       recipient: body?.recipient ?? '',
       templateKey: body?.templateKey ?? '',
       customerName: body?.customerName ?? '',

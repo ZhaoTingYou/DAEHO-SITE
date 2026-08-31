@@ -52,3 +52,5 @@ cms:
     solapi-api-key: ${SOLAPI_API_KEY:}
     solapi-api-secret: ${SOLAPI_API_SECRET:}
     solapi-pf-id: ${SOLAPI_PF_ID:}
+    telegram-api-base-url: ${TELEGRAM_API_BASE_URL:https://api.telegram.org}
+    telegram-encryption-key: ${CMS_TELEGRAM_ENCRYPTION_KEY:}

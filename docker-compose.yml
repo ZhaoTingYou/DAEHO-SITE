@@ -51,6 +51,8 @@ services:
       SOLAPI_API_KEY: ${SOLAPI_API_KEY:-}
       SOLAPI_API_SECRET: ${SOLAPI_API_SECRET:-}
       SOLAPI_PF_ID: ${SOLAPI_PF_ID:-}
+      TELEGRAM_API_BASE_URL: ${TELEGRAM_API_BASE_URL:-https://api.telegram.org}
+      CMS_TELEGRAM_ENCRYPTION_KEY: ${CMS_TELEGRAM_ENCRYPTION_KEY:-}
     volumes:
       - ./public/images:/data/uploads
     depends_on:

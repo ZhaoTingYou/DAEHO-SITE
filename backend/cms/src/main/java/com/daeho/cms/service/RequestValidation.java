@@ -12,8 +12,24 @@ import org.springframework.stereotype.Component;
 public class RequestValidation {
   public static final List<String> LOCALES = List.of("ko", "en");
   public static final List<String> COLLECTION_CATEGORIES = List.of("champion", "bespoke");
+  private static final List<String> REQUIRED_TELEGRAM_VARIABLES = List.of(
+      "inquiry_id",
+      "inquiry_type",
+      "name",
+      "organization",
+      "team",
+      "phone",
+      "email",
+      "quantity",
+      "due_date",
+      "use_case",
+      "message",
+      "admin_url"
+  );
   private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
   private static final Pattern INQUIRY_STATUS_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{0,31}$");
+  private static final Pattern TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{\\{\\s*([^{}]+?)\\s*}}");
+  private static final int TELEGRAM_TEMPLATE_LITERAL_LIMIT = 200;
 
   public ValidatedRequest pagePayload(Map<String, Object> body) {
     var issues = new ArrayList<Map<String, String>>();
@@ -202,15 +218,29 @@ public class RequestValidation {
     payload.putIfAbsent("internalEmailEnabled", false);
     payload.putIfAbsent("customerEmailEnabled", false);
     payload.putIfAbsent("kakaoEnabled", false);
+    payload.putIfAbsent("telegramEnabled", false);
+    payload.putIfAbsent("telegramBotToken", "");
+    payload.putIfAbsent("telegramChatId", "");
+    payload.putIfAbsent("clearTelegramBotToken", false);
     validateEmail(payload.get("internalEmail"), "internalEmail", issues);
     if (booleanValue(payload.get("internalEmailEnabled"), false)
         && stringValue(payload.get("internalEmail")).isBlank()) {
       issues.add(issue("internalEmail", "Internal email is required when internal notifications are enabled."));
     }
     maxLength(payload, "internalEmail", 254, issues);
+    maxLength(payload, "telegramBotToken", 512, issues);
+    maxLength(payload, "telegramChatId", 80, issues);
+    if (booleanValue(payload.get("telegramEnabled"), false)
+        && stringValue(payload.get("telegramChatId")).isBlank()) {
+      issues.add(issue("telegramChatId", "Telegram Chat ID is required when Telegram notifications are enabled."));
+    }
     payload.put("internalEmailEnabled", booleanValue(payload.get("internalEmailEnabled"), false));
     payload.put("customerEmailEnabled", booleanValue(payload.get("customerEmailEnabled"), false));
     payload.put("kakaoEnabled", booleanValue(payload.get("kakaoEnabled"), false));
+    payload.put("telegramEnabled", booleanValue(payload.get("telegramEnabled"), false));
+    payload.put("telegramBotToken", stringValue(payload.get("telegramBotToken")));
+    payload.put("telegramChatId", stringValue(payload.get("telegramChatId")));
+    payload.put("clearTelegramBotToken", booleanValue(payload.get("clearTelegramBotToken"), false));
     return new ValidatedRequest(payload, issues);
   }
 
@@ -227,6 +257,51 @@ public class RequestValidation {
     if ("email".equals(normalizedChannel)) {
       requireText(payload, "subject", issues);
       requireText(payload, "body", issues);
+    }
+    if ("telegram".equals(normalizedChannel)) {
+      requireText(payload, "body", issues);
+      if (booleanValue(payload.get("isActive"), false)) {
+        var templateBody = stringValue(payload.get("body"));
+        var missingVariables = REQUIRED_TELEGRAM_VARIABLES.stream()
+            .filter(variable -> !containsTemplateVariable(templateBody, variable))
+            .toList();
+        if (!missingVariables.isEmpty()) {
+          issues.add(issue(
+              "body",
+              "Active Telegram templates must include: " + String.join(", ", missingVariables) + "."
+          ));
+        }
+        var duplicateVariables = REQUIRED_TELEGRAM_VARIABLES.stream()
+            .filter(variable -> countTemplateVariable(templateBody, variable) > 1)
+            .toList();
+        if (!duplicateVariables.isEmpty()) {
+          issues.add(issue(
+              "body",
+              "Active Telegram templates must use each required variable once: "
+                  + String.join(", ", duplicateVariables) + "."
+          ));
+        }
+        var extraVariables = templateVariables(templateBody).stream()
+            .filter(variable -> !REQUIRED_TELEGRAM_VARIABLES.contains(variable))
+            .distinct()
+            .toList();
+        if (!extraVariables.isEmpty()) {
+          issues.add(issue(
+              "body",
+              "Active Telegram templates only support the required variables: "
+                  + String.join(", ", extraVariables) + "."
+          ));
+        }
+        var literal = TEMPLATE_VARIABLE_PATTERN.matcher(templateBody).replaceAll("");
+        if (literal.codePointCount(0, literal.length()) > TELEGRAM_TEMPLATE_LITERAL_LIMIT) {
+          issues.add(issue(
+              "body",
+              "Active Telegram template labels and spacing must use at most 200 characters."
+          ));
+        }
+      }
+      payload.put("subject", "");
+      payload.put("providerTemplateCode", "");
     }
     var kakaoTemplateType = stringValue(payload.get("kakaoTemplateType"));
     if ("kakao".equals(normalizedChannel)) {
@@ -249,6 +324,23 @@ public class RequestValidation {
     return new ValidatedRequest(payload, issues);
   }
 
+  private boolean containsTemplateVariable(String template, String variable) {
+    return countTemplateVariable(template, variable) > 0;
+  }
+
+  private long countTemplateVariable(String template, String variable) {
+    return templateVariables(template).stream().filter(variable::equals).count();
+  }
+
+  private List<String> templateVariables(String template) {
+    var variables = new ArrayList<String>();
+    var matcher = TEMPLATE_VARIABLE_PATTERN.matcher(template);
+    while (matcher.find()) {
+      variables.add(matcher.group(1).trim());
+    }
+    return List.copyOf(variables);
+  }
+
   public ValidatedRequest notificationTest(Map<String, Object> body) {
     var issues = new ArrayList<Map<String, String>>();
     var channel = stringValue(body.get("channel"));
@@ -256,10 +348,10 @@ public class RequestValidation {
     var templateKey = stringValue(body.get("templateKey"));
     var customerName = stringValue(body.get("customerName"));
     var inquiryNumber = stringValue(body.get("inquiryNumber"));
-    if (!List.of("email", "kakao").contains(channel)) {
-      issues.add(issue("channel", "Expected email or kakao."));
+    if (!List.of("email", "kakao", "telegram").contains(channel)) {
+      issues.add(issue("channel", "Expected email, kakao, or telegram."));
     }
-    if (recipient.isBlank()) {
+    if (recipient.isBlank() && !"telegram".equals(channel)) {
       issues.add(issue("recipient", "Recipient is required."));
     } else if ("email".equals(channel)) {
       validateEmail(recipient, "recipient", issues);

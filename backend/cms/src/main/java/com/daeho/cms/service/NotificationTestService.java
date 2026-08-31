@@ -24,6 +24,8 @@ public class NotificationTestService {
   private final NotificationRepository repository;
   private final WorkspaceEmailSender email;
   private final SolapiKakaoClient kakao;
+  private final TelegramBotClient telegram;
+  private final TelegramCredentialService telegramCredentials;
   private final NotificationTemplateRenderer renderer;
   private final DataSource dataSource;
 
@@ -31,12 +33,16 @@ public class NotificationTestService {
       NotificationRepository repository,
       WorkspaceEmailSender email,
       SolapiKakaoClient kakao,
+      TelegramBotClient telegram,
+      TelegramCredentialService telegramCredentials,
       NotificationTemplateRenderer renderer,
       DataSource dataSource
   ) {
     this.repository = repository;
     this.email = email;
     this.kakao = kakao;
+    this.telegram = telegram;
+    this.telegramCredentials = telegramCredentials;
     this.renderer = renderer;
     this.dataSource = dataSource;
   }
@@ -85,7 +91,10 @@ public class NotificationTestService {
         firstNonBlank(template.get("inquiryStatus"), "contacted")
     );
     var job = new LinkedHashMap<String, Object>();
-    job.put("recipient", recipient);
+    job.put(
+        "recipient",
+        "telegram".equals(channel) ? "" : recipient
+    );
     job.put("subject", renderer.render(text(template.get("subject")), variables));
     job.put("renderedBody", renderer.render(text(template.get("body")), variables));
     job.put("providerTemplateCode", text(template.get("providerTemplateCode")));
@@ -104,12 +113,58 @@ public class NotificationTestService {
       );
     }
 
+    if ("telegram".equals(channel)) {
+      return sendTelegramTestWithLock(job);
+    }
+
     if (!"approved".equals(text(template.get("approvalStatus")))
         || text(template.get("providerTemplateCode")).isBlank()) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "The Kakao template is not externally approved.");
     }
     var testedFingerprint = verificationFingerprint(templateKey, template);
     return sendKakaoTestWithLock(templateKey, testedFingerprint, job);
+  }
+
+  public boolean telegramJobVerified(Map<String, Object> job) {
+    return telegramCredentials.jobVerified(job);
+  }
+
+  private Map<String, Object> sendTelegramTestWithLock(Map<String, Object> job) {
+    if (dataSource == null) {
+      return sendTelegramTest(job);
+    }
+    try (var connection = dataSource.getConnection()) {
+      advisoryLock(connection, true);
+      try {
+        return sendTelegramTest(job);
+      } finally {
+        try {
+          advisoryLock(connection, false);
+        } catch (SQLException error) {
+          log.error("Unable to explicitly release the Telegram test lock; closing the connection will release it.", error);
+        }
+      }
+    } catch (SQLException error) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE,
+          "Unable to serialize the Telegram connection test with notification configuration changes."
+      );
+    }
+  }
+
+  private Map<String, Object> sendTelegramTest(Map<String, Object> job) {
+    var credentialSnapshot = telegramCredentials.current();
+    var testedJob = new LinkedHashMap<String, Object>(job);
+    testedJob.put("recipient", credentialSnapshot.chatId());
+    var result = telegram.send(testedJob, credentialSnapshot);
+    if (result.success()) {
+      telegramCredentials.markVerified(credentialSnapshot);
+    }
+    return Map.of(
+        "success", result.success(),
+        "providerMessageId", result.messageId(),
+        "errorMessage", result.errorMessage()
+    );
   }
 
   private Map<String, Object> sendKakaoTestWithLock(

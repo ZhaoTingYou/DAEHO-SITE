@@ -53,8 +53,9 @@ public class NotificationRepository {
   public Map<String, Object> getSettings(String fallbackInternalEmail) {
     jdbc.update("""
         INSERT INTO cms_notification_settings (
-          id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled, updated_at
-        ) VALUES ('default', ?, false, false, false, now())
+          id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled,
+          telegram_enabled, updated_at
+        ) VALUES ('default', ?, false, false, false, false, now())
         ON CONFLICT (id) DO UPDATE SET
           internal_email = CASE
             WHEN cms_notification_settings.internal_email = '' THEN excluded.internal_email
@@ -67,23 +68,101 @@ public class NotificationRepository {
     ).stream().findFirst().orElse(Map.of());
   }
 
+  public Map<String, String> getTelegramCredentials() {
+    return jdbc.query(
+        """
+        SELECT telegram_bot_token_ciphertext, telegram_chat_id
+        FROM cms_notification_settings
+        WHERE id = 'default'
+        """,
+        (rs, rowNum) -> Map.of(
+            "telegramBotTokenCiphertext", text(rs.getString("telegram_bot_token_ciphertext")),
+            "telegramChatId", text(rs.getString("telegram_chat_id"))
+        )
+    ).stream().findFirst().orElse(Map.of(
+        "telegramBotTokenCiphertext", "",
+        "telegramChatId", ""
+    ));
+  }
+
+  public boolean telegramTestVerified(String fingerprint) {
+    var verified = jdbc.queryForObject(
+        """
+        SELECT EXISTS (
+          SELECT 1
+          FROM cms_notification_settings
+          WHERE id = 'default'
+            AND telegram_test_fingerprint <> ''
+            AND telegram_test_fingerprint = ?
+        )
+        """,
+        Boolean.class,
+        validation.stringValue(fingerprint)
+    );
+    return Boolean.TRUE.equals(verified);
+  }
+
+  public void markTelegramTestVerified(String fingerprint) {
+    jdbc.update(
+        """
+        UPDATE cms_notification_settings
+        SET telegram_test_fingerprint = ?, updated_at = now()
+        WHERE id = 'default'
+        """,
+        validation.stringValue(fingerprint)
+    );
+  }
+
+  public boolean telegramJobCredentialsMatch(String jobId, String fingerprint, String chatId) {
+    var matches = jdbc.queryForObject(
+        """
+        SELECT EXISTS (
+          SELECT 1
+          FROM cms_notification_jobs
+          WHERE id = ?
+            AND channel = 'telegram'
+            AND verification_fingerprint = ?
+            AND recipient = ?
+        )
+        """,
+        Boolean.class,
+        validation.stringValue(jobId),
+        validation.stringValue(fingerprint),
+        validation.stringValue(chatId)
+    );
+    return Boolean.TRUE.equals(matches);
+  }
+
   @Transactional
   public Map<String, Object> updateSettings(Map<String, Object> payload) {
     jdbc.update("""
         INSERT INTO cms_notification_settings (
-          id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled, updated_at
-        ) VALUES ('default', ?, ?, ?, ?, now())
+          id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled,
+          telegram_enabled, telegram_bot_token_ciphertext, telegram_chat_id, updated_at
+        ) VALUES ('default', ?, ?, ?, ?, ?, ?, ?, now())
         ON CONFLICT (id) DO UPDATE SET
           internal_email = excluded.internal_email,
           internal_email_enabled = excluded.internal_email_enabled,
           customer_email_enabled = excluded.customer_email_enabled,
           kakao_enabled = excluded.kakao_enabled,
+          telegram_enabled = excluded.telegram_enabled,
+          telegram_test_fingerprint = CASE
+            WHEN cms_notification_settings.telegram_bot_token_ciphertext = excluded.telegram_bot_token_ciphertext
+              AND cms_notification_settings.telegram_chat_id = excluded.telegram_chat_id
+            THEN cms_notification_settings.telegram_test_fingerprint
+            ELSE ''
+          END,
+          telegram_bot_token_ciphertext = excluded.telegram_bot_token_ciphertext,
+          telegram_chat_id = excluded.telegram_chat_id,
           updated_at = now()
         """,
         validation.stringValue(payload.get("internalEmail")),
         validation.booleanValue(payload.get("internalEmailEnabled"), false),
         validation.booleanValue(payload.get("customerEmailEnabled"), false),
-        validation.booleanValue(payload.get("kakaoEnabled"), false)
+        validation.booleanValue(payload.get("kakaoEnabled"), false),
+        validation.booleanValue(payload.get("telegramEnabled"), false),
+        validation.stringValue(payload.get("telegramBotTokenCiphertext")),
+        validation.stringValue(payload.get("telegramChatId"))
     );
     return jdbc.query(
         "SELECT * FROM cms_notification_settings WHERE id = 'default'",
@@ -458,8 +537,15 @@ public class NotificationRepository {
         "internalEmailEnabled", rs.getBoolean("internal_email_enabled"),
         "customerEmailEnabled", rs.getBoolean("customer_email_enabled"),
         "kakaoEnabled", rs.getBoolean("kakao_enabled"),
+        "telegramEnabled", rs.getBoolean("telegram_enabled"),
+        "telegramChatId", text(rs.getString("telegram_chat_id")),
+        "telegramTokenConfigured", !text(rs.getString("telegram_bot_token_ciphertext")).isBlank(),
         "updatedAt", instantString(rs, "updated_at")
     );
+  }
+
+  private String text(Object value) {
+    return value == null ? "" : value.toString().trim();
   }
 
   private Map<String, Object> mapTemplate(ResultSet rs, int rowNum) throws SQLException {

@@ -174,7 +174,11 @@ export const notificationSettingsSchema = z
     internalEmail: inquiryEmail,
     internalEmailEnabled: z.boolean(),
     customerEmailEnabled: z.boolean(),
-    kakaoEnabled: z.boolean()
+    kakaoEnabled: z.boolean(),
+    telegramEnabled: z.boolean(),
+    telegramBotToken: z.string().trim().max(512).default(''),
+    telegramChatId: z.string().trim().max(80).default(''),
+    clearTelegramBotToken: z.boolean().default(false)
   })
   .superRefine((value, context) => {
     if (value.internalEmailEnabled && !value.internalEmail) {
@@ -182,6 +186,13 @@ export const notificationSettingsSchema = z
         code: z.ZodIssueCode.custom,
         path: ['internalEmail'],
         message: 'Internal email is required when internal notifications are enabled.'
+      });
+    }
+    if (value.telegramEnabled && !value.telegramChatId) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['telegramChatId'],
+        message: 'Telegram Chat ID is required when Telegram notifications are enabled.'
       });
     }
   });

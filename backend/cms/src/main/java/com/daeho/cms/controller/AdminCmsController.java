@@ -11,6 +11,8 @@ import com.daeho.cms.service.CmsStatusService;
 import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.MediaStorageService;
 import com.daeho.cms.service.SolapiKakaoClient;
+import com.daeho.cms.service.TelegramBotClient;
+import com.daeho.cms.service.TelegramCredentialService;
 import com.daeho.cms.service.NotificationPlanner;
 import com.daeho.cms.service.NotificationTemplateRenderer;
 import com.daeho.cms.service.NotificationTestService;
@@ -53,6 +55,8 @@ public class AdminCmsController {
   private final InquiryWorkflowService inquiryWorkflow;
   private final WorkspaceEmailSender workspaceEmail;
   private final SolapiKakaoClient kakao;
+  private final TelegramBotClient telegram;
+  private final TelegramCredentialService telegramCredentials;
   private final NotificationProperties notificationProperties;
   private final NotificationTestService notificationTest;
   private final CmsSnapshotService snapshots;
@@ -70,6 +74,8 @@ public class AdminCmsController {
       InquiryWorkflowService inquiryWorkflow,
       WorkspaceEmailSender workspaceEmail,
       SolapiKakaoClient kakao,
+      TelegramBotClient telegram,
+      TelegramCredentialService telegramCredentials,
       NotificationProperties notificationProperties,
       NotificationTestService notificationTest,
       CmsSnapshotService snapshots,
@@ -86,6 +92,8 @@ public class AdminCmsController {
     this.inquiryWorkflow = inquiryWorkflow;
     this.workspaceEmail = workspaceEmail;
     this.kakao = kakao;
+    this.telegram = telegram;
+    this.telegramCredentials = telegramCredentials;
     this.notificationProperties = notificationProperties;
     this.notificationTest = notificationTest;
     this.snapshots = snapshots;
@@ -460,8 +468,8 @@ public class AdminCmsController {
     if (!parsed.success()) {
       throw new ValidationFailedException(parsed.issues());
     }
+    notifications.lockNotificationDispatch();
     if (validation.booleanValue(parsed.data().get("kakaoEnabled"), false)) {
-      notifications.lockNotificationDispatch();
       if (!kakao.configured()) {
         throw new ResponseStatusException(HttpStatus.CONFLICT, "SOLAPI credentials are not configured.");
       }
@@ -478,7 +486,35 @@ public class AdminCmsController {
         );
       }
     }
-    return Map.of("settings", notifications.updateSettings(parsed.data()));
+    if (!validation.stringValue(parsed.data().get("telegramBotToken")).isBlank()
+        && !telegramCredentials.encryptionConfigured()) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Telegram credential encryption is not configured on the server."
+      );
+    }
+    var telegramUpdate = telegramCredentials.prepareUpdate(parsed.data());
+    if (validation.booleanValue(parsed.data().get("telegramEnabled"), false)) {
+      if (!telegramUpdate.configured()) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Telegram Bot credentials or group Chat ID are not configured."
+        );
+      }
+      if (!telegramUpdate.verified()) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Send a successful Telegram test from this CMS before enabling notifications."
+        );
+      }
+      if (!validation.booleanValue(notificationPlanner.health().get("telegramTemplateReady"), false)) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "The Telegram new-inquiry template must be active."
+        );
+      }
+    }
+    return Map.of("settings", notifications.updateSettings(telegramUpdate.payload()));
   }
 
   @GetMapping("/notifications/health")
@@ -488,6 +524,9 @@ public class AdminCmsController {
     health.put("emailConfigured", workspaceEmail.configured());
     health.put("kakaoConfigured", kakao.configured());
     health.put("kakaoVerified", notificationTest.kakaoVerified());
+    health.put("telegramConfigured", telegram.configured());
+    health.put("telegramEncryptionConfigured", telegramCredentials.encryptionConfigured());
+    health.put("telegramVerified", telegramCredentials.verified());
     health.put("workerEnabled", notificationProperties.workerEnabled());
     return health;
   }

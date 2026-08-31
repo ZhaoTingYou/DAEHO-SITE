@@ -5,22 +5,16 @@ import {useEffect, useState} from 'react';
 
 import {fetchAdminApi} from '@/lib/cms/admin-api-client.mjs';
 import {statusLabel} from '@/lib/cms/inquiry-status-label';
+import type {InquiryStatusOption} from '@/lib/cms/inquiry-statuses';
 
 type InquiryStatus = string;
-
-export type InquiryStatusOption = {
-  code: string;
-  label: string;
-  color: 'slate' | 'blue' | 'amber' | 'green' | 'red' | 'purple';
-  isActive: boolean;
-};
 
 type Preview = {
   changed: boolean;
   previousStatus: InquiryStatus;
   nextStatus: InquiryStatus;
   notifications: Array<{
-    channel: 'email' | 'kakao';
+    channel: 'email' | 'kakao' | 'telegram';
     audience: 'internal' | 'customer';
     maskedRecipient: string;
     subject: string;
@@ -150,7 +144,9 @@ export function InquiryStatusControl({
                 <div key={`${notification.channel}-${notification.audience}-${index}`} className="rounded-md border border-[#e4e7ec] p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-[#101827]">
-                      {notification.channel === 'kakao' ? 'Kakao 알림톡' : 'Email'} · {notification.audience}
+                      {notification.channel === 'kakao'
+                        ? 'Kakao 알림톡'
+                        : notification.channel === 'telegram' ? 'Telegram' : 'Email'} · {notification.audience}
                     </p>
                     <span className={`rounded-full px-2 py-1 text-xs font-semibold ${
                       notification.enabled && notification.ready

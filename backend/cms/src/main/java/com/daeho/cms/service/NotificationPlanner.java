@@ -11,19 +11,37 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationPlanner {
   private static final List<String> CUSTOMER_STATUSES = List.of("contacted", "in_progress", "done");
+  private static final int TELEGRAM_MESSAGE_LIMIT = 4096;
+  private static final Map<String, Integer> TELEGRAM_VARIABLE_LIMITS = Map.ofEntries(
+      Map.entry("inquiry_id", 160),
+      Map.entry("inquiry_type", 160),
+      Map.entry("name", 120),
+      Map.entry("organization", 160),
+      Map.entry("team", 160),
+      Map.entry("phone", 180),
+      Map.entry("email", 254),
+      Map.entry("quantity", 40),
+      Map.entry("due_date", 160),
+      Map.entry("use_case", 160),
+      Map.entry("message", 1800),
+      Map.entry("admin_url", 500)
+  );
 
   private final CmsProperties cmsProperties;
+  private final TelegramCredentialService telegramCredentials;
   private final NotificationRepository repository;
   private final NotificationTemplateRenderer renderer;
   private final NotificationTestService notificationTest;
 
   public NotificationPlanner(
       CmsProperties cmsProperties,
+      TelegramCredentialService telegramCredentials,
       NotificationRepository repository,
       NotificationTemplateRenderer renderer,
       NotificationTestService notificationTest
   ) {
     this.cmsProperties = cmsProperties;
+    this.telegramCredentials = telegramCredentials;
     this.repository = repository;
     this.renderer = renderer;
     this.notificationTest = notificationTest;
@@ -59,6 +77,35 @@ public class NotificationPlanner {
         "internal_new_email_ko",
         text(inquiry.get("id")) + ":new_inquiry:internal:email"
     ));
+    var telegramConfiguration = telegramCredentials.current();
+    var telegramPlan = buildPlan(
+        inquiry,
+        "",
+        "new",
+        "",
+        "telegram",
+        "internal",
+        "new_inquiry",
+        "ko",
+        text(telegramConfiguration.chatId()),
+        validationBoolean(settings.get("telegramEnabled")),
+        "internal_new_telegram_ko",
+        text(inquiry.get("id")) + ":new_inquiry:internal:telegram"
+    );
+    if (!telegramConfiguration.configured()) {
+      telegramPlan.put("ready", false);
+      telegramPlan.put("reason", "Telegram Bot credentials or group Chat ID are not configured.");
+    } else if (!telegramCredentials.verified()) {
+      telegramPlan.put("ready", false);
+      telegramPlan.put("reason", "Send a successful Telegram test from this CMS before enabling notifications.");
+    }
+    telegramPlan.put(
+        "verificationFingerprint",
+        telegramConfiguration.configured()
+            ? telegramCredentials.fingerprint(telegramConfiguration)
+            : ""
+    );
+    plans.add(telegramPlan);
     return queueEnabled(plans);
   }
 
@@ -79,7 +126,8 @@ public class NotificationPlanner {
     );
     return orderedMap(
         "settings", settings,
-        "kakaoTemplatesReady", kakaoTemplatesReady
+        "kakaoTemplatesReady", kakaoTemplatesReady,
+        "telegramTemplateReady", repository.getActiveTemplate("internal_new_telegram_ko") != null
     );
   }
 
@@ -195,16 +243,22 @@ public class NotificationPlanner {
         managedStatusLabel(previousStatus, locale),
         managedStatusLabel(nextStatus, locale)
     );
+    var renderVariables = "telegram".equals(channel)
+        ? boundedTelegramVariables(variables)
+        : variables;
     var subject = "";
     var body = "";
     var templateError = "";
     try {
       subject = latestTemplate == null
           ? ""
-          : renderer.render(text(latestTemplate.get("subject")), variables);
+          : renderer.render(text(latestTemplate.get("subject")), renderVariables);
       body = latestTemplate == null
           ? ""
-          : renderer.render(text(latestTemplate.get("body")), variables);
+          : renderer.render(text(latestTemplate.get("body")), renderVariables);
+      if ("telegram".equals(channel)) {
+        body = boundedTelegramBody(body, variables.getOrDefault("admin_url", ""));
+      }
     } catch (IllegalArgumentException error) {
       templateError = error.getMessage();
     }
@@ -275,6 +329,44 @@ public class NotificationPlanner {
       jobs.add(repository.createJob(job));
     }
     return List.copyOf(jobs);
+  }
+
+  private String boundedTelegramBody(String body, String adminUrl) {
+    if (body.codePointCount(0, body.length()) <= TELEGRAM_MESSAGE_LIMIT) {
+      return body;
+    }
+    var suffix = truncateCodePoints("\n\nCMS: " + text(adminUrl), TELEGRAM_MESSAGE_LIMIT - 1);
+    var prefixLength = TELEGRAM_MESSAGE_LIMIT
+        - suffix.codePointCount(0, suffix.length())
+        - 1;
+    return truncateCodePoints(body, Math.max(0, prefixLength)) + "…" + suffix;
+  }
+
+  private Map<String, String> boundedTelegramVariables(Map<String, String> variables) {
+    var bounded = new LinkedHashMap<String, String>(variables);
+    TELEGRAM_VARIABLE_LIMITS.forEach((key, maximum) ->
+        bounded.put(key, truncateWithEllipsis(variables.getOrDefault(key, ""), maximum))
+    );
+    return Map.copyOf(bounded);
+  }
+
+  private String truncateWithEllipsis(String value, int maximum) {
+    var count = value.codePointCount(0, value.length());
+    if (count <= maximum) {
+      return value;
+    }
+    return truncateCodePoints(value, Math.max(0, maximum - 1)) + "…";
+  }
+
+  private String truncateCodePoints(String value, int maximum) {
+    if (maximum <= 0) {
+      return "";
+    }
+    var count = value.codePointCount(0, value.length());
+    if (count <= maximum) {
+      return value;
+    }
+    return value.substring(0, value.offsetByCodePoints(0, maximum));
   }
 
   private Map<String, Object> previewPlan(Map<String, Object> plan) {

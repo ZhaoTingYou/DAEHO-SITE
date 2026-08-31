@@ -4,7 +4,7 @@ import {useState} from 'react';
 
 type Job = {
   id: string;
-  channel: 'email' | 'kakao';
+  channel: 'email' | 'kakao' | 'telegram';
   audience: 'internal' | 'customer';
   recipient: string;
   subject: string;
@@ -59,7 +59,7 @@ export function NotificationTimeline({
           <article key={job.id} className="space-y-3 px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm font-semibold text-[#101827]">
-                {job.channel === 'kakao' ? 'Kakao 알림톡' : 'Email'} · {job.audience}
+                {notificationChannelLabel(job.channel)} · {job.audience}
               </p>
               <NotificationStatus status={job.status} />
             </div>
@@ -113,6 +113,12 @@ export function NotificationTimeline({
     const payload = await response.json() as {job: Job};
     setJobs((current) => current.map((job) => job.id === jobId ? payload.job : job));
   }
+}
+
+function notificationChannelLabel(channel: Job['channel']) {
+  if (channel === 'kakao') return 'Kakao 알림톡';
+  if (channel === 'telegram') return 'Telegram';
+  return 'Email';
 }
 
 function NotificationStatus({status}: {status: string}) {

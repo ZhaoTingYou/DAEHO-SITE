@@ -3,7 +3,7 @@ import type {NextRequest} from 'next/server';
 
 import {requireAdminCapability} from '@/lib/cms/auth';
 import {maxAdminJsonBodyBytes, parseJsonBody, rejectOversizedRequest, validationError} from '@/lib/cms/http';
-import {getNotificationSettings, updateNotificationSettings} from '@/lib/cms/repositories';
+import {CmsBackendError, getNotificationSettings, updateNotificationSettings} from '@/lib/cms/repositories';
 import {notificationSettingsSchema} from '@/lib/cms/validation';
 
 export const runtime = 'nodejs';
@@ -21,5 +21,12 @@ export async function PUT(request: NextRequest) {
   if (oversized) return oversized;
   const parsed = await parseJsonBody(request, notificationSettingsSchema);
   if (!parsed.success) return validationError(parsed.error);
-  return NextResponse.json({settings: await updateNotificationSettings(parsed.data)});
+  try {
+    return NextResponse.json({settings: await updateNotificationSettings(parsed.data)});
+  } catch (error) {
+    if (error instanceof CmsBackendError) {
+      return NextResponse.json(error.payload ?? {error: error.message}, {status: error.status});
+    }
+    throw error;
+  }
 }

@@ -39,11 +39,23 @@ export default async function AdminNotificationsPage() {
           internalEmailEnabled: t('notification.internalEmailEnabled'),
           customerEmailEnabled: t('notification.customerEmailEnabled'),
           kakaoEnabled: t('notification.kakaoEnabled'),
+          telegramEnabled: t('notification.telegramEnabled'),
+          telegramBotToken: t('notification.telegramBotToken'),
+          telegramBotTokenHint: t('notification.telegramBotTokenHint'),
+          telegramChatId: t('notification.telegramChatId'),
+          telegramChatIdHint: t('notification.telegramChatIdHint'),
+          telegramTokenSaved: t('notification.telegramTokenSaved'),
+          telegramTokenMissing: t('notification.telegramTokenMissing'),
+          clearTelegramBotToken: t('notification.clearTelegramBotToken'),
+          telegramEncryption: t('notification.telegramEncryption'),
+          telegramVerification: t('notification.telegramVerification'),
           worker: t('notification.worker'),
           emailConnection: t('notification.emailConnection'),
           kakaoConnection: t('notification.kakaoConnection'),
           kakaoVerification: t('notification.kakaoVerification'),
           kakaoTemplates: t('notification.kakaoTemplates'),
+          telegramConnection: t('notification.telegramConnection'),
+          telegramTemplate: t('notification.telegramTemplate'),
           configured: t('overview.configured'),
           notConfigured: t('overview.notConfigured'),
           enabled: t('notification.enabled'),
@@ -59,6 +71,7 @@ export default async function AdminNotificationsPage() {
           kakaoTemplateHighlight: t('notification.kakaoTemplateHighlight'),
           kakaoHighlightTitle: t('notification.kakaoHighlightTitle'),
           templateVariables: t('notification.templateVariables'),
+          telegramTemplateVariables: t('notification.telegramTemplateVariables'),
           body: t('notification.body'),
           providerCode: t('notification.providerCode'),
           approval: t('notification.approval'),
@@ -73,7 +86,8 @@ export default async function AdminNotificationsPage() {
           testCustomerName: t('notification.testCustomerName'),
           testInquiryNumber: t('notification.testInquiryNumber'),
           testSuccess: t('notification.testSuccess'),
-          testError: t('notification.testError')
+          testError: t('notification.testError'),
+          telegramTestTarget: t('notification.telegramTestTarget')
         }}
       />
     </>

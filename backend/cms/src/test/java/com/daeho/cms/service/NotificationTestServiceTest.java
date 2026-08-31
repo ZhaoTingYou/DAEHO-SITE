@@ -2,6 +2,7 @@ package com.daeho.cms.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.inOrder;
@@ -17,6 +18,60 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 
 class NotificationTestServiceTest {
+  @Test
+  void telegramTestUsesTheConfiguredGroupAndRenderedTemplate() {
+    var repository = mock(NotificationRepository.class);
+    var kakao = mock(SolapiKakaoClient.class);
+    var telegram = mock(TelegramBotClient.class);
+    var telegramCredentials = mock(TelegramCredentialService.class);
+    var credentialSnapshot = new TelegramCredentialService.Credentials(
+        "test-token",
+        "-1001234567890"
+    );
+    var template = Map.<String, Object>of(
+        "channel", "telegram",
+        "locale", "ko",
+        "inquiryStatus", "",
+        "version", 1,
+        "subject", "",
+        "body", "새 문의: {{name}} / {{inquiry_id}} / {{admin_url}}",
+        "providerTemplateCode", "",
+        "kakaoTemplateType", "basic",
+        "approvalStatus", "approved"
+    );
+    when(repository.getActiveTemplate("internal_new_telegram_ko")).thenReturn(template);
+    when(telegramCredentials.current()).thenReturn(credentialSnapshot);
+    var sentJob = new java.util.concurrent.atomic.AtomicReference<Map<String, Object>>();
+    when(telegram.send(anyMap(), eq(credentialSnapshot))).thenAnswer(invocation -> {
+      sentJob.set(new java.util.LinkedHashMap<>(invocation.getArgument(0)));
+      return TelegramBotClient.SendResult.sent("42");
+    });
+    var properties = new NotificationProperties(
+        true, 1000, "https://daeho.works/admin", "", "", "", "", "", ""
+    );
+    var service = new NotificationTestService(
+        repository,
+        mock(WorkspaceEmailSender.class),
+        kakao,
+        telegram,
+        telegramCredentials,
+        new NotificationTemplateRenderer(properties),
+        null
+    );
+
+    var result = service.send(
+        "telegram", "-100-forged-recipient", "internal_new_telegram_ko", "테스트 고객", "TEST-123"
+    );
+
+    assertEquals(true, result.get("success"));
+    assertEquals("-1001234567890", sentJob.get().get("recipient"));
+    assertEquals(
+        "새 문의: 테스트 고객 / TEST-123 / https://daeho.works/admin/inquiries/TEST-123",
+        sentJob.get().get("renderedBody")
+    );
+    verify(telegramCredentials).markVerified(credentialSnapshot);
+  }
+
   @Test
   void persistsKakaoVerificationOnlyAfterTheCmsTestIsAccepted() {
     var repository = mock(NotificationRepository.class);
@@ -141,6 +196,60 @@ class NotificationTestServiceTest {
   }
 
   @Test
+  void telegramTestUsesOneCredentialSnapshotInsideTheDispatchLock() throws Exception {
+    var repository = mock(NotificationRepository.class);
+    var telegram = mock(TelegramBotClient.class);
+    var credentials = mock(TelegramCredentialService.class);
+    var dataSource = mock(DataSource.class);
+    var connection = mock(Connection.class);
+    var lock = mock(PreparedStatement.class);
+    var unlock = mock(PreparedStatement.class);
+    var snapshot = new TelegramCredentialService.Credentials("test-token", "-100-current");
+    when(repository.getActiveTemplate("internal_new_telegram_ko")).thenReturn(Map.of(
+        "channel", "telegram",
+        "locale", "ko",
+        "inquiryStatus", "",
+        "subject", "",
+        "body", "Telegram test {{admin_url}}",
+        "providerTemplateCode", "",
+        "kakaoTemplateType", "basic",
+        "approvalStatus", "approved"
+    ));
+    when(dataSource.getConnection()).thenReturn(connection);
+    when(connection.prepareStatement("SELECT pg_advisory_lock(?)")).thenReturn(lock);
+    when(connection.prepareStatement("SELECT pg_advisory_unlock(?)")).thenReturn(unlock);
+    when(credentials.current()).thenReturn(snapshot);
+    when(telegram.send(anyMap(), eq(snapshot))).thenReturn(TelegramBotClient.SendResult.sent("42"));
+    var properties = new NotificationProperties(
+        true, 1000, "https://daeho.works/admin", "", "", "", "", "", ""
+    );
+    var service = new NotificationTestService(
+        repository,
+        mock(WorkspaceEmailSender.class),
+        mock(SolapiKakaoClient.class),
+        telegram,
+        credentials,
+        new NotificationTemplateRenderer(properties),
+        dataSource
+    );
+
+    service.send(
+        "telegram",
+        "-100-forged",
+        "internal_new_telegram_ko",
+        "DAEHO TEST",
+        "TEST-INQUIRY"
+    );
+
+    var ordered = inOrder(connection, credentials, telegram);
+    ordered.verify(connection).prepareStatement("SELECT pg_advisory_lock(?)");
+    ordered.verify(credentials).current();
+    ordered.verify(telegram).send(anyMap(), eq(snapshot));
+    ordered.verify(credentials).markVerified(snapshot);
+    ordered.verify(connection).prepareStatement("SELECT pg_advisory_unlock(?)");
+  }
+
+  @Test
   void requiresCurrentFinalDeliveryVerificationForAllThreeKoreanTemplates() {
     var repository = mock(NotificationRepository.class);
     var kakao = mock(SolapiKakaoClient.class);
@@ -198,11 +307,13 @@ class NotificationTestServiceTest {
       SolapiKakaoClient kakao,
       DataSource dataSource
   ) {
-    var properties = new NotificationProperties(true, 1000, "", "", "", "", "");
+    var properties = new NotificationProperties(true, 1000, "", "", "", "", "", "", "");
     return new NotificationTestService(
         repository,
         mock(WorkspaceEmailSender.class),
         kakao,
+        mock(TelegramBotClient.class),
+        mock(TelegramCredentialService.class),
         new NotificationTemplateRenderer(properties),
         dataSource
     );
