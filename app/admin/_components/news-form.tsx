@@ -214,7 +214,9 @@ function normalizeNewsBlocks(value: unknown): NewsBodyBlock[] {
       }
 
       return {
-        type: block.type === 'imageFull' || block.type === 'imageText' || block.type === 'quote' ? block.type : 'text',
+        type: block.type === 'imageFull' || block.type === 'imageCentered' || block.type === 'imageText' || block.type === 'quote'
+          ? block.type
+          : 'text',
         title,
         body,
         image,
@@ -235,6 +237,9 @@ function newsBlocksEditorLabels(t: ReturnType<typeof createAdminTranslator>): Ne
     title: t('newsBlocks.title'),
     hint: t('newsBlocks.hint'),
     addBlock: t('newsBlocks.add'),
+    closePicker: t('newsBlocks.closePicker'),
+    layoutPickerTitle: t('newsBlocks.layoutPickerTitle'),
+    layoutPickerHint: t('newsBlocks.layoutPickerHint'),
     removeBlock: t('newsBlocks.remove'),
     moveUp: t('newsBlocks.up'),
     moveDown: t('newsBlocks.down'),
@@ -248,10 +253,17 @@ function newsBlocksEditorLabels(t: ReturnType<typeof createAdminTranslator>): Ne
     empty: t('newsBlocks.empty'),
     typeText: t('newsBlocks.typeText'),
     typeImageFull: t('newsBlocks.typeImageFull'),
+    typeImageCentered: t('newsBlocks.typeImageCentered'),
     typeImageText: t('newsBlocks.typeImageText'),
     typeQuote: t('newsBlocks.typeQuote'),
     layoutImageLeft: t('newsBlocks.layoutImageLeft'),
     layoutImageRight: t('newsBlocks.layoutImageRight'),
+    presetTextDescription: t('newsBlocks.presetTextDescription'),
+    presetImageFullDescription: t('newsBlocks.presetImageFullDescription'),
+    presetImageCenteredDescription: t('newsBlocks.presetImageCenteredDescription'),
+    presetImageLeftDescription: t('newsBlocks.presetImageLeftDescription'),
+    presetImageRightDescription: t('newsBlocks.presetImageRightDescription'),
+    presetQuoteDescription: t('newsBlocks.presetQuoteDescription'),
     widthNarrow: t('newsBlocks.widthNarrow'),
     widthStandard: t('newsBlocks.widthStandard'),
     widthWide: t('newsBlocks.widthWide'),
