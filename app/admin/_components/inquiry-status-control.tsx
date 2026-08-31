@@ -5,15 +5,9 @@ import {useEffect, useState} from 'react';
 
 import {fetchAdminApi} from '@/lib/cms/admin-api-client.mjs';
 import {statusLabel} from '@/lib/cms/inquiry-status-label';
+import type {InquiryStatusOption} from '@/lib/cms/inquiry-statuses';
 
 type InquiryStatus = string;
-
-export type InquiryStatusOption = {
-  code: string;
-  label: string;
-  color: 'slate' | 'blue' | 'amber' | 'green' | 'red' | 'purple';
-  isActive: boolean;
-};
 
 type Preview = {
   changed: boolean;

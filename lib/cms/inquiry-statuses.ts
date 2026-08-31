@@ -1,6 +1,12 @@
 import type {AdminLocale} from '@/lib/admin-locales';
 import type {CmsInquiryStatusDefinition} from '@/lib/cms/repositories';
-import type {InquiryStatusOption} from '@/app/admin/_components/inquiry-status-control';
+
+export type InquiryStatusOption = {
+  code: string;
+  label: string;
+  color: 'slate' | 'blue' | 'amber' | 'green' | 'red' | 'purple';
+  isActive: boolean;
+};
 
 export function inquiryStatusOptions(
   definitions: CmsInquiryStatusDefinition[],
