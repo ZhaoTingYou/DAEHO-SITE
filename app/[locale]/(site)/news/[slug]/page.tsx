@@ -69,7 +69,6 @@ export default async function NewsDetailPage({params}: Props) {
     nextNews ? {direction: 'next', label: text.next, item: nextNews} : null
   ].filter((item): item is {direction: 'previous' | 'next'; label: string; item: typeof card} => Boolean(item));
   const hasBlocks = detail.blocks.length > 0;
-  const hasTags = hasBlocks && detail.tags.length > 0;
   const hasCta = hasBlocks && detail.ctaTitle.trim().length > 0;
 
   return (
@@ -100,39 +99,27 @@ export default async function NewsDetailPage({params}: Props) {
           </div>
         </section>
 
-        {hasBlocks ? (
-          <section className="px-container py-12 md:py-[clamp(56px,8vw,112px)]">
-            <div className="mx-auto max-w-[1440px]">
-              <div className="space-y-0">
+        <section className="px-container py-12 md:py-[clamp(56px,8vw,112px)]">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="space-y-0">
+              {hasBlocks ? (
                 <NewsDetailBlocks blocks={detail.blocks} />
-                {hasTags ? (
-                  <Reveal className="mx-auto mt-[clamp(32px,5vw,72px)] flex max-w-[760px] flex-wrap items-center gap-3 border-t border-primary/10 pt-8">
-                    {detail.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="border border-hairline bg-white px-4 py-2 font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-subtext"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    <ShareLinkButton copy={messages.newsUi.share} />
-                  </Reveal>
-                ) : null}
-                {hasCta ? (
-                  <Reveal className="mx-auto mt-8 max-w-[760px] border-y border-primary/15 py-8">
-                    <p className="font-heading text-[clamp(28px,3.8vw,42px)] font-semibold leading-tight text-primary">{detail.ctaTitle}</p>
-                    <Link
-                      href={detail.ctaHref}
-                      className="link-sweep mt-6 inline-flex min-h-11 items-center font-body text-sm font-semibold uppercase tracking-[0.12em]"
-                    >
-                      {text.cta}
-                    </Link>
-                  </Reveal>
-                ) : null}
-              </div>
+              ) : null}
+              {hasCta ? (
+                <Reveal className="mx-auto mt-8 max-w-[760px] border-y border-primary/15 py-8">
+                  <p className="font-heading text-[clamp(28px,3.8vw,42px)] font-semibold leading-tight text-primary">{detail.ctaTitle}</p>
+                  <Link
+                    href={detail.ctaHref}
+                    className="link-sweep mt-6 inline-flex min-h-11 items-center font-body text-sm font-semibold uppercase tracking-[0.12em]"
+                  >
+                    {text.cta}
+                  </Link>
+                </Reveal>
+              ) : null}
+              <NewsArticleFooter tags={detail.tags} shareCopy={messages.newsUi.share} />
             </div>
-          </section>
-        ) : null}
+          </div>
+        </section>
       </article>
 
       {adjacentNews.length > 0 ? (
@@ -158,6 +145,47 @@ export default async function NewsDetailPage({params}: Props) {
         </section>
       ) : null}
     </main>
+  );
+}
+
+function NewsArticleFooter({
+  tags,
+  shareCopy
+}: {
+  tags: string[];
+  shareCopy: {label: string; copied: string};
+}) {
+  return (
+    <Reveal className="mx-auto mt-[clamp(48px,7vw,96px)] max-w-[880px]">
+      <footer
+        data-news-article-footer
+        className="relative border-y border-primary/15 py-8 before:absolute before:-top-px before:left-0 before:h-[2px] before:w-16 before:bg-accent md:py-10"
+      >
+        <div className={`flex flex-col gap-8 md:flex-row md:items-end ${tags.length > 0 ? 'md:justify-between' : 'md:justify-end'}`}>
+          {tags.length > 0 ? (
+            <div className="min-w-0">
+              <p
+                id="news-detail-tags-label"
+                className="font-body text-[10px] font-semibold uppercase tracking-[0.22em] text-accent"
+              >
+                Tags
+              </p>
+              <ul aria-labelledby="news-detail-tags-label" className="mt-4 flex flex-wrap gap-2.5">
+                {tags.map((tag) => (
+                  <li key={tag}>
+                    <span className="inline-flex min-h-9 items-center gap-2 rounded-full bg-primary/[0.055] px-4 py-2 font-body text-[13px] font-semibold leading-5 text-primary">
+                      <span aria-hidden="true" className="text-accent">#</span>
+                      {tag}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <ShareLinkButton copy={shareCopy} />
+        </div>
+      </footer>
+    </Reveal>
   );
 }
 
