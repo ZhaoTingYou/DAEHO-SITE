@@ -90,7 +90,7 @@ function HomeStatBandCell({
 
   return (
     <div
-      className={`grid justify-items-center gap-[18px] text-center lg:min-h-[184px] lg:px-9 ${
+      className={`grid justify-items-center gap-[18px] text-center lg:min-h-[184px] lg:px-6 ${
         index > 0 ? 'lg:border-l lg:border-[#F4E6E1]/70' : ''
       }`}
     >
@@ -103,7 +103,7 @@ function HomeStatBandCell({
           {item.label}
         </p>
       ) : null}
-      <p className={`home-stat-band__body max-w-[210px] whitespace-pre-line text-[16px] ${isKorean ? 'leading-[1.45] md:text-[13px]' : 'leading-[1.36] md:text-[15px]'}`}>
+      <p className="home-stat-band__body max-w-[220px] whitespace-pre-line text-[16px] leading-[1.55] lg:min-h-[75px]">
         {item.body}
       </p>
     </div>
