@@ -44,6 +44,8 @@ export default async function AdminNotificationsPage() {
           telegramBotTokenHint: t('notification.telegramBotTokenHint'),
           telegramChatId: t('notification.telegramChatId'),
           telegramChatIdHint: t('notification.telegramChatIdHint'),
+          telegramMessageThreadId: t('notification.telegramMessageThreadId'),
+          telegramMessageThreadIdHint: t('notification.telegramMessageThreadIdHint'),
           telegramTokenSaved: t('notification.telegramTokenSaved'),
           telegramTokenMissing: t('notification.telegramTokenMissing'),
           clearTelegramBotToken: t('notification.clearTelegramBotToken'),

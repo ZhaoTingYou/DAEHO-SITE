@@ -221,6 +221,7 @@ public class RequestValidation {
     payload.putIfAbsent("telegramEnabled", false);
     payload.putIfAbsent("telegramBotToken", "");
     payload.putIfAbsent("telegramChatId", "");
+    payload.putIfAbsent("telegramMessageThreadId", "");
     payload.putIfAbsent("clearTelegramBotToken", false);
     validateEmail(payload.get("internalEmail"), "internalEmail", issues);
     if (booleanValue(payload.get("internalEmailEnabled"), false)
@@ -230,9 +231,17 @@ public class RequestValidation {
     maxLength(payload, "internalEmail", 254, issues);
     maxLength(payload, "telegramBotToken", 512, issues);
     maxLength(payload, "telegramChatId", 80, issues);
+    maxLength(payload, "telegramMessageThreadId", 10, issues);
     if (booleanValue(payload.get("telegramEnabled"), false)
         && stringValue(payload.get("telegramChatId")).isBlank()) {
       issues.add(issue("telegramChatId", "Telegram Chat ID is required when Telegram notifications are enabled."));
+    }
+    var messageThreadId = stringValue(payload.get("telegramMessageThreadId"));
+    if (!messageThreadId.isBlank() && !positiveInteger(messageThreadId)) {
+      issues.add(issue(
+          "telegramMessageThreadId",
+          "Telegram Topic ID must be a positive integer or left blank for General."
+      ));
     }
     payload.put("internalEmailEnabled", booleanValue(payload.get("internalEmailEnabled"), false));
     payload.put("customerEmailEnabled", booleanValue(payload.get("customerEmailEnabled"), false));
@@ -240,8 +249,17 @@ public class RequestValidation {
     payload.put("telegramEnabled", booleanValue(payload.get("telegramEnabled"), false));
     payload.put("telegramBotToken", stringValue(payload.get("telegramBotToken")));
     payload.put("telegramChatId", stringValue(payload.get("telegramChatId")));
+    payload.put("telegramMessageThreadId", messageThreadId);
     payload.put("clearTelegramBotToken", booleanValue(payload.get("clearTelegramBotToken"), false));
     return new ValidatedRequest(payload, issues);
+  }
+
+  private boolean positiveInteger(String value) {
+    try {
+      return Integer.parseInt(value) > 0;
+    } catch (NumberFormatException error) {
+      return false;
+    }
   }
 
   public ValidatedRequest notificationTemplate(Map<String, Object> body, String channel) {

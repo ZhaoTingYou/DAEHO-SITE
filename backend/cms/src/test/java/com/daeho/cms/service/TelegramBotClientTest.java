@@ -46,7 +46,42 @@ class TelegramBotClientTest {
       assertTrue(result.success());
       assertEquals("42", result.messageId());
       assertTrue(requestBody.get().contains("\"chat_id\":\"-1001234567890\""));
+      assertTrue(requestBody.get().contains("\"message_thread_id\":402"));
       assertTrue(requestBody.get().contains("새 문의가 접수되었습니다."));
+    } finally {
+      server.stop(0);
+    }
+  }
+
+  @Test
+  void blankTopicSendsToGeneralWithoutAMessageThreadId() throws Exception {
+    var requestBody = new AtomicReference<String>();
+    var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    server.createContext("/bottest-token/sendMessage", exchange -> {
+      requestBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+      var response = """
+          {"ok":true,"result":{"message_id":43}}
+          """.getBytes(StandardCharsets.UTF_8);
+      exchange.sendResponseHeaders(200, response.length);
+      try (var output = exchange.getResponseBody()) {
+        output.write(response);
+      }
+    });
+    server.start();
+    try {
+      var client = client(
+          "http://127.0.0.1:" + server.getAddress().getPort(),
+          HttpClient.newHttpClient(),
+          ""
+      );
+
+      var result = client.send(Map.of(
+          "recipient", "-1001234567890",
+          "renderedBody", "General inquiry"
+      ));
+
+      assertTrue(result.success());
+      assertFalse(requestBody.get().contains("message_thread_id"));
     } finally {
       server.stop(0);
     }
@@ -130,6 +165,10 @@ class TelegramBotClientTest {
   }
 
   private TelegramBotClient client(String apiBaseUrl, HttpClient http) {
+    return client(apiBaseUrl, http, "402");
+  }
+
+  private TelegramBotClient client(String apiBaseUrl, HttpClient http, String messageThreadId) {
     var properties = new NotificationProperties(
         true,
         1000,
@@ -143,7 +182,7 @@ class TelegramBotClientTest {
     );
     var credentials = mock(TelegramCredentialService.class);
     when(credentials.current()).thenReturn(
-        new TelegramCredentialService.Credentials("test-token", "-1001234567890")
+        new TelegramCredentialService.Credentials("test-token", "-1001234567890", messageThreadId)
     );
     return new TelegramBotClient(
         properties,

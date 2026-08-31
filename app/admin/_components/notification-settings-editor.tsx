@@ -9,6 +9,7 @@ type Settings = {
   kakaoEnabled: boolean;
   telegramEnabled: boolean;
   telegramChatId: string;
+  telegramMessageThreadId: string;
   telegramTokenConfigured: boolean;
 };
 
@@ -52,6 +53,8 @@ type Copy = {
   telegramBotTokenHint: string;
   telegramChatId: string;
   telegramChatIdHint: string;
+  telegramMessageThreadId: string;
+  telegramMessageThreadIdHint: string;
   telegramTokenSaved: string;
   telegramTokenMissing: string;
   clearTelegramBotToken: string;
@@ -201,7 +204,7 @@ export function NotificationSettingsEditor({
               className="min-h-11 rounded-md border border-[#cbd3df] px-3"
             />
           </label>
-          <div className="grid gap-4 rounded-md border border-[#d9dee7] bg-[#f8fafc] p-4 md:grid-cols-2">
+          <div className="grid gap-4 rounded-md border border-[#d9dee7] bg-[#f8fafc] p-4 md:grid-cols-3">
             <div className="grid content-start gap-1.5 text-sm font-semibold text-[#344054]">
               <label htmlFor="telegram-bot-token" className="flex flex-wrap items-center gap-2">
                 {copy.telegramBotToken}
@@ -261,6 +264,27 @@ export function NotificationSettingsEditor({
                 className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
               />
               <span className="font-normal leading-5 text-[#647084]">{copy.telegramChatIdHint}</span>
+            </label>
+            <label className="grid content-start gap-1.5 text-sm font-semibold text-[#344054]">
+              <span>{copy.telegramMessageThreadId}</span>
+              <input
+                inputMode="numeric"
+                pattern="[1-9][0-9]*"
+                maxLength={10}
+                value={settings.telegramMessageThreadId}
+                onChange={(event) => setSettings((current) => ({
+                  ...current,
+                  telegramMessageThreadId: event.target.value,
+                  telegramEnabled: event.target.value === current.telegramMessageThreadId
+                    ? current.telegramEnabled
+                    : false
+                }))}
+                placeholder="402"
+                className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
+              />
+              <span className="font-normal leading-5 text-[#647084]">
+                {copy.telegramMessageThreadIdHint}
+              </span>
             </label>
           </div>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
