@@ -191,6 +191,22 @@ function NewsDetailBlock({block}: {block: NewsBodyBlock}) {
     );
   }
 
+  if (block.type === 'imageCentered') {
+    return (
+      <section className="mx-auto max-w-[760px]">
+        {block.image ? (
+          <SafeImage
+            filename={block.image}
+            alt="News image"
+            aspect="aspect-[4/3]"
+            sizes="(min-width: 1024px) 760px, calc(100vw - 48px)"
+            variant="plain"
+          />
+        ) : null}
+      </section>
+    );
+  }
+
   if (block.type === 'imageText') {
     const image = block.image ? (
       <SafeImage

@@ -27,7 +27,7 @@ export type PublicNewsDetail = {
 };
 
 export type NewsBodyBlock = {
-  type: 'text' | 'imageFull' | 'imageText' | 'quote';
+  type: 'text' | 'imageFull' | 'imageCentered' | 'imageText' | 'quote';
   title: string;
   body: string;
   image: string;
@@ -282,7 +282,9 @@ function normalizeNewsBlocks(value: unknown): NewsBodyBlock[] {
 }
 
 function newsBlockType(value: unknown): NewsBodyBlock['type'] {
-  return value === 'imageFull' || value === 'imageText' || value === 'quote' ? value : 'text';
+  return value === 'imageFull' || value === 'imageCentered' || value === 'imageText' || value === 'quote'
+    ? value
+    : 'text';
 }
 
 function newsBlockLayout(value: unknown): NewsBodyBlock['layout'] {

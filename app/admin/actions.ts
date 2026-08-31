@@ -575,7 +575,9 @@ async function readNewsBlocks(formData: FormData, locale: Locale, editorPath: st
 }
 
 function newsBlockType(value: string) {
-  return value === 'imageFull' || value === 'imageText' || value === 'quote' ? value : 'text';
+  return value === 'imageFull' || value === 'imageCentered' || value === 'imageText' || value === 'quote'
+    ? value
+    : 'text';
 }
 
 function newsBlockLayout(value: string) {
