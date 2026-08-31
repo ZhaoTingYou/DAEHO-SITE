@@ -71,17 +71,19 @@ public class NotificationRepository {
   public Map<String, String> getTelegramCredentials() {
     return jdbc.query(
         """
-        SELECT telegram_bot_token_ciphertext, telegram_chat_id
+        SELECT telegram_bot_token_ciphertext, telegram_chat_id, telegram_message_thread_id
         FROM cms_notification_settings
         WHERE id = 'default'
         """,
         (rs, rowNum) -> Map.of(
             "telegramBotTokenCiphertext", text(rs.getString("telegram_bot_token_ciphertext")),
-            "telegramChatId", text(rs.getString("telegram_chat_id"))
+            "telegramChatId", text(rs.getString("telegram_chat_id")),
+            "telegramMessageThreadId", text(rs.getString("telegram_message_thread_id"))
         )
     ).stream().findFirst().orElse(Map.of(
         "telegramBotTokenCiphertext", "",
-        "telegramChatId", ""
+        "telegramChatId", "",
+        "telegramMessageThreadId", ""
     ));
   }
 
@@ -138,8 +140,9 @@ public class NotificationRepository {
     jdbc.update("""
         INSERT INTO cms_notification_settings (
           id, internal_email, internal_email_enabled, customer_email_enabled, kakao_enabled,
-          telegram_enabled, telegram_bot_token_ciphertext, telegram_chat_id, updated_at
-        ) VALUES ('default', ?, ?, ?, ?, ?, ?, ?, now())
+          telegram_enabled, telegram_bot_token_ciphertext, telegram_chat_id,
+          telegram_message_thread_id, updated_at
+        ) VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, now())
         ON CONFLICT (id) DO UPDATE SET
           internal_email = excluded.internal_email,
           internal_email_enabled = excluded.internal_email_enabled,
@@ -149,11 +152,13 @@ public class NotificationRepository {
           telegram_test_fingerprint = CASE
             WHEN cms_notification_settings.telegram_bot_token_ciphertext = excluded.telegram_bot_token_ciphertext
               AND cms_notification_settings.telegram_chat_id = excluded.telegram_chat_id
+              AND cms_notification_settings.telegram_message_thread_id = excluded.telegram_message_thread_id
             THEN cms_notification_settings.telegram_test_fingerprint
             ELSE ''
           END,
           telegram_bot_token_ciphertext = excluded.telegram_bot_token_ciphertext,
           telegram_chat_id = excluded.telegram_chat_id,
+          telegram_message_thread_id = excluded.telegram_message_thread_id,
           updated_at = now()
         """,
         validation.stringValue(payload.get("internalEmail")),
@@ -162,7 +167,8 @@ public class NotificationRepository {
         validation.booleanValue(payload.get("kakaoEnabled"), false),
         validation.booleanValue(payload.get("telegramEnabled"), false),
         validation.stringValue(payload.get("telegramBotTokenCiphertext")),
-        validation.stringValue(payload.get("telegramChatId"))
+        validation.stringValue(payload.get("telegramChatId")),
+        validation.stringValue(payload.get("telegramMessageThreadId"))
     );
     return jdbc.query(
         "SELECT * FROM cms_notification_settings WHERE id = 'default'",
@@ -539,6 +545,7 @@ public class NotificationRepository {
         "kakaoEnabled", rs.getBoolean("kakao_enabled"),
         "telegramEnabled", rs.getBoolean("telegram_enabled"),
         "telegramChatId", text(rs.getString("telegram_chat_id")),
+        "telegramMessageThreadId", text(rs.getString("telegram_message_thread_id")),
         "telegramTokenConfigured", !text(rs.getString("telegram_bot_token_ciphertext")).isBlank(),
         "updatedAt", instantString(rs, "updated_at")
     );

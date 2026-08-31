@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,8 +82,15 @@ public class TelegramBotClient {
       return SendResult.failed("Telegram message body exceeds the 4096-character limit.");
     }
     try {
+      var requestPayload = new LinkedHashMap<String, Object>();
+      requestPayload.put("chat_id", recipient);
+      requestPayload.put("text", body);
+      var messageThreadId = text(configuration.messageThreadId());
+      if (!messageThreadId.isBlank()) {
+        requestPayload.put("message_thread_id", Long.parseLong(messageThreadId));
+      }
       var response = client.send(
-          request(configuration.botToken(), json.stringify(Map.of("chat_id", recipient, "text", body))),
+          request(configuration.botToken(), json.stringify(requestPayload)),
           HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
       );
       var payload = json.objectOrEmpty(response.body());

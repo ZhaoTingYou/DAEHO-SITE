@@ -2,6 +2,7 @@ package com.daeho.cms.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,12 +38,14 @@ class TelegramCredentialServiceTest {
         "telegramEnabled", true,
         "telegramBotToken", "",
         "telegramChatId", "-100-new",
+        "telegramMessageThreadId", "402",
         "clearTelegramBotToken", false
     ));
 
     assertTrue(prepared.configured());
     assertEquals(encrypted, prepared.payload().get("telegramBotTokenCiphertext"));
     assertEquals("-100-new", prepared.payload().get("telegramChatId"));
+    assertEquals("402", prepared.payload().get("telegramMessageThreadId"));
     assertFalse(prepared.payload().containsKey("telegramBotToken"));
     assertFalse(prepared.payload().containsKey("clearTelegramBotToken"));
   }
@@ -76,17 +79,26 @@ class TelegramCredentialServiceTest {
   }
 
   @Test
-  void verificationIsBoundToTheCurrentDecryptedTokenAndChatId() {
+  void verificationIsBoundToTheCurrentDecryptedTokenChatIdAndTopicId() {
     var encrypted = cipher.encrypt("saved-token");
     when(repository.getTelegramCredentials()).thenReturn(Map.of(
         "telegramBotTokenCiphertext", encrypted,
-        "telegramChatId", "-100-current"
+        "telegramChatId", "-100-current",
+        "telegramMessageThreadId", "402"
     ));
-    var fingerprint = credentials.fingerprint(credentials.current());
+    var current = credentials.current();
+    var fingerprint = credentials.fingerprint(current);
     when(repository.telegramTestVerified(fingerprint)).thenReturn(true);
 
+    assertEquals("402", current.messageThreadId());
+    assertNotEquals(
+        fingerprint,
+        credentials.fingerprint(new TelegramCredentialService.Credentials(
+            "saved-token", "-100-current", "403"
+        ))
+    );
     assertTrue(credentials.verified());
-    credentials.markVerified(credentials.current());
+    credentials.markVerified(current);
 
     org.mockito.Mockito.verify(repository).markTelegramTestVerified(fingerprint);
   }

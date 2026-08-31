@@ -46,6 +46,7 @@ class TelegramBotClientTest {
       assertTrue(result.success());
       assertEquals("42", result.messageId());
       assertTrue(requestBody.get().contains("\"chat_id\":\"-1001234567890\""));
+      assertTrue(requestBody.get().contains("\"message_thread_id\":402"));
       assertTrue(requestBody.get().contains("새 문의가 접수되었습니다."));
     } finally {
       server.stop(0);
@@ -143,7 +144,7 @@ class TelegramBotClientTest {
     );
     var credentials = mock(TelegramCredentialService.class);
     when(credentials.current()).thenReturn(
-        new TelegramCredentialService.Credentials("test-token", "-1001234567890")
+        new TelegramCredentialService.Credentials("test-token", "-1001234567890", "402")
     );
     return new TelegramBotClient(
         properties,

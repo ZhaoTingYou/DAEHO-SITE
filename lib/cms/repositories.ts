@@ -190,6 +190,7 @@ export type CmsNotificationSettings = {
   kakaoEnabled: boolean;
   telegramEnabled: boolean;
   telegramChatId: string;
+  telegramMessageThreadId: string;
   telegramTokenConfigured: boolean;
   updatedAt: string;
 };

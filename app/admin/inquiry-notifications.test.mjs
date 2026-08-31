@@ -66,6 +66,15 @@ test('Telegram credentials are entered in CMS without hydrating the saved token'
   assert.match(settings, /telegramBotToken: ''/);
 });
 
+test('Telegram topic targeting is editable in CMS and requires reverification after changes', () => {
+  assert.match(settings, /telegramMessageThreadId/);
+  assert.match(settings, /placeholder="402"/);
+  assert.match(
+    settings,
+    /telegramMessageThreadId: event\.target\.value,[\s\S]*telegramEnabled:[\s\S]*false/
+  );
+});
+
 test('Telegram settings and tests refresh health and surface backend validation errors', () => {
   assert.match(settings, /refreshHealth/);
   assert.match(settings, /onSuccess={refreshHealth}/);

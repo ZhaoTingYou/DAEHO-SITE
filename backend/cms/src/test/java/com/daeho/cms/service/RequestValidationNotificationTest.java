@@ -67,12 +67,14 @@ class RequestValidationNotificationTest {
         "telegramEnabled", true,
         "telegramBotToken", "123456:abc_DEF-ghi",
         "telegramChatId", "-1001234567890",
+        "telegramMessageThreadId", "402",
         "clearTelegramBotToken", false
     ));
 
     assertTrue(result.success());
     assertEquals("123456:abc_DEF-ghi", result.data().get("telegramBotToken"));
     assertEquals("-1001234567890", result.data().get("telegramChatId"));
+    assertEquals("402", result.data().get("telegramMessageThreadId"));
     assertEquals(false, result.data().get("clearTelegramBotToken"));
   }
 
@@ -91,5 +93,25 @@ class RequestValidationNotificationTest {
 
     assertFalse(result.success());
     assertTrue(result.issues().stream().anyMatch(issue -> "telegramChatId".equals(issue.get("path"))));
+  }
+
+  @Test
+  void telegramTopicIdMustBeBlankOrAPositiveInteger() {
+    var result = validation.notificationSettings(Map.of(
+        "internalEmail", "",
+        "internalEmailEnabled", false,
+        "customerEmailEnabled", false,
+        "kakaoEnabled", false,
+        "telegramEnabled", false,
+        "telegramBotToken", "",
+        "telegramChatId", "-1001234567890",
+        "telegramMessageThreadId", "문의",
+        "clearTelegramBotToken", false
+    ));
+
+    assertFalse(result.success());
+    assertTrue(result.issues().stream().anyMatch(
+        issue -> "telegramMessageThreadId".equals(issue.get("path"))
+    ));
   }
 }

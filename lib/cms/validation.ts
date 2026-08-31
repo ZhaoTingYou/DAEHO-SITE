@@ -178,6 +178,10 @@ export const notificationSettingsSchema = z
     telegramEnabled: z.boolean(),
     telegramBotToken: z.string().trim().max(512).default(''),
     telegramChatId: z.string().trim().max(80).default(''),
+    telegramMessageThreadId: z.string().trim().max(10).refine(
+      (value) => value === '' || (/^[1-9]\d*$/.test(value) && Number(value) <= 2_147_483_647),
+      'Telegram Topic ID must be a positive integer or left blank for General.'
+    ).default(''),
     clearTelegramBotToken: z.boolean().default(false)
   })
   .superRefine((value, context) => {

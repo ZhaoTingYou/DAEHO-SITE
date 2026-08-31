@@ -34,12 +34,18 @@ public class TelegramCredentialService {
       tokenCiphertext = cipher.encrypt(tokenInput);
     }
     var chatId = text(input.get("telegramChatId"));
+    var messageThreadId = text(input.get("telegramMessageThreadId"));
     var payload = new LinkedHashMap<String, Object>(input);
     payload.remove("telegramBotToken");
     payload.remove("clearTelegramBotToken");
     payload.put("telegramBotTokenCiphertext", tokenCiphertext);
     payload.put("telegramChatId", chatId);
-    var candidate = new Credentials(cipher.decrypt(tokenCiphertext).orElse(""), chatId);
+    payload.put("telegramMessageThreadId", messageThreadId);
+    var candidate = new Credentials(
+        cipher.decrypt(tokenCiphertext).orElse(""),
+        chatId,
+        messageThreadId
+    );
     var configured = candidate.configured();
     var verified = configured && repository.telegramTestVerified(fingerprint(candidate));
     return new PreparedUpdate(Map.copyOf(payload), configured, verified);
@@ -48,8 +54,9 @@ public class TelegramCredentialService {
   public Credentials current() {
     var stored = repository.getTelegramCredentials();
     var chatId = text(stored.get("telegramChatId"));
+    var messageThreadId = text(stored.get("telegramMessageThreadId"));
     var token = cipher.decrypt(text(stored.get("telegramBotTokenCiphertext"))).orElse("");
-    return new Credentials(token, chatId);
+    return new Credentials(token, chatId, messageThreadId);
   }
 
   public boolean encryptionConfigured() {
@@ -84,7 +91,11 @@ public class TelegramCredentialService {
   String fingerprint(Credentials credentials) {
     try {
       var digest = MessageDigest.getInstance("SHA-256");
-      var value = text(credentials.botToken()) + "\u0000" + text(credentials.chatId());
+      var value = text(credentials.botToken())
+          + "\u0000"
+          + text(credentials.chatId())
+          + "\u0000"
+          + text(credentials.messageThreadId());
       return Base64.getUrlEncoder().withoutPadding().encodeToString(
           digest.digest(value.getBytes(StandardCharsets.UTF_8))
       );
@@ -103,7 +114,11 @@ public class TelegramCredentialService {
 
   public record PreparedUpdate(Map<String, Object> payload, boolean configured, boolean verified) {}
 
-  public record Credentials(String botToken, String chatId) {
+  public record Credentials(String botToken, String chatId, String messageThreadId) {
+    public Credentials(String botToken, String chatId) {
+      this(botToken, chatId, "");
+    }
+
     public boolean configured() {
       return botToken != null && !botToken.isBlank() && chatId != null && !chatId.isBlank();
     }
