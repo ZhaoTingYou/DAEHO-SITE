@@ -56,6 +56,14 @@ public class InquiryWorkflowService {
     return inquiry;
   }
 
+  @Transactional
+  public Map<String, Object> createWebLiveChat(
+      Map<String, Object> payload,
+      Map<String, String> requestMeta
+  ) {
+    return inquiries.createWebLiveChatInquiry(payload, requestMeta);
+  }
+
   public Map<String, Object> previewStatus(String id, String nextStatus) {
     var inquiry = requireInquiry(id);
     requireActiveStatus(nextStatus, text(inquiry.get("status")), false);

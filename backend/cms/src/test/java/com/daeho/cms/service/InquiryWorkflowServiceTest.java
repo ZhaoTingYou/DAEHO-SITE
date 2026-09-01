@@ -102,6 +102,18 @@ class InquiryWorkflowServiceTest {
   }
 
   @Test
+  void webLiveChatRegistrationDoesNotInvokeTheExistingNotificationBotWorkflow() {
+    var inquiry = inquiry("new");
+    when(inquiries.createWebLiveChatInquiry(anyMap(), anyMap())).thenReturn(inquiry);
+
+    var created = workflow.createWebLiveChat(Map.of("conversationId", "conversation-1"), Map.of());
+
+    assertEquals("inquiry-1", created.get("id"));
+    verify(inquiries).createWebLiveChatInquiry(anyMap(), anyMap());
+    verify(planner, never()).queueNewInquiry(anyMap());
+  }
+
+  @Test
   void changesToAnActiveCmsManagedStatus() {
     var current = inquiry("new");
     var updated = inquiry("waiting_for_customer");

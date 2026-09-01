@@ -113,7 +113,7 @@ INSERT OR IGNORE INTO cms_inquiry_statuses (
 
 CREATE TABLE IF NOT EXISTS cms_inquiries (
   id TEXT PRIMARY KEY,
-  source TEXT NOT NULL CHECK (source IN ('contact', 'golf', 'telegram')),
+  source TEXT NOT NULL CHECK (source IN ('contact', 'golf', 'telegram', 'web_live_chat')),
   status TEXT NOT NULL DEFAULT 'new',
   locale TEXT NOT NULL DEFAULT 'ko',
   name TEXT NOT NULL,
@@ -319,3 +319,76 @@ CREATE INDEX IF NOT EXISTS idx_cms_telegram_live_chat_messages_session_created
 CREATE UNIQUE INDEX IF NOT EXISTS uq_cms_telegram_live_chat_customer_source
   ON cms_telegram_live_chat_messages (session_id, customer_message_id)
   WHERE customer_message_id IS NOT NULL AND customer_message_id > 0;
+
+CREATE TABLE IF NOT EXISTS cms_web_live_chat_visitors (
+  id TEXT PRIMARY KEY,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  last_seen_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS cms_web_live_chat_conversations (
+  id TEXT PRIMARY KEY,
+  visitor_id TEXT NOT NULL REFERENCES cms_web_live_chat_visitors(id),
+  configuration_generation INTEGER NOT NULL,
+  target_chat_id TEXT NOT NULL,
+  inquiry_id TEXT REFERENCES cms_inquiries(id) ON DELETE SET NULL,
+  locale TEXT NOT NULL CHECK (locale IN ('ko', 'en')),
+  state TEXT NOT NULL CHECK (state IN ('opening', 'active', 'needs_attention', 'closed')),
+  customer_name TEXT NOT NULL,
+  customer_contact TEXT NOT NULL,
+  inquiry_content TEXT NOT NULL,
+  consent_version TEXT NOT NULL,
+  consented_at TEXT NOT NULL,
+  attention_code TEXT NOT NULL DEFAULT '',
+  pending_action TEXT NOT NULL DEFAULT ''
+    CHECK (pending_action IN ('', 'topic_creation', 'registration_delivery', 'visitor_delivery', 'topic_close')),
+  pending_message_id INTEGER,
+  pending_client_message_key TEXT NOT NULL DEFAULT '',
+  topic_thread_id INTEGER,
+  topic_root_message_id INTEGER,
+  last_read_team_message_id INTEGER,
+  last_activity_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  closed_at TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cms_web_live_chat_open_conversation
+  ON cms_web_live_chat_conversations(visitor_id, configuration_generation)
+  WHERE state <> 'closed';
+
+CREATE TABLE IF NOT EXISTS cms_web_live_chat_messages (
+  id INTEGER PRIMARY KEY,
+  conversation_id TEXT NOT NULL REFERENCES cms_web_live_chat_conversations(id) ON DELETE CASCADE,
+  direction TEXT NOT NULL CHECK (direction IN ('visitor', 'team', 'system')),
+  body TEXT NOT NULL,
+  delivery_state TEXT NOT NULL CHECK (delivery_state IN ('pending', 'delivered', 'needs_attention')),
+  client_message_key TEXT,
+  telegram_message_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  delivered_at TEXT,
+  UNIQUE (conversation_id, client_message_key),
+  UNIQUE (conversation_id, telegram_message_id)
+);
+
+CREATE TABLE IF NOT EXISTS cms_web_live_chat_rate_limits (
+  key_hash TEXT NOT NULL,
+  action TEXT NOT NULL,
+  window_started_at TEXT NOT NULL,
+  request_count INTEGER NOT NULL CHECK (request_count > 0),
+  expires_at TEXT NOT NULL,
+  PRIMARY KEY (key_hash, action)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cms_web_live_chat_visitors_expires
+  ON cms_web_live_chat_visitors(expires_at);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cms_web_live_chat_topic
+  ON cms_web_live_chat_conversations(configuration_generation, target_chat_id, topic_thread_id)
+  WHERE topic_thread_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_cms_web_live_chat_messages_replay
+  ON cms_web_live_chat_messages(conversation_id, id);
+CREATE INDEX IF NOT EXISTS idx_cms_web_live_chat_rate_limits_expires
+  ON cms_web_live_chat_rate_limits(expires_at);

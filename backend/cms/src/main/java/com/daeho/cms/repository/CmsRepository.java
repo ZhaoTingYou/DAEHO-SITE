@@ -402,6 +402,36 @@ public class CmsRepository {
     return createInquiry(values);
   }
 
+  @Transactional
+  public Map<String, Object> createWebLiveChatInquiry(
+      Map<String, Object> payload,
+      Map<String, String> requestMeta
+  ) {
+    var contact = validation.stringValue(payload.get("contact"));
+    var email = contact.contains("@") ? contact : "";
+    var phone = email.isBlank() ? contact : "";
+    var values = new LinkedHashMap<String, Object>();
+    values.put("id", validation.stringValue(payload.get("inquiryId")));
+    values.put("source", "web_live_chat");
+    values.put("locale", validation.stringValue(payload.get("locale")));
+    values.put("name", validation.stringValue(payload.get("name")));
+    values.put("phone", phone);
+    values.put("email", email);
+    values.put("organization", "");
+    values.put("inquiryType", "web_live_chat");
+    values.put("team", "");
+    values.put("dueDate", "");
+    values.put("useCase", "");
+    values.put("message", validation.stringValue(payload.get("message")));
+    values.put("pagePath", "/live-chat");
+    values.put("configuration", Map.of(
+        "conversationId", validation.stringValue(payload.get("conversationId"))
+    ));
+    values.put("userAgent", requestMeta.getOrDefault("userAgent", ""));
+    values.put("ipAddress", "");
+    return createInquiry(values);
+  }
+
   public List<Map<String, Object>> listInquiries(String status, String source) {
     var clauses = new ArrayList<String>();
     var values = new ArrayList<Object>();

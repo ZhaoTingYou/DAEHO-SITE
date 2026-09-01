@@ -23,4 +23,6 @@ test('Flyway migration history stays contiguous for already deployed databases',
       `missing Flyway migration V${versions[index - 1] + 1}`
     );
   }
+
+  assert.ok(versions.includes(19), 'embedded web live chat migration must be present at V19');
 });
