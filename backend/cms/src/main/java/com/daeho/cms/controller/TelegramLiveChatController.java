@@ -1,5 +1,6 @@
 package com.daeho.cms.controller;
 
+import com.daeho.cms.security.WebLiveChatTokenCodec;
 import com.daeho.cms.service.TelegramLiveChatCredentialService;
 import com.daeho.cms.service.TelegramLiveChatService;
 import java.util.Map;
@@ -14,18 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class TelegramLiveChatController {
   private final TelegramLiveChatCredentialService credentials;
   private final TelegramLiveChatService liveChat;
+  private final WebLiveChatTokenCodec codec;
 
   public TelegramLiveChatController(
       TelegramLiveChatCredentialService credentials,
-      TelegramLiveChatService liveChat
+      TelegramLiveChatService liveChat,
+      WebLiveChatTokenCodec codec
   ) {
     this.credentials = credentials;
     this.liveChat = liveChat;
+    this.codec = codec;
   }
 
   @GetMapping("/api/cms/live-chat")
   public Map<String, Object> publicSettings() {
-    return credentials.publicView();
+    return credentials.publicView(codec.configured());
   }
 
   @PostMapping("/api/telegram/live-chat/webhook")

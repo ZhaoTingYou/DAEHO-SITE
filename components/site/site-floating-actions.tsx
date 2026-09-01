@@ -2,15 +2,15 @@ import {BackToTopButton} from './back-to-top-button';
 import type {Locale} from '@/lib/locales';
 
 import {
-  TelegramLiveChatButton,
-  type TelegramLiveChatCopy
-} from './telegram-live-chat-button';
+  WebLiveChatWidget,
+  type WebLiveChatCopy
+} from './web-live-chat-widget';
 
 type SiteFloatingActionsProps = {
   backToTopLabel: string;
   locale: Locale;
-  liveChatCopy: TelegramLiveChatCopy;
-  liveChatConfig: {enabled: boolean; botUsername: string};
+  liveChatCopy: WebLiveChatCopy;
+  liveChatConfig: {enabled: boolean};
 };
 
 export function SiteFloatingActions({
@@ -22,14 +22,13 @@ export function SiteFloatingActions({
   return (
     <div
       data-site-floating-actions
-      className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[90] flex w-[calc(100vw-2rem)] max-w-[15.5rem] flex-col items-end gap-3 transition-opacity duration-200 motion-reduce:transition-none md:bottom-8 md:right-8"
+      className="pointer-events-none fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-[90] flex flex-col items-end transition-opacity duration-200 motion-reduce:transition-none md:bottom-28 md:right-8"
     >
       <BackToTopButton label={backToTopLabel} />
-      <TelegramLiveChatButton
+      <WebLiveChatWidget
         copy={liveChatCopy}
         locale={locale}
         enabled={liveChatConfig.enabled}
-        botUsername={liveChatConfig.botUsername}
       />
     </div>
   );

@@ -13,7 +13,7 @@ import {isEnglishEnabledForSite} from '@/lib/english-visibility';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {getPublicLocaleMessages} from '@/lib/locale-messages';
-import {getTelegramLiveChatPublicConfig} from '@/lib/cms/repositories';
+import {getWebLiveChatPublicConfig} from '@/lib/cms/repositories';
 
 type Props = {
   children: React.ReactNode;
@@ -33,7 +33,7 @@ export default async function SiteLayout({children, params}: Props) {
   const [englishEnabled, golfEnabled, liveChatConfig] = await Promise.all([
     isEnglishEnabledForSite(),
     isGolfEnabledForSite(),
-    getTelegramLiveChatPublicConfig()
+    getWebLiveChatPublicConfig()
   ]);
   const messages = await getPublicLocaleMessages(locale as Locale, ['common', 'site-popup']);
   const externalSites = messages.common.footer.externalSites.items;
@@ -60,7 +60,7 @@ export default async function SiteLayout({children, params}: Props) {
         <SiteFloatingActions
           backToTopLabel={locale === 'ko' ? '맨 위로' : 'Back to top'}
           locale={locale as Locale}
-          liveChatCopy={messages.common.telegramLiveChat}
+          liveChatCopy={messages.common.webLiveChat}
           liveChatConfig={liveChatConfig}
         />
       </div>

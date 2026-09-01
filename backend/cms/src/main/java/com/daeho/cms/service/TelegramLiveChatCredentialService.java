@@ -196,14 +196,8 @@ public class TelegramLiveChatCredentialService {
     return result;
   }
 
-  public Map<String, Object> publicView() {
-    var credentials = current();
-    var settings = credentials.settings();
-    var available = credentials.ready();
-    return Map.of(
-        "enabled", available,
-        "botUsername", available ? settings.botUsername() : ""
-    );
+  public Map<String, Object> publicView(boolean webSessionCodecConfigured) {
+    return Map.of("enabled", current().ready() && webSessionCodecConfigured);
   }
 
   private String decrypt(String ciphertext) {

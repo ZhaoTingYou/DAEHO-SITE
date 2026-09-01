@@ -841,17 +841,17 @@ export async function setTelegramLiveChatEnabled(enabled: boolean) {
   return response;
 }
 
-export async function getTelegramLiveChatPublicConfig() {
+export async function getWebLiveChatPublicConfig() {
   if (process.env.CMS_PREVIEW_STATIC === 'true') {
-    return {enabled: false, botUsername: ''};
+    return {enabled: false};
   }
   try {
-    return await cmsFetch<{enabled: boolean; botUsername: string}>('/api/cms/live-chat', {
+    return await cmsFetch<{enabled: boolean}>('/api/cms/live-chat', {
       cacheTags: ['cms:all', 'cms-live-chat']
     });
   } catch (error) {
-    console.error('[cms] Telegram live-chat configuration is unavailable; the public entry stays disabled.', error);
-    return {enabled: false, botUsername: ''};
+    console.error('[cms] Web live-chat configuration is unavailable; the public entry stays disabled.', error);
+    return {enabled: false};
   }
 }
 

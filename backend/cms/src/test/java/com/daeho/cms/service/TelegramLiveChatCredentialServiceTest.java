@@ -12,11 +12,43 @@ import static org.mockito.Mockito.when;
 
 import com.daeho.cms.config.TelegramLiveChatProperties;
 import com.daeho.cms.repository.TelegramLiveChatRepository;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 
 class TelegramLiveChatCredentialServiceTest {
+  @Test
+  void publicViewRequiresTheAnonymousSessionCodecAndExposesOnlyEnabled() {
+    var repository = mock(TelegramLiveChatRepository.class);
+    var cipher = mock(TelegramCredentialCipher.class);
+    var gateway = mock(TelegramLiveChatGateway.class);
+    var separationGuard = mock(TelegramBotSeparationGuard.class);
+    var ready = new TelegramLiveChatRepository.Settings(
+        true,
+        "ciphertext",
+        "DAEHO_LIVE_BOT",
+        "-1001234567890",
+        "777",
+        "실시간 상담",
+        "secret-hash",
+        "2026-09-01T00:00:00Z",
+        "2026-09-01T00:00:00Z"
+    );
+    when(repository.settings()).thenReturn(ready);
+    when(cipher.decrypt("ciphertext")).thenReturn(Optional.of("separate-live-token"));
+    var service = new TelegramLiveChatCredentialService(
+        repository,
+        cipher,
+        gateway,
+        new TelegramLiveChatProperties("https://daeho.works"),
+        separationGuard
+    );
+
+    assertEquals(Map.of("enabled", true), service.publicView(true));
+    assertEquals(Map.of("enabled", false), service.publicView(false));
+  }
+
   @Test
   void verifiesTheSeparateBotAndRegistersTheWebhookWithoutCreatingACustomerTopic() {
     var repository = mock(TelegramLiveChatRepository.class);
@@ -178,7 +210,7 @@ class TelegramLiveChatCredentialServiceTest {
         separationGuard
     );
 
-    assertFalse((Boolean) service.publicView().get("enabled"));
+    assertFalse((Boolean) service.publicView(true).get("enabled"));
     assertThrows(ResponseStatusException.class, () -> service.setEnabled(true));
     verify(repository, never()).setEnabled(true);
   }
@@ -213,7 +245,7 @@ class TelegramLiveChatCredentialServiceTest {
         separationGuard
     );
 
-    assertFalse((Boolean) service.publicView().get("enabled"));
+    assertFalse((Boolean) service.publicView(true).get("enabled"));
     assertThrows(ResponseStatusException.class, () -> service.setEnabled(true));
     verify(repository, never()).setEnabled(true);
   }

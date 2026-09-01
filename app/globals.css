@@ -72,15 +72,9 @@ body:has([data-analytics-consent-banner]) [data-site-floating-actions] {
   opacity: 0;
 }
 
-@keyframes live-chat-notice-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+[data-web-live-chat-open="true"] {
+  isolation: isolate;
+  overscroll-behavior: contain;
 }
 
 html.is-chronicle-intro-locked,
