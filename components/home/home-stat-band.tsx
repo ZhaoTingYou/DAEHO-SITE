@@ -99,11 +99,11 @@ function HomeStatBandCell({
         {parsedValue?.suffix ? <span>{parsedValue.suffix}</span> : null}
       </p>
       {showLabel ? (
-        <p className="home-stat-band__label whitespace-pre-line text-[15px] uppercase leading-[1.08] tracking-[0.03em]">
+        <p className="home-stat-band__label whitespace-pre-line text-[15px] uppercase leading-[1.08] tracking-[0.03em] sm:min-h-[33px]">
           {item.label}
         </p>
       ) : null}
-      <p className="home-stat-band__body max-w-[220px] whitespace-pre-line text-[16px] leading-[1.55] lg:min-h-[75px]">
+      <p className="home-stat-band__body max-w-[220px] whitespace-pre-line text-[16px] leading-[1.55] sm:min-h-[75px]">
         {item.body}
       </p>
     </div>
