@@ -262,7 +262,7 @@ test('Technique introduction renders semantic localized copy between the Hero an
 });
 
 test('Technique introduction owns equal enlarged spacing without adjacent section padding stacking', () => {
-  assert.match(techniqueIntroSource, /py-\[clamp\(72px,7vw,112px\)\]/);
+  assert.match(techniqueIntroSource, /py-\[clamp\(96px,9vw,144px\)\]/);
   assert.match(
     techniquePageSource,
     /max-w-\[1220px\][^"]*pb-0[^"]*pt-\[clamp\(64px,8vw,116px\)\]/
