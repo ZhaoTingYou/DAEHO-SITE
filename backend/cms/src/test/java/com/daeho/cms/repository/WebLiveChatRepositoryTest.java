@@ -303,6 +303,28 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
+  void staleExpiryAtomicallyPersistsTheDurableClosedSystemEvent() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(closeRow());
+    var repository = new WebLiveChatRepository(jdbc);
+    var cutoff = NOW.minus(Duration.ofDays(30));
+
+    var results = repository.expireStale(cutoff, 100, "상담이 종료되었습니다.");
+
+    assertEquals(1, results.size());
+    assertEquals("closed", results.get(0).conversation().state());
+    assertEquals(42L, results.get(0).event().id());
+    assertEquals("system", results.get(0).event().direction());
+    var call = jdbc.calls.get(0);
+    assertTrue(call.sql().contains("FOR UPDATE SKIP LOCKED"));
+    assertTrue(call.sql().contains("LIMIT ?"));
+    assertTrue(call.sql().contains("INSERT INTO cms_web_live_chat_messages"));
+    assertTrue(call.sql().contains("SELECT id, 'system', ?, 'delivered'"));
+    assertTrue(call.sql().contains("last_activity_at = now()"));
+    assertEquals(List.of(databaseTime(cutoff), 100, "상담이 종료되었습니다."), Arrays.asList(call.args()));
+  }
+
+  @Test
   void recentCmsListingNeverSelectsVisitorTokenHashes() {
     var jdbc = new RecordingJdbcTemplate();
     jdbc.queryResult = call -> List.of(summaryRow(7L, 2L));

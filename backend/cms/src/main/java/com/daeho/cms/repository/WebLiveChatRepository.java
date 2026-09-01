@@ -226,7 +226,7 @@ public class WebLiveChatRepository {
         """, this::mapCloseResult, conversationId, systemBody));
   }
 
-  public List<Conversation> expireStale(Instant cutoff, int limit) {
+  public List<CloseResult> expireStale(Instant cutoff, int limit, String systemBody) {
     return jdbc.query("""
         WITH stale AS (
           SELECT id
@@ -235,13 +235,35 @@ public class WebLiveChatRepository {
           ORDER BY last_activity_at ASC
           LIMIT ?
           FOR UPDATE SKIP LOCKED
+        ), closed AS (
+          UPDATE cms_web_live_chat_conversations c
+          SET state = 'closed', pending_action = '', pending_message_id = NULL,
+              pending_client_message_key = '', closed_at = now(),
+              last_activity_at = now(), updated_at = now()
+          FROM stale
+          WHERE c.id = stale.id AND c.state <> 'closed'
+          RETURNING c.*
+        ), events AS (
+          INSERT INTO cms_web_live_chat_messages (
+            conversation_id, direction, body, delivery_state, delivered_at
+          )
+          SELECT id, 'system', ?, 'delivered', now()
+          FROM closed
+          RETURNING *
         )
-        UPDATE cms_web_live_chat_conversations c
-        SET state = 'closed', pending_action = '', closed_at = now(), updated_at = now()
-        FROM stale
-        WHERE c.id = stale.id AND c.state <> 'closed'
-        RETURNING c.*
-        """, this::mapConversation, databaseTime(cutoff), limit);
+        SELECT c.*,
+          e.id AS event_id,
+          e.conversation_id AS event_conversation_id,
+          e.direction AS event_direction,
+          e.body AS event_body,
+          e.delivery_state AS event_delivery_state,
+          e.client_message_key AS event_client_message_key,
+          e.telegram_message_id AS event_telegram_message_id,
+          e.created_at AS event_created_at
+        FROM closed c
+        INNER JOIN events e ON e.conversation_id = c.id
+        ORDER BY c.last_activity_at ASC
+        """, this::mapCloseResult, databaseTime(cutoff), limit, systemBody);
   }
 
   public VisitorMessageClaim claimVisitorMessage(
