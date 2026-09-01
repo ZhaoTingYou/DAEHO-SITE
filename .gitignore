@@ -35,6 +35,7 @@ pnpm-debug.log*
 /.frontend-only-build-backup
 /.worktrees
 /.agents
+/.superpowers
 /skills-lock.json
 /README.updated.md
 
