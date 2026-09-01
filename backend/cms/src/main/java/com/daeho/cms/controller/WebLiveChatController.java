@@ -132,10 +132,16 @@ public class WebLiveChatController {
     if (view.conversation() == null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no current conversation.");
     }
+    var selected = view.conversation();
+    var owned = repository.conversationForVisitor(identity.visitor().id(), selected.id());
+    if (owned == null
+        || owned.configurationGeneration() != selected.configurationGeneration()) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Conversation access is denied.");
+    }
     var after = eventId(lastEventId);
     return broker.open(
-        view.conversation().id(),
-        () -> replay(identity.visitor(), after)
+        owned.id(),
+        () -> replay(owned.id(), after)
     );
   }
 
@@ -278,11 +284,11 @@ public class WebLiveChatController {
     return "team".equals(message.direction()) || "system".equals(message.direction());
   }
 
-  private List<Message> replay(Visitor visitor, long after) {
+  private List<Message> replay(String conversationId, long after) {
     var replay = new ArrayList<Message>();
     var cursor = after;
     while (true) {
-      var page = liveChat.messages(visitor, cursor);
+      var page = repository.visibleMessagesAfter(conversationId, cursor, REPLAY_PAGE_SIZE);
       page.stream().filter(this::publiclyVisible).forEach(replay::add);
       var nextCursor = page.stream().mapToLong(Message::id).max().orElse(cursor);
       if (page.size() < REPLAY_PAGE_SIZE || nextCursor <= cursor) {

@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -235,19 +236,33 @@ class WebLiveChatControllerTest {
   }
 
   @Test
-  void sseUsesOwnedCurrentConversationAndLoadsReplayFromLastDurableIdAfterRegistration()
+  void ssePinsOwnershipAndEveryReplayPageToTheConversationRegisteredBeforeANewStart()
       throws Exception {
     var visitor = visitor();
-    var active = conversation("active");
+    var original = conversationWithId("conversation-original", "active");
+    var replacement = conversationWithId("conversation-new", "active");
     existingCookie(visitor);
-    when(liveChat.session(visitor)).thenReturn(new SessionView(active, List.of(), 0L));
+    when(liveChat.session(visitor)).thenReturn(new SessionView(original, List.of(), 0L));
+    when(repository.conversationForVisitor(visitor.id(), original.id())).thenReturn(original);
     var firstPage = LongStream.rangeClosed(41L, 140L)
-        .mapToObj(id -> message(id, "team"))
+        .mapToObj(id -> message(id, original.id(), "team"))
         .toList();
+    when(repository.visibleMessagesAfter(original.id(), 40L, 100)).thenAnswer(invocation -> {
+      when(liveChat.session(visitor)).thenReturn(new SessionView(replacement, List.of(), 0L));
+      return firstPage;
+    });
+    when(repository.visibleMessagesAfter(original.id(), 140L, 100))
+        .thenReturn(List.of(message(141L, original.id(), "team")));
+    when(repository.visibleMessagesAfter(eq(replacement.id()), anyLong(), eq(100)))
+        .thenReturn(List.of(message(1_001L, replacement.id(), "team")));
+
+    // The pre-fix implementation re-resolves latest on each page and mixes this replacement row.
     when(liveChat.messages(visitor, 40L)).thenReturn(firstPage);
-    when(liveChat.messages(visitor, 140L)).thenReturn(List.of(message(141L, "team")));
+    when(liveChat.messages(visitor, 140L)).thenReturn(
+        List.of(message(1_001L, replacement.id(), "team"))
+    );
     var emitter = new SseEmitter(70_000L);
-    when(broker.open(eq(active.id()), any())).thenReturn(emitter);
+    when(broker.open(eq(original.id()), any())).thenReturn(emitter);
 
     mvc.perform(get("/api/live-chat/conversations/current/events")
             .cookie(cookie()).header("Origin", "https://daeho.works")
@@ -258,10 +273,18 @@ class WebLiveChatControllerTest {
 
     @SuppressWarnings("unchecked")
     var replay = ArgumentCaptor.forClass(Supplier.class);
-    verify(broker).open(eq(active.id()), replay.capture());
-    assertEquals(101, ((List<?>) replay.getValue().get()).size());
-    verify(liveChat).messages(visitor, 40L);
-    verify(liveChat).messages(visitor, 140L);
+    verify(broker).open(eq(original.id()), replay.capture());
+    @SuppressWarnings("unchecked")
+    var replayed = (List<Message>) replay.getValue().get();
+    assertEquals(101, replayed.size());
+    assertEquals(true, replayed.stream()
+        .allMatch(message -> original.id().equals(message.conversationId())));
+    verify(repository).conversationForVisitor(visitor.id(), original.id());
+    verify(repository).visibleMessagesAfter(original.id(), 40L, 100);
+    verify(repository).visibleMessagesAfter(original.id(), 140L, 100);
+    verify(repository, never()).visibleMessagesAfter(eq(replacement.id()), anyLong(), eq(100));
+    verify(liveChat).session(visitor);
+    verify(liveChat, never()).messages(any(), anyLong());
     emitter.complete();
   }
 
@@ -337,16 +360,24 @@ class WebLiveChatControllerTest {
   }
 
   private Conversation conversation(String state) {
+    return conversationWithId("conversation-1", state);
+  }
+
+  private Conversation conversationWithId(String id, String state) {
     return new Conversation(
-        "conversation-1", "visitor-1", 3L, "-1003425727647", "inquiry-1", "ko", state,
+        id, "visitor-1", 3L, "-1003425727647", "inquiry-1", "ko", state,
         "홍길동", "01012345678", "반지 제작 상담", "2026-09-01", NOW, "", "", 0L,
         "", 701L, 702L, 0L, NOW, NOW, NOW, "closed".equals(state) ? NOW : null
     );
   }
 
   private Message message(long id, String direction) {
+    return message(id, "conversation-1", direction);
+  }
+
+  private Message message(long id, String conversationId, String direction) {
     return new Message(
-        id, "conversation-1", direction, "message-" + id, "delivered", "", 0L, NOW
+        id, conversationId, direction, "message-" + id, "delivered", "", 0L, NOW
     );
   }
 }

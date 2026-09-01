@@ -32,6 +32,7 @@ class WebLiveChatEventBrokerTest {
 
     var opened = broker.open("conversation-1", () -> {
       broker.publish("conversation-1", message(42L, "team"));
+      broker.publish("conversation-new", message(1_001L, "team"));
       return List.of(message(41L, "team"));
     });
 
