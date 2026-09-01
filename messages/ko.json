@@ -1809,12 +1809,14 @@
     "indexBody": "",
     "share": {
       "label": "공유",
-      "copied": "링크가 복사되었습니다."
+      "copied": "링크가 복사되었습니다.",
+      "shared": "공유되었습니다."
     },
     "detail": {
       "back": "저널 목록",
       "backHref": "/news",
       "cta": "문의하기",
+      "tagsLabel": "태그",
       "previous": "이전 소식",
       "next": "다음 소식"
     }

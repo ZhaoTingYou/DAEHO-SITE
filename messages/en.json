@@ -1809,12 +1809,14 @@
     "indexBody": "",
     "share": {
       "label": "Share",
-      "copied": "Link copied."
+      "copied": "Link copied.",
+      "shared": "Shared."
     },
     "detail": {
       "back": "Back to news",
       "backHref": "/news",
       "cta": "Contact us",
+      "tagsLabel": "Tags",
       "previous": "Previous story",
       "next": "Next story"
     }
