@@ -66,6 +66,17 @@ public class WebLiveChatRepository {
         """, this::mapConversation, visitorId, configurationGeneration));
   }
 
+  public Conversation latestConversation(String visitorId, long configurationGeneration) {
+    return one(jdbc.query("""
+        SELECT c.*
+        FROM cms_web_live_chat_conversations c
+        WHERE c.visitor_id = ?
+          AND c.configuration_generation = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+        """, this::mapConversation, visitorId, configurationGeneration));
+  }
+
   public Conversation conversationForVisitor(String visitorId, String conversationId) {
     return one(jdbc.query("""
         SELECT c.*

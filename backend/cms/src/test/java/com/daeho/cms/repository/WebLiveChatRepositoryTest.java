@@ -40,6 +40,24 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
+  void latestVisitorConversationRetainsTheMostRecentClosedSession() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(conversationRow());
+    var repository = new WebLiveChatRepository(jdbc);
+
+    var conversation = repository.latestConversation("visitor-1", 3L);
+
+    assertEquals("conversation-1", conversation.id());
+    var call = jdbc.calls.get(0);
+    assertTrue(call.sql().contains("visitor_id = ?"));
+    assertTrue(call.sql().contains("configuration_generation = ?"));
+    assertFalse(call.sql().contains("state <> 'closed'"));
+    assertTrue(call.sql().contains("ORDER BY created_at DESC"));
+    assertTrue(call.sql().contains("LIMIT 1"));
+    assertEquals(List.of("visitor-1", 3L), Arrays.asList(call.args()));
+  }
+
+  @Test
   void visitorQueriesUsePrivacySafeProjectionsAndRecords() {
     var jdbc = new RecordingJdbcTemplate();
     jdbc.queryResult = call -> List.of(visitorRow());

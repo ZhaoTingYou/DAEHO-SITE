@@ -111,6 +111,139 @@ public class WebLiveChatService {
           "The Telegram Topic was created but its mapping could not be recorded.", true
       );
     }
+    return deliverRegistration(conversation, configuration);
+  }
+
+  public SessionView session(WebLiveChatRepository.Visitor visitor) {
+    var configuration = requireConfiguration();
+    var conversation = repository.latestConversation(
+        visitor.id(), configuration.settings().configurationGeneration()
+    );
+    if (conversation == null) {
+      return new SessionView(null, List.of(), 0L);
+    }
+    return new SessionView(
+        withoutVisitorBody(conversation),
+        repository.visibleMessagesAfter(conversation.id(), 0L, MESSAGE_PAGE_SIZE),
+        repository.unreadCount(conversation.id())
+    );
+  }
+
+  public SendResult send(WebLiveChatRepository.Visitor visitor, MessageInput input) {
+    var configuration = requireConfiguration();
+    var conversation = requireActiveConversation(visitor, configuration);
+    var claim = repository.claimVisitorMessage(
+        conversation.id(), input.clientMessageKey(), input.body()
+    );
+    if (claim == null) {
+      throw conflict("The message could not be stored.");
+    }
+    var message = claim.message();
+    if ("already_delivered".equals(claim.status())) {
+      return new SendResult(message.id(), "sent");
+    }
+    if ("in_progress".equals(claim.status())) {
+      return new SendResult(message.id(), "in_progress");
+    }
+    if (!"acquired".equals(claim.status())) {
+      throw conflict("The message delivery state is invalid.");
+    }
+    long telegramMessageId;
+    try {
+      telegramMessageId = gateway.sendMessage(
+          configuration.botToken(), conversation.targetChatId(),
+          Long.toString(conversation.topicThreadId()), visitorFollowUp(message.body()),
+          Map.of(), null
+      );
+    } catch (TelegramLiveChatException error) {
+      if (!error.deliveryUncertain()) {
+        repository.releaseVisitorMessage(message.id());
+      }
+      throw error;
+    }
+    if (!repository.markVisitorDelivered(message.id(), telegramMessageId)) {
+      throw new TelegramLiveChatException(
+          "The visitor message was delivered but its mapping could not be recorded.", true
+      );
+    }
+    return new SendResult(message.id(), "sent");
+  }
+
+  public List<Message> messages(WebLiveChatRepository.Visitor visitor, long afterId) {
+    var configuration = requireConfiguration();
+    var conversation = repository.latestConversation(
+        visitor.id(), configuration.settings().configurationGeneration()
+    );
+    return conversation == null
+        ? List.of()
+        : repository.visibleMessagesAfter(
+            conversation.id(), Math.max(0L, afterId), MESSAGE_PAGE_SIZE
+        );
+  }
+
+  public Conversation markRead(WebLiveChatRepository.Visitor visitor, long teamMessageId) {
+    var configuration = requireConfiguration();
+    var conversation = repository.latestConversation(
+        visitor.id(), configuration.settings().configurationGeneration()
+    );
+    if (conversation == null) {
+      throw conflict("There is no current conversation.");
+    }
+    return repository.markRead(conversation.id(), Math.max(0L, teamMessageId));
+  }
+
+  public Conversation closeFromCms(String conversationId) {
+    var result = repository.close(conversationId, CLOSED_MESSAGE);
+    return result == null ? null : result.conversation();
+  }
+
+  public Conversation retryRegistrationFromCms(
+      String conversationId,
+      String expectedAttentionCode
+  ) {
+    var configuration = requireConfiguration();
+    var conversation = repository.reserveRegistrationRetry(
+        conversationId, expectedAttentionCode
+    );
+    if (conversation == null) {
+      throw conflict("The registration recovery state changed.");
+    }
+    if (conversation.configurationGeneration()
+        != configuration.settings().configurationGeneration()
+        || !conversation.targetChatId().equals(configuration.settings().targetChatId())) {
+      repository.markNeedsAttention(
+          conversation.id(), "registration_delivery", "registration_configuration_changed"
+      );
+      throw conflict("The Telegram configuration changed after this conversation opened.");
+    }
+    return deliverRegistration(conversation, configuration);
+  }
+
+  public Conversation resetTopicCreationFromCms(
+      String conversationId,
+      String expectedAttentionCode
+  ) {
+    var reset = repository.resetTopicCreation(conversationId, expectedAttentionCode);
+    if (reset == null) {
+      throw conflict("The Topic recovery state changed.");
+    }
+    return reset;
+  }
+
+  private TelegramLiveChatCredentialService.Credentials requireConfiguration() {
+    var configuration = credentials.current();
+    if (configuration == null || !configuration.ready()) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE, "Web live chat is temporarily unavailable."
+      );
+    }
+    return configuration;
+  }
+
+  private Conversation deliverRegistration(
+      Conversation conversation,
+      TelegramLiveChatCredentialService.Credentials configuration
+  ) {
     long rootMessageId;
     try {
       rootMessageId = gateway.sendMessage(
@@ -149,99 +282,6 @@ public class WebLiveChatService {
       );
     }
     return active;
-  }
-
-  public SessionView session(WebLiveChatRepository.Visitor visitor) {
-    var configuration = requireConfiguration();
-    var conversation = repository.currentConversation(
-        visitor.id(), configuration.settings().configurationGeneration()
-    );
-    if (conversation == null) {
-      return new SessionView(null, List.of(), 0L);
-    }
-    return new SessionView(
-        withoutVisitorBody(conversation),
-        repository.visibleMessagesAfter(conversation.id(), 0L, MESSAGE_PAGE_SIZE),
-        repository.unreadCount(conversation.id())
-    );
-  }
-
-  public SendResult send(WebLiveChatRepository.Visitor visitor, MessageInput input) {
-    var configuration = requireConfiguration();
-    var conversation = requireActiveConversation(visitor, configuration);
-    var claim = repository.claimVisitorMessage(
-        conversation.id(), input.clientMessageKey(), input.body()
-    );
-    if (claim == null) {
-      throw conflict("The message could not be stored.");
-    }
-    var message = claim.message();
-    if ("already_delivered".equals(claim.status())) {
-      return new SendResult(message.id(), "sent");
-    }
-    if ("in_progress".equals(claim.status())) {
-      return new SendResult(message.id(), "in_progress");
-    }
-    if (!"acquired".equals(claim.status())) {
-      throw conflict("The message delivery state is invalid.");
-    }
-    long telegramMessageId;
-    try {
-      telegramMessageId = gateway.sendMessage(
-          configuration.botToken(), conversation.targetChatId(),
-          Long.toString(conversation.topicThreadId()), visitorFollowUp(input.body()),
-          Map.of(), null
-      );
-    } catch (TelegramLiveChatException error) {
-      if (!error.deliveryUncertain()) {
-        repository.releaseVisitorMessage(message.id());
-      }
-      throw error;
-    }
-    if (!repository.markVisitorDelivered(message.id(), telegramMessageId)) {
-      throw new TelegramLiveChatException(
-          "The visitor message was delivered but its mapping could not be recorded.", true
-      );
-    }
-    return new SendResult(message.id(), "sent");
-  }
-
-  public List<Message> messages(WebLiveChatRepository.Visitor visitor, long afterId) {
-    var configuration = requireConfiguration();
-    var conversation = repository.currentConversation(
-        visitor.id(), configuration.settings().configurationGeneration()
-    );
-    return conversation == null
-        ? List.of()
-        : repository.visibleMessagesAfter(
-            conversation.id(), Math.max(0L, afterId), MESSAGE_PAGE_SIZE
-        );
-  }
-
-  public Conversation markRead(WebLiveChatRepository.Visitor visitor, long teamMessageId) {
-    var configuration = requireConfiguration();
-    var conversation = repository.currentConversation(
-        visitor.id(), configuration.settings().configurationGeneration()
-    );
-    if (conversation == null) {
-      throw conflict("There is no current conversation.");
-    }
-    return repository.markRead(conversation.id(), Math.max(0L, teamMessageId));
-  }
-
-  public Conversation closeFromCms(String conversationId) {
-    var result = repository.close(conversationId, CLOSED_MESSAGE);
-    return result == null ? null : result.conversation();
-  }
-
-  private TelegramLiveChatCredentialService.Credentials requireConfiguration() {
-    var configuration = credentials.current();
-    if (configuration == null || !configuration.ready()) {
-      throw new ResponseStatusException(
-          HttpStatus.SERVICE_UNAVAILABLE, "Web live chat is temporarily unavailable."
-      );
-    }
-    return configuration;
   }
 
   private String topicTitle(Conversation conversation) {
