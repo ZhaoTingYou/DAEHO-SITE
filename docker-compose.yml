@@ -53,6 +53,7 @@ services:
       SOLAPI_PF_ID: ${SOLAPI_PF_ID:-}
       TELEGRAM_API_BASE_URL: ${TELEGRAM_API_BASE_URL:-https://api.telegram.org}
       CMS_TELEGRAM_ENCRYPTION_KEY: ${CMS_TELEGRAM_ENCRYPTION_KEY:-}
+      CMS_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://daeho.works}
     volumes:
       - ./public/images:/data/uploads
     depends_on:

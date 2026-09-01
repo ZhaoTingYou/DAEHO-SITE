@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import com.daeho.cms.config.NotificationProperties;
 import com.daeho.cms.repository.NotificationRepository;
@@ -19,13 +20,15 @@ import org.junit.jupiter.api.Test;
 class TelegramCredentialServiceTest {
   private NotificationRepository repository;
   private TelegramCredentialCipher cipher;
+  private TelegramBotSeparationGuard separationGuard;
   private TelegramCredentialService credentials;
 
   @BeforeEach
   void setUp() {
     repository = mock(NotificationRepository.class);
     cipher = new TelegramCredentialCipher(properties());
-    credentials = new TelegramCredentialService(repository, cipher);
+    separationGuard = mock(TelegramBotSeparationGuard.class);
+    credentials = new TelegramCredentialService(repository, cipher, separationGuard);
   }
 
   @Test
@@ -50,6 +53,7 @@ class TelegramCredentialServiceTest {
     assertEquals("402", prepared.payload().get("telegramMessageThreadId"));
     assertFalse(prepared.payload().containsKey("telegramBotToken"));
     assertFalse(prepared.payload().containsKey("clearTelegramBotToken"));
+    verify(separationGuard).requireSeparateNotificationToken("saved-token");
   }
 
   @Test

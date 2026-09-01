@@ -201,6 +201,19 @@ export const notificationSettingsSchema = z
     }
   });
 
+export const telegramLiveChatSettingsSchema = z.object({
+  enabled: z.boolean().default(false),
+  botToken: z.string().trim().max(512).refine(
+    (value) => value === '' || /^[0-9]{5,20}:[A-Za-z0-9_-]{20,128}$/.test(value),
+    'Telegram Bot token is invalid.'
+  ).default(''),
+  clearBotToken: z.boolean().default(false),
+  targetChatId: z.string().trim().max(80).refine(
+    (value) => value === '' || /^-?\d+$/.test(value),
+    'Telegram group Chat ID must contain only digits and an optional leading minus sign.'
+  ).default('')
+});
+
 export const notificationTemplateSchema = z
   .object({
     subject: z.string().trim().max(300),

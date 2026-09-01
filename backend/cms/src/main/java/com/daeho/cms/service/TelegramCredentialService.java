@@ -13,13 +13,16 @@ import org.springframework.stereotype.Service;
 public class TelegramCredentialService {
   private final NotificationRepository repository;
   private final TelegramCredentialCipher cipher;
+  private final TelegramBotSeparationGuard separationGuard;
 
   public TelegramCredentialService(
       NotificationRepository repository,
-      TelegramCredentialCipher cipher
+      TelegramCredentialCipher cipher,
+      TelegramBotSeparationGuard separationGuard
   ) {
     this.repository = repository;
     this.cipher = cipher;
+    this.separationGuard = separationGuard;
   }
 
   public PreparedUpdate prepareUpdate(Map<String, Object> input) {
@@ -46,6 +49,7 @@ public class TelegramCredentialService {
         chatId,
         messageThreadId
     );
+    separationGuard.requireSeparateNotificationToken(candidate.botToken());
     var configured = candidate.configured();
     var verified = configured && repository.telegramTestVerified(fingerprint(candidate));
     return new PreparedUpdate(Map.copyOf(payload), configured, verified);

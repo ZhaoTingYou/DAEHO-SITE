@@ -21,6 +21,7 @@ import {
   publicNewsListCacheTags,
   publicPageCacheTags,
   revalidatePublicCollectionCache,
+  revalidateAllPublicCmsCache,
   revalidatePublicNewsCache,
   revalidatePublicPageCache
 } from '@/lib/cms/public-cache';
@@ -94,7 +95,7 @@ export type CmsMedia = {
 
 export type CmsInquiry = {
   id: string;
-  source: 'contact' | 'golf';
+  source: 'contact' | 'golf' | 'telegram';
   status: string;
   locale: Locale;
   name: string;
@@ -112,6 +113,42 @@ export type CmsInquiry = {
   pagePath: string;
   userAgent: string;
   ipAddress: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TelegramLiveChatSettings = {
+  enabled: boolean;
+  botTokenConfigured: boolean;
+  botUsername: string;
+  targetChatId: string;
+  messageThreadId: string;
+  topicName: string;
+  connected: boolean;
+  encryptionConfigured?: boolean;
+  setupState?: string;
+  setupErrorCode?: string;
+  setupNeedsAttention?: boolean;
+  verifiedAt: string;
+  updatedAt: string;
+};
+
+export type TelegramLiveChatSession = {
+  id: string;
+  telegramChatId: number;
+  telegramUserId: number;
+  inquiryId: string;
+  locale: Locale;
+  state: 'awaiting_consent' | 'awaiting_name' | 'awaiting_contact' | 'awaiting_content' | 'needs_attention' | 'active' | 'closed';
+  customerName: string;
+  customerContact: string;
+  inquiryContent: string;
+  attentionCode: string;
+  pendingCustomerMessageId: number;
+  pendingGroupMessageId: number;
+  pendingDirection: string;
+  topicThreadId: number;
+  topicRootMessageId: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -722,6 +759,100 @@ export async function sendNotificationTest(payload: {
 export async function listNotificationTemplates() {
   const response = await cmsFetch<{items: CmsNotificationTemplate[]}>('/api/admin/notifications/templates', {admin: true});
   return response.items;
+}
+
+export async function getTelegramLiveChatAdmin() {
+  return cmsFetch<{
+    settings: TelegramLiveChatSettings;
+    sessions: TelegramLiveChatSession[];
+  }>('/api/admin/live-chat', {admin: true});
+}
+
+export async function updateTelegramLiveChatSettings(payload: {
+  enabled: boolean;
+  botToken: string;
+  clearBotToken: boolean;
+  targetChatId: string;
+}) {
+  const response = await cmsFetch<{settings: TelegramLiveChatSettings}>('/api/admin/live-chat', {
+    admin: true,
+    method: 'PUT',
+    body: payload
+  });
+  revalidateAllPublicCmsCache();
+  return response;
+}
+
+export async function connectTelegramLiveChat() {
+  try {
+    return await cmsFetch<{settings: TelegramLiveChatSettings}>('/api/admin/live-chat/connect', {
+      admin: true,
+      method: 'POST'
+    });
+  } finally {
+    revalidateAllPublicCmsCache();
+  }
+}
+
+export async function resetTelegramLiveChatSetup() {
+  const response = await cmsFetch<{settings: TelegramLiveChatSettings}>(
+    '/api/admin/live-chat/connect/reset',
+    {admin: true, method: 'POST'}
+  );
+  revalidateAllPublicCmsCache();
+  return response;
+}
+
+export async function reconcileTelegramLiveChatSession(sessionId: string) {
+  return cmsFetch<{session: TelegramLiveChatSession}>(
+    `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/reconcile`,
+    {admin: true, method: 'POST'}
+  );
+}
+
+export async function retryTelegramLiveChatDelivery(sessionId: string) {
+  return cmsFetch<{session: TelegramLiveChatSession}>(
+    `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/retry-delivery`,
+    {admin: true, method: 'POST'}
+  );
+}
+
+export async function resetTelegramLiveChatTopicCreation(sessionId: string) {
+  return cmsFetch<{session: TelegramLiveChatSession}>(
+    `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/reset-topic-creation`,
+    {method: 'POST', admin: true}
+  );
+}
+
+export async function closeTelegramLiveChatSession(sessionId: string) {
+  return cmsFetch<{session: TelegramLiveChatSession}>(
+    `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/close`,
+    {admin: true, method: 'POST'}
+  );
+}
+
+export async function setTelegramLiveChatEnabled(enabled: boolean) {
+  const response = await cmsFetch<{settings: TelegramLiveChatSettings}>('/api/admin/live-chat/enable', {
+    admin: true,
+    method: 'POST',
+    body: {enabled}
+  });
+  revalidateAllPublicCmsCache();
+  return response;
+}
+
+export async function getTelegramLiveChatPublicConfig() {
+  if (process.env.CMS_PREVIEW_STATIC === 'true') {
+    return {enabled: false, botUsername: ''};
+  }
+  try {
+    return await cmsFetch<{enabled: boolean; botUsername: string}>('/api/cms/live-chat', {
+      cacheTags: ['cms:all', 'cms-live-chat']
+    });
+  } catch (error) {
+    console.error('[cms] Telegram live-chat configuration is unavailable; the public entry stays disabled.', error);
+    return {enabled: false, botUsername: ''};
+  }
 }
 
 export async function createNotificationTemplateVersion(

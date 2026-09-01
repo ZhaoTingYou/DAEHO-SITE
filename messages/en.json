@@ -1274,6 +1274,17 @@
       "closeLabel": "Close",
       "ariaLabel": "KakaoTalk consultation — coming soon"
     },
+    "telegramLiveChat": {
+      "label": "Telegram Live Inquiry",
+      "compactLabel": "Telegram Chat",
+      "descriptor": "LIVE CONSULTATION",
+      "noticeEyebrow": "TELEGRAM CONCIERGE",
+      "comingSoonTitle": "Telegram live chat is being prepared",
+      "comingSoonBody": "It will be available as soon as the new support Bot is connected.",
+      "closeLabel": "Close",
+      "unavailableAriaLabel": "Telegram live inquiry — coming soon",
+      "openAriaLabel": "Start a live inquiry on Telegram"
+    },
     "navigation": {
       "brandLabel": "DAEHO",
       "primaryLabel": "Primary navigation",

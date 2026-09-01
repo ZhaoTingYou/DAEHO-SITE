@@ -72,7 +72,7 @@ body:has([data-analytics-consent-banner]) [data-site-floating-actions] {
   opacity: 0;
 }
 
-@keyframes kakao-contact-notice-in {
+@keyframes live-chat-notice-in {
   from {
     opacity: 0;
     transform: translateY(8px) scale(.97);

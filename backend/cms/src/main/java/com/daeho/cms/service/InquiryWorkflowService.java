@@ -47,6 +47,15 @@ public class InquiryWorkflowService {
     return inquiry;
   }
 
+  @Transactional
+  public Map<String, Object> createTelegram(
+      Map<String, Object> payload,
+      Map<String, String> requestMeta
+  ) {
+    var inquiry = inquiries.createTelegramInquiry(payload, requestMeta);
+    return inquiry;
+  }
+
   public Map<String, Object> previewStatus(String id, String nextStatus) {
     var inquiry = requireInquiry(id);
     requireActiveStatus(nextStatus, text(inquiry.get("status")), false);

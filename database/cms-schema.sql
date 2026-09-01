@@ -113,7 +113,7 @@ INSERT OR IGNORE INTO cms_inquiry_statuses (
 
 CREATE TABLE IF NOT EXISTS cms_inquiries (
   id TEXT PRIMARY KEY,
-  source TEXT NOT NULL CHECK (source IN ('contact', 'golf')),
+  source TEXT NOT NULL CHECK (source IN ('contact', 'golf', 'telegram')),
   status TEXT NOT NULL DEFAULT 'new',
   locale TEXT NOT NULL DEFAULT 'ko',
   name TEXT NOT NULL,
@@ -237,3 +237,85 @@ CREATE INDEX IF NOT EXISTS idx_cms_collections_visible_sort ON cms_collections (
 CREATE INDEX IF NOT EXISTS idx_cms_inquiries_status_created ON cms_inquiries (status, created_at);
 CREATE INDEX IF NOT EXISTS idx_cms_media_filename ON cms_media (filename);
 CREATE INDEX IF NOT EXISTS idx_cms_inquiry_statuses_active_sort ON cms_inquiry_statuses (is_active, sort_order, code);
+
+CREATE TABLE IF NOT EXISTS cms_telegram_live_chat_settings (
+  id TEXT PRIMARY KEY CHECK (id = 'default'),
+  enabled INTEGER NOT NULL DEFAULT 0,
+  bot_token_ciphertext TEXT NOT NULL DEFAULT '',
+  bot_username TEXT NOT NULL DEFAULT '',
+  target_chat_id TEXT NOT NULL DEFAULT '',
+  message_thread_id TEXT NOT NULL DEFAULT '',
+  topic_name TEXT NOT NULL DEFAULT '실시간 상담',
+  webhook_secret_hash TEXT NOT NULL DEFAULT '',
+  setup_state TEXT NOT NULL DEFAULT 'idle'
+    CHECK (setup_state IN ('idle', 'connecting', 'needs_attention')),
+  setup_error_code TEXT NOT NULL DEFAULT '',
+  setup_attempt_id TEXT NOT NULL DEFAULT '',
+  configuration_generation INTEGER NOT NULL DEFAULT 1,
+  verified_at TEXT,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+INSERT OR IGNORE INTO cms_telegram_live_chat_settings (id) VALUES ('default');
+
+CREATE TABLE IF NOT EXISTS cms_telegram_live_chat_sessions (
+  id TEXT PRIMARY KEY,
+  configuration_generation INTEGER NOT NULL,
+  target_chat_id TEXT NOT NULL,
+  telegram_chat_id INTEGER NOT NULL,
+  telegram_user_id INTEGER NOT NULL,
+  inquiry_id TEXT,
+  locale TEXT NOT NULL DEFAULT 'ko' CHECK (locale IN ('ko', 'en')),
+  state TEXT NOT NULL DEFAULT 'awaiting_consent'
+    CHECK (state IN ('awaiting_consent', 'awaiting_name', 'awaiting_contact', 'awaiting_content', 'needs_attention', 'active', 'closed')),
+  customer_name TEXT NOT NULL DEFAULT '',
+  customer_contact TEXT NOT NULL DEFAULT '',
+  inquiry_content TEXT NOT NULL DEFAULT '',
+  attention_code TEXT NOT NULL DEFAULT '',
+  pending_customer_message_id INTEGER,
+  pending_group_message_id INTEGER,
+  pending_direction TEXT NOT NULL DEFAULT ''
+    CHECK (pending_direction IN ('', 'customer_to_team', 'team_to_customer', 'registration')),
+  topic_thread_id INTEGER,
+  topic_root_message_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (inquiry_id) REFERENCES cms_inquiries(id) ON DELETE SET NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cms_telegram_live_chat_open_session
+  ON cms_telegram_live_chat_sessions (configuration_generation, telegram_chat_id)
+  WHERE state <> 'closed';
+
+CREATE TABLE IF NOT EXISTS cms_telegram_live_chat_messages (
+  id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  direction TEXT NOT NULL CHECK (direction IN ('registration', 'customer_to_team', 'team_to_customer')),
+  customer_message_id INTEGER,
+  group_message_id INTEGER,
+  configuration_generation INTEGER NOT NULL,
+  group_chat_id TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (session_id) REFERENCES cms_telegram_live_chat_sessions(id) ON DELETE CASCADE,
+  UNIQUE (configuration_generation, group_chat_id, group_message_id)
+);
+
+CREATE TABLE IF NOT EXISTS cms_telegram_live_chat_updates (
+  configuration_generation INTEGER NOT NULL,
+  update_id INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'processing'
+    CHECK (status IN ('processing', 'completed')),
+  claim_token TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (configuration_generation, update_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cms_telegram_live_chat_sessions_state_updated
+  ON cms_telegram_live_chat_sessions (state, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_cms_telegram_live_chat_messages_session_created
+  ON cms_telegram_live_chat_messages (session_id, created_at DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cms_telegram_live_chat_customer_source
+  ON cms_telegram_live_chat_messages (session_id, customer_message_id)
+  WHERE customer_message_id IS NOT NULL AND customer_message_id > 0;

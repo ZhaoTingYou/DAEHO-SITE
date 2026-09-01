@@ -54,3 +54,5 @@ cms:
     solapi-pf-id: ${SOLAPI_PF_ID:}
     telegram-api-base-url: ${TELEGRAM_API_BASE_URL:https://api.telegram.org}
     telegram-encryption-key: ${CMS_TELEGRAM_ENCRYPTION_KEY:}
+  live-chat:
+    public-site-url: ${CMS_PUBLIC_SITE_URL:https://daeho.works}

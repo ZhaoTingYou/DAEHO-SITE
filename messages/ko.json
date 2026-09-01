@@ -1274,6 +1274,17 @@
       "closeLabel": "닫기",
       "ariaLabel": "카카오톡 1:1 상담 — 준비 중"
     },
+    "telegramLiveChat": {
+      "label": "Telegram 실시간 상담",
+      "compactLabel": "Telegram 상담",
+      "descriptor": "LIVE INQUIRY",
+      "noticeEyebrow": "TELEGRAM CONCIERGE",
+      "comingSoonTitle": "실시간 상담을 준비 중입니다",
+      "comingSoonBody": "새 Telegram 상담 Bot 연결 후 바로 이용하실 수 있습니다.",
+      "closeLabel": "닫기",
+      "unavailableAriaLabel": "Telegram 실시간 상담 — 준비 중",
+      "openAriaLabel": "Telegram에서 실시간 상담 시작"
+    },
     "navigation": {
       "brandLabel": "DAEHO",
       "primaryLabel": "주요 내비게이션",

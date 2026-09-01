@@ -91,6 +91,17 @@ class InquiryWorkflowServiceTest {
   }
 
   @Test
+  void telegramLiveRegistrationDoesNotInvokeTheExistingNotificationBotWorkflow() {
+    var inquiry = inquiry("new");
+    when(inquiries.createTelegramInquiry(anyMap(), anyMap())).thenReturn(inquiry);
+
+    var created = workflow.createTelegram(Map.of("name", "Tester"), Map.of());
+
+    assertEquals("inquiry-1", created.get("id"));
+    verify(planner, never()).queueNewInquiry(anyMap());
+  }
+
+  @Test
   void changesToAnActiveCmsManagedStatus() {
     var current = inquiry("new");
     var updated = inquiry("waiting_for_customer");

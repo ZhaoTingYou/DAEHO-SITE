@@ -35,6 +35,7 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
             <FilterLink href="/admin/inquiries?status=new" label={t('status.new')} active={query?.status === 'new'} />
             <FilterLink href="/admin/inquiries?source=contact" label={t('source.contact')} active={query?.source === 'contact'} />
             <FilterLink href="/admin/inquiries?source=golf" label={t('source.golf')} active={query?.source === 'golf'} />
+            <FilterLink href="/admin/inquiries?source=telegram" label={t('source.telegram')} active={query?.source === 'telegram'} />
           </div>
         }
       />

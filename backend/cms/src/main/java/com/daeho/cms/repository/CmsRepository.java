@@ -371,6 +371,37 @@ public class CmsRepository {
     return createInquiry(values);
   }
 
+  @Transactional
+  public Map<String, Object> createTelegramInquiry(
+      Map<String, Object> payload,
+      Map<String, String> requestMeta
+  ) {
+    var contact = validation.stringValue(payload.get("contact"));
+    var email = contact.contains("@") ? contact : "";
+    var phone = email.isBlank() ? contact : "";
+    var values = new LinkedHashMap<String, Object>();
+    values.put("id", validation.stringValue(payload.get("inquiryId")));
+    values.put("source", "telegram");
+    values.put("locale", validation.stringValue(payload.get("locale")));
+    values.put("name", validation.stringValue(payload.get("name")));
+    values.put("phone", phone);
+    values.put("email", email);
+    values.put("organization", "");
+    values.put("inquiryType", "telegram_live_chat");
+    values.put("team", "");
+    values.put("dueDate", "");
+    values.put("useCase", "");
+    values.put("message", validation.stringValue(payload.get("message")));
+    values.put("pagePath", "/telegram/live-chat");
+    values.put("configuration", Map.of(
+        "telegramChatId", validation.stringValue(payload.get("telegramChatId")),
+        "telegramUserId", validation.stringValue(payload.get("telegramUserId"))
+    ));
+    values.put("userAgent", requestMeta.getOrDefault("userAgent", "Telegram Bot"));
+    values.put("ipAddress", "");
+    return createInquiry(values);
+  }
+
   public List<Map<String, Object>> listInquiries(String status, String source) {
     var clauses = new ArrayList<String>();
     var values = new ArrayList<Object>();
@@ -638,19 +669,20 @@ public class CmsRepository {
   }
 
   private Map<String, Object> createInquiry(Map<String, Object> payload) {
-    var id = UUID.randomUUID().toString();
+    var id = firstNonBlank(payload.get("id"), UUID.randomUUID().toString());
     jdbc.update("""
         INSERT INTO cms_inquiries (
           id, source, status, locale, name, contact, phone, email, organization, inquiry_type,
           team, quantity, due_date, use_case, message, configuration_json,
           page_path, user_agent, ip_address, created_at, updated_at
         ) VALUES (?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+        ON CONFLICT (id) DO NOTHING
         """,
         id,
         payload.get("source"),
         payload.get("locale"),
         payload.get("name"),
-        payload.get("phone"),
+        firstNonBlank(payload.get("phone"), payload.get("email")),
         payload.get("phone"),
         payload.get("email"),
         payload.get("organization"),
