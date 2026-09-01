@@ -40,6 +40,23 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
+  void visitorQueriesUsePrivacySafeProjectionsAndRecords() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(visitorRow());
+    var repository = new WebLiveChatRepository(jdbc);
+
+    assertEquals("visitor-1", repository.visitorByTokenHash("secret-hash").id());
+    assertEquals("visitor-1", repository.createVisitor("secret-hash", Duration.ofDays(30)).id());
+    assertEquals("visitor-1", repository.touchVisitor("visitor-1", Duration.ofDays(30)).id());
+
+    assertTrue(Arrays.stream(WebLiveChatRepository.Visitor.class.getRecordComponents())
+        .noneMatch(component -> component.getName().equals("tokenHash")));
+    assertFalse(selectProjection(jdbc.calls.get(0).sql()).contains("token_hash"));
+    assertFalse(returningProjection(jdbc.calls.get(1).sql()).contains("token_hash"));
+    assertFalse(returningProjection(jdbc.calls.get(2).sql()).contains("token_hash"));
+  }
+
+  @Test
   void claimOpenUsesInsertOnConflictAndReturnsTheWinningConversation() {
     var jdbc = new RecordingJdbcTemplate();
     jdbc.queryResult = call -> call.sql().contains("INSERT INTO")
@@ -88,20 +105,29 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
-  void visitorMessageKeyIsIdempotentAndReturnsTheStoredMessage() {
+  void visitorMessageClaimHasOneDatabaseOwnerAndExplicitRetryStatuses() {
     var jdbc = new RecordingJdbcTemplate();
-    jdbc.queryResult = call -> call.sql().contains("INSERT INTO")
-        ? List.of()
-        : List.of(messageRow("visitor", 0L, "client-key-1"));
+    jdbc.queryResult = call -> List.of(claimRow("acquired"));
     var repository = new WebLiveChatRepository(jdbc);
 
-    var message = repository.claimVisitorMessage("conversation-1", "client-key-1", "추가 문의");
+    var acquired = repository.claimVisitorMessage("conversation-1", "client-key-1", "추가 문의");
 
-    assertEquals(41L, message.id());
-    assertEquals("client-key-1", message.clientMessageKey());
-    assertTrue(jdbc.calls.get(0).sql().contains("ON CONFLICT (conversation_id, client_message_key) DO NOTHING"));
-    assertEquals(List.of("conversation-1", "client-key-1"),
-        Arrays.asList(jdbc.calls.get(1).args()));
+    assertEquals("acquired", acquired.status());
+    assertEquals(41L, acquired.message().id());
+    var sql = jdbc.calls.get(0).sql();
+    assertTrue(sql.contains("ON CONFLICT (conversation_id, client_message_key) DO UPDATE"));
+    assertTrue(sql.contains("pending_action = 'visitor_delivery'"));
+    assertTrue(sql.contains("pending_message_id"));
+    assertTrue(sql.contains("pending_client_message_key"));
+    assertTrue(sql.contains("c.pending_action = ''"));
+
+    jdbc.queryResult = call -> List.of(claimRow("in_progress"));
+    assertEquals("in_progress",
+        repository.claimVisitorMessage("conversation-1", "client-key-1", "추가 문의").status());
+
+    jdbc.queryResult = call -> List.of(claimRow("already_delivered"));
+    assertEquals("already_delivered",
+        repository.claimVisitorMessage("conversation-1", "client-key-1", "추가 문의").status());
   }
 
   @Test
@@ -119,9 +145,24 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
-  void deliveryCompletionIsACompareAndSetTransition() {
+  void systemEventsArePersistedAsVisibleDeliveredMessages() {
     var jdbc = new RecordingJdbcTemplate();
-    jdbc.updateResult = call -> 1;
+    jdbc.queryResult = call -> List.of(messageRow("system", 0L, ""));
+    var repository = new WebLiveChatRepository(jdbc);
+
+    var event = repository.recordSystemMessage("conversation-1", "상담이 종료되었습니다.");
+
+    assertEquals("system", event.direction());
+    var sql = jdbc.calls.get(0).sql();
+    assertTrue(sql.contains("'system'"));
+    assertTrue(sql.contains("'delivered'"));
+    assertTrue(sql.contains("RETURNING"));
+  }
+
+  @Test
+  void deliveryCompletionRequiresAndClearsTheMatchingConversationClaim() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(Map.of("id", 41L));
     var repository = new WebLiveChatRepository(jdbc);
 
     assertTrue(repository.markVisitorDelivered(41L, 703L));
@@ -129,20 +170,45 @@ class WebLiveChatRepositoryTest {
     var call = jdbc.calls.get(0);
     assertTrue(call.sql().contains("delivery_state = 'pending'"));
     assertTrue(call.sql().contains("delivery_state = 'delivered'"));
+    assertTrue(call.sql().contains("pending_action = 'visitor_delivery'"));
+    assertTrue(call.sql().contains("pending_message_id = m.id"));
+    assertTrue(call.sql().contains("pending_client_message_key = m.client_message_key"));
+    assertTrue(call.sql().contains("pending_action = ''"));
     assertEquals(List.of(703L, 41L), Arrays.asList(call.args()));
+
+    jdbc.queryResult = ignored -> List.of();
+    assertFalse(repository.markVisitorDelivered(41L, 703L));
+  }
+
+  @Test
+  void definiteVisitorDeliveryFailureReleasesOnlyTheMatchingPendingClaim() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.updateResult = call -> 1;
+    var repository = new WebLiveChatRepository(jdbc);
+
+    assertTrue(repository.releaseVisitorMessage(41L));
+
+    var sql = jdbc.calls.get(0).sql();
+    assertTrue(sql.contains("pending_action = 'visitor_delivery'"));
+    assertTrue(sql.contains("pending_message_id = ?"));
+    assertTrue(sql.contains("delivery_state = 'pending'"));
+    assertTrue(sql.contains("pending_action = ''"));
+    assertEquals(List.of(41L, 41L), Arrays.asList(jdbc.calls.get(0).args()));
   }
 
   @Test
   void conversationTransitionsUseExpectedStateAndPendingActionPredicates() {
     var jdbc = new RecordingJdbcTemplate();
-    jdbc.queryResult = call -> List.of(conversationRow());
+    jdbc.queryResult = call -> call.sql().contains("WITH closed")
+        ? List.of(closeRow())
+        : List.of(conversationRow());
     var repository = new WebLiveChatRepository(jdbc);
 
     repository.attachInquiry("conversation-1", "inquiry-1");
     repository.reserveTopicCreation("conversation-1");
     repository.recordTopic("conversation-1", 701L);
     repository.activate("conversation-1", 702L);
-    repository.close("conversation-1");
+    var closed = repository.close("conversation-1", "상담이 종료되었습니다.");
 
     assertTrue(jdbc.calls.get(0).sql().contains("state = 'opening'"));
     assertTrue(jdbc.calls.get(0).sql().contains("inquiry_id IS NULL"));
@@ -150,7 +216,54 @@ class WebLiveChatRepositoryTest {
     assertTrue(jdbc.calls.get(2).sql().contains("pending_action = 'topic_creation'"));
     assertTrue(jdbc.calls.get(2).sql().contains("topic_thread_id IS NULL"));
     assertTrue(jdbc.calls.get(3).sql().contains("pending_action = 'registration_delivery'"));
+    assertEquals("closed", closed.conversation().state());
+    assertEquals("system", closed.event().direction());
+    assertTrue(jdbc.calls.get(4).sql().contains("WITH closed"));
     assertTrue(jdbc.calls.get(4).sql().contains("state <> 'closed'"));
+    assertTrue(jdbc.calls.get(4).sql().contains("FROM closed"));
+  }
+
+  @Test
+  void recoveryTransitionsCompareAndSetTheExpectedActionAndAttentionCode() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(conversationRow());
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.markNeedsAttention(
+        "conversation-1", "topic_creation", "topic_creation_uncertain");
+    repository.resetTopicCreation("conversation-1", "topic_creation_uncertain");
+    repository.reserveRegistrationRetry("conversation-1", "registration_delivery_uncertain");
+
+    assertTrue(jdbc.calls.get(0).sql().contains("state = 'needs_attention'"));
+    assertTrue(jdbc.calls.get(0).sql().contains("pending_action = ?"));
+    assertEquals(List.of("topic_creation_uncertain", "conversation-1", "topic_creation"),
+        Arrays.asList(jdbc.calls.get(0).args()));
+
+    assertTrue(jdbc.calls.get(1).sql().contains("state = 'needs_attention'"));
+    assertTrue(jdbc.calls.get(1).sql().contains("attention_code = ?"));
+    assertTrue(jdbc.calls.get(1).sql().contains("pending_action = 'topic_creation'"));
+    assertTrue(jdbc.calls.get(1).sql().contains("topic_thread_id IS NULL"));
+
+    assertTrue(jdbc.calls.get(2).sql().contains("state = 'needs_attention'"));
+    assertTrue(jdbc.calls.get(2).sql().contains("attention_code = ?"));
+    assertTrue(jdbc.calls.get(2).sql().contains("pending_action = 'registration_delivery'"));
+    assertTrue(jdbc.calls.get(2).sql().contains("topic_thread_id IS NOT NULL"));
+  }
+
+  @Test
+  void readCursorIsClampedToAPersistedTeamMessageInTheConversation() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(conversationRow());
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.markRead("conversation-1", 9_999L);
+
+    var call = jdbc.calls.get(0);
+    assertTrue(call.sql().contains("MAX(m.id)"));
+    assertTrue(call.sql().contains("m.conversation_id = c.id"));
+    assertTrue(call.sql().contains("m.direction = 'team'"));
+    assertTrue(call.sql().contains("m.id <= ?"));
+    assertEquals(List.of(9_999L, "conversation-1"), Arrays.asList(call.args()));
   }
 
   @Test
@@ -174,10 +287,14 @@ class WebLiveChatRepositoryTest {
   @Test
   void recentCmsListingNeverSelectsVisitorTokenHashes() {
     var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(summaryRow(7L, 2L));
     var repository = new WebLiveChatRepository(jdbc);
 
-    repository.recentConversations(50);
+    var summary = repository.recentConversations(50).get(0);
 
+    assertEquals("conversation-1", summary.conversation().id());
+    assertEquals(7L, summary.messageCount());
+    assertEquals(2L, summary.unreadCount());
     var sql = jdbc.calls.get(0).sql().toLowerCase();
     assertTrue(sql.contains("from cms_web_live_chat_conversations"));
     assertTrue(sql.contains("message_count"));
@@ -209,6 +326,37 @@ class WebLiveChatRepositoryTest {
     );
   }
 
+  private static Map<String, Object> visitorRow() {
+    return Map.of(
+        "id", "visitor-1",
+        "expires_at", databaseTime(NOW.plus(Duration.ofDays(30))),
+        "last_seen_at", databaseTime(NOW),
+        "created_at", databaseTime(NOW),
+        "updated_at", databaseTime(NOW)
+    );
+  }
+
+  private static Map<String, Object> closeRow() {
+    var row = new java.util.LinkedHashMap<>(conversationRow());
+    row.put("state", "closed");
+    row.put("event_id", 42L);
+    row.put("event_conversation_id", "conversation-1");
+    row.put("event_direction", "system");
+    row.put("event_body", "상담이 종료되었습니다.");
+    row.put("event_delivery_state", "delivered");
+    row.put("event_client_message_key", "");
+    row.put("event_telegram_message_id", 0L);
+    row.put("event_created_at", databaseTime(NOW));
+    return row;
+  }
+
+  private static Map<String, Object> summaryRow(long messageCount, long unreadCount) {
+    var row = new java.util.LinkedHashMap<>(conversationRow());
+    row.put("message_count", messageCount);
+    row.put("unread_count", unreadCount);
+    return row;
+  }
+
   private static Map<String, Object> messageRow(String direction, long telegramMessageId,
       String clientMessageKey) {
     return Map.ofEntries(
@@ -219,8 +367,22 @@ class WebLiveChatRepositoryTest {
     );
   }
 
+  private static Map<String, Object> claimRow(String status) {
+    var row = new java.util.LinkedHashMap<>(messageRow("visitor", 0L, "client-key-1"));
+    row.put("claim_status", status);
+    return row;
+  }
+
   private static OffsetDateTime databaseTime(Instant value) {
     return OffsetDateTime.ofInstant(value, ZoneOffset.UTC);
+  }
+
+  private static String selectProjection(String sql) {
+    return sql.substring(0, sql.toUpperCase().indexOf("FROM")).toLowerCase();
+  }
+
+  private static String returningProjection(String sql) {
+    return sql.substring(sql.toUpperCase().lastIndexOf("RETURNING")).toLowerCase();
   }
 
   private static ResultSet resultSet(Map<String, Object> row) {

@@ -25,13 +25,13 @@ public class WebLiveChatRepository {
         INSERT INTO cms_web_live_chat_visitors (id, token_hash, expires_at)
         VALUES (?, ?, now() + (? * interval '1 millisecond'))
         ON CONFLICT (token_hash) DO NOTHING
-        RETURNING *
+        RETURNING id, expires_at, last_seen_at, created_at, updated_at
         """, this::mapVisitor, UUID.randomUUID().toString(), tokenHash, millis(lifetime)));
   }
 
   public Visitor visitorByTokenHash(String tokenHash) {
     return one(jdbc.query("""
-        SELECT *
+        SELECT id, expires_at, last_seen_at, created_at, updated_at
         FROM cms_web_live_chat_visitors
         WHERE token_hash = ? AND expires_at > now()
         """, this::mapVisitor, tokenHash));
@@ -44,7 +44,7 @@ public class WebLiveChatRepository {
             expires_at = now() + (? * interval '1 millisecond'),
             updated_at = now()
         WHERE id = ? AND expires_at > now()
-        RETURNING *
+        RETURNING id, expires_at, last_seen_at, created_at, updated_at
         """, this::mapVisitor, millis(lifetime), visitorId));
   }
 
@@ -142,14 +142,77 @@ public class WebLiveChatRepository {
         """, topicRootMessageId, conversationId);
   }
 
-  public Conversation close(String conversationId) {
+  public Conversation markNeedsAttention(
+      String conversationId,
+      String expectedPendingAction,
+      String attentionCode
+  ) {
     return transition("""
         UPDATE cms_web_live_chat_conversations
-        SET state = 'closed', pending_action = '', closed_at = now(),
-            last_activity_at = now(), updated_at = now()
-        WHERE id = ? AND state <> 'closed'
+        SET state = 'needs_attention', attention_code = ?, updated_at = now()
+        WHERE id = ? AND state <> 'closed' AND pending_action = ?
         RETURNING *
-        """, conversationId);
+        """, attentionCode, conversationId, expectedPendingAction);
+  }
+
+  public Conversation resetTopicCreation(String conversationId, String expectedAttentionCode) {
+    return transition("""
+        UPDATE cms_web_live_chat_conversations
+        SET state = 'opening', attention_code = '', pending_action = '', updated_at = now()
+        WHERE id = ?
+          AND state = 'needs_attention'
+          AND attention_code = ?
+          AND pending_action = 'topic_creation'
+          AND topic_thread_id IS NULL
+        RETURNING *
+        """, conversationId, expectedAttentionCode);
+  }
+
+  public Conversation reserveRegistrationRetry(
+      String conversationId,
+      String expectedAttentionCode
+  ) {
+    return transition("""
+        UPDATE cms_web_live_chat_conversations
+        SET state = 'opening', attention_code = '', updated_at = now()
+        WHERE id = ?
+          AND state = 'needs_attention'
+          AND attention_code = ?
+          AND pending_action = 'registration_delivery'
+          AND topic_thread_id IS NOT NULL
+        RETURNING *
+        """, conversationId, expectedAttentionCode);
+  }
+
+  public CloseResult close(String conversationId, String systemBody) {
+    return one(jdbc.query("""
+        WITH closed AS (
+          UPDATE cms_web_live_chat_conversations
+          SET state = 'closed', pending_action = '', pending_message_id = NULL,
+              pending_client_message_key = '', closed_at = now(),
+              last_activity_at = now(), updated_at = now()
+          WHERE id = ? AND state <> 'closed'
+          RETURNING *
+        ), event AS (
+          INSERT INTO cms_web_live_chat_messages (
+            conversation_id, direction, body, delivery_state, delivered_at
+          )
+          SELECT id, 'system', ?, 'delivered', now()
+          FROM closed
+          RETURNING *
+        )
+        SELECT c.*,
+          e.id AS event_id,
+          e.conversation_id AS event_conversation_id,
+          e.direction AS event_direction,
+          e.body AS event_body,
+          e.delivery_state AS event_delivery_state,
+          e.client_message_key AS event_client_message_key,
+          e.telegram_message_id AS event_telegram_message_id,
+          e.created_at AS event_created_at
+        FROM closed c
+        INNER JOIN event e ON e.conversation_id = c.id
+        """, this::mapCloseResult, conversationId, systemBody));
   }
 
   public List<Conversation> expireStale(Instant cutoff, int limit) {
@@ -170,39 +233,95 @@ public class WebLiveChatRepository {
         """, this::mapConversation, databaseTime(cutoff), limit);
   }
 
-  @Transactional
-  public Message claimVisitorMessage(String conversationId, String clientMessageKey, String body) {
-    var inserted = one(jdbc.query("""
-        INSERT INTO cms_web_live_chat_messages (
-          conversation_id, direction, body, delivery_state, client_message_key
-        )
-        SELECT id, 'visitor', ?, 'pending', ?
-        FROM cms_web_live_chat_conversations
-        WHERE id = ? AND state = 'active'
-        ON CONFLICT (conversation_id, client_message_key) DO NOTHING
-        RETURNING *
-        """, this::mapMessage, body, clientMessageKey, conversationId));
-    if (inserted != null) {
-      jdbc.update("""
-          UPDATE cms_web_live_chat_conversations
-          SET last_activity_at = now(), updated_at = now()
-          WHERE id = ? AND state = 'active'
-          """, conversationId);
-      return inserted;
-    }
+  public VisitorMessageClaim claimVisitorMessage(
+      String conversationId,
+      String clientMessageKey,
+      String body
+  ) {
     return one(jdbc.query("""
-        SELECT *
-        FROM cms_web_live_chat_messages
-        WHERE conversation_id = ? AND client_message_key = ?
-        """, this::mapMessage, conversationId, clientMessageKey));
+        WITH stored AS (
+          INSERT INTO cms_web_live_chat_messages (
+            conversation_id, direction, body, delivery_state, client_message_key
+          )
+          SELECT id, 'visitor', ?, 'pending', ?
+          FROM cms_web_live_chat_conversations
+          WHERE id = ? AND state = 'active'
+          ON CONFLICT (conversation_id, client_message_key) DO UPDATE
+          SET client_message_key = excluded.client_message_key
+          RETURNING *
+        ), owned AS (
+          UPDATE cms_web_live_chat_conversations c
+          SET pending_action = 'visitor_delivery',
+              pending_message_id = m.id,
+              pending_client_message_key = m.client_message_key,
+              last_activity_at = now(),
+              updated_at = now()
+          FROM stored m
+          WHERE c.id = m.conversation_id
+            AND c.state = 'active'
+            AND c.pending_action = ''
+            AND m.delivery_state = 'pending'
+          RETURNING c.id
+        )
+        SELECT m.*,
+          CASE
+            WHEN m.delivery_state = 'delivered' THEN 'already_delivered'
+            WHEN EXISTS (SELECT 1 FROM owned) THEN 'acquired'
+            ELSE 'in_progress'
+          END AS claim_status
+        FROM stored m
+        """, this::mapVisitorMessageClaim, body, clientMessageKey, conversationId));
   }
 
   public boolean markVisitorDelivered(long messageId, long telegramMessageId) {
+    return !jdbc.query("""
+        WITH delivered AS (
+          UPDATE cms_web_live_chat_messages m
+          SET delivery_state = 'delivered', telegram_message_id = ?, delivered_at = now()
+          WHERE m.id = ?
+            AND m.direction = 'visitor'
+            AND m.delivery_state = 'pending'
+            AND EXISTS (
+              SELECT 1
+              FROM cms_web_live_chat_conversations c
+              WHERE c.id = m.conversation_id
+                AND c.pending_action = 'visitor_delivery'
+                AND c.pending_message_id = m.id
+                AND c.pending_client_message_key = m.client_message_key
+            )
+          RETURNING m.id, m.conversation_id, m.client_message_key
+        ), released AS (
+          UPDATE cms_web_live_chat_conversations c
+          SET pending_action = '', pending_message_id = NULL,
+              pending_client_message_key = '', updated_at = now()
+          FROM delivered m
+          WHERE c.id = m.conversation_id
+            AND c.pending_action = 'visitor_delivery'
+            AND c.pending_message_id = m.id
+            AND c.pending_client_message_key = m.client_message_key
+          RETURNING m.id
+        )
+        SELECT id FROM released
+        """, (rs, rowNum) -> rs.getLong("id"), telegramMessageId, messageId).isEmpty();
+  }
+
+  public boolean releaseVisitorMessage(long messageId) {
     return jdbc.update("""
-        UPDATE cms_web_live_chat_messages
-        SET delivery_state = 'delivered', telegram_message_id = ?, delivered_at = now()
-        WHERE id = ? AND direction = 'visitor' AND delivery_state = 'pending'
-        """, telegramMessageId, messageId) == 1;
+        UPDATE cms_web_live_chat_conversations c
+        SET pending_action = '', pending_message_id = NULL,
+            pending_client_message_key = '', updated_at = now()
+        WHERE c.pending_action = 'visitor_delivery'
+          AND c.pending_message_id = ?
+          AND EXISTS (
+            SELECT 1
+            FROM cms_web_live_chat_messages m
+            WHERE m.id = ?
+              AND m.conversation_id = c.id
+              AND m.direction = 'visitor'
+              AND m.delivery_state = 'pending'
+              AND m.client_message_key = c.pending_client_message_key
+          )
+        """, messageId, messageId) == 1;
   }
 
   @Transactional
@@ -227,6 +346,18 @@ public class WebLiveChatRepository {
     return inserted;
   }
 
+  public Message recordSystemMessage(String conversationId, String body) {
+    return one(jdbc.query("""
+        INSERT INTO cms_web_live_chat_messages (
+          conversation_id, direction, body, delivery_state, delivered_at
+        )
+        SELECT id, 'system', ?, 'delivered', now()
+        FROM cms_web_live_chat_conversations
+        WHERE id = ?
+        RETURNING *
+        """, this::mapMessage, body, conversationId));
+  }
+
   public List<Message> visibleMessagesAfter(String conversationId, long afterId, int limit) {
     return jdbc.query("""
         SELECT *
@@ -241,13 +372,20 @@ public class WebLiveChatRepository {
 
   public Conversation markRead(String conversationId, long teamMessageId) {
     return transition("""
-        UPDATE cms_web_live_chat_conversations
+        UPDATE cms_web_live_chat_conversations c
         SET last_read_team_message_id = GREATEST(
-              COALESCE(last_read_team_message_id, 0), ?
+              COALESCE(c.last_read_team_message_id, 0),
+              COALESCE((
+                SELECT MAX(m.id)
+                FROM cms_web_live_chat_messages m
+                WHERE m.conversation_id = c.id
+                  AND m.direction = 'team'
+                  AND m.id <= ?
+              ), COALESCE(c.last_read_team_message_id, 0))
             ),
             updated_at = now()
-        WHERE id = ?
-        RETURNING *
+        WHERE c.id = ?
+        RETURNING c.*
         """, teamMessageId, conversationId);
   }
 
@@ -292,7 +430,7 @@ public class WebLiveChatRepository {
         keyHash, action, millis(window), millis(window), limit).isEmpty();
   }
 
-  public List<Conversation> recentConversations(int limit) {
+  public List<CmsConversationSummary> recentConversations(int limit) {
     return jdbc.query("""
         SELECT c.*,
           (SELECT COUNT(*) FROM cms_web_live_chat_messages m
@@ -303,7 +441,7 @@ public class WebLiveChatRepository {
         FROM cms_web_live_chat_conversations c
         ORDER BY c.updated_at DESC, c.id DESC
         LIMIT ?
-        """, this::mapConversation, limit);
+        """, this::mapCmsConversationSummary, limit);
   }
 
   private Conversation transition(String sql, Object... args) {
@@ -312,8 +450,8 @@ public class WebLiveChatRepository {
 
   private Visitor mapVisitor(ResultSet rs, int rowNum) throws SQLException {
     return new Visitor(
-        rs.getString("id"), rs.getString("token_hash"), instant(rs, "expires_at"),
-        instant(rs, "last_seen_at"), instant(rs, "created_at"), instant(rs, "updated_at")
+        rs.getString("id"), instant(rs, "expires_at"), instant(rs, "last_seen_at"),
+        instant(rs, "created_at"), instant(rs, "updated_at")
     );
   }
 
@@ -339,6 +477,28 @@ public class WebLiveChatRepository {
         text(rs.getString("body")), text(rs.getString("delivery_state")),
         text(rs.getString("client_message_key")), nullableLong(rs, "telegram_message_id"),
         instant(rs, "created_at")
+    );
+  }
+
+  private VisitorMessageClaim mapVisitorMessageClaim(ResultSet rs, int rowNum) throws SQLException {
+    return new VisitorMessageClaim(mapMessage(rs, rowNum), text(rs.getString("claim_status")));
+  }
+
+  private CloseResult mapCloseResult(ResultSet rs, int rowNum) throws SQLException {
+    var event = new Message(
+        rs.getLong("event_id"), rs.getString("event_conversation_id"),
+        text(rs.getString("event_direction")), text(rs.getString("event_body")),
+        text(rs.getString("event_delivery_state")),
+        text(rs.getString("event_client_message_key")),
+        nullableLong(rs, "event_telegram_message_id"), instant(rs, "event_created_at")
+    );
+    return new CloseResult(mapConversation(rs, rowNum), event);
+  }
+
+  private CmsConversationSummary mapCmsConversationSummary(ResultSet rs, int rowNum)
+      throws SQLException {
+    return new CmsConversationSummary(
+        mapConversation(rs, rowNum), rs.getLong("message_count"), rs.getLong("unread_count")
     );
   }
 
@@ -383,7 +543,6 @@ public class WebLiveChatRepository {
 
   public record Visitor(
       String id,
-      String tokenHash,
       Instant expiresAt,
       Instant lastSeenAt,
       Instant createdAt,
@@ -425,6 +584,16 @@ public class WebLiveChatRepository {
       String clientMessageKey,
       long telegramMessageId,
       Instant createdAt
+  ) {}
+
+  public record VisitorMessageClaim(Message message, String status) {}
+
+  public record CloseResult(Conversation conversation, Message event) {}
+
+  public record CmsConversationSummary(
+      Conversation conversation,
+      long messageCount,
+      long unreadCount
   ) {}
 
   public record SessionView(
