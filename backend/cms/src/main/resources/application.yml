@@ -56,3 +56,8 @@ cms:
     telegram-encryption-key: ${CMS_TELEGRAM_ENCRYPTION_KEY:}
   live-chat:
     public-site-url: ${CMS_PUBLIC_SITE_URL:https://daeho.works}
+  web-live-chat:
+    session-secret: ${CMS_LIVE_CHAT_SESSION_SECRET:}
+    cookie-name: daeho_live_chat
+    history-days: 30
+    allowed-origins: ${CMS_LIVE_CHAT_ALLOWED_ORIGINS:https://daeho.works}

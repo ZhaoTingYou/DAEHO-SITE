@@ -3,6 +3,7 @@ package com.daeho.cms;
 import com.daeho.cms.config.CmsProperties;
 import com.daeho.cms.config.NotificationProperties;
 import com.daeho.cms.config.TelegramLiveChatProperties;
+import com.daeho.cms.config.WebLiveChatProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,7 +14,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableConfigurationProperties({
     CmsProperties.class,
     NotificationProperties.class,
-    TelegramLiveChatProperties.class
+    TelegramLiveChatProperties.class,
+    WebLiveChatProperties.class
 })
 public class CmsApplication {
   public static void main(String[] args) {
