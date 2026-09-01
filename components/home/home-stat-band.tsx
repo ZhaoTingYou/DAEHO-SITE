@@ -53,6 +53,7 @@ function HomeStatBandCell({
   const showLabel = !isKorean;
   const bodyWhitespaceClass = isKorean ? 'whitespace-pre-line' : 'whitespace-normal';
   const bodyLocaleClass = isKorean ? '' : 'home-stat-band__body--en';
+  const cellGapClass = isKorean ? 'gap-[28px]' : 'gap-[18px]';
 
   useEffect(() => {
     if (!isActive || !valueRef.current) {
@@ -92,7 +93,7 @@ function HomeStatBandCell({
 
   return (
     <div
-      className={`grid justify-items-center content-start gap-[18px] text-center xl:min-h-[184px] xl:px-6 ${
+      className={`grid justify-items-center content-start ${cellGapClass} text-center xl:min-h-[184px] xl:px-6 ${
         index > 0 ? 'xl:border-l xl:border-[#F4E6E1]/70' : ''
       }`}
     >
