@@ -32,7 +32,7 @@ test('public history accepts each positive durable ID once', () => {
       {id: 4, direction: 'visitor', body: 'private'}
     ],
     lastReadTeamMessageId: 2
-  }), 1);
+  }), 0);
 });
 
 test('hover changes only its visual flag and click opens the panel', () => {
@@ -124,6 +124,57 @@ test('durable team events deduplicate by positive ID and increment unread only w
   assert.strictEqual(visitor, duplicate);
 });
 
+test('durable system close stays visible and advances replay without becoming unread', () => {
+  const closed = reduceWebLiveChatState(createWebLiveChatState(), {
+    type: 'durable_event',
+    event: {
+      type: 'state', id: 43, state: 'closed', body: 'closed',
+      createdAt: '2026-09-01T00:01:00Z'
+    }
+  });
+
+  assert.equal(closed.conversationState, 'closed');
+  assert.deepEqual(closed.messages.map(({id, direction}) => ({id, direction})), [
+    {id: 43, direction: 'system'}
+  ]);
+  assert.equal(closed.highestDurableEventId, 43);
+  assert.equal(closed.highestTeamMessageId, 0);
+  assert.equal(closed.unread, 0);
+});
+
+test('refresh and mark-read use the highest team cursor across mixed public history', () => {
+  const session = {
+    available: true,
+    conversation: {state: 'active', lastReadTeamMessageId: 10},
+    messages: [
+      {id: 10, direction: 'team', body: 'read'},
+      {id: 11, direction: 'system', body: 'status'},
+      {id: 12, direction: 'team', body: 'unread'}
+    ],
+    unreadCount: 1
+  };
+  const loaded = reduceWebLiveChatState(createWebLiveChatState(), {
+    type: 'session_loaded', session
+  });
+  const read = reduceWebLiveChatState(loaded, {type: 'mark_read'});
+  const refreshed = reduceWebLiveChatState(read, {
+    type: 'session_loaded',
+    session: {
+      ...session,
+      conversation: {...session.conversation, lastReadTeamMessageId: 12},
+      unreadCount: 0
+    }
+  });
+
+  assert.equal(loaded.highestDurableEventId, 12);
+  assert.equal(loaded.highestTeamMessageId, 12);
+  assert.equal(loaded.unread, 1);
+  assert.equal(read.lastReadTeamMessageId, 12);
+  assert.equal(read.unread, 0);
+  assert.equal(refreshed.lastReadTeamMessageId, 12);
+  assert.equal(refreshed.unread, 0);
+});
+
 test('mark-read resets through a deterministic durable cursor and open events stay read', () => {
   const first = reduceWebLiveChatState(createWebLiveChatState(), {
     type: 'durable_event',
@@ -164,7 +215,7 @@ test('closed state is retained until an explicit new consultation resets private
         available: true,
         conversation: {state: 'closed', lastReadTeamMessageId: 7},
         messages: [{id: 7, direction: 'system', body: 'closed'}],
-        unreadCount: 1
+        unreadCount: 0
       }
     }
   );

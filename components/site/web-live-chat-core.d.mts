@@ -37,6 +37,7 @@ export type WebLiveChatState = {
   messages: PublicMessage[];
   unread: number;
   lastReadTeamMessageId: number;
+  highestTeamMessageId: number;
   highestDurableEventId: number;
   formDraft: {name: string; contact: string; content: string; consent: boolean};
   messageDraft: string;
@@ -55,7 +56,7 @@ export type WebLiveChatReducerEvent =
   | {type: 'session_loaded'; session: WebLiveChatSessionInput}
   | {type: 'conversation_closed'}
   | {type: 'new_consultation'}
-  | {type: 'mark_read'; messageId: number}
+  | {type: 'mark_read'; messageId?: number}
   | {type: 'durable_event'; event: WebLiveChatDurableEvent}
   | {type: 'sse_failure' | 'sse_connected'};
 

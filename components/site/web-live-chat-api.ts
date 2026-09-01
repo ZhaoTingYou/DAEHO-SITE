@@ -44,7 +44,7 @@ export type StartConversationInput = {
   consentVersion: string;
   companyWebsite?: string;
   formStartedAt: string | number;
-  clientMessageKey?: string;
+  clientMessageKey: string;
 };
 
 export class WebLiveChatApiError extends Error {
@@ -58,32 +58,34 @@ export class WebLiveChatApiError extends Error {
 }
 
 export async function getSession(): Promise<WebLiveChatSession> {
-  return request<WebLiveChatSession>(`${API_ROOT}/session`);
+  return request(`${API_ROOT}/session`, parseSession);
 }
 
 export async function startConversation(input: StartConversationInput): Promise<{
   conversation: WebLiveChatConversation;
 }> {
-  return request(`${API_ROOT}/conversations`, jsonWrite('POST', {
+  const clientMessageKey = requireClientMessageKey(input.clientMessageKey);
+  return request(`${API_ROOT}/conversations`, parseConversationResponse, jsonWrite('POST', {
     ...input,
     companyWebsite: input.companyWebsite ?? '',
-    clientMessageKey: input.clientMessageKey ?? createClientMessageKey()
+    clientMessageKey
   }));
 }
 
 export async function sendVisitorMessage(
   body: string,
-  clientMessageKey = createClientMessageKey()
+  clientMessageKey: string
 ): Promise<{messageId: number; status: string}> {
   return request(
     `${API_ROOT}/conversations/current/messages`,
-    jsonWrite('POST', {body, clientMessageKey})
+    parseSendResponse,
+    jsonWrite('POST', {body, clientMessageKey: requireClientMessageKey(clientMessageKey)})
   );
 }
 
 export async function getMessages(after = 0): Promise<{items: WebLiveChatMessage[]}> {
   const cursor = positiveInteger(after) ?? 0;
-  return request(`${API_ROOT}/conversations/current/messages?after=${cursor}`);
+  return request(`${API_ROOT}/conversations/current/messages?after=${cursor}`, parseMessagesResponse);
 }
 
 export async function markRead(messageId: number): Promise<{
@@ -95,6 +97,7 @@ export async function markRead(messageId: number): Promise<{
   }
   return request(
     `${API_ROOT}/conversations/current/read`,
+    parseConversationResponse,
     jsonWrite('POST', {messageId: cursor})
   );
 }
@@ -195,10 +198,21 @@ function durableEventId(
   return payloadId !== null && streamId === payloadId ? payloadId : null;
 }
 
-function createClientMessageKey(): string {
+export function createClientMessageKey(): string {
   const bytes = new Uint8Array(24);
   globalThis.crypto.getRandomValues(bytes);
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function requireClientMessageKey(value: unknown): string {
+  if (typeof value !== 'string') {
+    throw new TypeError('clientMessageKey must be a string containing 20 to 100 characters.');
+  }
+  const length = Array.from(value).length;
+  if (length < 20 || length > 100 || /[\u0000-\u001f\u007f]/.test(value)) {
+    throw new TypeError('clientMessageKey must be a string containing 20 to 100 characters.');
+  }
+  return value;
 }
 
 function jsonWrite(method: 'POST', value: unknown): RequestInit {
@@ -209,7 +223,11 @@ function jsonWrite(method: 'POST', value: unknown): RequestInit {
   };
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  parse: (value: unknown) => T,
+  init: RequestInit = {}
+): Promise<T> {
   if (!path.startsWith(`${API_ROOT}/`)) {
     throw new TypeError('Live-chat requests must use same-origin API paths.');
   }
@@ -218,7 +236,112 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok) {
     throw new WebLiveChatApiError(response.status, errorMessage(payload, response.status));
   }
-  return payload as T;
+  try {
+    return parse(payload);
+  } catch (error) {
+    if (error instanceof WebLiveChatApiError) {
+      throw error;
+    }
+    throw new WebLiveChatApiError(response.status, 'Live-chat response had an invalid shape.');
+  }
+}
+
+function parseSession(value: unknown): WebLiveChatSession {
+  const object = responseObject(value);
+  if (typeof object.available !== 'boolean'
+      || !Array.isArray(object.messages)
+      || !nonnegativeInteger(object.unreadCount)) {
+    throw new TypeError('Invalid session response.');
+  }
+  return {
+    available: object.available,
+    conversation: object.conversation === null
+      ? null
+      : parseConversation(object.conversation),
+    messages: projectPublicMessages(object.messages),
+    unreadCount: object.unreadCount
+  };
+}
+
+function parseConversationResponse(value: unknown): {conversation: WebLiveChatConversation} {
+  const object = responseObject(value);
+  return {conversation: parseConversation(object.conversation)};
+}
+
+function parseSendResponse(value: unknown): {messageId: number; status: string} {
+  const object = responseObject(value);
+  const messageId = positiveInteger(object.messageId);
+  if (messageId === null
+      || typeof object.status !== 'string'
+      || !object.status.trim()) {
+    throw new TypeError('Invalid send response.');
+  }
+  return {messageId, status: object.status};
+}
+
+function parseMessagesResponse(value: unknown): {items: WebLiveChatMessage[]} {
+  const object = responseObject(value);
+  if (!Array.isArray(object.items)) {
+    throw new TypeError('Invalid messages response.');
+  }
+  return {items: projectPublicMessages(object.items)};
+}
+
+function parseConversation(value: unknown): WebLiveChatConversation {
+  const object = responseObject(value);
+  if (!['opening', 'active', 'closed', 'needs_attention'].includes(String(object.state))
+      || !['ko', 'en'].includes(String(object.locale))
+      || typeof object.createdAt !== 'string'
+      || !(object.closedAt === null || typeof object.closedAt === 'string')
+      || !nonnegativeInteger(object.lastReadTeamMessageId)) {
+    throw new TypeError('Invalid conversation response.');
+  }
+  return {
+    state: object.state as WebLiveChatConversation['state'],
+    locale: object.locale as WebLiveChatConversation['locale'],
+    createdAt: object.createdAt,
+    closedAt: object.closedAt,
+    lastReadTeamMessageId: object.lastReadTeamMessageId
+  };
+}
+
+/** Malformed/private rows are dropped; an invalid response envelope is rejected. */
+function projectPublicMessages(items: unknown[]): WebLiveChatMessage[] {
+  const seen = new Set<number>();
+  const result: WebLiveChatMessage[] = [];
+  for (const value of items) {
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+      continue;
+    }
+    const object = value as Record<string, unknown>;
+    const id = positiveInteger(object.id);
+    if (id === null
+        || seen.has(id)
+        || (object.direction !== 'team' && object.direction !== 'system')
+        || typeof object.body !== 'string'
+        || typeof object.createdAt !== 'string') {
+      continue;
+    }
+    seen.add(id);
+    result.push({
+      id,
+      direction: object.direction,
+      body: object.body,
+      createdAt: object.createdAt
+    });
+  }
+  return result;
+}
+
+function responseObject(value: unknown): Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Expected an object response.');
+  }
+  return value as Record<string, unknown>;
+}
+
+function nonnegativeInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
 }
 
 async function readJson(response: Response): Promise<unknown> {

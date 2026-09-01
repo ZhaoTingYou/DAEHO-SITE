@@ -42,6 +42,7 @@ export function createWebLiveChatState() {
     messages: [],
     unread: 0,
     lastReadTeamMessageId: 0,
+    highestTeamMessageId: 0,
     highestDurableEventId: 0,
     formDraft: {name: '', contact: '', content: '', consent: false},
     messageDraft: '',
@@ -95,7 +96,12 @@ export function reduceWebLiveChatState(state, event) {
         conversationState,
         messages: [...state.messages, message].sort((left, right) => left.id - right.id),
         highestDurableEventId: Math.max(state.highestDurableEventId, id),
-        unread: state.panelOpen || id <= state.lastReadTeamMessageId
+        highestTeamMessageId: message.direction === 'team'
+          ? Math.max(state.highestTeamMessageId, id)
+          : state.highestTeamMessageId,
+        unread: message.direction !== 'team'
+          || state.panelOpen
+          || id <= state.lastReadTeamMessageId
           ? state.unread
           : state.unread + 1
       };
@@ -111,6 +117,12 @@ export function reduceWebLiveChatState(state, event) {
         messages,
         unread: unreadCount(session),
         lastReadTeamMessageId: durableId(session.conversation?.lastReadTeamMessageId),
+        highestTeamMessageId: messages.reduce(
+          (highest, message) => message.direction === 'team'
+            ? Math.max(highest, durableId(message.id))
+            : highest,
+          0
+        ),
         highestDurableEventId: messages.reduce(
           (highest, message) => Math.max(highest, durableId(message.id)), 0
         )
@@ -118,14 +130,20 @@ export function reduceWebLiveChatState(state, event) {
       return {...next, view: next.panelOpen ? openView(next) : 'closed_launcher'};
     }
     case 'mark_read': {
-      const messageId = durableId(event.messageId || state.highestDurableEventId);
+      const requested = durableId(event.messageId);
+      const messageId = requested
+          && state.messages.some((message) => message.id === requested && message.direction === 'team')
+        ? requested
+        : state.highestTeamMessageId;
       if (!messageId) {
         return state;
       }
       return {
         ...state,
         lastReadTeamMessageId: Math.max(state.lastReadTeamMessageId, messageId),
-        unread: state.messages.filter((message) => message.id > messageId).length
+        unread: state.messages.filter(
+          (message) => message.direction === 'team' && message.id > messageId
+        ).length
       };
     }
     case 'conversation_closed': {
@@ -181,7 +199,9 @@ export function unreadCount(session) {
   const cursor = durableId(
     session?.lastReadTeamMessageId ?? session?.conversation?.lastReadTeamMessageId
   );
-  return visibleTeamMessages(session?.messages).filter((message) => message.id > cursor).length;
+  return visibleTeamMessages(session?.messages).filter(
+    (message) => message.direction === 'team' && message.id > cursor
+  ).length;
 }
 
 export function shouldUsePolling(sseFailures) {
