@@ -28,6 +28,6 @@ test('Home stat labels reserve a shared row before aligned descriptions', () => 
 });
 
 test('Korean stats keep a larger value-to-description gap without changing English rhythm', () => {
-  assert.match(source, /const cellGapClass = isKorean \? 'gap-\[28px\]' : 'gap-\[18px\]'/);
+  assert.match(source, /const cellGapClass = isKorean \? 'gap-\[36px\]' : 'gap-\[18px\]'/);
   assert.match(source, /content-start \$\{cellGapClass\} text-center/);
 });

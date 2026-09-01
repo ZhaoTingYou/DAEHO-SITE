@@ -53,7 +53,7 @@ function HomeStatBandCell({
   const showLabel = !isKorean;
   const bodyWhitespaceClass = isKorean ? 'whitespace-pre-line' : 'whitespace-normal';
   const bodyLocaleClass = isKorean ? '' : 'home-stat-band__body--en';
-  const cellGapClass = isKorean ? 'gap-[28px]' : 'gap-[18px]';
+  const cellGapClass = isKorean ? 'gap-[36px]' : 'gap-[18px]';
 
   useEffect(() => {
     if (!isActive || !valueRef.current) {
