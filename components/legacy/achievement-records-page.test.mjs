@@ -41,6 +41,14 @@ test('achievement first records render up to four stable title-above-image cards
   assert.ok(!renderSource.includes('bg-[#62302F] p-8 text-[#F4E6E1]'), 'first records should not render the old red content block');
 });
 
+test('achievement first record titles use one consistently enlarged readable scale', () => {
+  assert.match(
+    cardSource,
+    /achievement-record-gallery__title[^\"]*text-\[18px\][^\"]*leading-\[1\.5\][^\"]*md:text-\[20px\][^\"]*md:leading-\[1\.5\]/,
+    'every title above a record image should use the approved larger mobile and desktop scale'
+  );
+});
+
 test('achievement first record CMS items expose the image-above title before the image', () => {
   const achievementPage = pageCatalog.find((page) => page.pageKey === 'heritage-achievement');
   const firstRecordsField = achievementPage?.fields.find((field) => field.path === 'copy.firstRecords');
