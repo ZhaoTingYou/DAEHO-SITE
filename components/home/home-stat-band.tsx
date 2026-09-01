@@ -21,7 +21,7 @@ export function HomeStatBand({items, locale}: HomeStatBandProps) {
   const inView = useInView(ref, {once: true, amount: 0.35});
 
   return (
-    <div ref={ref} className="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-[var(--mobile-page-gutter)] sm:grid-cols-2 md:px-container lg:grid-cols-5 lg:gap-0">
+    <div ref={ref} className="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-[var(--mobile-page-gutter)] sm:grid-cols-2 md:px-container xl:grid-cols-5 xl:gap-0">
       {items.map((item, index) => (
         <HomeStatBandCell
           key={`${item.value}-${item.label}`}
@@ -51,6 +51,8 @@ function HomeStatBandCell({
   const prefersReducedMotion = usePrefersReducedMotion();
   const isKorean = locale === 'ko';
   const showLabel = !isKorean;
+  const bodyWhitespaceClass = isKorean ? 'whitespace-pre-line' : 'whitespace-normal';
+  const bodyLocaleClass = isKorean ? '' : 'home-stat-band__body--en';
 
   useEffect(() => {
     if (!isActive || !valueRef.current) {
@@ -90,8 +92,8 @@ function HomeStatBandCell({
 
   return (
     <div
-      className={`grid justify-items-center gap-[18px] text-center lg:min-h-[184px] lg:px-6 ${
-        index > 0 ? 'lg:border-l lg:border-[#F4E6E1]/70' : ''
+      className={`grid justify-items-center content-start gap-[18px] text-center xl:min-h-[184px] xl:px-6 ${
+        index > 0 ? 'xl:border-l xl:border-[#F4E6E1]/70' : ''
       }`}
     >
       <p className="home-stat-band__value justify-self-center text-center text-[clamp(42px,4vw,68px)] leading-none tracking-normal">
@@ -103,7 +105,9 @@ function HomeStatBandCell({
           {item.label}
         </p>
       ) : null}
-      <p className="home-stat-band__body max-w-[220px] whitespace-pre-line text-[16px] leading-[1.55] sm:min-h-[75px]">
+      <p
+        className={`home-stat-band__body max-w-[220px] text-[16px] leading-[1.55] sm:min-h-[75px] xl:w-[190px] ${bodyWhitespaceClass} ${bodyLocaleClass}`}
+      >
         {item.body}
       </p>
     </div>

@@ -659,6 +659,11 @@ select {
   font-weight: 600;
 }
 
+.home-stat-band__body--en {
+  font-family: var(--font-body);
+  letter-spacing: -0.025em;
+}
+
 .home-brand-marquee {
   display: grid;
   gap: clamp(16px, 2vw, 26px);
