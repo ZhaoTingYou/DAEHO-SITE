@@ -18,19 +18,22 @@ public class TelegramLiveChatService {
   private final TelegramLiveChatGateway gateway;
   private final InquiryWorkflowService inquiries;
   private final TelegramLiveChatFlow flow;
+  private final WebLiveChatTelegramBridge webBridge;
 
   public TelegramLiveChatService(
       TelegramLiveChatRepository repository,
       TelegramLiveChatCredentialService credentials,
       TelegramLiveChatGateway gateway,
       InquiryWorkflowService inquiries,
-      TelegramLiveChatFlow flow
+      TelegramLiveChatFlow flow,
+      WebLiveChatTelegramBridge webBridge
   ) {
     this.repository = repository;
     this.credentials = credentials;
     this.gateway = gateway;
     this.inquiries = inquiries;
     this.flow = flow;
+    this.webBridge = webBridge;
   }
 
   public WebhookResult handleWebhook(Map<String, Object> update, String providedSecret) {
@@ -318,6 +321,12 @@ public class TelegramLiveChatService {
     }
     var generation = configuration.settings().configurationGeneration();
     var existing = repository.session(chatId, generation);
+    if (existing == null || "closed".equals(existing.state())) {
+      var webResult = webBridge.handlePrivateMessage(message, configuration);
+      if (webResult.isPresent()) {
+        return webResult.get();
+      }
+    }
     rejectWhileRecoveryPending(existing);
     var sourceMessageId = longValue(message.get("message_id"));
     if (existing != null
@@ -623,6 +632,10 @@ public class TelegramLiveChatService {
     if (!settings.targetChatId().equals(text(chat.get("id")))
         || booleanValue(from.get("is_bot"))) {
       return new WebhookResult("ignored");
+    }
+    var webResult = webBridge.handleTeamMessage(message, configuration);
+    if (webResult.isPresent()) {
+      return webResult.get();
     }
     var topicThreadId = longValue(message.get("message_thread_id"));
     var groupMessageId = longValue(message.get("message_id"));

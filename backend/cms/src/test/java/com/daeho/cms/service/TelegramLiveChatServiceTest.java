@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import com.daeho.cms.repository.TelegramLiveChatRepository;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +25,7 @@ class TelegramLiveChatServiceTest {
   private TelegramLiveChatCredentialService credentials;
   private TelegramLiveChatGateway gateway;
   private InquiryWorkflowService inquiries;
+  private WebLiveChatTelegramBridge webBridge;
   private TelegramLiveChatService service;
   private TelegramLiveChatRepository.Settings settings;
 
@@ -33,6 +35,7 @@ class TelegramLiveChatServiceTest {
     credentials = mock(TelegramLiveChatCredentialService.class);
     gateway = mock(TelegramLiveChatGateway.class);
     inquiries = mock(InquiryWorkflowService.class);
+    webBridge = mock(WebLiveChatTelegramBridge.class);
     settings = new TelegramLiveChatRepository.Settings(
         true,
         "ciphertext",
@@ -49,6 +52,8 @@ class TelegramLiveChatServiceTest {
     when(credentials.current()).thenReturn(configured);
     when(repository.claimUpdate(anyLong(), eq(1L), anyString()))
         .thenReturn(TelegramLiveChatRepository.UpdateClaim.CLAIMED);
+    when(webBridge.handleTeamMessage(anyMap(), any())).thenReturn(Optional.empty());
+    when(webBridge.handlePrivateMessage(anyMap(), any())).thenReturn(Optional.empty());
     when(gateway.createForumTopic("live-token", "-1001234567890", "문의 · 홍길동"))
         .thenReturn(777L);
     when(repository.reserveTopicCreation("session-1", 1L)).thenReturn(
@@ -70,7 +75,8 @@ class TelegramLiveChatServiceTest {
         credentials,
         gateway,
         inquiries,
-        new TelegramLiveChatFlow()
+        new TelegramLiveChatFlow(),
+        webBridge
     );
   }
 
@@ -341,6 +347,120 @@ class TelegramLiveChatServiceTest {
 
     assertEquals("team_reply_forwarded", result.status());
     verify(repository).recordTeamMessage(active.id(), 951L, 81L);
+  }
+
+  @Test
+  void mappedWebTopicIsRoutedBeforeLegacyThreadLookup() {
+    when(webBridge.handleTeamMessage(anyMap(), any())).thenReturn(Optional.of(
+        new TelegramLiveChatService.WebhookResult("web_team_reply_recorded")
+    ));
+
+    var result = service.handleWebhook(Map.of(
+        "update_id", 129L,
+        "message", Map.of(
+            "message_id", 970L,
+            "message_thread_id", 701L,
+            "chat", Map.of("id", -1001234567890L, "type", "supergroup"),
+            "from", Map.of("id", 999L, "is_bot", false),
+            "text", "확인했습니다."
+        )
+    ), "webhook-secret");
+
+    assertEquals("web_team_reply_recorded", result.status());
+    verify(repository, never()).sessionForThread(anyLong(), anyLong(), anyString());
+  }
+
+  @Test
+  void newPrivateBotUserIsRedirectedWithoutCreatingALegacySession() {
+    when(repository.session(12345L, 1L)).thenReturn(null);
+    when(webBridge.handlePrivateMessage(anyMap(), any())).thenReturn(Optional.of(
+        new TelegramLiveChatService.WebhookResult("web_private_redirect_sent")
+    ));
+
+    var result = service.handleWebhook(
+        privateTextUpdate(130L, 971L, "/start site_en"), "webhook-secret"
+    );
+
+    assertEquals("web_private_redirect_sent", result.status());
+    verify(repository, never()).saveSession(
+        anyLong(), anyLong(), anyString(), anyString(), anyString(), anyString(), anyLong()
+    );
+    verify(repository, never()).claimConversationOpen(
+        anyLong(), anyLong(), anyString(), anyString(), anyString(), anyString(), anyLong(), anyLong()
+    );
+  }
+
+  @Test
+  void userWithOnlyAClosedLegacySessionIsRedirectedWithoutReopeningIt() {
+    when(repository.session(12345L, 1L))
+        .thenReturn(session("closed", "홍길동", "01012345678", 900L));
+    when(webBridge.handlePrivateMessage(anyMap(), any())).thenReturn(Optional.of(
+        new TelegramLiveChatService.WebhookResult("web_private_redirect_sent")
+    ));
+
+    var result = service.handleWebhook(
+        privateTextUpdate(134L, 975L, "/start"), "webhook-secret"
+    );
+
+    assertEquals("web_private_redirect_sent", result.status());
+    verify(repository, never()).saveSession(
+        anyLong(), anyLong(), anyString(), anyString(), anyString(), anyString(), anyLong()
+    );
+    verify(repository, never()).claimConversationOpen(
+        anyLong(), anyLong(), anyString(), anyString(), anyString(), anyString(), anyLong(), anyLong()
+    );
+  }
+
+  @Test
+  void botAuthoredGroupMessageIsRejectedBeforeWebTopicRouting() {
+    var result = service.handleWebhook(Map.of(
+        "update_id", 131L,
+        "message", Map.of(
+            "message_id", 972L,
+            "message_thread_id", 701L,
+            "chat", Map.of("id", -1001234567890L, "type", "supergroup"),
+            "from", Map.of("id", 777L, "is_bot", true),
+            "text", "Bot reply"
+        )
+    ), "webhook-secret");
+
+    assertEquals("ignored", result.status());
+    verify(webBridge, never()).handleTeamMessage(anyMap(), any());
+  }
+
+  @Test
+  void wrongGroupMessageIsRejectedBeforeWebTopicRouting() {
+    var result = service.handleWebhook(Map.of(
+        "update_id", 132L,
+        "message", Map.of(
+            "message_id", 973L,
+            "message_thread_id", 701L,
+            "chat", Map.of("id", -1000000000001L, "type", "supergroup"),
+            "from", Map.of("id", 999L, "is_bot", false),
+            "text", "Wrong group"
+        )
+    ), "webhook-secret");
+
+    assertEquals("ignored", result.status());
+    verify(webBridge, never()).handleTeamMessage(anyMap(), any());
+  }
+
+  @Test
+  void editedMessageIsIgnoredBeforeAnyConversationRouter() {
+    var result = service.handleWebhook(Map.of(
+        "update_id", 133L,
+        "edited_message", Map.of(
+            "message_id", 974L,
+            "message_thread_id", 701L,
+            "chat", Map.of("id", -1001234567890L, "type", "supergroup"),
+            "from", Map.of("id", 999L, "is_bot", false),
+            "text", "Edited reply"
+        )
+    ), "webhook-secret");
+
+    assertEquals("ignored", result.status());
+    verify(webBridge, never()).handleTeamMessage(anyMap(), any());
+    verify(repository, never()).sessionForThread(anyLong(), anyLong(), anyString());
   }
 
   @Test
