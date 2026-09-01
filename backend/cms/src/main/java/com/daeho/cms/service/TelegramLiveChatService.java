@@ -290,6 +290,15 @@ public class TelegramLiveChatService {
     }
     var generation = configuration.settings().configurationGeneration();
     var session = repository.session(chatId, generation);
+    if (session == null || "closed".equals(session.state())) {
+      var locale = session == null ? callbackLocale(message) : session.locale();
+      var redirectMessage = Map.<String, Object>of(
+          "chat", chat,
+          "text", "en".equals(locale) ? "/start site_en" : "/start"
+      );
+      return webBridge.handlePrivateMessage(redirectMessage, configuration)
+          .orElse(new WebhookResult("ignored"));
+    }
     rejectWhileRecoveryPending(session);
     var accepted = "live_consent_yes".equals(text(callback.get("data")));
     var decision = flow.decide(toFlowSession(session), TelegramLiveChatFlow.Input.consent(accepted));
@@ -629,8 +638,16 @@ public class TelegramLiveChatService {
     var settings = configuration.settings();
     var chat = object(message.get("chat"));
     var from = object(message.get("from"));
-    if (!settings.targetChatId().equals(text(chat.get("id")))
-        || booleanValue(from.get("is_bot"))) {
+    if (!settings.targetChatId().equals(text(chat.get("id")))) {
+      return new WebhookResult("ignored");
+    }
+    var nativeTopicClose = message.containsKey("forum_topic_closed");
+    var explicitHumanSender = longValue(from.get("id")) > 0
+        && from.get("is_bot") instanceof Boolean isBot
+        && !isBot;
+    if (!nativeTopicClose && (!explicitHumanSender
+        || message.containsKey("sender_chat")
+        || booleanValue(message.get("is_automatic_forward")))) {
       return new WebhookResult("ignored");
     }
     var webResult = webBridge.handleTeamMessage(message, configuration);
@@ -964,6 +981,10 @@ public class TelegramLiveChatService {
 
   private String startLocale(String text) {
     return text.toLowerCase(java.util.Locale.ROOT).contains("site_en") ? "en" : "ko";
+  }
+
+  private String callbackLocale(Map<String, Object> message) {
+    return message("en", "consent").equals(text(message.get("text"))) ? "en" : "ko";
   }
 
   @SuppressWarnings("unchecked")

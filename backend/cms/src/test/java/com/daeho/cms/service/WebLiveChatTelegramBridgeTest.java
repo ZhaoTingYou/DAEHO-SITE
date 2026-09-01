@@ -2,11 +2,13 @@ package com.daeho.cms.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -95,6 +97,19 @@ class WebLiveChatTelegramBridgeTest {
   }
 
   @Test
+  void noteAddressedToThisBotWithArgumentsStaysInternal() {
+    when(repository.conversationForTopic(3L, "-1003425727647", 701L))
+        .thenReturn(active());
+
+    var result = bridge.handleTeamMessage(
+        teamUpdate("/note@DAEHO_SERVICE_BOT 견적 확인 필요", 908L), credentials()
+    );
+
+    assertEquals("web_internal_note_ignored", result.orElseThrow().status());
+    verify(repository, never()).recordTeamMessage(anyString(), anyLong(), anyString());
+  }
+
+  @Test
   void closeCommandPublishesTheAtomicDurableCloseAndClosesTheTopic() {
     var event = systemMessage(52L, "상담이 종료되었습니다.");
     when(repository.conversationForTopic(3L, "-1003425727647", 701L))
@@ -121,6 +136,43 @@ class WebLiveChatTelegramBridgeTest {
     var result = bridge.handleTeamMessage(
         teamUpdate("/close@DAEHO_SERVICE_BOT", 903L), credentials()
     );
+
+    assertEquals("web_conversation_closed", result.orElseThrow().status());
+    verify(broker).publish("conversation-1", event);
+  }
+
+  @Test
+  void closeCommandAllowsArgumentsAndReplayPublishesOnlyOnce() {
+    var event = systemMessage(52L, "상담이 종료되었습니다.");
+    when(repository.conversationForTopic(3L, "-1003425727647", 701L))
+        .thenReturn(active());
+    when(repository.close("conversation-1", "상담이 종료되었습니다."))
+        .thenReturn(new CloseResult(closed(), event), null);
+
+    var first = bridge.handleTeamMessage(
+        teamUpdate("/close@daeho_service_bot resolved", 909L), credentials()
+    );
+    var replay = bridge.handleTeamMessage(
+        teamUpdate("/close@daeho_service_bot resolved", 909L), credentials()
+    );
+
+    assertEquals("web_conversation_closed", first.orElseThrow().status());
+    assertEquals("web_conversation_already_closed", replay.orElseThrow().status());
+    verify(broker).publish("conversation-1", event);
+    verify(gateway).closeForumTopic("live-token", "-1003425727647", 701L);
+  }
+
+  @Test
+  void closeRemainsSuccessfulWhenTelegramTopicCloseFails() {
+    var event = systemMessage(52L, "상담이 종료되었습니다.");
+    when(repository.conversationForTopic(3L, "-1003425727647", 701L))
+        .thenReturn(active());
+    when(repository.close("conversation-1", "상담이 종료되었습니다."))
+        .thenReturn(new CloseResult(closed(), event));
+    doThrow(new TelegramLiveChatException("Topic close failed"))
+        .when(gateway).closeForumTopic("live-token", "-1003425727647", 701L);
+
+    var result = bridge.handleTeamMessage(teamUpdate("/close", 910L), credentials());
 
     assertEquals("web_conversation_closed", result.orElseThrow().status());
     verify(broker).publish("conversation-1", event);
@@ -198,6 +250,56 @@ class WebLiveChatTelegramBridgeTest {
     );
 
     verify(broker, never()).publish(anyString(), any());
+  }
+
+  @Test
+  void generalTopicAndUnmappedTopicFallThroughWithoutPersistence() {
+    var general = Map.<String, Object>of(
+        "message_id", 911L,
+        "chat", Map.of("id", -1003425727647L, "type", "supergroup"),
+        "from", Map.of("id", 999L, "is_bot", false),
+        "text", "General"
+    );
+    var unmapped = Map.<String, Object>of(
+        "message_id", 912L,
+        "message_thread_id", 702L,
+        "chat", Map.of("id", -1003425727647L, "type", "supergroup"),
+        "from", Map.of("id", 999L, "is_bot", false),
+        "text", "Unmapped"
+    );
+
+    assertTrue(bridge.handleTeamMessage(general, credentials()).isEmpty());
+    assertTrue(bridge.handleTeamMessage(unmapped, credentials()).isEmpty());
+    verify(repository, never()).recordTeamMessage(anyString(), anyLong(), anyString());
+  }
+
+  @Test
+  void mappedBlankInvalidAndIrrelevantServiceShapesAreIgnored() {
+    when(repository.conversationForTopic(3L, "-1003425727647", 701L))
+        .thenReturn(active());
+    var blank = teamUpdate("   ", 913L);
+    var invalidId = teamUpdate("Missing valid ID", 0L);
+    var irrelevantService = Map.<String, Object>of(
+        "message_id", 914L,
+        "message_thread_id", 701L,
+        "chat", Map.of("id", -1003425727647L, "type", "supergroup"),
+        "from", Map.of("id", 999L, "is_bot", false),
+        "forum_topic_reopened", Map.of()
+    );
+
+    assertEquals(
+        "web_message_ignored",
+        bridge.handleTeamMessage(blank, credentials()).orElseThrow().status()
+    );
+    assertEquals(
+        "web_message_ignored",
+        bridge.handleTeamMessage(invalidId, credentials()).orElseThrow().status()
+    );
+    assertEquals(
+        "web_message_ignored",
+        bridge.handleTeamMessage(irrelevantService, credentials()).orElseThrow().status()
+    );
+    verify(repository, never()).recordTeamMessage(anyString(), anyLong(), anyString());
   }
 
   private Map<String, Object> teamUpdate(String text, long messageId) {

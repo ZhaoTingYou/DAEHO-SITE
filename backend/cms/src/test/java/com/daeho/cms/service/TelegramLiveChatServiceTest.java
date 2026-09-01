@@ -429,6 +429,83 @@ class TelegramLiveChatServiceTest {
   }
 
   @Test
+  void senderLessGroupTextIsRejectedBeforeWebTopicRouting() {
+    when(webBridge.handleTeamMessage(anyMap(), any())).thenReturn(Optional.of(
+        new TelegramLiveChatService.WebhookResult("web_team_reply_recorded")
+    ));
+
+    var result = service.handleWebhook(Map.of(
+        "update_id", 138L,
+        "message", Map.of(
+            "message_id", 976L,
+            "message_thread_id", 701L,
+            "chat", Map.of("id", -1001234567890L, "type", "supergroup"),
+            "text", "Sender missing"
+        )
+    ), "webhook-secret");
+
+    assertEquals("ignored", result.status());
+    verify(webBridge, never()).handleTeamMessage(anyMap(), any());
+    verify(repository, never()).sessionForThread(anyLong(), anyLong(), anyString());
+  }
+
+  @Test
+  void senderChatGroupTextIsRejectedBeforeWebTopicRouting() {
+    var result = service.handleWebhook(Map.of(
+        "update_id", 139L,
+        "message", Map.of(
+            "message_id", 977L,
+            "message_thread_id", 701L,
+            "chat", Map.of("id", -1001234567890L, "type", "supergroup"),
+            "from", Map.of("id", 999L, "is_bot", false),
+            "sender_chat", Map.of("id", -1001234567890L),
+            "text", "On behalf of group"
+        )
+    ), "webhook-secret");
+
+    assertEquals("ignored", result.status());
+    verify(webBridge, never()).handleTeamMessage(anyMap(), any());
+  }
+
+  @Test
+  void automaticForwardGroupTextIsRejectedBeforeWebTopicRouting() {
+    var result = service.handleWebhook(Map.of(
+        "update_id", 140L,
+        "message", Map.of(
+            "message_id", 978L,
+            "message_thread_id", 701L,
+            "chat", Map.of("id", -1001234567890L, "type", "supergroup"),
+            "from", Map.of("id", 999L, "is_bot", false),
+            "is_automatic_forward", true,
+            "text", "Forwarded channel post"
+        )
+    ), "webhook-secret");
+
+    assertEquals("ignored", result.status());
+    verify(webBridge, never()).handleTeamMessage(anyMap(), any());
+  }
+
+  @Test
+  void nativeTopicCloseWithoutFromStillReachesWebTopicBridge() {
+    when(webBridge.handleTeamMessage(anyMap(), any())).thenReturn(Optional.of(
+        new TelegramLiveChatService.WebhookResult("web_conversation_closed")
+    ));
+
+    var result = service.handleWebhook(Map.of(
+        "update_id", 141L,
+        "message", Map.of(
+            "message_id", 979L,
+            "message_thread_id", 701L,
+            "chat", Map.of("id", -1001234567890L, "type", "supergroup"),
+            "forum_topic_closed", Map.of()
+        )
+    ), "webhook-secret");
+
+    assertEquals("web_conversation_closed", result.status());
+    verify(webBridge).handleTeamMessage(anyMap(), any());
+  }
+
+  @Test
   void wrongGroupMessageIsRejectedBeforeWebTopicRouting() {
     var result = service.handleWebhook(Map.of(
         "update_id", 132L,
@@ -584,6 +661,94 @@ class TelegramLiveChatServiceTest {
     assertEquals("name_requested", result.status());
     verify(gateway).sendMessage(
         eq("live-token"), eq("12345"), eq(""), eq("성함을 입력해 주세요."), anyMap(), any()
+    );
+    verify(webBridge, never()).handlePrivateMessage(anyMap(), any());
+  }
+
+  @Test
+  void staleEnglishConsentCallbackWithoutCurrentSessionRedirectsToWebsite() {
+    when(repository.session(12345L, 1L)).thenReturn(null);
+    var redirectMessage = Map.<String, Object>of(
+        "chat", Map.of("id", 12345L, "type", "private"),
+        "text", "/start site_en"
+    );
+    when(webBridge.handlePrivateMessage(eq(redirectMessage), any())).thenReturn(Optional.of(
+        new TelegramLiveChatService.WebhookResult("web_private_redirect_sent")
+    ));
+
+    var result = service.handleWebhook(Map.of(
+        "update_id", 135L,
+        "callback_query", Map.of(
+            "id", "callback-stale-en",
+            "data", "live_consent_yes",
+            "from", Map.of("id", 12345L),
+            "message", Map.of(
+                "text", "Before the live consultation, we need your name and contact details. "
+                    + "They will be used only to manage your inquiry. Do you agree?",
+                "chat", Map.of("id", 12345L, "type", "private")
+            )
+        )
+    ), "webhook-secret");
+
+    assertEquals("web_private_redirect_sent", result.status());
+    verify(gateway).answerCallback("live-token", "callback-stale-en");
+    verify(webBridge).handlePrivateMessage(eq(redirectMessage), any());
+    verify(repository, never()).saveSession(
+        anyLong(), anyLong(), anyString(), anyString(), anyString(), anyString(), anyLong()
+    );
+  }
+
+  @Test
+  void staleConsentCallbackForClosedSessionRedirectsWithoutRecoveryRejection() {
+    when(repository.session(12345L, 1L))
+        .thenReturn(session("closed", "홍길동", "01012345678", 900L));
+    var redirectMessage = Map.<String, Object>of(
+        "chat", Map.of("id", 12345L, "type", "private"),
+        "text", "/start"
+    );
+    when(webBridge.handlePrivateMessage(eq(redirectMessage), any())).thenReturn(Optional.of(
+        new TelegramLiveChatService.WebhookResult("web_private_redirect_sent")
+    ));
+
+    var result = service.handleWebhook(Map.of(
+        "update_id", 136L,
+        "callback_query", Map.of(
+            "id", "callback-stale-closed",
+            "data", "live_consent_no",
+            "from", Map.of("id", 12345L),
+            "message", Map.of("chat", Map.of("id", 12345L, "type", "private"))
+        )
+    ), "webhook-secret");
+
+    assertEquals("web_private_redirect_sent", result.status());
+    verify(gateway).answerCallback("live-token", "callback-stale-closed");
+    verify(repository, never()).saveSession(
+        anyLong(), anyLong(), anyString(), anyString(), anyString(), anyString(), anyLong()
+    );
+  }
+
+  @Test
+  void staleConsentCallbackForActiveLegacySessionKeepsLegacyRestartBehavior() {
+    var active = session("active", "홍길동", "01012345678", 900L);
+    when(repository.session(12345L, 1L)).thenReturn(active);
+    when(repository.saveSession(
+        12345L, 12345L, "active", "ko", "홍길동", "01012345678", 1L
+    )).thenReturn(active);
+
+    var result = service.handleWebhook(Map.of(
+        "update_id", 137L,
+        "callback_query", Map.of(
+            "id", "callback-active",
+            "data", "live_consent_yes",
+            "from", Map.of("id", 12345L),
+            "message", Map.of("chat", Map.of("id", 12345L, "type", "private"))
+        )
+    ), "webhook-secret");
+
+    assertEquals("restart_required", result.status());
+    verify(webBridge, never()).handlePrivateMessage(anyMap(), any());
+    verify(repository).saveSession(
+        12345L, 12345L, "active", "ko", "홍길동", "01012345678", 1L
     );
   }
 
