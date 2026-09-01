@@ -44,6 +44,34 @@ test('invalid top-level session JSON is rejected instead of cast', async () => {
   }
 });
 
+test('conversation wrappers reject array, object, number, and null enum values', async () => {
+  const originalFetch = globalThis.fetch;
+  const startInput = {
+    locale: 'ko', name: '김대호', contact: '010-0000-0000', content: '문의',
+    consent: true, consentVersion: 'v1', formStartedAt: 1,
+    clientMessageKey: '12345678901234567890'
+  };
+  const sessionResponse = (conversation) => ({
+    available: true, conversation, messages: [], unreadCount: 0
+  });
+  const cases = [
+    [() => api.getSession(), sessionResponse({...validConversation(), state: ['active']})],
+    [() => api.getSession(), sessionResponse({...validConversation(), locale: {value: 'ko'}})],
+    [() => api.startConversation(startInput), {conversation: {...validConversation(), state: 1}}],
+    [() => api.startConversation(startInput), {conversation: {...validConversation(), locale: ['ko']}}],
+    [() => api.markRead(1), {conversation: {...validConversation(), state: null}}],
+    [() => api.markRead(1), {conversation: {...validConversation(), locale: null}}]
+  ];
+  try {
+    for (const [run, payload] of cases) {
+      globalThis.fetch = async () => jsonResponse(payload);
+      await assert.rejects(run(), (error) => error instanceof api.WebLiveChatApiError);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('session parsing also removes visitor bodies from embedded history', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => jsonResponse({

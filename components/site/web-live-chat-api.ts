@@ -1,6 +1,8 @@
 const API_ROOT = '/api/live-chat';
 const MAX_RESPONSE_BYTES = 256 * 1024;
 const MAX_EVENT_BYTES = 64 * 1024;
+const CONVERSATION_STATES = new Set(['opening', 'active', 'closed', 'needs_attention']);
+const LOCALES = new Set(['ko', 'en']);
 
 export type WebLiveChatConversation = {
   state: 'opening' | 'active' | 'closed' | 'needs_attention';
@@ -289,20 +291,30 @@ function parseMessagesResponse(value: unknown): {items: WebLiveChatMessage[]} {
 
 function parseConversation(value: unknown): WebLiveChatConversation {
   const object = responseObject(value);
-  if (!['opening', 'active', 'closed', 'needs_attention'].includes(String(object.state))
-      || !['ko', 'en'].includes(String(object.locale))
+  const state = object.state;
+  const locale = object.locale;
+  if (!isConversationState(state)
+      || !isLocale(locale)
       || typeof object.createdAt !== 'string'
       || !(object.closedAt === null || typeof object.closedAt === 'string')
       || !nonnegativeInteger(object.lastReadTeamMessageId)) {
     throw new TypeError('Invalid conversation response.');
   }
   return {
-    state: object.state as WebLiveChatConversation['state'],
-    locale: object.locale as WebLiveChatConversation['locale'],
+    state,
+    locale,
     createdAt: object.createdAt,
     closedAt: object.closedAt,
     lastReadTeamMessageId: object.lastReadTeamMessageId
   };
+}
+
+function isConversationState(value: unknown): value is WebLiveChatConversation['state'] {
+  return typeof value === 'string' && CONVERSATION_STATES.has(value);
+}
+
+function isLocale(value: unknown): value is WebLiveChatConversation['locale'] {
+  return typeof value === 'string' && LOCALES.has(value);
 }
 
 /** Malformed/private rows are dropped; an invalid response envelope is rejected. */
