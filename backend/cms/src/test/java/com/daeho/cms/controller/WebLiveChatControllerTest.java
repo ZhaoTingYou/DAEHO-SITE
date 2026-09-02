@@ -123,6 +123,14 @@ class WebLiveChatControllerTest {
   }
 
   @Test
+  void rejectsRequestsWithoutOriginOrRefererBeforeResolvingAVisitor() throws Exception {
+    mvc.perform(get("/api/live-chat/session"))
+        .andExpect(status().isForbidden());
+
+    verify(repository, never()).createVisitor(anyString(), any(Duration.class));
+  }
+
+  @Test
   void honeypotIsRejectedWith422BeforeConversationWork() throws Exception {
     mvc.perform(post("/api/live-chat/conversations")
             .header("Origin", "https://daeho.works")

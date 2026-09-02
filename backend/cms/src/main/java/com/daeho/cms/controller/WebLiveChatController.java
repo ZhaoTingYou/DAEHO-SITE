@@ -347,12 +347,13 @@ public class WebLiveChatController {
   private String normalizedOrigin(String value) {
     try {
       var uri = URI.create(text(value)).normalize();
-      if (!List.of("http", "https").contains(uri.getScheme()) || uri.getHost() == null
+      var scheme = uri.getScheme();
+      if (scheme == null || !List.of("http", "https").contains(scheme) || uri.getHost() == null
           || uri.getUserInfo() != null || uri.getQuery() != null || uri.getFragment() != null
           || (uri.getPath() != null && !uri.getPath().isBlank() && !"/".equals(uri.getPath()))) {
         return "";
       }
-      return uri.getScheme() + "://" + uri.getAuthority();
+      return scheme + "://" + uri.getAuthority();
     } catch (IllegalArgumentException error) {
       return "";
     }
