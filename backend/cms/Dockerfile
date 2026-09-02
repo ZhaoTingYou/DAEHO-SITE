@@ -11,7 +11,10 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 ENV JAVA_OPTS=""
 
-RUN mkdir -p /data/uploads
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl \
+  && rm -rf /var/lib/apt/lists/* \
+  && mkdir -p /data/uploads
 COPY --from=build /workspace/target/daeho-cms-*.jar /app/app.jar
 
 EXPOSE 8080

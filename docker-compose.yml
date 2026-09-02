@@ -59,6 +59,12 @@ services:
       CMS_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://daeho.works}
     volumes:
       - ./public/images:/data/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/api/cms/account-features >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
@@ -133,8 +139,10 @@ services:
     volumes:
       - ./public/images:/app/public/images:ro
     depends_on:
-      - cms-api
-      - customer-api
+      cms-api:
+        condition: service_healthy
+      customer-api:
+        condition: service_healthy
 
   nginx:
     image: nginx:1.27-alpine

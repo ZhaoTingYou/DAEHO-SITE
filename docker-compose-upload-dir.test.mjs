@@ -4,6 +4,7 @@ import test from 'node:test';
 
 const compose = readFileSync(new URL('./docker-compose.yml', import.meta.url), 'utf8');
 const nextDockerfile = readFileSync(new URL('./Dockerfile.next', import.meta.url), 'utf8');
+const cmsDockerfile = readFileSync(new URL('./backend/cms/Dockerfile', import.meta.url), 'utf8');
 const envExample = readFileSync(new URL('./.env.example', import.meta.url), 'utf8');
 
 function serviceBlock(name) {
@@ -36,4 +37,14 @@ test('embedded live chat secrets are runtime-only CMS configuration', () => {
   assert.doesNotMatch(nextDockerfile, /CMS_LIVE_CHAT_(?:SESSION_SECRET|ALLOWED_ORIGINS)/);
   assert.match(envExample, /CMS_LIVE_CHAT_SESSION_SECRET=replace-with-a-long-random-live-chat-session-secret/);
   assert.match(envExample, /CMS_LIVE_CHAT_ALLOWED_ORIGINS=https:\/\/daeho\.works/);
+});
+
+test('the frontend waits for both backend services to become healthy', () => {
+  const cmsService = serviceBlock('cms-api');
+  const nextService = serviceBlock('next');
+
+  assert.match(cmsDockerfile, /apt-get install -y --no-install-recommends curl/);
+  assert.match(cmsService, /healthcheck:[\s\S]*curl -fsS http:\/\/localhost:8080\/api\/cms\/account-features/);
+  assert.match(nextService, /cms-api:\s*\n\s+condition: service_healthy/);
+  assert.match(nextService, /customer-api:\s*\n\s+condition: service_healthy/);
 });
