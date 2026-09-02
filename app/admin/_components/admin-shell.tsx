@@ -67,7 +67,7 @@ export function AdminShell({
           </form>
         </div>
       </aside>
-      <div className="lg:pl-64">
+      <div className="min-w-0 max-w-full lg:pl-64">
         <header className="sticky top-0 z-20 border-b border-[#d9dee7] bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-4">
             <Link href={homeHref} className="font-heading text-xl font-semibold tracking-[0.16em]">DAEHO</Link>
@@ -92,7 +92,7 @@ export function AdminShell({
             <AdminLanguageSwitcher activeLocale={adminLocale} label={t('shell.interfaceLanguage')} />
           </div>
         </header>
-        <main className="mx-auto max-w-[1280px] px-4 py-6 md:px-6 lg:px-8 lg:py-8">
+        <main className="mx-auto w-full min-w-0 max-w-[1280px] px-4 py-6 md:px-6 lg:px-8 lg:py-8">
           {children}
         </main>
       </div>

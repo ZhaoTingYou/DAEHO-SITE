@@ -130,10 +130,10 @@ export function NotificationSettingsEditor({
   };
 
   return (
-    <div className="grid gap-6">
-      <section className="rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
+    <div className="grid min-w-0 max-w-full gap-6">
+      <section className="min-w-0 max-w-full rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{copy.health}</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-3">
           <HealthItem label={copy.worker} ready={currentHealth.workerEnabled} copy={copy} />
           <HealthItem label={copy.emailConnection} ready={currentHealth.emailConfigured} copy={copy} />
           <HealthItem label={copy.kakaoConnection} ready={currentHealth.kakaoConfigured} copy={copy} />
@@ -148,10 +148,10 @@ export function NotificationSettingsEditor({
 
       <TestNotification templates={templates} copy={copy} onSuccess={refreshHealth} />
 
-      <section className="rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
+      <section className="min-w-0 max-w-full rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{copy.settings}</h2>
         <form
-          className="mt-5 grid gap-5"
+          className="mt-5 grid min-w-0 gap-5"
           onSubmit={async (event) => {
             event.preventDefault();
             setSettingsState('saving');
@@ -201,10 +201,10 @@ export function NotificationSettingsEditor({
               maxLength={254}
               value={settings.internalEmail}
               onChange={(event) => setSettings((current) => ({...current, internalEmail: event.target.value}))}
-              className="min-h-11 rounded-md border border-[#cbd3df] px-3"
+              className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] px-3"
             />
           </label>
-          <div className="grid gap-4 rounded-md border border-[#d9dee7] bg-[#f8fafc] p-4 md:grid-cols-3">
+          <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-4 rounded-md border border-[#d9dee7] bg-[#f8fafc] p-4">
             <div className="grid content-start gap-1.5 text-sm font-semibold text-[#344054]">
               <label htmlFor="telegram-bot-token" className="flex flex-wrap items-center gap-2">
                 {copy.telegramBotToken}
@@ -229,7 +229,7 @@ export function NotificationSettingsEditor({
                   clearTelegramBotToken: false,
                   telegramEnabled: event.target.value ? false : current.telegramEnabled
                 }))}
-                className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3 disabled:bg-[#eef2f6]"
+                className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3 disabled:bg-[#eef2f6]"
               />
               <span className="font-normal leading-5 text-[#647084]">{copy.telegramBotTokenHint}</span>
               <label className="mt-1 flex items-center gap-2 font-normal text-[#475467]">
@@ -261,7 +261,7 @@ export function NotificationSettingsEditor({
                     : false
                 }))}
                 placeholder="-1001234567890"
-                className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
+                className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3"
               />
               <span className="font-normal leading-5 text-[#647084]">{copy.telegramChatIdHint}</span>
             </label>
@@ -280,14 +280,14 @@ export function NotificationSettingsEditor({
                     : false
                 }))}
                 placeholder="402"
-                className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
+                className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3"
               />
               <span className="font-normal leading-5 text-[#647084]">
                 {copy.telegramMessageThreadIdHint}
               </span>
             </label>
           </div>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,13rem),1fr))] gap-3">
             <Toggle
               label={copy.internalEmailEnabled}
               checked={settings.internalEmailEnabled}
@@ -319,7 +319,7 @@ export function NotificationSettingsEditor({
         </form>
       </section>
 
-      <section className="rounded-lg border border-[#d9dee7] bg-white shadow-sm">
+      <section className="min-w-0 max-w-full rounded-lg border border-[#d9dee7] bg-white shadow-sm">
         <div className="border-b border-[#e4e7ec] p-5">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{copy.templates}</h2>
           <p className="mt-2 text-sm leading-6 text-[#647084]">{copy.kakaoApprovalHint}</p>
@@ -379,10 +379,10 @@ function TestNotification({
   const [message, setMessage] = useState('');
 
   return (
-    <section className="rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
+    <section className="min-w-0 max-w-full rounded-lg border border-[#d9dee7] bg-white p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{copy.testSend}</h2>
       <form
-        className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5 xl:items-end"
+        className="mt-4 grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,11rem),1fr))] items-end gap-4"
         onSubmit={async (event) => {
           event.preventDefault();
           if (!selected) return;
@@ -420,7 +420,7 @@ function TestNotification({
           <select
             value={templateKey}
             onChange={(event) => setTemplateKey(event.target.value)}
-            className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
+            className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3"
           >
             {active.map((template) => (
               <option key={template.templateKey} value={template.templateKey}>
@@ -441,7 +441,7 @@ function TestNotification({
               value={recipient}
               onChange={(event) => setRecipient(event.target.value)}
               placeholder={selected?.channel === 'kakao' ? '01012345678' : 'name@example.com'}
-              className="min-h-11 rounded-md border border-[#cbd3df] px-3"
+              className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] px-3"
             />
           </label>
         )}
@@ -455,7 +455,7 @@ function TestNotification({
                 value={customerName}
                 onChange={(event) => setCustomerName(event.target.value)}
                 placeholder="홍길동"
-                className="min-h-11 rounded-md border border-[#cbd3df] px-3"
+                className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] px-3"
               />
             </label>
             <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
@@ -466,7 +466,7 @@ function TestNotification({
                 value={inquiryNumber}
                 onChange={(event) => setInquiryNumber(event.target.value)}
                 placeholder="INQ-001"
-                className="min-h-11 rounded-md border border-[#cbd3df] px-3"
+                className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] px-3"
               />
             </label>
           </>
@@ -506,7 +506,7 @@ function TemplateEditor({
 
   return (
     <form
-      className="grid gap-4 p-5"
+      className="grid min-w-0 gap-4 p-5"
       onSubmit={(event) => {
         event.preventDefault();
         void onSave(draft);
@@ -529,7 +529,7 @@ function TemplateEditor({
             maxLength={300}
             value={draft.subject}
             onChange={(event) => setDraft((current) => ({...current, subject: event.target.value}))}
-            className="min-h-10 rounded-md border border-[#cbd3df] px-3"
+            className="min-h-10 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] px-3"
           />
         </label>
       ) : null}
@@ -542,7 +542,7 @@ function TemplateEditor({
             maxLength={4000}
             value={draft.body}
             onChange={(event) => setDraft((current) => ({...current, body: event.target.value}))}
-            className="rounded-md border border-[#cbd3df] p-3 font-mono text-xs leading-6"
+            className="w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] p-3 font-mono text-xs leading-6"
           />
         </label>
       ) : null}
@@ -554,7 +554,7 @@ function TemplateEditor({
             maxLength={160}
             value={draft.providerTemplateCode}
             onChange={(event) => setDraft((current) => ({...current, providerTemplateCode: event.target.value}))}
-            className="min-h-10 rounded-md border border-[#cbd3df] px-3 font-mono"
+            className="min-h-10 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] px-3 font-mono"
           />
         </label>
       ) : null}
@@ -573,7 +573,7 @@ function TemplateEditor({
                 ...current,
                 approvalStatus: event.target.value as Template['approvalStatus']
               }))}
-              className="min-h-10 rounded-md border border-[#cbd3df] bg-white px-3"
+              className="min-h-10 w-full min-w-0 max-w-full rounded-md border border-[#cbd3df] bg-white px-3"
             >
               <option value="draft">draft</option>
               <option value="pending">pending</option>
@@ -609,8 +609,8 @@ function Toggle({label, checked, onChange}: {label: string; checked: boolean; on
 
 function HealthItem({label, ready, copy}: {label: string; ready: boolean; copy: Copy}) {
   return (
-    <div className="rounded-md border border-[#e4e7ec] p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#647084]">{label}</p>
+    <div className="min-w-0 rounded-md border border-[#e4e7ec] p-4">
+      <p className="break-words text-xs font-semibold uppercase tracking-[0.12em] text-[#647084]">{label}</p>
       <p className={`mt-2 text-sm font-semibold ${ready ? 'text-[#027a48]' : 'text-[#b54708]'}`}>
         {ready ? copy.configured : copy.notConfigured}
       </p>
