@@ -341,6 +341,25 @@ class WebLiveChatRepositoryTest {
     assertFalse(sql.contains("token_hash"));
   }
 
+  @Test
+  void recentCmsListingAlwaysIncludesActionableRowsAndLimitsOnlyClosedHistory() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(summaryRow(0L, 0L));
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.recentConversations(50);
+
+    var call = jdbc.calls.get(0);
+    var sql = call.sql();
+    assertTrue(sql.contains("WHERE actionable.state <> 'closed'"));
+    assertTrue(sql.contains("WHERE closed.state = 'closed'"));
+    assertTrue(sql.contains("closed.configuration_generation"));
+    assertTrue(sql.contains("ORDER BY closed.updated_at DESC, closed.id DESC"));
+    assertTrue(sql.contains("LIMIT ?"));
+    assertTrue(sql.contains("ORDER BY c.updated_at DESC, c.id DESC"));
+    assertEquals(List.of(50), Arrays.asList(call.args()));
+  }
+
   private static WebLiveChatRepository.Conversation conversation() {
     return new WebLiveChatRepository.Conversation(
         "conversation-1", "visitor-1", 3L, "-1003425727647", "", "ko", "opening",

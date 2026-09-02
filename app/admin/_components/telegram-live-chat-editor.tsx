@@ -355,7 +355,7 @@ export function TelegramLiveChatEditor({
                       ? copy.retryDeliveryConfirm
                       : undefined;
                   return (
-                  <tr key={session.id}>
+                  <tr key={`${session.source}:${session.id}`}>
                     <td className="px-4 py-3 font-semibold text-[#101827]">{session.customerName || '-'}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full border border-[#cbd3df] bg-[#f8fafc] px-2.5 py-1 text-xs font-semibold text-[#344054]">

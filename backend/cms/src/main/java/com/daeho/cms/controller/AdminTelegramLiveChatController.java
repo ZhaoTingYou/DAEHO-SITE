@@ -7,6 +7,9 @@ import com.daeho.cms.service.TelegramLiveChatCredentialService;
 import com.daeho.cms.service.TelegramLiveChatService;
 import com.daeho.cms.service.WebLiveChatService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/admin/live-chat")
 public class AdminTelegramLiveChatController {
+  private static final int CLOSED_HISTORY_LIMIT = 50;
   private final AdminAuth auth;
   private final TelegramLiveChatCredentialService credentials;
   private final TelegramLiveChatService liveChat;
@@ -56,15 +60,49 @@ public class AdminTelegramLiveChatController {
   }
 
   private List<AdminSession> recentSessions() {
-    var sessions = new java.util.ArrayList<AdminSession>();
+    var rows = new java.util.ArrayList<AdminRow>();
     webRepository.recentConversations(50).stream()
-        .map(this::websiteSession)
-        .forEach(sessions::add);
+        .map(this::websiteRow)
+        .forEach(rows::add);
     repository.recentSessions(50).stream()
-        .map(this::legacySession)
-        .forEach(sessions::add);
-    sessions.sort(Comparator.comparing(AdminSession::updatedAt).reversed());
-    return sessions.stream().limit(50).toList();
+        .map(this::legacyRow)
+        .forEach(rows::add);
+    rows.sort(Comparator.comparing(AdminRow::updatedAt).reversed()
+        .thenComparing(row -> row.session().source())
+        .thenComparing(row -> row.session().id()));
+    var sessions = new java.util.ArrayList<AdminSession>();
+    var closedCount = 0;
+    for (var row : rows) {
+      if (row.actionable()) {
+        sessions.add(row.session());
+      } else if (closedCount < CLOSED_HISTORY_LIMIT) {
+        sessions.add(row.session());
+        closedCount += 1;
+      }
+    }
+    return List.copyOf(sessions);
+  }
+
+  private AdminRow websiteRow(WebLiveChatRepository.CmsConversationSummary summary) {
+    var conversation = summary.conversation();
+    return new AdminRow(
+        websiteSession(summary), conversation.updatedAt(), !"closed".equals(conversation.state())
+    );
+  }
+
+  private AdminRow legacyRow(TelegramLiveChatRepository.Session session) {
+    return new AdminRow(
+        legacySession(session), timestamp(session.updatedAt()),
+        !"closed".equals(session.state()) || session.attentionCode().startsWith("topic_close_")
+    );
+  }
+
+  private Instant timestamp(String value) {
+    try {
+      return Instant.parse(value);
+    } catch (DateTimeParseException ignored) {
+      return OffsetDateTime.parse(value).toInstant();
+    }
   }
 
   private AdminSession websiteSession(WebLiveChatRepository.CmsConversationSummary summary) {
@@ -298,4 +336,6 @@ public class AdminTelegramLiveChatController {
       WebLiveChatRepository.Conversation website,
       TelegramLiveChatRepository.Session legacy
   ) {}
+
+  private record AdminRow(AdminSession session, Instant updatedAt, boolean actionable) {}
 }

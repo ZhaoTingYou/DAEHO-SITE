@@ -473,16 +473,36 @@ public class WebLiveChatRepository {
 
   public List<CmsConversationSummary> recentConversations(int limit) {
     return jdbc.query("""
+        WITH current_generation AS (
+          SELECT configuration_generation
+          FROM cms_telegram_live_chat_settings
+          WHERE id = 'default'
+        ), visible_conversations AS (
+          SELECT actionable.*
+          FROM cms_web_live_chat_conversations actionable
+          WHERE actionable.state <> 'closed'
+          UNION ALL
+          SELECT recent_closed.*
+          FROM (
+            SELECT closed.*
+            FROM cms_web_live_chat_conversations closed
+            WHERE closed.state = 'closed'
+              AND closed.configuration_generation = (
+                SELECT configuration_generation FROM current_generation
+              )
+            ORDER BY closed.updated_at DESC, closed.id DESC
+            LIMIT ?
+          ) recent_closed
+        )
         SELECT c.*,
           (SELECT COUNT(*) FROM cms_web_live_chat_messages m
            WHERE m.conversation_id = c.id) AS message_count,
           (SELECT COUNT(*) FROM cms_web_live_chat_messages m
            WHERE m.conversation_id = c.id AND m.direction = 'team'
              AND m.id > COALESCE(c.last_read_team_message_id, 0)) AS unread_count
-        FROM cms_web_live_chat_conversations c
+        FROM visible_conversations c
         ORDER BY c.updated_at DESC, c.id DESC
-        LIMIT ?
-        """, this::mapCmsConversationSummary, limit);
+        """, this::mapCmsConversationSummary, Math.max(1, Math.min(limit, 100)));
   }
 
   private Conversation transition(String sql, Object... args) {

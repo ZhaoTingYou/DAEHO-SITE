@@ -19,6 +19,8 @@ import com.daeho.cms.service.TelegramLiveChatService;
 import com.daeho.cms.service.WebLiveChatService;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,6 +91,56 @@ class AdminLiveChatControllerTest {
         .andExpect(jsonPath("$.sessions[1].unreadCount").value(0))
         .andExpect(jsonPath("$.settings.botTokenCiphertext").doesNotExist())
         .andExpect(jsonPath("$.settings.webhookSecretHash").doesNotExist());
+  }
+
+  @Test
+  void adminListKeepsEveryActionableSessionAndBoundsOnlyDeterministicClosedHistory()
+      throws Exception {
+    var website = new ArrayList<WebLiveChatRepository.CmsConversationSummary>();
+    var legacy = new ArrayList<TelegramLiveChatRepository.Session>();
+    var tiedNewest = NOW.plusSeconds(1_000);
+    website.add(summary(websiteConversation("web-closed-a", "closed", "", 701L, tiedNewest)));
+    legacy.add(legacySession(
+        "legacy-closed-a", "closed", "",
+        tiedNewest.atOffset(ZoneOffset.ofHours(9)).toString()
+    ));
+    for (var index = 0; index < 25; index += 1) {
+      var updatedAt = NOW.plusSeconds(900L - index);
+      website.add(summary(websiteConversation(
+          "web-closed-%02d".formatted(index), "closed", "", 701L, updatedAt
+      )));
+      legacy.add(legacySession(
+          "legacy-closed-%02d".formatted(index), "closed", "",
+          updatedAt.atOffset(ZoneOffset.UTC).toString()
+      ));
+    }
+    var actionableTime = NOW.minusSeconds(100);
+    website.add(summary(websiteConversation(
+        "web-active", "active", "", 701L, actionableTime
+    )));
+    website.add(summary(websiteConversation(
+        "web-attention", "needs_attention", "registration_delivery_failed", 701L,
+        actionableTime
+    )));
+    legacy.add(legacySession(
+        "legacy-active", "active", "", actionableTime.atOffset(ZoneOffset.ofHours(9)).toString()
+    ));
+    legacy.add(legacySession(
+        "legacy-attention", "needs_attention", "registration_delivery_uncertain",
+        actionableTime.atOffset(ZoneOffset.UTC).toString()
+    ));
+    when(websiteRepository.recentConversations(50)).thenReturn(website);
+    when(legacyRepository.recentSessions(50)).thenReturn(legacy);
+
+    mvc.perform(get("/api/admin/live-chat").header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.sessions.length()").value(54))
+        .andExpect(jsonPath("$.sessions[0].id").value("legacy-closed-a"))
+        .andExpect(jsonPath("$.sessions[1].id").value("web-closed-a"))
+        .andExpect(jsonPath("$.sessions[50].id").value("legacy-active"))
+        .andExpect(jsonPath("$.sessions[51].id").value("legacy-attention"))
+        .andExpect(jsonPath("$.sessions[52].id").value("web-active"))
+        .andExpect(jsonPath("$.sessions[53].id").value("web-attention"));
   }
 
   @Test
@@ -263,10 +315,25 @@ class AdminLiveChatControllerTest {
       String state,
       String attentionCode
   ) {
+    return legacySession(id, state, attentionCode, NOW.plusSeconds(1).toString());
+  }
+
+  private TelegramLiveChatRepository.Session legacySession(
+      String id,
+      String state,
+      String attentionCode,
+      String updatedAt
+  ) {
     return new TelegramLiveChatRepository.Session(
         id, 101L, 202L, "inquiry-legacy", "ko", state, "Legacy Customer",
         "legacy@example.com", "Legacy inquiry", attentionCode, 0L, 0L, "", 702L,
-        703L, NOW.toString(), NOW.plusSeconds(1).toString()
+        703L, NOW.toString(), updatedAt
     );
+  }
+
+  private WebLiveChatRepository.CmsConversationSummary summary(
+      WebLiveChatRepository.Conversation conversation
+  ) {
+    return new WebLiveChatRepository.CmsConversationSummary(conversation, 0L, 0L);
   }
 }

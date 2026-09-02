@@ -964,13 +964,13 @@ public class TelegramLiveChatRepository {
               AND closed.configuration_generation = (
                 SELECT configuration_generation FROM current_generation
               )
-            ORDER BY closed.updated_at DESC
+            ORDER BY closed.updated_at DESC, closed.id DESC
             LIMIT ?
           ) recent_closed
         )
         SELECT *
         FROM visible_sessions
-        ORDER BY updated_at DESC
+        ORDER BY updated_at DESC, id DESC
         """, this::mapSession, Math.max(1, Math.min(limit, 100)));
   }
 
