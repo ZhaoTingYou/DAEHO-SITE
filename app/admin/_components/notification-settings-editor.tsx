@@ -324,7 +324,7 @@ export function NotificationSettingsEditor({
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#647084]">{copy.templates}</h2>
           <p className="mt-2 text-sm leading-6 text-[#647084]">{copy.kakaoApprovalHint}</p>
         </div>
-        <div className="divide-y divide-[#e4e7ec]">
+        <div className="min-w-0 max-w-full divide-y divide-[#e4e7ec]">
           {templates.map((template) => (
             <TemplateEditor
               key={template.id}
@@ -506,16 +506,16 @@ function TemplateEditor({
 
   return (
     <form
-      className="grid min-w-0 gap-4 p-5"
+      className="grid min-w-0 max-w-full gap-4 whitespace-normal p-5"
       onSubmit={(event) => {
         event.preventDefault();
         void onSave(draft);
       }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 className="font-semibold text-[#101827]">{template.templateKey}</h3>
-          <p className="mt-1 text-xs text-[#647084]">
+        <div className="min-w-0 max-w-full">
+          <h3 className="break-words font-semibold text-[#101827] [overflow-wrap:anywhere]">{template.templateKey}</h3>
+          <p className="mt-1 break-words text-xs text-[#647084] [overflow-wrap:anywhere]">
             {template.channel} · {template.audience} · {template.locale.toUpperCase()} · {copy.version} {template.version}
           </p>
         </div>
@@ -559,7 +559,7 @@ function TemplateEditor({
         </label>
       ) : null}
       {template.channel !== 'kakao' ? (
-        <p className="text-xs leading-5 text-[#647084]">
+        <p className="min-w-0 max-w-full whitespace-normal break-words text-xs leading-5 text-[#647084] [overflow-wrap:anywhere]">
           {template.channel === 'telegram' ? copy.telegramTemplateVariables : copy.templateVariables}
         </p>
       ) : null}

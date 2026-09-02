@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {existsSync} from 'node:fs';
-import {mkdtemp, rm} from 'node:fs/promises';
+import {mkdtemp, rm, writeFile} from 'node:fs/promises';
 import http from 'node:http';
 import net from 'node:net';
 import os from 'node:os';
@@ -185,6 +185,21 @@ test('notification settings fit a desktop viewport without horizontal scrolling'
   }
   await cdp.send('Page.enable');
   await cdp.send('Page.navigate', {url: `${baseUrl}/admin/notifications`});
+  await waitForLayout(cdp);
+  const safariLineBreaking = await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      const hint = Array.from(document.querySelectorAll('main p')).find((element) =>
+        element.textContent?.includes('{{selected_head}}')
+      );
+      if (!hint) return false;
+      const editor = hint.closest('form');
+      if (!editor?.parentElement) return false;
+      editor.parentElement.style.whiteSpace = 'nowrap';
+      return true;
+    })()`,
+    returnByValue: true
+  });
+  assert.equal(safariLineBreaking.result?.value, true, 'The production template-variable hint must render.');
 
   for (const width of [640, 768, 900, 1023, 1024, 1050, 1100, 1200, 1279, 1280, 1366, 1440]) {
     await cdp.send('Emulation.setDeviceMetricsOverride', {
@@ -204,6 +219,16 @@ test('notification settings fit a desktop viewport without horizontal scrolling'
         `Notification health cards do not reflow for the available desktop content width: ${JSON.stringify(dimensions)}`
       );
     }
+  }
+
+  if (process.env.NOTIFICATION_LAYOUT_SCREENSHOT) {
+    await cdp.send('Runtime.evaluate', {
+      expression: `Array.from(document.querySelectorAll('main p')).find((element) =>
+        element.textContent?.includes('{{selected_head}}')
+      )?.scrollIntoView({block: 'center'})`
+    });
+    const screenshot = await cdp.send('Page.captureScreenshot', {format: 'png'});
+    await writeFile(process.env.NOTIFICATION_LAYOUT_SCREENSHOT, screenshot.data, 'base64');
   }
 });
 
