@@ -2,6 +2,7 @@ import {NextResponse, type NextRequest} from 'next/server';
 
 import {isSameOriginMutation} from '@/lib/customer/request-security';
 import {
+  accountsEnabled,
   currentCustomerProfile,
   customerApiRequest,
   customerServiceHeaders,
@@ -23,6 +24,9 @@ export async function POST(request: NextRequest) {
 }
 
 async function handle(method: string, body?: string) {
+  if (!(await accountsEnabled())) {
+    return NextResponse.json({error: 'Customer accounts are not enabled'}, {status: 404});
+  }
   const session = await refreshedCustomerSession();
   if (!session) {
     return NextResponse.json({error: 'Authentication required'}, {status: 401});

@@ -2,6 +2,7 @@ import {NextResponse, type NextRequest} from 'next/server';
 
 import {isSameOriginMutation} from '@/lib/customer/request-security';
 import {
+  accountsEnabled,
   clearCustomerSessionCookie,
   customerApiRequest,
   refreshedCustomerSession
@@ -12,6 +13,9 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   if (!isSameOriginMutation(request)) {
     return NextResponse.json({error: 'Invalid request origin'}, {status: 403});
+  }
+  if (!(await accountsEnabled())) {
+    return NextResponse.json({error: 'Customer accounts are not enabled'}, {status: 404});
   }
   const session = await refreshedCustomerSession();
   if (!session) {

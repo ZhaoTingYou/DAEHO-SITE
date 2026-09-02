@@ -1,14 +1,18 @@
 import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
+import {connection} from 'next/server';
 
 import {MyDaehoDashboard} from '@/components/customer/my-daeho-dashboard';
+import {accountsEnabled} from '@/lib/customer/server';
 import {isLocale} from '@/lib/locales';
 
 export const metadata: Metadata = {title: 'MY DAEHO', robots: {index: false, follow: false}};
+export const dynamic = 'force-dynamic';
 
 export default async function MyDaehoPage({params}: {params: Promise<{locale: string}>}) {
+  await connection();
   const {locale} = await params;
-  if (!isLocale(locale)) notFound();
+  if (!isLocale(locale) || !(await accountsEnabled())) notFound();
   return (
     <main className="min-h-screen bg-bg px-container pb-28 pt-36 text-primary md:pt-44">
       <div className="mx-auto max-w-5xl">

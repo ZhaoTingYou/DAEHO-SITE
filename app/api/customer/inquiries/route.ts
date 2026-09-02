@@ -1,6 +1,7 @@
 import {NextResponse} from 'next/server';
 
 import {
+  accountsEnabled,
   currentCustomerProfile,
   customerServiceHeaders,
   refreshedCustomerSession,
@@ -11,6 +12,9 @@ import type {CustomerInquiry} from '@/lib/customer/types';
 export const runtime = 'nodejs';
 
 export async function GET() {
+  if (!(await accountsEnabled())) {
+    return NextResponse.json({error: 'Customer accounts are not enabled'}, {status: 404});
+  }
   const session = await refreshedCustomerSession();
   if (!session) {
     return NextResponse.json({error: 'Authentication required'}, {status: 401});

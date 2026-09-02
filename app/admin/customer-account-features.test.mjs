@@ -41,3 +41,26 @@ test('public login, registration, SMS and inquiry enforcement use CMS runtime se
   assert.match(read('app/[locale]/(site)/login/page.tsx'), /await connection\(\)/);
   assert.match(read('app/[locale]/(site)/register/page.tsx'), /await connection\(\)/);
 });
+
+test('turning customer accounts off blocks retained sessions from every MY DAEHO surface', () => {
+  const protectedPaths = [
+    'app/[locale]/(site)/my-daeho/page.tsx',
+    'app/api/customer/me/route.ts',
+    'app/api/customer/inquiries/route.ts',
+    'app/api/customer/inquiries/[id]/route.ts',
+    'app/api/customer/legacy-claims/route.ts',
+    'app/api/customer/logout-all/route.ts'
+  ];
+
+  for (const relativePath of protectedPaths) {
+    assert.match(read(relativePath), /accountsEnabled/);
+  }
+  assert.doesNotMatch(read('app/api/auth/logout/route.ts'), /accountsEnabled/);
+});
+
+test('runtime feature lookup times out quickly before applying its safe fallback', () => {
+  const repositories = read('lib/cms/repositories.ts');
+
+  assert.match(repositories, /timeoutMs:\s*1_500/);
+  assert.match(repositories, /AbortSignal\.timeout\(options\.timeoutMs\)/);
+});

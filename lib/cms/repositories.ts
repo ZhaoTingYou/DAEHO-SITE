@@ -399,6 +399,7 @@ type CmsFetchOptions = {
   cacheTags?: string[];
   headers?: HeadersInit;
   method?: string;
+  timeoutMs?: number;
 };
 
 export class CmsBackendError extends Error {
@@ -426,7 +427,7 @@ export async function getPublicAccountFeatureSettings(): Promise<CmsAccountFeatu
   try {
     const settings = await cmsFetch<Pick<CmsAccountFeatureSettings,
       'customerAccountsEnabled' | 'inquiryAccountRequired'
-    >>('/api/cms/account-features');
+    >>('/api/cms/account-features', {timeoutMs: 1_500});
     return {...disabledAccountFeatureSettings(), ...settings};
   } catch (error) {
     console.error('[cms] Account feature settings are unavailable; customer accounts stay disabled.', error);
@@ -1009,6 +1010,7 @@ async function cmsFetch<T>(
         ? undefined
         : JSON.stringify(options.body),
     cache: options.cacheTags ? 'force-cache' : 'no-store',
+    signal: options.timeoutMs ? AbortSignal.timeout(options.timeoutMs) : undefined,
     ...(options.cacheTags
       ? {
           next: {
