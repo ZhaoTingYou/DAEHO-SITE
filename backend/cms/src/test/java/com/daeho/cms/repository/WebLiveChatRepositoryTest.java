@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Proxy;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -72,6 +73,22 @@ class WebLiveChatRepositoryTest {
     assertFalse(selectProjection(jdbc.calls.get(0).sql()).contains("token_hash"));
     assertFalse(returningProjection(jdbc.calls.get(1).sql()).contains("token_hash"));
     assertFalse(returningProjection(jdbc.calls.get(2).sql()).contains("token_hash"));
+  }
+
+  @Test
+  void visitorMapperReadsPostgresTimestampsThroughTheTypedJdbcContract() {
+    var jdbc = new RecordingJdbcTemplate();
+    var row = new java.util.LinkedHashMap<>(visitorRow());
+    row.replaceAll((column, value) -> value instanceof OffsetDateTime offset
+        ? Timestamp.from(offset.toInstant())
+        : value);
+    jdbc.queryResult = call -> List.of(row);
+    var repository = new WebLiveChatRepository(jdbc);
+
+    var visitor = repository.createVisitor("secret-hash", Duration.ofDays(30));
+
+    assertEquals(NOW.plus(Duration.ofDays(30)), visitor.expiresAt());
+    assertEquals(NOW, visitor.createdAt());
   }
 
   @Test
@@ -454,7 +471,12 @@ class WebLiveChatRepositoryTest {
             if (!row.containsKey(column)) {
               throw new AssertionError("Unexpected SQL column: " + column);
             }
-            return row.get(column);
+            var value = row.get(column);
+            if ("getObject".equals(method.getName()) && args.length == 2
+                && args[1] == OffsetDateTime.class && value instanceof Timestamp timestamp) {
+              return timestamp.toInstant().atOffset(ZoneOffset.UTC);
+            }
+            return value;
           }
           if ("wasNull".equals(method.getName())) {
             return false;

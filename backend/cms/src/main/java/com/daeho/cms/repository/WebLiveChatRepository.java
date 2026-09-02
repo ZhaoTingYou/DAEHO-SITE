@@ -576,14 +576,8 @@ public class WebLiveChatRepository {
   }
 
   private static Instant nullableInstant(ResultSet rs, String column) throws SQLException {
-    var value = rs.getObject(column);
-    if (value instanceof OffsetDateTime offset) {
-      return offset.toInstant();
-    }
-    if (value instanceof Instant instant) {
-      return instant;
-    }
-    return value == null ? null : OffsetDateTime.parse(value.toString()).toInstant();
+    var value = rs.getObject(column, OffsetDateTime.class);
+    return value == null ? null : value.toInstant();
   }
 
   private static OffsetDateTime databaseTime(Instant value) {

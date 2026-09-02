@@ -3,6 +3,7 @@ package com.daeho.cms.service;
 import com.daeho.cms.repository.WebLiveChatRepository;
 import java.time.Clock;
 import java.time.Duration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ public class WebLiveChatCleanupWorker {
   private final TelegramLiveChatGateway gateway;
   private final Clock clock;
 
+  @Autowired
   public WebLiveChatCleanupWorker(
       WebLiveChatRepository repository,
       WebLiveChatEventBroker broker,

@@ -18,11 +18,28 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 class WebLiveChatCleanupWorkerTest {
   private static final Instant NOW = Instant.parse("2026-09-01T08:00:00Z");
+
+  @Test
+  void springContextSelectsTheProductionDependencyConstructor() {
+    try (var context = new AnnotationConfigApplicationContext()) {
+      context.registerBean(WebLiveChatRepository.class, () -> mock(WebLiveChatRepository.class));
+      context.registerBean(WebLiveChatEventBroker.class, () -> mock(WebLiveChatEventBroker.class));
+      context.registerBean(
+          TelegramLiveChatCredentialService.class,
+          () -> mock(TelegramLiveChatCredentialService.class)
+      );
+      context.registerBean(TelegramLiveChatGateway.class, () -> mock(TelegramLiveChatGateway.class));
+      context.registerBean(WebLiveChatCleanupWorker.class);
+
+      assertDoesNotThrow(context::refresh);
+    }
+  }
 
   @Test
   void cleanupPersistsAndPublishesDurableClosedEventsInABoundedBatch() {
