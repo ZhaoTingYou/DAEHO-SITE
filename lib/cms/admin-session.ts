@@ -29,6 +29,10 @@ export async function getAdminIdentity(): Promise<AdminIdentity | null> {
   return getIdentityFromCookie(adminSessionCookie);
 }
 
+export async function getAdminApiIdentity(): Promise<AdminIdentity | null> {
+  return getIdentityFromCookie(adminApiSessionCookie);
+}
+
 export async function assertAdminSession(): Promise<AdminIdentity> {
   const identity = await getAdminIdentity();
   if (!identity) {
@@ -53,11 +57,11 @@ export async function hasAdminSession() {
 }
 
 export async function hasAdminApiSession() {
-  return Boolean(await getIdentityFromCookie(adminApiSessionCookie));
+  return Boolean(await getAdminApiIdentity());
 }
 
 export async function hasAdminApiCapability(capability: AdminCapability) {
-  const identity = await getIdentityFromCookie(adminApiSessionCookie);
+  const identity = await getAdminApiIdentity();
   return Boolean(
     identity
       && (!identity.mustChangePassword || capability === 'account:self')

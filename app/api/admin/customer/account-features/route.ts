@@ -2,7 +2,7 @@ import {NextResponse, type NextRequest} from 'next/server';
 import {z} from 'zod';
 
 import {requireAdminCapability} from '@/lib/cms/auth';
-import {getAdminIdentity} from '@/lib/cms/admin-session';
+import {getAdminApiIdentity} from '@/lib/cms/admin-session';
 import {
   cmsBackendRequest,
   CmsBackendError,
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest) {
   const parsed = await parseJsonBody(request, settingsSchema);
   if (!parsed.success) return validationError(parsed.error);
 
-  const identity = await getAdminIdentity();
+  const identity = await getAdminApiIdentity();
   const actor = identity?.id || request.headers.get('x-admin-user-id') || '';
   if (!actor) {
     return NextResponse.json({error: 'Missing CMS actor.'}, {status: 400});

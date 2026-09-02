@@ -10,6 +10,7 @@ const read = (relativePath) => readFileSync(path.join(repoRoot, relativePath), '
 test('customer management exposes audited CMS controls for both rollout stages', () => {
   const editor = read('app/admin/_components/customer-operations.tsx');
   const route = read('app/api/admin/customer/account-features/route.ts');
+  const adminSession = read('lib/cms/admin-session.ts');
 
   assert.match(editor, /customerAccountsEnabled/);
   assert.match(editor, /inquiryAccountRequired/);
@@ -17,6 +18,9 @@ test('customer management exposes audited CMS controls for both rollout stages',
   assert.match(editor, /method:\s*'PUT'/);
   assert.match(route, /users:manage/);
   assert.match(route, /x-admin-user-id/);
+  assert.match(adminSession, /export async function getAdminApiIdentity/);
+  assert.match(route, /getAdminApiIdentity\(\)/);
+  assert.doesNotMatch(route, /getAdminIdentity\(\)/);
 });
 
 test('public login, registration, SMS and inquiry enforcement use CMS runtime settings', () => {
