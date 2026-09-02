@@ -124,7 +124,7 @@ test('Korean header styles strengthen all copy and the desktop dropdown has a fu
   );
   assert.match(
     headerSource,
-    /site-header-language-label[\s\S]*?aria-current=\{locale === item\.locale \? 'page' : undefined\}/
+    /site-header-language-link[\s\S]*?aria-current=\{locale === item\.locale \? 'page' : undefined\}/
   );
   assert.match(
     globalStyles,
