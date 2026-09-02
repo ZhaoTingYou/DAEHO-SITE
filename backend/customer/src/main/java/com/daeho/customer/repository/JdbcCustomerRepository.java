@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,7 +40,8 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         session.id(), session.method(), session.identifier(), session.legalName(), session.phone(),
         session.ciFingerprint(), session.adultVerified(), session.locale(), session.termsVersion(),
         session.privacyVersion(), session.marketingConsent(), session.status(), session.grantHash(),
-        session.grantExpiresAt(), session.expiresAt(), session.consumedAt()
+        databaseTimestamp(session.grantExpiresAt()), databaseTimestamp(session.expiresAt()),
+        databaseTimestamp(session.consumedAt())
     );
     return session;
   }
@@ -79,7 +81,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     return jdbc.update("""
         UPDATE verification_sessions SET consumed_at = ?, updated_at = now()
         WHERE id = ? AND grant_hash = ? AND consumed_at IS NULL AND grant_expires_at > now()
-        """, consumedAt, id, grantHash) == 1;
+        """, databaseTimestamp(consumedAt), id, grantHash) == 1;
   }
 
   @Override
@@ -97,7 +99,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     var count = jdbc.queryForObject("""
         SELECT COUNT(*) FROM verification_sessions
         WHERE method = 'sms_declaration' AND phone = ? AND created_at >= ?
-        """, Long.class, phone, since);
+        """, Long.class, phone, databaseTimestamp(since));
     return count == null ? 0 : count;
   }
 
@@ -106,7 +108,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     var count = jdbc.queryForObject("""
         SELECT COUNT(*) FROM verification_sessions
         WHERE method = 'sms_declaration' AND ip_fingerprint = ? AND created_at >= ?
-        """, Long.class, ipFingerprint, since);
+        """, Long.class, ipFingerprint, databaseTimestamp(since));
     return count == null ? 0 : count;
   }
 
@@ -130,8 +132,9 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
           ?, 'solapi', '', ?, ?, ?)
         """, challenge.id(), challenge.phone(), challenge.phone(), challenge.locale(),
         challenge.termsVersion(), challenge.privacyVersion(), challenge.marketingConsent(),
-        challenge.challengeHash(), challenge.ipFingerprint(), challenge.idempotencyHash(), challenge.expiresAt(),
-        challenge.createdAt(), challenge.createdAt());
+        challenge.challengeHash(), challenge.ipFingerprint(), challenge.idempotencyHash(),
+        databaseTimestamp(challenge.expiresAt()), databaseTimestamp(challenge.createdAt()),
+        databaseTimestamp(challenge.createdAt()));
   }
 
   @Override
@@ -139,7 +142,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     var updated = jdbc.update("""
         UPDATE verification_sessions SET provider_message_id = ?, sent_at = ?, updated_at = ?
         WHERE id = ? AND method = 'sms_declaration' AND status = 'pending'
-        """, providerMessageId, sentAt, sentAt, id);
+        """, providerMessageId, databaseTimestamp(sentAt), databaseTimestamp(sentAt), id);
     if (updated != 1) {
       throw new IllegalStateException("SMS challenge could not be marked as sent");
     }
@@ -150,7 +153,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     jdbc.update("""
         UPDATE verification_sessions SET status = 'failed', challenge_hash = '', updated_at = ?
         WHERE id = ? AND method = 'sms_declaration' AND status = 'pending'
-        """, failedAt, id);
+        """, databaseTimestamp(failedAt), id);
   }
 
   @Override
@@ -175,7 +178,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     jdbc.update("""
         UPDATE verification_sessions SET attempt_count = attempt_count + 1, updated_at = ?
         WHERE id = ? AND method = 'sms_declaration' AND status = 'pending'
-        """, attemptedAt, id);
+        """, databaseTimestamp(attemptedAt), id);
   }
 
   @Override
@@ -184,7 +187,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         UPDATE verification_sessions SET status = 'verified', challenge_hash = '', updated_at = ?
         WHERE id = ? AND method = 'sms_declaration' AND status = 'pending'
           AND sent_at IS NOT NULL AND attempt_count < 5 AND expires_at > ?
-        """, verifiedAt, id, verifiedAt) == 1;
+        """, databaseTimestamp(verifiedAt), id, databaseTimestamp(verifiedAt)) == 1;
   }
 
   @Override
@@ -328,7 +331,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     var customerIds = jdbc.queryForList("""
         SELECT customer_id FROM customer_profiles
         WHERE status = 'deletion_pending' AND deletion_requested_at < ?
-        """, UUID.class, cutoff);
+        """, UUID.class, databaseTimestamp(cutoff));
     for (var customerId : customerIds) {
       jdbc.update("DELETE FROM identity_verifications WHERE customer_id = ?", customerId);
       jdbc.update("DELETE FROM consent_receipts WHERE customer_id = ?", customerId);
@@ -408,6 +411,10 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
   private Instant instant(ResultSet rs, String column) throws SQLException {
     var value = rs.getObject(column, OffsetDateTime.class);
     return value == null ? null : value.toInstant();
+  }
+
+  private OffsetDateTime databaseTimestamp(Instant value) {
+    return value == null ? null : value.atOffset(ZoneOffset.UTC);
   }
 
   private String mask(String value) {
