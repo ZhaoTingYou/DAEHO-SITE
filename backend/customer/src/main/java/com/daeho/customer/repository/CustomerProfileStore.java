@@ -13,7 +13,9 @@ public interface CustomerProfileStore {
 
   CustomerProfile findByCiFingerprint(String ciFingerprint);
 
-  CustomerProfile createFromVerification(String subject, VerificationSession verification);
+  CustomerProfile createFromVerification(String subject, VerificationSession verification, String loginName);
+
+  CustomerProfile relinkVerifiedPhone(UUID customerId, String subject, String loginName);
 
   CustomerProfile update(String subject, String displayName, String email, String organization, String team, String locale);
 

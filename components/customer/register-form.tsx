@@ -3,6 +3,15 @@
 import Link from 'next/link';
 import {useState, type FormEvent} from 'react';
 
+import {
+  normalizeLoginName,
+  passwordPolicyIssues,
+  passwordPolicyMessage,
+  registrationErrorMessage,
+  usernamePolicyIssues,
+  usernamePolicyMessage
+} from '@/lib/customer/auth-ui-core.mjs';
+
 type RegisterFormProps = {locale: 'ko' | 'en'};
 
 export function RegisterForm({locale}: RegisterFormProps) {
@@ -10,6 +19,8 @@ export function RegisterForm({locale}: RegisterFormProps) {
   const [verificationId, setVerificationId] = useState('');
   const [grant, setGrant] = useState('');
   const [phone, setPhone] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [smsRequestKey, setSmsRequestKey] = useState(() => crypto.randomUUID());
   const [status, setStatus] = useState<'idle' | 'working' | 'code' | 'verified' | 'done' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -68,9 +79,39 @@ export function RegisterForm({locale}: RegisterFormProps) {
       {grant ? (
         <form className="space-y-5 border-t border-hairline pt-8" onSubmit={createAccount}>
           <p className="text-sm leading-6 text-primary">
-            {ko ? '휴대폰이 확인되었습니다. 로그인에 사용할 비밀번호를 설정하세요.' : 'Phone verified. Set the password you will use to sign in.'}
+            {ko ? '휴대폰이 확인되었습니다. 로그인에 사용할 아이디와 비밀번호를 설정하세요.' : 'Phone verified. Choose the username and password you will use to sign in.'}
           </p>
-          <CustomerField label={ko ? '비밀번호' : 'Password'} name="password" type="password" minLength={8} autoComplete="new-password" />
+          <CustomerField
+            label={ko ? '아이디' : 'Username'}
+            name="username"
+            value={username}
+            onChange={(value) => setUsername(value.toLowerCase())}
+            minLength={4}
+            maxLength={24}
+            pattern="[a-z][a-z0-9._-]{3,23}"
+            autoComplete="username"
+            aria-describedby="registration-username-policy"
+          />
+          <p id="registration-username-policy" className="text-xs leading-5 text-subtext">
+            {usernamePolicyMessage(locale)} {ko ? '아이디는 계정 생성 후 변경할 수 없습니다.' : 'Your username cannot be changed after account creation.'}
+          </p>
+          <CustomerField
+            label={ko ? '비밀번호' : 'Password'}
+            name="password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            minLength={8}
+            autoComplete="new-password"
+            aria-describedby="registration-password-policy"
+          />
+          <ul id="registration-password-policy" className="grid gap-1 text-xs leading-5 text-subtext sm:grid-cols-2">
+            {(['minLength', 'uppercase', 'lowercase', 'number', 'symbol'] as const).map((rule) => (
+              <li key={rule} className={password && !passwordPolicyIssues(password).includes(rule) ? 'text-accent' : ''}>
+                {password && !passwordPolicyIssues(password).includes(rule) ? '✓ ' : '· '}{passwordPolicyMessage(locale, rule)}
+              </li>
+            ))}
+          </ul>
           <CustomerField label={ko ? '비밀번호 확인' : 'Confirm password'} name="passwordConfirm" type="password" minLength={8} autoComplete="new-password" />
           <button className="consult-cta consult-cta--accent" disabled={status === 'working'}>
             <span className="consult-cta__label">{ko ? '계정 만들기' : 'Create account'}</span>
@@ -107,7 +148,7 @@ export function RegisterForm({locale}: RegisterFormProps) {
     if (!response.ok || !payload.verificationId) {
       setStatus('error');
       setSmsRequestKey(crypto.randomUUID());
-      setMessage(payload.message || payload.error || (ko ? '인증 요청을 처리할 수 없습니다.' : 'Unable to request verification.'));
+      setMessage(ko ? '인증 요청을 처리할 수 없습니다. 입력 내용을 확인하고 잠시 후 다시 시도해 주세요.' : (payload.message || payload.error || 'Unable to request verification.'));
       return;
     }
     setVerificationId(payload.verificationId);
@@ -127,7 +168,7 @@ export function RegisterForm({locale}: RegisterFormProps) {
     const payload = await response.json().catch(() => ({})) as {grant?: string; error?: string; message?: string};
     if (!response.ok || !payload.grant) {
       setStatus('error');
-      setMessage(payload.message || payload.error || (ko ? '인증번호가 올바르지 않거나 만료되었습니다.' : 'The code is invalid or expired.'));
+      setMessage(ko ? '인증번호가 올바르지 않거나 만료되었습니다.' : (payload.message || payload.error || 'The code is invalid or expired.'));
       return;
     }
     setGrant(payload.grant);
@@ -137,7 +178,18 @@ export function RegisterForm({locale}: RegisterFormProps) {
   async function createAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const password = String(data.get('password') ?? '');
+    const normalizedUsername = normalizeLoginName(username);
+    if (!normalizedUsername || usernamePolicyIssues(username).length > 0) {
+      setStatus('error');
+      setMessage(usernamePolicyMessage(locale));
+      return;
+    }
+    const issues = passwordPolicyIssues(password);
+    if (issues.length > 0) {
+      setStatus('error');
+      setMessage(issues.map((issue) => passwordPolicyMessage(locale, issue)).join(' '));
+      return;
+    }
     if (password !== data.get('passwordConfirm')) {
       setStatus('error');
       setMessage(ko ? '비밀번호가 일치하지 않습니다.' : 'Passwords do not match.');
@@ -158,7 +210,7 @@ export function RegisterForm({locale}: RegisterFormProps) {
     };
     if (!prepareResponse.ok || !prepared.cognitoEndpoint || !prepared.clientId) {
       setStatus('error');
-      setMessage(prepared.message || prepared.error || (ko ? '계정을 만들 수 없습니다.' : 'Unable to create account.'));
+      setMessage(ko ? '계정을 만들 수 없습니다. 잠시 후 다시 시도해 주세요.' : (prepared.message || prepared.error || 'Unable to create account.'));
       return;
     }
     const normalizedPhone = normalizePhone(phone);
@@ -170,7 +222,7 @@ export function RegisterForm({locale}: RegisterFormProps) {
       },
       body: JSON.stringify({
         ClientId: prepared.clientId,
-        Username: normalizedPhone,
+        Username: normalizedUsername,
         Password: password,
         UserAttributes: [{Name: 'phone_number', Value: normalizedPhone}],
         ClientMetadata: {registrationGrant: grant}
@@ -184,13 +236,14 @@ export function RegisterForm({locale}: RegisterFormProps) {
     const signup = await signupResponse.json().catch(() => ({})) as {message?: string; __type?: string};
     if (!signupResponse.ok) {
       setStatus('error');
-      setMessage(signup.message || signup.__type?.split('#').at(-1) || (ko ? '계정을 만들 수 없습니다.' : 'Unable to create account.'));
+      setMessage(registrationErrorMessage(locale, {type: signup.__type, message: signup.message}));
       return;
     }
     setStatus('done');
     const loginUrl = new URL(prepared.loginUrl ?? '/api/auth/login', window.location.origin);
     loginUrl.searchParams.set('returnTo', `/${locale}/my-daeho`);
     loginUrl.searchParams.set('reauth', 'true');
+    loginUrl.searchParams.set('loginHint', normalizedUsername);
     window.location.assign(loginUrl.toString());
   }
 }

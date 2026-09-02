@@ -64,7 +64,7 @@ public class CustomerController {
   public CustomerProfile provisionFromAuthenticatedPhone(
       HttpServletRequest request, @RequestBody AuthenticatedPhoneProvisionRequest input) {
     internalApiKey.require(request);
-    return accounts.provisionFromAuthenticatedPhone(input.subject(), input.phone());
+    return accounts.provisionFromAuthenticatedPhone(input.subject(), input.phone(), input.loginName());
   }
 
   @PostMapping("/v1/internal/registration-grants/validate")
@@ -109,7 +109,7 @@ public class CustomerController {
 
   public record ProfileUpdate(String displayName, String email, String organization, String team, String locale) {}
 
-  public record AuthenticatedPhoneProvisionRequest(String subject, String phone) {}
+  public record AuthenticatedPhoneProvisionRequest(String subject, String phone, String loginName) {}
 
   public record RegistrationGrantValidation(String registrationGrant) {}
 

@@ -22,20 +22,37 @@ public class CustomerAccountService {
   }
 
   @Transactional
-  public CustomerProfile provisionFromAuthenticatedPhone(String subject, String phone) {
+  public CustomerProfile provisionFromAuthenticatedPhone(String subject, String phone, String loginName) {
     var existing = profiles.findBySubject(subject);
     if (existing != null) {
       return existing;
     }
+    var normalizedLoginName = LoginNamePolicy.normalize(loginName);
     var verification = grants.requireConsumedPhoneForProvisioning(phone);
-    requireRegistrationIdentifierAvailable(verification);
-    var profile = profiles.createFromVerification(subject, verification);
+    var profileForPhone = profiles.findByPhone(phone);
+    CustomerProfile profile;
+    if (profileForPhone == null) {
+      profile = profiles.createFromVerification(subject, verification, normalizedLoginName);
+    } else {
+      requireLegacyMigrationCandidate(profileForPhone);
+      profile = profiles.relinkVerifiedPhone(profileForPhone.customerId(), subject, normalizedLoginName);
+    }
     grants.consumeProvisioningReceipt(verification.id());
     return profile;
   }
 
   public void requireRegistrationIdentifierAvailable(VerificationSession verification) {
-    if (!verification.phone().isBlank() && profiles.findByPhone(verification.phone()) != null) {
+    if (verification.phone().isBlank()) {
+      return;
+    }
+    var existing = profiles.findByPhone(verification.phone());
+    if (existing != null) {
+      requireLegacyMigrationCandidate(existing);
+    }
+  }
+
+  private void requireLegacyMigrationCandidate(CustomerProfile profile) {
+    if (!"active".equals(profile.status()) || (profile.loginName() != null && !profile.loginName().isBlank())) {
       throw new RegistrationGrantException("An account already exists for this phone; use account recovery");
     }
   }

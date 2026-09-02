@@ -1,9 +1,14 @@
 const validationUrl = required(process.env.CUSTOMER_GRANT_VALIDATION_URL);
 const customerApiKey = required(process.env.CUSTOMER_INTERNAL_API_KEY);
+const customUsernamePoolId = process.env.CUSTOM_USERNAME_POOL_ID ?? '';
 
 export async function handler(event) {
   if (event.triggerSource !== 'PreSignUp_SignUp') {
     return event;
+  }
+  if (customUsernamePoolId && event.userPoolId === customUsernamePoolId
+      && !/^[a-z][a-z0-9._-]{3,23}$/.test(String(event.userName ?? ''))) {
+    throw new Error('Login name is invalid');
   }
   const registrationGrant = event.request?.clientMetadata?.registrationGrant;
   const phone = normalizePhone(event.request?.userAttributes?.phone_number);

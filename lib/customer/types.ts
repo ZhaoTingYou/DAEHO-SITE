@@ -3,6 +3,7 @@ export type CustomerStatus = 'active' | 'suspended' | 'deletion_pending' | 'dele
 export type CustomerProfile = {
   customerId: string;
   cognitoSubject: string;
+  loginName: string;
   status: CustomerStatus;
   legalName: string;
   displayName: string;

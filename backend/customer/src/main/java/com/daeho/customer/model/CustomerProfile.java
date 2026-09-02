@@ -6,6 +6,7 @@ import java.util.UUID;
 public record CustomerProfile(
     UUID customerId,
     String cognitoSubject,
+    String loginName,
     String status,
     String legalName,
     String displayName,

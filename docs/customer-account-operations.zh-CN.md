@@ -4,7 +4,7 @@
 
 ## 当前实现边界
 
-- 韩国用户：手机号 + 密码；SOLAPI 自动发送六位短信验证码。
+- 韩国用户：自定义用户名 + 密码；注册和找回流程使用 SOLAPI 验证手机号。
 - 账号与跨站登录：Amazon Cognito Essentials，区域 `ap-northeast-2`。
 - 会员资料与认证记录：独立 `customer-api` Spring Boot 服务及 `customer_account` schema。
 - MY DAEHO：个人资料、문의列表、详情、状态、旧 문의认领、退出所有设备、删除账号。
@@ -61,7 +61,7 @@ SOLAPI_SENDER_NUMBER=<已登记发信号码，仅数字>
 
 ## Cognito 配置
 
-1. 在首尔区域创建 Essentials User Pool，登录名使用手机号，密码由 Cognito 管理。
+1. 在首尔区域创建 Essentials User Pool，登录标识只选择“用户名”，注册必要属性选择 `phone_number`。用户名采用 4–24 位小写英文、数字、点、下划线或连字符，必须以英文字母开头；Cognito 用户名创建后不可修改。手机号仅用于 SOLAPI 验证与密码找回，不作为登录名。
 2. 官网 App Client 使用公开客户端：不要创建 client secret；启用 Authorization Code 和 PKCE；scope 为 `openid email phone`。
 3. 只添加精确 URL：
    - Callback：`https://daeho.works/api/auth/callback`
@@ -71,9 +71,10 @@ SOLAPI_SENDER_NUMBER=<已登记发信号码，仅数字>
 5. 将 `infra/cognito/pre-signup/index.mjs` 部署为 Node.js 20+ Lambda，并配置为 User Pool 的 Pre sign-up trigger。Lambda 环境变量：
    - `CUSTOMER_GRANT_VALIDATION_URL=https://daeho.works/internal/cognito/registration-grants/validate`
    - `CUSTOMER_INTERNAL_API_KEY=<与服务端相同的内部密钥>`
+   - `CUSTOM_USERNAME_POOL_ID=<当前支持自定义用户名的 User Pool ID>`
 6. Lambda 必须能访问上述 HTTPS 地址。Nginx 只公开这一个精确的验证路径，并由内部密钥和限流保护。该路径会在 Cognito 建号前原子消费一次性凭证；之后的客户资料建立只接受已由该触发器消费的凭证。
 7. 未安装并实测 Pre sign-up trigger 前，不得把 `CUSTOMER_ACCOUNTS_ENABLED` 改为 `true`。该触发器会拒绝没有有效短信注册凭证、重复消费凭证、手机号不匹配或未成年声明未通过的直接 Cognito 注册。
-8. 注册页先让 BFF 把一次性凭证加密保存在 `HttpOnly` Cookie，再由浏览器直接把手机号和密码提交给 Cognito。密码不经过 Next 或 Customer Service。用户首次登录后，OIDC 回调使用已验签的 `sub` 和该凭证幂等建立客户资料。如果资料服务短暂不可用，后续登录会用 Cognito 签名且已验证的手机声明重试幂等建立，不需要重新建号。
+8. 注册页先让 BFF 把一次性凭证加密保存在 `HttpOnly` Cookie，再由浏览器直接把用户名、手机号和密码提交给 Cognito。密码不经过 Next 或 Customer Service。用户首次登录后，OIDC 回调使用已验签的 `sub`、`cognito:username` 和已验证手机声明幂等建立客户资料。如果同一已验证手机号原来属于旧手机号用户池，Customer Account Service 仅允许一次迁移：保留原 `customer_id`、문의关联和资料，只更新 Cognito `sub` 与登录用户名，并写入迁移审计事件；迁移完成后同一手机号不能再创建第二个用户名账号，停用或待删除账号也不能借此恢复。
 
 ## 功能开关与发布顺序
 

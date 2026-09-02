@@ -86,6 +86,7 @@ export function MyDaehoDashboard({locale}: Props) {
       <section id="profile" aria-labelledby="profile-title">
         <h2 id="profile-title" className="font-heading text-3xl font-semibold">{ko ? '개인 정보' : 'Profile'}</h2>
         <form className="mt-7 grid gap-5 md:grid-cols-2" onSubmit={saveProfile}>
+          <ReadOnlyField label={ko ? '로그인 아이디' : 'Username'} value={profile.loginName} />
           <ReadOnlyField label={ko ? '확인된 휴대폰' : 'Verified mobile'} value={profile.phone} />
           <EditableField label={ko ? '표시 이름' : 'Display name'} name="displayName" defaultValue={profile.displayName} />
           <EditableField label={ko ? '이메일' : 'Email'} name="email" type="email" defaultValue={profile.email} />

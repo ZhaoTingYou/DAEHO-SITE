@@ -1,6 +1,7 @@
 package com.daeho.customer.repository;
 
 import com.daeho.customer.model.CustomerProfile;
+import com.daeho.customer.service.RegistrationGrantException;
 import com.daeho.customer.service.VerificationSession;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -222,7 +223,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
 
   @Override
   @Transactional
-  public CustomerProfile createFromVerification(String subject, VerificationSession verification) {
+  public CustomerProfile createFromVerification(String subject, VerificationSession verification, String loginName) {
     var existing = findBySubject(subject);
     if (existing != null) {
       return existing;
@@ -237,12 +238,12 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     var isEmail = "email_declaration".equals(verification.method());
     jdbc.update("""
         INSERT INTO customer_profiles (
-          customer_id, cognito_subject, status, legal_name, display_name, phone, email,
+          customer_id, cognito_subject, login_name, status, legal_name, display_name, phone, email,
           locale, country, organization, team, verification_method, verified_at,
           adult_verified, session_version, sessions_valid_after, created_at, updated_at
-        ) VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?, '', '', ?, now(), true, 1,
+        ) VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?, ?, '', '', ?, now(), true, 1,
           to_timestamp(0), now(), now())
-        """, customerId, subject, verification.legalName(), verification.legalName(),
+        """, customerId, subject, loginName, verification.legalName(), verification.legalName(),
         verification.phone(), isEmail ? verification.identifier() : "", verification.locale(),
         isEmail ? "overseas" : "KR", verification.method());
     jdbc.update("""
@@ -259,6 +260,21 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         """, UUID.randomUUID(), customerId, verification.termsVersion(),
         verification.privacyVersion(), verification.marketingConsent());
     audit(customerId, "account_created", "system");
+    return findBySubject(subject);
+  }
+
+  @Override
+  @Transactional
+  public CustomerProfile relinkVerifiedPhone(UUID customerId, String subject, String loginName) {
+    var updated = jdbc.update("""
+        UPDATE customer_profiles SET cognito_subject = ?, login_name = ?,
+          session_version = session_version + 1, sessions_valid_after = now(), updated_at = now()
+        WHERE customer_id = ? AND phone <> '' AND login_name = '' AND status = 'active'
+        """, subject, loginName, customerId);
+    if (updated != 1) {
+      throw new RegistrationGrantException("Verified account migration could not be completed");
+    }
+    audit(customerId, "account_identity_migrated", "system");
     return findBySubject(subject);
   }
 
@@ -337,7 +353,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
       jdbc.update("DELETE FROM consent_receipts WHERE customer_id = ?", customerId);
       jdbc.update("""
           UPDATE customer_profiles SET cognito_subject = ?, status = 'deleted', legal_name = '',
-            display_name = '', phone = '', email = '', locale = 'ko', country = '',
+            login_name = '', display_name = '', phone = '', email = '', locale = 'ko', country = '',
             organization = '', team = '', adult_verified = false,
             session_version = session_version + 1, sessions_valid_after = now(), updated_at = now()
           WHERE customer_id = ? AND status = 'deletion_pending'
@@ -373,10 +389,10 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     var needle = "%" + (query == null ? "" : query.trim().toLowerCase()) + "%";
     return jdbc.query("""
         SELECT * FROM customer_profiles
-        WHERE lower(display_name) LIKE ? OR lower(email) LIKE ? OR phone LIKE ?
+        WHERE lower(login_name) LIKE ? OR lower(display_name) LIKE ? OR lower(email) LIKE ? OR phone LIKE ?
           OR lower(customer_id::text) LIKE ?
         ORDER BY created_at DESC LIMIT ?
-        """, this::mapProfile, needle, needle, needle, needle, Math.min(Math.max(limit, 1), 100));
+        """, this::mapProfile, needle, needle, needle, needle, needle, Math.min(Math.max(limit, 1), 100));
   }
 
   private void audit(UUID customerId, String eventType, String actor) {
@@ -388,7 +404,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
 
   private CustomerProfile mapProfile(ResultSet rs, int rowNum) throws SQLException {
     return new CustomerProfile(
-        rs.getObject("customer_id", UUID.class), rs.getString("cognito_subject"), rs.getString("status"),
+        rs.getObject("customer_id", UUID.class), rs.getString("cognito_subject"), rs.getString("login_name"), rs.getString("status"),
         rs.getString("legal_name"), rs.getString("display_name"), rs.getString("phone"),
         rs.getString("email"), rs.getString("locale"), rs.getString("country"),
         rs.getString("organization"), rs.getString("team"), rs.getString("verification_method"),

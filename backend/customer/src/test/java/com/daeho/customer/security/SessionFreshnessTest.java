@@ -33,7 +33,7 @@ class SessionFreshnessTest {
 
   private CustomerProfile profile(Instant sessionsValidAfter) {
     return new CustomerProfile(
-        UUID.randomUUID(), "subject", "active", "", "", "+821012345678", "", "ko", "KR",
+        UUID.randomUUID(), "subject", "daeho.member", "active", "", "", "+821012345678", "", "ko", "KR",
         "", "", "sms_declaration", Instant.parse("2026-09-01T00:00:00Z"), true, 2,
         sessionsValidAfter, Instant.parse("2026-09-01T00:00:00Z"), Instant.parse("2026-09-02T00:05:00Z")
     );
