@@ -12,6 +12,9 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import com.daeho.customer.security.CognitoAccessTokenValidator;
 
 @Configuration
@@ -40,9 +43,17 @@ public class CognitoSecurityConfig {
     return http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/actuator/**", "/v1/verifications/**", "/v1/internal/**").permitAll()
+            .requestMatchers(publicEndpoints()).permitAll()
             .anyRequest().authenticated())
         .oauth2ResourceServer(resource -> resource.jwt(Customizer.withDefaults()))
         .build();
+  }
+
+  static RequestMatcher publicEndpoints() {
+    return new OrRequestMatcher(
+        PathPatternRequestMatcher.pathPattern("/actuator/**"),
+        PathPatternRequestMatcher.pathPattern("/v1/verifications/**"),
+        PathPatternRequestMatcher.pathPattern("/v1/internal/**")
+    );
   }
 }
