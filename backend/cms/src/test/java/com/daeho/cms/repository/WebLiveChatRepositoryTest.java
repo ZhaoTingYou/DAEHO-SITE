@@ -389,11 +389,26 @@ class WebLiveChatRepositoryTest {
     assertTrue(jdbc.calls.get(2).sql().contains("pending_action = 'topic_creation'"));
     assertTrue(jdbc.calls.get(2).sql().contains("topic_thread_id IS NULL"));
     assertTrue(jdbc.calls.get(3).sql().contains("pending_action = 'registration_delivery'"));
+    assertFalse(jdbc.calls.get(3).sql().contains("last_activity_at = now()"));
     assertEquals("closed", closed.conversation().state());
     assertEquals("system", closed.event().direction());
     assertTrue(jdbc.calls.get(4).sql().contains("WITH closed"));
     assertTrue(jdbc.calls.get(4).sql().contains("state <> 'closed'"));
     assertTrue(jdbc.calls.get(4).sql().contains("FROM closed"));
+  }
+
+  @Test
+  void delayedActivationPreservesTheCustomerWriteTimestampForThirtyDayExpiry() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(conversationRow());
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.activate("conversation-1", 702L);
+
+    var sql = jdbc.calls.get(0).sql();
+    assertTrue(sql.contains("state = 'active'"));
+    assertFalse(sql.contains("last_activity_at = now()"));
+    assertTrue(sql.contains("updated_at = now()"));
   }
 
   @Test
@@ -519,7 +534,7 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
-  void recentCmsListingAlwaysIncludesActionableRowsAndLimitsOnlyClosedHistory() {
+  void recentCmsListingKeepsEveryTopicCloseActionAcrossGenerationsOutsideTheHistoryCap() {
     var jdbc = new RecordingJdbcTemplate();
     jdbc.queryResult = call -> List.of(summaryRow(0L, 0L));
     var repository = new WebLiveChatRepository(jdbc);
@@ -529,7 +544,9 @@ class WebLiveChatRepositoryTest {
     var call = jdbc.calls.get(0);
     var sql = call.sql();
     assertTrue(sql.contains("WHERE actionable.state <> 'closed'"));
+    assertTrue(sql.contains("actionable.state = 'closed' AND actionable.pending_action = 'topic_close'"));
     assertTrue(sql.contains("WHERE closed.state = 'closed'"));
+    assertTrue(sql.contains("closed.pending_action <> 'topic_close'"));
     assertTrue(sql.contains("closed.configuration_generation"));
     assertTrue(sql.contains("ORDER BY closed.updated_at DESC, closed.id DESC"));
     assertTrue(sql.contains("LIMIT ?"));

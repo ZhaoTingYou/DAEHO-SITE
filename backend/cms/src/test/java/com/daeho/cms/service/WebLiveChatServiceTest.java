@@ -546,8 +546,8 @@ class WebLiveChatServiceTest {
         new Message(51L, "conversation-1", "team", "확인했습니다.", "delivered", "", 901L, NOW)
     );
     when(repository.latestConversation("visitor-1", 3L)).thenReturn(active);
-    when(repository.ownerMessagesAfter("conversation-1", 0L, 24)).thenReturn(visible);
-    when(repository.ownerMessagesAfter("conversation-1", 50L, 24)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 0L, 65)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 50L, 65)).thenReturn(visible);
     when(repository.unreadCount("conversation-1")).thenReturn(1L);
 
     var session = service.session(visitor());
@@ -557,8 +557,8 @@ class WebLiveChatServiceTest {
     assertEquals(visible, session.messages());
     assertEquals(1L, session.unreadCount());
     assertEquals(visible, messages);
-    verify(repository).ownerMessagesAfter("conversation-1", 0L, 24);
-    verify(repository).ownerMessagesAfter("conversation-1", 50L, 24);
+    verify(repository).ownerMessagesAfter("conversation-1", 0L, 65);
+    verify(repository).ownerMessagesAfter("conversation-1", 50L, 65);
   }
 
   @Test
@@ -572,8 +572,8 @@ class WebLiveChatServiceTest {
         )
     );
     when(repository.latestConversation("visitor-1", 3L)).thenReturn(closed);
-    when(repository.ownerMessagesAfter("conversation-1", 0L, 24)).thenReturn(visible);
-    when(repository.ownerMessagesAfter("conversation-1", 51L, 24)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 0L, 65)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 51L, 65)).thenReturn(visible);
     when(repository.unreadCount("conversation-1")).thenReturn(0L);
     when(repository.markRead("conversation-1", 52L)).thenReturn(read);
 

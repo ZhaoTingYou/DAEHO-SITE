@@ -85,7 +85,7 @@ public class AdminTelegramLiveChatController {
     var conversation = summary.conversation();
     return new AdminRow(
         websiteSession(summary), conversation.updatedAt(), !"closed".equals(conversation.state())
-            || conversation.attentionCode().startsWith("topic_close_")
+            || "topic_close".equals(conversation.pendingAction())
     );
   }
 

@@ -534,7 +534,7 @@ void explicitPanelOpenIssuesASecureAnonymousCookieWithoutExposingTheTokenInJson(
 }
 ```
 
-Add tests for a cookie-free passive `GET session` returning no `Set-Cookie`, explicit-open identity issuance, foreign Origin rejection, rate-limit `429`, honeypot `422`, active reuse, conversation ownership, same-cookie history containing delivered visitor/team/system rows, second-cookie denial, visitor suppression from SSE, SSE `text/event-stream`, Last-Event-ID replay, and team-only read idempotency. Resolve an existing logical start/message key before any quota; `429` retries retain that exact key.
+Add tests for a cookie-free passive `GET session` returning no `Set-Cookie`, explicit-open identity issuance, foreign Origin rejection, rate-limit `429`, honeypot `422`, active reuse, conversation ownership, same-cookie history containing delivered visitor/team/system rows, second-cookie denial, visitor suppression from SSE, SSE `text/event-stream`, Last-Event-ID replay, and team-only read idempotency. A missing/invalid identity must pass the application IP issuance quota, and a new start must also pass its IP quota, before any visitor row is created. Resolve an existing owner's logical start/message key before any quota; `429` retries retain that exact key.
 
 - [ ] **Step 2: Write failing broker and cleanup tests**
 
@@ -563,7 +563,7 @@ private static final String COOKIE_PATH = "/api/live-chat";
 private static final Duration COOKIE_AGE = Duration.ofDays(30);
 ```
 
-Read `X-Daeho-Client-IP` first, then the first `X-Forwarded-For` address. Immediately hash it; never persist/log the raw value. On a new logical write, consume the Postgres rate bucket before external service work, but exact idempotency-key replay is resolved first and bypasses quota. Use limits: 5 starts/hour per IP hash, 3 starts/hour per visitor, 20 messages/minute per visitor, 60 messages/hour per IP hash, one new message per two seconds per visitor, and one salted duplicate-content fingerprint per 30 seconds. Never persist the raw body in a rate bucket.
+Read `X-Daeho-Client-IP` first, then the first `X-Forwarded-For` address. Immediately hash it; never persist/log the raw value. Before creating any missing visitor identity, consume the 10 issuances/hour application IP bucket; a new start consumes its 5 starts/hour IP bucket before identity creation as well. On a new logical write, consume the Postgres rate bucket before external service work, but exact idempotency-key replay for a valid existing owner is resolved first and bypasses quota. Other limits are 3 starts/hour per visitor, 20 messages/minute per visitor, 60 messages/hour per IP hash, one new message per two seconds per visitor, and one salted duplicate-content fingerprint per 30 seconds. Never persist the raw body in a rate bucket.
 
 - [ ] **Step 5: Implement SSE and fallback replay**
 
@@ -802,7 +802,7 @@ export function connectEvents(
 }
 ```
 
-All fetches use `credentials:'same-origin'`, `Content-Type: application/json`, a generated client message key, and bounded response parsing. A passive mount calls `getSession(false)` and cannot issue identity; explicit panel open calls `getSession(true)`. Page owner history in 24-row chunks so a valid Korean/multibyte page remains below the client's 256 KiB parser cap. Do not place identity/contact in URLs or localStorage.
+All fetches use `credentials:'same-origin'`, `Content-Type: application/json`, a generated client message key, and bounded response parsing. A passive mount calls `getSession(false)` and cannot issue identity; explicit panel open calls `getSession(true)`. Owner history uses explicit `nextCursor`/`hasMore` continuation and a strict serialized-byte budget below the client's 256 KiB parser cap; rows are never truncated, and `session` carries only the first byte-safe page. Do not place identity/contact in URLs or localStorage.
 
 - [ ] **Step 5: Run tests and TypeScript check**
 
@@ -1161,7 +1161,7 @@ Return the deployed commit, backup path/size, test totals, V19/V20 status, servi
 - [ ] Confirming Topic absence immediately resumes the original Topic creation workflow. Closing from CMS/Telegram/expiry first persists and publishes one system event, then persists successful Topic closure or an explicit retryable close code.
 - [ ] Cookie-free passive `GET session` creates no visitor. Identity issuance happens only on explicit panel open/write. Bounded cleanup removes expired rate buckets, closed anonymous conversations/messages, and orphan visitors while retaining CMS inquiries.
 - [ ] Start/message idempotency resolves before quota. `429` and lost-response retries keep the original client key. New messages enforce a two-second interval and a 30-second salted duplicate-content fingerprint without storing raw bodies in anti-abuse rows.
-- [ ] Owner history pages in 24-row chunks compatible with the 256 KiB parser cap, including maximum valid Korean payloads; session remains a lightweight initial page.
+- [ ] Owner history uses explicit cursor/`hasMore` continuation with every serialized page below the 256 KiB parser cap, including 24 maximum-size Korean team messages recovered across pages without truncation or duplication; session remains a lightweight initial page.
 - [ ] Nginx limits API request rates and SSE connections per IP; the application limits active emitters per conversation and globally, releasing capacity on every terminal path.
 - [ ] Opening/restoring and near-bottom appends scroll to a bottom sentinel; reading older history preserves position and exposes an accessible new-messages-below affordance.
 - [ ] Anonymous upstream failures expose only neutral structured `502`/`503` responses. CMS inquiry source `web_live_chat` is typed, translated in every locale, and filterable without a raw key.

@@ -35,6 +35,7 @@ import com.daeho.cms.service.WebLiveChatService;
 import com.daeho.cms.service.TelegramLiveChatException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -47,6 +48,7 @@ import org.springframework.mock.web.MockCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.json.JsonMapper;
 
 class WebLiveChatControllerTest {
   private static final Instant NOW = Instant.parse("2026-09-01T08:00:00Z");
@@ -187,6 +189,7 @@ class WebLiveChatControllerTest {
         .andExpect(jsonPath("$.conversation.state").value("active"));
 
     verify(repository, never()).consumeRateBucket(anyString(), anyString(), anyInt(), any());
+    verify(repository, never()).createVisitor(anyString(), any(Duration.class));
     verify(liveChat, never()).start(any(), any(), any());
   }
 
@@ -371,6 +374,41 @@ class WebLiveChatControllerTest {
         .andExpect(jsonPath("$.unreadCount").value(0));
 
     verify(repository).createVisitor(anyString(), eq(Duration.ofDays(30)));
+    verify(repository).consumeRateBucket(
+        codec.ipHash("127.0.0.1"), "identity_issue_ip_hour", 10, Duration.ofHours(1)
+    );
+  }
+
+  @Test
+  void rejectedIdentityIssuanceCreatesNoVisitorRow() throws Exception {
+    when(repository.consumeRateBucket(
+        codec.ipHash("203.0.113.9"), "identity_issue_ip_hour", 10, Duration.ofHours(1)
+    )).thenReturn(false);
+
+    mvc.perform(get("/api/live-chat/session?issue=true")
+            .header("Origin", "https://daeho.works")
+            .header("X-Daeho-Client-IP", "203.0.113.9"))
+        .andExpect(status().isTooManyRequests())
+        .andExpect(header().doesNotExist("Set-Cookie"));
+
+    verify(repository, never()).createVisitor(anyString(), any(Duration.class));
+  }
+
+  @Test
+  void rejectedNewVisitorStartIpQuotaCreatesNoVisitorRow() throws Exception {
+    when(repository.consumeRateBucket(
+        codec.ipHash("203.0.113.10"), "start_ip_hour", 5, Duration.ofHours(1)
+    )).thenReturn(false);
+
+    mvc.perform(post("/api/live-chat/conversations")
+            .header("Origin", "https://daeho.works")
+            .header("X-Daeho-Client-IP", "203.0.113.10")
+            .contentType(MediaType.APPLICATION_JSON).content(startJson("")))
+        .andExpect(status().isTooManyRequests())
+        .andExpect(header().doesNotExist("Set-Cookie"));
+
+    verify(repository, never()).createVisitor(anyString(), any(Duration.class));
+    verify(liveChat, never()).resolveExistingStart(any(), any());
   }
 
   @Test
@@ -386,26 +424,45 @@ class WebLiveChatControllerTest {
   }
 
   @Test
-  void maximumKoreanHistoryPageStaysBelowTheClientByteBudget() throws Exception {
+  void maximumKoreanHistoryIsBytePaginatedAndFullyRecoverable() throws Exception {
     var visitor = visitor();
     existingCookie(visitor);
-    var koreanBody = "한".repeat(2_000);
+    var koreanBody = "한".repeat(4_096);
     var history = LongStream.rangeClosed(1L, 24L)
         .mapToObj(id -> new Message(
-            id, "conversation-1", "visitor", koreanBody, "delivered", "key-" + id, 0L, NOW
+            id, "conversation-1", "team", koreanBody, "delivered", "key-" + id, id, NOW
         ))
         .toList();
     when(liveChat.session(visitor)).thenReturn(new SessionView(
         conversation("active"), history, 0L
     ));
+    when(liveChat.messages(eq(visitor), anyLong())).thenAnswer(invocation -> {
+      var after = invocation.getArgument(1, Long.class);
+      return history.stream().filter(message -> message.id() > after).toList();
+    });
 
     var response = mvc.perform(get("/api/live-chat/session")
             .cookie(cookie()).header("Origin", "https://daeho.works"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.messages.length()").value(24))
         .andReturn().getResponse();
-
+    var mapper = new JsonMapper();
+    var page = mapper.readTree(response.getContentAsByteArray());
+    var ids = new ArrayList<Long>();
+    page.get("messages").forEach(message -> ids.add(message.get("id").longValue()));
     assertTrue(response.getContentAsByteArray().length < 256 * 1024);
+    assertTrue(page.get("hasMore").booleanValue());
+
+    while (page.get("hasMore").booleanValue()) {
+      var cursor = page.get("nextCursor").longValue();
+      response = mvc.perform(get("/api/live-chat/conversations/current/messages?after=" + cursor)
+              .cookie(cookie()).header("Origin", "https://daeho.works"))
+          .andExpect(status().isOk())
+          .andReturn().getResponse();
+      assertTrue(response.getContentAsByteArray().length < 256 * 1024);
+      page = mapper.readTree(response.getContentAsByteArray());
+      page.get("items").forEach(message -> ids.add(message.get("id").longValue()));
+    }
+    assertEquals(LongStream.rangeClosed(1L, 24L).boxed().toList(), ids);
   }
 
   @Test

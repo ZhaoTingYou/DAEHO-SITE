@@ -1,5 +1,3 @@
-const MESSAGE_PAGE_SIZE = 24;
-
 export function nextMessageScrollAction({opened, nearBottom, appended}) {
   if (opened || (nearBottom && appended)) return 'scroll';
   if (appended) return 'notify';
@@ -105,16 +103,23 @@ export function createInvalidationQueue(refresh, options = {}) {
 export async function loadMessagePages(loadPage, after) {
   let cursor = positiveId(after);
   const items = [];
+  const seen = new Set();
   while (true) {
     const page = await loadPage(cursor);
-    const rows = Array.isArray(page) ? page : [];
-    items.push(...rows);
-    const nextCursor = rows.reduce(
-      (highest, row) => Math.max(highest, positiveId(row?.id)),
-      cursor
-    );
-    if (rows.length < MESSAGE_PAGE_SIZE || nextCursor <= cursor) {
-      return {items, cursor: nextCursor};
+    const rows = Array.isArray(page?.items) ? page.items : [];
+    for (const row of rows) {
+      const id = positiveId(row?.id);
+      if (id > cursor && !seen.has(id)) {
+        seen.add(id);
+        items.push(row);
+      }
+    }
+    const nextCursor = positiveId(page?.nextCursor);
+    if (page?.hasMore !== true) {
+      return {items, cursor: Math.max(cursor, nextCursor)};
+    }
+    if (nextCursor <= cursor) {
+      throw new Error('Live-chat history cursor did not advance.');
     }
     cursor = nextCursor;
   }

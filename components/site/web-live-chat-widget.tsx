@@ -149,12 +149,11 @@ export function WebLiveChatWidget({
     if (!session.conversation) return session;
 
     dispatch({type: 'messages_merged', messages: session.messages});
-    const sessionCursor = session.messages.reduce(
-      (highest, message) => Math.max(highest, message.id),
-      currentCursor
-    );
+    const sessionCursor = changed
+      ? session.nextCursor
+      : Math.max(currentCursor, session.nextCursor);
     const page = await loadMessagePages(
-      async (after) => (await getMessages(after)).items,
+      getMessages,
       sessionCursor
     );
     dispatch({type: 'messages_merged', messages: page.items});

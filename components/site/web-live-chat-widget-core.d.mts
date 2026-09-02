@@ -1,4 +1,8 @@
-import type {WebLiveChatEvent, WebLiveChatMessage} from './web-live-chat-api';
+import type {
+  WebLiveChatEvent,
+  WebLiveChatMessage,
+  WebLiveChatMessagePage
+} from './web-live-chat-api';
 
 export function createStableStreamController(
   connect: (
@@ -42,7 +46,7 @@ export function createInvalidationQueue(
 ): {invalidate(): void; dispose(): void};
 
 export function loadMessagePages(
-  loadPage: (after: number) => Promise<WebLiveChatMessage[]>,
+  loadPage: (after: number) => Promise<WebLiveChatMessagePage>,
   after: number
 ): Promise<{items: WebLiveChatMessage[]; cursor: number}>;
 export function nextMessageScrollAction(input: {

@@ -23,7 +23,15 @@ export type WebLiveChatSession = {
   available: boolean;
   conversation: WebLiveChatConversation | null;
   messages: WebLiveChatMessage[];
+  nextCursor: number;
+  hasMore: boolean;
   unreadCount: number;
+};
+
+export type WebLiveChatMessagePage = {
+  items: WebLiveChatMessage[];
+  nextCursor: number;
+  hasMore: boolean;
 };
 
 export type WebLiveChatEvent =
@@ -85,7 +93,7 @@ export async function sendVisitorMessage(
   );
 }
 
-export async function getMessages(after = 0): Promise<{items: WebLiveChatMessage[]}> {
+export async function getMessages(after = 0): Promise<WebLiveChatMessagePage> {
   const cursor = positiveInteger(after) ?? 0;
   return request(`${API_ROOT}/conversations/current/messages?after=${cursor}`, parseMessagesResponse);
 }
@@ -252,6 +260,8 @@ function parseSession(value: unknown): WebLiveChatSession {
   const object = responseObject(value);
   if (typeof object.available !== 'boolean'
       || !Array.isArray(object.messages)
+      || !nonnegativeInteger(object.nextCursor)
+      || typeof object.hasMore !== 'boolean'
       || !nonnegativeInteger(object.unreadCount)) {
     throw new TypeError('Invalid session response.');
   }
@@ -261,6 +271,8 @@ function parseSession(value: unknown): WebLiveChatSession {
       ? null
       : parseConversation(object.conversation),
     messages: projectPublicMessages(object.messages),
+    nextCursor: object.nextCursor,
+    hasMore: object.hasMore,
     unreadCount: object.unreadCount
   };
 }
@@ -283,12 +295,18 @@ function parseSendResponse(value: unknown): {
   return {messageId, status: object.status};
 }
 
-function parseMessagesResponse(value: unknown): {items: WebLiveChatMessage[]} {
+function parseMessagesResponse(value: unknown): WebLiveChatMessagePage {
   const object = responseObject(value);
-  if (!Array.isArray(object.items)) {
+  if (!Array.isArray(object.items)
+      || !nonnegativeInteger(object.nextCursor)
+      || typeof object.hasMore !== 'boolean') {
     throw new TypeError('Invalid messages response.');
   }
-  return {items: projectPublicMessages(object.items)};
+  return {
+    items: projectPublicMessages(object.items),
+    nextCursor: object.nextCursor,
+    hasMore: object.hasMore
+  };
 }
 
 function parseConversation(value: unknown): WebLiveChatConversation {

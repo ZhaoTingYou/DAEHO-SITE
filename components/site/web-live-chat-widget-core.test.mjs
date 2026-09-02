@@ -14,7 +14,7 @@ import {
   reduceWebLiveChatState
 } from './web-live-chat-core.mjs';
 
-test('message paging advances from the durable cursor until a short page', async () => {
+test('message paging follows explicit continuation without duplicates or fixed row assumptions', async () => {
   const rows = Array.from({length: 53}, (_, index) => ({
     id: index + 1,
     direction: index % 2 ? 'system' : 'team',
@@ -24,12 +24,24 @@ test('message paging advances from the durable cursor until a short page', async
 
   const result = await loadMessagePages(async (after) => {
     cursors.push(after);
-    return rows.filter(({id}) => id > after).slice(0, 24);
+    const items = rows.filter(({id}) => id > after).slice(0, 17);
+    return {
+      items: [...items, ...(after === 17 ? [items[0]] : [])],
+      nextCursor: items.at(-1)?.id ?? after,
+      hasMore: (items.at(-1)?.id ?? after) < rows.at(-1).id
+    };
   }, 0);
 
-  assert.deepEqual(cursors, [0, 24, 48]);
+  assert.deepEqual(cursors, [0, 17, 34, 51]);
   assert.equal(result.items.length, 53);
   assert.equal(result.cursor, 53);
+});
+
+test('message paging rejects a continuation that cannot advance', async () => {
+  await assert.rejects(
+    loadMessagePages(async () => ({items: [], nextCursor: 7, hasMore: true}), 7),
+    /cursor did not advance/
+  );
 });
 
 test('message scrolling follows the latest only on open or while already near the bottom', () => {

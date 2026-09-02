@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 @RestController
 @RequestMapping("/api/live-chat")
@@ -40,11 +42,15 @@ public class WebLiveChatController {
   private static final String COOKIE_PATH = "/api/live-chat";
   private static final Duration COOKIE_AGE = Duration.ofDays(30);
   private static final Duration START_WINDOW = Duration.ofHours(1);
+  private static final Duration IDENTITY_ISSUE_WINDOW = Duration.ofHours(1);
   private static final Duration MESSAGE_VISITOR_WINDOW = Duration.ofMinutes(1);
   private static final Duration MESSAGE_IP_WINDOW = Duration.ofHours(1);
   private static final Duration MESSAGE_MINIMUM_INTERVAL = Duration.ofSeconds(2);
   private static final Duration MESSAGE_DUPLICATE_WINDOW = Duration.ofSeconds(30);
   private static final int REPLAY_PAGE_SIZE = 100;
+  private static final int MAX_HISTORY_PAGE_ITEMS = 64;
+  private static final int MAX_HISTORY_RESPONSE_BYTES = 256 * 1024;
+  private static final JsonMapper JSON = new JsonMapper();
 
   private final WebLiveChatProperties properties;
   private final WebLiveChatTokenCodec codec;
@@ -94,12 +100,19 @@ public class WebLiveChatController {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Spam submission rejected.");
     }
     var input = validator.validateStart(body, formAge(body));
-    var identity = identity(request, response, true);
+    var identity = identity(request, response, false);
+    if (identity == null) {
+      enforceStartIpLimit(request);
+      identity = issueIdentity(request, response);
+      enforceStartVisitorLimit(identity.visitor());
+    }
     var existing = liveChat.resolveExistingStart(identity.visitor(), input);
     if (existing != null) {
       return Map.of("conversation", publicConversation(existing));
     }
-    enforceStartLimits(identity.visitor(), request);
+    if (!identity.newlyIssued()) {
+      enforceStartLimits(identity.visitor(), request);
+    }
     var conversation = liveChat.start(identity.visitor(), input, Map.of());
     renewAfterCustomerWrite(identity, response);
     return Map.of("conversation", publicConversation(conversation));
@@ -133,10 +146,10 @@ public class WebLiveChatController {
   ) {
     authorize(request);
     var identity = requireExistingIdentity(request, response);
-    return Map.of("items", liveChat.messages(identity.visitor(), Math.max(0L, after)).stream()
-        .filter(this::ownerVisible)
-        .map(this::publicMessage)
-        .toList());
+    return historyResponse(
+        new LinkedHashMap<>(), "items",
+        liveChat.messages(identity.visitor(), Math.max(0L, after)), Math.max(0L, after)
+    );
   }
 
   @GetMapping(path = "/conversations/current/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -206,6 +219,13 @@ public class WebLiveChatController {
     if (!issue) {
       return null;
     }
+    return issueIdentity(request, response);
+  }
+
+  private Identity issueIdentity(HttpServletRequest request, HttpServletResponse response) {
+    requireBucket(
+        clientIpHash(request), "identity_issue_ip_hour", 10, IDENTITY_ISSUE_WINDOW
+    );
     for (var attempt = 0; attempt < 3; attempt++) {
       var issued = codec.issue();
       var visitor = repository.createVisitor(issued.hash(), COOKIE_AGE);
@@ -253,8 +273,15 @@ public class WebLiveChatController {
   }
 
   private void enforceStartLimits(Visitor visitor, HttpServletRequest request) {
-    var ipHash = clientIpHash(request);
-    requireBucket(ipHash, "start_ip_hour", 5, START_WINDOW);
+    enforceStartIpLimit(request);
+    enforceStartVisitorLimit(visitor);
+  }
+
+  private void enforceStartIpLimit(HttpServletRequest request) {
+    requireBucket(clientIpHash(request), "start_ip_hour", 5, START_WINDOW);
+  }
+
+  private void enforceStartVisitorLimit(Visitor visitor) {
     requireBucket(visitorKey(visitor), "start_visitor_hour", 3, START_WINDOW);
   }
 
@@ -298,12 +325,74 @@ public class WebLiveChatController {
     var result = new LinkedHashMap<String, Object>();
     result.put("available", true);
     result.put("conversation", view.conversation() == null ? null : publicConversation(view.conversation()));
-    result.put("messages", view.messages().stream()
+    result.put("unreadCount", view.unreadCount());
+    return historyResponse(result, "messages", view.messages(), 0L);
+  }
+
+  private Map<String, Object> historyResponse(
+      LinkedHashMap<String, Object> base,
+      String itemsKey,
+      List<Message> candidates,
+      long after
+  ) {
+    var visible = candidates.stream()
         .filter(this::ownerVisible)
         .map(this::publicMessage)
-        .toList());
-    result.put("unreadCount", view.unreadCount());
+        .toList();
+    var included = new ArrayList<Map<String, Object>>();
+    var cursor = after;
+    for (var item : visible) {
+      if (included.size() >= MAX_HISTORY_PAGE_ITEMS) {
+        break;
+      }
+      var trial = new ArrayList<>(included);
+      trial.add(item);
+      var trialCursor = ((Number) item.get("id")).longValue();
+      var trialResponse = historyEnvelope(base, itemsKey, trial, trialCursor, true);
+      if (serializedBytes(trialResponse) >= MAX_HISTORY_RESPONSE_BYTES) {
+        break;
+      }
+      included.add(item);
+      cursor = trialCursor;
+    }
+    if (!visible.isEmpty() && included.isEmpty()) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE, "Web live chat history is temporarily unavailable."
+      );
+    }
+    var result = historyEnvelope(
+        base, itemsKey, included, cursor, included.size() < visible.size()
+    );
+    if (serializedBytes(result) >= MAX_HISTORY_RESPONSE_BYTES) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE, "Web live chat history is temporarily unavailable."
+      );
+    }
     return result;
+  }
+
+  private LinkedHashMap<String, Object> historyEnvelope(
+      Map<String, Object> base,
+      String itemsKey,
+      List<Map<String, Object>> items,
+      long nextCursor,
+      boolean hasMore
+  ) {
+    var result = new LinkedHashMap<String, Object>(base);
+    result.put(itemsKey, List.copyOf(items));
+    result.put("nextCursor", nextCursor);
+    result.put("hasMore", hasMore);
+    return result;
+  }
+
+  private int serializedBytes(Map<String, Object> value) {
+    try {
+      return JSON.writeValueAsBytes(value).length;
+    } catch (JacksonException error) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE, "Web live chat history is temporarily unavailable."
+      );
+    }
   }
 
   private Map<String, Object> publicConversation(Conversation conversation) {

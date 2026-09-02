@@ -174,7 +174,7 @@ public class WebLiveChatRepository {
     return transition("""
         UPDATE cms_web_live_chat_conversations
         SET state = 'active', topic_root_message_id = ?, pending_action = '',
-            attention_code = '', last_activity_at = now(), updated_at = now()
+            attention_code = '', updated_at = now()
         WHERE id = ? AND state = 'opening' AND pending_action = 'registration_delivery'
         RETURNING *
         """, topicRootMessageId, conversationId);
@@ -766,12 +766,14 @@ public class WebLiveChatRepository {
           SELECT actionable.*
           FROM cms_web_live_chat_conversations actionable
           WHERE actionable.state <> 'closed'
+             OR (actionable.state = 'closed' AND actionable.pending_action = 'topic_close')
           UNION ALL
           SELECT recent_closed.*
           FROM (
             SELECT closed.*
             FROM cms_web_live_chat_conversations closed
             WHERE closed.state = 'closed'
+              AND closed.pending_action <> 'topic_close'
               AND closed.configuration_generation = (
                 SELECT configuration_generation FROM current_generation
               )

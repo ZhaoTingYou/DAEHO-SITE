@@ -18,14 +18,14 @@ test('owner-scoped message reads retain visitor rows and drop duplicates or malf
     {id: 3, direction: 'system', body: 'closed', createdAt: '2026-09-01T00:02:00Z'},
     {id: 0, direction: 'team', body: 'invalid id', createdAt: '2026-09-01T00:03:00Z'},
     {id: 4, direction: 'team', body: 42, createdAt: '2026-09-01T00:04:00Z'}
-  ]});
+  ], nextCursor: 4, hasMore: false});
   try {
     const response = await api.getMessages(0);
-    assert.deepEqual(response.items, [
+    assert.deepEqual(response, {items: [
       {id: 1, direction: 'visitor', body: 'private', createdAt: '2026-09-01T00:00:00Z'},
       {id: 2, direction: 'team', body: 'answer', createdAt: '2026-09-01T00:01:00Z'},
       {id: 3, direction: 'system', body: 'closed', createdAt: '2026-09-01T00:02:00Z'}
-    ]);
+    ], nextCursor: 4, hasMore: false});
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -53,7 +53,7 @@ test('conversation wrappers reject array, object, number, and null enum values',
     clientMessageKey: '12345678901234567890'
   };
   const sessionResponse = (conversation) => ({
-    available: true, conversation, messages: [], unreadCount: 0
+    available: true, conversation, messages: [], nextCursor: 0, hasMore: false, unreadCount: 0
   });
   const cases = [
     [() => api.getSession(), sessionResponse({...validConversation(), state: ['active']})],
@@ -82,6 +82,8 @@ test('owner-scoped session parsing retains initial and follow-up visitor history
       {id: 1, direction: 'visitor', body: 'private', createdAt: '2026-09-01T00:00:00Z'},
       {id: 2, direction: 'team', body: 'public', createdAt: '2026-09-01T00:01:00Z'}
     ],
+    nextCursor: 2,
+    hasMore: false,
     unreadCount: 1
   });
   try {
@@ -108,6 +110,8 @@ test('conversation and write response shapes are validated at every endpoint', a
     ],
     [() => api.sendVisitorMessage('hello', '12345678901234567890'), {messageId: 0, status: 'sent'}],
     [() => api.getMessages(0), {items: 'not-an-array'}],
+    [() => api.getMessages(0), {items: [], nextCursor: 0}],
+    [() => api.getMessages(0), {items: [], nextCursor: -1, hasMore: false}],
     [() => api.markRead(1), {conversation: null}]
   ];
   try {

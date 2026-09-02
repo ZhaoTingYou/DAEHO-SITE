@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class WebLiveChatService {
   private static final Logger log = LoggerFactory.getLogger(WebLiveChatService.class);
-  private static final int MESSAGE_PAGE_SIZE = 24;
+  private static final int MESSAGE_QUERY_LIMIT = 65;
   private static final Duration VISITOR_DELIVERY_LEASE = Duration.ofMinutes(2);
   private static final String CLOSED_MESSAGE = "상담이 종료되었습니다.";
   private final WebLiveChatRepository repository;
@@ -162,7 +162,7 @@ public class WebLiveChatService {
     }
     return new SessionView(
         withoutVisitorBody(conversation),
-        repository.ownerMessagesAfter(conversation.id(), 0L, MESSAGE_PAGE_SIZE),
+        repository.ownerMessagesAfter(conversation.id(), 0L, MESSAGE_QUERY_LIMIT),
         repository.unreadCount(conversation.id())
     );
   }
@@ -284,7 +284,7 @@ public class WebLiveChatService {
     return conversation == null
         ? List.of()
         : repository.ownerMessagesAfter(
-            conversation.id(), Math.max(0L, afterId), MESSAGE_PAGE_SIZE
+            conversation.id(), Math.max(0L, afterId), MESSAGE_QUERY_LIMIT
         );
   }
 

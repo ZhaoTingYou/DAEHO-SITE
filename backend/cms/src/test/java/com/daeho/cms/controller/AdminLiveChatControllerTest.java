@@ -141,6 +141,33 @@ class AdminLiveChatControllerTest {
   }
 
   @Test
+  void oldGenerationTopicCloseRemainsActionableBehindMoreThanFiftyNewerClosedRows()
+      throws Exception {
+    var website = new ArrayList<WebLiveChatRepository.CmsConversationSummary>();
+    for (var index = 0; index < 51; index += 1) {
+      website.add(summary(websiteConversation(
+          "newer-closed-%02d".formatted(index), "closed", "", 701L,
+          NOW.plusSeconds(1_000L - index)
+      )));
+    }
+    var oldTopicClose = new WebLiveChatRepository.Conversation(
+        "old-topic-close", "visitor-secret-id", 1L, "-1003425727647", "inquiry-web",
+        "ko", "closed", "Website Customer", "website@example.com", "Website inquiry",
+        "2026-09", NOW, "", "topic_close", 0L, "", 701L, 704L, 0L,
+        NOW.minusSeconds(90_000), NOW.minusSeconds(90_000), NOW.minusSeconds(80_000), NOW
+    );
+    website.add(summary(oldTopicClose));
+    when(websiteRepository.recentConversations(50)).thenReturn(website);
+    when(legacyRepository.recentSessions(50)).thenReturn(List.of());
+
+    mvc.perform(get("/api/admin/live-chat").header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.sessions.length()").value(51))
+        .andExpect(jsonPath("$.sessions[50].id").value("old-topic-close"))
+        .andExpect(jsonPath("$.sessions[50].source").value("website"));
+  }
+
+  @Test
   void websiteCloseIsResolvedFromTheStoredIdAndNeverTrustsAClientSource() throws Exception {
     var active = websiteConversation("website-id", "active", "", 701L, NOW);
     var closed = websiteConversation("website-id", "closed", "", 701L, NOW.plusSeconds(1));
