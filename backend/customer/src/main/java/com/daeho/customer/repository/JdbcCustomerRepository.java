@@ -30,6 +30,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())
         ON CONFLICT (id) DO UPDATE SET
           status = excluded.status,
+          ci_fingerprint = excluded.ci_fingerprint,
           grant_hash = excluded.grant_hash,
           grant_expires_at = excluded.grant_expires_at,
           consumed_at = excluded.consumed_at,
