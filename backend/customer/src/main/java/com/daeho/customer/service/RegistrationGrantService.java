@@ -50,11 +50,18 @@ public class RegistrationGrantService {
   }
 
   public VerificationSession consumeForSignup(String grant) {
-    var session = requireGrant(grant, false);
+    var session = requireValidGrant(grant);
+    if (session.consumedAt() != null) {
+      return session;
+    }
     var grantHash = hash(grant);
     var now = clock.instant();
     if (!store.consumeGrant(session.id(), grantHash, now)) {
-      throw new RegistrationGrantException("Registration grant has already been consumed");
+      // Cognito can invoke the pre-sign-up trigger before applying every
+      // password-policy check. A password rejection must not strand the
+      // already-verified user. Treat a concurrent or repeated validation of
+      // the same unexpired grant as an idempotent retry.
+      return requireGrant(grant, true);
     }
     return session.consumedAt(now);
   }
@@ -87,14 +94,21 @@ public class RegistrationGrantService {
   }
 
   private VerificationSession requireGrant(String grant, boolean mustBeConsumed) {
+    var session = requireValidGrant(grant);
+    if (mustBeConsumed ? session.consumedAt() == null : session.consumedAt() != null) {
+      throw new RegistrationGrantException("Registration grant is invalid or expired");
+    }
+    return session;
+  }
+
+  private VerificationSession requireValidGrant(String grant) {
     if (grant == null || grant.isBlank()) {
       throw new RegistrationGrantException("Registration grant is required");
     }
     var grantHash = hash(grant);
     var session = store.findByGrantHash(grantHash);
     var now = clock.instant();
-    if (session == null || (mustBeConsumed ? session.consumedAt() == null : session.consumedAt() != null)
-        || session.grantExpiresAt() == null
+    if (session == null || session.grantExpiresAt() == null
         || !session.grantExpiresAt().isAfter(now) || !"verified".equals(session.status())
         || !session.adultVerified()) {
       throw new RegistrationGrantException("Registration grant is invalid or expired");

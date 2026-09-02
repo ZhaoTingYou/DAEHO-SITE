@@ -16,7 +16,7 @@ class RegistrationGrantServiceTest {
   private final Clock clock = Clock.fixed(Instant.parse("2026-09-02T00:00:00Z"), ZoneOffset.UTC);
 
   @Test
-  void consumesARegistrationGrantOnlyOnce() {
+  void marksARegistrationGrantConsumedAndKeepsValidationIdempotent() {
     var store = new MemoryStore();
     var service = new RegistrationGrantService(store, clock);
     var issued = service.issue(verifiedSession("subject@example.com"));
@@ -28,8 +28,8 @@ class RegistrationGrantServiceTest {
         .isEqualTo("subject@example.com");
     assertThat(service.requireConsumedPhoneForProvisioning("+821012345678").phone())
         .isEqualTo("+821012345678");
-    assertThatThrownBy(() -> service.consumeForSignup(issued.grant()))
-        .isInstanceOf(RegistrationGrantException.class);
+    assertThat(service.consumeForSignup(issued.grant()).consumedAt())
+        .isEqualTo(consumed.consumedAt());
   }
 
   @Test
@@ -50,10 +50,22 @@ class RegistrationGrantServiceTest {
     var issued = service.issue(verifiedSession("+821012345678"));
 
     assertThat(service.consumeForSignup(issued.grant()).phone()).isEqualTo("+821012345678");
-    assertThatThrownBy(() -> service.consumeForSignup(issued.grant()))
-        .isInstanceOf(RegistrationGrantException.class);
+    assertThat(service.consumeForSignup(issued.grant()).consumedAt()).isNotNull();
     assertThat(service.requireConsumedForProvisioning(issued.grant()).phone())
         .isEqualTo("+821012345678");
+  }
+
+  @Test
+  void allowsPreSignupRetryAfterCognitoRejectsThePassword() {
+    var store = new MemoryStore();
+    var service = new RegistrationGrantService(store, clock);
+    var issued = service.issue(verifiedSession("+821012345678"));
+
+    var firstValidation = service.consumeForSignup(issued.grant());
+    var retryValidation = service.consumeForSignup(issued.grant());
+
+    assertThat(retryValidation.id()).isEqualTo(firstValidation.id());
+    assertThat(retryValidation.consumedAt()).isEqualTo(firstValidation.consumedAt());
   }
 
   private VerificationSession verifiedSession(String identifier) {
