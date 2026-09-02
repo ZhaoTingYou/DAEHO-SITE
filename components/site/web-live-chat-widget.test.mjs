@@ -21,6 +21,14 @@ test('widget supports focus, escape, reduced motion, and mobile dialog semantics
   assert.match(source, /safe-area-inset-bottom/);
 });
 
+test('dialog bypasses Lenis so desktop wheel events reach its nested scrollers', () => {
+  const lenisProvider = read('../motion/lenis-provider.tsx');
+  const dialog = source.match(/<motion\.section[\s\S]*?role="dialog"[\s\S]*?>/)?.[0] ?? '';
+
+  assert.match(lenisProvider, /closest\('\[data-lenis-prevent\]'\)/);
+  assert.match(dialog, /data-lenis-prevent/);
+});
+
 test('widget orchestrates the Task 8 client through every customer state', () => {
   assert.match(source, /createWebLiveChatState/);
   assert.match(source, /reduceWebLiveChatState/);

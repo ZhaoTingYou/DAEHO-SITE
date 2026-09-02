@@ -538,6 +538,7 @@ export function WebLiveChatWidget({
             <motion.section
               key="dialog"
               ref={dialogRef}
+              data-lenis-prevent
               role="dialog"
               aria-modal="true"
               aria-labelledby={titleId}
