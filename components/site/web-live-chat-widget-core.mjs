@@ -58,7 +58,7 @@ export function createLogicalMutationController(createKey) {
     },
     finish(operation, outcome) {
       if (!current || !operation || current.generation !== operation.generation) return false;
-      if (outcome === 'ambiguous_failure') {
+      if (outcome === 'ambiguous_failure' || outcome === 'in_progress') {
         current = {...current, status: 'retryable'};
       } else if (outcome === 'accepted') {
         current = {...current, status: 'accepted', key: ''};

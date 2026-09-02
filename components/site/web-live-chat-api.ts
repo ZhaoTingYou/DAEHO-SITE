@@ -77,7 +77,7 @@ export async function startConversation(input: StartConversationInput): Promise<
 export async function sendVisitorMessage(
   body: string,
   clientMessageKey: string
-): Promise<{messageId: number; status: string}> {
+): Promise<{messageId: number; status: 'sent' | 'in_progress'}> {
   return request(
     `${API_ROOT}/conversations/current/messages`,
     parseSendResponse,
@@ -270,12 +270,14 @@ function parseConversationResponse(value: unknown): {conversation: WebLiveChatCo
   return {conversation: parseConversation(object.conversation)};
 }
 
-function parseSendResponse(value: unknown): {messageId: number; status: string} {
+function parseSendResponse(value: unknown): {
+  messageId: number;
+  status: 'sent' | 'in_progress';
+} {
   const object = responseObject(value);
   const messageId = positiveInteger(object.messageId);
   if (messageId === null
-      || typeof object.status !== 'string'
-      || !object.status.trim()) {
+      || (object.status !== 'sent' && object.status !== 'in_progress')) {
     throw new TypeError('Invalid send response.');
   }
   return {messageId, status: object.status};

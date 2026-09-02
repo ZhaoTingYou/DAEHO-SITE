@@ -27,7 +27,7 @@ export function createLogicalMutationController(createKey: () => string): {
   edit(): boolean;
   finish(
     operation: LogicalMutationOperation,
-    outcome: 'success' | 'accepted' | 'definitive_failure' | 'ambiguous_failure'
+    outcome: 'success' | 'accepted' | 'definitive_failure' | 'ambiguous_failure' | 'in_progress'
   ): boolean;
   isLocked(): boolean;
   reset(): void;

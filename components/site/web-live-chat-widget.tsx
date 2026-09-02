@@ -62,6 +62,7 @@ export type WebLiveChatCopy = {
   sendLabel: string;
   sendingLabel: string;
   sentLabel: string;
+  inProgressLabel: string;
   sendError: string;
   retrySendLabel: string;
   reconnectingLabel: string;
@@ -456,9 +457,14 @@ export function WebLiveChatWidget({
     if (!operation) return;
     dispatch({type: 'send_pending'});
     try {
-      await sendVisitorMessage(body, operation.key);
-      if (!sendMutationRef.current.finish(operation, 'success')) return;
-      dispatch({type: 'send_succeeded'});
+      const response = await sendVisitorMessage(body, operation.key);
+      if (response.status === 'sent') {
+        if (!sendMutationRef.current.finish(operation, 'success')) return;
+        dispatch({type: 'send_succeeded'});
+      } else {
+        if (!sendMutationRef.current.finish(operation, 'in_progress')) return;
+        dispatch({type: 'send_in_progress'});
+      }
     } catch (error) {
       const outcome = isDefinitiveMutationFailure(error)
         ? 'definitive_failure'
@@ -686,10 +692,20 @@ function ConversationView({copy, mode, state, onChange, onSubmit}: {
         </label>
         <div className="mt-3 flex items-center justify-between gap-3">
           <p aria-live="polite" className={`text-xs ${state.sendStatus === 'failed' ? 'text-[#9B2C2C]' : 'text-[#526074]'}`}>
-            {state.sendStatus === 'sent' ? copy.sentLabel : state.sendStatus === 'failed' ? copy.sendError : ''}
+            {state.sendStatus === 'sent'
+              ? copy.sentLabel
+              : state.sendStatus === 'in_progress'
+                ? copy.inProgressLabel
+                : state.sendStatus === 'failed'
+                  ? copy.sendError
+                  : ''}
           </p>
           <button type="submit" disabled={!state.messageDraft.trim() || state.sendStatus === 'pending'} className={`${primaryButtonClass} mt-0 w-auto min-w-28 px-5`}>
-            {state.sendStatus === 'pending' ? copy.sendingLabel : state.sendStatus === 'failed' ? copy.retrySendLabel : copy.sendLabel}
+            {state.sendStatus === 'pending'
+              ? copy.sendingLabel
+              : state.sendStatus === 'failed' || state.sendStatus === 'in_progress'
+                ? copy.retrySendLabel
+                : copy.sendLabel}
           </button>
         </div>
       </form>

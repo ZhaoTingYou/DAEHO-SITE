@@ -118,6 +118,29 @@ test('conversation and write response shapes are validated at every endpoint', a
   }
 });
 
+test('send response accepts only sent and in-progress delivery states', async () => {
+  const originalFetch = globalThis.fetch;
+  try {
+    for (const status of ['sent', 'in_progress']) {
+      globalThis.fetch = async () => jsonResponse({messageId: 7, status});
+      assert.deepEqual(
+        await api.sendVisitorMessage('hello', '12345678901234567890'),
+        {messageId: 7, status}
+      );
+    }
+
+    for (const status of ['queued', 'delivered', '']) {
+      globalThis.fetch = async () => jsonResponse({messageId: 7, status});
+      await assert.rejects(
+        api.sendVisitorMessage('hello', '12345678901234567890'),
+        (error) => error instanceof api.WebLiveChatApiError
+      );
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('non-2xx and oversized responses fail explicitly', async () => {
   const originalFetch = globalThis.fetch;
   try {

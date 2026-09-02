@@ -8,6 +8,10 @@ import {
   loadMessagePages,
   nextFocusIndex
 } from './web-live-chat-widget-core.mjs';
+import {
+  createWebLiveChatState,
+  reduceWebLiveChatState
+} from './web-live-chat-core.mjs';
 
 test('message paging advances from the durable cursor until a short page', async () => {
   const rows = Array.from({length: 205}, (_, index) => ({
@@ -73,6 +77,25 @@ test('logical mutation controller serializes edits and retries while rejecting s
   assert.equal(controller.finish(replacement, 'accepted'), true);
   assert.equal(controller.edit(), false);
   assert.equal(controller.begin('payload A'), null);
+});
+
+test('in-progress send preserves draft and status while retry reuses the identical key', () => {
+  let keyNumber = 0;
+  const controller = createLogicalMutationController(() => `key-${++keyNumber}`);
+  let state = reduceWebLiveChatState(createWebLiveChatState(), {
+    type: 'message_draft', body: 'same logical message'
+  });
+  const first = controller.begin(state.messageDraft);
+  state = reduceWebLiveChatState(state, {type: 'send_pending'});
+
+  assert.equal(controller.finish(first, 'in_progress'), true);
+  state = reduceWebLiveChatState(state, {type: 'send_in_progress'});
+
+  assert.equal(state.messageDraft, 'same logical message');
+  assert.equal(state.sendStatus, 'in_progress');
+  const retry = controller.begin(state.messageDraft);
+  assert.equal(retry.key, first.key);
+  assert.equal(controller.finish(first, 'in_progress'), false);
 });
 
 test('accepted start remains locked when later history hydration fails', async () => {

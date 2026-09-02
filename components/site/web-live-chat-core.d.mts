@@ -44,7 +44,7 @@ export type WebLiveChatState = {
   highestDurableEventId: number;
   formDraft: {name: string; contact: string; content: string; consent: boolean};
   messageDraft: string;
-  sendStatus: 'idle' | 'pending' | 'sent' | 'failed';
+  sendStatus: 'idle' | 'pending' | 'in_progress' | 'sent' | 'failed';
   sseFailures: number;
   polling: boolean;
   retryDelayMs: number;
@@ -55,7 +55,7 @@ export type WebLiveChatReducerEvent =
   | {type: 'toggle'}
   | {type: 'form_draft'; patch: Partial<WebLiveChatState['formDraft']>}
   | {type: 'message_draft'; body: string}
-  | {type: 'send_pending' | 'send_succeeded' | 'send_failed'}
+  | {type: 'send_pending' | 'send_in_progress' | 'send_succeeded' | 'send_failed'}
   | {type: 'session_loaded'; session: WebLiveChatSessionInput}
   | {type: 'session_metadata_loaded'; session: Omit<WebLiveChatSessionInput, 'messages'>}
   | {type: 'messages_merged'; messages: WebLiveChatSessionInput['messages']}

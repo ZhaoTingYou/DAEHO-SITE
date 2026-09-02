@@ -1309,6 +1309,7 @@
       "sendLabel": "Send",
       "sendingLabel": "Sending…",
       "sentLabel": "Message sent.",
+      "inProgressLabel": "Delivery is still being confirmed. You can safely retry the same message.",
       "sendError": "The message was not sent. Your draft is still here.",
       "retrySendLabel": "Retry send",
       "reconnectingLabel": "Restoring the connection. New replies will be checked automatically.",

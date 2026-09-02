@@ -211,6 +211,8 @@ export function reduceWebLiveChatState(state, event) {
       return {...state, messageDraft: String(event.body ?? ''), sendStatus: 'idle'};
     case 'send_pending':
       return {...state, sendStatus: 'pending'};
+    case 'send_in_progress':
+      return {...state, sendStatus: 'in_progress'};
     case 'send_succeeded':
       return {...state, messageDraft: '', sendStatus: 'sent'};
     case 'send_failed':

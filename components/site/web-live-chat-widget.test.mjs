@@ -102,3 +102,15 @@ test('registration and send mutations are generation-guarded and classify defini
   assert.match(source, /status === 'accepted'/);
   assert.match(source, /copy\.hydrationError/);
 });
+
+test('in-progress delivery is retry-safe and never presented as sent', () => {
+  const ko = JSON.parse(read('../../messages/ko.json'));
+  const en = JSON.parse(read('../../messages/en.json'));
+
+  assert.match(source, /response\.status === 'sent'/);
+  assert.match(source, /finish\(operation, 'in_progress'\)/);
+  assert.match(source, /send_in_progress/);
+  assert.match(source, /copy\.inProgressLabel/);
+  assert.notEqual(ko.common.webLiveChat.inProgressLabel, ko.common.webLiveChat.sentLabel);
+  assert.notEqual(en.common.webLiveChat.inProgressLabel, en.common.webLiveChat.sentLabel);
+});
