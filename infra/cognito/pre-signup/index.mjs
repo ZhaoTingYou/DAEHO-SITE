@@ -7,7 +7,11 @@ export async function handler(event) {
   }
   const registrationGrant = event.request?.clientMetadata?.registrationGrant;
   const phone = normalizePhone(event.request?.userAttributes?.phone_number);
-  if (!registrationGrant || !phone || phone !== normalizePhone(event.userName)) {
+  // Pools configured with phone_number/email as username attributes replace the
+  // submitted Username with an internal UUID before invoking this trigger.
+  // The verified phone must therefore be matched against userAttributes below,
+  // not event.userName.
+  if (!registrationGrant || !phone) {
     throw new Error('Verified registration is required');
   }
   const response = await fetch(validationUrl, {

@@ -34,10 +34,15 @@ test('rejects a grant verified for a different phone', async (t) => {
   await assert.rejects(() => handler(signupEvent('+821012345678')), /does not match/);
 });
 
+test('rejects registration without a valid phone attribute', async () => {
+  await assert.rejects(() => handler(signupEvent('not-a-phone')), /Verified registration is required/);
+});
+
 function signupEvent(phone) {
   return {
     triggerSource: 'PreSignUp_SignUp',
-    userName: phone,
+    // Cognito uses an internal UUID here when phone_number is a username attribute.
+    userName: '7ca74d47-f22e-41a6-8cb7-b5d3f9ee5cc4',
     request: {
       clientMetadata: {registrationGrant: 'grant-value'},
       userAttributes: {phone_number: phone}
