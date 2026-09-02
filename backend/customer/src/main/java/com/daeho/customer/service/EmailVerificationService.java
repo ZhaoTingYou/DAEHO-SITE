@@ -116,7 +116,8 @@ public class EmailVerificationService {
     var verified = new VerificationSession(
         id, "email_declaration", text(row.get("identifier")), "", "", "", true,
         text(row.get("locale")), text(row.get("terms_version")), text(row.get("privacy_version")),
-        Boolean.TRUE.equals(row.get("marketing_consent")), "verified", "", null, expires, null
+        Boolean.TRUE.equals(row.get("marketing_consent")), "verified", "", null, expires, null,
+        "", "", ""
     );
     sessions.save(verified);
     return grants.issue(verified);

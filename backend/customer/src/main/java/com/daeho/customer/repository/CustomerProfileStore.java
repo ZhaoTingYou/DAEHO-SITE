@@ -15,7 +15,8 @@ public interface CustomerProfileStore {
 
   CustomerProfile createFromVerification(String subject, VerificationSession verification, String loginName);
 
-  CustomerProfile relinkVerifiedPhone(UUID customerId, String subject, String loginName);
+  CustomerProfile relinkVerifiedPhone(
+      UUID customerId, String subject, String loginName, VerificationSession verification);
 
   CustomerProfile update(String subject, String displayName, String email, String organization, String team, String locale);
 

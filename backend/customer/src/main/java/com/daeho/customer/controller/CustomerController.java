@@ -64,14 +64,16 @@ public class CustomerController {
   public CustomerProfile provisionFromAuthenticatedPhone(
       HttpServletRequest request, @RequestBody AuthenticatedPhoneProvisionRequest input) {
     internalApiKey.require(request);
-    return accounts.provisionFromAuthenticatedPhone(input.subject(), input.phone(), input.loginName());
+    return accounts.provisionFromAuthenticatedPhone(
+        input.subject(), input.phone(), input.loginName(), input.registrationGrant());
   }
 
   @PostMapping("/v1/internal/registration-grants/validate")
   public Map<String, Object> validateRegistrationGrant(
       HttpServletRequest request, @RequestBody RegistrationGrantValidation input) {
     internalApiKey.require(request);
-    var verification = registrationGrants.consumeForSignup(input.registrationGrant());
+    var verification = registrationGrants.consumeForSignup(
+        input.registrationGrant(), input.userPoolId(), input.clientId(), input.username());
     accounts.requireRegistrationIdentifierAvailable(verification);
     return Map.of(
         "method", verification.method(),
@@ -109,9 +111,11 @@ public class CustomerController {
 
   public record ProfileUpdate(String displayName, String email, String organization, String team, String locale) {}
 
-  public record AuthenticatedPhoneProvisionRequest(String subject, String phone, String loginName) {}
+  public record AuthenticatedPhoneProvisionRequest(
+      String subject, String phone, String loginName, String registrationGrant) {}
 
-  public record RegistrationGrantValidation(String registrationGrant) {}
+  public record RegistrationGrantValidation(
+      String registrationGrant, String userPoolId, String clientId, String username) {}
 
   public record StatusUpdate(String status, String actor) {}
 }

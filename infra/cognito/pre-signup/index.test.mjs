@@ -12,7 +12,12 @@ test('allows only a matching verified SMS registration grant', async (t) => {
   t.after(() => { globalThis.fetch = originalFetch; });
   globalThis.fetch = async (_url, init) => {
     assert.equal(init.headers['x-customer-service-key'], 'test-internal-key');
-    assert.deepEqual(JSON.parse(init.body), {registrationGrant: 'grant-value'});
+    assert.deepEqual(JSON.parse(init.body), {
+      registrationGrant: 'grant-value',
+      userPoolId: 'ap-northeast-2_legacyPool',
+      clientId: 'legacy-client',
+      username: '7ca74d47-f22e-41a6-8cb7-b5d3f9ee5cc4'
+    });
     return new Response(JSON.stringify({
       method: 'sms_declaration', phone: '+821012345678', adultVerified: true
     }), {status: 200});
@@ -39,6 +44,16 @@ test('rejects registration without a valid phone attribute', async () => {
   await assert.rejects(() => handler(signupEvent('not-a-phone')), /Verified registration is required/);
 });
 
+test('preserves the stable duplicate-phone code without exposing backend details', async (t) => {
+  const originalFetch = globalThis.fetch;
+  t.after(() => { globalThis.fetch = originalFetch; });
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    error: 'duplicate_phone', message: 'sensitive backend detail'
+  }), {status: 400});
+
+  await assert.rejects(() => handler(signupEvent('+821012345678')), /DAEHO_DUPLICATE_PHONE/);
+});
+
 test('username pool accepts only a normalized DAEHO login name', async (t) => {
   const originalFetch = globalThis.fetch;
   t.after(() => { globalThis.fetch = originalFetch; });
@@ -62,6 +77,8 @@ test('username pool accepts only a normalized DAEHO login name', async (t) => {
 function signupEvent(phone) {
   return {
     triggerSource: 'PreSignUp_SignUp',
+    userPoolId: 'ap-northeast-2_legacyPool',
+    callerContext: {clientId: 'legacy-client'},
     // Cognito uses an internal UUID here when phone_number is a username attribute.
     userName: '7ca74d47-f22e-41a6-8cb7-b5d3f9ee5cc4',
     request: {

@@ -172,7 +172,8 @@ public class SmsVerificationService {
     var verified = new VerificationSession(
         id, "sms_declaration", challenge.phone(), "", challenge.phone(), hmac("phone:" + challenge.phone()), true,
         challenge.locale(), challenge.termsVersion(), challenge.privacyVersion(),
-        challenge.marketingConsent(), "verified", "", null, challenge.expiresAt(), null
+        challenge.marketingConsent(), "verified", "", null, challenge.expiresAt(), null,
+        "", "", ""
     );
     sessions.save(verified);
     return grants.issue(verified);

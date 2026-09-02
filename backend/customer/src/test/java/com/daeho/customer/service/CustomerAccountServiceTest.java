@@ -27,13 +27,16 @@ class CustomerAccountServiceTest {
     var migrated = profile("new-pool-subject", "daeho.member");
     var verification = verification(phone);
     when(profiles.findBySubject("new-pool-subject")).thenReturn(null);
-    when(grants.requireConsumedPhoneForProvisioning(phone)).thenReturn(verification);
+    when(grants.requireConsumedForProvisioning("registration-grant", phone, "daeho.member"))
+        .thenReturn(verification);
     when(profiles.findByPhone(phone)).thenReturn(old);
-    when(profiles.relinkVerifiedPhone(old.customerId(), "new-pool-subject", "daeho.member"))
+    when(profiles.relinkVerifiedPhone(
+        old.customerId(), "new-pool-subject", "daeho.member", verification))
         .thenReturn(migrated);
 
     var result = new CustomerAccountService(profiles, grants)
-        .provisionFromAuthenticatedPhone("new-pool-subject", phone, "daeho.member");
+        .provisionFromAuthenticatedPhone(
+            "new-pool-subject", phone, "daeho.member", "registration-grant");
 
     assertThat(result.loginName()).isEqualTo("daeho.member");
     verify(profiles, never()).createFromVerification("new-pool-subject", verification, "daeho.member");
@@ -46,16 +49,18 @@ class CustomerAccountServiceTest {
     var migrated = profile("first-new-pool-subject", "daeho.member");
     var verification = verification(phone);
     when(profiles.findBySubject("second-new-pool-subject")).thenReturn(null);
-    when(grants.requireConsumedPhoneForProvisioning(phone)).thenReturn(verification);
+    when(grants.requireConsumedForProvisioning("registration-grant", phone, "another.member"))
+        .thenReturn(verification);
     when(profiles.findByPhone(phone)).thenReturn(migrated);
 
     var service = new CustomerAccountService(profiles, grants);
 
     assertThatThrownBy(() -> service.provisionFromAuthenticatedPhone(
-        "second-new-pool-subject", phone, "another.member"))
+        "second-new-pool-subject", phone, "another.member", "registration-grant"))
         .isInstanceOf(RegistrationGrantException.class);
     verify(profiles, never()).createFromVerification("second-new-pool-subject", verification, "another.member");
-    verify(profiles, never()).relinkVerifiedPhone(migrated.customerId(), "second-new-pool-subject", "another.member");
+    verify(profiles, never()).relinkVerifiedPhone(
+        migrated.customerId(), "second-new-pool-subject", "another.member", verification);
     verify(grants, never()).consumeProvisioningReceipt(verification.id());
   }
 
@@ -72,7 +77,7 @@ class CustomerAccountServiceTest {
         UUID.randomUUID(), "sms_declaration", phone, "", phone, "fingerprint", true, "ko",
         "terms-2026-09", "privacy-2026-09", false, "verified", "hash",
         Instant.parse("2026-09-02T00:15:00Z"), Instant.parse("2026-09-02T00:15:00Z"),
-        Instant.parse("2026-09-02T00:00:00Z")
+        Instant.parse("2026-09-02T00:00:00Z"), "ap-northeast-2_pool", "client-one", "daeho.member"
     );
   }
 }

@@ -19,27 +19,32 @@ public record VerificationSession(
     String grantHash,
     Instant grantExpiresAt,
     Instant expiresAt,
-    Instant consumedAt
+    Instant consumedAt,
+    String signupUserPoolId,
+    String signupClientId,
+    String signupUsername
 ) {
   public VerificationSession withGrant(String hash, Instant expiresAt) {
     return new VerificationSession(
         id, method, identifier, legalName, phone, ciFingerprint, adultVerified, locale,
         termsVersion, privacyVersion, marketingConsent, status, hash, expiresAt,
-        this.expiresAt, consumedAt
+        this.expiresAt, consumedAt, signupUserPoolId, signupClientId, signupUsername
     );
   }
 
-  public VerificationSession consumedAt(Instant value) {
+  public VerificationSession withSignupBinding(
+      String userPoolId, String clientId, String username, Instant consumedAt) {
     return new VerificationSession(
         id, method, identifier, legalName, phone, ciFingerprint, adultVerified, locale,
         termsVersion, privacyVersion, marketingConsent, status, grantHash, grantExpiresAt,
-        expiresAt, value
+        expiresAt, consumedAt, userPoolId, clientId, username
     );
   }
 
   public VerificationSession withPhone(String value) {
     return new VerificationSession(id, method, identifier, legalName, value, ciFingerprint,
         adultVerified, locale, termsVersion, privacyVersion, marketingConsent, status,
-        grantHash, grantExpiresAt, expiresAt, consumedAt);
+        grantHash, grantExpiresAt, expiresAt, consumedAt,
+        signupUserPoolId, signupClientId, signupUsername);
   }
 }

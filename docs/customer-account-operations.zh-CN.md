@@ -72,11 +72,13 @@ SOLAPI_SENDER_NUMBER=<已登记发信号码，仅数字>
    - `CUSTOMER_GRANT_VALIDATION_URL=https://daeho.works/internal/cognito/registration-grants/validate`
    - `CUSTOMER_INTERNAL_API_KEY=<与服务端相同的内部密钥>`
    - `CUSTOM_USERNAME_POOL_ID=<当前支持自定义用户名的 User Pool ID>`
-6. Lambda 必须能访问上述 HTTPS 地址。Nginx 只公开这一个精确的验证路径，并由内部密钥和限流保护。该路径会在 Cognito 建号前原子消费一次性凭证；之后的客户资料建立只接受已由该触发器消费的凭证。
+6. Lambda 必须能访问上述 HTTPS 地址。Nginx 只公开这一个精确的验证路径，并由内部密钥和限流保护。该路径会在 Cognito 建号前把一次性凭证原子绑定到准确的 User Pool、App Client 和用户名；只有完全相同的 Cognito 密码策略重试可以复用，改换用户名、客户端或用户池会被拒绝。资料建立还必须同时持有浏览器的加密注册事务 Cookie，并匹配已验签 ID Token 中的手机号和用户名。
 7. 未安装并实测 Pre sign-up trigger 前，不得把 `CUSTOMER_ACCOUNTS_ENABLED` 改为 `true`。该触发器会拒绝没有有效短信注册凭证、重复消费凭证、手机号不匹配或未成年声明未通过的直接 Cognito 注册。
-8. 注册页先让 BFF 把一次性凭证加密保存在 `HttpOnly` Cookie，再由浏览器直接把用户名、手机号和密码提交给 Cognito。密码不经过 Next 或 Customer Service。用户首次登录后，OIDC 回调使用已验签的 `sub`、`cognito:username` 和已验证手机声明幂等建立客户资料。如果同一已验证手机号原来属于旧手机号用户池，Customer Account Service 仅允许一次迁移：保留原 `customer_id`、문의关联和资料，只更新 Cognito `sub` 与登录用户名，并写入迁移审计事件；迁移完成后同一手机号不能再创建第二个用户名账号，停用或待删除账号也不能借此恢复。
+8. 注册页先让 BFF 把一次性凭证加密保存在 `HttpOnly` Cookie，再由浏览器直接把用户名、手机号和密码提交给 Cognito。密码不经过 Next 或 Customer Service。用户首次登录后，OIDC 回调使用已验签的 `sub`、`cognito:username`、手机号和同一注册 Cookie 幂等建立客户资料。如果同一已验证手机号原来属于旧手机号用户池，Customer Account Service 仅允许一次迁移：保留原 `customer_id`、문의关联和资料，把新旧两个 Cognito `sub` 都保存在身份映射表中，将新用户名设为当前身份，并补记本次短信验证、条款、隐私与营销选择；迁移完成后同一手机号不能再创建第二个用户名账号，停用或待删除账号也不能借此恢复。旧池仍可解析原 `sub`，用于受控回滚。
 
 ## 功能开关与发布顺序
+
+> 生产开放前置：自定义用户名池需要补齐 SOLAPI 手机验证后的“找回用户名 / 重置密码”流程。该流程未完成前，只能创建和配置测试池，不得在 CMS 开启会员入口。
 
 1. 保持 `CUSTOMER_ACCOUNTS_ENABLED=false` 和 CMS 内的两个开关关闭，先启动 PostgreSQL、CMS、`customer-api`、Next 和 Nginx；确认两个 Spring 服务 health 为 `UP`。
 2. 在测试 User Pool、测试 SOLAPI Key 和测试域名上完成全部验收。

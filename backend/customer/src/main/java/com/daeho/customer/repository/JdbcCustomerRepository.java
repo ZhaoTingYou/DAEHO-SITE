@@ -28,21 +28,26 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         INSERT INTO verification_sessions (
           id, method, identifier, legal_name, phone, ci_fingerprint, adult_verified,
           locale, terms_version, privacy_version, marketing_consent, status,
-          grant_hash, grant_expires_at, expires_at, consumed_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())
+          grant_hash, grant_expires_at, expires_at, consumed_at,
+          signup_user_pool_id, signup_client_id, signup_username, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())
         ON CONFLICT (id) DO UPDATE SET
           status = excluded.status,
           ci_fingerprint = excluded.ci_fingerprint,
           grant_hash = excluded.grant_hash,
           grant_expires_at = excluded.grant_expires_at,
           consumed_at = excluded.consumed_at,
+          signup_user_pool_id = excluded.signup_user_pool_id,
+          signup_client_id = excluded.signup_client_id,
+          signup_username = excluded.signup_username,
           updated_at = now()
         """,
         session.id(), session.method(), session.identifier(), session.legalName(), session.phone(),
         session.ciFingerprint(), session.adultVerified(), session.locale(), session.termsVersion(),
         session.privacyVersion(), session.marketingConsent(), session.status(), session.grantHash(),
         databaseTimestamp(session.grantExpiresAt()), databaseTimestamp(session.expiresAt()),
-        databaseTimestamp(session.consumedAt())
+        databaseTimestamp(session.consumedAt()), session.signupUserPoolId(), session.signupClientId(),
+        session.signupUsername()
     );
     return session;
   }
@@ -78,11 +83,18 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
   }
 
   @Override
-  public boolean consumeGrant(UUID id, String grantHash, Instant consumedAt) {
+  public boolean bindGrant(UUID id, String grantHash, String userPoolId, String clientId,
+      String username, Instant consumedAt) {
     return jdbc.update("""
-        UPDATE verification_sessions SET consumed_at = ?, updated_at = now()
-        WHERE id = ? AND grant_hash = ? AND consumed_at IS NULL AND grant_expires_at > now()
-        """, databaseTimestamp(consumedAt), id, grantHash) == 1;
+        UPDATE verification_sessions SET
+          consumed_at = COALESCE(consumed_at, ?),
+          signup_user_pool_id = ?, signup_client_id = ?, signup_username = ?, updated_at = now()
+        WHERE id = ? AND grant_hash = ? AND grant_expires_at > now()
+          AND (consumed_at IS NULL OR (
+            signup_user_pool_id = ? AND signup_client_id = ? AND signup_username = ?
+          ))
+        """, databaseTimestamp(consumedAt), userPoolId, clientId, username, id, grantHash,
+        userPoolId, clientId, username) == 1;
   }
 
   @Override
@@ -193,7 +205,11 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
 
   @Override
   public CustomerProfile findBySubject(String subject) {
-    return jdbc.query("SELECT * FROM customer_profiles WHERE cognito_subject = ?", this::mapProfile, subject)
+    return jdbc.query("""
+        SELECT p.* FROM customer_profiles p
+        JOIN customer_identities i ON i.customer_id = p.customer_id
+        WHERE i.cognito_subject = ?
+        """, this::mapProfile, subject)
         .stream().findFirst().orElse(null);
   }
 
@@ -247,6 +263,10 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         verification.phone(), isEmail ? verification.identifier() : "", verification.locale(),
         isEmail ? "overseas" : "KR", verification.method());
     jdbc.update("""
+        INSERT INTO customer_identities (cognito_subject, customer_id)
+        VALUES (?, ?)
+        """, subject, customerId);
+    jdbc.update("""
         INSERT INTO identity_verifications (
           id, customer_id, method, identifier_snapshot, ci_fingerprint,
           adult_verified, verified_at, created_at
@@ -265,27 +285,50 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
 
   @Override
   @Transactional
-  public CustomerProfile relinkVerifiedPhone(UUID customerId, String subject, String loginName) {
+  public CustomerProfile relinkVerifiedPhone(
+      UUID customerId, String subject, String loginName, VerificationSession verification) {
+    jdbc.update("""
+        INSERT INTO customer_identities (cognito_subject, customer_id)
+        VALUES (?, ?)
+        """, subject, customerId);
     var updated = jdbc.update("""
         UPDATE customer_profiles SET cognito_subject = ?, login_name = ?,
+          verification_method = ?, verified_at = COALESCE(CAST(? AS timestamptz), now()), adult_verified = true,
           session_version = session_version + 1, sessions_valid_after = now(), updated_at = now()
         WHERE customer_id = ? AND phone <> '' AND login_name = '' AND status = 'active'
-        """, subject, loginName, customerId);
+        """, subject, loginName, verification.method(), databaseTimestamp(verification.consumedAt()), customerId);
     if (updated != 1) {
       throw new RegistrationGrantException("Verified account migration could not be completed");
     }
+    jdbc.update("""
+        INSERT INTO identity_verifications (
+          id, customer_id, method, identifier_snapshot, ci_fingerprint,
+          adult_verified, verified_at, created_at
+        ) VALUES (?, ?, ?, ?, '', true, COALESCE(CAST(? AS timestamptz), now()), now())
+        """, UUID.randomUUID(), customerId, verification.method(), mask(verification.identifier()),
+        databaseTimestamp(verification.consumedAt()));
+    jdbc.update("""
+        INSERT INTO consent_receipts (
+          id, customer_id, terms_version, privacy_version, marketing_consent, consented_at
+        ) VALUES (?, ?, ?, ?, ?, COALESCE(CAST(? AS timestamptz), now()))
+        """, UUID.randomUUID(), customerId, verification.termsVersion(),
+        verification.privacyVersion(), verification.marketingConsent(),
+        databaseTimestamp(verification.consumedAt()));
     audit(customerId, "account_identity_migrated", "system");
     return findBySubject(subject);
   }
 
   @Override
   public CustomerProfile update(String subject, String displayName, String email, String organization, String team, String locale) {
-    jdbc.update("""
+    var updated = jdbc.update("""
         UPDATE customer_profiles SET display_name = ?, email = ?, organization = ?, team = ?,
-          locale = ?, updated_at = now() WHERE cognito_subject = ? AND status = 'active'
+          locale = ?, updated_at = now()
+        WHERE customer_id = (
+          SELECT customer_id FROM customer_identities WHERE cognito_subject = ?
+        ) AND status = 'active'
         """, displayName, email, organization, team, locale, subject);
     var profile = findBySubject(subject);
-    if (profile != null) {
+    if (updated == 1 && profile != null) {
       audit(profile.customerId(), "profile_updated", subject);
     }
     return profile;
@@ -293,13 +336,15 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
 
   @Override
   public CustomerProfile markDeletionPending(String subject) {
-    jdbc.update("""
+    var updated = jdbc.update("""
         UPDATE customer_profiles SET status = 'deletion_pending', deletion_requested_at = now(),
           session_version = session_version + 1, sessions_valid_after = now(), updated_at = now()
-        WHERE cognito_subject = ? AND status = 'active'
+        WHERE customer_id = (
+          SELECT customer_id FROM customer_identities WHERE cognito_subject = ?
+        ) AND status = 'active'
         """, subject);
     var profile = findBySubject(subject);
-    if (profile != null) {
+    if (updated == 1 && profile != null) {
       audit(profile.customerId(), "deletion_requested", subject);
     }
     return profile;
@@ -310,7 +355,9 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     jdbc.update("""
         UPDATE customer_profiles SET session_version = session_version + 1,
           sessions_valid_after = now(), updated_at = now()
-        WHERE cognito_subject = ? AND status = 'active'
+        WHERE customer_id = (
+          SELECT customer_id FROM customer_identities WHERE cognito_subject = ?
+        ) AND status = 'active'
         """, subject);
     return findBySubject(subject);
   }
@@ -351,6 +398,7 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     for (var customerId : customerIds) {
       jdbc.update("DELETE FROM identity_verifications WHERE customer_id = ?", customerId);
       jdbc.update("DELETE FROM consent_receipts WHERE customer_id = ?", customerId);
+      jdbc.update("DELETE FROM customer_identities WHERE customer_id = ?", customerId);
       jdbc.update("""
           UPDATE customer_profiles SET cognito_subject = ?, status = 'deleted', legal_name = '',
             login_name = '', display_name = '', phone = '', email = '', locale = 'ko', country = '',
@@ -420,7 +468,8 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         rs.getBoolean("adult_verified"), rs.getString("locale"), rs.getString("terms_version"),
         rs.getString("privacy_version"), rs.getBoolean("marketing_consent"), rs.getString("status"),
         rs.getString("grant_hash"), instant(rs, "grant_expires_at"), instant(rs, "expires_at"),
-        instant(rs, "consumed_at")
+        instant(rs, "consumed_at"), rs.getString("signup_user_pool_id"),
+        rs.getString("signup_client_id"), rs.getString("signup_username")
     );
   }
 

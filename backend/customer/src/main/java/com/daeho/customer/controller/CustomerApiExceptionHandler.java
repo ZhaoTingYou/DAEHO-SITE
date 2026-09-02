@@ -12,6 +12,6 @@ public class CustomerApiExceptionHandler {
   @ExceptionHandler(RegistrationGrantException.class)
   ResponseEntity<Map<String, String>> registrationGrant(RegistrationGrantException error) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(Map.of("error", "invalid_registration_grant", "message", error.getMessage()));
+        .body(Map.of("error", error.code(), "message", error.getMessage()));
   }
 }

@@ -15,5 +15,6 @@ public interface VerificationSessionStore {
 
   void delete(UUID id);
 
-  boolean consumeGrant(UUID id, String grantHash, Instant consumedAt);
+  boolean bindGrant(UUID id, String grantHash, String userPoolId, String clientId,
+      String username, Instant consumedAt);
 }

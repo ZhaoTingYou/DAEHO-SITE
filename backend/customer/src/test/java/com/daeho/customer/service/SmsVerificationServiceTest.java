@@ -39,7 +39,8 @@ class SmsVerificationServiceTest {
         false
     ), "203.0.113.10", "request-1234567890");
     var grant = service.complete(started.verificationId(), "123456");
-    var verified = grants.consumeForSignup(grant.grant());
+    var verified = grants.consumeForSignup(
+        grant.grant(), "ap-northeast-2_pool", "client-one", "daeho.member");
 
     assertThat(sender.to).isEqualTo("+821012345678");
     assertThat(sender.text).isEqualTo("[DAEHO] 인증번호 123456 (10분간 유효)");
@@ -234,12 +235,17 @@ class SmsVerificationServiceTest {
     public void delete(UUID id) { sessions.remove(id); }
 
     @Override
-    public boolean consumeGrant(UUID id, String grantHash, Instant consumedAt) {
+    public boolean bindGrant(UUID id, String grantHash, String userPoolId, String clientId,
+        String username, Instant consumedAt) {
       var session = sessions.get(id);
-      if (session == null || session.consumedAt() != null || !grantHash.equals(session.grantHash())) {
+      if (session == null || !grantHash.equals(session.grantHash())) {
         return false;
       }
-      sessions.put(id, session.consumedAt(consumedAt));
+      if (session.consumedAt() != null && (!userPoolId.equals(session.signupUserPoolId())
+          || !clientId.equals(session.signupClientId()) || !username.equals(session.signupUsername()))) {
+        return false;
+      }
+      sessions.put(id, session.withSignupBinding(userPoolId, clientId, username, consumedAt));
       return true;
     }
   }

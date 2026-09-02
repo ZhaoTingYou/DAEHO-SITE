@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
   let subject: string;
   let authTime = 0;
   let provisioning: ReturnType<typeof profileProvisioningRequest> = null;
+  const registration = await readRegistrationTransaction();
   try {
     const {payload} = await jwtVerify(
       tokens.id_token,
@@ -71,11 +72,11 @@ export async function GET(request: NextRequest) {
     }
     subject = payload.sub;
     authTime = typeof payload.auth_time === 'number' ? payload.auth_time : 0;
-    provisioning = profileProvisioningRequest(subject, payload);
+    provisioning = profileProvisioningRequest(
+      subject, payload, registration?.registrationGrant ?? '');
   } catch {
     return NextResponse.redirect(new URL('/ko/login?error=invalid_id_token', config.siteUrl));
   }
-  const registration = await readRegistrationTransaction();
   if (provisioning) {
     const customerBaseUrl = process.env.CUSTOMER_BACKEND_URL?.replace(/\/+$/, '');
     const profileResponse = customerBaseUrl

@@ -22,20 +22,23 @@ public class CustomerAccountService {
   }
 
   @Transactional
-  public CustomerProfile provisionFromAuthenticatedPhone(String subject, String phone, String loginName) {
+  public CustomerProfile provisionFromAuthenticatedPhone(
+      String subject, String phone, String loginName, String registrationGrant) {
     var existing = profiles.findBySubject(subject);
     if (existing != null) {
       return existing;
     }
     var normalizedLoginName = LoginNamePolicy.normalize(loginName);
-    var verification = grants.requireConsumedPhoneForProvisioning(phone);
+    var verification = grants.requireConsumedForProvisioning(
+        registrationGrant, phone, normalizedLoginName);
     var profileForPhone = profiles.findByPhone(phone);
     CustomerProfile profile;
     if (profileForPhone == null) {
       profile = profiles.createFromVerification(subject, verification, normalizedLoginName);
     } else {
       requireLegacyMigrationCandidate(profileForPhone);
-      profile = profiles.relinkVerifiedPhone(profileForPhone.customerId(), subject, normalizedLoginName);
+      profile = profiles.relinkVerifiedPhone(
+          profileForPhone.customerId(), subject, normalizedLoginName, verification);
     }
     grants.consumeProvisioningReceipt(verification.id());
     return profile;
@@ -53,7 +56,8 @@ public class CustomerAccountService {
 
   private void requireLegacyMigrationCandidate(CustomerProfile profile) {
     if (!"active".equals(profile.status()) || (profile.loginName() != null && !profile.loginName().isBlank())) {
-      throw new RegistrationGrantException("An account already exists for this phone; use account recovery");
+      throw new RegistrationGrantException(
+          "duplicate_phone", "An account already exists for this phone; use account recovery");
     }
   }
 

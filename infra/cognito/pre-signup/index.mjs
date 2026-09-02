@@ -25,10 +25,19 @@ export async function handler(event) {
       'content-type': 'application/json',
       'x-customer-service-key': customerApiKey
     },
-    body: JSON.stringify({registrationGrant}),
+    body: JSON.stringify({
+      registrationGrant,
+      userPoolId: event.userPoolId,
+      clientId: event.callerContext?.clientId,
+      username: event.userName
+    }),
     signal: AbortSignal.timeout(8_000)
   });
   if (!response.ok) {
+    const failure = await response.json().catch(() => ({}));
+    if (failure?.error === 'duplicate_phone') {
+      throw new Error('DAEHO_DUPLICATE_PHONE');
+    }
     throw new Error('Registration grant is invalid or expired');
   }
   const verification = await response.json();

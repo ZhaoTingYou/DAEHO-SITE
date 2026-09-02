@@ -49,36 +49,35 @@ public class RegistrationGrantService {
     return new IssuedGrant(grant, expiry);
   }
 
-  public VerificationSession consumeForSignup(String grant) {
+  public VerificationSession consumeForSignup(
+      String grant, String userPoolId, String clientId, String username) {
+    var pool = requireBindingValue(userPoolId);
+    var client = requireBindingValue(clientId);
+    var login = requireBindingValue(username);
     var session = requireValidGrant(grant);
-    if (session.consumedAt() != null) {
-      return session;
-    }
     var grantHash = hash(grant);
     var now = clock.instant();
-    if (!store.consumeGrant(session.id(), grantHash, now)) {
-      // Cognito can invoke the pre-sign-up trigger before applying every
-      // password-policy check. A password rejection must not strand the
-      // already-verified user. Treat a concurrent or repeated validation of
-      // the same unexpired grant as an idempotent retry.
-      return requireGrant(grant, true);
+    if (!store.bindGrant(session.id(), grantHash, pool, client, login, now)) {
+      throw new RegistrationGrantException("Registration grant is invalid or bound to another signup");
     }
-    return session.consumedAt(now);
+    var bound = requireGrant(grant, true);
+    if (!pool.equals(bound.signupUserPoolId()) || !client.equals(bound.signupClientId())
+        || !login.equals(bound.signupUsername())) {
+      throw new RegistrationGrantException("Registration grant is invalid or bound to another signup");
+    }
+    return bound;
   }
 
-  public VerificationSession requireConsumedForProvisioning(String grant) {
-    return requireGrant(grant, true);
-  }
-
-  public VerificationSession requireConsumedPhoneForProvisioning(String phone) {
+  public VerificationSession requireConsumedForProvisioning(
+      String grant, String phone, String username) {
     if (phone == null || !phone.matches("^\\+8210\\d{8}$")) {
       throw new RegistrationGrantException("A verified Korean phone is required");
     }
-    var session = store.findLatestConsumedByPhoneFingerprint(phoneFingerprint(phone));
-    if (session == null) session = store.findLatestConsumedByPhone(phone);
-    if (session == null || session.consumedAt() == null || !"verified".equals(session.status())
-        || !session.adultVerified()) {
-      throw new RegistrationGrantException("No completed registration exists for this verified phone");
+    var session = requireGrant(grant, true);
+    var samePhone = phone.equals(session.phone())
+        || phoneFingerprint(phone).equals(session.ciFingerprint());
+    if (!samePhone || !username.equals(session.signupUsername())) {
+      throw new RegistrationGrantException("Registration grant does not match this account");
     }
     return session.withPhone(phone);
   }
@@ -114,6 +113,14 @@ public class RegistrationGrantService {
       throw new RegistrationGrantException("Registration grant is invalid or expired");
     }
     return session;
+  }
+
+  private String requireBindingValue(String value) {
+    var normalized = value == null ? "" : value.trim();
+    if (normalized.isBlank() || normalized.length() > 256) {
+      throw new RegistrationGrantException("Registration binding is invalid");
+    }
+    return normalized;
   }
 
   private String hash(String value) {
