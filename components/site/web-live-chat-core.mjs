@@ -31,6 +31,13 @@ export function visibleTeamMessages(messages) {
   });
 }
 
+export function mergeVisibleMessages(existing, incoming) {
+  return visibleTeamMessages([
+    ...(Array.isArray(existing) ? existing : []),
+    ...(Array.isArray(incoming) ? incoming : [])
+  ]).sort((left, right) => left.id - right.id);
+}
+
 export function createWebLiveChatState() {
   return {
     panelOpen: false,
@@ -38,6 +45,7 @@ export function createWebLiveChatState() {
     launcherExpanded: false,
     view: 'closed_launcher',
     available: true,
+    conversationFingerprint: null,
     conversationState: null,
     messages: [],
     unread: 0,
@@ -110,13 +118,50 @@ export function reduceWebLiveChatState(state, event) {
     case 'session_loaded': {
       const session = event.session ?? {};
       const messages = visibleTeamMessages(session.messages);
+      const fingerprint = conversationFingerprint(session.conversation);
       const next = {
         ...state,
         available: session.available !== false,
+        conversationFingerprint: fingerprint,
         conversationState: session.conversation?.state ?? null,
         messages,
         unread: unreadCount(session),
         lastReadTeamMessageId: durableId(session.conversation?.lastReadTeamMessageId),
+        highestTeamMessageId: messages.reduce(
+          (highest, message) => message.direction === 'team'
+            ? Math.max(highest, durableId(message.id))
+            : highest,
+          0
+        ),
+        highestDurableEventId: messages.reduce(
+          (highest, message) => Math.max(highest, durableId(message.id)), 0
+        )
+      };
+      return {...next, view: next.panelOpen ? openView(next) : 'closed_launcher'};
+    }
+    case 'session_metadata_loaded': {
+      const session = event.session ?? {};
+      const fingerprint = conversationFingerprint(session.conversation);
+      const changed = fingerprint !== state.conversationFingerprint;
+      const messages = changed ? [] : state.messages;
+      const next = {
+        ...state,
+        available: session.available !== false,
+        conversationFingerprint: fingerprint,
+        conversationState: session.conversation?.state ?? null,
+        messages,
+        unread: unreadCount(session),
+        lastReadTeamMessageId: durableId(session.conversation?.lastReadTeamMessageId),
+        highestTeamMessageId: changed ? 0 : state.highestTeamMessageId,
+        highestDurableEventId: changed ? 0 : state.highestDurableEventId
+      };
+      return {...next, view: next.panelOpen ? openView(next) : 'closed_launcher'};
+    }
+    case 'messages_merged': {
+      const messages = mergeVisibleMessages(state.messages, event.messages);
+      const next = {
+        ...state,
+        messages,
         highestTeamMessageId: messages.reduce(
           (highest, message) => message.direction === 'team'
             ? Math.max(highest, durableId(message.id))
@@ -189,6 +234,11 @@ export function reduceWebLiveChatState(state, event) {
 
 function durableId(value) {
   return Number.isSafeInteger(value) && value > 0 ? value : 0;
+}
+
+function conversationFingerprint(conversation) {
+  if (!conversation || typeof conversation !== 'object') return null;
+  return `${String(conversation.locale ?? '')}|${String(conversation.createdAt ?? '')}`;
 }
 
 export function unreadCount(session) {

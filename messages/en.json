@@ -1297,6 +1297,7 @@
       "retryStartLabel": "Try again",
       "requiredError": "Please complete your name, contact, inquiry, and consent.",
       "submissionError": "We could not start the consultation. Your details are still here, and it is safe to retry.",
+      "hydrationError": "Your consultation was accepted, but its history is taking longer to load. Close and reopen this panel to refresh it.",
       "waitingTitle": "Your inquiry is received",
       "waitingBody": "The DAEHO consultation team will review it and reply in this window.",
       "retentionNote": "You can return in this browser to read replies and history for up to 30 days.",

@@ -38,11 +38,19 @@ test('widget orchestrates the Task 8 client through every customer state', () =>
 });
 
 test('logical writes retain one client key through explicit retry', () => {
-  assert.match(source, /startKeyRef/);
-  assert.match(source, /sendKeyRef/);
+  assert.match(source, /startMutationRef/);
+  assert.match(source, /sendMutationRef/);
   assert.match(source, /createClientMessageKey/);
   assert.match(source, /sendStatus === 'failed'/);
   assert.doesNotMatch(source, /direction === 'visitor'/);
+});
+
+test('stream source stays native-stable until polling threshold and broadcasts only invalidate', () => {
+  assert.match(source, /createStableStreamController/);
+  assert.doesNotMatch(source, /\[openCycle[^\]]*sseFailures/);
+  const broadcastHandler = source.match(/channel\.onmessage[\s\S]*?\n    \};/)?.[0] ?? '';
+  assert.match(broadcastHandler, /invalidation\.invalidate/);
+  assert.doesNotMatch(broadcastHandler, /dispatch\(/);
 });
 
 test('site integration uses embedded copy and an enabled-only public config', () => {
@@ -64,4 +72,33 @@ test('site integration uses embedded copy and an enabled-only public config', ()
   assert.equal(en.common.webLiveChat.label, 'Live consultation');
   assert.equal(en.common.webLiveChat.noSignIn, 'No sign-in required');
   assert.equal(existsSync(new URL('./telegram-live-chat-button.tsx', import.meta.url)), false);
+});
+
+test('closed launcher refreshes authoritative unread state without marking it read', () => {
+  assert.match(source, /CLOSED_REFRESH_MS/);
+  assert.match(source, /visibilitychange/);
+  assert.match(source, /addEventListener\('focus'/);
+  assert.match(source, /if \(!state\.panelOpen[\s\S]*markRead/);
+  assert.match(source, /loadMessagePages/);
+  assert.match(source, /session_metadata_loaded/);
+  assert.match(source, /messages_merged/);
+});
+
+test('modal blocks pointer access and contains focus after interrupted-safe motion completion', () => {
+  assert.match(source, /data-web-live-chat-backdrop/);
+  assert.match(source, /\.inert = true/);
+  assert.match(source, /focusin/);
+  assert.match(source, /nextFocusIndex/);
+  assert.match(source, /onLayoutAnimationComplete/);
+  assert.doesNotMatch(source, /requestAnimationFrame\(\(\) => closeRef\.current\?\.focus/);
+});
+
+test('registration and send mutations are generation-guarded and classify definitive failures', () => {
+  assert.match(source, /createLogicalMutationController/);
+  assert.match(source, /WebLiveChatApiError/);
+  assert.match(source, /definitive_failure/);
+  assert.match(source, /ambiguous_failure/);
+  assert.match(source, /<fieldset[\s\S]*disabled=/);
+  assert.match(source, /status === 'accepted'/);
+  assert.match(source, /copy\.hydrationError/);
 });

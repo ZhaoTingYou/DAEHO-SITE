@@ -17,6 +17,8 @@ export type WebLiveChatSessionInput = {
   available: boolean;
   conversation: {
     state: 'opening' | 'active' | 'closed' | 'needs_attention';
+    locale?: 'ko' | 'en';
+    createdAt?: string;
     lastReadTeamMessageId?: number;
   } | null;
   messages: Array<PublicMessage | {id: number; direction: 'visitor'; body: string; createdAt?: string}>;
@@ -33,6 +35,7 @@ export type WebLiveChatState = {
   launcherExpanded: false;
   view: WebLiveChatView;
   available: boolean;
+  conversationFingerprint: string | null;
   conversationState: 'opening' | 'active' | 'closed' | 'needs_attention' | null;
   messages: PublicMessage[];
   unread: number;
@@ -54,6 +57,8 @@ export type WebLiveChatReducerEvent =
   | {type: 'message_draft'; body: string}
   | {type: 'send_pending' | 'send_succeeded' | 'send_failed'}
   | {type: 'session_loaded'; session: WebLiveChatSessionInput}
+  | {type: 'session_metadata_loaded'; session: Omit<WebLiveChatSessionInput, 'messages'>}
+  | {type: 'messages_merged'; messages: WebLiveChatSessionInput['messages']}
   | {type: 'conversation_closed'}
   | {type: 'new_consultation'}
   | {type: 'mark_read'; messageId?: number}
@@ -66,5 +71,6 @@ export function reduceWebLiveChatState(
   event: WebLiveChatReducerEvent
 ): WebLiveChatState;
 export function visibleTeamMessages(messages: unknown): PublicMessage[];
+export function mergeVisibleMessages(existing: unknown, incoming: unknown): PublicMessage[];
 export function shouldUsePolling(sseFailures: number): boolean;
 export function unreadCount(session: unknown): number;

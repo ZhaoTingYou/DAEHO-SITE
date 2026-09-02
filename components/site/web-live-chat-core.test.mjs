@@ -4,11 +4,58 @@ import test from 'node:test';
 
 import {
   createWebLiveChatState,
+  mergeVisibleMessages,
   reduceWebLiveChatState,
   shouldUsePolling,
   unreadCount,
   visibleTeamMessages
 } from './web-live-chat-core.mjs';
+
+test('paged history merges preserve later stream rows and deduplicate durable IDs', () => {
+  const existing = [
+    {id: 150, direction: 'team', body: 'arrived by stream'},
+    {id: 151, direction: 'system', body: 'closed by stream'}
+  ];
+  const page = [
+    {id: 100, direction: 'team', body: 'older page'},
+    {id: 150, direction: 'team', body: 'duplicate replay'},
+    {id: 152, direction: 'visitor', body: 'private'}
+  ];
+
+  assert.deepEqual(mergeVisibleMessages(existing, page).map(({id, body}) => ({id, body})), [
+    {id: 100, body: 'older page'},
+    {id: 150, body: 'arrived by stream'},
+    {id: 151, body: 'closed by stream'}
+  ]);
+});
+
+test('authoritative metadata replaces a prior conversation before invalidated history merges', () => {
+  const oldConversation = reduceWebLiveChatState(createWebLiveChatState(), {
+    type: 'session_loaded',
+    session: {
+      available: true,
+      conversation: {state: 'closed', locale: 'ko', createdAt: '2026-09-01T00:00:00Z'},
+      messages: [{id: 10, direction: 'team', body: 'old reply'}],
+      unreadCount: 1
+    }
+  });
+  const replacement = reduceWebLiveChatState(oldConversation, {
+    type: 'session_metadata_loaded',
+    session: {
+      available: true,
+      conversation: {state: 'active', locale: 'ko', createdAt: '2026-09-02T00:00:00Z'},
+      unreadCount: 0
+    }
+  });
+  const merged = reduceWebLiveChatState(replacement, {
+    type: 'messages_merged',
+    messages: [{id: 20, direction: 'team', body: 'new reply'}]
+  });
+
+  assert.deepEqual(replacement.messages, []);
+  assert.equal(replacement.unread, 0);
+  assert.deepEqual(merged.messages.map(({id}) => id), [20]);
+});
 
 test('public history never renders visitor bodies', () => {
   assert.deepEqual(visibleTeamMessages([

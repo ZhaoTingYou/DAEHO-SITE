@@ -12,12 +12,20 @@ import {
   getSession,
   markRead,
   sendVisitorMessage,
-  startConversation
+  startConversation,
+  WebLiveChatApiError
 } from './web-live-chat-api';
 import {
   createWebLiveChatState,
   reduceWebLiveChatState
 } from './web-live-chat-core.mjs';
+import {
+  createInvalidationQueue,
+  createLogicalMutationController,
+  createStableStreamController,
+  loadMessagePages,
+  nextFocusIndex
+} from './web-live-chat-widget-core.mjs';
 
 export type WebLiveChatCopy = {
   label: string;
@@ -42,6 +50,7 @@ export type WebLiveChatCopy = {
   retryStartLabel: string;
   requiredError: string;
   submissionError: string;
+  hydrationError: string;
   waitingTitle: string;
   waitingBody: string;
   retentionNote: string;
@@ -63,8 +72,10 @@ export type WebLiveChatCopy = {
   unavailableBody: string;
 };
 
-type StartStatus = 'idle' | 'pending' | 'failed';
+type StartStatus = 'idle' | 'pending' | 'accepted' | 'failed';
 type ChatState = ReturnType<typeof createWebLiveChatState>;
+
+const CLOSED_REFRESH_MS = 30_000;
 
 const FOCUSABLE = [
   'button:not([disabled])',
@@ -98,33 +109,66 @@ export function WebLiveChatWidget({
   const launcherRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
-  const startKeyRef = useRef<string | null>(null);
-  const sendKeyRef = useRef<string | null>(null);
+  const startMutationRef = useRef(createLogicalMutationController(createClientMessageKey));
+  const sendMutationRef = useRef(createLogicalMutationController(createClientMessageKey));
   const formStartedAtRef = useRef(0);
   const restoreFocusRef = useRef(false);
-  const sseAttemptedOpenRef = useRef(-1);
+  const stateRef = useRef(state);
+  const streamControllerRef = useRef(createStableStreamController(connectEvents));
   const announcedTeamIdRef = useRef(0);
   const broadcastRef = useRef<BroadcastChannel | null>(null);
+  const focusGenerationRef = useRef(0);
+  const focusShellReadyRef = useRef(false);
+  const focusContentReadyRef = useRef(false);
+  const focusContainedRef = useRef(false);
   const titleId = useId();
   const errorId = useId();
 
-  const refreshSession = useCallback(async () => {
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  const refreshAuthoritative = useCallback(async () => {
     const session = await getSession();
-    let messages = session.messages;
-    if (session.conversation) messages = (await getMessages(0)).items;
-    const newestTeamMessage = messages
+    const fingerprint = session.conversation
+      ? `${session.conversation.locale}|${session.conversation.createdAt}`
+      : null;
+    const changed = fingerprint !== stateRef.current.conversationFingerprint;
+    const currentCursor = changed ? 0 : stateRef.current.highestDurableEventId;
+    dispatch({
+      type: 'session_metadata_loaded',
+      session: {
+        available: session.available,
+        conversation: session.conversation,
+        unreadCount: session.unreadCount
+      }
+    });
+    if (!session.conversation) return session;
+
+    dispatch({type: 'messages_merged', messages: session.messages});
+    const sessionCursor = session.messages.reduce(
+      (highest, message) => Math.max(highest, message.id),
+      currentCursor
+    );
+    const page = await loadMessagePages(
+      async (after) => (await getMessages(after)).items,
+      sessionCursor
+    );
+    dispatch({type: 'messages_merged', messages: page.items});
+    const newestTeamMessage = [...session.messages, ...page.items]
       .filter((message) => message.direction === 'team')
       .sort((left, right) => right.id - left.id)[0];
     if (newestTeamMessage && newestTeamMessage.id > announcedTeamIdRef.current) {
       announcedTeamIdRef.current = newestTeamMessage.id;
       setAnnouncement(newestTeamMessage.body);
     }
-    dispatch({type: 'session_loaded', session: {...session, messages}});
-    return {...session, messages};
+    return session;
   }, []);
 
   const closePanel = useCallback(() => {
     if (state.panelOpen) {
+      focusGenerationRef.current += 1;
+      focusContainedRef.current = false;
       restoreFocusRef.current = true;
       dispatch({type: 'toggle'});
     }
@@ -132,20 +176,25 @@ export function WebLiveChatWidget({
 
   const openPanel = useCallback(() => {
     formStartedAtRef.current = Date.now();
+    const generation = focusGenerationRef.current + 1;
+    focusGenerationRef.current = generation;
+    focusShellReadyRef.current = Boolean(reduceMotion);
+    focusContentReadyRef.current = false;
+    focusContainedRef.current = false;
     setInitializing(true);
-    setOpenCycle((value) => value + 1);
+    setOpenCycle(generation);
     dispatch({type: 'toggle'});
-  }, []);
+  }, [reduceMotion]);
 
   useEffect(() => {
     if (!state.panelOpen) return;
     let active = true;
-    refreshSession()
+    refreshAuthoritative()
       .catch(() => {
         if (active) {
           dispatch({
-            type: 'session_loaded',
-            session: {available: false, conversation: null, messages: [], unreadCount: 0}
+            type: 'session_metadata_loaded',
+            session: {available: false, conversation: null, unreadCount: 0}
           });
         }
       })
@@ -155,7 +204,32 @@ export function WebLiveChatWidget({
     return () => {
       active = false;
     };
-  }, [openCycle, refreshSession, state.panelOpen]);
+  }, [openCycle, refreshAuthoritative, state.panelOpen]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const refresh = () => {
+      if (document.visibilityState === 'visible') {
+        refreshAuthoritative().catch(() => undefined);
+      }
+    };
+    refresh();
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [enabled, refreshAuthoritative]);
+
+  const tryEnterFocus = useCallback((generation: number) => {
+    if (generation !== focusGenerationRef.current
+        || !stateRef.current.panelOpen
+        || !focusShellReadyRef.current
+        || !focusContentReadyRef.current) return;
+    focusContainedRef.current = true;
+    closeRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (!state.panelOpen) return;
@@ -167,27 +241,43 @@ export function WebLiveChatWidget({
         return;
       }
       if (event.key !== 'Tab' || !dialog) return;
-      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE));
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (!first || !last) {
+      if (!focusContainedRef.current) {
         event.preventDefault();
-        dialog.focus();
-      } else if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
+        return;
       }
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE));
+      const currentIndex = focusable.indexOf(document.activeElement as HTMLElement);
+      const targetIndex = nextFocusIndex(focusable.length, currentIndex, event.shiftKey);
+      event.preventDefault();
+      if (targetIndex < 0) dialog.focus();
+      else focusable[targetIndex]?.focus();
+    };
+    const onFocusIn = (event: FocusEvent) => {
+      if (!focusContainedRef.current || !dialog) return;
+      if (event.target instanceof Node && dialog.contains(event.target)) return;
+      const first = dialog.querySelector<HTMLElement>(FOCUSABLE);
+      (first ?? dialog).focus();
     };
     window.addEventListener('keydown', onKeyDown);
-    const frame = requestAnimationFrame(() => closeRef.current?.focus());
+    document.addEventListener('focusin', onFocusIn);
     return () => {
-      cancelAnimationFrame(frame);
       window.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('focusin', onFocusIn);
     };
   }, [closePanel, state.panelOpen]);
+
+  useEffect(() => {
+    if (!state.panelOpen) return;
+    const boundary = document.querySelector<HTMLElement>('.site-cursor-scope');
+    if (!boundary) return;
+    const outside = Array.from(boundary.children).filter(
+      (element): element is HTMLElement => element instanceof HTMLElement
+        && !element.hasAttribute('data-site-floating-actions')
+    );
+    const previous = outside.map((element) => element.inert);
+    outside.forEach((element) => { element.inert = true; });
+    return () => outside.forEach((element, index) => { element.inert = previous[index] ?? false; });
+  }, [state.panelOpen]);
 
   useEffect(() => {
     if (!state.panelOpen || !window.matchMedia('(max-width: 767px)').matches) return;
@@ -202,77 +292,78 @@ export function WebLiveChatWidget({
   }, [state.panelOpen]);
 
   useEffect(() => {
-    if (state.panelOpen || !restoreFocusRef.current) return;
-    const timer = window.setTimeout(() => {
-      restoreFocusRef.current = false;
-      launcherRef.current?.focus();
-    }, reduceMotion ? 130 : 320);
-    return () => window.clearTimeout(timer);
-  }, [reduceMotion, state.panelOpen]);
-
-  useEffect(() => {
     if (!enabled || typeof BroadcastChannel === 'undefined') return;
     const channel = new BroadcastChannel('daeho-live-chat');
+    const invalidation = createInvalidationQueue(async () => {
+      await refreshAuthoritative().catch(() => undefined);
+    });
     broadcastRef.current = channel;
     channel.onmessage = ({data}: MessageEvent<unknown>) => {
       if (!data || typeof data !== 'object' || Array.isArray(data)) return;
       const hint = data as {type?: unknown; messageId?: unknown};
-      if (hint.type === 'read' && Number.isSafeInteger(hint.messageId)) {
-        dispatch({type: 'mark_read', messageId: Number(hint.messageId)});
-      } else if (hint.type === 'closed') {
-        dispatch({type: 'conversation_closed'});
-      }
+      const validRead = hint.type === 'read' && Number.isSafeInteger(hint.messageId);
+      if (validRead || hint.type === 'closed') invalidation.invalidate();
     };
     return () => {
       broadcastRef.current = null;
+      invalidation.dispose();
       channel.close();
     };
-  }, [enabled]);
+  }, [enabled, refreshAuthoritative]);
 
   const streamEligible = state.conversationState === 'opening'
     || state.conversationState === 'active'
     || state.conversationState === 'needs_attention';
 
   useEffect(() => {
+    if (state.panelOpen || !streamEligible) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refreshAuthoritative().catch(() => undefined);
+      }
+    }, CLOSED_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [refreshAuthoritative, state.panelOpen, streamEligible]);
+
+  useEffect(() => {
     if (!state.panelOpen || !streamEligible) return;
-    if (state.polling && sseAttemptedOpenRef.current === openCycle) return;
-    sseAttemptedOpenRef.current = openCycle;
-    let disconnect = () => {};
-    let active = true;
-    const connect = () => {
-      if (!active) return;
-      disconnect = connectEvents(
-        (event) => {
-          dispatch({type: 'sse_connected'});
-          if (event.type === 'heartbeat') return;
-          dispatch({type: 'durable_event', event});
-          if (event.type === 'message' && event.id > announcedTeamIdRef.current) {
-            announcedTeamIdRef.current = event.id;
-            setAnnouncement(event.message.body);
-          }
-          if (event.type === 'state') broadcastRef.current?.postMessage({type: 'closed'});
-        },
-        () => dispatch({type: 'sse_failure'})
-      );
-    };
-    const timer = window.setTimeout(connect, state.sseFailures ? state.retryDelayMs : 0);
-    const onPageHide = () => disconnect();
+    const stream = streamControllerRef.current;
+    stream.open({
+      probing: stateRef.current.polling,
+      onEvent(event) {
+        dispatch({type: 'sse_connected'});
+        if (event.type === 'heartbeat') return;
+        dispatch({type: 'durable_event', event});
+        if (event.type === 'message' && event.id > announcedTeamIdRef.current) {
+          announcedTeamIdRef.current = event.id;
+          setAnnouncement(event.message.body);
+        }
+        if (event.type === 'state') broadcastRef.current?.postMessage({type: 'closed'});
+      },
+      onFailure() {
+        dispatch({type: 'sse_failure'});
+      }
+    });
+    const onPageHide = () => stream.close();
     window.addEventListener('pagehide', onPageHide);
     return () => {
-      active = false;
-      window.clearTimeout(timer);
-      disconnect();
+      stream.close();
       window.removeEventListener('pagehide', onPageHide);
     };
-  }, [openCycle, state.panelOpen, state.polling, state.retryDelayMs, state.sseFailures, streamEligible]);
+  }, [openCycle, state.panelOpen, streamEligible]);
+
+  useEffect(() => {
+    if (!state.polling) return;
+    streamControllerRef.current.stopForPolling();
+  }, [state.polling]);
 
   useEffect(() => {
     if (!state.panelOpen || !streamEligible || !state.polling) return;
     const timer = window.setInterval(() => {
-      refreshSession().catch(() => undefined);
+      refreshAuthoritative().catch(() => undefined);
     }, 5000);
     return () => window.clearInterval(timer);
-  }, [refreshSession, state.panelOpen, state.polling, streamEligible]);
+  }, [refreshAuthoritative, state.panelOpen, state.polling, streamEligible]);
 
   useEffect(() => {
     if (!state.panelOpen
@@ -290,10 +381,15 @@ export function WebLiveChatWidget({
   }, [state.highestTeamMessageId, state.lastReadTeamMessageId, state.panelOpen]);
 
   const changeForm = useCallback((patch: Partial<ChatState['formDraft']>) => {
-    startKeyRef.current = null;
+    if (!startMutationRef.current.edit()) return;
     setStartStatus('idle');
     setStartError('');
     dispatch({type: 'form_draft', patch});
+  }, []);
+
+  const changeCompanyWebsite = useCallback((value: string) => {
+    if (!startMutationRef.current.edit()) return;
+    setCompanyWebsite(value);
   }, []);
 
   const submitStart = useCallback(async () => {
@@ -305,9 +401,18 @@ export function WebLiveChatWidget({
       setStartError(copy.requiredError);
       return;
     }
+    const operationPayload = JSON.stringify({
+      locale,
+      name: name.trim(),
+      contact: contact.trim(),
+      content: content.trim(),
+      consent,
+      companyWebsite
+    });
+    const operation = startMutationRef.current.begin(operationPayload);
+    if (!operation) return;
     setStartStatus('pending');
     setStartError('');
-    startKeyRef.current ??= createClientMessageKey();
     try {
       await startConversation({
         locale,
@@ -318,39 +423,54 @@ export function WebLiveChatWidget({
         consentVersion: 'web-live-chat-2026-09',
         companyWebsite,
         formStartedAt: formStartedAtRef.current,
-        clientMessageKey: startKeyRef.current
+        clientMessageKey: operation.key
       });
-      startKeyRef.current = null;
-      setStartStatus('idle');
-      await refreshSession();
-    } catch {
+      if (!startMutationRef.current.finish(operation, 'accepted')) return;
+      setStartStatus('accepted');
+      try {
+        await refreshAuthoritative();
+      } catch {
+        if (startMutationRef.current.isLocked()) {
+          setStartError(copy.hydrationError);
+        }
+      }
+    } catch (error) {
+      const outcome = isDefinitiveMutationFailure(error)
+        ? 'definitive_failure'
+        : 'ambiguous_failure';
+      if (!startMutationRef.current.finish(operation, outcome)) return;
       setStartStatus('failed');
       setStartError(copy.submissionError);
     }
-  }, [companyWebsite, copy.requiredError, copy.submissionError, locale, refreshSession, state.formDraft]);
+  }, [companyWebsite, copy.hydrationError, copy.requiredError, copy.submissionError, locale, refreshAuthoritative, state.formDraft]);
 
   const changeMessage = useCallback((body: string) => {
-    sendKeyRef.current = null;
+    if (!sendMutationRef.current.edit()) return;
     dispatch({type: 'message_draft', body});
   }, []);
 
   const submitMessage = useCallback(async () => {
     const body = state.messageDraft.trim();
-    if (!body || state.sendStatus === 'pending') return;
+    if (!body) return;
+    const operation = sendMutationRef.current.begin(body);
+    if (!operation) return;
     dispatch({type: 'send_pending'});
-    sendKeyRef.current ??= createClientMessageKey();
     try {
-      await sendVisitorMessage(body, sendKeyRef.current);
-      sendKeyRef.current = null;
+      await sendVisitorMessage(body, operation.key);
+      if (!sendMutationRef.current.finish(operation, 'success')) return;
       dispatch({type: 'send_succeeded'});
-    } catch {
+    } catch (error) {
+      const outcome = isDefinitiveMutationFailure(error)
+        ? 'definitive_failure'
+        : 'ambiguous_failure';
+      if (!sendMutationRef.current.finish(operation, outcome)) return;
       dispatch({type: 'send_failed'});
     }
-  }, [state.messageDraft, state.sendStatus]);
+  }, [state.messageDraft]);
 
   const startNewConsultation = useCallback(() => {
-    startKeyRef.current = null;
-    sendKeyRef.current = null;
+    startMutationRef.current.reset();
+    sendMutationRef.current.reset();
     formStartedAtRef.current = Date.now();
     setStartStatus('idle');
     setStartError('');
@@ -365,95 +485,133 @@ export function WebLiveChatWidget({
     : {layout: {duration: state.panelOpen ? 0.44 : 0.3, ease: [0.16, 1, 0.3, 1] as const}};
 
   return (
-    <motion.div
-      data-web-live-chat-open={state.panelOpen ? 'true' : undefined}
-      layout={!reduceMotion}
-      transition={transition}
-      whileHover={state.panelOpen || reduceMotion ? undefined : {y: -2, scale: 1.03}}
-      className={state.panelOpen
-        ? 'pointer-events-auto fixed inset-x-0 bottom-0 z-[120] flex h-[min(100dvh,46rem)] origin-bottom-right flex-col overflow-hidden rounded-t-[1.5rem] bg-[#F7F1E5] pb-[env(safe-area-inset-bottom)] shadow-[0_-20px_70px_rgba(5,16,31,0.28)] md:inset-x-auto md:bottom-8 md:right-8 md:h-[min(42rem,calc(100dvh-4rem))] md:w-[25rem] md:rounded-[1.5rem]'
-        : 'pointer-events-auto fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[90] md:bottom-8 md:right-8'}
-    >
-      <span className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</span>
-      <AnimatePresence initial={false} mode="wait">
+    <>
+      <AnimatePresence initial={false}>
         {state.panelOpen ? (
-          <motion.section
-            key="dialog"
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            tabIndex={-1}
+          <motion.div
+            data-web-live-chat-backdrop
+            aria-hidden="true"
+            className="pointer-events-auto fixed inset-0 z-[110] bg-[#071426]/45"
             initial={{opacity: 0}}
-            animate={{
-              opacity: 1,
-              transition: {duration: reduceMotion ? 0.12 : 0.22, delay: reduceMotion ? 0 : 0.12}
-            }}
-            exit={{
-              opacity: 0,
-              transition: {duration: reduceMotion ? 0.12 : 0.18}
-            }}
-            className="flex min-h-0 flex-1 flex-col text-[#101D30]"
-          >
-            <header className="flex min-h-16 items-center justify-between border-b border-[#C6AE78]/35 bg-[#101D30] px-5 text-white">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E4C77D]">{copy.eyebrow}</p>
-                <h2 id={titleId} className="font-heading text-lg font-semibold">{copy.title}</h2>
-              </div>
-              <button ref={closeRef} type="button" onClick={closePanel} aria-label={copy.closeLabel} className={iconButtonClass}>
-                <CloseIcon />
-              </button>
-            </header>
-
-            {initializing ? (
-              <div className="grid flex-1 place-items-center px-6" role="status">
-                <p className="text-sm text-[#34445A]">{copy.loadingLabel}</p>
-              </div>
-            ) : (
-              <div className="flex min-h-0 flex-1 flex-col">
-                {state.view === 'registration' ? (
-                  <RegistrationView copy={copy} draft={state.formDraft} status={startStatus} error={startError} errorId={errorId} companyWebsite={companyWebsite} onCompanyWebsite={setCompanyWebsite} onChange={changeForm} onSubmit={submitStart} />
-                ) : null}
-                {state.view === 'waiting' ? (
-                  <ConversationView copy={copy} mode="waiting" state={state} onChange={changeMessage} onSubmit={submitMessage} />
-                ) : null}
-                {state.view === 'active' ? (
-                  <ConversationView copy={copy} mode="active" state={state} onChange={changeMessage} onSubmit={submitMessage} />
-                ) : null}
-                {state.view === 'closed' ? (
-                  <ClosedView copy={copy} messages={state.messages} onStartNew={startNewConsultation} />
-                ) : null}
-                {state.view === 'temporarily_unavailable' ? (
-                  <StatusView title={copy.unavailableTitle} body={copy.unavailableBody} />
-                ) : null}
-              </div>
-            )}
-          </motion.section>
-        ) : (
-          <motion.button
-            key="launcher"
-            ref={launcherRef}
-            type="button"
-            onClick={openPanel}
-            aria-label={copy.openLabel}
-            className="relative flex min-h-16 items-center gap-3 rounded-full border border-white/15 bg-[#101D30] p-1.5 pr-5 text-left text-white shadow-[0_16px_42px_rgba(5,12,22,0.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C6AE78]"
-          >
-            <span aria-hidden="true" className="grid size-[52px] shrink-0 place-items-center rounded-full border border-[#C6AE78]/70 bg-[#172A44] text-[#E4C77D]">
-              <ChatIcon />
-            </span>
-            <span>
-              <span className="block font-heading text-sm font-semibold">{copy.label}</span>
-              <span className="mt-0.5 block text-xs text-white/75">{copy.noSignIn}</span>
-            </span>
-            {state.unread > 0 ? (
-              <span className="absolute -right-1 -top-1 grid min-h-6 min-w-6 place-items-center rounded-full bg-[#C6AE78] px-1 text-xs font-bold text-[#101D30]" aria-label={`${copy.unreadLabel}: ${state.unread}`}>
-                {state.unread > 99 ? '99+' : state.unread}
-              </span>
-            ) : null}
-          </motion.button>
-        )}
+            animate={{opacity: 1}}
+            exit={{opacity: 0}}
+            transition={{duration: reduceMotion ? 0.1 : 0.2}}
+          />
+        ) : null}
       </AnimatePresence>
-    </motion.div>
+      <motion.div
+        data-web-live-chat-open={state.panelOpen ? 'true' : undefined}
+        layout={!reduceMotion}
+        transition={transition}
+        whileHover={state.panelOpen || reduceMotion ? undefined : {y: -2, scale: 1.03}}
+        onLayoutAnimationComplete={() => {
+          if (stateRef.current.panelOpen) {
+            focusShellReadyRef.current = true;
+            tryEnterFocus(focusGenerationRef.current);
+          } else if (restoreFocusRef.current) {
+            restoreFocusRef.current = false;
+            launcherRef.current?.focus();
+          }
+        }}
+        className={state.panelOpen
+          ? 'pointer-events-auto fixed inset-x-0 bottom-0 z-[120] flex h-[min(100dvh,46rem)] origin-bottom-right flex-col overflow-hidden rounded-t-[1.5rem] bg-[#F7F1E5] pb-[env(safe-area-inset-bottom)] shadow-[0_-20px_70px_rgba(5,16,31,0.28)] md:inset-x-auto md:bottom-8 md:right-8 md:h-[min(42rem,calc(100dvh-4rem))] md:w-[25rem] md:rounded-[1.5rem]'
+          : 'pointer-events-auto fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[90] md:bottom-8 md:right-8'}
+      >
+        <span className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</span>
+        <AnimatePresence
+          initial={false}
+          mode="wait"
+          onExitComplete={() => {
+            if (reduceMotion && restoreFocusRef.current && !stateRef.current.panelOpen) {
+              restoreFocusRef.current = false;
+              launcherRef.current?.focus();
+            }
+          }}
+        >
+          {state.panelOpen ? (
+            <motion.section
+              key="dialog"
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              tabIndex={-1}
+              initial={{opacity: 0}}
+              animate={{
+                opacity: 1,
+                transition: {duration: reduceMotion ? 0.12 : 0.22, delay: reduceMotion ? 0 : 0.12}
+              }}
+              exit={{
+                opacity: 0,
+                transition: {duration: reduceMotion ? 0.12 : 0.18}
+              }}
+              onAnimationComplete={() => {
+                if (!stateRef.current.panelOpen || openCycle !== focusGenerationRef.current) return;
+                focusContentReadyRef.current = true;
+                tryEnterFocus(openCycle);
+              }}
+              className="flex min-h-0 flex-1 flex-col text-[#101D30]"
+            >
+              <header className="flex min-h-16 items-center justify-between border-b border-[#C6AE78]/35 bg-[#101D30] px-5 text-white">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E4C77D]">{copy.eyebrow}</p>
+                  <h2 id={titleId} className="font-heading text-lg font-semibold">{copy.title}</h2>
+                </div>
+                <button ref={closeRef} type="button" onClick={closePanel} aria-label={copy.closeLabel} className={iconButtonClass}>
+                  <CloseIcon />
+                </button>
+              </header>
+
+              {initializing ? (
+                <div className="grid flex-1 place-items-center px-6" role="status">
+                  <p className="text-sm text-[#34445A]">{copy.loadingLabel}</p>
+                </div>
+              ) : (
+                <div className="flex min-h-0 flex-1 flex-col">
+                  {state.view === 'registration' ? (
+                    <RegistrationView copy={copy} draft={state.formDraft} status={startStatus} error={startError} errorId={errorId} companyWebsite={companyWebsite} onCompanyWebsite={changeCompanyWebsite} onChange={changeForm} onSubmit={submitStart} />
+                  ) : null}
+                  {state.view === 'waiting' ? (
+                    <ConversationView copy={copy} mode="waiting" state={state} onChange={changeMessage} onSubmit={submitMessage} />
+                  ) : null}
+                  {state.view === 'active' ? (
+                    <ConversationView copy={copy} mode="active" state={state} onChange={changeMessage} onSubmit={submitMessage} />
+                  ) : null}
+                  {state.view === 'closed' ? (
+                    <ClosedView copy={copy} messages={state.messages} onStartNew={startNewConsultation} />
+                  ) : null}
+                  {state.view === 'temporarily_unavailable' ? (
+                    <StatusView title={copy.unavailableTitle} body={copy.unavailableBody} />
+                  ) : null}
+                </div>
+              )}
+            </motion.section>
+          ) : (
+            <motion.button
+              key="launcher"
+              ref={launcherRef}
+              type="button"
+              onClick={openPanel}
+              aria-label={copy.openLabel}
+              className="relative flex min-h-16 items-center gap-3 rounded-full border border-white/15 bg-[#101D30] p-1.5 pr-5 text-left text-white shadow-[0_16px_42px_rgba(5,12,22,0.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C6AE78]"
+            >
+              <span aria-hidden="true" className="grid size-[52px] shrink-0 place-items-center rounded-full border border-[#C6AE78]/70 bg-[#172A44] text-[#E4C77D]">
+                <ChatIcon />
+              </span>
+              <span>
+                <span className="block font-heading text-sm font-semibold">{copy.label}</span>
+                <span className="mt-0.5 block text-xs text-white/75">{copy.noSignIn}</span>
+              </span>
+              {state.unread > 0 ? (
+                <span className="absolute -right-1 -top-1 grid min-h-6 min-w-6 place-items-center rounded-full bg-[#C6AE78] px-1 text-xs font-bold text-[#101D30]" aria-label={`${copy.unreadLabel}: ${state.unread}`}>
+                  {state.unread > 99 ? '99+' : state.unread}
+                </span>
+              ) : null}
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </>
   );
 }
 
@@ -470,31 +628,33 @@ function RegistrationView({copy, draft, status, error, errorId, companyWebsite, 
 }) {
   return (
     <form className="min-h-0 flex-1 overflow-y-auto px-5 py-6" onSubmit={(event) => { event.preventDefault(); onSubmit(); }} noValidate>
-      <h3 className="font-heading text-2xl font-semibold">{copy.registrationTitle}</h3>
-      <p className="mt-2 text-sm leading-6 text-[#34445A]">{copy.registrationBody}</p>
-      <div className="mt-6 space-y-4">
-        <Field label={copy.nameLabel}>
-          <input required minLength={2} maxLength={80} value={draft.name} onChange={(event) => onChange({name: event.target.value})} placeholder={copy.namePlaceholder} className={fieldClass} />
-        </Field>
-        <Field label={copy.contactLabel}>
-          <input required minLength={5} maxLength={120} value={draft.contact} onChange={(event) => onChange({contact: event.target.value})} placeholder={copy.contactPlaceholder} autoComplete="email" className={fieldClass} />
-        </Field>
-        <Field label={copy.contentLabel}>
-          <textarea required minLength={2} maxLength={2000} rows={4} value={draft.content} onChange={(event) => onChange({content: event.target.value})} placeholder={copy.contentPlaceholder} className={`${fieldClass} resize-none py-3`} />
-        </Field>
-        <div aria-hidden="true" className="absolute left-[-10000px] top-auto size-px overflow-hidden">
-          <label>Website<input tabIndex={-1} autoComplete="off" value={companyWebsite} onChange={(event) => onCompanyWebsite(event.target.value)} /></label>
+      <fieldset disabled={status === 'pending' || status === 'accepted'} className="m-0 min-w-0 border-0 p-0 disabled:opacity-75">
+        <h3 className="font-heading text-2xl font-semibold">{copy.registrationTitle}</h3>
+        <p className="mt-2 text-sm leading-6 text-[#34445A]">{copy.registrationBody}</p>
+        <div className="mt-6 space-y-4">
+          <Field label={copy.nameLabel}>
+            <input required minLength={2} maxLength={80} value={draft.name} onChange={(event) => onChange({name: event.target.value})} placeholder={copy.namePlaceholder} className={fieldClass} />
+          </Field>
+          <Field label={copy.contactLabel}>
+            <input required minLength={5} maxLength={120} value={draft.contact} onChange={(event) => onChange({contact: event.target.value})} placeholder={copy.contactPlaceholder} autoComplete="email" className={fieldClass} />
+          </Field>
+          <Field label={copy.contentLabel}>
+            <textarea required minLength={2} maxLength={2000} rows={4} value={draft.content} onChange={(event) => onChange({content: event.target.value})} placeholder={copy.contentPlaceholder} className={`${fieldClass} resize-none py-3`} />
+          </Field>
+          <div aria-hidden="true" className="absolute left-[-10000px] top-auto size-px overflow-hidden">
+            <label>Website<input tabIndex={-1} autoComplete="off" value={companyWebsite} onChange={(event) => onCompanyWebsite(event.target.value)} /></label>
+          </div>
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-5 text-[#263A52]">
+            <input type="checkbox" checked={draft.consent} onChange={(event) => onChange({consent: event.target.checked})} className="mt-0.5 size-5 shrink-0 accent-[#101D30] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A78135]" />
+            <span>{copy.consentLabel}</span>
+          </label>
+          <p className="text-xs leading-5 text-[#526074]">{copy.privacyNote}</p>
+          <p id={errorId} aria-live="polite" className="min-h-5 text-sm font-medium text-[#9B2C2C]">{error}</p>
         </div>
-        <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-5 text-[#263A52]">
-          <input type="checkbox" checked={draft.consent} onChange={(event) => onChange({consent: event.target.checked})} className="mt-0.5 size-5 shrink-0 accent-[#101D30] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A78135]" />
-          <span>{copy.consentLabel}</span>
-        </label>
-        <p className="text-xs leading-5 text-[#526074]">{copy.privacyNote}</p>
-        <p id={errorId} aria-live="polite" className="min-h-5 text-sm font-medium text-[#9B2C2C]">{error}</p>
-      </div>
-      <button type="submit" disabled={status === 'pending'} aria-describedby={error ? errorId : undefined} className={primaryButtonClass}>
-        {status === 'pending' ? copy.sendingLabel : status === 'failed' ? copy.retryStartLabel : copy.startLabel}
-      </button>
+        <button type="submit" disabled={status === 'pending' || status === 'accepted'} aria-describedby={error ? errorId : undefined} className={primaryButtonClass}>
+          {status === 'pending' || status === 'accepted' ? copy.loadingLabel : status === 'failed' ? copy.retryStartLabel : copy.startLabel}
+        </button>
+      </fieldset>
     </form>
   );
 }
@@ -580,6 +740,10 @@ function Field({label, children}: {label: string; children: React.ReactNode}) {
 const fieldClass = 'min-h-11 w-full rounded-xl border border-[#AFA58F] bg-white px-3 text-base text-[#101D30] outline-none placeholder:text-[#727C89] focus-visible:border-[#8B6D2F] focus-visible:ring-2 focus-visible:ring-[#C6AE78]/60 disabled:cursor-wait disabled:opacity-65';
 const primaryButtonClass = 'mt-5 min-h-11 w-full rounded-full bg-[#101D30] px-6 text-sm font-semibold text-white shadow-sm transition-[transform,background-color] hover:bg-[#172A44] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A78135] disabled:cursor-not-allowed disabled:opacity-55 motion-reduce:transition-none';
 const iconButtonClass = 'grid size-11 place-items-center rounded-full text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E4C77D]';
+
+function isDefinitiveMutationFailure(error: unknown) {
+  return error instanceof WebLiveChatApiError && error.status >= 400 && error.status < 500;
+}
 
 function ChatIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6 fill-none stroke-current" strokeWidth="1.7"><path d="M5.5 17.5 4 21l4.2-1.8A9 9 0 1 0 5.5 17.5Z" strokeLinecap="round" strokeLinejoin="round" /><path d="M8 12h8M8 9h5" strokeLinecap="round" /></svg>;
