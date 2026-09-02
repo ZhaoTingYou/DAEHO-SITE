@@ -54,6 +54,20 @@ function assertLiveChatLimitZones(config) {
   assert.match(config, /limit_conn_zone \$binary_remote_addr zone=live_chat_sse_conn:10m;/);
 }
 
+function assertDynamicDockerUpstreams(config) {
+  assert.match(config, /resolver 127\.0\.0\.11 valid=10s ipv6=off;/);
+  for (const [upstream, service, port] of [
+    ['next_app', 'next', '3000'],
+    ['cms_api', 'cms-api', '8080'],
+    ['customer_api', 'customer-api', '8081']
+  ]) {
+    assert.match(
+      config,
+      new RegExp(`upstream ${upstream} \\{[\\s\\S]*zone ${upstream} 64k;[\\s\\S]*server ${service}:${port} resolve;`)
+    );
+  }
+}
+
 function assertTrustedProxyHeaders(config, forwardedProto) {
   assert.match(config, /proxy_set_header Host \$http_host;/);
   assert.match(config, /proxy_set_header X-Forwarded-Host \$http_host;/);
@@ -79,4 +93,9 @@ test('local HTTP proxies public anonymous live chat with an unbuffered SSE route
 test('production TLS proxies public anonymous live chat with an unbuffered SSE route', () => {
   assertLiveChatLimitZones(httpsNginxConfig);
   assertPublicEmbeddedLiveChatRoutes(apexTlsServer, 'https');
+});
+
+test('nginx re-resolves recreated Docker services without a manual restart', () => {
+  assertDynamicDockerUpstreams(defaultNginxConfig);
+  assertDynamicDockerUpstreams(httpsNginxConfig);
 });
