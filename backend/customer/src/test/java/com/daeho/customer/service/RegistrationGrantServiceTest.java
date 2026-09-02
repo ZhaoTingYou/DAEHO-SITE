@@ -90,9 +90,44 @@ class RegistrationGrantServiceTest {
         .isInstanceOf(RegistrationGrantException.class);
   }
 
+  @Test
+  void reservesOneVerifiedPhoneForOnlyOneCognitoSignupAtATime() {
+    var store = new MemoryStore();
+    var service = new RegistrationGrantService(store, clock);
+    var first = service.issue(verifiedSession("+821012345678"));
+    var second = service.issue(verifiedSession("+821012345678"));
+
+    service.consumeForSignup(
+        first.grant(), "ap-northeast-2_pool", "client-one", "daeho.member");
+
+    assertThatThrownBy(() -> service.consumeForSignup(
+        second.grant(), "ap-northeast-2_pool", "client-one", "another.member"))
+        .isInstanceOf(RegistrationGrantException.class)
+        .hasMessageContaining("account already exists");
+  }
+
+  @Test
+  void keepsThePhoneReservationAfterTheSignupGrantExpires() {
+    var store = new MemoryStore();
+    var signupService = new RegistrationGrantService(store, clock);
+    var first = signupService.issue(verifiedSession("+821012345678"));
+    signupService.consumeForSignup(
+        first.grant(), "ap-northeast-2_pool", "client-one", "daeho.member");
+
+    var laterService = new RegistrationGrantService(
+        store, Clock.fixed(Instant.parse("2026-09-02T01:00:00Z"), ZoneOffset.UTC));
+    var laterSession = verifiedSession("+821012345678");
+    store.save(laterSession.withGrant(hashForTest("later-grant"), Instant.parse("2026-09-02T01:15:00Z")));
+
+    assertThatThrownBy(() -> laterService.consumeForSignup(
+        "later-grant", "ap-northeast-2_pool", "client-one", "another.member"))
+        .isInstanceOf(RegistrationGrantException.class)
+        .hasMessageContaining("account already exists");
+  }
+
   private VerificationSession verifiedSession(String identifier) {
     return new VerificationSession(
-        UUID.randomUUID(), "email", identifier, "Verified User", "+821012345678", "",
+        UUID.randomUUID(), "email", identifier, "Verified User", "+821012345678", "phone-fingerprint",
         true, "ko", "terms-2026-09", "privacy-2026-09", false,
         "verified", "", null, Instant.parse("2026-09-02T00:15:00Z"), null,
         "", "", ""
@@ -124,7 +159,14 @@ class RegistrationGrantServiceTest {
     }
 
     @Override
-    public VerificationSession findLatestConsumedByPhoneFingerprint(String fingerprint) { return null; }
+    public VerificationSession findLatestConsumedByPhoneFingerprint(String fingerprint) {
+      return sessions.values().stream()
+          .filter(session -> fingerprint.equals(session.ciFingerprint()) && session.consumedAt() != null)
+          .findFirst().orElse(null);
+    }
+
+    @Override
+    public void acquireSignupPhoneLock(String phone) {}
 
     @Override
     public void delete(UUID id) { sessions.remove(id); }
@@ -142,6 +184,16 @@ class RegistrationGrantServiceTest {
       }
       sessions.put(id, session.withSignupBinding(userPoolId, clientId, username, consumedAt));
       return true;
+    }
+  }
+
+  private static String hashForTest(String value) {
+    try {
+      return java.util.HexFormat.of().formatHex(
+          java.security.MessageDigest.getInstance("SHA-256")
+              .digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+    } catch (java.security.NoSuchAlgorithmException error) {
+      throw new IllegalStateException(error);
     }
   }
 }

@@ -232,6 +232,9 @@ class SmsVerificationServiceTest {
     }
 
     @Override
+    public void acquireSignupPhoneLock(String phone) {}
+
+    @Override
     public void delete(UUID id) { sessions.remove(id); }
 
     @Override

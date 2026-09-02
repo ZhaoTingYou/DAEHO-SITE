@@ -13,6 +13,8 @@ public interface VerificationSessionStore {
 
   VerificationSession findLatestConsumedByPhoneFingerprint(String fingerprint);
 
+  void acquireSignupPhoneLock(String phone);
+
   void delete(UUID id);
 
   boolean bindGrant(UUID id, String grantHash, String userPoolId, String clientId,

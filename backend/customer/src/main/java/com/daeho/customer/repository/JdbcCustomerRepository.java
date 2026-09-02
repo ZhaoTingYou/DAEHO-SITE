@@ -78,6 +78,13 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
   }
 
   @Override
+  public void acquireSignupPhoneLock(String phone) {
+    jdbc.queryForList(
+        "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))",
+        "cognito-signup-phone:" + phone);
+  }
+
+  @Override
   public void delete(UUID id) {
     jdbc.update("DELETE FROM verification_sessions WHERE id = ?", id);
   }

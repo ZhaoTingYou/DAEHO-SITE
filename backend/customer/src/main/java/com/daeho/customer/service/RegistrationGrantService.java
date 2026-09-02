@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import javax.crypto.Mac;
@@ -49,6 +50,7 @@ public class RegistrationGrantService {
     return new IssuedGrant(grant, expiry);
   }
 
+  @Transactional
   public VerificationSession consumeForSignup(
       String grant, String userPoolId, String clientId, String username) {
     var pool = requireBindingValue(userPoolId);
@@ -57,6 +59,16 @@ public class RegistrationGrantService {
     var session = requireValidGrant(grant);
     var grantHash = hash(grant);
     var now = clock.instant();
+    if (!session.phone().isBlank()) {
+      store.acquireSignupPhoneLock(session.phone());
+      var reserved = session.ciFingerprint().isBlank()
+          ? store.findLatestConsumedByPhone(session.phone())
+          : store.findLatestConsumedByPhoneFingerprint(session.ciFingerprint());
+      if (reserved != null && !reserved.id().equals(session.id())) {
+        throw new RegistrationGrantException(
+            "duplicate_phone", "An account already exists for this phone; use account recovery");
+      }
+    }
     if (!store.bindGrant(session.id(), grantHash, pool, client, login, now)) {
       throw new RegistrationGrantException("Registration grant is invalid or bound to another signup");
     }

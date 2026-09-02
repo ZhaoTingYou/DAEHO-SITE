@@ -4,6 +4,7 @@ import test from 'node:test';
 process.env.CUSTOMER_GRANT_VALIDATION_URL = 'https://daeho.example/internal/cognito/registration-grants/validate';
 process.env.CUSTOMER_INTERNAL_API_KEY = 'test-internal-key';
 process.env.CUSTOM_USERNAME_POOL_ID = 'ap-northeast-2_usernamePool';
+process.env.LEGACY_USER_POOL_IDS = 'ap-northeast-2_legacyPool';
 
 const {handler} = await import('./index.mjs');
 
@@ -42,6 +43,12 @@ test('rejects a grant verified for a different phone', async (t) => {
 
 test('rejects registration without a valid phone attribute', async () => {
   await assert.rejects(() => handler(signupEvent('not-a-phone')), /Verified registration is required/);
+});
+
+test('rejects a pool that is not explicitly configured', async () => {
+  const event = signupEvent('+821012345678');
+  event.userPoolId = 'ap-northeast-2_typoPool';
+  await assert.rejects(() => handler(event), /User pool is not configured/);
 });
 
 test('preserves the stable duplicate-phone code without exposing backend details', async (t) => {

@@ -5,7 +5,6 @@ export function authLocaleForReturnTo(returnTo: unknown): AuthLocale;
 export function normalizeKoreanPhoneForCognito(input: unknown): string;
 export function usernamePolicyIssues(input: unknown): Array<'length' | 'startsWithLetter' | 'characters'>;
 export function normalizeLoginName(input: unknown): string;
-export function usernamePolicyMessage(locale: 'ko' | 'en'): string;
 export function managedLoginParameters(input: {
   clientId: string;
   redirectUri: string;
@@ -17,8 +16,17 @@ export function managedLoginParameters(input: {
   reauth?: boolean;
 }): Record<string, string>;
 export function passwordPolicyIssues(password: unknown): PasswordPolicyIssue[];
-export function passwordPolicyMessage(locale: AuthLocale, issue: PasswordPolicyIssue): string;
-export function registrationErrorMessage(
-  locale: AuthLocale,
-  error?: {type?: unknown; message?: unknown}
-): string;
+export type RegistrationErrorCode =
+  | 'invalidPassword'
+  | 'usernameExists'
+  | 'duplicatePhone'
+  | 'expiredGrant'
+  | 'rateLimit'
+  | 'generic';
+export function registrationErrorCode(error?: {type?: unknown; message?: unknown}): RegistrationErrorCode;
+export type LoginErrorCode =
+  | 'invalidCredentials'
+  | 'resetRequired'
+  | 'rateLimit'
+  | 'generic';
+export function loginErrorCode(error?: {type?: unknown; message?: unknown}): LoginErrorCode;

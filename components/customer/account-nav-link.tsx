@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import {useTranslations} from 'next-intl';
 import {useEffect, useState} from 'react';
 
 export function AccountNavLink({locale, variant = 'text'}: {locale: 'ko' | 'en'; variant?: 'text' | 'icon' | 'mobile-menu'}) {
+  const text = useTranslations('common.navigation');
   const [state, setState] = useState<{loaded: boolean; enabled: boolean; authenticated: boolean}>({loaded: false, enabled: false, authenticated: false});
   useEffect(() => {
     fetch('/api/auth/session')
@@ -15,7 +17,7 @@ export function AccountNavLink({locale, variant = 'text'}: {locale: 'ko' | 'en';
     return variant === 'icon' ? <span className="h-11 w-11" aria-hidden="true" /> : null;
   }
   const href = state.authenticated ? `/${locale}/my-daeho` : `/${locale}/login`;
-  const label = state.authenticated ? 'MY DAEHO' : (locale === 'ko' ? '로그인' : 'LOGIN');
+  const label = state.authenticated ? text('accountDashboard') : text('accountLogin');
   if (variant === 'icon') {
     return (
       <Link href={href} aria-label={label} className="flex h-11 w-11 items-center justify-center">

@@ -84,26 +84,33 @@ export async function refreshedCustomerSession() {
     return null;
   }
   const config = authConfig();
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    client_id: config.clientId,
-    refresh_token: session.refreshToken
-  });
-  const response = await fetch(`${config.domain}/oauth2/token`, {
+  const region = process.env.COGNITO_REGION || 'ap-northeast-2';
+  const response = await fetch(`https://cognito-idp.${region}.amazonaws.com/`, {
     method: 'POST',
-    headers: {'content-type': 'application/x-www-form-urlencoded'},
-    body,
+    headers: {
+      'content-type': 'application/x-amz-json-1.1',
+      'x-amz-target': 'AWSCognitoIdentityProviderService.InitiateAuth'
+    },
+    body: JSON.stringify({
+      AuthFlow: 'REFRESH_TOKEN_AUTH',
+      ClientId: config.clientId,
+      AuthParameters: {REFRESH_TOKEN: session.refreshToken}
+    }),
     cache: 'no-store',
     signal: AbortSignal.timeout(8_000)
   });
   if (!response.ok) {
     return null;
   }
-  const tokens = await response.json() as {access_token: string; expires_in: number};
+  const payload = await response.json() as {
+    AuthenticationResult?: {AccessToken?: string; ExpiresIn?: number};
+  };
+  const tokens = payload.AuthenticationResult;
+  if (!tokens?.AccessToken || !tokens.ExpiresIn) return null;
   return touchSession({
     ...session,
-    accessToken: tokens.access_token,
-    expiresAt: now + tokens.expires_in
+    accessToken: tokens.AccessToken,
+    expiresAt: now + tokens.ExpiresIn
   });
 }
 

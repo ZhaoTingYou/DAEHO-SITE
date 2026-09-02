@@ -1,14 +1,19 @@
 const validationUrl = required(process.env.CUSTOMER_GRANT_VALIDATION_URL);
 const customerApiKey = required(process.env.CUSTOMER_INTERNAL_API_KEY);
-const customUsernamePoolId = process.env.CUSTOM_USERNAME_POOL_ID ?? '';
+const customUsernamePoolId = required(process.env.CUSTOM_USERNAME_POOL_ID);
+const legacyUserPoolIds = new Set(String(process.env.LEGACY_USER_POOL_IDS ?? '')
+  .split(',').map((value) => value.trim()).filter(Boolean));
 
 export async function handler(event) {
   if (event.triggerSource !== 'PreSignUp_SignUp') {
     return event;
   }
-  if (customUsernamePoolId && event.userPoolId === customUsernamePoolId
-      && !/^[a-z][a-z0-9._-]{3,23}$/.test(String(event.userName ?? ''))) {
-    throw new Error('Login name is invalid');
+  if (event.userPoolId === customUsernamePoolId) {
+    if (!/^[a-z][a-z0-9._-]{3,23}$/.test(String(event.userName ?? ''))) {
+      throw new Error('Login name is invalid');
+    }
+  } else if (!legacyUserPoolIds.has(event.userPoolId)) {
+    throw new Error('User pool is not configured for registration');
   }
   const registrationGrant = event.request?.clientMetadata?.registrationGrant;
   const phone = normalizePhone(event.request?.userAttributes?.phone_number);

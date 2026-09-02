@@ -6,16 +6,14 @@ import {useState, type FormEvent} from 'react';
 import {
   normalizeLoginName,
   passwordPolicyIssues,
-  passwordPolicyMessage,
-  registrationErrorMessage,
-  usernamePolicyIssues,
-  usernamePolicyMessage
+  registrationErrorCode,
+  usernamePolicyIssues
 } from '@/lib/customer/auth-ui-core.mjs';
+import type {AccountMessages} from '@/lib/customer/messages';
 
-type RegisterFormProps = {locale: 'ko' | 'en'};
+type RegisterFormProps = {locale: 'ko' | 'en'; copy: AccountMessages['register']};
 
-export function RegisterForm({locale}: RegisterFormProps) {
-  const ko = locale === 'ko';
+export function RegisterForm({locale, copy}: RegisterFormProps) {
   const [verificationId, setVerificationId] = useState('');
   const [grant, setGrant] = useState('');
   const [phone, setPhone] = useState('');
@@ -27,9 +25,9 @@ export function RegisterForm({locale}: RegisterFormProps) {
 
   return (
     <div className="space-y-8">
-      <form className="space-y-5" onSubmit={requestCode}>
+      <form className="space-y-5" noValidate onSubmit={requestCode}>
         <CustomerField
-          label={ko ? '휴대폰 번호' : 'Mobile number'}
+          label={copy.fields.phone}
           name="phone"
           type="tel"
           value={phone}
@@ -37,84 +35,78 @@ export function RegisterForm({locale}: RegisterFormProps) {
           placeholder="010-1234-5678"
           disabled={Boolean(verificationId)}
         />
-        <CustomerField label={ko ? '생년월일' : 'Date of birth'} name="birthDate" type="date" disabled={Boolean(verificationId)} />
+        <CustomerField label={copy.fields.birthDate} name="birthDate" type="date" disabled={Boolean(verificationId)} />
         <label className="flex items-start gap-3 text-sm leading-6 text-primary">
           <input name="adultDeclaration" type="checkbox" required disabled={Boolean(verificationId)} className="mt-1" />
-          <span>{ko ? '만 19세 이상이며 입력한 정보가 사실임을 확인합니다.' : 'I confirm that I am at least 19 and the information is accurate.'}</span>
+          <span>{copy.adultDeclaration}</span>
         </label>
         <label className="flex items-start gap-3 text-sm leading-6 text-primary">
           <input name="requiredConsent" type="checkbox" required disabled={Boolean(verificationId)} className="mt-1" />
           <span>
-            {ko ? '이용약관과 개인정보처리방침에 동의합니다.' : 'I agree to the Terms and Privacy Policy.'}{' '}
-            <Link className="underline" href={`/${locale}/terms`}>{ko ? '약관' : 'Terms'}</Link>
+            {copy.requiredConsent}{' '}
+            <Link className="underline" href={`/${locale}/terms`}>{copy.terms}</Link>
             {' · '}
-            <Link className="underline" href={`/${locale}/privacy`}>{ko ? '개인정보' : 'Privacy'}</Link>
+            <Link className="underline" href={`/${locale}/privacy`}>{copy.privacy}</Link>
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm leading-6 text-subtext">
           <input name="marketingConsent" type="checkbox" disabled={Boolean(verificationId)} className="mt-1" />
-          <span>{ko ? '마케팅 정보 수신에 동의합니다. (선택)' : 'I agree to receive marketing messages. (Optional)'}</span>
+          <span>{copy.marketingConsent}</span>
         </label>
         {!verificationId ? (
           <button className="consult-cta consult-cta--accent" disabled={status === 'working'}>
-            <span className="consult-cta__label">{ko ? '인증번호 요청' : 'Request code'}</span>
+            <span className="consult-cta__label">{copy.requestCode}</span>
           </button>
         ) : null}
       </form>
 
       {verificationId && !grant ? (
-        <form className="space-y-5 border-t border-hairline pt-8" onSubmit={verifyCode}>
+        <form className="space-y-5 border-t border-hairline pt-8" noValidate onSubmit={verifyCode}>
           <div className="border-l-2 border-accent bg-white/60 px-4 py-3 text-sm leading-6">
-            {ko
-              ? 'SOLAPI를 통해 인증번호가 자동으로 전송되었습니다. 문자로 받은 6자리 번호를 입력해 주세요.'
-              : 'The verification code was sent automatically through SOLAPI. Enter the 6-digit code from the SMS.'}
+            {copy.codeSent}
           </div>
-          <CustomerField label={ko ? '6자리 인증번호' : '6-digit code'} name="code" inputMode="numeric" maxLength={6} />
+          <CustomerField label={copy.fields.code} name="code" inputMode="numeric" maxLength={6} />
           <button className="consult-cta consult-cta--accent" disabled={status === 'working'}>
-            <span className="consult-cta__label">{ko ? '휴대폰 확인' : 'Verify phone'}</span>
+            <span className="consult-cta__label">{copy.verifyPhone}</span>
           </button>
         </form>
       ) : null}
 
       {grant ? (
-        <form className="space-y-5 border-t border-hairline pt-8" onSubmit={createAccount}>
+        <form className="space-y-5 border-t border-hairline pt-8" noValidate onSubmit={createAccount}>
           <p className="text-sm leading-6 text-primary">
-            {ko ? '휴대폰이 확인되었습니다. 로그인에 사용할 아이디와 비밀번호를 설정하세요.' : 'Phone verified. Choose the username and password you will use to sign in.'}
+            {copy.phoneVerified}
           </p>
           <CustomerField
-            label={ko ? '아이디' : 'Username'}
+            label={copy.fields.username}
             name="username"
             value={username}
             onChange={(value) => setUsername(value.toLowerCase())}
-            minLength={4}
-            maxLength={24}
-            pattern="[a-z][a-z0-9._-]{3,23}"
             autoComplete="username"
             aria-describedby="registration-username-policy"
           />
           <p id="registration-username-policy" className="text-xs leading-5 text-subtext">
-            {usernamePolicyMessage(locale)} {ko ? '아이디는 계정 생성 후 변경할 수 없습니다.' : 'Your username cannot be changed after account creation.'}
+            {copy.usernamePolicy} {copy.usernameImmutable}
           </p>
           <CustomerField
-            label={ko ? '비밀번호' : 'Password'}
+            label={copy.fields.password}
             name="password"
             type="password"
             value={password}
             onChange={setPassword}
-            minLength={8}
             autoComplete="new-password"
             aria-describedby="registration-password-policy"
           />
           <ul id="registration-password-policy" className="grid gap-1 text-xs leading-5 text-subtext sm:grid-cols-2">
             {(['minLength', 'uppercase', 'lowercase', 'number', 'symbol'] as const).map((rule) => (
               <li key={rule} className={password && !passwordPolicyIssues(password).includes(rule) ? 'text-accent' : ''}>
-                {password && !passwordPolicyIssues(password).includes(rule) ? '✓ ' : '· '}{passwordPolicyMessage(locale, rule)}
+                {password && !passwordPolicyIssues(password).includes(rule) ? '✓ ' : '· '}{copy.passwordRules[rule]}
               </li>
             ))}
           </ul>
-          <CustomerField label={ko ? '비밀번호 확인' : 'Confirm password'} name="passwordConfirm" type="password" minLength={8} autoComplete="new-password" />
+          <CustomerField label={copy.fields.passwordConfirm} name="passwordConfirm" type="password" autoComplete="new-password" />
           <button className="consult-cta consult-cta--accent" disabled={status === 'working'}>
-            <span className="consult-cta__label">{ko ? '계정 만들기' : 'Create account'}</span>
+            <span className="consult-cta__label">{copy.createAccount}</span>
           </button>
         </form>
       ) : null}
@@ -148,7 +140,7 @@ export function RegisterForm({locale}: RegisterFormProps) {
     if (!response.ok || !payload.verificationId) {
       setStatus('error');
       setSmsRequestKey(crypto.randomUUID());
-      setMessage(ko ? '인증 요청을 처리할 수 없습니다. 입력 내용을 확인하고 잠시 후 다시 시도해 주세요.' : (payload.message || payload.error || 'Unable to request verification.'));
+      setMessage(copy.errors.smsRequest);
       return;
     }
     setVerificationId(payload.verificationId);
@@ -168,7 +160,7 @@ export function RegisterForm({locale}: RegisterFormProps) {
     const payload = await response.json().catch(() => ({})) as {grant?: string; error?: string; message?: string};
     if (!response.ok || !payload.grant) {
       setStatus('error');
-      setMessage(ko ? '인증번호가 올바르지 않거나 만료되었습니다.' : (payload.message || payload.error || 'The code is invalid or expired.'));
+      setMessage(copy.errors.code);
       return;
     }
     setGrant(payload.grant);
@@ -181,18 +173,18 @@ export function RegisterForm({locale}: RegisterFormProps) {
     const normalizedUsername = normalizeLoginName(username);
     if (!normalizedUsername || usernamePolicyIssues(username).length > 0) {
       setStatus('error');
-      setMessage(usernamePolicyMessage(locale));
+      setMessage(copy.usernamePolicy);
       return;
     }
     const issues = passwordPolicyIssues(password);
     if (issues.length > 0) {
       setStatus('error');
-      setMessage(issues.map((issue) => passwordPolicyMessage(locale, issue)).join(' '));
+      setMessage(issues.map((issue) => copy.passwordRules[issue]).join(' '));
       return;
     }
     if (password !== data.get('passwordConfirm')) {
       setStatus('error');
-      setMessage(ko ? '비밀번호가 일치하지 않습니다.' : 'Passwords do not match.');
+      setMessage(copy.errors.passwordMismatch);
       return;
     }
     setStatus('working');
@@ -204,13 +196,12 @@ export function RegisterForm({locale}: RegisterFormProps) {
     const prepared = await prepareResponse.json().catch(() => ({})) as {
       cognitoEndpoint?: string;
       clientId?: string;
-      loginUrl?: string;
       error?: string;
       message?: string;
     };
     if (!prepareResponse.ok || !prepared.cognitoEndpoint || !prepared.clientId) {
       setStatus('error');
-      setMessage(ko ? '계정을 만들 수 없습니다. 잠시 후 다시 시도해 주세요.' : (prepared.message || prepared.error || 'Unable to create account.'));
+      setMessage(copy.errors.prepare);
       return;
     }
     const normalizedPhone = normalizePhone(phone);
@@ -230,20 +221,20 @@ export function RegisterForm({locale}: RegisterFormProps) {
     }).catch(() => null);
     if (!signupResponse) {
       setStatus('error');
-      setMessage(ko ? 'Cognito에 연결할 수 없습니다.' : 'Unable to reach Cognito.');
+      setMessage(copy.errors.cognitoConnection);
       return;
     }
     const signup = await signupResponse.json().catch(() => ({})) as {message?: string; __type?: string};
     if (!signupResponse.ok) {
       setStatus('error');
-      setMessage(registrationErrorMessage(locale, {type: signup.__type, message: signup.message}));
+      const errorKey = registrationErrorCode({type: signup.__type, message: signup.message}) as keyof typeof copy.errors;
+      setMessage(copy.errors[errorKey]);
       return;
     }
     setStatus('done');
-    const loginUrl = new URL(prepared.loginUrl ?? '/api/auth/login', window.location.origin);
-    loginUrl.searchParams.set('returnTo', `/${locale}/my-daeho`);
-    loginUrl.searchParams.set('reauth', 'true');
-    loginUrl.searchParams.set('loginHint', normalizedUsername);
+    const loginUrl = new URL(`/${locale}/login`, window.location.origin);
+    loginUrl.searchParams.set('registered', 'true');
+    loginUrl.searchParams.set('username', normalizedUsername);
     window.location.assign(loginUrl.toString());
   }
 }
