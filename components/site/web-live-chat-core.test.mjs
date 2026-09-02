@@ -25,7 +25,8 @@ test('paged history merges preserve later stream rows and deduplicate durable ID
   assert.deepEqual(mergeVisibleMessages(existing, page).map(({id, body}) => ({id, body})), [
     {id: 100, body: 'older page'},
     {id: 150, body: 'arrived by stream'},
-    {id: 151, body: 'closed by stream'}
+    {id: 151, body: 'closed by stream'},
+    {id: 152, body: 'private'}
   ]);
 });
 
@@ -57,12 +58,12 @@ test('authoritative metadata replaces a prior conversation before invalidated hi
   assert.deepEqual(merged.messages.map(({id}) => id), [20]);
 });
 
-test('public history never renders visitor bodies', () => {
+test('owner history retains visitor bubbles', () => {
   assert.deepEqual(visibleTeamMessages([
     {id: 1, direction: 'visitor', body: 'private follow-up'},
     {id: 2, direction: 'team', body: '팀 답변'},
     {id: 3, direction: 'system', body: 'closed'}
-  ]).map((item) => item.id), [2, 3]);
+  ]).map((item) => item.id), [1, 2, 3]);
 });
 
 test('public history accepts each positive durable ID once', () => {
@@ -107,7 +108,7 @@ test('registration form draft is retained while the panel is closed and reopened
   assert.equal(reopened.view, 'registration');
 });
 
-test('visitor send lifecycle reports status without creating a visitor bubble', () => {
+test('visitor send lifecycle waits for authoritative history before creating a durable bubble', () => {
   const drafted = reduceWebLiveChatState(createWebLiveChatState(), {
     type: 'message_draft', body: 'private follow-up'
   });

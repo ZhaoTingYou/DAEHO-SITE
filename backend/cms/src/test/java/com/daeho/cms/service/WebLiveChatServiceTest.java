@@ -98,6 +98,9 @@ class WebLiveChatServiceTest {
         """.trim(), card.getValue());
     var order = inOrder(repository, inquiries, gateway);
     order.verify(repository).claimOpen(any());
+    order.verify(repository).storeInitialVisitorMessage(
+        "conversation-1", "client-key-0000000001", "반지 제작 상담"
+    );
     order.verify(inquiries).createWebLiveChat(anyMap(), anyMap());
     order.verify(repository).attachInquiry("conversation-1", "inquiry-1");
     order.verify(repository).reserveTopicCreation("conversation-1");
@@ -117,6 +120,9 @@ class WebLiveChatServiceTest {
     var result = service.start(visitor(), validStart(), requestMeta());
 
     assertEquals(active, result);
+    verify(repository).storeInitialVisitorMessage(
+        "conversation-1", "client-key-0000000001", "반지 제작 상담"
+    );
     verify(inquiries, never()).createWebLiveChat(anyMap(), anyMap());
     verify(gateway, never()).createForumTopic(anyString(), anyString(), anyString());
     verify(gateway, never()).sendMessage(anyString(), anyString(), anyString(), anyString(), anyMap(), any());
@@ -401,14 +407,15 @@ class WebLiveChatServiceTest {
   }
 
   @Test
-  void sessionAndMessageHistoryUseOnlyTheRepositorysCustomerVisibleProjection() {
+  void sessionAndMessageHistoryUseTheOwnerScopedProjectionIncludingVisitorRows() {
     var active = conversation("active", "inquiry-1", "", "", 701L, 702L);
     var visible = List.of(
+        new Message(50L, "conversation-1", "visitor", "반지 제작 상담", "delivered", "", 0L, NOW),
         new Message(51L, "conversation-1", "team", "확인했습니다.", "delivered", "", 901L, NOW)
     );
     when(repository.latestConversation("visitor-1", 3L)).thenReturn(active);
-    when(repository.visibleMessagesAfter("conversation-1", 0L, 100)).thenReturn(visible);
-    when(repository.visibleMessagesAfter("conversation-1", 50L, 100)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 0L, 100)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 50L, 100)).thenReturn(visible);
     when(repository.unreadCount("conversation-1")).thenReturn(1L);
 
     var session = service.session(visitor());
@@ -418,8 +425,8 @@ class WebLiveChatServiceTest {
     assertEquals(visible, session.messages());
     assertEquals(1L, session.unreadCount());
     assertEquals(visible, messages);
-    verify(repository).visibleMessagesAfter("conversation-1", 0L, 100);
-    verify(repository).visibleMessagesAfter("conversation-1", 50L, 100);
+    verify(repository).ownerMessagesAfter("conversation-1", 0L, 100);
+    verify(repository).ownerMessagesAfter("conversation-1", 50L, 100);
   }
 
   @Test
@@ -433,8 +440,8 @@ class WebLiveChatServiceTest {
         )
     );
     when(repository.latestConversation("visitor-1", 3L)).thenReturn(closed);
-    when(repository.visibleMessagesAfter("conversation-1", 0L, 100)).thenReturn(visible);
-    when(repository.visibleMessagesAfter("conversation-1", 51L, 100)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 0L, 100)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 51L, 100)).thenReturn(visible);
     when(repository.unreadCount("conversation-1")).thenReturn(0L);
     when(repository.markRead("conversation-1", 52L)).thenReturn(read);
 

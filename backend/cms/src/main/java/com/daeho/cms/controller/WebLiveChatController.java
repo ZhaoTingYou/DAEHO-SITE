@@ -115,7 +115,7 @@ public class WebLiveChatController {
     authorize(request);
     var identity = identity(request, response);
     return Map.of("items", liveChat.messages(identity.visitor(), Math.max(0L, after)).stream()
-        .filter(this::publiclyVisible)
+        .filter(this::ownerVisible)
         .map(this::publicMessage)
         .toList());
   }
@@ -251,7 +251,7 @@ public class WebLiveChatController {
     result.put("available", true);
     result.put("conversation", view.conversation() == null ? null : publicConversation(view.conversation()));
     result.put("messages", view.messages().stream()
-        .filter(this::publiclyVisible)
+        .filter(this::ownerVisible)
         .map(this::publicMessage)
         .toList());
     result.put("unreadCount", view.unreadCount());
@@ -282,6 +282,10 @@ public class WebLiveChatController {
 
   private boolean publiclyVisible(Message message) {
     return "team".equals(message.direction()) || "system".equals(message.direction());
+  }
+
+  private boolean ownerVisible(Message message) {
+    return "visitor".equals(message.direction()) || publiclyVisible(message);
   }
 
   private List<Message> replay(String conversationId, long after) {

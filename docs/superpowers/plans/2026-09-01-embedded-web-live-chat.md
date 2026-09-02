@@ -352,7 +352,7 @@ git commit -m "feat: secure anonymous live chat identity"
 - Produces records: `Visitor`, `Conversation`, `Message`, `SessionView`.
 - Produces visitor methods: `createVisitor`, `visitorByTokenHash`, `touchVisitor`, `expireVisitor`.
 - Produces conversation methods: `currentConversation`, `conversationForVisitor`, `conversationForTopic`, `claimOpen`, `attachInquiry`, `reserveTopicCreation`, `recordTopic`, `activate`, `close`, `expireStale`.
-- Produces message methods: `claimVisitorMessage`, `markVisitorDelivered`, `recordTeamMessage`, `visibleMessagesAfter`, `markRead`, `unreadCount`.
+- Produces message methods: `storeInitialVisitorMessage`, `claimVisitorMessage`, `markVisitorDelivered`, `recordTeamMessage`, `ownerMessagesAfter`, `visibleMessagesAfter`, `markRead`, `unreadCount`.
 - Produces guard method: `boolean consumeRateBucket(String keyHash, String action, int limit, Duration window)`.
 
 - [ ] **Step 1: Write repository mapping and concurrency tests**
@@ -366,7 +366,7 @@ void claimOpenUsesThePartialUniqueConstraintToReuseAnActiveConversation() {
 }
 
 @Test
-void visibleHistoryFiltersOutVisitorMessagesInSql() {
+void streamHistoryFiltersOutVisitorMessagesInSql() {
   repository.visibleMessagesAfter("conversation-1", 40L, 100);
   verify(jdbc).query(argThat(sql -> sql.contains("direction IN ('team', 'system')")),
       any(RowMapper.class), eq("conversation-1"), eq(40L), eq(100));
@@ -392,7 +392,7 @@ public record Message(
 ) {}
 ```
 
-`visibleMessagesAfter` must never select `visitor` direction. `recentConversations` for CMS may select all message counts but must not return token hashes.
+`ownerMessagesAfter` returns delivered `visitor`, `team`, and `system` rows only after visitor-cookie ownership has selected the conversation. `visibleMessagesAfter` is the SSE replay projection and must never select `visitor`. `recentConversations` for CMS may select counts but must not return token hashes or visitor message bodies.
 
 - [ ] **Step 4: Run repository tests**
 
@@ -490,7 +490,7 @@ private String teamHeader(Conversation c) {
 
 - [ ] **Step 5: Implement visitor follow-up delivery and reads**
 
-Store the visitor body for audit/delivery but make `messages()` call only `visibleMessagesAfter`. Do not include visitor content in `SessionView` after the initial form summary has been accepted.
+Store the visitor body for audit/delivery and owner reload. `messages()` and `SessionView` use `ownerMessagesAfter`; SSE replay alone uses `visibleMessagesAfter`. Insert the initial inquiry as one delivered visitor row keyed by the start idempotency key.
 
 - [ ] **Step 6: Run focused tests and commit**
 
@@ -750,12 +750,12 @@ git commit -m "feat: proxy embedded live chat events"
 - [ ] **Step 1: Write reducer/filter/reconnect tests**
 
 ```js
-test('public history never renders visitor bodies', () => {
+test('owner history retains durable visitor bodies', () => {
   assert.deepEqual(visibleTeamMessages([
     {id: 1, direction: 'visitor', body: 'private follow-up'},
     {id: 2, direction: 'team', body: '팀 답변'},
     {id: 3, direction: 'system', body: 'closed'}
-  ]).map((item) => item.id), [2, 3]);
+  ]).map((item) => item.id), [1, 2, 3]);
 });
 
 test('hover never changes launcher width and click opens the panel', () => {
@@ -765,7 +765,7 @@ test('hover never changes launcher width and click opens the panel', () => {
 });
 ```
 
-Test form draft, sent status without visitor bubble, Last-Event-ID dedupe, unread increment, close state, new conversation reset, SSE retry backoff, and fallback after three consecutive failures.
+Test form draft, authoritative sent visitor bubble, `in_progress` draft/key retention, Last-Event-ID dedupe, team-only unread increment, close state, new conversation reset, SSE retry backoff, and fallback after three consecutive failures.
 
 - [ ] **Step 2: Run tests and verify failure**
 
@@ -781,7 +781,7 @@ Keep all network and DOM work outside the `.mjs` core. Use monotonically increas
 ```ts
 export type WebLiveChatMessage = {
   id: number;
-  direction: 'team' | 'system';
+  direction: 'visitor' | 'team' | 'system';
   body: string;
   createdAt: string;
 };
@@ -882,7 +882,7 @@ Fade panel content after `0.12s`; close over `0.30s`. Under reduced motion, use 
 - Active: system/team history, sent receipt, composer, reconnect indicator.
 - Closed: read-only history and “new consultation” action.
 
-Never render visitor message bodies from local optimistic state. Keep a failed draft in the composer and show a retry action.
+Render visitor bodies only from owner-authenticated server history, right-aligned. Never create optimistic synthetic message IDs. Keep an ambiguous or in-progress draft and key in the composer; after definitive success refresh authoritative history and show the durable bubble once.
 
 - [ ] **Step 5: Implement unread/reconnect/accessibility behavior**
 
@@ -1142,8 +1142,8 @@ Return the deployed commit, backup path/size, test totals, V19 status, service h
 ## Plan Self-Review Checklist
 
 - Every spec requirement is assigned to Tasks 1–11.
-- Anonymous identity, 30-day expiry, no-login UI, text-only scope, no customer bubbles, SSE/polling, `/note`, `/close`, Topic mapping, CMS recovery, animation, accessibility, anti-spam, cost constraints, and AWS deployment all have explicit tests.
-- Public DTOs never expose Bot username, Telegram IDs, token hashes, IP hashes, or visitor message bodies.
+- Anonymous identity, 30-day expiry, no-login UI, text-only scope, owner-only customer bubbles, SSE/polling, `/note`, `/close`, Topic mapping, CMS recovery, animation, accessibility, anti-spam, cost constraints, and AWS deployment all have explicit tests.
+- Public DTOs never expose Bot username, Telegram IDs, token hashes, or IP hashes. Visitor message bodies appear only in same-cookie owner history, never CMS lists, public config, or SSE.
 - Type names are consistent: `Visitor`, `Conversation`, `Message`, `SessionView`, `StartInput`, `MessageInput`, `WebLiveChatEvent`.
 - No task requires a new paid service or infrastructure dependency.
-- V19 is additive and legacy Telegram sessions remain compatible.
+- V19 and V20 are additive and legacy Telegram sessions remain compatible; V20 backfills one initial visitor row per existing website conversation.

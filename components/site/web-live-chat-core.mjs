@@ -1,4 +1,4 @@
-const TEAM_DIRECTIONS = new Set(['team', 'system']);
+const OWNER_DIRECTIONS = new Set(['visitor', 'team', 'system']);
 
 function openView(state) {
   if (state.available === false) {
@@ -23,7 +23,7 @@ export function visibleTeamMessages(messages) {
   const seen = new Set();
   return messages.filter((message) => {
     const id = durableId(message?.id);
-    if (!id || seen.has(id) || !TEAM_DIRECTIONS.has(message?.direction)) {
+    if (!id || seen.has(id) || !OWNER_DIRECTIONS.has(message?.direction)) {
       return false;
     }
     seen.add(id);

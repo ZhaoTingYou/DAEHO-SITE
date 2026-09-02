@@ -9,7 +9,7 @@ const compiled = ts.transpileModule(source, {
 }).outputText;
 const api = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
 
-test('message reads drop visitor, duplicate, and malformed rows at the HTTP seam', async () => {
+test('owner-scoped message reads retain visitor rows and drop duplicates or malformed rows', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => jsonResponse({items: [
     {id: 1, direction: 'visitor', body: 'private', createdAt: '2026-09-01T00:00:00Z'},
@@ -22,6 +22,7 @@ test('message reads drop visitor, duplicate, and malformed rows at the HTTP seam
   try {
     const response = await api.getMessages(0);
     assert.deepEqual(response.items, [
+      {id: 1, direction: 'visitor', body: 'private', createdAt: '2026-09-01T00:00:00Z'},
       {id: 2, direction: 'team', body: 'answer', createdAt: '2026-09-01T00:01:00Z'},
       {id: 3, direction: 'system', body: 'closed', createdAt: '2026-09-01T00:02:00Z'}
     ]);
@@ -72,7 +73,7 @@ test('conversation wrappers reject array, object, number, and null enum values',
   }
 });
 
-test('session parsing also removes visitor bodies from embedded history', async () => {
+test('owner-scoped session parsing retains initial and follow-up visitor history', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => jsonResponse({
     available: true,
@@ -86,6 +87,7 @@ test('session parsing also removes visitor bodies from embedded history', async 
   try {
     const session = await api.getSession();
     assert.deepEqual(session.messages, [
+      {id: 1, direction: 'visitor', body: 'private', createdAt: '2026-09-01T00:00:00Z'},
       {id: 2, direction: 'team', body: 'public', createdAt: '2026-09-01T00:01:00Z'}
     ]);
   } finally {

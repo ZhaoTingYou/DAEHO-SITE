@@ -14,7 +14,7 @@ export type WebLiveChatConversation = {
 
 export type WebLiveChatMessage = {
   id: number;
-  direction: 'team' | 'system';
+  direction: 'visitor' | 'team' | 'system';
   body: string;
   createdAt: string;
 };
@@ -319,7 +319,7 @@ function isLocale(value: unknown): value is WebLiveChatConversation['locale'] {
   return typeof value === 'string' && LOCALES.has(value);
 }
 
-/** Malformed/private rows are dropped; an invalid response envelope is rejected. */
+/** Malformed rows are dropped; visitor rows are accepted only from owner-authenticated history. */
 function projectPublicMessages(items: unknown[]): WebLiveChatMessage[] {
   const seen = new Set<number>();
   const result: WebLiveChatMessage[] = [];
@@ -331,7 +331,9 @@ function projectPublicMessages(items: unknown[]): WebLiveChatMessage[] {
     const id = positiveInteger(object.id);
     if (id === null
         || seen.has(id)
-        || (object.direction !== 'team' && object.direction !== 'system')
+        || (object.direction !== 'visitor'
+          && object.direction !== 'team'
+          && object.direction !== 'system')
         || typeof object.body !== 'string'
         || typeof object.createdAt !== 'string') {
       continue;

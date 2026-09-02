@@ -50,7 +50,15 @@ test('logical writes retain one client key through explicit retry', () => {
   assert.match(source, /sendMutationRef/);
   assert.match(source, /createClientMessageKey/);
   assert.match(source, /sendStatus === 'failed'/);
-  assert.doesNotMatch(source, /direction === 'visitor'/);
+  assert.match(source, /direction === 'visitor'/);
+  assert.match(source, /dispatch\(\{type: 'send_succeeded'\}\)[\s\S]*refreshAuthoritative/);
+});
+
+test('owner visitor history renders as right-aligned bubbles without name or contact fields', () => {
+  const history = source.match(/function MessageHistory[\s\S]*?\n\}/)?.[0] ?? '';
+  assert.match(history, /message\.direction === 'visitor'/);
+  assert.match(history, /ml-auto/);
+  assert.doesNotMatch(history, /customerName|customerContact|nameLabel|contactLabel/);
 });
 
 test('stream source stays native-stable until polling threshold and broadcasts only invalidate', () => {

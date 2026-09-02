@@ -53,6 +53,11 @@ public class WebLiveChatService {
         now, now, now, null
     );
     var conversation = repository.claimOpen(candidate);
+    if (conversation != null) {
+      repository.storeInitialVisitorMessage(
+          conversation.id(), input.clientMessageKey(), conversation.inquiryContent()
+      );
+    }
     if (conversation == null || !"opening".equals(conversation.state())) {
       return conversation;
     }
@@ -127,7 +132,7 @@ public class WebLiveChatService {
     }
     return new SessionView(
         withoutVisitorBody(conversation),
-        repository.visibleMessagesAfter(conversation.id(), 0L, MESSAGE_PAGE_SIZE),
+        repository.ownerMessagesAfter(conversation.id(), 0L, MESSAGE_PAGE_SIZE),
         repository.unreadCount(conversation.id())
     );
   }
@@ -179,7 +184,7 @@ public class WebLiveChatService {
     );
     return conversation == null
         ? List.of()
-        : repository.visibleMessagesAfter(
+        : repository.ownerMessagesAfter(
             conversation.id(), Math.max(0L, afterId), MESSAGE_PAGE_SIZE
         );
   }

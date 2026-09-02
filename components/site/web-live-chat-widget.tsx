@@ -461,6 +461,7 @@ export function WebLiveChatWidget({
       if (response.status === 'sent') {
         if (!sendMutationRef.current.finish(operation, 'success')) return;
         dispatch({type: 'send_succeeded'});
+        await refreshAuthoritative().catch(() => undefined);
       } else {
         if (!sendMutationRef.current.finish(operation, 'in_progress')) return;
         dispatch({type: 'send_in_progress'});
@@ -472,7 +473,7 @@ export function WebLiveChatWidget({
       if (!sendMutationRef.current.finish(operation, outcome)) return;
       dispatch({type: 'send_failed'});
     }
-  }, [state.messageDraft]);
+  }, [refreshAuthoritative, state.messageDraft]);
 
   const startNewConsultation = useCallback(() => {
     startMutationRef.current.reset();
@@ -728,7 +729,11 @@ function ClosedView({copy, messages, onStartNew}: {copy: WebLiveChatCopy; messag
 function MessageHistory({copy, messages}: {copy: WebLiveChatCopy; messages: ChatState['messages']}) {
   return (
     <ol className="mt-5 space-y-3">
-      {messages.map((message) => message.direction === 'team' ? (
+      {messages.map((message) => message.direction === 'visitor' ? (
+        <li key={message.id} className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-[#D9BF82] px-4 py-3 text-[#101D30] shadow-sm">
+          <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.body}</p>
+        </li>
+      ) : message.direction === 'team' ? (
         <li key={message.id} className="rounded-2xl rounded-tl-sm bg-[#101D30] px-4 py-3 text-white shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#E4C77D]">{copy.teamLabel}</p>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6">{message.body}</p>

@@ -8,7 +8,7 @@ export type WebLiveChatView =
 
 export type PublicMessage = {
   id: number;
-  direction: 'team' | 'system';
+  direction: 'visitor' | 'team' | 'system';
   body: string;
   createdAt?: string;
 };
@@ -21,12 +21,12 @@ export type WebLiveChatSessionInput = {
     createdAt?: string;
     lastReadTeamMessageId?: number;
   } | null;
-  messages: Array<PublicMessage | {id: number; direction: 'visitor'; body: string; createdAt?: string}>;
+  messages: PublicMessage[];
   unreadCount: number;
 };
 
 export type WebLiveChatDurableEvent =
-  | {type: 'message'; id: number; message: PublicMessage | {id: number; direction: 'visitor'; body: string}}
+  | {type: 'message'; id: number; message: PublicMessage}
   | {type: 'state'; id: number; state: 'closed'; body: string; createdAt?: string};
 
 export type WebLiveChatState = {

@@ -110,7 +110,21 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
-  void visibleHistoryFiltersVisitorMessagesInSqlBeforeApplyingTheLimit() {
+  void ownerHistoryIncludesVisitorMessagesBeforeApplyingTheLimit() {
+    var jdbc = new RecordingJdbcTemplate();
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.ownerMessagesAfter("conversation-1", 40L, 100);
+
+    var call = jdbc.calls.get(0);
+    assertFalse(call.sql().contains("direction IN ('team', 'system')"));
+    assertTrue(call.sql().contains("id > ?"));
+    assertTrue(call.sql().contains("LIMIT ?"));
+    assertEquals(List.of("conversation-1", 40L, 100), Arrays.asList(call.args()));
+  }
+
+  @Test
+  void streamHistoryFiltersVisitorMessagesInSqlBeforeApplyingTheLimit() {
     var jdbc = new RecordingJdbcTemplate();
     var repository = new WebLiveChatRepository(jdbc);
 
@@ -121,6 +135,29 @@ class WebLiveChatRepositoryTest {
     assertTrue(call.sql().contains("id > ?"));
     assertTrue(call.sql().contains("LIMIT ?"));
     assertEquals(List.of("conversation-1", 40L, 100), Arrays.asList(call.args()));
+  }
+
+  @Test
+  void initialVisitorMessageIsInsertedDeliveredAndIdempotentPerConversation() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(messageRow("visitor", 0L, "start-key"));
+    var repository = new WebLiveChatRepository(jdbc);
+
+    var message = repository.storeInitialVisitorMessage(
+        "conversation-1", "start-key", "반지 제작 상담"
+    );
+
+    assertEquals("visitor", message.direction());
+    var call = jdbc.calls.get(0);
+    assertTrue(call.sql().contains("'visitor'"));
+    assertTrue(call.sql().contains("'delivered'"));
+    assertTrue(call.sql().contains("is_initial"));
+    assertTrue(call.sql().contains("ON CONFLICT (conversation_id) WHERE is_initial DO UPDATE"));
+    assertFalse(call.sql().contains("body = excluded.body"));
+    assertEquals(
+        List.of("반지 제작 상담", "start-key", "conversation-1"),
+        Arrays.asList(call.args())
+    );
   }
 
   @Test

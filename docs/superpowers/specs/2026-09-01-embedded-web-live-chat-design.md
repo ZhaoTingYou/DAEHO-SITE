@@ -22,7 +22,7 @@
 - 每个咨询对应一个 Telegram Forum Topic。
 - 同一访客的未关闭咨询继续使用原话题；关闭后发起新咨询时创建新话题。
 - Telegram 话题中的普通消息发送给客户；`/note 内容` 仅作为内部备注；`/close` 结束咨询。
-- 客户页面只显示系统引导、状态和 DAEHO 团队回复。客户追加内容成功后只显示“已发送”状态，不重新渲染为客户聊天气泡。
+- 客户页面显示该匿名 Cookie 所拥有会话的初始咨询、客户追加内容、系统状态和 DAEHO 团队回复。客户内容使用右侧气泡；姓名与联系方式不渲染为聊天消息。
 - 采用 HTTP POST 发送消息、Server-Sent Events（SSE）实时接收消息，并提供短轮询恢复接口。
 - 不引入 Vercel、Redis、第三方聊天服务、短信、邮件或付费验证码服务。
 
@@ -97,7 +97,7 @@ Telegram Bot 不再作为客户入口。已知 Bot 私聊收到 `/start` 时应�
 - 公开 API 不接受对话 ID 作为独立授权依据；每次访问都必须由 Cookie 解析到访客，再验证对话归属。
 - 姓名、手机号、邮箱或咨询编号不能用于恢复记录。
 - API 返回中不包含 Telegram chat ID、topic thread ID、Telegram message ID、内部恢复状态或员工身份。
-- 客户消息虽然为投递和审计保存在数据库，但访客历史接口只返回系统可见状态和团队正式回复。
+- 客户消息为投递、审计和同一匿名 Cookie 的 30 天历史恢复保存在数据库。只有通过 Cookie 归属验证的历史接口可以返回客户正文；SSE、CMS 列表和公开配置不返回客户正文。
 
 ## 7. 数据模型
 
@@ -137,6 +137,7 @@ Telegram Bot 不再作为客户入口。已知 Bot 私聊收到 `/start` 时应�
 - `delivery_state`：`pending`、`delivered`、`needs_attention`。
 - `client_message_key`：客户发送幂等键。
 - `telegram_message_id`：团队回复或群内投递的去重来源。
+- `is_initial`：标记由初始咨询内容生成的唯一首条客户消息。
 - `created_at`、`delivered_at`。
 
 同一对话的 `client_message_key` 唯一；同一 Topic 的 `telegram_message_id` 唯一。
@@ -170,13 +171,13 @@ Telegram Bot 不再作为客户入口。已知 Bot 私聊收到 `/start` 时应�
 `POST /api/live-chat/conversations/current/messages`
 
 输入：文字和客户端幂等键。  
-行为：保存后发送至当前 Telegram Topic。成功时网页只显示“已发送”；失败时保留草稿并允许安全重试。
+行为：保存后发送至当前 Telegram Topic。明确成功后从服务端权威历史加载并显示右侧客户气泡与“已发送”；`in_progress` 或结果不确定时保留同一草稿和幂等键，不误报成功且允许安全重试。
 
 ### 8.4 读取消息
 
 `GET /api/live-chat/conversations/current/messages?after=<id>`
 
-作为初次加载、刷新恢复和 SSE 备用轮询接口。只返回 `system` 与 `team` 可见消息。
+作为初次加载、刷新恢复和 SSE 备用轮询接口。在匿名 Cookie 归属验证后返回已投递的 `visitor`、`system` 与 `team` 消息。初始咨询内容是第一条 `visitor` 消息；姓名和联系方式不进入消息 DTO。
 
 ### 8.5 实时事件
 
@@ -184,6 +185,7 @@ Telegram Bot 不再作为客户入口。已知 Bot 私聊收到 `/start` 时应�
 
 - `Content-Type: text/event-stream`。
 - 支持 `Last-Event-ID`，从数据库补发错过的团队消息。
+- SSE 只发送 `team` 与 `system` 持久事件，绝不回显 `visitor` 行。
 - 发送轻量心跳以防代理关闭空闲连接。
 - 事件只包含消息 ID、正文、时间、会话状态和未读变化。
 
@@ -248,7 +250,7 @@ needs_attention ◀──恢复操作─────── closed
 - 表单在浏览器中仅作为草稿；服务端接受后才进入 `opening`。
 - `opening` 过程的每个外部动作都有数据库预留状态，避免网络超时后重复创建 Topic。
 - `active` 会话接收客户追加消息和团队回复。
-- `closed` 保留可见团队历史至访客凭证失效，输入框禁用，并提供“开始新咨询”。
+- `closed` 保留该访客自己的客户、系统与团队历史至访客凭证失效，输入框禁用，并提供“开始新咨询”。
 - `needs_attention` 在 CMS 显示恢复动作；客户看到中性的“已收到，团队正在处理”状态，不暴露内部错误。
 - 后台清理任务将超过 30 天没有消息或状态事件的活动咨询标记为 `closed`，并尽力关闭 Telegram Topic，避免产生无法再被访客访问的孤立活动话题。CMS 问询记录不随匿名凭证过期而删除。
 
@@ -290,7 +292,7 @@ No sign-in required
 
 1. **开始咨询**：姓名、联系方式、咨询内容、同意复选框。
 2. **等待回复**：确认已经接收，提示同一浏览器可在 30 天内查看回复。
-3. **实时聊天**：显示系统状态、团队回复、输入框和“已发送”反馈。
+3. **实时聊天**：客户消息右对齐，团队回复左对齐，系统状态居中或中性显示，并提供输入框和可靠的发送状态反馈。
 4. **已结束**：历史只读、输入禁用、“开始新咨询”按钮。
 
 桌面窗体保持在右下角且不覆盖主要导航；手机端遵守安全区、锁定背景滚动并提供明确关闭按钮。支持 Esc、焦点陷阱、ARIA live、新消息可读提示和键盘操作。
@@ -311,6 +313,8 @@ No sign-in required
 - SSE 客户端保存最后事件 ID；重连后从数据库补发。
 - SSE 连续失败时每 5 秒轮询一次；恢复后停止轮询。
 - 浏览器生成每次发送的随机 `client_message_key`，重复点击或网络重试不会重复投递。
+- 客户气泡只由带正整数数据库 ID 的权威历史生成；刷新或重试按 ID 去重，不使用会破坏游标的合成 ID。
+- 最高持久游标覆盖所有历史行，但未读数和已读游标只计算 `team` 消息。
 - Telegram Webhook 使用 update/message ID 去重。
 - 创建 Topic、发送初始卡片、追加客户消息和团队回复都先预留数据库状态，再执行外部调用。
 - Telegram 返回明确失败时允许自动或 CMS 手动重试；投递结果不确定时标记 `needs_attention`，禁止自动重复创建 Topic。
@@ -342,7 +346,7 @@ No sign-in required
 - 匿名凭证生成、哈希、过期及归属验证。
 - 输入验证、限流、隐藏字段和重复内容检测。
 - 会话状态机：创建、活动复用、关闭后新建、过期访客。
-- 消息过滤：访客 API 不返回客户原文、内部备注或 Telegram 元数据。
+- 消息过滤：归属验证后的访客历史 API 返回其自身客户原文，但不返回内部备注或 Telegram 元数据；SSE 仍过滤客户消息。
 - `/note`、`/close`、原生 Topic 关闭和普通团队回复路由。
 - SSE last-event 恢复、未读计算和消息幂等。
 - 并发建会话、重复 POST、重复 Telegram update 及投递不确定恢复。
@@ -350,6 +354,7 @@ No sign-in required
 ### 16.2 API 与集成
 
 - 无 Cookie 首次访问、Cookie 续期、伪造 ID、跨访客访问拒绝。
+- V20 为既有网站会话从 `inquiry_content` 回填且仅回填一条初始客户消息，新会话以创建请求幂等键插入一条初始客户消息。
 - 创建问询与 Topic 的完整事务补偿。
 - Telegram 团队回复写入数据库后由 SSE 和轮询读取。
 - Bot 配置切换时旧代次不能接收新回复。

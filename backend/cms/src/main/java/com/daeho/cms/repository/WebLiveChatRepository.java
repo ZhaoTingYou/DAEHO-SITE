@@ -123,6 +123,25 @@ public class WebLiveChatRepository {
         : inserted;
   }
 
+  public Message storeInitialVisitorMessage(
+      String conversationId,
+      String clientMessageKey,
+      String body
+  ) {
+    return one(jdbc.query("""
+        INSERT INTO cms_web_live_chat_messages (
+          conversation_id, direction, body, delivery_state, client_message_key,
+          delivered_at, is_initial
+        )
+        SELECT id, 'visitor', ?, 'delivered', ?, now(), true
+        FROM cms_web_live_chat_conversations
+        WHERE id = ?
+        ON CONFLICT (conversation_id) WHERE is_initial DO UPDATE
+        SET is_initial = excluded.is_initial
+        RETURNING *
+        """, this::mapMessage, body, clientMessageKey, conversationId));
+  }
+
   public Conversation attachInquiry(String conversationId, String inquiryId) {
     return transition("""
         UPDATE cms_web_live_chat_conversations
@@ -406,6 +425,18 @@ public class WebLiveChatRepository {
         WHERE conversation_id = ?
           AND id > ?
           AND direction IN ('team', 'system')
+        ORDER BY id ASC
+        LIMIT ?
+        """, this::mapMessage, conversationId, afterId, limit);
+  }
+
+  public List<Message> ownerMessagesAfter(String conversationId, long afterId, int limit) {
+    return jdbc.query("""
+        SELECT *
+        FROM cms_web_live_chat_messages
+        WHERE conversation_id = ?
+          AND id > ?
+          AND (direction <> 'visitor' OR delivery_state = 'delivered')
         ORDER BY id ASC
         LIMIT ?
         """, this::mapMessage, conversationId, afterId, limit);

@@ -220,7 +220,7 @@ class WebLiveChatControllerTest {
   }
 
   @Test
-  void publicHistoryFiltersVisitorMessagesEvenAtTheHttpSeam() throws Exception {
+  void ownerCookieHistoryIncludesVisitorMessagesAtTheHttpSeam() throws Exception {
     var visitor = visitor();
     existingCookie(visitor);
     when(liveChat.messages(visitor, 40L)).thenReturn(List.of(
@@ -230,9 +230,11 @@ class WebLiveChatControllerTest {
     mvc.perform(get("/api/live-chat/conversations/current/messages?after=40")
             .cookie(cookie()).header("Origin", "https://daeho.works"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.items.length()").value(2))
-        .andExpect(jsonPath("$.items[0].id").value(42))
-        .andExpect(jsonPath("$.items[1].id").value(43));
+        .andExpect(jsonPath("$.items.length()").value(3))
+        .andExpect(jsonPath("$.items[0].id").value(41))
+        .andExpect(jsonPath("$.items[0].direction").value("visitor"))
+        .andExpect(jsonPath("$.items[1].id").value(42))
+        .andExpect(jsonPath("$.items[2].id").value(43));
   }
 
   @Test
@@ -310,6 +312,9 @@ class WebLiveChatControllerTest {
     var other = new Visitor(
         "visitor-2", NOW.plus(Duration.ofDays(30)), NOW, NOW, NOW
     );
+    when(liveChat.session(visitor())).thenReturn(new SessionView(
+        conversation("active"), List.of(message(41L, "visitor")), 0L
+    ));
     when(repository.visitorByTokenHash(codec.hash("other-token"))).thenReturn(other);
     when(liveChat.session(other)).thenReturn(new SessionView(null, List.of(), 0L));
 
@@ -317,6 +322,8 @@ class WebLiveChatControllerTest {
             .cookie(new MockCookie("daeho_live_chat", "other-token"))
             .header("Origin", "https://daeho.works"))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.conversation").isEmpty())
+        .andExpect(jsonPath("$.messages.length()").value(0))
         .andExpect(header().doesNotExist("Set-Cookie"));
 
     verify(liveChat).session(other);
