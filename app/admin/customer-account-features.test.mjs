@@ -64,3 +64,9 @@ test('runtime feature lookup times out quickly before applying its safe fallback
   assert.match(repositories, /timeoutMs:\s*1_500/);
   assert.match(repositories, /AbortSignal\.timeout\(options\.timeoutMs\)/);
 });
+
+test('customer API routes bypass locale redirects after the infrastructure gate', () => {
+  const proxy = read('proxy.ts');
+
+  assert.match(proxy, /pathname\.startsWith\('\/api\/customer\/'\)[\s\S]*?NextResponse\.next\(\)/);
+});

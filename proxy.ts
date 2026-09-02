@@ -21,6 +21,9 @@ export default async function proxy(request: NextRequest) {
       && process.env.CUSTOMER_ACCOUNTS_ENABLED !== 'true') {
     return notFoundResponse();
   }
+  if (request.nextUrl.pathname.startsWith('/api/customer/')) {
+    return NextResponse.next();
+  }
   if (isAdminProtectedPath(request.nextUrl.pathname)) {
     if (!isAdminIpAllowed(request.headers)) {
       return notFoundResponse();
