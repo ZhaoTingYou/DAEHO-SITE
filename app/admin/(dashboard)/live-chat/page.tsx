@@ -52,21 +52,26 @@ export default async function AdminTelegramLiveChatPage() {
           content: t('liveChat.content'),
           sessionState: t('liveChat.sessionState'),
           inquiry: t('liveChat.inquiry'),
-          stateAwaitingConsent: t('liveChat.state.awaitingConsent'),
-          stateAwaitingName: t('liveChat.state.awaitingName'),
-          stateAwaitingContact: t('liveChat.state.awaitingContact'),
-          stateAwaitingContent: t('liveChat.state.awaitingContent'),
+          source: t('liveChat.source'),
+          sourceWebsite: t('liveChat.source.website'),
+          sourceTelegramLegacy: t('liveChat.source.telegramLegacy'),
+          stateOpening: t('liveChat.state.opening'),
           stateNeedsAttention: t('liveChat.state.needsAttention'),
           attentionRequired: t('liveChat.attentionRequired'),
+          unreadReplies: t('liveChat.unreadReplies'),
+          topic: t('liveChat.topic'),
           reconcile: t('liveChat.reconcile'),
           retryDelivery: t('liveChat.retryDelivery'),
           retryDeliveryConfirm: t('liveChat.retryDeliveryConfirm'),
+          resetTopicCreation: t('liveChat.resetTopicCreation'),
+          resetTopicCreationConfirm: t('liveChat.resetTopicCreationConfirm'),
           resetSetup: t('liveChat.resetSetup'),
           resetSetupConfirm: t('liveChat.resetSetupConfirm'),
           stateActive: t('liveChat.state.active'),
           stateClosed: t('liveChat.state.closed'),
           closeConversation: t('liveChat.closeConversation'),
-          closeConversationConfirm: t('liveChat.closeConversationConfirm')
+          closeConversationConfirm: t('liveChat.closeConversationConfirm'),
+          working: t('liveChat.working')
         }}
       />
     </>

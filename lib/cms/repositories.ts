@@ -133,22 +133,17 @@ export type TelegramLiveChatSettings = {
   updatedAt: string;
 };
 
-export type TelegramLiveChatSession = {
+export type LiveChatAdminSession = {
   id: string;
-  telegramChatId: number;
-  telegramUserId: number;
-  inquiryId: string;
-  locale: Locale;
-  state: 'awaiting_consent' | 'awaiting_name' | 'awaiting_contact' | 'awaiting_content' | 'needs_attention' | 'active' | 'closed';
+  source: 'website' | 'telegram_legacy';
+  state: 'opening' | 'active' | 'needs_attention' | 'closed';
   customerName: string;
   customerContact: string;
   inquiryContent: string;
+  inquiryId: string;
+  topicThreadId: number | null;
   attentionCode: string;
-  pendingCustomerMessageId: number;
-  pendingGroupMessageId: number;
-  pendingDirection: string;
-  topicThreadId: number;
-  topicRootMessageId: number;
+  unreadCount: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -764,7 +759,7 @@ export async function listNotificationTemplates() {
 export async function getTelegramLiveChatAdmin() {
   return cmsFetch<{
     settings: TelegramLiveChatSettings;
-    sessions: TelegramLiveChatSession[];
+    sessions: LiveChatAdminSession[];
   }>('/api/admin/live-chat', {admin: true});
 }
 
@@ -804,28 +799,28 @@ export async function resetTelegramLiveChatSetup() {
 }
 
 export async function reconcileTelegramLiveChatSession(sessionId: string) {
-  return cmsFetch<{session: TelegramLiveChatSession}>(
+  return cmsFetch<{session: LiveChatAdminSession}>(
     `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/reconcile`,
     {admin: true, method: 'POST'}
   );
 }
 
 export async function retryTelegramLiveChatDelivery(sessionId: string) {
-  return cmsFetch<{session: TelegramLiveChatSession}>(
+  return cmsFetch<{session: LiveChatAdminSession}>(
     `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/retry-delivery`,
     {admin: true, method: 'POST'}
   );
 }
 
 export async function resetTelegramLiveChatTopicCreation(sessionId: string) {
-  return cmsFetch<{session: TelegramLiveChatSession}>(
+  return cmsFetch<{session: LiveChatAdminSession}>(
     `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/reset-topic-creation`,
     {method: 'POST', admin: true}
   );
 }
 
 export async function closeTelegramLiveChatSession(sessionId: string) {
-  return cmsFetch<{session: TelegramLiveChatSession}>(
+  return cmsFetch<{session: LiveChatAdminSession}>(
     `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/close`,
     {admin: true, method: 'POST'}
   );

@@ -768,7 +768,7 @@ public class TelegramLiveChatRepository {
     return reset == 1 ? sessionById(sessionId) : null;
   }
 
-  private Session sessionById(String sessionId) {
+  public Session sessionById(String sessionId) {
     return jdbc.query(
         "SELECT * FROM cms_telegram_live_chat_sessions WHERE id = ?",
         this::mapSession,

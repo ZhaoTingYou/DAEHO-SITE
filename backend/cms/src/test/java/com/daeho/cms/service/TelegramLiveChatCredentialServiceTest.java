@@ -19,6 +19,36 @@ import org.springframework.web.server.ResponseStatusException;
 
 class TelegramLiveChatCredentialServiceTest {
   @Test
+  void adminViewExposesConfigurationStatusWithoutCredentialMaterial() {
+    var repository = mock(TelegramLiveChatRepository.class);
+    var cipher = mock(TelegramCredentialCipher.class);
+    var gateway = mock(TelegramLiveChatGateway.class);
+    var separationGuard = mock(TelegramBotSeparationGuard.class);
+    var settings = new TelegramLiveChatRepository.Settings(
+        true, "ciphertext-secret", "DAEHO_LIVE_BOT", "-1001234567890", "", "실시간 상담",
+        "webhook-secret-hash", "idle", "", 3L, "2026-09-01T00:00:00Z",
+        "2026-09-01T00:00:00Z"
+    );
+    when(repository.settings()).thenReturn(settings);
+    when(cipher.configured()).thenReturn(true);
+    var service = new TelegramLiveChatCredentialService(
+        repository,
+        cipher,
+        gateway,
+        new TelegramLiveChatProperties("https://daeho.works"),
+        separationGuard
+    );
+
+    var view = service.adminView();
+
+    assertEquals(true, view.get("botTokenConfigured"));
+    assertEquals("DAEHO_LIVE_BOT", view.get("botUsername"));
+    assertFalse(view.containsKey("botTokenCiphertext"));
+    assertFalse(view.containsKey("botToken"));
+    assertFalse(view.containsKey("webhookSecretHash"));
+  }
+
+  @Test
   void publicViewRequiresTheAnonymousSessionCodecAndExposesOnlyEnabled() {
     var repository = mock(TelegramLiveChatRepository.class);
     var cipher = mock(TelegramCredentialCipher.class);

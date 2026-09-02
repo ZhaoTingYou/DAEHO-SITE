@@ -1,10 +1,14 @@
 package com.daeho.cms.controller;
 
 import com.daeho.cms.repository.TelegramLiveChatRepository;
+import com.daeho.cms.repository.WebLiveChatRepository;
 import com.daeho.cms.security.AdminAuth;
 import com.daeho.cms.service.TelegramLiveChatCredentialService;
 import com.daeho.cms.service.TelegramLiveChatService;
+import com.daeho.cms.service.WebLiveChatService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,17 +27,23 @@ public class AdminTelegramLiveChatController {
   private final TelegramLiveChatCredentialService credentials;
   private final TelegramLiveChatService liveChat;
   private final TelegramLiveChatRepository repository;
+  private final WebLiveChatService webLiveChat;
+  private final WebLiveChatRepository webRepository;
 
   public AdminTelegramLiveChatController(
       AdminAuth auth,
       TelegramLiveChatCredentialService credentials,
       TelegramLiveChatService liveChat,
-      TelegramLiveChatRepository repository
+      TelegramLiveChatRepository repository,
+      WebLiveChatService webLiveChat,
+      WebLiveChatRepository webRepository
   ) {
     this.auth = auth;
     this.credentials = credentials;
     this.liveChat = liveChat;
     this.repository = repository;
+    this.webLiveChat = webLiveChat;
+    this.webRepository = webRepository;
   }
 
   @GetMapping
@@ -41,8 +51,73 @@ public class AdminTelegramLiveChatController {
     auth.requireAdmin(request);
     return Map.of(
         "settings", credentials.adminView(),
-        "sessions", repository.recentSessions(50)
+        "sessions", recentSessions()
     );
+  }
+
+  private List<AdminSession> recentSessions() {
+    var sessions = new java.util.ArrayList<AdminSession>();
+    webRepository.recentConversations(50).stream()
+        .map(this::websiteSession)
+        .forEach(sessions::add);
+    repository.recentSessions(50).stream()
+        .map(this::legacySession)
+        .forEach(sessions::add);
+    sessions.sort(Comparator.comparing(AdminSession::updatedAt).reversed());
+    return sessions.stream().limit(50).toList();
+  }
+
+  private AdminSession websiteSession(WebLiveChatRepository.CmsConversationSummary summary) {
+    var conversation = summary.conversation();
+    return new AdminSession(
+        conversation.id(), "website", conversation.state(), conversation.customerName(),
+        conversation.customerContact(), conversation.inquiryContent(), conversation.inquiryId(),
+        positiveOrNull(conversation.topicThreadId()), conversation.attentionCode(),
+        summary.unreadCount(), conversation.createdAt().toString(),
+        conversation.updatedAt().toString()
+    );
+  }
+
+  private AdminSession websiteSession(WebLiveChatRepository.Conversation conversation) {
+    return new AdminSession(
+        conversation.id(), "website", conversation.state(), conversation.customerName(),
+        conversation.customerContact(), conversation.inquiryContent(), conversation.inquiryId(),
+        positiveOrNull(conversation.topicThreadId()), conversation.attentionCode(),
+        webRepository.unreadCount(conversation.id()), conversation.createdAt().toString(),
+        conversation.updatedAt().toString()
+    );
+  }
+
+  private AdminSession legacySession(TelegramLiveChatRepository.Session session) {
+    return new AdminSession(
+        session.id(), "telegram_legacy", legacyState(session.state()), session.customerName(),
+        session.customerContact(), session.inquiryContent(), session.inquiryId(),
+        positiveOrNull(session.topicThreadId()), session.attentionCode(), 0L,
+        session.createdAt(), session.updatedAt()
+    );
+  }
+
+  private String legacyState(String state) {
+    return switch (state) {
+      case "active", "needs_attention", "closed" -> state;
+      default -> "opening";
+    };
+  }
+
+  private Long positiveOrNull(long value) {
+    return value > 0 ? value : null;
+  }
+
+  private ResolvedSession resolve(String sessionId) {
+    var website = webRepository.conversationById(sessionId);
+    var legacy = repository.sessionById(sessionId);
+    if (website != null && legacy != null) {
+      throw conflict("The live-chat session ID is ambiguous.");
+    }
+    if (website == null && legacy == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Live-chat session not found.");
+    }
+    return new ResolvedSession(website, legacy);
   }
 
   @PutMapping
@@ -83,11 +158,15 @@ public class AdminTelegramLiveChatController {
       HttpServletRequest request
   ) {
     auth.requireAdmin(request);
+    var source = resolve(sessionId);
+    if (source.website() != null) {
+      invalid("Reconcile is only available for legacy sessions.");
+    }
     var session = repository.reconcile(sessionId);
     if (session == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Live-chat session not found");
     }
-    return Map.of("session", session);
+    return Map.of("session", legacySession(session));
   }
 
   @PostMapping("/sessions/{sessionId}/retry-delivery")
@@ -96,7 +175,20 @@ public class AdminTelegramLiveChatController {
       HttpServletRequest request
   ) {
     auth.requireAdmin(request);
-    return Map.of("session", liveChat.retryUncertainDelivery(sessionId));
+    var source = resolve(sessionId);
+    if (source.website() != null) {
+      var attentionCode = source.website().attentionCode();
+      if (!List.of(
+          "registration_delivery_failed", "registration_delivery_uncertain"
+      ).contains(attentionCode)) {
+        invalid("Registration delivery cannot be retried in this state.");
+      }
+      return Map.of(
+          "session",
+          websiteSession(webLiveChat.retryRegistrationFromCms(sessionId, attentionCode))
+      );
+    }
+    return Map.of("session", legacySession(liveChat.retryUncertainDelivery(sessionId)));
   }
 
   @PostMapping("/sessions/{sessionId}/reset-topic-creation")
@@ -105,6 +197,17 @@ public class AdminTelegramLiveChatController {
       HttpServletRequest request
   ) {
     auth.requireAdmin(request);
+    var source = resolve(sessionId);
+    if (source.website() != null) {
+      var attentionCode = source.website().attentionCode();
+      if (!List.of("topic_creation_failed", "topic_creation_uncertain").contains(attentionCode)) {
+        invalid("Topic creation cannot be reset in this state.");
+      }
+      return Map.of(
+          "session",
+          websiteSession(webLiveChat.resetTopicCreationFromCms(sessionId, attentionCode))
+      );
+    }
     var session = repository.confirmTopicMissingAndReset(sessionId);
     if (session == null) {
       throw new ResponseStatusException(
@@ -112,7 +215,7 @@ public class AdminTelegramLiveChatController {
           "This Topic creation no longer requires recovery."
       );
     }
-    return Map.of("session", session);
+    return Map.of("session", legacySession(session));
   }
 
   @PostMapping("/sessions/{sessionId}/close")
@@ -121,7 +224,15 @@ public class AdminTelegramLiveChatController {
       HttpServletRequest request
   ) {
     auth.requireAdmin(request);
-    return Map.of("session", liveChat.closeConversation(sessionId));
+    var source = resolve(sessionId);
+    if (source.website() != null) {
+      var closed = webLiveChat.closeFromCms(sessionId);
+      if (closed == null) {
+        throw conflict("This website conversation is already closed or cannot be closed.");
+      }
+      return Map.of("session", websiteSession(closed));
+    }
+    return Map.of("session", legacySession(liveChat.closeConversation(sessionId)));
   }
 
   private Map<String, Object> safe(TelegramLiveChatRepository.Settings settings) {
@@ -160,7 +271,31 @@ public class AdminTelegramLiveChatController {
     throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, message);
   }
 
+  private ResponseStatusException conflict(String message) {
+    return new ResponseStatusException(HttpStatus.CONFLICT, message);
+  }
+
   private String text(Object value) {
     return value == null ? "" : value.toString().trim();
   }
+
+  public record AdminSession(
+      String id,
+      String source,
+      String state,
+      String customerName,
+      String customerContact,
+      String inquiryContent,
+      String inquiryId,
+      Long topicThreadId,
+      String attentionCode,
+      long unreadCount,
+      String createdAt,
+      String updatedAt
+  ) {}
+
+  private record ResolvedSession(
+      WebLiveChatRepository.Conversation website,
+      TelegramLiveChatRepository.Session legacy
+  ) {}
 }

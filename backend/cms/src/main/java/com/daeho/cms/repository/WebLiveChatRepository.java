@@ -85,6 +85,14 @@ public class WebLiveChatRepository {
         """, this::mapConversation, conversationId, visitorId));
   }
 
+  public Conversation conversationById(String conversationId) {
+    return one(jdbc.query("""
+        SELECT c.*
+        FROM cms_web_live_chat_conversations c
+        WHERE c.id = ?
+        """, this::mapConversation, conversationId));
+  }
+
   public Conversation conversationForTopic(long configurationGeneration, String targetChatId,
       long topicThreadId) {
     return one(jdbc.query("""

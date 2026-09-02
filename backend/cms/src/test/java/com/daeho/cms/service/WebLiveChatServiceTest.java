@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -462,6 +463,39 @@ class WebLiveChatServiceTest {
 
     assertEquals(read, service.markRead(visitor(), 51L));
     assertEquals(closed, service.closeFromCms("conversation-1"));
+  }
+
+  @Test
+  void cmsCloseIsDurableBeforeTelegramTopicClosureAndTopicFailureIsBestEffort() {
+    var closed = conversation("closed", "inquiry-1", "", "", 701L, 702L);
+    var closeEvent = new Message(
+        52L, "conversation-1", "system", "상담이 종료되었습니다.", "delivered", "", 0L, NOW
+    );
+    when(repository.close("conversation-1", "상담이 종료되었습니다."))
+        .thenReturn(new WebLiveChatRepository.CloseResult(closed, closeEvent));
+    org.mockito.Mockito.doThrow(new TelegramLiveChatException("topic close failed"))
+        .when(gateway).closeForumTopic("token", "-1003425727647", 701L);
+
+    assertEquals(closed, service.closeFromCms("conversation-1"));
+
+    var order = inOrder(repository, gateway);
+    order.verify(repository).close("conversation-1", "상담이 종료되었습니다.");
+    order.verify(gateway).closeForumTopic("token", "-1003425727647", 701L);
+  }
+
+  @Test
+  void cmsCloseRemainsAvailableWhenBotConfigurationIsBroken() {
+    var closed = conversation("closed", "inquiry-1", "", "", 701L, 702L);
+    var closeEvent = new Message(
+        52L, "conversation-1", "system", "상담이 종료되었습니다.", "delivered", "", 0L, NOW
+    );
+    when(repository.close("conversation-1", "상담이 종료되었습니다."))
+        .thenReturn(new WebLiveChatRepository.CloseResult(closed, closeEvent));
+    when(credentials.current()).thenThrow(new IllegalStateException("broken ciphertext"));
+
+    assertEquals(closed, service.closeFromCms("conversation-1"));
+
+    verify(gateway, never()).closeForumTopic(anyString(), anyString(), anyLong());
   }
 
   @Test

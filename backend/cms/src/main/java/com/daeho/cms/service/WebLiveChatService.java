@@ -10,12 +10,15 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class WebLiveChatService {
+  private static final Logger log = LoggerFactory.getLogger(WebLiveChatService.class);
   private static final int MESSAGE_PAGE_SIZE = 100;
   private static final String CLOSED_MESSAGE = "상담이 종료되었습니다.";
   private final WebLiveChatRepository repository;
@@ -194,7 +197,27 @@ public class WebLiveChatService {
 
   public Conversation closeFromCms(String conversationId) {
     var result = repository.close(conversationId, CLOSED_MESSAGE);
-    return result == null ? null : result.conversation();
+    if (result == null) {
+      return null;
+    }
+    var closed = result.conversation();
+    if (closed.topicThreadId() <= 0) {
+      return closed;
+    }
+    try {
+      var configuration = credentials.current();
+      if (configuration.configured()
+          && configuration.settings().configurationGeneration()
+              == closed.configurationGeneration()
+          && configuration.settings().targetChatId().equals(closed.targetChatId())) {
+        gateway.closeForumTopic(
+            configuration.botToken(), closed.targetChatId(), closed.topicThreadId()
+        );
+      }
+    } catch (RuntimeException error) {
+      log.warn("Website live-chat closed in CMS while Telegram Topic closure was unavailable.");
+    }
+    return closed;
   }
 
   public Conversation retryRegistrationFromCms(

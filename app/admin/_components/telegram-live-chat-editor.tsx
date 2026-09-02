@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {useState} from 'react';
 
 import type {
-  TelegramLiveChatSession,
+  LiveChatAdminSession,
   TelegramLiveChatSettings
 } from '@/lib/cms/repositories';
 
@@ -44,21 +44,26 @@ type Copy = Record<
   | 'content'
   | 'sessionState'
   | 'inquiry'
-  | 'stateAwaitingConsent'
-  | 'stateAwaitingName'
-  | 'stateAwaitingContact'
-  | 'stateAwaitingContent'
+  | 'source'
+  | 'sourceWebsite'
+  | 'sourceTelegramLegacy'
+  | 'stateOpening'
   | 'stateNeedsAttention'
   | 'attentionRequired'
+  | 'unreadReplies'
+  | 'topic'
   | 'reconcile'
   | 'retryDelivery'
   | 'retryDeliveryConfirm'
+  | 'resetTopicCreation'
+  | 'resetTopicCreationConfirm'
   | 'resetSetup'
   | 'resetSetupConfirm'
   | 'stateActive'
   | 'stateClosed'
   | 'closeConversation'
-  | 'closeConversationConfirm',
+  | 'closeConversationConfirm'
+  | 'working',
   string
 >;
 
@@ -68,7 +73,7 @@ export function TelegramLiveChatEditor({
   copy
 }: {
   initialSettings: TelegramLiveChatSettings;
-  sessions: TelegramLiveChatSession[];
+  sessions: LiveChatAdminSession[];
   copy: Copy;
 }) {
   const [settings, setSettings] = useState(initialSettings);
@@ -76,11 +81,8 @@ export function TelegramLiveChatEditor({
   const [clearBotToken, setClearBotToken] = useState(false);
   const [state, setState] = useState<'idle' | 'working' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const stateLabels: Record<TelegramLiveChatSession['state'], string> = {
-    awaiting_consent: copy.stateAwaitingConsent,
-    awaiting_name: copy.stateAwaitingName,
-    awaiting_contact: copy.stateAwaitingContact,
-    awaiting_content: copy.stateAwaitingContent,
+  const stateLabels: Record<LiveChatAdminSession['state'], string> = {
+    opening: copy.stateOpening,
     needs_attention: copy.stateNeedsAttention,
     active: copy.stateActive,
     closed: copy.stateClosed
@@ -110,6 +112,26 @@ export function TelegramLiveChatEditor({
     setClearBotToken(false);
     setState('success');
     setMessage(successMessage);
+  };
+
+  const runSessionAction = async (
+    session: LiveChatAdminSession,
+    action: 'close' | 'reconcile' | 'retry-delivery' | 'reset-topic-creation',
+    confirmation?: string
+  ) => {
+    if (confirmation && !window.confirm(confirmation)) return;
+    setState('working');
+    setMessage(copy.working);
+    const response = await fetch(
+      `/api/admin/live-chat/sessions/${encodeURIComponent(session.id)}/${action}`,
+      {method: 'POST'}
+    ).catch(() => null);
+    if (response?.ok) {
+      window.location.reload();
+      return;
+    }
+    setState('error');
+    setMessage(copy.error);
   };
 
   return (
@@ -228,7 +250,7 @@ export function TelegramLiveChatEditor({
           <div className="flex flex-wrap items-center gap-3 border-t border-[#e4e7ec] pt-5">
             <button
               disabled={state === 'working'}
-              className="admin-on-dark min-h-10 rounded-md bg-[#101827] px-4 text-sm font-semibold text-white disabled:opacity-50"
+              className="admin-on-dark min-h-11 rounded-md bg-[#101827] px-4 text-sm font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#7a2230] focus-visible:ring-offset-2 disabled:opacity-50"
             >
               {copy.save}
             </button>
@@ -239,7 +261,7 @@ export function TelegramLiveChatEditor({
                 () => fetch('/api/admin/live-chat/connect', {method: 'POST'}),
                 copy.connectedMessage
               )}
-              className="min-h-10 rounded-md border border-[#7a2230] px-4 text-sm font-semibold text-[#7a2230] disabled:cursor-not-allowed disabled:opacity-40"
+              className="min-h-11 rounded-md border border-[#7a2230] px-4 text-sm font-semibold text-[#7a2230] outline-none focus-visible:ring-2 focus-visible:ring-[#7a2230] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {copy.connect}
             </button>
@@ -254,7 +276,7 @@ export function TelegramLiveChatEditor({
                 }),
                 settings.enabled ? copy.disabled : copy.enabled
               )}
-              className="min-h-10 rounded-md border border-[#cbd3df] px-4 text-sm font-semibold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40"
+              className="min-h-11 rounded-md border border-[#cbd3df] px-4 text-sm font-semibold text-[#344054] outline-none focus-visible:ring-2 focus-visible:ring-[#7a2230] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {settings.enabled ? copy.disableAction : copy.enable}
             </button>
@@ -269,13 +291,14 @@ export function TelegramLiveChatEditor({
                     copy.saved
                   );
                 }}
-                className="min-h-10 rounded-md border border-[#b42318] px-4 text-sm font-semibold text-[#b42318] disabled:opacity-40"
+                className="min-h-11 rounded-md border border-[#b42318] px-4 text-sm font-semibold text-[#b42318] outline-none focus-visible:ring-2 focus-visible:ring-[#b42318] focus-visible:ring-offset-2 disabled:opacity-40"
               >
                 {copy.resetSetup}
               </button>
             ) : null}
-            {state === 'success' ? <p className="text-sm text-[#027a48]">{message}</p> : null}
-            {state === 'error' ? <p className="text-sm text-[#b42318]">{message}</p> : null}
+            <p aria-live="polite" className={`text-sm ${state === 'error' ? 'text-[#b42318]' : 'text-[#027a48]'}`}>
+              {state === 'working' || state === 'success' || state === 'error' ? message : ''}
+            </p>
           </div>
         </form>
       </section>
@@ -288,10 +311,11 @@ export function TelegramLiveChatEditor({
           <p className="p-6 text-sm text-[#647084]">{copy.noSessions}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-[880px] text-left text-sm">
               <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#647084]">
                 <tr>
                   <th className="px-4 py-3">{copy.customer}</th>
+                  <th className="px-4 py-3">{copy.source}</th>
                   <th className="px-4 py-3">{copy.contact}</th>
                   <th className="px-4 py-3">{copy.content}</th>
                   <th className="px-4 py-3">{copy.sessionState}</th>
@@ -300,45 +324,74 @@ export function TelegramLiveChatEditor({
               </thead>
               <tbody className="divide-y divide-[#e4e7ec]">
                 {sessions.map((session) => {
-                  const deliveryUncertain = /^(registration|customer|team)_delivery_(uncertain|in_flight|retrying)$/
-                    .test(session.attentionCode);
-                  const topicCreationRecovery = /^topic_creation_(uncertain|in_flight|failed)$/
-                    .test(session.attentionCode);
-                  const topicCloseRecovery = /^topic_close_(in_flight|uncertain|failed)$/
-                    .test(session.attentionCode);
+                  const websiteRegistrationRetry = session.source === 'website'
+                    && /^registration_delivery_(failed|uncertain)$/.test(session.attentionCode);
+                  const websiteTopicReset = session.source === 'website'
+                    && /^topic_creation_(failed|uncertain)$/.test(session.attentionCode);
+                  const legacyDeliveryRetry = session.source === 'telegram_legacy'
+                    && /^(registration|customer|team)_delivery_(uncertain|in_flight|retrying)$/
+                      .test(session.attentionCode);
+                  const legacyTopicReset = session.source === 'telegram_legacy'
+                    && /^topic_creation_(uncertain|in_flight|failed)$/.test(session.attentionCode);
+                  const legacyReconcile = session.source === 'telegram_legacy'
+                    && Boolean(session.attentionCode)
+                    && !legacyDeliveryRetry
+                    && !legacyTopicReset;
+                  const recoveryAction = websiteTopicReset || legacyTopicReset
+                    ? 'reset-topic-creation'
+                    : websiteRegistrationRetry || legacyDeliveryRetry
+                      ? 'retry-delivery'
+                      : legacyReconcile
+                        ? 'reconcile'
+                        : null;
+                  const recoveryLabel = websiteTopicReset || legacyTopicReset
+                    ? copy.resetTopicCreation
+                    : websiteRegistrationRetry || legacyDeliveryRetry
+                      ? copy.retryDelivery
+                      : copy.reconcile;
+                  const recoveryConfirmation = websiteTopicReset || legacyTopicReset
+                    ? copy.resetTopicCreationConfirm
+                    : websiteRegistrationRetry || legacyDeliveryRetry
+                      ? copy.retryDeliveryConfirm
+                      : undefined;
                   return (
                   <tr key={session.id}>
                     <td className="px-4 py-3 font-semibold text-[#101827]">{session.customerName || '-'}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex rounded-full border border-[#cbd3df] bg-[#f8fafc] px-2.5 py-1 text-xs font-semibold text-[#344054]">
+                        {session.source === 'website' ? copy.sourceWebsite : copy.sourceTelegramLegacy}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-[#475467]">{session.customerContact || '-'}</td>
                     <td className="max-w-96 px-4 py-3 text-[#475467]">{session.inquiryContent || '-'}</td>
                     <td className="px-4 py-3 text-[#475467]">
                       <span className={session.state === 'needs_attention' ? 'font-semibold text-[#b42318]' : ''}>
                         {stateLabels[session.state]}
                       </span>
+                      {session.unreadCount > 0 ? (
+                        <span className="mt-1 block text-xs font-semibold text-[#7a2230]">
+                          {copy.unreadReplies}: {session.unreadCount}
+                        </span>
+                      ) : null}
+                      <span className="mt-1 block text-xs text-[#647084]">
+                        {copy.topic}: {session.topicThreadId ?? '-'}
+                      </span>
                       {session.attentionCode ? (
                         <span className="mt-1 block max-w-80 text-xs leading-5 text-[#b42318]">
                           {copy.attentionRequired}
                         </span>
                       ) : null}
-                      {session.state === 'active' ? (
+                      {session.state === 'active'
+                          || (session.source === 'website'
+                            && session.state !== 'closed'
+                            && !recoveryAction) ? (
                         <button
                           type="button"
                           disabled={state === 'working'}
-                          onClick={async () => {
-                            if (!window.confirm(copy.closeConversationConfirm)) return;
-                            setState('working');
-                            const response = await fetch(
-                              `/api/admin/live-chat/sessions/${encodeURIComponent(session.id)}/close`,
-                              {method: 'POST'}
-                            ).catch(() => null);
-                            if (response?.ok) {
-                              window.location.reload();
-                            } else {
-                              setState('error');
-                              setMessage(copy.error);
-                            }
-                          }}
-                          className="ml-3 rounded border border-[#667085] px-2 py-1 text-xs font-semibold text-[#475467] disabled:opacity-40"
+                          onClick={() => void runSessionAction(
+                            session, 'close', copy.closeConversationConfirm
+                          )}
+                          className="mt-2 min-h-11 rounded-md border border-[#667085] px-3 text-xs font-semibold text-[#475467] outline-none focus-visible:ring-2 focus-visible:ring-[#7a2230] focus-visible:ring-offset-2 disabled:opacity-40"
                         >
                           {copy.closeConversation}
                         </button>
@@ -350,31 +403,16 @@ export function TelegramLiveChatEditor({
                           {session.inquiryId.slice(0, 8)}
                         </Link>
                       ) : '-'}
-                      {session.attentionCode ? (
+                      {recoveryAction ? (
                         <button
                           type="button"
                           disabled={state === 'working'}
-                          onClick={async () => {
-                            if ((deliveryUncertain || topicCreationRecovery || topicCloseRecovery)
-                                && !window.confirm(copy.retryDeliveryConfirm)) return;
-                            setState('working');
-                            const recoveryAction = topicCreationRecovery
-                              ? 'reset-topic-creation'
-                              : (deliveryUncertain ? 'retry-delivery' : 'reconcile');
-                            const response = await fetch(
-                              `/api/admin/live-chat/sessions/${encodeURIComponent(session.id)}/${recoveryAction}`,
-                              {method: 'POST'}
-                            ).catch(() => null);
-                            if (response?.ok) {
-                              window.location.reload();
-                            } else {
-                              setState('error');
-                              setMessage(copy.error);
-                            }
-                          }}
-                          className="ml-3 rounded border border-[#b42318] px-2 py-1 text-xs font-semibold text-[#b42318] disabled:opacity-40"
+                          onClick={() => void runSessionAction(
+                            session, recoveryAction, recoveryConfirmation
+                          )}
+                          className="mt-2 min-h-11 rounded-md border border-[#b42318] px-3 text-xs font-semibold text-[#b42318] outline-none focus-visible:ring-2 focus-visible:ring-[#b42318] focus-visible:ring-offset-2 disabled:opacity-40"
                         >
-                          {deliveryUncertain ? copy.retryDelivery : copy.reconcile}
+                          {recoveryLabel}
                         </button>
                       ) : null}
                     </td>
