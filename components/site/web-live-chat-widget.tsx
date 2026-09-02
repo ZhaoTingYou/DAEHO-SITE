@@ -24,6 +24,7 @@ import {
   createLogicalMutationController,
   createStableStreamController,
   loadMessagePages,
+  nextMessageScrollAction,
   nextFocusIndex
 } from './web-live-chat-widget-core.mjs';
 
@@ -63,6 +64,7 @@ export type WebLiveChatCopy = {
   sendingLabel: string;
   sentLabel: string;
   inProgressLabel: string;
+  newMessagesBelow: string;
   sendError: string;
   retrySendLabel: string;
   reconnectingLabel: string;
@@ -129,8 +131,8 @@ export function WebLiveChatWidget({
     stateRef.current = state;
   }, [state]);
 
-  const refreshAuthoritative = useCallback(async () => {
-    const session = await getSession();
+  const refreshAuthoritative = useCallback(async (issueIdentity = false) => {
+    const session = await getSession(issueIdentity);
     const fingerprint = session.conversation
       ? `${session.conversation.locale}|${session.conversation.createdAt}`
       : null;
@@ -190,7 +192,7 @@ export function WebLiveChatWidget({
   useEffect(() => {
     if (!state.panelOpen) return;
     let active = true;
-    refreshAuthoritative()
+    refreshAuthoritative(true)
       .catch(() => {
         if (active) {
           dispatch({
@@ -674,9 +676,16 @@ function ConversationView({copy, mode, state, onChange, onSubmit}: {
   onChange: (body: string) => void;
   onSubmit: () => void;
 }) {
+  const {
+    historyScrollRef, bottomSentinelRef, messagesBelow, onScroll, scrollLatest
+  } = useMessageScroll(state.messages);
   return (
     <>
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+      <div
+        ref={historyScrollRef}
+        onScroll={onScroll}
+        className="relative min-h-0 flex-1 overflow-y-auto px-5 py-5"
+      >
         <div className="rounded-2xl border border-[#C6AE78]/45 bg-white/70 p-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#8B6D2F]">{mode === 'waiting' ? copy.waitingTitle : copy.activeTitle}</p>
           <p className="mt-2 text-sm leading-6 text-[#263A52]">{copy.waitingBody}</p>
@@ -685,7 +694,17 @@ function ConversationView({copy, mode, state, onChange, onSubmit}: {
         {state.polling || state.sseFailures > 0 ? (
           <p role="status" className="mt-3 flex items-center gap-2 text-xs text-[#6B5730]"><span aria-hidden="true" className="size-2 rounded-full bg-[#A78135]" />{copy.reconnectingLabel}</p>
         ) : null}
-        <MessageHistory copy={copy} messages={state.messages} />
+        <MessageHistory copy={copy} messages={state.messages} bottomSentinelRef={bottomSentinelRef} />
+        {messagesBelow ? (
+          <button
+            type="button"
+            aria-live="polite"
+            onClick={scrollLatest}
+            className="sticky bottom-2 mx-auto mt-3 block min-h-10 rounded-full bg-[#101D30] px-4 text-xs font-semibold text-white shadow-lg"
+          >
+            {copy.newMessagesBelow}
+          </button>
+        ) : null}
       </div>
       <form className="border-t border-[#C6AE78]/30 bg-white/70 p-4" onSubmit={(event) => { event.preventDefault(); onSubmit(); }}>
         <label className="block text-xs font-semibold text-[#263A52]">
@@ -716,17 +735,25 @@ function ConversationView({copy, mode, state, onChange, onSubmit}: {
 }
 
 function ClosedView({copy, messages, onStartNew}: {copy: WebLiveChatCopy; messages: ChatState['messages']; onStartNew: () => void}) {
+  const {
+    historyScrollRef, bottomSentinelRef, messagesBelow, onScroll, scrollLatest
+  } = useMessageScroll(messages);
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6">
+    <div ref={historyScrollRef} onScroll={onScroll} className="relative min-h-0 flex-1 overflow-y-auto px-5 py-6">
       <h3 className="font-heading text-2xl font-semibold">{copy.closedTitle}</h3>
       <p className="mt-2 text-sm leading-6 text-[#34445A]">{copy.closedBody}</p>
-      <MessageHistory copy={copy} messages={messages} />
+      <MessageHistory copy={copy} messages={messages} bottomSentinelRef={bottomSentinelRef} />
+      {messagesBelow ? (
+        <button type="button" aria-live="polite" onClick={scrollLatest} className="sticky bottom-2 mx-auto mt-3 block min-h-10 rounded-full bg-[#101D30] px-4 text-xs font-semibold text-white shadow-lg">
+          {copy.newMessagesBelow}
+        </button>
+      ) : null}
       <button type="button" onClick={onStartNew} className={primaryButtonClass}>{copy.newConsultationLabel}</button>
     </div>
   );
 }
 
-function MessageHistory({copy, messages}: {copy: WebLiveChatCopy; messages: ChatState['messages']}) {
+function MessageHistory({copy, messages, bottomSentinelRef}: {copy: WebLiveChatCopy; messages: ChatState['messages']; bottomSentinelRef: React.RefObject<HTMLDivElement | null>}) {
   return (
     <ol className="mt-5 space-y-2">
       {messages.map((message) => message.direction === 'visitor' ? (
@@ -743,8 +770,44 @@ function MessageHistory({copy, messages}: {copy: WebLiveChatCopy; messages: Chat
           <span className="sr-only">{copy.systemLabel}: </span>{message.body}
         </li>
       ))}
+      <li aria-hidden="true" className="h-px"><div ref={bottomSentinelRef} /></li>
     </ol>
   );
+}
+
+function useMessageScroll(messages: ChatState['messages']) {
+  const historyScrollRef = useRef<HTMLDivElement | null>(null);
+  const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
+  const nearBottomRef = useRef(true);
+  const previousHighestRef = useRef(0);
+  const [messagesBelow, setMessagesBelow] = useState(false);
+  const scrollLatest = useCallback(() => {
+    bottomSentinelRef.current?.scrollIntoView({block: 'end', behavior: 'smooth'});
+    nearBottomRef.current = true;
+    setMessagesBelow(false);
+  }, []);
+
+  useEffect(() => {
+    const highest = messages.reduce((value, message) => Math.max(value, message.id), 0);
+    const previous = previousHighestRef.current;
+    const action = nextMessageScrollAction({
+      opened: previous === 0 && highest > 0,
+      nearBottom: nearBottomRef.current,
+      appended: highest > previous
+    });
+    previousHighestRef.current = highest;
+    if (action === 'scroll') scrollLatest();
+    else if (action === 'notify') setMessagesBelow(true);
+  }, [messages, scrollLatest]);
+
+  const onScroll = useCallback(() => {
+    const container = historyScrollRef.current;
+    if (!container) return;
+    nearBottomRef.current = container.scrollHeight - container.scrollTop - container.clientHeight <= 48;
+    if (nearBottomRef.current) setMessagesBelow(false);
+  }, []);
+
+  return {historyScrollRef, bottomSentinelRef, messagesBelow, onScroll, scrollLatest};
 }
 
 function StatusView({title, body}: {title: string; body: string}) {
@@ -764,7 +827,10 @@ const primaryButtonClass = 'mt-5 min-h-11 w-full rounded-full bg-[#101D30] px-6 
 const iconButtonClass = 'grid size-11 place-items-center rounded-full text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E4C77D]';
 
 function isDefinitiveMutationFailure(error: unknown) {
-  return error instanceof WebLiveChatApiError && error.status >= 400 && error.status < 500;
+  return error instanceof WebLiveChatApiError
+    && error.status >= 400
+    && error.status < 500
+    && error.status !== 429;
 }
 
 function ChatIcon() {

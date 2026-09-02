@@ -217,6 +217,18 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
+  void teamRepliesDoNotExtendTheCustomerWriteExpiryClock() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(messageRow("team", 900L, ""));
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.recordTeamMessage("conversation-1", 900L, "확인했습니다.");
+
+    assertEquals(1, jdbc.calls.size());
+    assertFalse(jdbc.calls.get(0).sql().contains("last_activity_at = now()"));
+  }
+
+  @Test
   void systemEventsArePersistedAsVisibleDeliveredMessages() {
     var jdbc = new RecordingJdbcTemplate();
     jdbc.queryResult = call -> List.of(messageRow("system", 0L, ""));
@@ -266,6 +278,95 @@ class WebLiveChatRepositoryTest {
     assertTrue(sql.contains("delivery_state = 'pending'"));
     assertTrue(sql.contains("pending_action = ''"));
     assertEquals(List.of(41L, 41L), Arrays.asList(jdbc.calls.get(0).args()));
+  }
+
+  @Test
+  void uncertainAndStaleVisitorDeliveriesBecomeExactRecoverableClaims() {
+    var jdbc = new RecordingJdbcTemplate();
+    var attentionRow = new java.util.LinkedHashMap<>(conversationRow());
+    attentionRow.put("state", "needs_attention");
+    jdbc.queryResult = call -> call.sql().contains("SELECT m.*")
+        ? List.of(messageRow("visitor", 0L, "client-key-1"))
+        : List.of(attentionRow);
+    var repository = new WebLiveChatRepository(jdbc);
+
+    assertEquals(
+        "needs_attention",
+        repository.markVisitorDeliveryNeedsAttention(
+            "conversation-1", 41L, "visitor_delivery_uncertain"
+        ).state()
+    );
+    repository.reconcileStaleVisitorDelivery(
+        "conversation-1", "client-key-1", NOW.minusSeconds(120)
+    );
+
+    var uncertainSql = jdbc.calls.get(0).sql();
+    assertTrue(uncertainSql.contains("delivery_state = 'needs_attention'"));
+    assertTrue(uncertainSql.contains("pending_message_id = ?"));
+    assertTrue(uncertainSql.contains("pending_action = 'visitor_delivery'"));
+    var staleSql = jdbc.calls.get(1).sql();
+    assertTrue(staleSql.contains("updated_at <= ?"));
+    assertTrue(staleSql.contains("visitor_delivery_stale"));
+    assertTrue(staleSql.contains("client_message_key = ?"));
+  }
+
+  @Test
+  void staleVisitorDeliverySweepIsBoundedAndPreservesTheExactPendingMessage() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(Map.of("updated", 1));
+    var repository = new WebLiveChatRepository(jdbc);
+    var cutoff = NOW.minusSeconds(120);
+
+    assertEquals(1, repository.reconcileStaleVisitorDeliveries(cutoff, 100));
+
+    var call = jdbc.calls.get(0);
+    assertTrue(call.sql().contains("pending_action = 'visitor_delivery'"));
+    assertTrue(call.sql().contains("pending_message_id = m.id"));
+    assertTrue(call.sql().contains("delivery_state = 'needs_attention'"));
+    assertTrue(call.sql().contains("visitor_delivery_stale"));
+    assertTrue(call.sql().contains("FOR UPDATE OF c SKIP LOCKED"));
+    assertTrue(call.sql().contains("LIMIT ?"));
+    assertEquals(List.of(databaseTime(cutoff), 100), Arrays.asList(call.args()));
+  }
+
+  @Test
+  void exactMessageRecoveryConfirmsOrReacquiresTheOriginalPersistedKey() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> call.sql().contains("claim_status")
+        ? List.of(claimRow("acquired"))
+        : List.of(conversationRow());
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.confirmVisitorMessageDelivered(
+        "conversation-1", 41L, "visitor_delivery_uncertain"
+    );
+    var retry = repository.reserveVisitorMessageRetry(
+        "conversation-1", 41L, "visitor_delivery_uncertain"
+    );
+
+    assertTrue(jdbc.calls.get(0).sql().contains("delivery_state = 'delivered'"));
+    assertTrue(jdbc.calls.get(0).sql().contains("m.client_message_key = c.pending_client_message_key"));
+    assertEquals("client-key-1", retry.message().clientMessageKey());
+    assertTrue(jdbc.calls.get(1).sql().contains("delivery_state = 'pending'"));
+    assertTrue(jdbc.calls.get(1).sql().contains("pending_client_message_key = m.client_message_key"));
+  }
+
+  @Test
+  void closePersistsRetryableTopicStatusAndCompletionUsesCompareAndSet() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(closeRow());
+    jdbc.updateResult = call -> 1;
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.close("conversation-1", "상담이 종료되었습니다.");
+    assertTrue(jdbc.calls.get(0).sql().contains("pending_action = CASE"));
+    assertTrue(jdbc.calls.get(0).sql().contains("'topic_close'"));
+    assertEquals("conversation-1", repository.completeTopicClose("conversation-1").id());
+    assertTrue(repository.markTopicCloseNeedsAttention(
+        "conversation-1", "topic_close_uncertain"
+    ));
+    assertTrue(jdbc.calls.get(1).sql().contains("pending_action = 'topic_close'"));
+    assertTrue(jdbc.calls.get(2).sql().contains("attention_code = ?"));
   }
 
   @Test
@@ -375,7 +476,29 @@ class WebLiveChatRepositoryTest {
     assertTrue(call.sql().contains("INSERT INTO cms_web_live_chat_messages"));
     assertTrue(call.sql().contains("SELECT id, 'system', ?, 'delivered'"));
     assertTrue(call.sql().contains("last_activity_at = now()"));
+    assertTrue(call.sql().contains("ELSE 'topic_close'"));
+    assertTrue(call.sql().contains("topic_close_in_flight"));
     assertEquals(List.of(databaseTime(cutoff), 100, "상담이 종료되었습니다."), Arrays.asList(call.args()));
+  }
+
+  @Test
+  void cleanupDeletesOnlyBoundedExpiredAnonymousStateAndPreservesInquiryRows() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(Map.of("deleted", 1));
+    var repository = new WebLiveChatRepository(jdbc);
+
+    repository.deleteExpiredRateBuckets(100);
+    repository.deleteExpiredAnonymousConversations(100);
+    repository.deleteExpiredOrphanVisitors(100);
+
+    assertTrue(jdbc.calls.get(0).sql().contains("expires_at <= now()"));
+    assertTrue(jdbc.calls.get(0).sql().contains("LIMIT ?"));
+    assertTrue(jdbc.calls.get(1).sql().contains("DELETE FROM cms_web_live_chat_conversations"));
+    assertFalse(jdbc.calls.get(1).sql().contains("DELETE FROM cms_inquiries"));
+    assertTrue(jdbc.calls.get(2).sql().contains("NOT EXISTS"));
+    assertEquals(List.of(100), Arrays.asList(jdbc.calls.get(0).args()));
+    assertEquals(List.of(100), Arrays.asList(jdbc.calls.get(1).args()));
+    assertEquals(List.of(100), Arrays.asList(jdbc.calls.get(2).args()));
   }
 
   @Test

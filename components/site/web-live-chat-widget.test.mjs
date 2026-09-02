@@ -85,6 +85,20 @@ test('message history uses compact WeChat-style participant bubbles and a center
   assert.doesNotMatch(system, /rounded-t[lr]-sm/);
 });
 
+test('history uses a bottom sentinel and preserves older-reading position with an accessible below affordance', () => {
+  assert.match(source, /bottomSentinelRef/);
+  assert.match(source, /historyScrollRef/);
+  assert.match(source, /scrollIntoView/);
+  assert.match(source, /nextMessageScrollAction/);
+  assert.match(source, /copy\.newMessagesBelow/);
+  assert.match(source, /aria-live="polite"/);
+});
+
+test('429 is retryable so a rate-limited logical send keeps its original client key', () => {
+  const classifier = source.match(/function isDefinitiveMutationFailure[\s\S]*?\n\}/)?.[0] ?? '';
+  assert.match(classifier, /error\.status !== 429/);
+});
+
 test('stream source stays native-stable until polling threshold and broadcasts only invalidate', () => {
   assert.match(source, /createStableStreamController/);
   assert.doesNotMatch(source, /\[openCycle[^\]]*sseFailures/);

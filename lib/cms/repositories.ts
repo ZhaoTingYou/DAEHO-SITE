@@ -95,7 +95,7 @@ export type CmsMedia = {
 
 export type CmsInquiry = {
   id: string;
-  source: 'contact' | 'golf' | 'telegram';
+  source: 'contact' | 'golf' | 'telegram' | 'web_live_chat';
   status: string;
   locale: Locale;
   name: string;
@@ -143,6 +143,7 @@ export type LiveChatAdminSession = {
   inquiryId: string;
   topicThreadId: number | null;
   attentionCode: string;
+  pendingMessageId: number | null;
   unreadCount: number;
   createdAt: string;
   updatedAt: string;
@@ -808,6 +809,27 @@ export async function reconcileTelegramLiveChatSession(sessionId: string) {
 export async function retryTelegramLiveChatDelivery(sessionId: string) {
   return cmsFetch<{session: LiveChatAdminSession}>(
     `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/retry-delivery`,
+    {admin: true, method: 'POST'}
+  );
+}
+
+export async function retryWebLiveChatTopicClose(sessionId: string) {
+  return cmsFetch<{session: LiveChatAdminSession}>(
+    `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/retry-topic-close`,
+    {admin: true, method: 'POST'}
+  );
+}
+
+export async function confirmWebLiveChatVisitorMessage(sessionId: string, messageId: number) {
+  return cmsFetch<{session: LiveChatAdminSession}>(
+    `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/messages/${messageId}/confirm-delivered`,
+    {admin: true, method: 'POST'}
+  );
+}
+
+export async function retryWebLiveChatVisitorMessage(sessionId: string, messageId: number) {
+  return cmsFetch<{session: LiveChatAdminSession}>(
+    `/api/admin/live-chat/sessions/${encodeURIComponent(sessionId)}/messages/${messageId}/retry-delivery`,
     {admin: true, method: 'POST'}
   );
 }

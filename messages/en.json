@@ -1313,6 +1313,7 @@
       "sendError": "The message was not sent. Your draft is still here.",
       "retrySendLabel": "Retry send",
       "reconnectingLabel": "Restoring the connection. New replies will be checked automatically.",
+      "newMessagesBelow": "New messages below",
       "closedTitle": "Consultation closed",
       "closedBody": "You can still read previous replies. A new inquiry starts a separate consultation.",
       "newConsultationLabel": "Start a new consultation",

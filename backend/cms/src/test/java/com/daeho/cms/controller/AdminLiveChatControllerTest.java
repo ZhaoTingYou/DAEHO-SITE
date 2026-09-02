@@ -185,6 +185,41 @@ class AdminLiveChatControllerTest {
   }
 
   @Test
+  void websiteVisitorRecoveryTargetsTheExactStoredMessageAndTopicCloseCanRetry() throws Exception {
+    var attention = new WebLiveChatRepository.Conversation(
+        "website-id", "visitor-secret-id", 3L, "-1003425727647", "inquiry-web", "ko",
+        "needs_attention", "Website Customer", "website@example.com", "Website inquiry",
+        "2026-09", NOW, "visitor_delivery_uncertain", "visitor_delivery", 41L,
+        "client-secret-key", 701L, 704L, 0L, NOW, NOW, NOW, null
+    );
+    var active = websiteConversation("website-id", "active", "", 701L, NOW.plusSeconds(1));
+    when(websiteRepository.conversationById("website-id")).thenReturn(attention);
+    when(legacyRepository.sessionById("website-id")).thenReturn(null);
+    when(websiteService.confirmVisitorMessageFromCms(
+        "website-id", 41L, "visitor_delivery_uncertain"
+    )).thenReturn(active);
+
+    mvc.perform(post("/api/admin/live-chat/sessions/website-id/messages/41/confirm-delivered")
+            .header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.session.state").value("active"));
+    verify(websiteService).confirmVisitorMessageFromCms(
+        "website-id", 41L, "visitor_delivery_uncertain"
+    );
+
+    var closed = websiteConversation(
+        "website-id", "closed", "topic_close_failed", 701L, NOW.plusSeconds(2)
+    );
+    when(websiteRepository.conversationById("website-id")).thenReturn(closed);
+    when(websiteService.retryTopicCloseFromCms("website-id", "topic_close_failed"))
+        .thenReturn(websiteConversation("website-id", "closed", "", 701L, NOW.plusSeconds(3)));
+    mvc.perform(post("/api/admin/live-chat/sessions/website-id/retry-topic-close")
+            .header("x-admin-api-key", ADMIN_KEY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.session.state").value("closed"));
+  }
+
+  @Test
   void websiteTopicResetUsesTheStoredAttentionCodeAndDoesNotCreateATopic() throws Exception {
     var needsAttention = websiteConversation(
         "website-id", "needs_attention", "topic_creation_uncertain", 0L, NOW

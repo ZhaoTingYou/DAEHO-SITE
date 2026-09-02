@@ -1,6 +1,7 @@
 package com.daeho.cms.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.server.ResponseStatusException;
 
 class WebLiveChatEventBrokerTest {
   @Test
@@ -92,7 +94,9 @@ class WebLiveChatEventBrokerTest {
         .thenReturn(future);
     var emitters = List.of(new RecordingEmitter(), new RecordingEmitter(), new RecordingEmitter());
     var next = new AtomicInteger();
-    var broker = new WebLiveChatEventBroker(scheduler, () -> emitters.get(next.getAndIncrement()));
+    var broker = new WebLiveChatEventBroker(
+        scheduler, () -> emitters.get(next.getAndIncrement()), 10, 10
+    );
     emitters.forEach(ignored -> broker.open("conversation-1", List::of));
 
     emitters.get(0).timeout.run();
@@ -102,6 +106,25 @@ class WebLiveChatEventBrokerTest {
 
     emitters.forEach(emitter -> assertEquals(List.of(), emitter.ids));
     verify(future, org.mockito.Mockito.times(3)).cancel(false);
+  }
+
+  @Test
+  void activeEmitterLimitsRejectExcessConnectionsAndReleaseCapacityOnCompletion() {
+    var scheduler = mock(ScheduledExecutorService.class);
+    when(scheduler.scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class)))
+        .thenReturn(mock(ScheduledFuture.class));
+    var emitters = List.of(new RecordingEmitter(), new RecordingEmitter(), new RecordingEmitter());
+    var next = new AtomicInteger();
+    var broker = new WebLiveChatEventBroker(
+        scheduler, () -> emitters.get(next.getAndIncrement()), 2, 2
+    );
+
+    broker.open("conversation-1", List::of);
+    broker.open("conversation-1", List::of);
+    assertThrows(ResponseStatusException.class, () -> broker.open("conversation-1", List::of));
+
+    emitters.get(0).completion.run();
+    assertEquals(emitters.get(2), broker.open("conversation-1", List::of));
   }
 
   private Message message(long id, String direction) {

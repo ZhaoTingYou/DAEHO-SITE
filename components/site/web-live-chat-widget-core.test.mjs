@@ -6,6 +6,7 @@ import {
   createLogicalMutationController,
   createStableStreamController,
   loadMessagePages,
+  nextMessageScrollAction,
   nextFocusIndex
 } from './web-live-chat-widget-core.mjs';
 import {
@@ -14,7 +15,7 @@ import {
 } from './web-live-chat-core.mjs';
 
 test('message paging advances from the durable cursor until a short page', async () => {
-  const rows = Array.from({length: 205}, (_, index) => ({
+  const rows = Array.from({length: 53}, (_, index) => ({
     id: index + 1,
     direction: index % 2 ? 'system' : 'team',
     body: `row ${index + 1}`
@@ -23,12 +24,19 @@ test('message paging advances from the durable cursor until a short page', async
 
   const result = await loadMessagePages(async (after) => {
     cursors.push(after);
-    return rows.filter(({id}) => id > after).slice(0, 100);
+    return rows.filter(({id}) => id > after).slice(0, 24);
   }, 0);
 
-  assert.deepEqual(cursors, [0, 100, 200]);
-  assert.equal(result.items.length, 205);
-  assert.equal(result.cursor, 205);
+  assert.deepEqual(cursors, [0, 24, 48]);
+  assert.equal(result.items.length, 53);
+  assert.equal(result.cursor, 53);
+});
+
+test('message scrolling follows the latest only on open or while already near the bottom', () => {
+  assert.equal(nextMessageScrollAction({opened: true, nearBottom: false, appended: false}), 'scroll');
+  assert.equal(nextMessageScrollAction({opened: false, nearBottom: true, appended: true}), 'scroll');
+  assert.equal(nextMessageScrollAction({opened: false, nearBottom: false, appended: true}), 'notify');
+  assert.equal(nextMessageScrollAction({opened: false, nearBottom: false, appended: false}), 'preserve');
 });
 
 test('one native stream survives failures until polling and reopen uses one probe', () => {

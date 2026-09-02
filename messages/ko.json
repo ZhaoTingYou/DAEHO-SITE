@@ -1313,6 +1313,7 @@
       "sendError": "전송하지 못했습니다. 작성한 내용은 그대로 유지됩니다.",
       "retrySendLabel": "다시 보내기",
       "reconnectingLabel": "연결을 복구하는 중입니다. 새 답변은 자동으로 확인합니다.",
+      "newMessagesBelow": "아래에 새 메시지가 있습니다",
       "closedTitle": "상담이 종료되었습니다",
       "closedBody": "이전 답변은 읽을 수 있으며, 새로운 문의는 별도 상담으로 시작됩니다.",
       "newConsultationLabel": "새 상담 시작하기",

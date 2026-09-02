@@ -42,6 +42,8 @@ public class WebLiveChatController {
   private static final Duration START_WINDOW = Duration.ofHours(1);
   private static final Duration MESSAGE_VISITOR_WINDOW = Duration.ofMinutes(1);
   private static final Duration MESSAGE_IP_WINDOW = Duration.ofHours(1);
+  private static final Duration MESSAGE_MINIMUM_INTERVAL = Duration.ofSeconds(2);
+  private static final Duration MESSAGE_DUPLICATE_WINDOW = Duration.ofSeconds(30);
   private static final int REPLAY_PAGE_SIZE = 100;
 
   private final WebLiveChatProperties properties;
@@ -68,9 +70,16 @@ public class WebLiveChatController {
   }
 
   @GetMapping("/session")
-  public Map<String, Object> session(HttpServletRequest request, HttpServletResponse response) {
+  public Map<String, Object> session(
+      @RequestParam(name = "issue", defaultValue = "false") boolean issue,
+      HttpServletRequest request,
+      HttpServletResponse response
+  ) {
     authorize(request);
-    var identity = identity(request, response);
+    var identity = identity(request, response, issue);
+    if (identity == null) {
+      return sessionResponse(new WebLiveChatRepository.SessionView(null, List.of(), 0L));
+    }
     return sessionResponse(liveChat.session(identity.visitor()));
   }
 
@@ -81,12 +90,16 @@ public class WebLiveChatController {
       HttpServletResponse response
   ) {
     authorize(request);
-    var identity = identity(request, response);
     if (!value(body, "companyWebsite").isBlank()) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Spam submission rejected.");
     }
-    enforceStartLimits(identity.visitor(), request);
     var input = validator.validateStart(body, formAge(body));
+    var identity = identity(request, response, true);
+    var existing = liveChat.resolveExistingStart(identity.visitor(), input);
+    if (existing != null) {
+      return Map.of("conversation", publicConversation(existing));
+    }
+    enforceStartLimits(identity.visitor(), request);
     var conversation = liveChat.start(identity.visitor(), input, Map.of());
     renewAfterCustomerWrite(identity, response);
     return Map.of("conversation", publicConversation(conversation));
@@ -99,9 +112,15 @@ public class WebLiveChatController {
       HttpServletResponse response
   ) {
     authorize(request);
-    var identity = identity(request, response);
+    var identity = identity(request, response, true);
+    var input = validator.validateMessage(body);
+    var existing = liveChat.resolveExistingSend(identity.visitor(), input);
+    if (existing != null) {
+      return Map.of("messageId", existing.messageId(), "status", existing.status());
+    }
     enforceMessageLimits(identity.visitor(), request);
-    var result = liveChat.send(identity.visitor(), validator.validateMessage(body));
+    enforceMessageSpam(identity.visitor(), input.body());
+    var result = liveChat.send(identity.visitor(), input);
     renewAfterCustomerWrite(identity, response);
     return Map.of("messageId", result.messageId(), "status", result.status());
   }
@@ -113,7 +132,7 @@ public class WebLiveChatController {
       HttpServletResponse response
   ) {
     authorize(request);
-    var identity = identity(request, response);
+    var identity = requireExistingIdentity(request, response);
     return Map.of("items", liveChat.messages(identity.visitor(), Math.max(0L, after)).stream()
         .filter(this::ownerVisible)
         .map(this::publicMessage)
@@ -127,7 +146,7 @@ public class WebLiveChatController {
       HttpServletResponse response
   ) {
     authorize(request);
-    var identity = identity(request, response);
+    var identity = requireExistingIdentity(request, response);
     var view = liveChat.session(identity.visitor());
     if (view.conversation() == null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no current conversation.");
@@ -152,7 +171,7 @@ public class WebLiveChatController {
       HttpServletResponse response
   ) {
     authorize(request);
-    var identity = identity(request, response);
+    var identity = requireExistingIdentity(request, response);
     var conversation = liveChat.markRead(identity.visitor(), longValue(body, "messageId"));
     return Map.of("conversation", publicConversation(conversation));
   }
@@ -172,13 +191,20 @@ public class WebLiveChatController {
     }
   }
 
-  private Identity identity(HttpServletRequest request, HttpServletResponse response) {
+  private Identity identity(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      boolean issue
+  ) {
     var raw = cookie(request, properties.cookieName());
     if (!raw.isBlank()) {
       var visitor = repository.visitorByTokenHash(codec.hash(raw));
       if (visitor != null) {
         return new Identity(visitor, raw, false);
       }
+    }
+    if (!issue) {
+      return null;
     }
     for (var attempt = 0; attempt < 3; attempt++) {
       var issued = codec.issue();
@@ -191,6 +217,17 @@ public class WebLiveChatController {
     throw new ResponseStatusException(
         HttpStatus.SERVICE_UNAVAILABLE, "Web live chat is temporarily unavailable."
     );
+  }
+
+  private Identity requireExistingIdentity(
+      HttpServletRequest request,
+      HttpServletResponse response
+  ) {
+    var identity = identity(request, response, false);
+    if (identity == null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no anonymous session.");
+    }
+    return identity;
   }
 
   private void renewAfterCustomerWrite(Identity identity, HttpServletResponse response) {
@@ -225,6 +262,17 @@ public class WebLiveChatController {
     var ipHash = clientIpHash(request);
     requireBucket(visitorKey(visitor), "message_visitor_minute", 20, MESSAGE_VISITOR_WINDOW);
     requireBucket(ipHash, "message_ip_hour", 60, MESSAGE_IP_WINDOW);
+  }
+
+  private void enforceMessageSpam(Visitor visitor, String body) {
+    var visitorHash = visitorKey(visitor);
+    requireBucket(
+        visitorHash, "message_minimum_interval", 1, MESSAGE_MINIMUM_INTERVAL
+    );
+    requireBucket(
+        codec.hash("duplicate:visitor:" + visitor.id() + ":" + body),
+        "message_duplicate", 1, MESSAGE_DUPLICATE_WINDOW
+    );
   }
 
   private void requireBucket(String keyHash, String action, int limit, Duration window) {

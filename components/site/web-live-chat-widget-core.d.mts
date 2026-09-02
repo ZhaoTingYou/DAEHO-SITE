@@ -45,4 +45,9 @@ export function loadMessagePages(
   loadPage: (after: number) => Promise<WebLiveChatMessage[]>,
   after: number
 ): Promise<{items: WebLiveChatMessage[]; cursor: number}>;
+export function nextMessageScrollAction(input: {
+  opened: boolean;
+  nearBottom: boolean;
+  appended: boolean;
+}): 'scroll' | 'notify' | 'preserve';
 export function nextFocusIndex(count: number, currentIndex: number, reverse: boolean): number;

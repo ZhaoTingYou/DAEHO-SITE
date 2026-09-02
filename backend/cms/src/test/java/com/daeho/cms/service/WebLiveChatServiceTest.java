@@ -38,6 +38,7 @@ class WebLiveChatServiceTest {
   private TelegramLiveChatCredentialService credentials;
   private TelegramLiveChatGateway gateway;
   private InquiryWorkflowService inquiries;
+  private WebLiveChatEventBroker broker;
   private WebLiveChatService service;
 
   @BeforeEach
@@ -46,6 +47,7 @@ class WebLiveChatServiceTest {
     credentials = mock(TelegramLiveChatCredentialService.class);
     gateway = mock(TelegramLiveChatGateway.class);
     inquiries = mock(InquiryWorkflowService.class);
+    broker = mock(WebLiveChatEventBroker.class);
     var settings = new TelegramLiveChatRepository.Settings(
         true, "ciphertext", "DAEHO_LIVE_BOT", "-1003425727647", "", "실시간 상담",
         "secret-hash", "idle", "", 3L, "2026-09-01T00:00:00Z",
@@ -54,7 +56,7 @@ class WebLiveChatServiceTest {
     when(credentials.current()).thenReturn(
         new TelegramLiveChatCredentialService.Credentials(settings, "token")
     );
-    service = new WebLiveChatService(repository, credentials, gateway, inquiries);
+    service = new WebLiveChatService(repository, credentials, gateway, inquiries, broker);
   }
 
   @Test
@@ -359,7 +361,7 @@ class WebLiveChatServiceTest {
   }
 
   @Test
-  void uncertainFollowUpFailureKeepsTheClaimAndRetryDoesNotDuplicateTheSend() {
+  void uncertainFollowUpFailurePersistsExactManualRecoveryStateAndRetryDoesNotDuplicateTheSend() {
     var active = conversation("active", "inquiry-1", "", "", 701L, 702L);
     var message = visitorMessage(41L, "pending", 0L);
     when(repository.currentConversation("visitor-1", 3L)).thenReturn(active);
@@ -379,6 +381,9 @@ class WebLiveChatServiceTest {
         service.send(visitor(), validMessage())
     );
 
+    verify(repository).markVisitorDeliveryNeedsAttention(
+        "conversation-1", 41L, "visitor_delivery_uncertain"
+    );
     verify(repository, never()).releaseVisitorMessage(41L);
     verify(gateway, times(1)).sendMessage(
         "token", "-1003425727647", "701", "고객 추가 메시지\n\n추가 문의", Map.of(), null
@@ -403,7 +408,134 @@ class WebLiveChatServiceTest {
     );
 
     assertTrue(error.deliveryUncertain());
+    verify(repository).markVisitorDeliveryNeedsAttention(
+        "conversation-1", 41L, "visitor_delivery_mapping_pending"
+    );
     verify(repository, never()).releaseVisitorMessage(41L);
+  }
+
+  @Test
+  void deliveredFollowUpWithMappingExceptionStillPersistsManualRecovery() {
+    var active = conversation("active", "inquiry-1", "", "", 701L, 702L);
+    when(repository.currentConversation("visitor-1", 3L)).thenReturn(active);
+    when(repository.claimVisitorMessage(
+        "conversation-1", "client-key-0000000002", "추가 문의"
+    )).thenReturn(new VisitorMessageClaim(visitorMessage(41L, "pending", 0L), "acquired"));
+    when(gateway.sendMessage(
+        "token", "-1003425727647", "701", "고객 추가 메시지\n\n추가 문의", Map.of(), null
+    )).thenReturn(703L);
+    when(repository.markVisitorDelivered(41L, 703L))
+        .thenThrow(new IllegalStateException("database unavailable"));
+
+    assertThrows(TelegramLiveChatException.class, () -> service.send(visitor(), validMessage()));
+
+    verify(repository).markVisitorDeliveryNeedsAttention(
+        "conversation-1", 41L, "visitor_delivery_mapping_pending"
+    );
+  }
+
+  @Test
+  void exactExistingFollowUpResolvesBeforeQuotaWithoutResending() {
+    var active = conversation("active", "inquiry-1", "", "", 701L, 702L);
+    var delivered = visitorMessage(41L, "delivered", 703L);
+    when(repository.latestConversation("visitor-1", 3L)).thenReturn(active);
+    when(repository.visitorMessageByKey(
+        "conversation-1", "client-key-0000000002"
+    )).thenReturn(delivered);
+
+    assertEquals(
+        new WebLiveChatService.SendResult(41L, "sent"),
+        service.resolveExistingSend(visitor(), validMessage())
+    );
+    verify(gateway, never()).sendMessage(anyString(), anyString(), anyString(), anyString(), anyMap(), any());
+  }
+
+  @Test
+  void closedLostResponseStillResolvesItsKnownStartAndMessageKeysBeforeQuota() {
+    var closed = conversation("closed", "inquiry-1", "", "", 701L, 702L);
+    var initial = new Message(
+        40L, "conversation-1", "visitor", "반지 제작 상담", "delivered",
+        "client-key-0000000001", 0L, NOW
+    );
+    var followUp = visitorMessage(41L, "delivered", 703L);
+    when(repository.latestConversation("visitor-1", 3L)).thenReturn(closed);
+    when(repository.visitorMessageByKey(
+        "conversation-1", "client-key-0000000001"
+    )).thenReturn(initial);
+    when(repository.visitorMessageByKey(
+        "conversation-1", "client-key-0000000002"
+    )).thenReturn(followUp);
+
+    assertEquals(closed, service.resolveExistingStart(visitor(), validStart()));
+    assertEquals(
+        new WebLiveChatService.SendResult(41L, "sent"),
+        service.resolveExistingSend(visitor(), validMessage())
+    );
+  }
+
+  @Test
+  void exactPendingKeyReleasedAfterDefiniteFailureIsReacquiredAndDeliveredBeforeQuota() {
+    var active = conversation("active", "inquiry-1", "", "", 701L, 702L);
+    var pending = visitorMessage(41L, "pending", 0L);
+    when(repository.latestConversation("visitor-1", 3L)).thenReturn(active);
+    when(repository.visitorMessageByKey(
+        "conversation-1", "client-key-0000000002"
+    )).thenReturn(pending);
+    when(repository.claimVisitorMessage(
+        "conversation-1", "client-key-0000000002", "추가 문의"
+    )).thenReturn(new VisitorMessageClaim(pending, "acquired"));
+    when(gateway.sendMessage(
+        "token", "-1003425727647", "701", "고객 추가 메시지\n\n추가 문의", Map.of(), null
+    )).thenReturn(703L);
+    when(repository.markVisitorDelivered(41L, 703L)).thenReturn(true);
+
+    assertEquals(
+        new WebLiveChatService.SendResult(41L, "sent"),
+        service.resolveExistingSend(visitor(), validMessage())
+    );
+    verify(repository).claimVisitorMessage(
+        "conversation-1", "client-key-0000000002", "추가 문의"
+    );
+  }
+
+  @Test
+  void cmsCanConfirmOrRetryTheExactUncertainMessageWithItsOriginalKey() {
+    var attention = conversationWithPendingMessage(
+        "needs_attention", "visitor_delivery", "visitor_delivery_uncertain", 41L,
+        "client-key-0000000002"
+    );
+    var active = conversation("active", "inquiry-1", "", "", 701L, 702L);
+    var pending = visitorMessage(41L, "pending", 0L);
+    when(repository.conversationById("conversation-1")).thenReturn(attention);
+    when(repository.confirmVisitorMessageDelivered(
+        "conversation-1", 41L, "visitor_delivery_uncertain"
+    )).thenReturn(active);
+
+    assertEquals(
+        active,
+        service.confirmVisitorMessageFromCms(
+            "conversation-1", 41L, "visitor_delivery_uncertain"
+        )
+    );
+
+    when(repository.reserveVisitorMessageRetry(
+        "conversation-1", 41L, "visitor_delivery_uncertain"
+    )).thenReturn(new VisitorMessageClaim(pending, "acquired"));
+    when(repository.conversationById("conversation-1")).thenReturn(active);
+    when(gateway.sendMessage(
+        "token", "-1003425727647", "701", "고객 추가 메시지\n\n추가 문의", Map.of(), null
+    )).thenReturn(703L);
+    when(repository.markVisitorDelivered(41L, 703L)).thenReturn(true);
+
+    assertEquals(
+        new WebLiveChatService.SendResult(41L, "sent"),
+        service.retryVisitorMessageFromCms(
+            "conversation-1", 41L, "visitor_delivery_uncertain"
+        )
+    );
+    verify(repository).reserveVisitorMessageRetry(
+        "conversation-1", 41L, "visitor_delivery_uncertain"
+    );
   }
 
   @Test
@@ -414,8 +546,8 @@ class WebLiveChatServiceTest {
         new Message(51L, "conversation-1", "team", "확인했습니다.", "delivered", "", 901L, NOW)
     );
     when(repository.latestConversation("visitor-1", 3L)).thenReturn(active);
-    when(repository.ownerMessagesAfter("conversation-1", 0L, 100)).thenReturn(visible);
-    when(repository.ownerMessagesAfter("conversation-1", 50L, 100)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 0L, 24)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 50L, 24)).thenReturn(visible);
     when(repository.unreadCount("conversation-1")).thenReturn(1L);
 
     var session = service.session(visitor());
@@ -425,8 +557,8 @@ class WebLiveChatServiceTest {
     assertEquals(visible, session.messages());
     assertEquals(1L, session.unreadCount());
     assertEquals(visible, messages);
-    verify(repository).ownerMessagesAfter("conversation-1", 0L, 100);
-    verify(repository).ownerMessagesAfter("conversation-1", 50L, 100);
+    verify(repository).ownerMessagesAfter("conversation-1", 0L, 24);
+    verify(repository).ownerMessagesAfter("conversation-1", 50L, 24);
   }
 
   @Test
@@ -440,8 +572,8 @@ class WebLiveChatServiceTest {
         )
     );
     when(repository.latestConversation("visitor-1", 3L)).thenReturn(closed);
-    when(repository.ownerMessagesAfter("conversation-1", 0L, 100)).thenReturn(visible);
-    when(repository.ownerMessagesAfter("conversation-1", 51L, 100)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 0L, 24)).thenReturn(visible);
+    when(repository.ownerMessagesAfter("conversation-1", 51L, 24)).thenReturn(visible);
     when(repository.unreadCount("conversation-1")).thenReturn(0L);
     when(repository.markRead("conversation-1", 52L)).thenReturn(read);
 
@@ -456,7 +588,7 @@ class WebLiveChatServiceTest {
   }
 
   @Test
-  void markReadAndCmsCloseDelegateToAtomicRepositoryTransitions() {
+  void markReadAndCmsClosePublishTheAtomicDurableCloseEvent() {
     var active = conversation("active", "inquiry-1", "", "", 701L, 702L);
     var read = conversation("active", "inquiry-1", "", "", 701L, 702L);
     var closed = conversation("closed", "inquiry-1", "", "", 701L, 702L);
@@ -470,6 +602,7 @@ class WebLiveChatServiceTest {
 
     assertEquals(read, service.markRead(visitor(), 51L));
     assertEquals(closed, service.closeFromCms("conversation-1"));
+    verify(broker).publish("conversation-1", closeEvent);
   }
 
   @Test
@@ -572,14 +705,24 @@ class WebLiveChatServiceTest {
   }
 
   @Test
-  void cmsTopicResetRequiresTheExpectedAttentionCodeAndNeverCallsTelegram() {
+  void confirmedCmsTopicResetImmediatelyResumesCreationAndRegistration() {
     var reset = conversation("opening", "inquiry-1", "", "", 0L, 0L);
+    var reserved = conversation("opening", "inquiry-1", "topic_creation", "", 0L, 0L);
+    var delivering = conversation("opening", "inquiry-1", "registration_delivery", "", 701L, 0L);
+    var active = conversation("active", "inquiry-1", "", "", 701L, 702L);
     when(repository.resetTopicCreation(
         "conversation-1", "topic_creation_uncertain"
     )).thenReturn(reset);
+    when(repository.reserveTopicCreation("conversation-1")).thenReturn(reserved);
+    when(gateway.createForumTopic("token", "-1003425727647", "문의 · 홍길동"))
+        .thenReturn(701L);
+    when(repository.recordTopic("conversation-1", 701L)).thenReturn(delivering);
+    when(gateway.sendMessage(eq("token"), eq("-1003425727647"), eq("701"), anyString(), eq(Map.of()), eq(null)))
+        .thenReturn(702L);
+    when(repository.activate("conversation-1", 702L)).thenReturn(active);
 
     assertEquals(
-        reset,
+        active,
         service.resetTopicCreationFromCms(
             "conversation-1", "topic_creation_uncertain"
         )
@@ -591,9 +734,16 @@ class WebLiveChatServiceTest {
         )
     );
 
-    verify(gateway, never()).createForumTopic(anyString(), anyString(), anyString());
-    verify(gateway, never()).sendMessage(
-        anyString(), anyString(), anyString(), anyString(), anyMap(), any()
+    verify(gateway).createForumTopic("token", "-1003425727647", "문의 · 홍길동");
+  }
+
+  private Conversation conversationWithPendingMessage(
+      String state, String pendingAction, String attentionCode, long messageId, String clientKey
+  ) {
+    return new Conversation(
+        "conversation-1", "visitor-1", 3L, "-1003425727647", "inquiry-1", "ko", state,
+        "홍길동", "01012345678", "반지 제작 상담", "2026-09", NOW, attentionCode,
+        pendingAction, messageId, clientKey, 701L, 702L, 0L, NOW, NOW, NOW, null
     );
   }
 

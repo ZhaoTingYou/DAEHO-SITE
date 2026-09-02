@@ -16,8 +16,9 @@
 - Keep the existing configured `@Daeho_Service_bot` as the internal routing Bot; never expose its token or username in public API payloads.
 - Text only: no image, file, voice, video, SMS, email, push notification, Redis, Vercel, or new paid service.
 - Anonymous access uses an unpredictable 256-bit token in a `Secure`, `HttpOnly`, `SameSite=Lax` cookie; PostgreSQL stores only an HMAC hash.
-- Anonymous history expires 30 days after the last customer message, team reply, or close event; page reads and SSE heartbeats do not extend expiry.
+- Anonymous history expires 30 days after the last customer write. Team/system activity, close events, page reads, and SSE heartbeats do not extend expiry; team replies remain bounded by that last customer-write window.
 - One non-closed conversation per visitor and Bot configuration generation; after close, the next start creates a new inquiry and Topic.
+- The owner surface restores only that cookie's latest conversation in the current Bot configuration generation; it is intentionally not a cross-generation or multi-conversation inbox.
 - Same-cookie owner history exposes delivered visitor, team, and system messages for 30 days. Initial inquiry content is the first visitor bubble and follow-ups render on the right; names and contact details never render as bubbles. SSE delivery and unread/read cursors remain team/system-only, and CMS/public configuration never exposes visitor bodies.
 - Telegram normal text replies go to the customer; `/note ...` stays internal; `/close` and `/close@Daeho_Service_bot` close the conversation and Topic.
 - The launcher is a fixed circle plus a persistent `실시간 상담 / 로그인 없이 바로 문의` label; hover never changes width.
@@ -104,7 +105,7 @@ test('V19 defines isolated anonymous visitors, conversations, messages, and rate
 
 - [ ] **Step 2: Run the schema tests and verify the expected failure**
 
-Run: `node --test web-live-chat-schema.test.mjs flyway-migration-history.test.mjs`  
+Run: `node --test web-live-chat-schema.test.mjs flyway-migration-history.test.mjs`
 Expected: FAIL because V19 and its required table names do not exist.
 
 - [ ] **Step 3: Implement the additive V19 migration**
@@ -208,8 +209,8 @@ The repository method must store `source=web_live_chat`, `inquiryType=web_live_c
 
 - [ ] **Step 5: Run focused tests**
 
-Run: `node --test web-live-chat-schema.test.mjs flyway-migration-history.test.mjs`  
-Run: `cd backend/cms && ./mvnw -q -Dtest=InquiryWorkflowServiceTest test`  
+Run: `node --test web-live-chat-schema.test.mjs flyway-migration-history.test.mjs`
+Run: `cd backend/cms && ./mvnw -q -Dtest=InquiryWorkflowServiceTest test`
 Expected: PASS.
 
 - [ ] **Step 6: Commit Task 1**
@@ -285,7 +286,7 @@ public record MessageInput(String body, String clientMessageKey) {}
 
 - [ ] **Step 3: Run focused tests and verify failure**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatTokenCodecTest,WebLiveChatInputValidatorTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatTokenCodecTest,WebLiveChatInputValidatorTest test`
 Expected: FAIL because the new classes do not exist.
 
 - [ ] **Step 4: Implement the security primitives**
@@ -329,7 +330,7 @@ Add `WebLiveChatProperties.class` to `@EnableConfigurationProperties` and these 
 
 - [ ] **Step 6: Run focused tests and commit**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatTokenCodecTest,WebLiveChatInputValidatorTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatTokenCodecTest,WebLiveChatInputValidatorTest test`
 Expected: PASS.
 
 ```bash
@@ -378,7 +379,7 @@ Cover Topic lookup by `(configuration_generation,target_chat_id,topic_thread_id)
 
 - [ ] **Step 2: Run tests and verify failure**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatRepositoryTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatRepositoryTest test`
 Expected: FAIL because the repository does not exist.
 
 - [ ] **Step 3: Implement focused repository methods**
@@ -397,7 +398,7 @@ public record Message(
 
 - [ ] **Step 4: Run repository tests**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatRepositoryTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatRepositoryTest test`
 Expected: PASS.
 
 - [ ] **Step 5: Commit Task 3**
@@ -465,11 +466,11 @@ void followUpIsStoredOnceAndDeliveredWithTheCustomerPrefix() {
 }
 ```
 
-Cover duplicate client key returning the existing sent result and a failed send preserving a retryable draft state.
+Cover duplicate client key returning the existing sent result before quota, a definite failed send releasing the exact original key for retry, an uncertain/stale reservation entering `needs_attention`, and CMS exact-message confirm/retry using the persisted body and original key. The two-minute reservation lease is also reconciled by the bounded cleanup worker so abandoned reservations cannot remain wedged forever.
 
 - [ ] **Step 3: Run focused tests and verify failure**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatServiceTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatServiceTest test`
 Expected: FAIL because `WebLiveChatService` is absent.
 
 - [ ] **Step 4: Implement the opening state machine**
@@ -495,7 +496,7 @@ Store the visitor body for audit/delivery and owner reload. `messages()` and `Se
 
 - [ ] **Step 6: Run focused tests and commit**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatServiceTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatServiceTest test`
 Expected: PASS.
 
 ```bash
@@ -517,14 +518,14 @@ git commit -m "feat: route web inquiries into Telegram topics"
 **Interfaces:**
 - Consumes: Tasks 2–4.
 - Produces endpoints: `GET /api/live-chat/session`, `POST /api/live-chat/conversations`, `POST /api/live-chat/conversations/current/messages`, `GET /api/live-chat/conversations/current/messages`, `GET /api/live-chat/conversations/current/events`, `POST /api/live-chat/conversations/current/read`.
-- Produces SSE events: `message`, `state`, `heartbeat`, each with monotonic message/state event IDs.
+- Produces SSE events: durable persisted team/system `message` events with numeric IDs and id-less `heartbeat` events. A close/state change is first persisted as a system message and uses that row's durable ID.
 
 - [ ] **Step 1: Write failing controller contract tests**
 
 ```java
 @Test
-void sessionIssuesASecureAnonymousCookieWithoutExposingTheTokenInJson() throws Exception {
-  mvc.perform(get("/api/live-chat/session").header("Origin", "https://daeho.works"))
+void explicitPanelOpenIssuesASecureAnonymousCookieWithoutExposingTheTokenInJson() throws Exception {
+  mvc.perform(get("/api/live-chat/session?issue=true").header("Origin", "https://daeho.works"))
       .andExpect(status().isOk())
       .andExpect(header().string("Set-Cookie", allOf(
           containsString("daeho_live_chat="), containsString("HttpOnly"),
@@ -533,7 +534,7 @@ void sessionIssuesASecureAnonymousCookieWithoutExposingTheTokenInJson() throws E
 }
 ```
 
-Add tests for foreign Origin rejection, rate-limit `429`, honeypot `422`, active reuse, conversation ownership, same-cookie history containing delivered visitor/team/system rows, second-cookie denial, visitor suppression from SSE, SSE `text/event-stream`, Last-Event-ID replay, and team-only read idempotency.
+Add tests for a cookie-free passive `GET session` returning no `Set-Cookie`, explicit-open identity issuance, foreign Origin rejection, rate-limit `429`, honeypot `422`, active reuse, conversation ownership, same-cookie history containing delivered visitor/team/system rows, second-cookie denial, visitor suppression from SSE, SSE `text/event-stream`, Last-Event-ID replay, and team-only read idempotency. Resolve an existing logical start/message key before any quota; `429` retries retain that exact key.
 
 - [ ] **Step 2: Write failing broker and cleanup tests**
 
@@ -546,11 +547,11 @@ void replayAndLivePublishMayOverlapWithoutLosingAnEvent() {
 }
 ```
 
-Cleanup must close conversations whose `last_activity_at < now() - 30 days`, publish a closed state, and call Topic close best-effort without deleting CMS inquiries.
+Cleanup must close conversations whose customer-write `last_activity_at < now() - 30 days`, publish a persisted closed event, and record retryable Topic-close status without deleting CMS inquiries.
 
 - [ ] **Step 3: Run focused tests and verify failure**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatEventBrokerTest,WebLiveChatControllerTest,WebLiveChatCleanupWorkerTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatEventBrokerTest,WebLiveChatControllerTest,WebLiveChatCleanupWorkerTest test`
 Expected: FAIL because the controller/broker/worker do not exist.
 
 - [ ] **Step 4: Implement cookie resolution and public endpoints**
@@ -562,19 +563,19 @@ private static final String COOKIE_PATH = "/api/live-chat";
 private static final Duration COOKIE_AGE = Duration.ofDays(30);
 ```
 
-Read `X-Daeho-Client-IP` first, then the first `X-Forwarded-For` address. Immediately hash it; never persist/log the raw value. On every write, consume the Postgres rate bucket before service work. Use limits: 5 starts/hour per IP hash, 3 starts/hour per visitor, 20 messages/minute per visitor, 60 messages/hour per IP hash.
+Read `X-Daeho-Client-IP` first, then the first `X-Forwarded-For` address. Immediately hash it; never persist/log the raw value. On a new logical write, consume the Postgres rate bucket before external service work, but exact idempotency-key replay is resolved first and bypasses quota. Use limits: 5 starts/hour per IP hash, 3 starts/hour per visitor, 20 messages/minute per visitor, 60 messages/hour per IP hash, one new message per two seconds per visitor, and one salted duplicate-content fingerprint per 30 seconds. Never persist the raw body in a rate bucket.
 
 - [ ] **Step 5: Implement SSE and fallback replay**
 
-Use `SseEmitter(70_000L)`, send a heartbeat every 25 seconds, and complete emitters on timeout/error. Register before replaying stored events; duplicate overlap is safe because browser deduplicates by numeric event ID.
+Use `SseEmitter(70_000L)`, send a heartbeat every 25 seconds, and complete emitters on timeout/error. Admit at most two emitters per conversation and 200 in-process total. Register before replaying stored events; duplicate overlap is safe because browser deduplicates by numeric event ID.
 
 - [ ] **Step 6: Implement cleanup worker**
 
-Use a fixed one-hour schedule and a bounded batch of 100 conversations. Reads and heartbeats must not update `last_activity_at`; customer message, team reply, and close do.
+Use a fixed one-hour schedule and a bounded batch of 100. Only customer writes update expiry activity; reads, heartbeats, team/system messages, and close do not extend the 30-day ownership window. In each run, reconcile visitor-delivery reservations older than two minutes to exact-message `needs_attention`, close stale conversations with a durable system event, persist Topic-close recovery, and delete expired rate buckets, closed anonymous conversations/messages, and orphan visitors without deleting CMS inquiries.
 
 - [ ] **Step 7: Run focused tests and commit**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatEventBrokerTest,WebLiveChatControllerTest,WebLiveChatCleanupWorkerTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatEventBrokerTest,WebLiveChatControllerTest,WebLiveChatCleanupWorkerTest test`
 Expected: PASS.
 
 ```bash
@@ -637,7 +638,7 @@ New private users receive one localized website link and do not create Telegram 
 
 - [ ] **Step 4: Run tests and verify failure**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatTelegramBridgeTest,TelegramLiveChatServiceTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=WebLiveChatTelegramBridgeTest,TelegramLiveChatServiceTest test`
 Expected: FAIL because the bridge does not exist and the router does not call it.
 
 - [ ] **Step 5: Implement the bridge and route web Topics first**
@@ -648,7 +649,7 @@ For normal team messages, accept text only. Ignore service messages except `foru
 
 - [ ] **Step 6: Run focused and full live-chat backend tests**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest='*LiveChat*Test' test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest='*LiveChat*Test' test`
 Expected: PASS.
 
 - [ ] **Step 7: Commit Task 6**
@@ -690,7 +691,7 @@ test('production TLS proxies anonymous live chat and disables SSE buffering', ()
 
 - [ ] **Step 2: Run tests and verify failure**
 
-Run: `node --test nginx-live-chat-routes.test.mjs docker-compose-upload-dir.test.mjs`  
+Run: `node --test nginx-live-chat-routes.test.mjs docker-compose-upload-dir.test.mjs`
 Expected: FAIL because the web routes and secret are absent.
 
 - [ ] **Step 3: Add exact SSE and general API locations to both configs**
@@ -726,7 +727,7 @@ Do not pass the session secret to the Next container or build args.
 
 - [ ] **Step 5: Run tests and commit**
 
-Run: `node --test nginx-live-chat-routes.test.mjs docker-compose-upload-dir.test.mjs`  
+Run: `node --test nginx-live-chat-routes.test.mjs docker-compose-upload-dir.test.mjs`
 Expected: PASS.
 
 ```bash
@@ -770,7 +771,7 @@ Test form draft, authoritative sent visitor bubble, `in_progress` draft/key rete
 
 - [ ] **Step 2: Run tests and verify failure**
 
-Run: `node --test components/site/web-live-chat-core.test.mjs`  
+Run: `node --test components/site/web-live-chat-core.test.mjs`
 Expected: FAIL because the core module does not exist.
 
 - [ ] **Step 3: Implement the pure reducer**
@@ -790,7 +791,7 @@ export type WebLiveChatMessage = {
 export type WebLiveChatEvent =
   | {type: 'message'; id: number; message: WebLiveChatMessage}
   | {type: 'state'; id: number; state: 'waiting' | 'active' | 'closed'}
-  | {type: 'heartbeat'; id: number};
+  | {type: 'heartbeat'; at: string};
 
 export function connectEvents(
   onEvent: (event: WebLiveChatEvent) => void,
@@ -801,12 +802,12 @@ export function connectEvents(
 }
 ```
 
-All fetches use `credentials:'same-origin'`, `Content-Type: application/json`, a generated client message key, and bounded response parsing. Do not place identity/contact in URLs or localStorage.
+All fetches use `credentials:'same-origin'`, `Content-Type: application/json`, a generated client message key, and bounded response parsing. A passive mount calls `getSession(false)` and cannot issue identity; explicit panel open calls `getSession(true)`. Page owner history in 24-row chunks so a valid Korean/multibyte page remains below the client's 256 KiB parser cap. Do not place identity/contact in URLs or localStorage.
 
 - [ ] **Step 5: Run tests and TypeScript check**
 
-Run: `node --test components/site/web-live-chat-core.test.mjs`  
-Run: `npx tsc --noEmit`  
+Run: `node --test components/site/web-live-chat-core.test.mjs`
+Run: `npx tsc --noEmit`
 Expected: PASS.
 
 - [ ] **Step 6: Commit Task 8**
@@ -859,7 +860,7 @@ test('widget supports focus, escape, reduced motion, and mobile dialog semantics
 
 - [ ] **Step 2: Run tests and verify failure**
 
-Run: `node --test components/site/web-live-chat-widget.test.mjs`  
+Run: `node --test components/site/web-live-chat-widget.test.mjs`
 Expected: FAIL because the widget does not exist.
 
 - [ ] **Step 3: Implement the fixed-label launcher and morph**
@@ -889,7 +890,7 @@ Render visitor bodies only from owner-authenticated server history, right-aligne
 
 Open EventSource only for waiting/active conversations. On close/page hide, close it. After three failures, poll every five seconds and return to SSE on the next panel open. Use `BroadcastChannel('daeho-live-chat')` only to sync read/close hints; server ownership remains authoritative.
 
-Move focus into the dialog after expansion, trap focus while open, restore it to the launcher on close, lock mobile background scroll, announce new team messages with a polite live region, and support Escape.
+Move focus into the dialog after expansion, trap focus while open, restore it to the launcher on close, lock mobile background scroll, announce new team messages with a polite live region, and support Escape. Use a bottom sentinel: opening/restoring or receiving while already near the bottom follows the newest row; reading older history preserves position and exposes a keyboard-accessible, screen-reader-labelled new-messages-below control.
 
 - [ ] **Step 6: Replace copy and public config**
 
@@ -909,9 +910,9 @@ Rename `getTelegramLiveChatPublicConfig` to `getWebLiveChatPublicConfig`, return
 
 - [ ] **Step 7: Run frontend checks**
 
-Run: `node --test components/site/web-live-chat-core.test.mjs components/site/web-live-chat-widget.test.mjs`  
-Run: `npm run lint`  
-Run: `npx tsc --noEmit`  
+Run: `node --test components/site/web-live-chat-core.test.mjs components/site/web-live-chat-widget.test.mjs`
+Run: `npm run lint`
+Run: `npx tsc --noEmit`
 Expected: PASS.
 
 - [ ] **Step 8: Commit Task 9**
@@ -950,11 +951,11 @@ void adminListDistinguishesWebsiteAndLegacySessionsWithoutCredentialHashes() thr
 }
 ```
 
-Test website close, registration retry, Topic creation reset, and legacy endpoint compatibility.
+Test website close, registration retry, Topic creation reset that immediately resumes creation, exact visitor-message confirm/retry, retryable Topic close, and legacy endpoint compatibility.
 
 - [ ] **Step 2: Run backend contract tests and verify failure**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=AdminLiveChatControllerTest test`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=AdminLiveChatControllerTest test`
 Expected: FAIL because website conversations are not included.
 
 - [ ] **Step 3: Implement source-aware DTOs and actions**
@@ -971,6 +972,7 @@ type LiveChatAdminSession = {
   inquiryContent: string;
   topicThreadId: number | null;
   attentionCode: string;
+  pendingMessageId: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -984,8 +986,8 @@ Clarify that the configured Bot is the internal team routing Bot and customers u
 
 - [ ] **Step 5: Run backend/frontend checks**
 
-Run: `cd backend/cms && ./mvnw -q -Dtest=AdminLiveChatControllerTest,TelegramLiveChatCredentialServiceTest test`  
-Run: `npm run lint && npx tsc --noEmit`  
+Run: `cd backend/cms && ./mvnw -q -Dtest=AdminLiveChatControllerTest,TelegramLiveChatCredentialServiceTest test`
+Run: `npm run lint && npx tsc --noEmit`
 Expected: PASS.
 
 - [ ] **Step 6: Commit Task 10**
@@ -1109,7 +1111,8 @@ Verify:
 ```text
 GET https://daeho.works/ko                                      -> 200
 GET https://daeho.works/api/cms/live-chat                      -> 200, enabled true, no botUsername
-GET https://daeho.works/api/live-chat/session                  -> 200 + Secure HttpOnly cookie
+GET https://daeho.works/api/live-chat/session                  -> 200, no cookie on passive no-cookie check
+GET https://daeho.works/api/live-chat/session?issue=true       -> 200 + Secure HttpOnly cookie
 POST https://daeho.works/api/telegram/live-chat/webhook        -> 401 without secret
 Flyway V19 and V20                                             -> true
 Telegram getWebhookInfo                                        -> correct URL, zero error
@@ -1135,6 +1138,7 @@ Check 1440px, 1024px, 768px, and 375px:
 - visitor/team bubbles shrink to content on their respective right/left sides, cap near 78%, safely wrap long text, use opposing corner cues and compact spacing, while system events remain centered;
 - mobile locks background scroll and respects safe-area insets;
 - focus, Escape, live announcements, and keyboard tab order work.
+- opening/restoring follows the latest message, while reading older history preserves scroll and exposes the accessible new-message affordance.
 
 - [ ] **Step 11: Report deployment evidence**
 
@@ -1142,9 +1146,34 @@ Return the deployed commit, backup path/size, test totals, V19/V20 status, servi
 
 ---
 
+### Task 12: Harden recovery, retention, abuse controls, and long-history UX
+
+**Files:**
+- Modify: web live-chat repository/service/controller/cleanup/event broker/Telegram bridge and focused JUnit tests.
+- Modify: admin live-chat controller/editor/types, inquiry source translations and filters, and focused contract tests.
+- Modify: web live-chat API/core/widget/copy and focused Node tests.
+- Modify: both Nginx configurations and proxy contract tests.
+- Modify: this plan, the design spec, progress ledger, and Task 12 report.
+
+**Required outcomes:**
+
+- [ ] A visitor delivery reservation has a two-minute lease. Exact-key replay and a bounded scheduled sweep convert stale work to a CMS-visible exact-message recovery state; confirmation or resend targets the recorded message ID and reuses the persisted logical key.
+- [ ] Confirming Topic absence immediately resumes the original Topic creation workflow. Closing from CMS/Telegram/expiry first persists and publishes one system event, then persists successful Topic closure or an explicit retryable close code.
+- [ ] Cookie-free passive `GET session` creates no visitor. Identity issuance happens only on explicit panel open/write. Bounded cleanup removes expired rate buckets, closed anonymous conversations/messages, and orphan visitors while retaining CMS inquiries.
+- [ ] Start/message idempotency resolves before quota. `429` and lost-response retries keep the original client key. New messages enforce a two-second interval and a 30-second salted duplicate-content fingerprint without storing raw bodies in anti-abuse rows.
+- [ ] Owner history pages in 24-row chunks compatible with the 256 KiB parser cap, including maximum valid Korean payloads; session remains a lightweight initial page.
+- [ ] Nginx limits API request rates and SSE connections per IP; the application limits active emitters per conversation and globally, releasing capacity on every terminal path.
+- [ ] Opening/restoring and near-bottom appends scroll to a bottom sentinel; reading older history preserves position and exposes an accessible new-messages-below affordance.
+- [ ] Anonymous upstream failures expose only neutral structured `502`/`503` responses. CMS inquiry source `web_live_chat` is typed, translated in every locale, and filterable without a raw key.
+- [ ] Preserve adjudicated boundaries: only customer writes extend the 30-day expiry, and owner history selects only the latest current-generation conversation rather than becoming a multi-conversation inbox.
+- [ ] Run focused and full Node/JUnit suites, lint, Next type generation, TypeScript, production build, fresh PostgreSQL/Flyway verification, real Nginx configuration tests, and range-aware whitespace verification from `5f0b35fab212ec7bdf65a012fcc4d8c6f59430fb`.
+- [ ] Before production deployment, create a distinct non-overwriting gzip-valid mode-0600 PostgreSQL backup. Fast-forward `main`, rebuild/recreate only changed services (including forced Nginx recreation for bind-mounted config), then verify all five services, PostgreSQL/Flyway, public/passive/explicit-session/webhook endpoints, and deploy-window logs without creating a production customer conversation.
+
+---
+
 ## Plan Self-Review Checklist
 
-- Every spec requirement is assigned to Tasks 1–11.
+- Every spec requirement is assigned to Tasks 1–12.
 - Anonymous identity, 30-day expiry, no-login UI, text-only scope, owner-only customer bubbles, SSE/polling, `/note`, `/close`, Topic mapping, CMS recovery, animation, accessibility, anti-spam, cost constraints, and AWS deployment all have explicit tests.
 - Public DTOs never expose Bot username, Telegram IDs, token hashes, or IP hashes. Visitor message bodies appear only in same-cookie owner history, never CMS lists, public config, or SSE.
 - Type names are consistent: `Visitor`, `Conversation`, `Message`, `SessionView`, `StartInput`, `MessageInput`, `WebLiveChatEvent`.

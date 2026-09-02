@@ -35,14 +35,23 @@ function assertPublicEmbeddedLiveChatRoutes(config, forwardedProto) {
   assert.match(sseBlock, /proxy_read_timeout 75s;/);
   assert.match(sseBlock, /proxy_set_header Connection "";/);
   assert.match(sseBlock, /add_header X-Accel-Buffering no;/);
+  assert.match(sseBlock, /limit_req zone=live_chat_sse burst=3 nodelay;/);
+  assert.match(sseBlock, /limit_conn live_chat_sse_conn 2;/);
   assertTrustedProxyHeaders(sseBlock, forwardedProto);
 
   const publicApiBlock = config.slice(publicApiOffset, config.indexOf('location / {', publicApiOffset));
   assert.match(publicApiBlock, /client_max_body_size 16k;/);
   assert.match(publicApiBlock, /proxy_pass http:\/\/cms_api\/api\/live-chat\//);
   assert.match(publicApiBlock, /proxy_http_version 1\.1;/);
+  assert.match(publicApiBlock, /limit_req zone=live_chat_api burst=10 nodelay;/);
   assertTrustedProxyHeaders(publicApiBlock, forwardedProto);
   assert.doesNotMatch(config, /location \/api\/admin\//);
+}
+
+function assertLiveChatLimitZones(config) {
+  assert.match(config, /limit_req_zone \$binary_remote_addr zone=live_chat_api:10m rate=5r\/s;/);
+  assert.match(config, /limit_req_zone \$binary_remote_addr zone=live_chat_sse:10m rate=2r\/s;/);
+  assert.match(config, /limit_conn_zone \$binary_remote_addr zone=live_chat_sse_conn:10m;/);
 }
 
 function assertTrustedProxyHeaders(config, forwardedProto) {
@@ -63,9 +72,11 @@ test('live-chat routes reach the CMS API in the production TLS server', () => {
 });
 
 test('local HTTP proxies public anonymous live chat with an unbuffered SSE route', () => {
+  assertLiveChatLimitZones(defaultNginxConfig);
   assertPublicEmbeddedLiveChatRoutes(defaultNginxConfig, '\\$scheme');
 });
 
 test('production TLS proxies public anonymous live chat with an unbuffered SSE route', () => {
+  assertLiveChatLimitZones(httpsNginxConfig);
   assertPublicEmbeddedLiveChatRoutes(apexTlsServer, 'https');
 });

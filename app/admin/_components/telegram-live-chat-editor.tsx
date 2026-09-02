@@ -55,6 +55,8 @@ type Copy = Record<
   | 'reconcile'
   | 'retryDelivery'
   | 'retryDeliveryConfirm'
+  | 'confirmDelivery'
+  | 'confirmDeliveryConfirm'
   | 'resetTopicCreation'
   | 'resetTopicCreationConfirm'
   | 'resetSetup'
@@ -116,7 +118,7 @@ export function TelegramLiveChatEditor({
 
   const runSessionAction = async (
     session: LiveChatAdminSession,
-    action: 'close' | 'reconcile' | 'retry-delivery' | 'reset-topic-creation',
+    action: string,
     confirmation?: string
   ) => {
     if (confirmation && !window.confirm(confirmation)) return;
@@ -331,6 +333,11 @@ export function TelegramLiveChatEditor({
                   const legacyDeliveryRetry = session.source === 'telegram_legacy'
                     && /^(registration|customer|team)_delivery_(uncertain|in_flight|retrying)$/
                       .test(session.attentionCode);
+                  const websiteVisitorRecovery = session.source === 'website'
+                    && session.pendingMessageId !== null
+                    && /^visitor_delivery_(uncertain|stale|mapping_pending|failed)$/.test(session.attentionCode);
+                  const websiteTopicCloseRecovery = session.source === 'website'
+                    && /^topic_close_/.test(session.attentionCode);
                   const legacyTopicReset = session.source === 'telegram_legacy'
                     && /^topic_creation_(uncertain|in_flight|failed)$/.test(session.attentionCode);
                   const legacyReconcile = session.source === 'telegram_legacy'
@@ -339,6 +346,8 @@ export function TelegramLiveChatEditor({
                     && !legacyTopicReset;
                   const recoveryAction = websiteTopicReset || legacyTopicReset
                     ? 'reset-topic-creation'
+                    : websiteTopicCloseRecovery
+                      ? 'retry-topic-close'
                     : websiteRegistrationRetry || legacyDeliveryRetry
                       ? 'retry-delivery'
                       : legacyReconcile
@@ -346,11 +355,15 @@ export function TelegramLiveChatEditor({
                         : null;
                   const recoveryLabel = websiteTopicReset || legacyTopicReset
                     ? copy.resetTopicCreation
+                    : websiteTopicCloseRecovery
+                      ? copy.retryDelivery
                     : websiteRegistrationRetry || legacyDeliveryRetry
                       ? copy.retryDelivery
                       : copy.reconcile;
                   const recoveryConfirmation = websiteTopicReset || legacyTopicReset
                     ? copy.resetTopicCreationConfirm
+                    : websiteTopicCloseRecovery
+                      ? copy.retryDeliveryConfirm
                     : websiteRegistrationRetry || legacyDeliveryRetry
                       ? copy.retryDeliveryConfirm
                       : undefined;
@@ -414,6 +427,34 @@ export function TelegramLiveChatEditor({
                         >
                           {recoveryLabel}
                         </button>
+                      ) : null}
+                      {websiteVisitorRecovery ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={state === 'working'}
+                            onClick={() => void runSessionAction(
+                              session,
+                              `messages/${session.pendingMessageId}/confirm-delivered`,
+                              copy.confirmDeliveryConfirm
+                            )}
+                            className="min-h-11 rounded-md border border-[#667085] px-3 text-xs font-semibold text-[#475467]"
+                          >
+                            {copy.confirmDelivery}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={state === 'working'}
+                            onClick={() => void runSessionAction(
+                              session,
+                              `messages/${session.pendingMessageId}/retry-delivery`,
+                              copy.retryDeliveryConfirm
+                            )}
+                            className="min-h-11 rounded-md border border-[#b42318] px-3 text-xs font-semibold text-[#b42318]"
+                          >
+                            {copy.retryDelivery}
+                          </button>
+                        </div>
                       ) : null}
                     </td>
                   </tr>

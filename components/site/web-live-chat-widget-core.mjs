@@ -1,4 +1,10 @@
-const MESSAGE_PAGE_SIZE = 100;
+const MESSAGE_PAGE_SIZE = 24;
+
+export function nextMessageScrollAction({opened, nearBottom, appended}) {
+  if (opened || (nearBottom && appended)) return 'scroll';
+  if (appended) return 'notify';
+  return 'preserve';
+}
 
 export function createStableStreamController(connect) {
   let disconnect = null;

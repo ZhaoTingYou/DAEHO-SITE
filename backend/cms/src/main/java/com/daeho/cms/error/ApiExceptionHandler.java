@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import com.daeho.cms.service.TelegramLiveChatException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -28,6 +29,14 @@ public class ApiExceptionHandler {
   public ResponseEntity<Map<String, String>> responseStatus(ResponseStatusException error) {
     var reason = error.getReason() == null ? error.getStatusCode().toString() : error.getReason();
     return ResponseEntity.status(error.getStatusCode()).body(Map.of("error", reason));
+  }
+
+  @ExceptionHandler(TelegramLiveChatException.class)
+  public ResponseEntity<Map<String, String>> telegram(TelegramLiveChatException error) {
+    var status = error.deliveryUncertain() ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_GATEWAY;
+    return ResponseEntity.status(status).body(Map.of(
+        "error", "Live-chat upstream is temporarily unavailable."
+    ));
   }
 
   @ExceptionHandler(MissingServletRequestParameterException.class)

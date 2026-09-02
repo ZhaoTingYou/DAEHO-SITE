@@ -3,6 +3,7 @@ package com.daeho.cms.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -31,6 +32,7 @@ import com.daeho.cms.security.WebLiveChatTokenCodec;
 import com.daeho.cms.service.WebLiveChatEventBroker;
 import com.daeho.cms.service.WebLiveChatInputValidator;
 import com.daeho.cms.service.WebLiveChatService;
+import com.daeho.cms.service.TelegramLiveChatException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -168,6 +170,24 @@ class WebLiveChatControllerTest {
         codec.hash("rate:visitor:" + visitor.id()), "start_visitor_hour", 3, Duration.ofHours(1)
     );
     verify(repository).touchVisitor(visitor.id(), Duration.ofDays(30));
+  }
+
+  @Test
+  void lostStartResponseReplayBypassesQuotaUsingTheOriginalLogicalKey() throws Exception {
+    var visitor = visitor();
+    existingCookie(visitor);
+    when(liveChat.resolveExistingStart(eq(visitor), any())).thenReturn(conversation("active"));
+    when(repository.consumeRateBucket(anyString(), anyString(), anyInt(), any(Duration.class)))
+        .thenReturn(false);
+
+    mvc.perform(post("/api/live-chat/conversations")
+            .cookie(cookie()).header("Origin", "https://daeho.works")
+            .contentType(MediaType.APPLICATION_JSON).content(startJson("")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.conversation.state").value("active"));
+
+    verify(repository, never()).consumeRateBucket(anyString(), anyString(), anyInt(), any());
+    verify(liveChat, never()).start(any(), any(), any());
   }
 
   @Test
@@ -341,7 +361,7 @@ class WebLiveChatControllerTest {
 
   @Test
   void sessionIssuesASecureAnonymousCookieWithoutExposingTheTokenInJson() throws Exception {
-    mvc.perform(get("/api/live-chat/session").header("Origin", "https://daeho.works"))
+    mvc.perform(get("/api/live-chat/session?issue=true").header("Origin", "https://daeho.works"))
         .andExpect(status().isOk())
         .andExpect(header().string("Set-Cookie", allOf(
             containsString("daeho_live_chat="), containsString("HttpOnly"),
@@ -351,6 +371,110 @@ class WebLiveChatControllerTest {
         .andExpect(jsonPath("$.unreadCount").value(0));
 
     verify(repository).createVisitor(anyString(), eq(Duration.ofDays(30)));
+  }
+
+  @Test
+  void passiveSessionCheckWithoutCookieDoesNotCreateVisitorIdentity() throws Exception {
+    mvc.perform(get("/api/live-chat/session").header("Origin", "https://daeho.works"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.conversation").isEmpty())
+        .andExpect(jsonPath("$.messages.length()").value(0))
+        .andExpect(header().doesNotExist("Set-Cookie"));
+
+    verify(repository, never()).createVisitor(anyString(), any(Duration.class));
+    verify(liveChat, never()).session(any());
+  }
+
+  @Test
+  void maximumKoreanHistoryPageStaysBelowTheClientByteBudget() throws Exception {
+    var visitor = visitor();
+    existingCookie(visitor);
+    var koreanBody = "한".repeat(2_000);
+    var history = LongStream.rangeClosed(1L, 24L)
+        .mapToObj(id -> new Message(
+            id, "conversation-1", "visitor", koreanBody, "delivered", "key-" + id, 0L, NOW
+        ))
+        .toList();
+    when(liveChat.session(visitor)).thenReturn(new SessionView(
+        conversation("active"), history, 0L
+    ));
+
+    var response = mvc.perform(get("/api/live-chat/session")
+            .cookie(cookie()).header("Origin", "https://daeho.works"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.messages.length()").value(24))
+        .andReturn().getResponse();
+
+    assertTrue(response.getContentAsByteArray().length < 256 * 1024);
+  }
+
+  @Test
+  void deliveredIdempotencyReplayBypassesFullQuotaAndDoesNotRenewIdentity() throws Exception {
+    var visitor = visitor();
+    existingCookie(visitor);
+    var input = new WebLiveChatInputValidator.MessageInput(
+        "추가 문의", "client-message-key-0001"
+    );
+    when(liveChat.resolveExistingSend(visitor, input))
+        .thenReturn(new WebLiveChatService.SendResult(41L, "sent"));
+    when(repository.consumeRateBucket(anyString(), anyString(), anyInt(), any(Duration.class)))
+        .thenReturn(false);
+
+    mvc.perform(post("/api/live-chat/conversations/current/messages")
+            .cookie(cookie()).header("Origin", "https://daeho.works")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"body\":\"추가 문의\",\"clientMessageKey\":\"client-message-key-0001\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.messageId").value(41))
+        .andExpect(jsonPath("$.status").value("sent"));
+
+    verify(repository, never()).consumeRateBucket(anyString(), anyString(), anyInt(), any());
+    verify(liveChat, never()).send(any(), any());
+    verify(repository, never()).touchVisitor(anyString(), any());
+  }
+
+  @Test
+  void newMessageConsumesIntervalAndSaltedDuplicateBucketsBeforeDelivery() throws Exception {
+    var visitor = visitor();
+    existingCookie(visitor);
+    when(liveChat.resolveExistingSend(eq(visitor), any())).thenReturn(null);
+    when(liveChat.send(eq(visitor), any()))
+        .thenReturn(new WebLiveChatService.SendResult(41L, "sent"));
+    when(repository.touchVisitor(visitor.id(), Duration.ofDays(30))).thenReturn(visitor);
+
+    mvc.perform(post("/api/live-chat/conversations/current/messages")
+            .cookie(cookie()).header("Origin", "https://daeho.works")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"body\":\"추가 문의\",\"clientMessageKey\":\"client-message-key-0001\"}"))
+        .andExpect(status().isOk());
+
+    verify(repository).consumeRateBucket(
+        codec.hash("rate:visitor:" + visitor.id()), "message_minimum_interval", 1,
+        Duration.ofSeconds(2)
+    );
+    verify(repository).consumeRateBucket(
+        codec.hash("duplicate:visitor:" + visitor.id() + ":추가 문의"),
+        "message_duplicate", 1, Duration.ofSeconds(30)
+    );
+  }
+
+  @Test
+  void telegramFailuresReturnNeutralStructuredUpstreamErrors() throws Exception {
+    var visitor = visitor();
+    existingCookie(visitor);
+    when(liveChat.resolveExistingSend(eq(visitor), any())).thenReturn(null);
+    when(liveChat.send(eq(visitor), any()))
+        .thenThrow(new TelegramLiveChatException("sensitive Telegram detail", true));
+
+    mvc.perform(post("/api/live-chat/conversations/current/messages")
+            .cookie(cookie()).header("Origin", "https://daeho.works")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"body\":\"추가 문의\",\"clientMessageKey\":\"client-message-key-0001\"}"))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.error").value("Live-chat upstream is temporarily unavailable."))
+        .andExpect(jsonPath("$.error").value(org.hamcrest.Matchers.not(
+            org.hamcrest.Matchers.containsString("Telegram")
+        )));
   }
 
   private Visitor visitor() {

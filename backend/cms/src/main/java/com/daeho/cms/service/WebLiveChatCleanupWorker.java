@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class WebLiveChatCleanupWorker {
   static final int BATCH_SIZE = 100;
   private static final Duration STALE_AGE = Duration.ofDays(30);
+  private static final Duration VISITOR_DELIVERY_LEASE = Duration.ofMinutes(2);
   private static final String CLOSED_MESSAGE = "상담이 종료되었습니다.";
 
   private final WebLiveChatRepository repository;
@@ -50,6 +51,12 @@ public class WebLiveChatCleanupWorker {
       broker.publish(result.conversation().id(), result.event());
       closeTopicBestEffort(result.conversation());
     }
+    repository.reconcileStaleVisitorDeliveries(
+        clock.instant().minus(VISITOR_DELIVERY_LEASE), BATCH_SIZE
+    );
+    repository.deleteExpiredRateBuckets(BATCH_SIZE);
+    repository.deleteExpiredAnonymousConversations(BATCH_SIZE);
+    repository.deleteExpiredOrphanVisitors(BATCH_SIZE);
   }
 
   private void closeTopicBestEffort(WebLiveChatRepository.Conversation conversation) {
@@ -61,13 +68,21 @@ public class WebLiveChatCleanupWorker {
       if (current == null || !current.ready()
           || current.settings().configurationGeneration() != conversation.configurationGeneration()
           || !current.settings().targetChatId().equals(conversation.targetChatId())) {
+        repository.markTopicCloseNeedsAttention(
+            conversation.id(), "topic_close_configuration_unavailable"
+        );
         return;
       }
       gateway.closeForumTopic(
           current.botToken(), conversation.targetChatId(), conversation.topicThreadId()
       );
+      repository.completeTopicClose(conversation.id());
+    } catch (TelegramLiveChatException error) {
+      repository.markTopicCloseNeedsAttention(
+          conversation.id(), error.deliveryUncertain() ? "topic_close_uncertain" : "topic_close_failed"
+      );
     } catch (RuntimeException ignored) {
-      // The database close is authoritative; Topic closure is deliberately best effort.
+      repository.markTopicCloseNeedsAttention(conversation.id(), "topic_close_unavailable");
     }
   }
 }

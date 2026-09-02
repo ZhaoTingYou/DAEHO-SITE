@@ -63,6 +63,8 @@ export default async function AdminTelegramLiveChatPage() {
           reconcile: t('liveChat.reconcile'),
           retryDelivery: t('liveChat.retryDelivery'),
           retryDeliveryConfirm: t('liveChat.retryDeliveryConfirm'),
+          confirmDelivery: t('liveChat.confirmDelivery'),
+          confirmDeliveryConfirm: t('liveChat.confirmDeliveryConfirm'),
           resetTopicCreation: t('liveChat.resetTopicCreation'),
           resetTopicCreationConfirm: t('liveChat.resetTopicCreationConfirm'),
           resetSetup: t('liveChat.resetSetup'),

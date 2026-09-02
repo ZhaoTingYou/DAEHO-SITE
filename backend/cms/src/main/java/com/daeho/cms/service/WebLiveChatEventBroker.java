@@ -16,17 +16,25 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 public class WebLiveChatEventBroker {
   static final long EMITTER_TIMEOUT_MILLIS = 70_000L;
   static final long HEARTBEAT_SECONDS = 25L;
+  static final int MAX_TOTAL_CONNECTIONS = 200;
+  static final int MAX_CONNECTIONS_PER_CONVERSATION = 2;
 
   private final Map<String, Set<Connection>> connections = new ConcurrentHashMap<>();
+  private final Map<String, Integer> admissionCounts = new ConcurrentHashMap<>();
   private final ScheduledExecutorService scheduler;
   private final Supplier<SseEmitter> emitterFactory;
   private final boolean ownsScheduler;
+  private final int maxTotalConnections;
+  private final int maxConnectionsPerConversation;
+  private int totalConnections;
 
   public WebLiveChatEventBroker() {
     this(
@@ -36,7 +44,9 @@ public class WebLiveChatEventBroker {
           return thread;
         }),
         () -> new SseEmitter(EMITTER_TIMEOUT_MILLIS),
-        true
+        true,
+        MAX_TOTAL_CONNECTIONS,
+        MAX_CONNECTIONS_PER_CONVERSATION
     );
   }
 
@@ -44,22 +54,47 @@ public class WebLiveChatEventBroker {
       ScheduledExecutorService scheduler,
       Supplier<SseEmitter> emitterFactory
   ) {
-    this(scheduler, emitterFactory, false);
+    this(
+        scheduler, emitterFactory, false,
+        MAX_TOTAL_CONNECTIONS, MAX_CONNECTIONS_PER_CONVERSATION
+    );
+  }
+
+  WebLiveChatEventBroker(
+      ScheduledExecutorService scheduler,
+      Supplier<SseEmitter> emitterFactory,
+      int maxTotalConnections,
+      int maxConnectionsPerConversation
+  ) {
+    this(
+        scheduler, emitterFactory, false, maxTotalConnections, maxConnectionsPerConversation
+    );
   }
 
   private WebLiveChatEventBroker(
       ScheduledExecutorService scheduler,
       Supplier<SseEmitter> emitterFactory,
-      boolean ownsScheduler
+      boolean ownsScheduler,
+      int maxTotalConnections,
+      int maxConnectionsPerConversation
   ) {
     this.scheduler = scheduler;
     this.emitterFactory = emitterFactory;
     this.ownsScheduler = ownsScheduler;
+    this.maxTotalConnections = maxTotalConnections;
+    this.maxConnectionsPerConversation = maxConnectionsPerConversation;
   }
 
   /** Registers the live emitter before invoking the replay loader. */
   public SseEmitter open(String conversationId, Supplier<List<Message>> replayLoader) {
-    var emitter = emitterFactory.get();
+    reserve(conversationId);
+    SseEmitter emitter;
+    try {
+      emitter = emitterFactory.get();
+    } catch (RuntimeException error) {
+      releaseReservation(conversationId);
+      throw error;
+    }
     var connection = new Connection(conversationId, emitter);
     connections.computeIfAbsent(conversationId, ignored -> ConcurrentHashMap.newKeySet())
         .add(connection);
@@ -87,6 +122,25 @@ public class WebLiveChatEventBroker {
     return emitter;
   }
 
+  private synchronized void reserve(String conversationId) {
+    var current = admissionCounts.getOrDefault(conversationId, 0);
+    if (totalConnections >= maxTotalConnections
+        || current >= maxConnectionsPerConversation) {
+      throw new ResponseStatusException(
+          HttpStatus.TOO_MANY_REQUESTS, "Too many live-chat event connections."
+      );
+    }
+    totalConnections += 1;
+    admissionCounts.put(conversationId, current + 1);
+  }
+
+  private synchronized void releaseReservation(String conversationId) {
+    totalConnections = Math.max(0, totalConnections - 1);
+    admissionCounts.computeIfPresent(
+        conversationId, (ignored, count) -> count <= 1 ? null : count - 1
+    );
+  }
+
   public void publish(String conversationId, Message event) {
     if (conversationId == null || !publicEvent(event)) {
       return;
@@ -110,7 +164,9 @@ public class WebLiveChatEventBroker {
   }
 
   private void remove(Connection connection) {
-    connection.markClosed();
+    if (!connection.markClosed()) {
+      return;
+    }
     var subscribers = connections.get(connection.conversationId);
     if (subscribers != null) {
       subscribers.remove(connection);
@@ -122,6 +178,7 @@ public class WebLiveChatEventBroker {
     if (heartbeat != null) {
       heartbeat.cancel(false);
     }
+    releaseReservation(connection.conversationId);
   }
 
   @PreDestroy
@@ -132,6 +189,8 @@ public class WebLiveChatEventBroker {
       }
     }
     connections.clear();
+    admissionCounts.clear();
+    totalConnections = 0;
     if (ownsScheduler) {
       scheduler.shutdownNow();
     }
@@ -219,10 +278,8 @@ public class WebLiveChatEventBroker {
     }
 
     synchronized void close() {
-      if (markClosed()) {
-        emitter.complete();
-        remove(this);
-      }
+      emitter.complete();
+      remove(this);
     }
   }
 

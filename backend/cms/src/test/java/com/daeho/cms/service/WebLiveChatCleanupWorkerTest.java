@@ -65,6 +65,10 @@ class WebLiveChatCleanupWorkerTest {
     assertEquals(NOW.minusSeconds(30L * 24 * 60 * 60), cutoff.getValue());
     verify(broker).publish(closed.id(), event);
     verify(gateway).closeForumTopic("token", closed.targetChatId(), closed.topicThreadId());
+    verify(repository).reconcileStaleVisitorDeliveries(NOW.minusSeconds(120), 100);
+    verify(repository).deleteExpiredRateBuckets(100);
+    verify(repository).deleteExpiredAnonymousConversations(100);
+    verify(repository).deleteExpiredOrphanVisitors(100);
   }
 
   @Test

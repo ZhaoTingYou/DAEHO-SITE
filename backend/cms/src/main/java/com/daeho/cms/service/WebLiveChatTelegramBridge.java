@@ -130,14 +130,23 @@ public class WebLiveChatTelegramBridge {
       return new TelegramLiveChatService.WebhookResult("web_conversation_already_closed");
     }
     broker.publish(conversation.id(), closed.event());
-    if (closeTopic && conversation.topicThreadId() > 0) {
+    if (!closeTopic && conversation.topicThreadId() > 0) {
+      repository.completeTopicClose(conversation.id());
+    } else if (conversation.topicThreadId() > 0) {
       try {
         gateway.closeForumTopic(
             configuration.botToken(),
             configuration.settings().targetChatId(),
             conversation.topicThreadId()
         );
+        repository.completeTopicClose(conversation.id());
+      } catch (TelegramLiveChatException error) {
+        repository.markTopicCloseNeedsAttention(
+            conversation.id(), error.deliveryUncertain() ? "topic_close_uncertain" : "topic_close_failed"
+        );
+        log.warn("Web live-chat closed while its Telegram Topic still needs closure.");
       } catch (RuntimeException error) {
+        repository.markTopicCloseNeedsAttention(conversation.id(), "topic_close_unavailable");
         log.warn("Web live-chat closed while its Telegram Topic still needs closure.");
       }
     }

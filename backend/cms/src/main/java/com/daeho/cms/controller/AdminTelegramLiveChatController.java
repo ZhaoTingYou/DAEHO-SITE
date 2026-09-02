@@ -85,6 +85,7 @@ public class AdminTelegramLiveChatController {
     var conversation = summary.conversation();
     return new AdminRow(
         websiteSession(summary), conversation.updatedAt(), !"closed".equals(conversation.state())
+            || conversation.attentionCode().startsWith("topic_close_")
     );
   }
 
@@ -101,6 +102,7 @@ public class AdminTelegramLiveChatController {
         conversation.id(), "website", conversation.state(), conversation.customerName(),
         conversation.customerContact(), conversation.inquiryContent(), conversation.inquiryId(),
         positiveOrNull(conversation.topicThreadId()), conversation.attentionCode(),
+        positiveOrNull(conversation.pendingMessageId()),
         summary.unreadCount(), conversation.createdAt().toString(),
         conversation.updatedAt().toString()
     );
@@ -111,6 +113,7 @@ public class AdminTelegramLiveChatController {
         conversation.id(), "website", conversation.state(), conversation.customerName(),
         conversation.customerContact(), conversation.inquiryContent(), conversation.inquiryId(),
         positiveOrNull(conversation.topicThreadId()), conversation.attentionCode(),
+        positiveOrNull(conversation.pendingMessageId()),
         webRepository.unreadCount(conversation.id()), conversation.createdAt().toString(),
         conversation.updatedAt().toString()
     );
@@ -120,7 +123,7 @@ public class AdminTelegramLiveChatController {
     return new AdminSession(
         session.id(), "telegram_legacy", legacyState(session.state()), session.customerName(),
         session.customerContact(), session.inquiryContent(), session.inquiryId(),
-        positiveOrNull(session.topicThreadId()), session.attentionCode(), 0L,
+        positiveOrNull(session.topicThreadId()), session.attentionCode(), null, 0L,
         session.createdAt().toString(), session.updatedAt().toString()
     );
   }
@@ -246,6 +249,76 @@ public class AdminTelegramLiveChatController {
     return Map.of("session", legacySession(session));
   }
 
+  @PostMapping("/sessions/{sessionId}/messages/{messageId}/confirm-delivered")
+  public Map<String, Object> confirmVisitorMessage(
+      @PathVariable String sessionId,
+      @PathVariable long messageId,
+      HttpServletRequest request
+  ) {
+    auth.requireAdmin(request);
+    var source = resolve(sessionId);
+    if (source.website() == null) {
+      invalid("Visitor message recovery is only available for website sessions.");
+    }
+    var conversation = source.website();
+    requireVisitorRecovery(conversation, messageId);
+    return Map.of(
+        "session",
+        websiteSession(webLiveChat.confirmVisitorMessageFromCms(
+            sessionId, messageId, conversation.attentionCode()
+        ))
+    );
+  }
+
+  @PostMapping("/sessions/{sessionId}/messages/{messageId}/retry-delivery")
+  public Map<String, Object> retryVisitorMessage(
+      @PathVariable String sessionId,
+      @PathVariable long messageId,
+      HttpServletRequest request
+  ) {
+    auth.requireAdmin(request);
+    var source = resolve(sessionId);
+    if (source.website() == null) {
+      invalid("Visitor message recovery is only available for website sessions.");
+    }
+    var conversation = source.website();
+    requireVisitorRecovery(conversation, messageId);
+    webLiveChat.retryVisitorMessageFromCms(
+        sessionId, messageId, conversation.attentionCode()
+    );
+    return Map.of("session", websiteSession(webRepository.conversationById(sessionId)));
+  }
+
+  @PostMapping("/sessions/{sessionId}/retry-topic-close")
+  public Map<String, Object> retryTopicClose(
+      @PathVariable String sessionId,
+      HttpServletRequest request
+  ) {
+    auth.requireAdmin(request);
+    var source = resolve(sessionId);
+    if (source.website() == null
+        || !source.website().attentionCode().startsWith("topic_close_")) {
+      invalid("Topic close cannot be retried in this state.");
+    }
+    return Map.of(
+        "session",
+        websiteSession(webLiveChat.retryTopicCloseFromCms(
+            sessionId, source.website().attentionCode()
+        ))
+    );
+  }
+
+  private void requireVisitorRecovery(
+      WebLiveChatRepository.Conversation conversation,
+      long messageId
+  ) {
+    if (conversation.pendingMessageId() != messageId
+        || !conversation.attentionCode().startsWith("visitor_delivery_")
+        || !"visitor_delivery".equals(conversation.pendingAction())) {
+      invalid("Visitor message cannot be recovered in this state.");
+    }
+  }
+
   @PostMapping("/sessions/{sessionId}/close")
   public Map<String, Object> close(
       @PathVariable String sessionId,
@@ -317,6 +390,7 @@ public class AdminTelegramLiveChatController {
       String inquiryId,
       Long topicThreadId,
       String attentionCode,
+      Long pendingMessageId,
       long unreadCount,
       String createdAt,
       String updatedAt

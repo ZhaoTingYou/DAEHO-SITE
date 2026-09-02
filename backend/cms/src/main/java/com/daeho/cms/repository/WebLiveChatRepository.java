@@ -226,7 +226,10 @@ public class WebLiveChatRepository {
     return one(jdbc.query("""
         WITH closed AS (
           UPDATE cms_web_live_chat_conversations
-          SET state = 'closed', pending_action = '', pending_message_id = NULL,
+          SET state = 'closed',
+              pending_action = CASE WHEN topic_thread_id IS NULL THEN '' ELSE 'topic_close' END,
+              attention_code = CASE WHEN topic_thread_id IS NULL THEN '' ELSE 'topic_close_in_flight' END,
+              pending_message_id = NULL,
               pending_client_message_key = '', closed_at = now(),
               last_activity_at = now(), updated_at = now()
           WHERE id = ? AND state <> 'closed'
@@ -264,7 +267,12 @@ public class WebLiveChatRepository {
           FOR UPDATE SKIP LOCKED
         ), closed AS (
           UPDATE cms_web_live_chat_conversations c
-          SET state = 'closed', pending_action = '', pending_message_id = NULL,
+          SET state = 'closed',
+              pending_action = CASE WHEN c.topic_thread_id IS NULL THEN '' ELSE 'topic_close' END,
+              attention_code = CASE
+                WHEN c.topic_thread_id IS NULL THEN '' ELSE 'topic_close_in_flight'
+              END,
+              pending_message_id = NULL,
               pending_client_message_key = '', closed_at = now(),
               last_activity_at = now(), updated_at = now()
           FROM stale
@@ -333,6 +341,174 @@ public class WebLiveChatRepository {
         """, this::mapVisitorMessageClaim, body, clientMessageKey, conversationId));
   }
 
+  public Message visitorMessageByKey(String conversationId, String clientMessageKey) {
+    return one(jdbc.query("""
+        SELECT *
+        FROM cms_web_live_chat_messages
+        WHERE conversation_id = ?
+          AND direction = 'visitor'
+          AND client_message_key = ?
+        """, this::mapMessage, conversationId, clientMessageKey));
+  }
+
+  public Conversation reconcileStaleVisitorDelivery(
+      String conversationId,
+      String clientMessageKey,
+      Instant cutoff
+  ) {
+    return transition("""
+        WITH stale_message AS (
+          UPDATE cms_web_live_chat_messages m
+          SET delivery_state = 'needs_attention'
+          FROM cms_web_live_chat_conversations c
+          WHERE c.id = ?
+            AND c.id = m.conversation_id
+            AND c.state = 'active'
+            AND c.pending_action = 'visitor_delivery'
+            AND c.pending_message_id = m.id
+            AND c.pending_client_message_key = ?
+            AND m.client_message_key = ?
+            AND m.delivery_state = 'pending'
+            AND c.updated_at <= ?
+          RETURNING m.conversation_id
+        )
+        UPDATE cms_web_live_chat_conversations c
+        SET state = 'needs_attention', attention_code = 'visitor_delivery_stale',
+            updated_at = now()
+        FROM stale_message m
+        WHERE c.id = m.conversation_id
+        RETURNING c.*
+        """, conversationId, clientMessageKey, clientMessageKey, databaseTime(cutoff));
+  }
+
+  public int reconcileStaleVisitorDeliveries(Instant cutoff, int limit) {
+    return jdbc.query("""
+        WITH stale AS (
+          SELECT c.id, c.pending_message_id
+          FROM cms_web_live_chat_conversations c
+          INNER JOIN cms_web_live_chat_messages m
+            ON m.conversation_id = c.id AND m.id = c.pending_message_id
+          WHERE c.state = 'active'
+            AND c.pending_action = 'visitor_delivery'
+            AND c.pending_message_id = m.id
+            AND c.pending_client_message_key = m.client_message_key
+            AND m.delivery_state = 'pending'
+            AND c.updated_at <= ?
+          ORDER BY c.updated_at ASC, c.id ASC
+          LIMIT ?
+          FOR UPDATE OF c SKIP LOCKED
+        ), warned_messages AS (
+          UPDATE cms_web_live_chat_messages m
+          SET delivery_state = 'needs_attention'
+          FROM stale s
+          WHERE m.conversation_id = s.id AND m.id = s.pending_message_id
+          RETURNING m.conversation_id
+        ), warned_conversations AS (
+          UPDATE cms_web_live_chat_conversations c
+          SET state = 'needs_attention', attention_code = 'visitor_delivery_stale',
+              updated_at = now()
+          FROM warned_messages m
+          WHERE c.id = m.conversation_id
+            AND c.state = 'active'
+            AND c.pending_action = 'visitor_delivery'
+          RETURNING 1
+        ) SELECT 1 AS updated FROM warned_conversations
+        """, (rs, rowNum) -> rs.getInt("updated"),
+        databaseTime(cutoff), Math.max(1, limit)).size();
+  }
+
+  public Conversation markVisitorDeliveryNeedsAttention(
+      String conversationId,
+      long messageId,
+      String attentionCode
+  ) {
+    return transition("""
+        WITH warned AS (
+          UPDATE cms_web_live_chat_messages m
+          SET delivery_state = 'needs_attention'
+          FROM cms_web_live_chat_conversations c
+          WHERE c.id = ?
+            AND c.id = m.conversation_id
+            AND c.pending_action = 'visitor_delivery'
+            AND c.pending_message_id = ?
+            AND c.pending_message_id = m.id
+            AND c.pending_client_message_key = m.client_message_key
+            AND m.delivery_state = 'pending'
+          RETURNING m.conversation_id
+        )
+        UPDATE cms_web_live_chat_conversations c
+        SET state = 'needs_attention', attention_code = ?, updated_at = now()
+        FROM warned w
+        WHERE c.id = w.conversation_id
+        RETURNING c.*
+        """, conversationId, messageId, attentionCode);
+  }
+
+  public Conversation confirmVisitorMessageDelivered(
+      String conversationId,
+      long messageId,
+      String expectedAttentionCode
+  ) {
+    return transition("""
+        WITH delivered AS (
+          UPDATE cms_web_live_chat_messages m
+          SET delivery_state = 'delivered', delivered_at = COALESCE(delivered_at, now())
+          FROM cms_web_live_chat_conversations c
+          WHERE c.id = ?
+            AND c.state = 'needs_attention'
+            AND c.pending_action = 'visitor_delivery'
+            AND c.attention_code = ?
+            AND c.pending_message_id = ?
+            AND c.pending_message_id = m.id
+            AND m.client_message_key = c.pending_client_message_key
+            AND m.delivery_state = 'needs_attention'
+          RETURNING m.conversation_id
+        )
+        UPDATE cms_web_live_chat_conversations c
+        SET state = 'active', pending_action = '', attention_code = '',
+            pending_message_id = NULL, pending_client_message_key = '', updated_at = now()
+        FROM delivered m
+        WHERE c.id = m.conversation_id
+        RETURNING c.*
+        """, conversationId, expectedAttentionCode, messageId);
+  }
+
+  public VisitorMessageClaim reserveVisitorMessageRetry(
+      String conversationId,
+      long messageId,
+      String expectedAttentionCode
+  ) {
+    return one(jdbc.query("""
+        WITH message AS (
+          UPDATE cms_web_live_chat_messages m
+          SET delivery_state = 'pending'
+          FROM cms_web_live_chat_conversations c
+          WHERE c.id = ?
+            AND c.state = 'needs_attention'
+            AND c.pending_action = 'visitor_delivery'
+            AND c.attention_code = ?
+            AND c.pending_message_id = ?
+            AND c.pending_message_id = m.id
+            AND m.client_message_key = c.pending_client_message_key
+            AND m.delivery_state = 'needs_attention'
+          RETURNING m.*
+        ), reserved AS (
+          UPDATE cms_web_live_chat_conversations c
+          SET state = 'active', attention_code = '',
+              pending_client_message_key = m.client_message_key, updated_at = now()
+          FROM message m
+          WHERE c.id = m.conversation_id
+            AND c.pending_action = 'visitor_delivery'
+            AND c.pending_message_id = m.id
+          RETURNING c.id
+        )
+        SELECT m.*, 'acquired' AS claim_status
+        FROM message m
+        INNER JOIN reserved r ON r.id = m.conversation_id
+        """, this::mapVisitorMessageClaim,
+        conversationId, expectedAttentionCode, messageId));
+  }
+
   public boolean markVisitorDelivered(long messageId, long telegramMessageId) {
     return !jdbc.query("""
         WITH delivered AS (
@@ -384,6 +560,33 @@ public class WebLiveChatRepository {
         """, messageId, messageId) == 1;
   }
 
+  public Conversation completeTopicClose(String conversationId) {
+    return transition("""
+        UPDATE cms_web_live_chat_conversations
+        SET pending_action = '', attention_code = '', updated_at = now()
+        WHERE id = ? AND state = 'closed' AND pending_action = 'topic_close'
+        RETURNING *
+        """, conversationId);
+  }
+
+  public boolean markTopicCloseNeedsAttention(String conversationId, String attentionCode) {
+    return jdbc.update("""
+        UPDATE cms_web_live_chat_conversations
+        SET attention_code = ?, updated_at = now()
+        WHERE id = ? AND state = 'closed' AND pending_action = 'topic_close'
+        """, attentionCode, conversationId) == 1;
+  }
+
+  public Conversation reserveTopicCloseRetry(String conversationId, String expectedAttentionCode) {
+    return transition("""
+        UPDATE cms_web_live_chat_conversations
+        SET attention_code = 'topic_close_in_flight', updated_at = now()
+        WHERE id = ? AND state = 'closed' AND pending_action = 'topic_close'
+          AND attention_code = ? AND topic_thread_id IS NOT NULL
+        RETURNING *
+        """, conversationId, expectedAttentionCode);
+  }
+
   @Transactional
   public Message recordTeamMessage(String conversationId, long telegramMessageId, String body) {
     var inserted = one(jdbc.query("""
@@ -396,13 +599,6 @@ public class WebLiveChatRepository {
         ON CONFLICT (conversation_id, telegram_message_id) DO NOTHING
         RETURNING *
         """, this::mapMessage, body, telegramMessageId, conversationId));
-    if (inserted != null) {
-      jdbc.update("""
-          UPDATE cms_web_live_chat_conversations
-          SET last_activity_at = now(), updated_at = now()
-          WHERE id = ? AND state <> 'closed'
-          """, conversationId);
-    }
     return inserted;
   }
 
@@ -500,6 +696,64 @@ public class WebLiveChatRepository {
         RETURNING request_count
         """, (rs, rowNum) -> rs.getInt("request_count"),
         keyHash, action, millis(window), millis(window), limit).isEmpty();
+  }
+
+  public int deleteExpiredRateBuckets(int limit) {
+    return jdbc.query("""
+        WITH doomed AS (
+          SELECT key_hash, action
+          FROM cms_web_live_chat_rate_limits
+          WHERE expires_at <= now()
+          ORDER BY expires_at ASC
+          LIMIT ?
+          FOR UPDATE SKIP LOCKED
+        ), deleted AS (
+          DELETE FROM cms_web_live_chat_rate_limits r
+          USING doomed d
+          WHERE r.key_hash = d.key_hash AND r.action = d.action
+          RETURNING 1
+        ) SELECT 1 AS deleted FROM deleted
+        """, (rs, rowNum) -> rs.getInt("deleted"), Math.max(1, limit)).size();
+  }
+
+  public int deleteExpiredAnonymousConversations(int limit) {
+    return jdbc.query("""
+        WITH doomed AS (
+          SELECT c.id
+          FROM cms_web_live_chat_conversations c
+          INNER JOIN cms_web_live_chat_visitors v ON v.id = c.visitor_id
+          WHERE c.state = 'closed' AND v.expires_at <= now()
+          ORDER BY v.expires_at ASC, c.id ASC
+          LIMIT ?
+          FOR UPDATE OF c SKIP LOCKED
+        ), deleted AS (
+          DELETE FROM cms_web_live_chat_conversations c
+          USING doomed d
+          WHERE c.id = d.id
+          RETURNING 1
+        ) SELECT 1 AS deleted FROM deleted
+        """, (rs, rowNum) -> rs.getInt("deleted"), Math.max(1, limit)).size();
+  }
+
+  public int deleteExpiredOrphanVisitors(int limit) {
+    return jdbc.query("""
+        WITH doomed AS (
+          SELECT v.id
+          FROM cms_web_live_chat_visitors v
+          WHERE v.expires_at <= now()
+            AND NOT EXISTS (
+              SELECT 1 FROM cms_web_live_chat_conversations c WHERE c.visitor_id = v.id
+            )
+          ORDER BY v.expires_at ASC, v.id ASC
+          LIMIT ?
+          FOR UPDATE SKIP LOCKED
+        ), deleted AS (
+          DELETE FROM cms_web_live_chat_visitors v
+          USING doomed d
+          WHERE v.id = d.id
+          RETURNING 1
+        ) SELECT 1 AS deleted FROM deleted
+        """, (rs, rowNum) -> rs.getInt("deleted"), Math.max(1, limit)).size();
   }
 
   public List<CmsConversationSummary> recentConversations(int limit) {

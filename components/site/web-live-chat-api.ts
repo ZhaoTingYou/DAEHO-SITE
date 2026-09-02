@@ -59,8 +59,8 @@ export class WebLiveChatApiError extends Error {
   }
 }
 
-export async function getSession(): Promise<WebLiveChatSession> {
-  return request(`${API_ROOT}/session`, parseSession);
+export async function getSession(issueIdentity = false): Promise<WebLiveChatSession> {
+  return request(`${API_ROOT}/session${issueIdentity ? '?issue=true' : ''}`, parseSession);
 }
 
 export async function startConversation(input: StartConversationInput): Promise<{

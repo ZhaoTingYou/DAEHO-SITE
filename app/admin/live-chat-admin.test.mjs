@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 import test from 'node:test';
 
 const repositories = readFileSync(
@@ -58,4 +58,22 @@ test('website recovery is explicit, state-limited, and Topic reset has its own c
   assert.match(editor, /window\.confirm\(confirmation\)/);
   assert.doesNotMatch(editor, /useEffect\([\s\S]*reset-topic-creation/);
   assert.doesNotMatch(editor, /useEffect\([\s\S]*retry-delivery/);
+});
+
+test('every exact website recovery action has a capability-guarded Next proxy', () => {
+  const routeUrls = [
+    '../api/admin/live-chat/sessions/[sessionId]/retry-topic-close/route.ts',
+    '../api/admin/live-chat/sessions/[sessionId]/messages/[messageId]/confirm-delivered/route.ts',
+    '../api/admin/live-chat/sessions/[sessionId]/messages/[messageId]/retry-delivery/route.ts'
+  ];
+  for (const routeUrl of routeUrls) {
+    const url = new URL(routeUrl, import.meta.url);
+    assert.equal(existsSync(url), true, routeUrl);
+    const route = readFileSync(url, 'utf8');
+    assert.match(route, /requireAdminCapability\(request, 'notifications:manage'\)/);
+    assert.match(route, /error instanceof CmsBackendError/);
+  }
+  assert.match(repositories, /retryWebLiveChatTopicClose/);
+  assert.match(repositories, /confirmWebLiveChatVisitorMessage/);
+  assert.match(repositories, /retryWebLiveChatVisitorMessage/);
 });
