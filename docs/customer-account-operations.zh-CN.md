@@ -9,7 +9,7 @@
 - 会员资料与认证记录：独立 `customer-api` Spring Boot 服务及 `customer_account` schema。
 - MY DAEHO：个人资料、문의列表、详情、状态、旧 문의认领、退出所有设备、删除账号。
 - NICE、本人人证一致认证、居民号码、原始 CI/DI、护照、聊天、附件、订单和企业多人账号均不在本期范围内。
-- 系统默认关闭。未完成下列配置前，必须保持 `CUSTOMER_ACCOUNTS_ENABLED=false` 和 `INQUIRY_ACCOUNT_REQUIRED=false`。
+- 系统默认关闭。未完成下列配置前，必须保持基础设施总保险 `CUSTOMER_ACCOUNTS_ENABLED=false`；CMS 内的“开放登录、注册和 MY DAEHO”与“提交 문의 前必须登录”也必须保持关闭。
 
 ## 小流量费用
 
@@ -31,7 +31,6 @@ Cognito Essentials 对直接使用 Cognito 登录的用户提供每月 10,000 MA
 
 ```text
 CUSTOMER_ACCOUNTS_ENABLED=false
-INQUIRY_ACCOUNT_REQUIRED=false
 CUSTOMER_AUTH_MODE=cognito
 CUSTOMER_INTERNAL_API_KEY=<至少 32 字节随机值>
 CUSTOMER_VERIFICATION_HMAC_SECRET=<不同的至少 32 字节随机值>
@@ -78,12 +77,15 @@ SOLAPI_SENDER_NUMBER=<已登记发信号码，仅数字>
 
 ## 功能开关与发布顺序
 
-1. 保持两个开关为 `false`，先启动 PostgreSQL、CMS、`customer-api`、Next 和 Nginx；确认两个 Spring 服务 health 为 `UP`。
+1. 保持 `CUSTOMER_ACCOUNTS_ENABLED=false` 和 CMS 内的两个开关关闭，先启动 PostgreSQL、CMS、`customer-api`、Next 和 Nginx；确认两个 Spring 服务 health 为 `UP`。
 2. 在测试 User Pool、测试 SOLAPI Key 和测试域名上完成全部验收。
-3. 设置 `CUSTOMER_ACCOUNTS_ENABLED=true`、`INQUIRY_ACCOUNT_REQUIRED=false`，仅开放登录、注册和 MY DAEHO。
-4. 稳定运行一至两周，检查注册完成率、短信失败、登录失败、无资料 Cognito 用户和 문의关联率。
-5. 确认无异常后设置 `INQUIRY_ACCOUNT_REQUIRED=true`。未登录表单会先保存在当前标签页 `sessionStorage`，登录后恢复并要求用户再次确认，绝不自动提交。
-6. 回滚只需把两个开关改回 `false`；恢复访客 문의，不回滚数据库迁移或删除会员数据。
+3. 设置一次基础设施总保险 `CUSTOMER_ACCOUNTS_ENABLED=true` 并重启 `customer-api` 与 Next；此时 CMS 开关仍关闭，公众入口不会出现。
+4. 在 CMS > 会员中开启“开放登录、注册和 MY DAEHO”，先只开放会员功能。
+5. 稳定运行一至两周，检查注册完成率、短信失败、登录失败、无资料 Cognito 用户和 문의关联率。
+6. 确认无异常后在同一 CMS 页面开启“提交 문의 前必须登录”。未登录表单会先保存在当前标签页 `sessionStorage`，登录后恢复并要求用户再次确认，绝不自动提交。
+7. 日常回滚只需在 CMS 关闭两个开关；紧急基础设施回滚再把 `CUSTOMER_ACCOUNTS_ENABLED=false` 并重启服务。两种回滚都不删除会员数据或回滚数据库迁移。
+
+CMS 每次保存这两个开关都会写入 `cms_account_feature_events` 审计记录。“提交 문의 前必须登录”不能在会员入口关闭时单独开启。CMS 服务不可用时，会员入口会自动关闭，但访客 문의继续开放，避免配置故障导致客户无法联系。
 
 ## 安全与运维检查
 

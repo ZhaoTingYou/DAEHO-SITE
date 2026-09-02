@@ -18,7 +18,7 @@ import {
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  if (!accountsEnabled()) {
+  if (!(await accountsEnabled())) {
     return new NextResponse('Not found', {status: 404});
   }
   const config = authConfig();

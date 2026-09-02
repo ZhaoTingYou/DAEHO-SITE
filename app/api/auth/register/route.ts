@@ -10,7 +10,7 @@ import {
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
-  if (!accountsEnabled() || !isSameOriginMutation(request)) {
+  if (!(await accountsEnabled()) || !isSameOriginMutation(request)) {
     return NextResponse.json({error: 'Registration is unavailable'}, {status: 403});
   }
   const input = await request.json() as {registrationGrant?: string};

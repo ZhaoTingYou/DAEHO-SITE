@@ -1,13 +1,16 @@
 import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
+import {connection} from 'next/server';
 
 import {RegisterForm} from '@/components/customer/register-form';
 import {accountsEnabled} from '@/lib/customer/server';
 import {isLocale} from '@/lib/locales';
 
 export const metadata: Metadata = {title: 'Create DAEHO account', robots: {index: false, follow: false}};
+export const dynamic = 'force-dynamic';
 
 export default async function RegisterPage({params}: {params: Promise<{locale: string}>}) {
+  await connection();
   const {locale} = await params;
   if (!isLocale(locale)) notFound();
   const ko = locale === 'ko';
@@ -20,7 +23,7 @@ export default async function RegisterPage({params}: {params: Promise<{locale: s
           {ko ? '문의 내역과 진행 상태를 한곳에서 확인할 수 있습니다.' : 'Keep your inquiries and progress in one place.'}
         </p>
         <div className="mt-10 border-t border-hairline pt-8">
-          {accountsEnabled() ? <RegisterForm locale={locale} /> : (
+          {await accountsEnabled() ? <RegisterForm locale={locale} /> : (
             <p className="border-l-2 border-accent px-4 py-3 text-sm leading-6">
               {ko ? '회원 기능은 현재 준비 중입니다.' : 'Customer accounts are being prepared.'}
             </p>

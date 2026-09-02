@@ -231,6 +231,13 @@ export type CmsNotificationSettings = {
   updatedAt: string;
 };
 
+export type CmsAccountFeatureSettings = {
+  customerAccountsEnabled: boolean;
+  inquiryAccountRequired: boolean;
+  updatedBy: string;
+  updatedAt: string;
+};
+
 export type CmsNotificationTemplate = {
   id: string;
   templateKey: string;
@@ -410,6 +417,30 @@ export function getCmsBackendBaseUrl() {
 
 export async function cmsBackendRequest<T>(path: string, options: CmsFetchOptions = {}) {
   return cmsFetch<T>(path, options);
+}
+
+export async function getPublicAccountFeatureSettings(): Promise<CmsAccountFeatureSettings> {
+  if (process.env.CMS_PREVIEW_STATIC === 'true') {
+    return disabledAccountFeatureSettings();
+  }
+  try {
+    const settings = await cmsFetch<Pick<CmsAccountFeatureSettings,
+      'customerAccountsEnabled' | 'inquiryAccountRequired'
+    >>('/api/cms/account-features');
+    return {...disabledAccountFeatureSettings(), ...settings};
+  } catch (error) {
+    console.error('[cms] Account feature settings are unavailable; customer accounts stay disabled.', error);
+    return disabledAccountFeatureSettings();
+  }
+}
+
+function disabledAccountFeatureSettings(): CmsAccountFeatureSettings {
+  return {
+    customerAccountsEnabled: false,
+    inquiryAccountRequired: false,
+    updatedBy: '',
+    updatedAt: ''
+  };
 }
 
 export async function getTrafficAnalyticsSummary(filters: TrafficAnalyticsFilters) {

@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 
 import {
-  accountsEnabled,
+  accountFeatureSettings,
   clearCustomerSessionCookie,
   currentCustomerProfile,
   refreshedCustomerSession,
@@ -11,21 +11,22 @@ import {
 export const runtime = 'nodejs';
 
 export async function GET() {
-  if (!accountsEnabled()) {
+  const features = await accountFeatureSettings();
+  if (!features.customerAccountsEnabled) {
     return NextResponse.json({authenticated: false, enabled: false, inquiryAccountRequired: false});
   }
   const session = await refreshedCustomerSession();
   if (!session) {
-    return NextResponse.json({authenticated: false, enabled: true, inquiryAccountRequired: process.env.INQUIRY_ACCOUNT_REQUIRED === 'true'});
+    return NextResponse.json({authenticated: false, enabled: true, inquiryAccountRequired: features.inquiryAccountRequired});
   }
   try {
     const profile = await currentCustomerProfile(session);
-    const response = NextResponse.json({authenticated: true, enabled: true, profile, inquiryAccountRequired: process.env.INQUIRY_ACCOUNT_REQUIRED === 'true'});
+    const response = NextResponse.json({authenticated: true, enabled: true, profile, inquiryAccountRequired: features.inquiryAccountRequired});
     setCustomerSessionCookie(response, session);
     return response;
   } catch (error) {
     const status = (error as {status?: number}).status;
-    const response = NextResponse.json({authenticated: false, enabled: true, needsProvisioning: status === 428, inquiryAccountRequired: process.env.INQUIRY_ACCOUNT_REQUIRED === 'true'});
+    const response = NextResponse.json({authenticated: false, enabled: true, needsProvisioning: status === 428, inquiryAccountRequired: features.inquiryAccountRequired});
     if (status !== 428) {
       clearCustomerSessionCookie(response);
     }

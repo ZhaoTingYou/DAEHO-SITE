@@ -14,6 +14,7 @@ import {golfInquirySchema} from '@/lib/cms/validation';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {isSameOriginMutation} from '@/lib/customer/request-security';
 import {
+  accountFeatureSettings,
   currentCustomerProfile,
   customerServiceHeaders,
   refreshedCustomerSession
@@ -51,7 +52,8 @@ export async function POST(request: NextRequest) {
       profile = null;
     }
   }
-  if (process.env.INQUIRY_ACCOUNT_REQUIRED === 'true' && !profile) {
+  const features = await accountFeatureSettings();
+  if (features.inquiryAccountRequired && !profile) {
     return NextResponse.json({error: 'Authentication required'}, {status: 401});
   }
   const inquiryData = profile ? {

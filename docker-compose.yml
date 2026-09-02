@@ -121,7 +121,6 @@ services:
       CMS_ADMIN_SESSION_SECRET: ${CMS_ADMIN_SESSION_SECRET:-replace-with-a-long-random-session-secret}
       ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
       CUSTOMER_ACCOUNTS_ENABLED: ${CUSTOMER_ACCOUNTS_ENABLED:-false}
-      INQUIRY_ACCOUNT_REQUIRED: ${INQUIRY_ACCOUNT_REQUIRED:-false}
       CUSTOMER_BACKEND_URL: http://customer-api:8081
       CUSTOMER_INTERNAL_API_KEY: ${CUSTOMER_INTERNAL_API_KEY:-replace-with-a-separate-long-random-key}
       AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:-replace-with-at-least-32-random-characters}

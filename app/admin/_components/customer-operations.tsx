@@ -13,17 +13,26 @@ type PendingClaim = {
   createdAt: string;
 };
 
+type AccountFeatureSettings = {
+  customerAccountsEnabled: boolean;
+  inquiryAccountRequired: boolean;
+  updatedBy: string;
+  updatedAt: string;
+};
+
 async function loadCustomerOperations(search = '') {
-  const [customersResponse, claimsResponse] = await Promise.all([
+  const [customersResponse, claimsResponse, settingsResponse] = await Promise.all([
     fetch(`/api/admin/customers?query=${encodeURIComponent(search)}`),
-    fetch('/api/admin/customer/legacy-claims')
+    fetch('/api/admin/customer/legacy-claims'),
+    fetch('/api/admin/customer/account-features')
   ]);
-  if (!customersResponse.ok || !claimsResponse.ok) {
+  if (!customersResponse.ok || !claimsResponse.ok || !settingsResponse.ok) {
     throw new Error('Unable to load customer operations');
   }
   return {
     customers: await customersResponse.json() as CustomerProfile[],
-    claims: await claimsResponse.json() as PendingClaim[]
+    claims: await claimsResponse.json() as PendingClaim[],
+    settings: await settingsResponse.json() as AccountFeatureSettings
   };
 }
 
@@ -32,6 +41,14 @@ export function CustomerOperations({locale}: {locale: 'zh' | 'en' | 'ko'}) {
   const zh = locale === 'zh';
   const [customers, setCustomers] = useState<CustomerProfile[]>([]);
   const [claims, setClaims] = useState<PendingClaim[]>([]);
+  const [settings, setSettings] = useState<AccountFeatureSettings>({
+    customerAccountsEnabled: false,
+    inquiryAccountRequired: false,
+    updatedBy: '',
+    updatedAt: ''
+  });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [settingsState, setSettingsState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState('');
@@ -41,6 +58,8 @@ export function CustomerOperations({locale}: {locale: 'zh' | 'en' | 'ko'}) {
       const result = await loadCustomerOperations(search);
       setCustomers(result.customers);
       setClaims(result.claims);
+      setSettings(result.settings);
+      setSettingsLoaded(true);
       setError('');
     } catch {
       setError(zh ? '无法加载会员服务。' : ko ? '회원 서비스를 불러오지 못했습니다.' : 'Unable to load customer operations.');
@@ -53,6 +72,8 @@ export function CustomerOperations({locale}: {locale: 'zh' | 'en' | 'ko'}) {
       if (!active) return;
       setCustomers(result.customers);
       setClaims(result.claims);
+      setSettings(result.settings);
+      setSettingsLoaded(true);
     }).catch(() => {
       if (active) {
         setError(zh ? '无法加载会员服务。' : ko ? '회원 서비스를 불러오지 못했습니다.' : 'Unable to load customer operations.');
@@ -64,6 +85,29 @@ export function CustomerOperations({locale}: {locale: 'zh' | 'en' | 'ko'}) {
   async function search(event: FormEvent) {
     event.preventDefault();
     await reload(query);
+  }
+
+  async function saveAccountFeatures(event: FormEvent) {
+    event.preventDefault();
+    setSettingsState('saving');
+    try {
+      const response = await fetch('/api/admin/customer/account-features', {
+        method: 'PUT',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify({
+          customerAccountsEnabled: settings.customerAccountsEnabled,
+          inquiryAccountRequired: settings.inquiryAccountRequired
+        })
+      });
+      if (!response.ok) {
+        setSettingsState('error');
+        return;
+      }
+      setSettings(await response.json() as AccountFeatureSettings);
+      setSettingsState('saved');
+    } catch {
+      setSettingsState('error');
+    }
   }
 
   async function changeStatus(customer: CustomerProfile) {
@@ -104,6 +148,70 @@ export function CustomerOperations({locale}: {locale: 'zh' | 'en' | 'ko'}) {
   return (
     <div className="grid gap-6">
       {error ? <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p> : null}
+      <section className="rounded-lg border border-[#d9dee7] bg-white shadow-sm">
+        <div className="border-b border-[#d9dee7] px-5 py-4">
+          <h2 className="font-heading text-xl font-semibold">{zh ? '会员开放设置' : ko ? '회원 공개 설정' : 'Customer account rollout'}</h2>
+          <p className="mt-2 text-sm leading-6 text-[#647084]">
+            {zh
+              ? '验证码固定由 SOLAPI 自动发送。此处不会开启 NICE 或 SOLAPI 自动充值。'
+              : ko
+                ? '인증번호는 SOLAPI가 자동 발송합니다. NICE 또는 SOLAPI 자동 충전은 이 설정으로 활성화되지 않습니다.'
+                : 'Verification codes are sent automatically by SOLAPI. These switches do not enable NICE or SOLAPI auto-recharge.'}
+          </p>
+        </div>
+        <form onSubmit={saveAccountFeatures} className="grid gap-5 px-5 py-5">
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4"
+              checked={settings.customerAccountsEnabled}
+              disabled={!settingsLoaded || settingsState === 'saving'}
+              onChange={(event) => {
+                setSettingsState('idle');
+                setSettings((current) => ({
+                  ...current,
+                  customerAccountsEnabled: event.target.checked,
+                  inquiryAccountRequired: event.target.checked ? current.inquiryAccountRequired : false
+                }));
+              }}
+            />
+            <span>
+              <span className="block text-sm font-semibold">{zh ? '开放登录、注册和 MY DAEHO' : ko ? '로그인, 회원가입 및 MY DAEHO 공개' : 'Enable sign-in, registration, and MY DAEHO'}</span>
+              <span className="mt-1 block text-xs leading-5 text-[#647084]">{zh ? '开启后，用户可以请求一条付费 SOLAPI 验证短信并注册。' : ko ? '활성화하면 사용자가 유료 SOLAPI 인증 문자를 요청하고 가입할 수 있습니다.' : 'When enabled, users can request a billable SOLAPI verification SMS and register.'}</span>
+            </span>
+          </label>
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4"
+              checked={settings.inquiryAccountRequired}
+              disabled={!settings.customerAccountsEnabled || !settingsLoaded || settingsState === 'saving'}
+              onChange={(event) => {
+                setSettingsState('idle');
+                setSettings((current) => ({
+                  ...current,
+                  inquiryAccountRequired: event.target.checked
+                }));
+              }}
+            />
+            <span>
+              <span className="block text-sm font-semibold">{zh ? '提交 문의 前必须登录' : ko ? '문의 제출 전 로그인 필수' : 'Require sign-in before inquiry submission'}</span>
+              <span className="mt-1 block text-xs leading-5 text-[#647084]">{zh ? '建议先开放会员并稳定运行一至两周，再开启此项。' : ko ? '회원 기능을 먼저 공개하고 1~2주 안정화한 뒤 활성화하는 것을 권장합니다.' : 'Enable this only after customer accounts have been stable for one to two weeks.'}</span>
+            </span>
+          </label>
+          <div className="flex flex-wrap items-center gap-3 border-t border-[#e4e7ec] pt-4">
+            <button
+              type="submit"
+              disabled={!settingsLoaded || settingsState === 'saving'}
+              className="rounded-md bg-[#101827] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {settingsState === 'saving' ? (zh ? '保存中…' : ko ? '저장 중…' : 'Saving…') : (zh ? '保存开放设置' : ko ? '공개 설정 저장' : 'Save rollout settings')}
+            </button>
+            {settingsState === 'saved' ? <span className="text-sm text-[#027a48]">{zh ? '设置已保存。' : ko ? '설정이 저장되었습니다.' : 'Settings saved.'}</span> : null}
+            {settingsState === 'error' ? <span role="alert" className="text-sm text-[#b42318]">{zh ? '保存失败，请重试。' : ko ? '저장하지 못했습니다. 다시 시도하세요.' : 'Unable to save. Try again.'}</span> : null}
+          </div>
+        </form>
+      </section>
       <section className="rounded-lg border border-[#d9dee7] bg-white shadow-sm">
         <div className="border-b border-[#d9dee7] px-5 py-4">
           <h2 className="font-heading text-xl font-semibold">{zh ? '旧 문의认领审核' : ko ? '이전 문의 연결 검토' : 'Legacy inquiry claims'}</h2>

@@ -11,6 +11,8 @@ import {
   type CustomerSession
 } from './auth-cookie-core.mjs';
 import type {CustomerProfile} from './types';
+import {getPublicAccountFeatureSettings} from '@/lib/cms/repositories';
+import {resolveAccountFeatureSettings} from './account-feature-settings-core.mjs';
 
 export const customerSessionCookie = 'daeho_customer_session';
 export const loginTransactionCookie = 'daeho_login_transaction';
@@ -18,8 +20,15 @@ export const registrationTransactionCookie = 'daeho_registration_transaction';
 const idleSessionSeconds = 7 * 24 * 60 * 60;
 const absoluteSessionSeconds = 30 * 24 * 60 * 60;
 
-export function accountsEnabled() {
-  return process.env.CUSTOMER_ACCOUNTS_ENABLED === 'true';
+export async function accountFeatureSettings() {
+  return resolveAccountFeatureSettings(
+    process.env.CUSTOMER_ACCOUNTS_ENABLED === 'true',
+    await getPublicAccountFeatureSettings()
+  );
+}
+
+export async function accountsEnabled() {
+  return (await accountFeatureSettings()).customerAccountsEnabled;
 }
 
 export function authConfig() {

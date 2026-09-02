@@ -1,16 +1,19 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
+import {connection} from 'next/server';
 
 import {accountsEnabled} from '@/lib/customer/server';
 import {isLocale} from '@/lib/locales';
 
 export const metadata: Metadata = {title: 'DAEHO Login', robots: {index: false, follow: false}};
+export const dynamic = 'force-dynamic';
 
 export default async function LoginPage({params, searchParams}: {
   params: Promise<{locale: string}>;
   searchParams: Promise<{error?: string}>;
 }) {
+  await connection();
   const {locale} = await params;
   const {error} = await searchParams;
   if (!isLocale(locale)) notFound();
@@ -26,7 +29,7 @@ export default async function LoginPage({params, searchParams}: {
         </p>
         {error ? <p role="alert" className="mt-6 border-l-2 border-primary px-4 py-3 text-sm">{ko ? '로그인을 완료하지 못했습니다. 다시 시도해 주세요.' : 'Sign-in could not be completed. Please try again.'}</p> : null}
         <div className="mt-10 grid gap-4 border-t border-hairline pt-8">
-          {accountsEnabled() ? (
+          {await accountsEnabled() ? (
             <>
               <a className="consult-cta consult-cta--accent justify-center" href={`/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`}>
                 <span className="consult-cta__label">{ko ? '로그인 계속하기' : 'Continue to sign in'}</span>

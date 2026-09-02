@@ -6,7 +6,7 @@ import {accountsEnabled} from '@/lib/customer/server';
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest, context: {params: Promise<{id: string}>}) {
-  if (!accountsEnabled()) {
+  if (!(await accountsEnabled())) {
     return NextResponse.json({error: 'Phone verification is not enabled'}, {status: 404});
   }
   if (!isSameOriginMutation(request)) {

@@ -6,7 +6,7 @@ import {accountsEnabled, authConfig, loginTransactionCookie} from '@/lib/custome
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  if (!accountsEnabled()) {
+  if (!(await accountsEnabled())) {
     return NextResponse.json({error: 'Customer accounts are not enabled'}, {status: 404});
   }
   const config = authConfig();
