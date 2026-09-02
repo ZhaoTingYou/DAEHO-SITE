@@ -368,6 +368,7 @@ CREATE TABLE IF NOT EXISTS cms_web_live_chat_messages (
   delivery_state TEXT NOT NULL CHECK (delivery_state IN ('pending', 'delivered', 'needs_attention')),
   client_message_key TEXT,
   telegram_message_id INTEGER,
+  is_initial INTEGER NOT NULL DEFAULT 0 CHECK (is_initial IN (0, 1)),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   delivered_at TEXT,
   UNIQUE (conversation_id, client_message_key),
@@ -390,5 +391,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_cms_web_live_chat_topic
   WHERE topic_thread_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_cms_web_live_chat_messages_replay
   ON cms_web_live_chat_messages(conversation_id, id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cms_web_live_chat_initial_message
+  ON cms_web_live_chat_messages(conversation_id)
+  WHERE is_initial = 1;
 CREATE INDEX IF NOT EXISTS idx_cms_web_live_chat_rate_limits_expires
   ON cms_web_live_chat_rate_limits(expires_at);

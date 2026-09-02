@@ -18,7 +18,7 @@
 - Anonymous access uses an unpredictable 256-bit token in a `Secure`, `HttpOnly`, `SameSite=Lax` cookie; PostgreSQL stores only an HMAC hash.
 - Anonymous history expires 30 days after the last customer message, team reply, or close event; page reads and SSE heartbeats do not extend expiry.
 - One non-closed conversation per visitor and Bot configuration generation; after close, the next start creates a new inquiry and Topic.
-- Public history exposes system state and team replies only. Visitor messages remain server-side for delivery/audit but are represented in the UI only by sent status.
+- Same-cookie owner history exposes delivered visitor, team, and system messages for 30 days. Initial inquiry content is the first visitor bubble and follow-ups render on the right; names and contact details never render as bubbles. SSE delivery and unread/read cursors remain team/system-only, and CMS/public configuration never exposes visitor bodies.
 - Telegram normal text replies go to the customer; `/note ...` stays internal; `/close` and `/close@Daeho_Service_bot` close the conversation and Topic.
 - The launcher is a fixed circle plus a persistent `실시간 상담 / 로그인 없이 바로 문의` label; hover never changes width.
 - Desktop opens from the bottom-right in 440ms with content fading after 120ms; mobile opens as a full or near-full bottom sheet; reduced-motion users receive a short fade only.
@@ -33,6 +33,7 @@
 ### Backend files to create
 
 - `backend/cms/src/main/resources/db/migration/V19__embedded_web_live_chat.sql` — additive web visitor, conversation, message, and rate-limit schema.
+- `backend/cms/src/main/resources/db/migration/V20__customer_message_history.sql` — adds one idempotent initial visitor row per conversation, backfills existing website conversations, and enforces one initial row with a partial unique index.
 - `backend/cms/src/main/java/com/daeho/cms/config/WebLiveChatProperties.java` — session secret, cookie, expiry, limits, allowed origins.
 - `backend/cms/src/main/java/com/daeho/cms/security/WebLiveChatTokenCodec.java` — random token issuance and HMAC hashing.
 - `backend/cms/src/main/java/com/daeho/cms/service/WebLiveChatInputValidator.java` — typed start/message validation and honeypot/minimum-time checks.
@@ -53,7 +54,7 @@
 
 ### Existing files to modify
 
-- `database/cms-schema.sql`, `flyway-migration-history.test.mjs`, `backend/cms/src/main/java/com/daeho/cms/CmsApplication.java`.
+- `database/cms-schema.sql` (canonical SQLite shape mirrors V20), `flyway-migration-history.test.mjs`, `backend/cms/src/main/java/com/daeho/cms/CmsApplication.java`.
 - `backend/cms/src/main/java/com/daeho/cms/repository/CmsRepository.java`, `InquiryWorkflowService.java` and their tests.
 - `TelegramLiveChatService.java`, `TelegramLiveChatCredentialService.java`, `AdminTelegramLiveChatController.java` and tests.
 - `backend/cms/src/main/resources/application.yml`, `docker-compose.yml`, `.env.example`, `docker/nginx/default.conf`, `docker/nginx/https.conf`, `nginx-live-chat-routes.test.mjs`.
@@ -532,7 +533,7 @@ void sessionIssuesASecureAnonymousCookieWithoutExposingTheTokenInJson() throws E
 }
 ```
 
-Add tests for foreign Origin rejection, rate-limit `429`, honeypot `422`, active reuse, conversation ownership, visitor-message filtering, SSE `text/event-stream`, Last-Event-ID replay, and read idempotency.
+Add tests for foreign Origin rejection, rate-limit `429`, honeypot `422`, active reuse, conversation ownership, same-cookie history containing delivered visitor/team/system rows, second-cookie denial, visitor suppression from SSE, SSE `text/event-stream`, Last-Event-ID replay, and team-only read idempotency.
 
 - [ ] **Step 2: Write failing broker and cleanup tests**
 
@@ -743,7 +744,7 @@ git commit -m "feat: proxy embedded live chat events"
 - Create: `components/site/web-live-chat-core.test.mjs`
 
 **Interfaces:**
-- Produces: `createWebLiveChatState()`, `reduceWebLiveChatState(state,event)`, `visibleTeamMessages(messages)`, `shouldUsePolling(sseFailures)`, `unreadCount(session)`.
+- Produces: `createWebLiveChatState()`, `reduceWebLiveChatState(state,event)`, the legacy-named `visibleTeamMessages(messages)` owner-history projection (visitor/team/system), `shouldUsePolling(sseFailures)`, `unreadCount(session)`.
 - Produces TypeScript API: `getSession`, `startConversation`, `sendVisitorMessage`, `getMessages`, `markRead`, `connectEvents`.
 - Produces view states: `closed_launcher`, `registration`, `waiting`, `active`, `closed`, `temporarily_unavailable`.
 
@@ -879,7 +880,7 @@ Fade panel content after `0.12s`; close over `0.30s`. Under reduced motion, use 
 
 - Registration: name/contact/content/consent and invisible honeypot.
 - Waiting: accepted status, 30-day explanation, composer enabled.
-- Active: system/team history, sent receipt, composer, reconnect indicator.
+- Active: same-cookie owner visitor/team/system history, definitive sent receipt, composer, reconnect indicator, right-aligned visitor bubbles, left-aligned team bubbles, and neutral system events.
 - Closed: read-only history and “new consultation” action.
 
 Render visitor bodies only from owner-authenticated server history, right-aligned. Never create optimistic synthetic message IDs. Keep an ambiguous or in-progress draft and key in the composer; after definitive success refresh authoritative history and show the durable bubble once.
@@ -1006,7 +1007,7 @@ git commit -m "feat: manage website live chats in CMS"
 
 **Interfaces:**
 - Consumes: all earlier tasks.
-- Produces: deployed AWS service, migrated V19 database, healthy SSE/Webhook routes, and one cleaned-up end-to-end test conversation.
+- Produces: deployed AWS service, migrated V19/V20 database, healthy SSE/Webhook routes, and one cleaned-up end-to-end test conversation.
 
 - [ ] **Step 1: Run all local automated tests**
 
@@ -1022,7 +1023,7 @@ git diff --check
 
 Expected: all Node and Maven tests pass, lint/typecheck/build succeed, and no whitespace errors exist.
 
-- [ ] **Step 2: Verify V19 on a fresh disposable PostgreSQL volume**
+- [ ] **Step 2: Verify V19 and V20 on a fresh disposable PostgreSQL volume**
 
 ```bash
 VERIFY_PROJECT=daeho-web-live-chat-verify
@@ -1030,15 +1031,15 @@ POSTGRES_PASSWORD=verify-only-password \
   docker compose -p "$VERIFY_PROJECT" up -d --build postgres cms-api
 docker compose -p "$VERIFY_PROJECT" exec -T postgres \
   psql -U daeho -d daeho_cms -Atc \
-  "select version || ':' || success from flyway_schema_history where version='19';"
+  "select version || ':' || success from flyway_schema_history where version in ('19','20') order by installed_rank;"
 docker compose -p "$VERIFY_PROJECT" down -v
 ```
 
-Expected: `19:true`; disposable containers and volume are removed.
+Expected: `19:true` and `20:true`; exercise V20's backfill and partial unique constraint against a real disposable PostgreSQL database, then remove only that disposable project and volume.
 
 - [ ] **Step 3: Verify anonymous ownership and SSE locally**
 
-Using one cookie jar, create a conversation and read it. Using a second cookie jar, assert the first conversation is inaccessible. Connect SSE with `curl -N`, inject a mapped team message through a test double/local Telegram base URL, and verify one event only. Repeat the same client key and Telegram update ID to prove idempotency.
+Using one cookie jar, create a conversation and confirm owner history contains the initial visitor body and a follow-up exactly once. Using a second cookie jar, assert the first conversation is inaccessible. Connect SSE with `curl -N`, confirm visitor rows are not published, inject a mapped team message through a test double/local Telegram base URL, and verify one event only. Repeat the same client key and Telegram update ID to prove idempotency, and verify unread/read advancement is team-only.
 
 - [ ] **Step 4: Commit any verification-only fixes, then push**
 
@@ -1110,7 +1111,7 @@ GET https://daeho.works/ko                                      -> 200
 GET https://daeho.works/api/cms/live-chat                      -> 200, enabled true, no botUsername
 GET https://daeho.works/api/live-chat/session                  -> 200 + Secure HttpOnly cookie
 POST https://daeho.works/api/telegram/live-chat/webhook        -> 401 without secret
-Flyway V19                                                     -> true
+Flyway V19 and V20                                             -> true
 Telegram getWebhookInfo                                        -> correct URL, zero error
 ```
 
@@ -1118,7 +1119,7 @@ Check `cms-api`, `next`, and `nginx` logs since deployment for `error|exception|
 
 - [ ] **Step 9: Run one production end-to-end conversation and clean only its test data**
 
-Submit a clearly named `CODEX E2E 2026-09-01` inquiry through the website API, record the returned conversation/inquiry IDs, verify exactly one Topic appears, post one team reply in that Topic, and verify the SSE/browser history receives it. Post `/note` and verify it is absent from browser history. Post `/close` and verify web state becomes closed.
+Submit a clearly named `CODEX E2E 2026-09-02` inquiry through the website UI, record the returned conversation/inquiry IDs, and verify exactly one Topic appears. Confirm the same-cookie owner sees the initial inquiry as one right-aligned visitor bubble; send a follow-up, confirm exactly one additional visitor bubble and a definitive sent state, then hard-refresh and confirm both persist without duplication. Post one human team reply in that Topic and verify browser history/SSE receives it while unread remains team-only. Post `/note` and verify it is absent from browser history. Post `/close` and verify web state becomes closed with one durable system event.
 
 After evidence is captured, remove only the recorded E2E inquiry/conversation rows and close/delete only the recorded E2E Topic. Do not use broad text matching, wildcards, or recursive deletion. Report what was removed and that it was test-only.
 
@@ -1130,12 +1131,13 @@ Check 1440px, 1024px, 768px, and 375px:
 - no width jump on hover;
 - open/close motion matches 440ms/300ms and reduced motion disables morph;
 - form, waiting, active, unread, failed-send, reconnect, closed, and new-conversation states render correctly;
+- initial and follow-up visitor messages render right-aligned exactly once after a hard refresh for the owning cookie, while a second cookie cannot access the history;
 - mobile locks background scroll and respects safe-area insets;
 - focus, Escape, live announcements, and keyboard tab order work.
 
 - [ ] **Step 11: Report deployment evidence**
 
-Return the deployed commit, backup path/size, test totals, V19 status, service health, public endpoint status, Bot webhook status, E2E result, and any intentional limitations. Never include Bot Token, anonymous cookie, session secret, admin key, database password, or raw customer data.
+Return the deployed commit, backup path/size, test totals, V19/V20 status, service health, public endpoint status, Bot webhook status, E2E result, owner-cookie visitor-history evidence, and any intentional limitations. Never include Bot Token, anonymous cookie, session secret, admin key, database password, or raw customer data.
 
 ---
 
