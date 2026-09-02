@@ -188,7 +188,10 @@ export function RegisterForm({locale}: RegisterFormProps) {
       return;
     }
     setStatus('done');
-    window.location.assign(`${prepared.loginUrl ?? '/api/auth/login'}?returnTo=/${locale}/my-daeho`);
+    const loginUrl = new URL(prepared.loginUrl ?? '/api/auth/login', window.location.origin);
+    loginUrl.searchParams.set('returnTo', `/${locale}/my-daeho`);
+    loginUrl.searchParams.set('reauth', 'true');
+    window.location.assign(loginUrl.toString());
   }
 }
 
