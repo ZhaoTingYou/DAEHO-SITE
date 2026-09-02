@@ -68,6 +68,12 @@ function assertDynamicDockerUpstreams(config) {
   }
 }
 
+function assertAuthenticationResponseHeadersFit(config) {
+  assert.match(config, /proxy_buffer_size 16k;/);
+  assert.match(config, /proxy_buffers 8 16k;/);
+  assert.match(config, /proxy_busy_buffers_size 32k;/);
+}
+
 function assertTrustedProxyHeaders(config, forwardedProto) {
   assert.match(config, /proxy_set_header Host \$http_host;/);
   assert.match(config, /proxy_set_header X-Forwarded-Host \$http_host;/);
@@ -98,4 +104,9 @@ test('production TLS proxies public anonymous live chat with an unbuffered SSE r
 test('nginx re-resolves recreated Docker services without a manual restart', () => {
   assertDynamicDockerUpstreams(defaultNginxConfig);
   assertDynamicDockerUpstreams(httpsNginxConfig);
+});
+
+test('nginx accepts Cognito callback response headers containing secure session cookies', () => {
+  assertAuthenticationResponseHeadersFit(defaultNginxConfig);
+  assertAuthenticationResponseHeadersFit(apexTlsServer);
 });

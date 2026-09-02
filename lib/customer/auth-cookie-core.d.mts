@@ -10,7 +10,6 @@ export type LoginTransaction = {
 
 export type CustomerSession = {
   accessToken: string;
-  idToken?: string;
   refreshToken?: string;
   expiresAt: number;
   absoluteExpiresAt?: number;

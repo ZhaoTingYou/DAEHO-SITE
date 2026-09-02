@@ -102,7 +102,6 @@ export async function GET(request: NextRequest) {
   );
   setCustomerSessionCookie(response, {
     accessToken: tokens.access_token,
-    idToken: tokens.id_token,
     refreshToken: tokens.refresh_token,
     expiresAt: now + tokens.expires_in,
     absoluteExpiresAt: now + 30 * 24 * 60 * 60,

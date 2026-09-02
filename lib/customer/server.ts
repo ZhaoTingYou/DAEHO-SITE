@@ -99,11 +99,10 @@ export async function refreshedCustomerSession() {
   if (!response.ok) {
     return null;
   }
-  const tokens = await response.json() as {access_token: string; id_token?: string; expires_in: number};
+  const tokens = await response.json() as {access_token: string; expires_in: number};
   return touchSession({
     ...session,
     accessToken: tokens.access_token,
-    idToken: tokens.id_token ?? session.idToken,
     expiresAt: now + tokens.expires_in
   });
 }
