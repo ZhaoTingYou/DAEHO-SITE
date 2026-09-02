@@ -8,8 +8,6 @@ import com.daeho.cms.service.TelegramLiveChatService;
 import com.daeho.cms.service.WebLiveChatService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -92,17 +90,9 @@ public class AdminTelegramLiveChatController {
 
   private AdminRow legacyRow(TelegramLiveChatRepository.Session session) {
     return new AdminRow(
-        legacySession(session), timestamp(session.updatedAt()),
+        legacySession(session), session.updatedAt(),
         !"closed".equals(session.state()) || session.attentionCode().startsWith("topic_close_")
     );
-  }
-
-  private Instant timestamp(String value) {
-    try {
-      return Instant.parse(value);
-    } catch (DateTimeParseException ignored) {
-      return OffsetDateTime.parse(value).toInstant();
-    }
   }
 
   private AdminSession websiteSession(WebLiveChatRepository.CmsConversationSummary summary) {
@@ -131,7 +121,7 @@ public class AdminTelegramLiveChatController {
         session.id(), "telegram_legacy", legacyState(session.state()), session.customerName(),
         session.customerContact(), session.inquiryContent(), session.inquiryId(),
         positiveOrNull(session.topicThreadId()), session.attentionCode(), 0L,
-        session.createdAt(), session.updatedAt()
+        session.createdAt().toString(), session.updatedAt().toString()
     );
   }
 

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import com.daeho.cms.repository.TelegramLiveChatRepository;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,14 +61,14 @@ class TelegramLiveChatServiceTest {
         new TelegramLiveChatRepository.Session(
             "session-1", 12345L, 12345L, "inquiry-live-1", "ko", "needs_attention",
             "홍길동", "01012345678", "반지 제작 상담", "topic_creation_in_flight",
-            55L, 0L, "registration", 0L, 0L, "", ""
+            55L, 0L, "registration", 0L, 0L, Instant.EPOCH, Instant.EPOCH
         )
     );
     when(repository.recordTopicThread(12345L, 777L, 1L)).thenReturn(
         new TelegramLiveChatRepository.Session(
             "session-1", 12345L, 12345L, "inquiry-live-1", "ko", "needs_attention",
             "홍길동", "01012345678", "반지 제작 상담", "registration_delivery_pending",
-            55L, 0L, "registration", 777L, 0L, "", ""
+            55L, 0L, "registration", 777L, 0L, Instant.EPOCH, Instant.EPOCH
         )
     );
     service = new TelegramLiveChatService(
@@ -599,7 +600,7 @@ class TelegramLiveChatServiceTest {
     var marked = new TelegramLiveChatRepository.Session(
         "session-1", 12345L, 12345L, "", "ko", "closed",
         "홍길동", "01012345678", "반지 제작 상담", "topic_close_failed",
-        0L, 0L, "", 777L, 900L, "", ""
+        0L, 0L, "", 777L, 900L, Instant.EPOCH, Instant.EPOCH
     );
     var disconnectedSettings = new TelegramLiveChatRepository.Settings(
         false, "", "", "-1001234567890", "", "실시간 상담", "", "", ""
@@ -929,7 +930,7 @@ class TelegramLiveChatServiceTest {
     var uncertain = new TelegramLiveChatRepository.Session(
         "session-1", 12345L, 12345L, "inquiry-live-1", "ko", "active",
         "홍길동", "01012345678", "반지 제작 상담", "customer_delivery_retrying",
-        56L, 0L, "", 777L, 900L, "", ""
+        56L, 0L, "", 777L, 900L, Instant.EPOCH, Instant.EPOCH
     );
     var recovered = sessionWithInquiry(
         "active", "홍길동", "01012345678", "inquiry-live-1", 900L
@@ -954,7 +955,7 @@ class TelegramLiveChatServiceTest {
     var uncertain = new TelegramLiveChatRepository.Session(
         "session-1", 12345L, 12345L, "inquiry-live-1", "ko", "needs_attention",
         "홍길동", "01012345678", "반지 제작 상담", "registration_delivery_retrying",
-        55L, 0L, "registration", 777L, 0L, "", ""
+        55L, 0L, "registration", 777L, 0L, Instant.EPOCH, Instant.EPOCH
     );
     var recovered = sessionWithInquiry(
         "active", "홍길동", "01012345678", "inquiry-live-1", 900L
@@ -978,7 +979,7 @@ class TelegramLiveChatServiceTest {
     var uncertain = new TelegramLiveChatRepository.Session(
         "session-1", 12345L, 12345L, "inquiry-live-1", "ko", "active",
         "홍길동", "01012345678", "반지 제작 상담", "team_delivery_retrying",
-        0L, 951L, "", 777L, 900L, "", ""
+        0L, 951L, "", 777L, 900L, Instant.EPOCH, Instant.EPOCH
     );
     var recovered = sessionWithInquiry(
         "active", "홍길동", "01012345678", "inquiry-live-1", 900L
@@ -1042,8 +1043,8 @@ class TelegramLiveChatServiceTest {
         "",
         rootMessageId > 0 ? 777L : 0L,
         rootMessageId,
-        "",
-        ""
+        Instant.EPOCH,
+        Instant.EPOCH
     );
   }
 

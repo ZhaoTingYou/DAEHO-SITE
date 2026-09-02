@@ -19,7 +19,6 @@ import com.daeho.cms.service.TelegramLiveChatService;
 import com.daeho.cms.service.WebLiveChatService;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ class AdminLiveChatControllerTest {
         new TelegramLiveChatRepository.Session(
             "legacy-id", 101L, 202L, "inquiry-legacy", "ko", "awaiting_content",
             "Legacy Customer", "legacy@example.com", "Legacy inquiry", "", 0L, 0L,
-            "", 702L, 703L, NOW.toString(), NOW.plusSeconds(10).toString()
+            "", 702L, 703L, NOW, NOW.plusSeconds(10)
         )
     ));
 
@@ -101,8 +100,7 @@ class AdminLiveChatControllerTest {
     var tiedNewest = NOW.plusSeconds(1_000);
     website.add(summary(websiteConversation("web-closed-a", "closed", "", 701L, tiedNewest)));
     legacy.add(legacySession(
-        "legacy-closed-a", "closed", "",
-        tiedNewest.atOffset(ZoneOffset.ofHours(9)).toString()
+        "legacy-closed-a", "closed", "", tiedNewest
     ));
     for (var index = 0; index < 25; index += 1) {
       var updatedAt = NOW.plusSeconds(900L - index);
@@ -110,8 +108,7 @@ class AdminLiveChatControllerTest {
           "web-closed-%02d".formatted(index), "closed", "", 701L, updatedAt
       )));
       legacy.add(legacySession(
-          "legacy-closed-%02d".formatted(index), "closed", "",
-          updatedAt.atOffset(ZoneOffset.UTC).toString()
+          "legacy-closed-%02d".formatted(index), "closed", "", updatedAt
       ));
     }
     var actionableTime = NOW.minusSeconds(100);
@@ -123,11 +120,11 @@ class AdminLiveChatControllerTest {
         actionableTime
     )));
     legacy.add(legacySession(
-        "legacy-active", "active", "", actionableTime.atOffset(ZoneOffset.ofHours(9)).toString()
+        "legacy-active", "active", "", actionableTime
     ));
     legacy.add(legacySession(
         "legacy-attention", "needs_attention", "registration_delivery_uncertain",
-        actionableTime.atOffset(ZoneOffset.UTC).toString()
+        actionableTime
     ));
     when(websiteRepository.recentConversations(50)).thenReturn(website);
     when(legacyRepository.recentSessions(50)).thenReturn(legacy);
@@ -315,19 +312,19 @@ class AdminLiveChatControllerTest {
       String state,
       String attentionCode
   ) {
-    return legacySession(id, state, attentionCode, NOW.plusSeconds(1).toString());
+    return legacySession(id, state, attentionCode, NOW.plusSeconds(1));
   }
 
   private TelegramLiveChatRepository.Session legacySession(
       String id,
       String state,
       String attentionCode,
-      String updatedAt
+      Instant updatedAt
   ) {
     return new TelegramLiveChatRepository.Session(
         id, 101L, 202L, "inquiry-legacy", "ko", state, "Legacy Customer",
         "legacy@example.com", "Legacy inquiry", attentionCode, 0L, 0L, "", 702L,
-        703L, NOW.toString(), updatedAt
+        703L, NOW, updatedAt
     );
   }
 

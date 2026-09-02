@@ -2,6 +2,8 @@ package com.daeho.cms.repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -1009,9 +1011,14 @@ public class TelegramLiveChatRepository {
         text(rs.getString("pending_direction")),
         rs.getObject("topic_thread_id") == null ? 0 : rs.getLong("topic_thread_id"),
         rs.getObject("topic_root_message_id") == null ? 0 : rs.getLong("topic_root_message_id"),
-        rs.getObject("created_at") == null ? "" : rs.getObject("created_at").toString(),
-        rs.getObject("updated_at") == null ? "" : rs.getObject("updated_at").toString()
+        instant(rs, "created_at"),
+        instant(rs, "updated_at")
     );
+  }
+
+  private Instant instant(ResultSet rs, String column) throws SQLException {
+    var value = rs.getObject(column, OffsetDateTime.class);
+    return value == null ? null : value.toInstant();
   }
 
   private String firstNonBlank(String value, String fallback) {
@@ -1114,8 +1121,8 @@ public class TelegramLiveChatRepository {
       String pendingDirection,
       long topicThreadId,
       long topicRootMessageId,
-      String createdAt,
-      String updatedAt
+      Instant createdAt,
+      Instant updatedAt
   ) {
     public Session(
         String id,
@@ -1128,8 +1135,8 @@ public class TelegramLiveChatRepository {
         String customerContact,
         String attentionCode,
         long topicRootMessageId,
-        String createdAt,
-        String updatedAt
+        Instant createdAt,
+        Instant updatedAt
     ) {
       this(
           id, telegramChatId, telegramUserId, inquiryId, locale, state, customerName,
@@ -1151,8 +1158,8 @@ public class TelegramLiveChatRepository {
         long pendingGroupMessageId,
         String pendingDirection,
         long topicRootMessageId,
-        String createdAt,
-        String updatedAt
+        Instant createdAt,
+        Instant updatedAt
     ) {
       this(
           id, telegramChatId, telegramUserId, inquiryId, locale, state, customerName,
