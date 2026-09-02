@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -20,6 +21,7 @@ public class CustomerAccountService {
     this.grants = grants;
   }
 
+  @Transactional
   public CustomerProfile provisionFromAuthenticatedPhone(String subject, String phone) {
     var existing = profiles.findBySubject(subject);
     if (existing != null) {
