@@ -880,10 +880,10 @@ Fade panel content after `0.12s`; close over `0.30s`. Under reduced motion, use 
 
 - Registration: name/contact/content/consent and invisible honeypot.
 - Waiting: accepted status, 30-day explanation, composer enabled.
-- Active: same-cookie owner visitor/team/system history, definitive sent receipt, composer, reconnect indicator, right-aligned visitor bubbles, left-aligned team bubbles, and neutral system events.
+- Active: same-cookie owner visitor/team/system history, definitive sent receipt, composer, reconnect indicator, compact shrink-to-content visitor bubbles on the right, team bubbles on the left, and centered neutral system events. Participant bubbles use opposing corner cues, a 78% maximum width, and safe long-text wrapping.
 - Closed: read-only history and “new consultation” action.
 
-Render visitor bodies only from owner-authenticated server history, right-aligned. Never create optimistic synthetic message IDs. Keep an ambiguous or in-progress draft and key in the composer; after definitive success refresh authoritative history and show the durable bubble once.
+Render visitor bodies only from owner-authenticated server history, right-aligned. Render team bubbles on the left and keep system/state events centered so they cannot be confused with a participant. Both participant bubbles shrink to content, cap at 78%, wrap unbroken text safely, use opposing small-corner cues, and keep compact vertical rhythm. Never create optimistic synthetic message IDs. Keep an ambiguous or in-progress draft and key in the composer; after definitive success refresh authoritative history and show the durable bubble once.
 
 - [ ] **Step 5: Implement unread/reconnect/accessibility behavior**
 
@@ -1132,6 +1132,7 @@ Check 1440px, 1024px, 768px, and 375px:
 - open/close motion matches 440ms/300ms and reduced motion disables morph;
 - form, waiting, active, unread, failed-send, reconnect, closed, and new-conversation states render correctly;
 - initial and follow-up visitor messages render right-aligned exactly once after a hard refresh for the owning cookie, while a second cookie cannot access the history;
+- visitor/team bubbles shrink to content on their respective right/left sides, cap near 78%, safely wrap long text, use opposing corner cues and compact spacing, while system events remain centered;
 - mobile locks background scroll and respects safe-area insets;
 - focus, Escape, live announcements, and keyboard tab order work.
 

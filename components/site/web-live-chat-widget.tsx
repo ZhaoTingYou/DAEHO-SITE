@@ -728,18 +728,18 @@ function ClosedView({copy, messages, onStartNew}: {copy: WebLiveChatCopy; messag
 
 function MessageHistory({copy, messages}: {copy: WebLiveChatCopy; messages: ChatState['messages']}) {
   return (
-    <ol className="mt-5 space-y-3">
+    <ol className="mt-5 space-y-2">
       {messages.map((message) => message.direction === 'visitor' ? (
-        <li key={message.id} className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-[#D9BF82] px-4 py-3 text-[#101D30] shadow-sm">
-          <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.body}</p>
+        <li key={message.id} className="ml-auto w-fit max-w-[78%] rounded-2xl rounded-tr-sm bg-[#D9BF82] px-3.5 py-2.5 text-[#101D30] shadow-sm">
+          <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-6">{message.body}</p>
         </li>
       ) : message.direction === 'team' ? (
-        <li key={message.id} className="rounded-2xl rounded-tl-sm bg-[#101D30] px-4 py-3 text-white shadow-sm">
+        <li key={message.id} className="mr-auto w-fit max-w-[78%] rounded-2xl rounded-tl-sm bg-[#101D30] px-3.5 py-2.5 text-white shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#E4C77D]">{copy.teamLabel}</p>
-          <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6">{message.body}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-6">{message.body}</p>
         </li>
       ) : (
-        <li key={message.id} className="border-l-2 border-[#C6AE78] px-3 py-1 text-sm leading-6 text-[#46566B]">
+        <li key={message.id} className="mx-auto w-fit max-w-[90%] rounded-full bg-[#E9E1D2] px-3 py-1.5 text-center text-xs leading-5 text-[#46566B]">
           <span className="sr-only">{copy.systemLabel}: </span>{message.body}
         </li>
       ))}

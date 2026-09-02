@@ -61,6 +61,30 @@ test('owner visitor history renders as right-aligned bubbles without name or con
   assert.doesNotMatch(history, /customerName|customerContact|nameLabel|contactLabel/);
 });
 
+test('message history uses compact WeChat-style participant bubbles and a centered system state', () => {
+  const history = source.match(/function MessageHistory[\s\S]*?\n\}/)?.[0] ?? '';
+  const visitor = history.match(/message\.direction === 'visitor'[\s\S]*?\) : message\.direction === 'team'/)?.[0] ?? '';
+  const team = history.match(/message\.direction === 'team'[\s\S]*?\) : \(/)?.[0] ?? '';
+  const system = history.match(/\) : \([\s\S]*?<\/li>/)?.[0] ?? '';
+
+  assert.match(history, /space-y-2/);
+  assert.match(visitor, /ml-auto/);
+  assert.match(visitor, /w-fit/);
+  assert.match(visitor, /max-w-\[78%\]/);
+  assert.match(visitor, /rounded-tr-sm/);
+  assert.match(visitor, /bg-\[#D9BF82\]/);
+  assert.match(visitor, /\[overflow-wrap:anywhere\]/);
+  assert.match(team, /mr-auto/);
+  assert.match(team, /w-fit/);
+  assert.match(team, /max-w-\[78%\]/);
+  assert.match(team, /rounded-tl-sm/);
+  assert.match(team, /bg-\[#101D30\]/);
+  assert.match(team, /\[overflow-wrap:anywhere\]/);
+  assert.match(system, /mx-auto/);
+  assert.match(system, /text-center/);
+  assert.doesNotMatch(system, /rounded-t[lr]-sm/);
+});
+
 test('stream source stays native-stable until polling threshold and broadcasts only invalidate', () => {
   assert.match(source, /createStableStreamController/);
   assert.doesNotMatch(source, /\[openCycle[^\]]*sseFailures/);
