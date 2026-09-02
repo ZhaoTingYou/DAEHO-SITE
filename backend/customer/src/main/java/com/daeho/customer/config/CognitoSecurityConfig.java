@@ -1,5 +1,6 @@
 package com.daeho.customer.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,7 @@ public class CognitoSecurityConfig {
     return http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
+            .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
             .requestMatchers(publicEndpoints()).permitAll()
             .anyRequest().authenticated())
         .oauth2ResourceServer(resource -> resource.jwt(Customizer.withDefaults()))

@@ -2,6 +2,8 @@ package com.daeho.customer.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -14,6 +16,15 @@ class CognitoSecurityConfigTest {
     assertThat(matcher.matches(request("POST", "/v1/internal/registration-grants/validate"))).isTrue();
     assertThat(matcher.matches(request("GET", "/actuator/health"))).isTrue();
     assertThat(matcher.matches(request("GET", "/v1/me"))).isFalse();
+  }
+
+  @Test
+  void errorDispatchesRemainPublicSoApiErrorsKeepTheirOriginalStatus() throws Exception {
+    var source = Files.readString(Path.of(
+        "src/main/java/com/daeho/customer/config/CognitoSecurityConfig.java"
+    ));
+
+    assertThat(source).contains(".dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()");
   }
 
   private MockHttpServletRequest request(String method, String path) {
