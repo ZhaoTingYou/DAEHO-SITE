@@ -67,11 +67,19 @@ public class CustomerController {
     return accounts.provision(input.subject(), input.registrationGrant());
   }
 
+  @PostMapping("/v1/internal/profiles/from-authenticated-phone")
+  public CustomerProfile provisionFromAuthenticatedPhone(
+      HttpServletRequest request, @RequestBody AuthenticatedPhoneProvisionRequest input) {
+    internalApiKey.require(request);
+    return accounts.provisionFromAuthenticatedPhone(input.subject(), input.phone());
+  }
+
   @PostMapping("/v1/internal/registration-grants/validate")
   public Map<String, Object> validateRegistrationGrant(
       HttpServletRequest request, @RequestBody RegistrationGrantValidation input) {
     internalApiKey.require(request);
     var verification = registrationGrants.consumeForSignup(input.registrationGrant());
+    accounts.requireRegistrationIdentifierAvailable(verification);
     return Map.of(
         "method", verification.method(),
         "identifier", verification.identifier(),
@@ -109,6 +117,8 @@ public class CustomerController {
   public record ProfileUpdate(String displayName, String email, String organization, String team, String locale) {}
 
   public record ProvisionRequest(String subject, String registrationGrant) {}
+
+  public record AuthenticatedPhoneProvisionRequest(String subject, String phone) {}
 
   public record RegistrationGrantValidation(String registrationGrant) {}
 

@@ -37,5 +37,15 @@ public class LegacyClaimAdminController {
     return claims.review(id, input.status(), input.reviewer(), input.reason());
   }
 
+  @PatchMapping("/{id}/match-result")
+  public Map<String, Object> matchResult(
+      HttpServletRequest request, @PathVariable UUID id, @RequestBody MatchResultRequest input) {
+    auth.require(request);
+    claims.recordMatchResult(id, input.customerId(), input.result());
+    return Map.of("recorded", true);
+  }
+
   public record ReviewRequest(String status, String reviewer, String reason) {}
+
+  public record MatchResultRequest(UUID customerId, String result) {}
 }

@@ -50,6 +50,18 @@ public class RegistrationGrantService {
     return requireGrant(grant, true);
   }
 
+  public VerificationSession requireConsumedPhoneForProvisioning(String phone) {
+    if (phone == null || !phone.matches("^\\+8210\\d{8}$")) {
+      throw new RegistrationGrantException("A verified Korean phone is required");
+    }
+    var session = store.findLatestConsumedByPhone(phone);
+    if (session == null || session.consumedAt() == null || !"verified".equals(session.status())
+        || !session.adultVerified() || !phone.equals(session.phone())) {
+      throw new RegistrationGrantException("No completed registration exists for this verified phone");
+    }
+    return session;
+  }
+
   private VerificationSession requireGrant(String grant, boolean mustBeConsumed) {
     if (grant == null || grant.isBlank()) {
       throw new RegistrationGrantException("Registration grant is required");

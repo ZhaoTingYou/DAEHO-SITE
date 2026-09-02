@@ -9,5 +9,7 @@ public interface VerificationSessionStore {
 
   VerificationSession findByGrantHash(String grantHash);
 
+  VerificationSession findLatestConsumedByPhone(String phone);
+
   boolean consumeGrant(UUID id, String grantHash, Instant consumedAt);
 }

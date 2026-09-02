@@ -29,6 +29,22 @@ public class CustomerAccountService {
     return profiles.createFromVerification(subject, verification);
   }
 
+  public CustomerProfile provisionFromAuthenticatedPhone(String subject, String phone) {
+    var existing = profiles.findBySubject(subject);
+    if (existing != null) {
+      return existing;
+    }
+    var verification = grants.requireConsumedPhoneForProvisioning(phone);
+    requireRegistrationIdentifierAvailable(verification);
+    return profiles.createFromVerification(subject, verification);
+  }
+
+  public void requireRegistrationIdentifierAvailable(VerificationSession verification) {
+    if (!verification.phone().isBlank() && profiles.findByPhone(verification.phone()) != null) {
+      throw new RegistrationGrantException("An account already exists for this phone; use account recovery");
+    }
+  }
+
   public CustomerProfile requireActive(String subject) {
     var profile = profiles.findBySubject(subject);
     if (profile == null) {

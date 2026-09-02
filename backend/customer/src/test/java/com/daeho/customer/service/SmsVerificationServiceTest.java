@@ -34,9 +34,8 @@ class SmsVerificationServiceTest {
         "010-1234-5678",
         LocalDate.of(1990, 1, 1),
         true,
+        true,
         "ko",
-        "terms-2026-09",
-        "privacy-2026-09",
         false
     ), "203.0.113.10", "request-1234567890");
     var grant = service.complete(started.verificationId(), "123456");
@@ -60,8 +59,7 @@ class SmsVerificationServiceTest {
     );
 
     assertThatThrownBy(() -> service.start(new SmsVerificationService.SmsStartRequest(
-        "01012345678", LocalDate.of(1990, 1, 1), true, "ko",
-        "terms-2026-09", "privacy-2026-09", false
+        "01012345678", LocalDate.of(1990, 1, 1), true, true, "ko", false
     ), "203.0.113.10", "request-1234567890"))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("503 SERVICE_UNAVAILABLE");
@@ -80,8 +78,7 @@ class SmsVerificationServiceTest {
         "a-secret-long-enough-for-hmac", () -> "123456"
     );
     var request = new SmsVerificationService.SmsStartRequest(
-        "01012345678", LocalDate.of(1990, 1, 1), true, "ko",
-        "terms-2026-09", "privacy-2026-09", false
+        "01012345678", LocalDate.of(1990, 1, 1), true, true, "ko", false
     );
 
     var first = service.start(request, "203.0.113.10", "same-request-123456");
@@ -89,6 +86,39 @@ class SmsVerificationServiceTest {
 
     assertThat(second.verificationId()).isEqualTo(first.verificationId());
     assertThat(sender.sendCount).isEqualTo(1);
+  }
+
+  @Test
+  void rejectsRegistrationWithoutRequiredConsent() {
+    var store = new MemoryStore();
+    var service = new SmsVerificationService(
+        store, store, new RegistrationGrantService(store, clock), new CapturingSender(), clock,
+        "a-secret-long-enough-for-hmac", () -> "123456"
+    );
+
+    assertThatThrownBy(() -> service.start(new SmsVerificationService.SmsStartRequest(
+        "01012345678", LocalDate.of(1990, 1, 1), true, false, "ko", false
+    ), "203.0.113.10", "request-no-consent-12345"))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("400 BAD_REQUEST");
+  }
+
+  @Test
+  void accountFeatureFlagPreventsSmsChargesEvenWhenSenderIsConfigured() {
+    var store = new MemoryStore();
+    var sender = new CapturingSender();
+    var service = new SmsVerificationService(
+        store, store, new RegistrationGrantService(store, clock), sender, clock,
+        "a-secret-long-enough-for-hmac", () -> "123456",
+        "terms-2026-09", "privacy-2026-09", false
+    );
+
+    assertThatThrownBy(() -> service.start(new SmsVerificationService.SmsStartRequest(
+        "01012345678", LocalDate.of(1990, 1, 1), true, true, "ko", false
+    ), "203.0.113.10", "request-disabled-12345"))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("503 SERVICE_UNAVAILABLE");
+    assertThat(sender.sendCount).isZero();
   }
 
   private static final class CapturingSender implements SmsSender {
@@ -117,6 +147,9 @@ class SmsVerificationServiceTest {
   private static final class MemoryStore implements SmsChallengeStore, VerificationSessionStore {
     private final Map<UUID, SmsChallenge> challenges = new HashMap<>();
     private final Map<UUID, VerificationSession> sessions = new HashMap<>();
+
+    @Override
+    public void acquireRateLimitLocks(String phone, String ipFingerprint, String idempotencyHash) {}
 
     @Override
     public long countRecentForPhone(String phone, Instant since) {
@@ -180,6 +213,13 @@ class SmsVerificationServiceTest {
     public VerificationSession findByGrantHash(String grantHash) {
       return sessions.values().stream()
           .filter(session -> grantHash.equals(session.grantHash()))
+          .findFirst().orElse(null);
+    }
+
+    @Override
+    public VerificationSession findLatestConsumedByPhone(String phone) {
+      return sessions.values().stream()
+          .filter(session -> phone.equals(session.phone()) && session.consumedAt() != null)
           .findFirst().orElse(null);
     }
 

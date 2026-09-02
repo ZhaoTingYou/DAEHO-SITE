@@ -48,6 +48,7 @@ public class CmsRepository {
   private static final Set<String> TIMESTAMPTZ_COLUMNS = Set.of(
       "created_at", "updated_at", "next_attempt_at"
   );
+  private static final Set<String> UUID_COLUMNS = Set.of("customer_id");
   private static final Set<String> LEGACY_PAGE_COLUMNS = Set.of("content_zh", "seo_zh");
   private static final Set<String> LEGACY_MEDIA_COLUMNS = Set.of("alt_zh");
   private static final Set<String> NON_EXPORTABLE_JOB_COLUMNS = Set.of("verification_fingerprint");
@@ -463,28 +464,28 @@ public class CmsRepository {
   }
 
   @Transactional
-  public Map<String, Object> linkInquiryByAdmin(String id, String customerId, String actor, String reason) {
-    return linkInquiry(id, customerId, "admin", actor, reason);
-  }
-
-  @Transactional
-  public Map<String, Object> linkInquiryByClaim(String id, String customerId, String actor, String reason) {
-    return linkInquiry(id, customerId, "claim", actor, reason);
-  }
-
-  private Map<String, Object> linkInquiry(String id, String customerId, String source, String actor, String reason) {
+  public Map<String, Object> linkInquiryByAdmin(
+      String id, String customerId, String actor, String reason) {
     var existing = getInquiry(id);
-    if (existing == null) return null;
+    if (existing == null) {
+      return null;
+    }
     var linkedCustomerId = validation.stringValue(existing.get("customerId"));
-    if (linkedCustomerId.equals(customerId)) return existing;
-    if (!linkedCustomerId.isBlank()) return null;
+    if (linkedCustomerId.equals(customerId)) {
+      return existing;
+    }
+    if (!linkedCustomerId.isBlank() && !linkedCustomerId.equals(customerId)) {
+      return null;
+    }
     var updated = jdbc.update("""
-        UPDATE cms_inquiries SET customer_id = ?::uuid, link_source = ?,
+        UPDATE cms_inquiries SET customer_id = ?::uuid, link_source = 'admin',
           linked_at = COALESCE(linked_at, now()), updated_at = now()
         WHERE id = ? AND (customer_id IS NULL OR customer_id = ?::uuid)
-        """, customerId, source, id, customerId);
-    if (updated != 1) return null;
-    auditInquiryLink(id, customerId, source, actor, reason);
+        """, customerId, id, customerId);
+    if (updated != 1) {
+      return null;
+    }
+    auditInquiryLink(id, customerId, "admin", actor, reason);
     return getInquiry(id);
   }
 
@@ -500,19 +501,26 @@ public class CmsRepository {
 
   @Transactional
   public int unlinkInquiriesForDeletedCustomer(String customerId) {
-    var inquiryIds = jdbc.queryForList("SELECT id FROM cms_inquiries WHERE customer_id = ?::uuid", String.class, customerId);
+    var inquiryIds = jdbc.queryForList("""
+        SELECT id FROM cms_inquiries WHERE customer_id = ?::uuid
+        """, String.class, customerId);
     var unlinked = 0;
     for (var inquiryId : inquiryIds) {
-      var updated = jdbc.update("UPDATE cms_inquiries SET customer_id = NULL, link_source = NULL, linked_at = NULL, updated_at = now() WHERE id = ? AND customer_id = ?::uuid", inquiryId, customerId);
+      var updated = jdbc.update("""
+          UPDATE cms_inquiries SET customer_id = NULL, link_source = NULL,
+            linked_at = NULL, updated_at = now()
+          WHERE id = ? AND customer_id = ?::uuid
+          """, inquiryId, customerId);
       if (updated == 1) {
-        unlinked++;
+        unlinked += 1;
         auditInquiryLink(inquiryId, customerId, "unlink", "account-deletion", "retention unlink");
       }
     }
     return unlinked;
   }
 
-  private void auditInquiryLink(String inquiryId, String customerId, String action, String actor, String reason) {
+  private void auditInquiryLink(
+      String inquiryId, String customerId, String action, String actor, String reason) {
     jdbc.update("""
         INSERT INTO cms_inquiry_link_events (id, inquiry_id, customer_id, action, actor, reason, created_at)
         VALUES (?, ?, NULLIF(?, '')::uuid, ?, ?, ?, now())
@@ -991,6 +999,9 @@ public class CmsRepository {
   private String placeholderForColumn(String column) {
     if (TIMESTAMPTZ_COLUMNS.contains(column)) {
       return "?::timestamptz";
+    }
+    if (UUID_COLUMNS.contains(column)) {
+      return "?::uuid";
     }
     return "?";
   }

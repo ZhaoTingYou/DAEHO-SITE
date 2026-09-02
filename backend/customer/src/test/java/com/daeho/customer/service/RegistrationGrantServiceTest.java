@@ -26,6 +26,8 @@ class RegistrationGrantServiceTest {
     assertThat(consumed.identifier()).isEqualTo("subject@example.com");
     assertThat(service.requireConsumedForProvisioning(issued.grant()).identifier())
         .isEqualTo("subject@example.com");
+    assertThat(service.requireConsumedPhoneForProvisioning("+821012345678").phone())
+        .isEqualTo("+821012345678");
     assertThatThrownBy(() -> service.consumeForSignup(issued.grant()))
         .isInstanceOf(RegistrationGrantException.class);
   }
@@ -77,6 +79,13 @@ class RegistrationGrantServiceTest {
           .filter(session -> grantHash.equals(session.grantHash()))
           .findFirst()
           .orElse(null);
+    }
+
+    @Override
+    public VerificationSession findLatestConsumedByPhone(String phone) {
+      return sessions.values().stream()
+          .filter(session -> phone.equals(session.phone()) && session.consumedAt() != null)
+          .findFirst().orElse(null);
     }
 
     @Override

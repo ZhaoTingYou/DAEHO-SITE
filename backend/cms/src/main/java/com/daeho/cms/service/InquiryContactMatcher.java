@@ -14,11 +14,19 @@ public final class InquiryContactMatcher {
       var normalizedEmail = value.toLowerCase(Locale.ROOT);
       return normalizedEmail.equals(clean(email).toLowerCase(Locale.ROOT));
     }
-    var digits = value.replaceAll("[^0-9]", "");
+    var digits = normalizePhone(value);
     return !digits.isBlank() && (
-        digits.equals(clean(contact).replaceAll("[^0-9]", ""))
-            || digits.equals(clean(phone).replaceAll("[^0-9]", ""))
+        digits.equals(normalizePhone(contact))
+            || digits.equals(normalizePhone(phone))
     );
+  }
+
+  private static String normalizePhone(String value) {
+    var digits = clean(value).replaceAll("[^0-9]", "");
+    if (digits.matches("010\\d{8}")) {
+      return "82" + digits.substring(1);
+    }
+    return digits;
   }
 
   private static String clean(String value) {

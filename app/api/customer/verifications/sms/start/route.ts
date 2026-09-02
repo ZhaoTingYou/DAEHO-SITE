@@ -1,10 +1,14 @@
 import {NextResponse, type NextRequest} from 'next/server';
 
 import {isSameOriginMutation} from '@/lib/customer/request-security';
+import {accountsEnabled} from '@/lib/customer/server';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+  if (!accountsEnabled()) {
+    return NextResponse.json({error: 'Phone verification is not enabled'}, {status: 404});
+  }
   if (!isSameOriginMutation(request)) {
     return NextResponse.json({error: 'Invalid request origin'}, {status: 403});
   }
@@ -17,7 +21,7 @@ export async function POST(request: NextRequest) {
     headers: {
       'content-type': 'application/json',
       'idempotency-key': request.headers.get('idempotency-key') ?? '',
-      'x-forwarded-for': request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? ''
+      'x-forwarded-for': request.headers.get('x-daeho-client-ip') ?? request.headers.get('x-real-ip') ?? ''
     },
     body: await request.text(),
     cache: 'no-store',

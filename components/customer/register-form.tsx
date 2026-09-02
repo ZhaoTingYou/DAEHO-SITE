@@ -98,9 +98,8 @@ export function RegisterForm({locale}: RegisterFormProps) {
         phone,
         birthDate: data.get('birthDate'),
         adultDeclaration: data.get('adultDeclaration') === 'on',
+        requiredConsent: data.get('requiredConsent') === 'on',
         locale,
-        termsVersion: 'terms-2026-09',
-        privacyVersion: 'privacy-2026-09',
         marketingConsent: data.get('marketingConsent') === 'on'
       })
     });
@@ -145,20 +144,57 @@ export function RegisterForm({locale}: RegisterFormProps) {
       return;
     }
     setStatus('working');
-    const response = await fetch('/api/auth/register', {
+    const prepareResponse = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {'content-type': 'application/json'},
-      body: JSON.stringify({phone, password, registrationGrant: grant})
+      body: JSON.stringify({registrationGrant: grant})
     });
-    const payload = await response.json().catch(() => ({})) as {loginUrl?: string; error?: string; message?: string};
-    if (!response.ok) {
+    const prepared = await prepareResponse.json().catch(() => ({})) as {
+      cognitoEndpoint?: string;
+      clientId?: string;
+      loginUrl?: string;
+      error?: string;
+      message?: string;
+    };
+    if (!prepareResponse.ok || !prepared.cognitoEndpoint || !prepared.clientId) {
       setStatus('error');
-      setMessage(payload.message || payload.error || (ko ? '계정을 만들 수 없습니다.' : 'Unable to create account.'));
+      setMessage(prepared.message || prepared.error || (ko ? '계정을 만들 수 없습니다.' : 'Unable to create account.'));
+      return;
+    }
+    const normalizedPhone = normalizePhone(phone);
+    const signupResponse = await fetch(prepared.cognitoEndpoint, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-amz-json-1.1',
+        'x-amz-target': 'AWSCognitoIdentityProviderService.SignUp'
+      },
+      body: JSON.stringify({
+        ClientId: prepared.clientId,
+        Username: normalizedPhone,
+        Password: password,
+        UserAttributes: [{Name: 'phone_number', Value: normalizedPhone}],
+        ClientMetadata: {registrationGrant: grant}
+      })
+    }).catch(() => null);
+    if (!signupResponse) {
+      setStatus('error');
+      setMessage(ko ? 'Cognito에 연결할 수 없습니다.' : 'Unable to reach Cognito.');
+      return;
+    }
+    const signup = await signupResponse.json().catch(() => ({})) as {message?: string; __type?: string};
+    if (!signupResponse.ok) {
+      setStatus('error');
+      setMessage(signup.message || signup.__type?.split('#').at(-1) || (ko ? '계정을 만들 수 없습니다.' : 'Unable to create account.'));
       return;
     }
     setStatus('done');
-    window.location.assign(`${payload.loginUrl ?? '/api/auth/login'}?returnTo=/${locale}/my-daeho`);
+    window.location.assign(`${prepared.loginUrl ?? '/api/auth/login'}?returnTo=/${locale}/my-daeho`);
   }
+}
+
+function normalizePhone(input: string) {
+  const value = input.replace(/[^0-9+]/g, '');
+  return value.startsWith('010') ? `+82${value.slice(1)}` : value;
 }
 
 function CustomerField({label, name, value, onChange, ...props}: {

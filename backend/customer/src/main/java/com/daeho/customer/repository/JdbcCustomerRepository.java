@@ -50,11 +50,31 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
   }
 
   @Override
+  public VerificationSession findLatestConsumedByPhone(String phone) {
+    return jdbc.query("""
+        SELECT * FROM verification_sessions
+        WHERE method = 'sms_declaration' AND phone = ? AND status = 'verified'
+          AND consumed_at IS NOT NULL
+        ORDER BY consumed_at DESC LIMIT 1
+        """, this::mapVerification, phone).stream().findFirst().orElse(null);
+  }
+
+  @Override
   public boolean consumeGrant(UUID id, String grantHash, Instant consumedAt) {
     return jdbc.update("""
         UPDATE verification_sessions SET consumed_at = ?, updated_at = now()
         WHERE id = ? AND grant_hash = ? AND consumed_at IS NULL AND grant_expires_at > now()
         """, consumedAt, id, grantHash) == 1;
+  }
+
+  @Override
+  public void acquireRateLimitLocks(String phone, String ipFingerprint, String idempotencyHash) {
+    java.util.stream.Stream.of(
+        "sms-phone:" + phone,
+        "sms-ip:" + ipFingerprint,
+        "sms-idempotency:" + idempotencyHash
+    ).sorted().forEach(lockKey -> jdbc.queryForList(
+        "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))", lockKey));
   }
 
   @Override
@@ -159,6 +179,17 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
   }
 
   @Override
+  public CustomerProfile findByPhone(String phone) {
+    if (phone == null || phone.isBlank()) {
+      return null;
+    }
+    return jdbc.query("""
+        SELECT * FROM customer_profiles
+        WHERE phone = ? AND status <> 'deleted' LIMIT 1
+        """, this::mapProfile, phone).stream().findFirst().orElse(null);
+  }
+
+  @Override
   public CustomerProfile findByCiFingerprint(String fingerprint) {
     if (fingerprint == null || fingerprint.isBlank()) {
       return null;
@@ -180,6 +211,9 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
     }
     if (!verification.ciFingerprint().isBlank() && findByCiFingerprint(verification.ciFingerprint()) != null) {
       throw new IllegalStateException("An account already exists for this verified identity");
+    }
+    if (!verification.phone().isBlank() && findByPhone(verification.phone()) != null) {
+      throw new IllegalStateException("An account already exists for this verified phone");
     }
     var customerId = UUID.randomUUID();
     var isEmail = "email_declaration".equals(verification.method());
@@ -293,6 +327,27 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
       audit(customerId, "customer_personal_data_deleted", "scheduled-cleanup");
     }
     return customerIds.size();
+  }
+
+  @Override
+  public List<UUID> findCustomersAwaitingInquiryUnlink(int limit) {
+    return jdbc.queryForList("""
+        SELECT customer_id FROM customer_profiles
+        WHERE status = 'deleted' AND inquiries_unlinked_at IS NULL
+        ORDER BY updated_at ASC LIMIT ?
+        """, UUID.class, Math.min(Math.max(limit, 1), 500));
+  }
+
+  @Override
+  @Transactional
+  public void markInquiriesUnlinked(UUID customerId) {
+    var updated = jdbc.update("""
+        UPDATE customer_profiles SET inquiries_unlinked_at = now(), updated_at = now()
+        WHERE customer_id = ? AND status = 'deleted' AND inquiries_unlinked_at IS NULL
+        """, customerId);
+    if (updated == 1) {
+      audit(customerId, "retained_inquiries_unlinked", "scheduled-cleanup");
+    }
   }
 
   @Override

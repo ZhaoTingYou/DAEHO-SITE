@@ -8,6 +8,8 @@ type PendingClaim = {
   id: string;
   customerId: string;
   inquiryId: string;
+  contactHint: string;
+  matchResult: string;
   createdAt: string;
 };
 
@@ -112,7 +114,13 @@ export function CustomerOperations({locale}: {locale: 'zh' | 'en' | 'ko'}) {
           <div className="divide-y divide-[#e4e7ec]">
             {claims.map((claim) => (
               <div key={claim.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_1fr_auto] md:items-center">
-                <div><span className="text-xs text-[#647084]">Inquiry</span><p className="font-mono text-sm">{claim.inquiryId}</p></div>
+                <div>
+                  <span className="text-xs text-[#647084]">Inquiry</span>
+                  <p className="font-mono text-sm">{claim.inquiryId}</p>
+                  <p className="mt-1 text-xs text-[#647084]">
+                    {claim.contactHint || '—'} · {claim.matchResult || 'unverified'}
+                  </p>
+                </div>
                 <div><span className="text-xs text-[#647084]">Customer</span><p className="font-mono text-sm">{claim.customerId}</p></div>
                 <div className="flex gap-2">
                   <button disabled={busyId === claim.id} onClick={() => void reviewClaim(claim, 'approved')} className="rounded-md bg-[#101827] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">{zh ? '批准关联' : ko ? '연결 승인' : 'Approve'}</button>

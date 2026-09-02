@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -35,6 +36,9 @@ public class SmsVerificationService {
   private final Clock clock;
   private final byte[] hmacSecret;
   private final Supplier<String> codeSupplier;
+  private final String termsVersion;
+  private final String privacyVersion;
+  private final boolean accountsEnabled;
 
   @Autowired
   public SmsVerificationService(
@@ -43,8 +47,12 @@ public class SmsVerificationService {
       RegistrationGrantService grants,
       SmsSender sender,
       Clock clock,
-      @Value("${customer.verification-hmac-secret:}") String secret) {
-    this(challenges, sessions, grants, sender, clock, secret, randomCodeSupplier());
+      @Value("${customer.verification-hmac-secret:}") String secret,
+      @Value("${customer.consent.terms-version:terms-2026-09}") String termsVersion,
+      @Value("${customer.consent.privacy-version:privacy-2026-09}") String privacyVersion,
+      @Value("${customer.accounts-enabled:false}") boolean accountsEnabled) {
+    this(challenges, sessions, grants, sender, clock, secret, randomCodeSupplier(), termsVersion,
+        privacyVersion, accountsEnabled);
   }
 
   public SmsVerificationService(
@@ -55,6 +63,21 @@ public class SmsVerificationService {
       Clock clock,
       String secret,
       Supplier<String> codeSupplier) {
+    this(challenges, sessions, grants, sender, clock, secret, codeSupplier,
+        "terms-2026-09", "privacy-2026-09", true);
+  }
+
+  SmsVerificationService(
+      SmsChallengeStore challenges,
+      VerificationSessionStore sessions,
+      RegistrationGrantService grants,
+      SmsSender sender,
+      Clock clock,
+      String secret,
+      Supplier<String> codeSupplier,
+      String termsVersion,
+      String privacyVersion,
+      boolean accountsEnabled) {
     this.challenges = challenges;
     this.sessions = sessions;
     this.grants = grants;
@@ -62,18 +85,23 @@ public class SmsVerificationService {
     this.clock = clock;
     this.hmacSecret = secret.getBytes(StandardCharsets.UTF_8);
     this.codeSupplier = codeSupplier;
+    this.termsVersion = termsVersion;
+    this.privacyVersion = privacyVersion;
+    this.accountsEnabled = accountsEnabled;
   }
 
+  @Transactional(noRollbackFor = ResponseStatusException.class)
   public SmsStartResult start(SmsStartRequest request, String ipAddress, String idempotencyKey) {
     requireConfigured();
     var phone = normalizePhone(request.phone());
-    if (request.birthDate() == null || !request.adultDeclaration()
+    if (request.birthDate() == null || !request.adultDeclaration() || !request.requiredConsent()
         || !AdultEligibility.isAdult(request.birthDate(), clock)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Adult declaration is required");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Adult and required consent declarations are required");
     }
     var now = clock.instant();
     var ipFingerprint = hmac("ip:" + safeIp(ipAddress));
     var idempotencyHash = hmac("idempotency:" + requireIdempotencyKey(idempotencyKey));
+    challenges.acquireRateLimitLocks(phone, ipFingerprint, idempotencyHash);
     var existing = challenges.findByIdempotencyHash(idempotencyHash);
     if (existing != null) {
       if (!existing.phone().equals(phone) || !existing.ipFingerprint().equals(ipFingerprint)) {
@@ -96,8 +124,8 @@ public class SmsVerificationService {
     }
     var expiresAt = now.plus(CHALLENGE_TTL);
     challenges.create(new SmsChallenge(
-        id, phone, ipFingerprint, idempotencyHash, locale(request.locale()), required(request.termsVersion()),
-        required(request.privacyVersion()), request.marketingConsent(), "pending",
+        id, phone, ipFingerprint, idempotencyHash, locale(request.locale()), required(termsVersion),
+        required(privacyVersion), request.marketingConsent(), "pending",
         challengeHash(id, code), 0, "", null, expiresAt, now
     ));
     try {
@@ -150,7 +178,7 @@ public class SmsVerificationService {
   }
 
   private void requireConfigured() {
-    if (hmacSecret.length < 24 || !sender.isConfigured()) {
+    if (!accountsEnabled || hmacSecret.length < 24 || !sender.isConfigured()) {
       throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "SMS verification is not configured");
     }
   }
@@ -222,9 +250,8 @@ public class SmsVerificationService {
       String phone,
       LocalDate birthDate,
       boolean adultDeclaration,
+      boolean requiredConsent,
       String locale,
-      String termsVersion,
-      String privacyVersion,
       boolean marketingConsent
   ) {}
 

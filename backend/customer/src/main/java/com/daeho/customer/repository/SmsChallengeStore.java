@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 public interface SmsChallengeStore {
+  void acquireRateLimitLocks(String phone, String ipFingerprint, String idempotencyHash);
+
   long countRecentForPhone(String phone, Instant since);
 
   long countRecentForIp(String ipFingerprint, Instant since);

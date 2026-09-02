@@ -4,7 +4,10 @@ import {createRemoteJWKSet, jwtVerify} from 'jose';
 import {verifyLoginTransaction} from '@/lib/customer/auth-cookie-core.mjs';
 import {
   authConfig,
+  clearRegistrationTransactionCookie,
+  customerServiceHeaders,
   loginTransactionCookie,
+  readRegistrationTransaction,
   setCustomerSessionCookie
 } from '@/lib/customer/server';
 
@@ -49,6 +52,7 @@ export async function GET(request: NextRequest) {
   }
   let subject: string;
   let authTime = 0;
+  let verifiedPhone = '';
   try {
     const {payload} = await jwtVerify(
       tokens.id_token,
@@ -60,11 +64,48 @@ export async function GET(request: NextRequest) {
     }
     subject = payload.sub;
     authTime = typeof payload.auth_time === 'number' ? payload.auth_time : 0;
+    verifiedPhone = payload.phone_number_verified === true && typeof payload.phone_number === 'string'
+      ? payload.phone_number
+      : '';
   } catch {
     return NextResponse.redirect(new URL('/ko/login?error=invalid_id_token', config.siteUrl));
   }
+  const registration = await readRegistrationTransaction();
+  const provisioning = registration
+    ? {
+        path: '/v1/internal/profiles',
+        body: {subject, registrationGrant: registration.registrationGrant}
+      }
+    : verifiedPhone
+      ? {
+          path: '/v1/internal/profiles/from-authenticated-phone',
+          body: {subject, phone: verifiedPhone}
+        }
+      : null;
+  if (provisioning) {
+    const customerBaseUrl = process.env.CUSTOMER_BACKEND_URL?.replace(/\/+$/, '');
+    const profileResponse = customerBaseUrl
+      ? await fetch(`${customerBaseUrl}${provisioning.path}`, {
+          method: 'POST',
+          headers: {'content-type': 'application/json', ...customerServiceHeaders()},
+          body: JSON.stringify(provisioning.body),
+          cache: 'no-store',
+          signal: AbortSignal.timeout(8_000)
+        }).catch(() => null)
+      : null;
+    if (!profileResponse?.ok) {
+      const locale = transaction.returnTo.startsWith('/en/') ? 'en' : 'ko';
+      const failed = NextResponse.redirect(new URL(`/${locale}/login?error=profile_provisioning`, config.siteUrl));
+      failed.cookies.set(loginTransactionCookie, '', {path: '/api/auth', maxAge: 0});
+      return failed;
+    }
+  }
   const now = Math.floor(Date.now() / 1000);
-  const response = NextResponse.redirect(new URL(transaction.returnTo, config.siteUrl));
+  const destination = new URL(transaction.returnTo, config.siteUrl);
+  const siteOrigin = new URL(config.siteUrl).origin;
+  const response = NextResponse.redirect(
+    destination.origin === siteOrigin ? destination : new URL('/ko/my-daeho', config.siteUrl)
+  );
   setCustomerSessionCookie(response, {
     accessToken: tokens.access_token,
     idToken: tokens.id_token,
@@ -75,6 +116,9 @@ export async function GET(request: NextRequest) {
     subject,
     authTime
   });
+  if (registration) {
+    clearRegistrationTransactionCookie(response);
+  }
   response.cookies.set(loginTransactionCookie, '', {path: '/api/auth', maxAge: 0});
   return response;
 }

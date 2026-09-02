@@ -5,6 +5,8 @@ import type {NextResponse} from 'next/server';
 
 import {
   decryptSession,
+  decryptRegistrationTransaction,
+  encryptRegistrationTransaction,
   encryptSession,
   type CustomerSession
 } from './auth-cookie-core.mjs';
@@ -12,6 +14,7 @@ import type {CustomerProfile} from './types';
 
 export const customerSessionCookie = 'daeho_customer_session';
 export const loginTransactionCookie = 'daeho_login_transaction';
+export const registrationTransactionCookie = 'daeho_registration_transaction';
 const idleSessionSeconds = 7 * 24 * 60 * 60;
 const absoluteSessionSeconds = 30 * 24 * 60 * 60;
 
@@ -44,6 +47,16 @@ export async function readCustomerSession() {
     return null;
   }
   return decryptSession(value, secret);
+}
+
+export async function readRegistrationTransaction() {
+  const cookieStore = await cookies();
+  const value = cookieStore.get(registrationTransactionCookie)?.value;
+  const secret = process.env.AUTH_SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    return null;
+  }
+  return decryptRegistrationTransaction(value, secret);
 }
 
 export async function refreshedCustomerSession() {
@@ -109,6 +122,31 @@ export function clearCustomerSessionCookie(response: NextResponse) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
+    maxAge: 0
+  });
+}
+
+export function setRegistrationTransactionCookie(response: NextResponse, registrationGrant: string) {
+  const secret = required(process.env.AUTH_SESSION_SECRET, 'AUTH_SESSION_SECRET', 32);
+  response.cookies.set(
+    registrationTransactionCookie,
+    encryptRegistrationTransaction(registrationGrant, secret),
+    {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/api/auth',
+      maxAge: 15 * 60
+    }
+  );
+}
+
+export function clearRegistrationTransactionCookie(response: NextResponse) {
+  response.cookies.set(registrationTransactionCookie, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/api/auth',
     maxAge: 0
   });
 }

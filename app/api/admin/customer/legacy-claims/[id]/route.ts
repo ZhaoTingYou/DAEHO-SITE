@@ -24,25 +24,6 @@ export async function PATCH(request: NextRequest, context: {params: Promise<{id:
   const claim = ((await pendingResponse.json()) as PendingClaim[]).find((item) => item.id === id);
   if (!claim) return NextResponse.json({error: 'Pending claim not found'}, {status: 404});
 
-  if (input.status === 'approved') {
-    const cmsBase = (process.env.CMS_BACKEND_URL || 'http://localhost:8080').replace(/\/+$/, '');
-    const linkResponse = await fetch(
-      `${cmsBase}/api/customer/inquiries/${encodeURIComponent(claim.inquiryId)}/link`,
-      {
-        method: 'PATCH',
-        headers: {'content-type': 'application/json', ...customerServiceHeaders()},
-        body: JSON.stringify({
-          customerId: claim.customerId, actor: 'cms-admin', reason: input.reason.trim()
-        }),
-        cache: 'no-store',
-        signal: AbortSignal.timeout(8_000)
-      }
-    ).catch(() => null);
-    if (!linkResponse?.ok) {
-      return NextResponse.json({error: 'Inquiry could not be linked'}, {status: 502});
-    }
-  }
-
   const reviewResponse = await fetch(
     `${customerBase}/v1/internal/admin/legacy-claims/${encodeURIComponent(id)}`,
     {

@@ -44,6 +44,11 @@ management:
         enabled: true
 
 customer:
+  accounts-enabled: ${CUSTOMER_ACCOUNTS_ENABLED:false}
+  cms-base-url: ${CMS_BACKEND_URL:}
+  consent:
+    terms-version: ${CUSTOMER_TERMS_VERSION:terms-2026-09}
+    privacy-version: ${CUSTOMER_PRIVACY_VERSION:privacy-2026-09}
   auth:
     mode: ${CUSTOMER_AUTH_MODE:disabled}
     issuer-uri: ${COGNITO_ISSUER_URI:}

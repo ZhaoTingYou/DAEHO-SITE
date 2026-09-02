@@ -66,6 +66,13 @@ public class CustomerInquiryController {
     return Map.of("inquiry", inquiry);
   }
 
+  @PatchMapping("/customer/{customerId}/unlink")
+  public Map<String, Object> unlinkDeletedCustomer(
+      HttpServletRequest request, @PathVariable UUID customerId) {
+    auth.requireService(request);
+    return Map.of("unlinked", inquiries.unlinkInquiriesForDeletedCustomer(customerId.toString()));
+  }
+
   public record ClaimRequest(UUID customerId, String contact) {}
 
   public record AdminLinkRequest(UUID customerId, String actor, String reason) {}

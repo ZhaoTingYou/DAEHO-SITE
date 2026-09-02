@@ -74,6 +74,7 @@ SOLAPI_SENDER_NUMBER=<已登记发信号码，仅数字>
    - `CUSTOMER_INTERNAL_API_KEY=<与服务端相同的内部密钥>`
 6. Lambda 必须能访问上述 HTTPS 地址。Nginx 只公开这一个精确的验证路径，并由内部密钥和限流保护。该路径会在 Cognito 建号前原子消费一次性凭证；之后的客户资料建立只接受已由该触发器消费的凭证。
 7. 未安装并实测 Pre sign-up trigger 前，不得把 `CUSTOMER_ACCOUNTS_ENABLED` 改为 `true`。该触发器会拒绝没有有效短信注册凭证、重复消费凭证、手机号不匹配或未成年声明未通过的直接 Cognito 注册。
+8. 注册页先让 BFF 把一次性凭证加密保存在 `HttpOnly` Cookie，再由浏览器直接把手机号和密码提交给 Cognito。密码不经过 Next 或 Customer Service。用户首次登录后，OIDC 回调使用已验签的 `sub` 和该凭证幂等建立客户资料。如果资料服务短暂不可用，后续登录会用 Cognito 签名且已验证的手机声明重试幂等建立，不需要重新建号。
 
 ## 功能开关与发布顺序
 
@@ -89,11 +90,13 @@ SOLAPI_SENDER_NUMBER=<已登记发信号码，仅数字>
 - Access Token 在 `customer-api` 校验 issuer、`token_use=access` 和 App Client ID。
 - OIDC 回调校验 state、PKCE、nonce、ID Token 签名、issuer 和 audience。
 - BFF 令牌只存于加密的 `HttpOnly + Secure + SameSite=Lax` Cookie；浏览器不写 `localStorage`。
+- 注册密码由浏览器直接发送给 Cognito，不经过 DAEHO BFF 和客户服务。
 - 本地会话闲置 7 天、绝对 30 天。退出所有设备同时更新 `sessions_valid_after` 并调用 Cognito GlobalSignOut。
-- 删除账号要求最近 5 分钟内重新登录；立即停止 MY DAEHO 访问并调用 Cognito DeleteUser，30 天后定时清理资料。
+- 删除账号要求最近 5 分钟内重新登录；立即停止 MY DAEHO 访问并调用 Cognito DeleteUser，30 天后定时清理资料。清理任务通过 CMS 内部接口解除保留的询价关联；CMS 不可用时保留待重试状态。
 - 新 문의只能由当前已登录且状态为 `active` 的账号写入 `customer_id`；列表和详情的 customer ID 由服务端会话解析。
 - 旧 문의只有编号和旧联系方式完全匹配时自动关联；其余进入人工审核。关联、解除、审核、停用、恢复和删除均写审计记录。
 - 日志不得记录验证码、完整手机号、完整邮箱、注册凭证、访问令牌、SOLAPI 请求体或 문의正文。
+- 已过期的验证会话在过期 7 天后定时删除，包括未完成注册的手机号、IP 指纹、SOLAPI 消息 ID 和凭证元数据。已建立账号的必要认证结果和同意回执另行按账号保留政策处理。
 - 每月检查 SOLAPI 余额和发送明细、Cognito MAU、AWS Budget、短信失败率、注册完成率和 30 天删除任务。
 
 ## 上线前硬性前置

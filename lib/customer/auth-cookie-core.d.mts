@@ -29,3 +29,9 @@ export function verifyLoginTransaction(
 ): Omit<LoginTransaction, 'challenge' | 'cookieValue'> | null;
 export function encryptSession(session: CustomerSession, secret: string): string;
 export function decryptSession(value: string | undefined, secret: string, now?: number): CustomerSession | null;
+export function encryptRegistrationTransaction(registrationGrant: string, secret: string, now?: number): string;
+export function decryptRegistrationTransaction(
+  value: string | undefined,
+  secret: string,
+  now?: number
+): {kind: 'registration'; registrationGrant: string; expiresAt: number} | null;

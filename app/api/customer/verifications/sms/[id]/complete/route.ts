@@ -1,10 +1,14 @@
 import {NextResponse, type NextRequest} from 'next/server';
 
 import {isSameOriginMutation} from '@/lib/customer/request-security';
+import {accountsEnabled} from '@/lib/customer/server';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest, context: {params: Promise<{id: string}>}) {
+  if (!accountsEnabled()) {
+    return NextResponse.json({error: 'Phone verification is not enabled'}, {status: 404});
+  }
   if (!isSameOriginMutation(request)) {
     return NextResponse.json({error: 'Invalid request origin'}, {status: 403});
   }
