@@ -122,7 +122,11 @@ class CmsHttpContractTest {
                 mock(AdminPasswordService.class)
             ),
             new PublicCmsController(repository, validation),
-            new PublicInquiryController(inquiryWorkflow, validation),
+            new PublicInquiryController(
+                inquiryWorkflow,
+                validation,
+                new com.daeho.cms.security.CustomerLinkAuth("test-customer-service-key-with-entropy")
+            ),
             new PublicAnalyticsController(analytics),
             new AdminAnalyticsController(auth, analytics)
         )

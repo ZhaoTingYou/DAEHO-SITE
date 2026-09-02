@@ -131,6 +131,9 @@ CREATE TABLE IF NOT EXISTS cms_inquiries (
   page_path TEXT NOT NULL DEFAULT '',
   user_agent TEXT NOT NULL DEFAULT '',
   ip_address TEXT NOT NULL DEFAULT '',
+  customer_id TEXT,
+  link_source TEXT CHECK (link_source IS NULL OR link_source IN ('authenticated', 'claim', 'admin')),
+  linked_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (status) REFERENCES cms_inquiry_statuses(code) ON UPDATE CASCADE
@@ -159,6 +162,17 @@ CREATE TABLE IF NOT EXISTS cms_inquiry_status_events (
   FOREIGN KEY (inquiry_id) REFERENCES cms_inquiries(id) ON DELETE CASCADE,
   FOREIGN KEY (previous_status) REFERENCES cms_inquiry_statuses(code) ON UPDATE CASCADE,
   FOREIGN KEY (next_status) REFERENCES cms_inquiry_statuses(code) ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS cms_inquiry_link_events (
+  id TEXT PRIMARY KEY,
+  inquiry_id TEXT NOT NULL,
+  customer_id TEXT,
+  action TEXT NOT NULL CHECK (action IN ('claim', 'admin', 'unlink')),
+  actor TEXT NOT NULL DEFAULT '',
+  reason TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (inquiry_id) REFERENCES cms_inquiries(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS cms_notification_settings (
@@ -235,6 +249,8 @@ CREATE TABLE IF NOT EXISTS cms_notification_attempts (
 CREATE INDEX IF NOT EXISTS idx_cms_news_visible_sort ON cms_news (is_visible, sort_order, published_at);
 CREATE INDEX IF NOT EXISTS idx_cms_collections_visible_sort ON cms_collections (is_visible, sort_order);
 CREATE INDEX IF NOT EXISTS idx_cms_inquiries_status_created ON cms_inquiries (status, created_at);
+CREATE INDEX IF NOT EXISTS idx_cms_inquiries_customer_created ON cms_inquiries (customer_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_cms_inquiry_link_events_inquiry_created ON cms_inquiry_link_events (inquiry_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_cms_media_filename ON cms_media (filename);
 CREATE INDEX IF NOT EXISTS idx_cms_inquiry_statuses_active_sort ON cms_inquiry_statuses (is_active, sort_order, code);
 

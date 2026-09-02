@@ -1,0 +1,60 @@
+server:
+  port: ${PORT:8081}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: daeho-customer
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/daeho_cms}
+    username: ${SPRING_DATASOURCE_USERNAME:daeho}
+    password: ${SPRING_DATASOURCE_PASSWORD:daeho}
+    hikari:
+      schema: ${CUSTOMER_DB_SCHEMA:customer_account}
+  flyway:
+    enabled: true
+    create-schemas: true
+    default-schema: ${CUSTOMER_DB_SCHEMA:customer_account}
+    schemas: ${CUSTOMER_DB_SCHEMA:customer_account}
+    table: customer_flyway_schema_history
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASS:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:false}
+          starttls:
+            enable: ${SMTP_STARTTLS:true}
+            required: ${SMTP_STARTTLS_REQUIRED:true}
+
+management:
+  health:
+    mail:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+customer:
+  auth:
+    mode: ${CUSTOMER_AUTH_MODE:disabled}
+    issuer-uri: ${COGNITO_ISSUER_URI:}
+    client-id: ${COGNITO_CLIENT_ID:}
+  internal-api-key: ${CUSTOMER_INTERNAL_API_KEY:}
+  verification-hmac-secret: ${CUSTOMER_VERIFICATION_HMAC_SECRET:}
+  email:
+    mode: ${CUSTOMER_EMAIL_MODE:disabled}
+    from: ${CUSTOMER_EMAIL_FROM:}
+  sms:
+    base-url: ${SOLAPI_API_BASE_URL:https://api.solapi.com}
+    api-key: ${SOLAPI_API_KEY:}
+    api-secret: ${SOLAPI_API_SECRET:}
+    sender-number: ${SOLAPI_SENDER_NUMBER:}

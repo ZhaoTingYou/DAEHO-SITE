@@ -30,6 +30,7 @@ spring:
 
 cms:
   admin-api-key: ${CMS_ADMIN_API_KEY:}
+  customer-link-api-key: ${CMS_CUSTOMER_LINK_API_KEY:}
   admin-password: ${CMS_ADMIN_PASSWORD:}
   owner-email: ${CMS_OWNER_EMAIL:}
   notify-to: ${CMS_NOTIFY_TO:}

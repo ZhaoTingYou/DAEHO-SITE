@@ -1,6 +1,6 @@
 'use client';
 
-import {type FormEvent, useState} from 'react';
+import {type FormEvent, useEffect, useRef, useState} from 'react';
 
 import {currentAnalyticsPagePath, trackAnalyticsEvent} from '@/lib/analytics';
 import {
@@ -8,6 +8,7 @@ import {
   type ContactInquiryType
 } from '@/lib/inquiry-query-core.mjs';
 import {isLocale} from '@/lib/locales';
+import type {CustomerProfile} from '@/lib/customer/types';
 import {useLocationSearch} from '@/lib/use-location-search';
 
 type ContactFormProps = {
@@ -35,10 +36,39 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
   const inquiryType = selectedInquiryType ?? (
     locationSearch ? resolveContactInquiryType(locationSearch) : defaultType
   );
+  const [profile, setProfile] = useState<CustomerProfile | null>(null);
+  const [accountRequired, setAccountRequired] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const isSubmitted = status === 'success';
+  const draftKey = 'daeho:inquiry-draft:contact';
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then((response) => response.json())
+      .then((session: {authenticated?: boolean; inquiryAccountRequired?: boolean; profile?: CustomerProfile}) => {
+        setAccountRequired(Boolean(session.inquiryAccountRequired));
+        setProfile(session.authenticated && session.profile ? session.profile : null);
+        const draft = readDraft(draftKey);
+        const values = draft ?? {};
+        const nextProfile = session.authenticated ? session.profile : null;
+        fillForm(formRef.current, {
+          ...values,
+          ...(nextProfile ? {
+            name: nextProfile.legalName || nextProfile.displayName || values.name,
+            phone: nextProfile.phone,
+            email: nextProfile.email || values.email,
+            organization: nextProfile.organization || values.organization
+          } : {})
+        });
+        setDraftRestored(Boolean(draft));
+      })
+      .catch(() => undefined);
+  }, []);
 
   return (
     <form
+      ref={formRef}
       className="mobile-form space-y-5 pb-[calc(32px+env(safe-area-inset-bottom))] md:space-y-6 md:pb-0"
       onSubmit={async (event) => {
         if (await submitContactForm(event)) {
@@ -62,6 +92,7 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
         inputMode="tel"
         autoComplete="tel"
         maxLength={180}
+        readOnly={Boolean(profile?.phone)}
       />
       <TextField
         id="contact-email"
@@ -105,6 +136,11 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
       >
         {text.submit}
       </button>
+      {draftRestored ? (
+        <div className="border-l-2 border-accent bg-bg px-4 py-3 font-body text-[16px] leading-7 text-primary md:text-sm md:leading-6" role="status">
+          {getCurrentLocale() === 'ko' ? '로그인 전에 작성한 내용을 복원했습니다. 확인 후 제출해 주세요.' : 'Your pre-login draft was restored. Review it before submitting.'}
+        </div>
+      ) : null}
       {isSubmitted ? (
         <div className="border-l-2 border-accent bg-bg px-4 py-3 font-body text-[16px] leading-7 text-primary md:text-sm md:leading-6" role="status">
           <p>{text.success}</p>
@@ -125,28 +161,42 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
     const formData = new FormData(form);
     setStatus('submitting');
 
+    const payload = {
+      name: String(formData.get('name') ?? ''),
+      organization: String(formData.get('organization') ?? ''),
+      phone: String(formData.get('phone') ?? ''),
+      email: String(formData.get('email') ?? ''),
+      type: String(formData.get('type') ?? ''),
+      message: String(formData.get('message') ?? ''),
+      website: String(formData.get('website') ?? ''),
+      locale: getCurrentLocale(),
+      pagePath: `${window.location.pathname}${window.location.search}`
+    };
+    if (accountRequired && !profile) {
+      sessionStorage.setItem(draftKey, JSON.stringify(payload));
+      window.location.assign(`/api/auth/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
+      return false;
+    }
+
     const response = await fetch('/api/inquiries/contact', {
       method: 'POST',
       headers: {'content-type': 'application/json'},
-      body: JSON.stringify({
-        name: String(formData.get('name') ?? ''),
-        organization: String(formData.get('organization') ?? ''),
-        phone: String(formData.get('phone') ?? ''),
-        email: String(formData.get('email') ?? ''),
-        type: String(formData.get('type') ?? ''),
-        message: String(formData.get('message') ?? ''),
-        website: String(formData.get('website') ?? ''),
-        locale: getCurrentLocale(),
-        pagePath: `${window.location.pathname}${window.location.search}`
-      })
+      body: JSON.stringify(payload)
     }).catch(() => null);
 
+    if (response?.status === 401) {
+      sessionStorage.setItem(draftKey, JSON.stringify(payload));
+      window.location.assign(`/api/auth/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
+      return false;
+    }
     if (!response?.ok) {
       setStatus('error');
       return false;
     }
 
     form.reset();
+    sessionStorage.removeItem(draftKey);
+    setDraftRestored(false);
     return true;
   }
 }
@@ -160,6 +210,7 @@ function TextField({
   autoComplete,
   maxLength,
   required = false
+  ,readOnly = false
 }: {
   id: string;
   label: string;
@@ -169,6 +220,7 @@ function TextField({
   autoComplete?: string;
   maxLength?: number;
   required?: boolean;
+  readOnly?: boolean;
 }) {
   return (
     <label htmlFor={id} className="block space-y-2 font-body text-[16px] font-semibold uppercase tracking-[0.08em] text-subtext md:text-sm md:tracking-[0.12em]">
@@ -181,10 +233,30 @@ function TextField({
         autoComplete={autoComplete}
         maxLength={maxLength}
         required={required}
+        readOnly={readOnly}
         className="min-h-[52px] w-full border-b border-primary/30 bg-transparent py-3 text-[16px] normal-case tracking-normal text-primary outline-none transition duration-hover ease-brand focus:border-accent md:min-h-12 md:text-base"
       />
     </label>
   );
+}
+
+function readDraft(key: string) {
+  try {
+    const value = sessionStorage.getItem(key);
+    return value ? JSON.parse(value) as Record<string, string> : null;
+  } catch {
+    return null;
+  }
+}
+
+function fillForm(form: HTMLFormElement | null, values: Record<string, unknown>) {
+  if (!form) return;
+  for (const [name, value] of Object.entries(values)) {
+    const field = form.elements.namedItem(name);
+    if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+      field.value = String(value ?? '');
+    }
+  }
 }
 
 function SpamTrapField() {

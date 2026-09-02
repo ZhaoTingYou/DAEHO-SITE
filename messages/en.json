@@ -2110,8 +2110,8 @@
     "terms": {
       "eyebrow": "LEGAL",
       "title": "Terms of Use",
-      "effective": "Effective date: 2026-06-27",
-      "notice": "These Terms govern use of the official DAEHO website. The DAEHO Site currently does not provide public member registration, shopping cart, or instant online payment functions. Product production proceeds only after inquiry, individual consultation, quotation, order confirmation, or separate agreement.",
+      "effective": "Effective date: 2026-09-02",
+      "notice": "These Terms govern the official DAEHO website, DAEHO customer accounts, and MY DAEHO. The Site does not currently provide a shopping cart or instant online payment. Product production proceeds only after inquiry, individual consultation, quotation, order confirmation, or separate agreement.",
       "intro": "DAEHO (the “Company”) operates the official website (the “Site”) to provide brand information and production consultation for commemorative rings, championship rings, appointment rings, bespoke products, and golf-related products. These Terms define the rights, obligations, and responsibilities of the Company and users in relation to use of the Site.",
       "sections": [
         {
@@ -2177,9 +2177,10 @@
         {
           "heading": "Article 7 (Membership and Account Services)",
           "body": [
-            "The Site currently does not provide public member registration, login accounts, My Page, shopping cart, or online purchase history functions.",
-            "Administrator CMS or internal operation accounts are for Company operations and are not membership services provided to general users.",
-            "If the Company provides member registration or account-based services in the future, the Company may provide separate terms and privacy notices or amend these Terms."
+            "The Company provides individual customer accounts and MY DAEHO for adults aged 19 or older. Korean mobile registration requires a one-time SMS code, and users must provide accurate information and keep their credentials secure.",
+            "An account may be used to view the account holder’s linked inquiries and their progress. It does not itself create a purchase, production, or supply agreement, and the first release does not provide chat, attachments, orders, team membership, or online payment.",
+            "The Company may suspend an account for misuse, false registration, security risk, or violation of these Terms. Users may request deletion in MY DAEHO; access stops immediately and profile data is deleted within 30 days, subject to records that must be retained by law or under the Privacy Policy.",
+            "Administrator CMS or internal operation accounts are Company operational accounts and are separate from customer membership."
           ]
         },
         {
@@ -2357,8 +2358,8 @@
     "privacy": {
       "eyebrow": "LEGAL",
       "title": "Privacy Policy",
-      "effective": "Effective date: 2026-07-23",
-      "notice": "DAEHO does not currently provide member registration, shopping cart, or online payment services through the official website. This Policy is based on personal information processed when users browse brand and product information, submit Contact or Golf Inquiry forms, and receive consultation responses.",
+      "effective": "Effective date: 2026-09-02",
+      "notice": "DAEHO provides customer registration, login, MY DAEHO, and account-linked inquiry services. The Site does not currently provide a shopping cart or online payment. This Policy covers personal information processed for accounts, mobile verification, inquiries, consultation, and website operation.",
       "intro": "DAEHO (the “Company”) complies with the Personal Information Protection Act of Korea and other applicable laws. The Company establishes and discloses this Privacy Policy to protect users’ personal information safely. The Company processes only the personal information necessary for the stated purposes and does not use it for unrelated purposes.",
       "sections": [
         {
@@ -2369,7 +2370,8 @@
             "2. Consulting on commemorative rings, championship rings, appointment rings, bespoke products, and golf-related products, including quotations, schedules, quantities, and specifications",
             "3. Reviewing materials requested or provided by users, managing consultation history, and responding to disputes or errors",
             "4. Securing website stability, preventing misuse, conducting security checks, and improving service quality",
-            "5. Complying with legal obligations and protecting rights"
+            "5. Creating and managing customer accounts, authenticating sign-in, recovering access, maintaining consent records, linking inquiries to the correct customer, and displaying inquiry progress in MY DAEHO",
+            "6. Complying with legal obligations and protecting rights"
           ]
         },
         {
@@ -2380,6 +2382,7 @@
             "2. Golf Inquiry submissions: name, organization or team, contact details, quantity, preferred due date, intended use, configuration or selected options, inquiry message, page language, and submission path",
             "3. Information that may be automatically generated during service use and security management: IP address, User-Agent, access date and time, request path, browser and device information, cookies, or similar technology data",
             "4. Information voluntarily included by users in inquiry content: logos, emblems, organization names, event names, award records, personal names, images, and reference materials necessary for production consultation",
+            "5. Customer account and verification: verified Korean mobile number, Cognito user identifier, display name, email, language, country, optional company/team, adult-verification result, verification time and method, terms/privacy versions, and optional marketing consent. Date of birth is used only to determine adult eligibility and is not retained after the determination.",
             "The Company does not request resident registration numbers, payment card information, account passwords, sensitive information, or other information unnecessary for website consultation. Users should avoid including unnecessary sensitive information in inquiry content."
           ]
         },
@@ -2390,7 +2393,8 @@
             "1. Inquiry and consultation records: 3 years from completion of inquiry handling or the last contact date",
             "2. Consultation records that lead to production, order, or contract: for the period necessary for contract performance, settlement, defect or dispute response, and any period required by applicable law",
             "3. Access logs and security records: up to 3 months from collection. However, records may be retained for the necessary period where required for security incident investigation, dispute response, or legal preservation.",
-            "4. Records required to be retained under applicable law: for the period specified by the relevant law"
+            "4. Records required to be retained under applicable law: for the period specified by the relevant law",
+            "5. Customer profile: while the account is active and for up to 30 days after a deletion request. Inquiry snapshots are retained under the three-year inquiry policy, but the account link and user access are removed when deletion is completed."
           ]
         },
         {
@@ -2406,7 +2410,7 @@
           "heading": "Article 5 (Outsourcing of Personal Information Processing)",
           "body": [
             "The Company may outsource personal information processing to external service providers to the extent necessary for smooth Site operation and inquiry response.",
-            "Outsourced work may include website and CMS operation, server hosting, data backup, security and DNS management, email sending, and inquiry notification processing.",
+            "Outsourced work may include website and CMS operation, server hosting, data backup, security and DNS management, email sending, inquiry notifications, account authentication through Amazon Web Services (AWS Cognito in the Seoul Region), and automated SMS verification through SOLAPI.",
             "The Company manages and supervises processors through relevant contracts or terms so that they process personal information safely. When actual processors and outsourced work are confirmed, the Company will disclose them through this Policy or separate notice on the Site."
           ]
         },
@@ -2425,7 +2429,7 @@
             "Users may request access to, correction of, deletion of, suspension of processing of, or withdrawal of consent regarding their personal information at any time.",
             "Rights may be exercised through the Contact page or contact details announced by the Company, and the Company will act without delay in accordance with applicable law after verifying the requester’s identity.",
             "Where a user requests correction of errors in personal information, the Company will not use or provide that personal information until the correction is completed.",
-            "Where processing of personal information of a child under 14 is necessary, the Company will follow procedures required by applicable law, including confirmation of consent from a legal representative."
+            "Customer accounts are intended only for adults aged 19 or older. The Company does not knowingly offer account registration to minors."
           ]
         },
         {
@@ -2433,7 +2437,8 @@
           "body": [
             "The Company destroys personal information without delay when the retention period expires or the processing purpose has been achieved.",
             "Electronic files are deleted by secure methods so that they cannot be restored or reproduced, and paper documents are shredded or incinerated.",
-            "Personal information that must be retained under other laws is separated into a separate database or storage location."
+            "Personal information that must be retained under other laws is separated into a separate database or storage location.",
+            "When account deletion is completed, the customer profile and verification identifiers are deleted or anonymized and retained inquiry snapshots are disconnected from the account so that the former user can no longer access them."
           ]
         },
         {

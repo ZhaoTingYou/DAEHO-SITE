@@ -1,6 +1,7 @@
 package com.daeho.cms.controller;
 
 import com.daeho.cms.error.ValidationFailedException;
+import com.daeho.cms.security.CustomerLinkAuth;
 import com.daeho.cms.service.InquiryWorkflowService;
 import com.daeho.cms.service.RequestValidation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,10 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class PublicInquiryController {
   private final InquiryWorkflowService workflow;
   private final RequestValidation validation;
+  private final CustomerLinkAuth customerLinkAuth;
 
-  public PublicInquiryController(InquiryWorkflowService workflow, RequestValidation validation) {
+  public PublicInquiryController(
+      InquiryWorkflowService workflow,
+      RequestValidation validation,
+      CustomerLinkAuth customerLinkAuth) {
     this.workflow = workflow;
     this.validation = validation;
+    this.customerLinkAuth = customerLinkAuth;
   }
 
   @PostMapping("/contact")
@@ -46,9 +52,12 @@ public class PublicInquiryController {
   private Map<String, String> requestMeta(HttpServletRequest request) {
     var forwardedFor = request.getHeader("x-forwarded-for");
     var realIp = request.getHeader("x-real-ip");
+    var customerId = customerLinkAuth.customerId(request);
     return Map.of(
         "userAgent", text(request.getHeader("user-agent")),
-        "ipAddress", text(forwardedFor != null ? forwardedFor.split(",")[0].trim() : realIp)
+        "ipAddress", text(forwardedFor != null ? forwardedFor.split(",")[0].trim() : realIp),
+        "customerId", customerId,
+        "linkSource", customerId.isBlank() ? "" : "authenticated"
     );
   }
 

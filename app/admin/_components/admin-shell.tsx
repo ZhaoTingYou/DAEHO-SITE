@@ -10,6 +10,7 @@ import {AdminLanguageSwitcher} from './admin-language-switcher';
 const navItems = [
   {href: '/admin', labelKey: 'nav.overview', capability: 'content:read'},
   {href: '/admin/inquiries', labelKey: 'nav.inquiries', capability: 'inquiries:read'},
+  {href: '/admin/customers', labelKey: 'nav.customers', capability: 'users:manage'},
   {href: '/admin/live-chat', labelKey: 'nav.liveChat', capability: 'notifications:manage'},
   {href: '/admin/notifications', labelKey: 'nav.notifications', capability: 'notifications:manage'},
   {href: '/admin/news', labelKey: 'nav.news', capability: 'content:read'},

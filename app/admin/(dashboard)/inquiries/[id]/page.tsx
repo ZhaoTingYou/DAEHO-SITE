@@ -9,6 +9,8 @@ import {
   getInquiryDetail,
   listInquiryStatuses
 } from '@/lib/cms/repositories';
+import {customerServiceHeaders} from '@/lib/customer/server';
+import type {CustomerProfile} from '@/lib/customer/types';
 
 import {PageHeader, Panel} from '../../../_components/admin-shell';
 import {InquiryStatusBadge, InquiryStatusControl} from '../../../_components/inquiry-status-control';
@@ -33,6 +35,7 @@ export default async function AdminInquiryDetailPage({params}: Props) {
 
   const {inquiry, statusEvents, notificationJobs, notificationAttempts} = detail;
   const statuses = inquiryStatusOptions(statusDefinitions, locale);
+  const linkedCustomer = inquiry.customerId ? await getLinkedCustomer(inquiry.customerId) : null;
   const statusCopy = inquiryStatusCopy(t);
 
   return (
@@ -73,6 +76,10 @@ export default async function AdminInquiryDetailPage({params}: Props) {
               <DetailItem label={t('inquiry.quantity')} value={inquiry.quantity?.toString() ?? '-'} />
               <DetailItem label={t('inquiry.due')} value={inquiry.dueDate || '-'} />
               <DetailItem label={t('inquiry.use')} value={inquiry.useCase || '-'} />
+              <DetailItem label="Customer ID" value={inquiry.customerId || '-'} />
+              <DetailItem label="Link source" value={inquiry.linkSource || '-'} />
+              <DetailItem label="Verification" value={linkedCustomer?.verificationMethod || '-'} />
+              <DetailItem label="Verified at" value={linkedCustomer ? formatDate(linkedCustomer.verifiedAt) : '-'} />
               <DetailItem label={t('inquiry.pagePath')} value={inquiry.pagePath || '-'} />
               <DetailItem label={t('common.created')} value={formatDate(inquiry.createdAt)} />
             </dl>
@@ -161,6 +168,17 @@ export default async function AdminInquiryDetailPage({params}: Props) {
       </div>
     </>
   );
+}
+
+async function getLinkedCustomer(customerId: string) {
+  const baseUrl = process.env.CUSTOMER_BACKEND_URL?.replace(/\/+$/, '');
+  if (!baseUrl) return null;
+  const response = await fetch(
+    `${baseUrl}/v1/internal/admin/customers?query=${encodeURIComponent(customerId)}&limit=1`,
+    {headers: customerServiceHeaders(), cache: 'no-store', signal: AbortSignal.timeout(8_000)}
+  ).catch(() => null);
+  if (!response?.ok) return null;
+  return ((await response.json()) as CustomerProfile[])[0] ?? null;
 }
 
 function DetailItem({label, value}: {label: string; value: string}) {

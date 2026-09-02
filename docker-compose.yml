@@ -25,6 +25,7 @@ services:
       CMS_ADMIN_API_KEY: ${CMS_BACKEND_API_KEY:-replace-with-a-long-random-key}
       CMS_ADMIN_PASSWORD: ${CMS_ADMIN_PASSWORD:-replace-with-a-strong-password}
       CMS_OWNER_EMAIL: ${CMS_OWNER_EMAIL:-}
+      CMS_CUSTOMER_LINK_API_KEY: ${CUSTOMER_INTERNAL_API_KEY:-replace-with-a-separate-long-random-key}
       CMS_UPLOAD_DIR: /data/uploads
       CMS_PUBLIC_UPLOAD_BASE_URL: /uploads
       CMS_STORAGE_PROVIDER: ${CMS_STORAGE_PROVIDER:-local}
@@ -62,6 +63,46 @@ services:
       postgres:
         condition: service_healthy
 
+  customer-api:
+    build:
+      context: ./backend/customer
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-daeho_cms}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-daeho}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      CUSTOMER_DB_SCHEMA: ${CUSTOMER_DB_SCHEMA:-customer_account}
+      CMS_BACKEND_URL: http://cms-api:8080
+      CUSTOMER_ACCOUNTS_ENABLED: ${CUSTOMER_ACCOUNTS_ENABLED:-false}
+      CUSTOMER_AUTH_MODE: ${CUSTOMER_AUTH_MODE:-disabled}
+      COGNITO_ISSUER_URI: ${COGNITO_ISSUER_URI:-}
+      COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:-}
+      CUSTOMER_INTERNAL_API_KEY: ${CUSTOMER_INTERNAL_API_KEY:-replace-with-a-separate-long-random-key}
+      CUSTOMER_VERIFICATION_HMAC_SECRET: ${CUSTOMER_VERIFICATION_HMAC_SECRET:-replace-with-at-least-32-random-characters}
+      CUSTOMER_TERMS_VERSION: ${CUSTOMER_TERMS_VERSION:-terms-2026-09}
+      CUSTOMER_PRIVACY_VERSION: ${CUSTOMER_PRIVACY_VERSION:-privacy-2026-09}
+      CUSTOMER_EMAIL_MODE: ${CUSTOMER_EMAIL_MODE:-disabled}
+      CUSTOMER_EMAIL_FROM: ${CUSTOMER_EMAIL_FROM:-}
+      SOLAPI_API_BASE_URL: ${SOLAPI_API_BASE_URL:-https://api.solapi.com}
+      SOLAPI_API_KEY: ${SOLAPI_API_KEY:-}
+      SOLAPI_API_SECRET: ${SOLAPI_API_SECRET:-}
+      SOLAPI_SENDER_NUMBER: ${SOLAPI_SENDER_NUMBER:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_AUTH: ${SMTP_AUTH:-false}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8081/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   next:
     build:
       context: .
@@ -79,12 +120,22 @@ services:
       CMS_ADMIN_COOKIE_SECURE: ${CMS_ADMIN_COOKIE_SECURE:-}
       CMS_ADMIN_SESSION_SECRET: ${CMS_ADMIN_SESSION_SECRET:-replace-with-a-long-random-session-secret}
       ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
+      CUSTOMER_ACCOUNTS_ENABLED: ${CUSTOMER_ACCOUNTS_ENABLED:-false}
+      INQUIRY_ACCOUNT_REQUIRED: ${INQUIRY_ACCOUNT_REQUIRED:-false}
+      CUSTOMER_BACKEND_URL: http://customer-api:8081
+      CUSTOMER_INTERNAL_API_KEY: ${CUSTOMER_INTERNAL_API_KEY:-replace-with-a-separate-long-random-key}
+      AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:-replace-with-at-least-32-random-characters}
+      COGNITO_DOMAIN: ${COGNITO_DOMAIN:-}
+      COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:-}
+      COGNITO_ISSUER_URI: ${COGNITO_ISSUER_URI:-}
+      COGNITO_REGION: ${COGNITO_REGION:-ap-northeast-2}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
       NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-G-FXQGWE9XZ0}
     volumes:
       - ./public/images:/app/public/images:ro
     depends_on:
       - cms-api
+      - customer-api
 
   nginx:
     image: nginx:1.27-alpine
@@ -98,6 +149,7 @@ services:
     depends_on:
       - next
       - cms-api
+      - customer-api
 
   backup:
     image: postgres:17-alpine

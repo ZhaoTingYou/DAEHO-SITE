@@ -1,0 +1,6 @@
+{
+  "name": "daeho-cognito-pre-signup",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=20"}
+}

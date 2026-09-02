@@ -1,6 +1,7 @@
 package com.daeho.cms.repository;
 
 import com.daeho.cms.service.JsonSupport;
+import com.daeho.cms.service.InquiryContactMatcher;
 import com.daeho.cms.service.RequestValidation;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,6 +28,7 @@ public class CmsRepository {
       "cms_media",
       "cms_inquiry_statuses",
       "cms_inquiries",
+      "cms_inquiry_link_events",
       "cms_email_events",
       "cms_inquiry_status_events",
       "cms_notification_settings",
@@ -339,7 +341,9 @@ public class CmsRepository {
         Map.entry("pagePath", validation.stringValue(payload.get("pagePath"))),
         Map.entry("configuration", Map.of()),
         Map.entry("userAgent", requestMeta.getOrDefault("userAgent", "")),
-        Map.entry("ipAddress", requestMeta.getOrDefault("ipAddress", ""))
+        Map.entry("ipAddress", requestMeta.getOrDefault("ipAddress", "")),
+        Map.entry("customerId", requestMeta.getOrDefault("customerId", "")),
+        Map.entry("linkSource", requestMeta.getOrDefault("linkSource", ""))
     ));
   }
 
@@ -368,6 +372,8 @@ public class CmsRepository {
     ));
     values.put("userAgent", requestMeta.getOrDefault("userAgent", ""));
     values.put("ipAddress", requestMeta.getOrDefault("ipAddress", ""));
+    values.put("customerId", requestMeta.getOrDefault("customerId", ""));
+    values.put("linkSource", requestMeta.getOrDefault("linkSource", ""));
     return createInquiry(values);
   }
 
@@ -430,6 +436,88 @@ public class CmsRepository {
     values.put("userAgent", requestMeta.getOrDefault("userAgent", ""));
     values.put("ipAddress", "");
     return createInquiry(values);
+  }
+
+  public List<Map<String, Object>> listCustomerInquiries(String customerId) {
+    return jdbc.query("SELECT * FROM cms_inquiries WHERE customer_id = ?::uuid ORDER BY created_at DESC",
+        this::mapInquiry, customerId);
+  }
+
+  public Map<String, Object> getCustomerInquiry(String customerId, String id) {
+    return jdbc.query("SELECT * FROM cms_inquiries WHERE customer_id = ?::uuid AND id = ?",
+        this::mapInquiry, customerId, id).stream().findFirst().orElse(null);
+  }
+
+  @Transactional
+  public Map<String, Object> claimInquiry(String id, String customerId, String suppliedContact) {
+    var inquiry = getInquiry(id);
+    if (inquiry == null) return Map.of("matched", false, "reason", "not_found");
+    var linkedCustomerId = validation.stringValue(inquiry.get("customerId"));
+    if (!linkedCustomerId.isBlank()) return Map.of("matched", linkedCustomerId.equals(customerId),
+        "reason", linkedCustomerId.equals(customerId) ? "already_linked" : "linked_to_another_customer");
+    if (!InquiryContactMatcher.matches(validation.stringValue(inquiry.get("contact")),
+        validation.stringValue(inquiry.get("phone")), validation.stringValue(inquiry.get("email")), suppliedContact)) {
+      return Map.of("matched", false, "reason", "contact_mismatch");
+    }
+    return Map.of("matched", true, "reason", "exact_match");
+  }
+
+  @Transactional
+  public Map<String, Object> linkInquiryByAdmin(String id, String customerId, String actor, String reason) {
+    return linkInquiry(id, customerId, "admin", actor, reason);
+  }
+
+  @Transactional
+  public Map<String, Object> linkInquiryByClaim(String id, String customerId, String actor, String reason) {
+    return linkInquiry(id, customerId, "claim", actor, reason);
+  }
+
+  private Map<String, Object> linkInquiry(String id, String customerId, String source, String actor, String reason) {
+    var existing = getInquiry(id);
+    if (existing == null) return null;
+    var linkedCustomerId = validation.stringValue(existing.get("customerId"));
+    if (linkedCustomerId.equals(customerId)) return existing;
+    if (!linkedCustomerId.isBlank()) return null;
+    var updated = jdbc.update("""
+        UPDATE cms_inquiries SET customer_id = ?::uuid, link_source = ?,
+          linked_at = COALESCE(linked_at, now()), updated_at = now()
+        WHERE id = ? AND (customer_id IS NULL OR customer_id = ?::uuid)
+        """, customerId, source, id, customerId);
+    if (updated != 1) return null;
+    auditInquiryLink(id, customerId, source, actor, reason);
+    return getInquiry(id);
+  }
+
+  @Transactional
+  public Map<String, Object> unlinkInquiryByAdmin(String id, String actor, String reason) {
+    var existing = getInquiry(id);
+    if (existing == null) return null;
+    var customerId = validation.stringValue(existing.get("customerId"));
+    jdbc.update("UPDATE cms_inquiries SET customer_id = NULL, link_source = NULL, linked_at = NULL, updated_at = now() WHERE id = ?", id);
+    auditInquiryLink(id, customerId, "unlink", actor, reason);
+    return getInquiry(id);
+  }
+
+  @Transactional
+  public int unlinkInquiriesForDeletedCustomer(String customerId) {
+    var inquiryIds = jdbc.queryForList("SELECT id FROM cms_inquiries WHERE customer_id = ?::uuid", String.class, customerId);
+    var unlinked = 0;
+    for (var inquiryId : inquiryIds) {
+      var updated = jdbc.update("UPDATE cms_inquiries SET customer_id = NULL, link_source = NULL, linked_at = NULL, updated_at = now() WHERE id = ? AND customer_id = ?::uuid", inquiryId, customerId);
+      if (updated == 1) {
+        unlinked++;
+        auditInquiryLink(inquiryId, customerId, "unlink", "account-deletion", "retention unlink");
+      }
+    }
+    return unlinked;
+  }
+
+  private void auditInquiryLink(String inquiryId, String customerId, String action, String actor, String reason) {
+    jdbc.update("""
+        INSERT INTO cms_inquiry_link_events (id, inquiry_id, customer_id, action, actor, reason, created_at)
+        VALUES (?, ?, NULLIF(?, '')::uuid, ?, ?, ?, now())
+        """, UUID.randomUUID().toString(), inquiryId, customerId, action,
+        validation.stringValue(actor), validation.stringValue(reason));
   }
 
   public List<Map<String, Object>> listInquiries(String status, String source) {
@@ -700,12 +788,15 @@ public class CmsRepository {
 
   private Map<String, Object> createInquiry(Map<String, Object> payload) {
     var id = firstNonBlank(payload.get("id"), UUID.randomUUID().toString());
+    var customerId = validation.stringValue(payload.get("customerId"));
+    var linkSource = validation.stringValue(payload.get("linkSource"));
     jdbc.update("""
         INSERT INTO cms_inquiries (
           id, source, status, locale, name, contact, phone, email, organization, inquiry_type,
           team, quantity, due_date, use_case, message, configuration_json,
-          page_path, user_agent, ip_address, created_at, updated_at
-        ) VALUES (?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+          page_path, user_agent, ip_address, customer_id, link_source, linked_at, created_at, updated_at
+        ) VALUES (?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, '')::uuid,
+          NULLIF(?, ''), CASE WHEN NULLIF(?, '') IS NULL THEN NULL ELSE now() END, now(), now())
         ON CONFLICT (id) DO NOTHING
         """,
         id,
@@ -725,7 +816,10 @@ public class CmsRepository {
         json.jsonb(payload.get("configuration")),
         payload.get("pagePath"),
         payload.get("userAgent"),
-        payload.get("ipAddress")
+        payload.get("ipAddress"),
+        customerId,
+        linkSource,
+        customerId
     );
     return getInquiry(id);
   }
@@ -1054,6 +1148,9 @@ public class CmsRepository {
         "pagePath", rs.getString("page_path"),
         "userAgent", rs.getString("user_agent"),
         "ipAddress", rs.getString("ip_address"),
+        "customerId", validation.stringValue(rs.getString("customer_id")),
+        "linkSource", validation.stringValue(rs.getString("link_source")),
+        "linkedAt", instantString(rs, "linked_at"),
         "createdAt", instantString(rs, "created_at"),
         "updatedAt", instantString(rs, "updated_at")
     );

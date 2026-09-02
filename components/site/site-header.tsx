@@ -7,6 +7,7 @@ import {usePathname} from 'next/navigation';
 import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
+import {AccountNavLink} from '@/components/customer/account-nav-link';
 import type {Locale} from '@/i18n/routing';
 import {resolveCmsHref} from '@/lib/cms-link-core.mjs';
 import {
@@ -537,6 +538,8 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
               </>
             ) : null}
 
+            <AccountNavLink locale={locale} />
+
             <Link
               href={navigationHref('contact', '/contact')}
               className={`consult-cta shrink-0 ${isHeroTransparent ? 'consult-cta--light' : 'consult-cta--accent'}`}
@@ -584,31 +587,7 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
           {navText('brandLabel')}
         </Link>
 
-        {englishEnabled ? (
-          <div className="flex min-h-11 items-center gap-2 font-body text-[13px] font-[300] uppercase tracking-[0.12em]">
-            {languageLinks.map((item, index) => (
-              <span key={item.locale} className="contents">
-                {index > 0 ? (
-                  <span className={isHeroTransparent ? 'opacity-70' : 'opacity-35'} aria-hidden="true">
-                    /
-                  </span>
-                ) : null}
-                <Link
-                  href={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`site-header-language-label inline-flex min-h-11 min-w-11 items-center justify-center ${
-                    locale === item.locale ? 'opacity-100' : isHeroTransparent ? 'opacity-90' : 'opacity-55'
-                  }`}
-                  aria-current={locale === item.locale ? 'page' : undefined}
-                >
-                  {item.label}
-                </Link>
-              </span>
-            ))}
-          </div>
-        ) : (
-          <span className="h-11 w-11" aria-hidden="true" />
-        )}
+        <AccountNavLink locale={locale} variant="icon" />
       </div>
 
       <AnimatePresence>
@@ -787,6 +766,19 @@ export function SiteHeader({locale, englishEnabled, golfEnabled, externalSites}:
                 );
               })}
             </motion.nav>
+
+            <div className="mt-6 space-y-4">
+              <AccountNavLink locale={locale} variant="mobile-menu" />
+              {englishEnabled ? (
+                <div className="flex min-h-12 items-center gap-3 border-b border-hairline pb-4 font-body text-[13px] uppercase tracking-[0.12em]" aria-label={navText('languageSwitcherLabel')}>
+                  {languageLinks.map((item) => (
+                    <Link key={item.locale} href={item.href} onClick={() => setIsMenuOpen(false)} className={locale === item.locale ? 'text-accent' : 'text-subtext'}>
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
 
             <Link
               href={navigationHref('contact', '/contact')}

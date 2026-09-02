@@ -113,6 +113,9 @@ export type CmsInquiry = {
   pagePath: string;
   userAgent: string;
   ipAddress: string;
+  customerId: string;
+  linkSource: string;
+  linkedAt: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -614,20 +617,28 @@ export async function deleteCollection(idOrSlug: string) {
   return Boolean(response?.ok);
 }
 
-export async function createContactInquiry(payload: ContactInquiryPayload, requestMeta: RequestMeta) {
+export async function createContactInquiry(
+  payload: ContactInquiryPayload,
+  requestMeta: RequestMeta,
+  customerHeaders: HeadersInit = {}
+) {
   const response = await cmsFetch<{inquiry: CmsInquiry}>('/api/inquiries/contact', {
     method: 'POST',
     body: payload,
-    headers: requestMetaHeaders(requestMeta)
+    headers: {...requestMetaHeaders(requestMeta), ...Object.fromEntries(new Headers(customerHeaders))}
   });
   return response;
 }
 
-export async function createGolfInquiry(payload: GolfInquiryPayload, requestMeta: RequestMeta) {
+export async function createGolfInquiry(
+  payload: GolfInquiryPayload,
+  requestMeta: RequestMeta,
+  customerHeaders: HeadersInit = {}
+) {
   const response = await cmsFetch<{inquiry: CmsInquiry}>('/api/inquiries/golf', {
     method: 'POST',
     body: payload,
-    headers: requestMetaHeaders(requestMeta)
+    headers: {...requestMetaHeaders(requestMeta), ...Object.fromEntries(new Headers(customerHeaders))}
   });
   return response;
 }

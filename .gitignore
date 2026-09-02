@@ -32,6 +32,8 @@ pnpm-debug.log*
 /data/*.sqlite
 /data/*.sqlite-*
 /backend/cms/target
+/backend/customer/target
+/.pnpm-store
 /.frontend-only-build-backup
 /.worktrees
 /.agents
