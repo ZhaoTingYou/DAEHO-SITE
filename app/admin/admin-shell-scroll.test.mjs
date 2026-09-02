@@ -22,3 +22,8 @@ test('desktop CMS navigation uses a scoped native scrollbar', () => {
   assert.match(globals, /\.admin-sidebar-scroll\s*\{[\s\S]*scrollbar-width:\s*thin;/);
   assert.match(globals, /\.admin-sidebar-scroll::-webkit-scrollbar-thumb/);
 });
+
+test('compact CMS navigation wraps into view instead of requiring horizontal scrolling', () => {
+  assert.match(shell, /<nav className="[^"]*max-w-full[^"]*flex-wrap[^"]*">/);
+  assert.doesNotMatch(shell, /<nav className="[^"]*overflow-x-auto[^"]*">/);
+});

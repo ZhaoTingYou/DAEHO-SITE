@@ -40,6 +40,15 @@ test('CMS copy identifies the Bot as internal routing and sends customers to the
   assert.match(page, /resetTopicCreationConfirm: t\('liveChat\.resetTopicCreationConfirm'\)/);
 });
 
+test('CMS names the live-chat area for the website experience rather than the internal Telegram transport', () => {
+  assert.match(i18n, /'nav\.liveChat': '网站实时咨询管理'/);
+  assert.match(i18n, /'liveChat\.title': '网站实时咨询管理'/);
+  assert.match(i18n, /'nav\.liveChat': 'Website live-chat management'/);
+  assert.match(i18n, /'liveChat\.title': 'Website live-chat management'/);
+  assert.match(i18n, /'nav\.liveChat': '웹사이트 실시간 상담 관리'/);
+  assert.match(i18n, /'liveChat\.title': '웹사이트 실시간 상담 관리'/);
+});
+
 test('admin live-chat rows show text source badges, website states, unread count, and accessible targets', () => {
   assert.match(editor, /session\.source === 'website'/);
   assert.match(editor, /copy\.sourceWebsite/);

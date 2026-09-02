@@ -77,12 +77,12 @@ export function AdminShell({
               </button>
             </form>
           </div>
-          <nav className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          <nav className="mt-3 flex max-w-full flex-wrap gap-2 pb-1">
             {visibleNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="shrink-0 rounded-md border border-[#d9dee7] bg-white px-3 py-2 text-xs font-semibold"
+                className="max-w-full rounded-md border border-[#d9dee7] bg-white px-3 py-2 text-center text-xs font-semibold"
               >
                 {t(item.labelKey)}
               </Link>

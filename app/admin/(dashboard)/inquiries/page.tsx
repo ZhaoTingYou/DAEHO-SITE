@@ -29,13 +29,12 @@ export default async function AdminInquiriesPage({searchParams}: Props) {
         title={t('inquiry.title')}
         description={t('inquiry.description')}
         action={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 max-w-full flex-wrap gap-2">
             <FilterLink href="/admin/inquiries/statuses" label={t('inquiry.manageStatuses')} active={false} />
             <FilterLink href="/admin/inquiries" label={t('common.all')} active={!query?.status && !query?.source} />
             <FilterLink href="/admin/inquiries?status=new" label={t('status.new')} active={query?.status === 'new'} />
             <FilterLink href="/admin/inquiries?source=contact" label={t('source.contact')} active={query?.source === 'contact'} />
             <FilterLink href="/admin/inquiries?source=golf" label={t('source.golf')} active={query?.source === 'golf'} />
-            <FilterLink href="/admin/inquiries?source=telegram" label={t('source.telegram')} active={query?.source === 'telegram'} />
             <FilterLink href="/admin/inquiries?source=web_live_chat" label={t('source.web_live_chat')} active={query?.source === 'web_live_chat'} />
           </div>
         }
