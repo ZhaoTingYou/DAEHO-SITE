@@ -1058,7 +1058,7 @@ ssh -i /Users/tingyouzhao/.ssh/LightsailDefaultKey-ap-northeast-2.pem \
   "cd /home/ubuntu/daeho-site && test -z \"\$(git status --porcelain)\" && git rev-parse HEAD && sudo docker compose -p daeho-prod ps"
 ```
 
-Create `/home/ubuntu/backups/daeho-pre-web-live-chat-20260901.sql.gz` using `pg_dump` inside `daeho-prod-postgres-1`; verify gzip integrity and non-zero size before deployment.
+Create `/home/ubuntu/backups/daeho-pre-web-live-chat-20260902.sql.gz` using `pg_dump` inside `daeho-prod-postgres-1`; verify gzip integrity and non-zero size before deployment. Before V20, create and validate a distinct `/home/ubuntu/backups/daeho-pre-customer-message-history-20260902.sql.gz` without overwriting the first backup.
 
 - [ ] **Step 6: Install a production session secret without printing it**
 
