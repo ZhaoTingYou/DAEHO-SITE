@@ -11,5 +11,9 @@ public interface VerificationSessionStore {
 
   VerificationSession findLatestConsumedByPhone(String phone);
 
+  VerificationSession findLatestConsumedByPhoneFingerprint(String fingerprint);
+
+  void delete(UUID id);
+
   boolean consumeGrant(UUID id, String grantHash, Instant consumedAt);
 }

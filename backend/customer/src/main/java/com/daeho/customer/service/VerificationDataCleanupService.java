@@ -19,9 +19,13 @@ public class VerificationDataCleanupService {
 
   @Scheduled(cron = "0 40 3 * * *", zone = "UTC")
   public void purgeExpiredVerificationData() {
-    jdbc.update(
-        "DELETE FROM verification_sessions WHERE expires_at < ?",
-        clock.instant().minus(RETENTION_AFTER_EXPIRY)
-    );
+    var cutoff = clock.instant().minus(RETENTION_AFTER_EXPIRY);
+    jdbc.update("DELETE FROM verification_sessions WHERE expires_at < ? AND consumed_at IS NULL", cutoff);
+    jdbc.update("""
+        UPDATE verification_sessions SET identifier = '', phone = '', legal_name = '',
+          challenge_hash = '', ip_fingerprint = '', idempotency_key_hash = '',
+          provider_message_id = '', updated_at = now()
+        WHERE expires_at < ? AND consumed_at IS NOT NULL
+        """, cutoff);
   }
 }

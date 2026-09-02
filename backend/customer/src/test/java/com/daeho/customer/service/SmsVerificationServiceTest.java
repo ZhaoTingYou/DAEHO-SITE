@@ -224,6 +224,16 @@ class SmsVerificationServiceTest {
     }
 
     @Override
+    public VerificationSession findLatestConsumedByPhoneFingerprint(String fingerprint) {
+      return sessions.values().stream()
+          .filter(session -> fingerprint.equals(session.ciFingerprint()) && session.consumedAt() != null)
+          .findFirst().orElse(null);
+    }
+
+    @Override
+    public void delete(UUID id) { sessions.remove(id); }
+
+    @Override
     public boolean consumeGrant(UUID id, String grantHash, Instant consumedAt) {
       var session = sessions.get(id);
       if (session == null || session.consumedAt() != null || !grantHash.equals(session.grantHash())) {

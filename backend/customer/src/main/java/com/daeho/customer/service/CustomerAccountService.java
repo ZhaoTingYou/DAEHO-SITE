@@ -20,15 +20,6 @@ public class CustomerAccountService {
     this.grants = grants;
   }
 
-  public CustomerProfile provision(String subject, String grant) {
-    var existing = profiles.findBySubject(subject);
-    if (existing != null) {
-      return existing;
-    }
-    var verification = grants.requireConsumedForProvisioning(grant);
-    return profiles.createFromVerification(subject, verification);
-  }
-
   public CustomerProfile provisionFromAuthenticatedPhone(String subject, String phone) {
     var existing = profiles.findBySubject(subject);
     if (existing != null) {
@@ -36,7 +27,9 @@ public class CustomerAccountService {
     }
     var verification = grants.requireConsumedPhoneForProvisioning(phone);
     requireRegistrationIdentifierAvailable(verification);
-    return profiles.createFromVerification(subject, verification);
+    var profile = profiles.createFromVerification(subject, verification);
+    grants.consumeProvisioningReceipt(verification.id());
+    return profile;
   }
 
   public void requireRegistrationIdentifierAvailable(VerificationSession verification) {

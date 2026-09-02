@@ -60,13 +60,6 @@ public class CustomerController {
     return Map.of("sessionVersion", profile.sessionVersion());
   }
 
-  @PostMapping("/v1/internal/profiles")
-  public CustomerProfile provision(
-      HttpServletRequest request, @RequestBody ProvisionRequest input) {
-    internalApiKey.require(request);
-    return accounts.provision(input.subject(), input.registrationGrant());
-  }
-
   @PostMapping("/v1/internal/profiles/from-authenticated-phone")
   public CustomerProfile provisionFromAuthenticatedPhone(
       HttpServletRequest request, @RequestBody AuthenticatedPhoneProvisionRequest input) {
@@ -115,8 +108,6 @@ public class CustomerController {
   }
 
   public record ProfileUpdate(String displayName, String email, String organization, String team, String locale) {}
-
-  public record ProvisionRequest(String subject, String registrationGrant) {}
 
   public record AuthenticatedPhoneProvisionRequest(String subject, String phone) {}
 

@@ -1,9 +1,13 @@
 import {NextResponse, type NextRequest} from 'next/server';
 import {createRemoteJWKSet, jwtVerify} from 'jose';
 
-import {verifyLoginTransaction} from '@/lib/customer/auth-cookie-core.mjs';
+import {
+  profileProvisioningRequest,
+  verifyLoginTransaction
+} from '@/lib/customer/auth-cookie-core.mjs';
 import {
   authConfig,
+  accountsEnabled,
   clearRegistrationTransactionCookie,
   customerServiceHeaders,
   loginTransactionCookie,
@@ -14,6 +18,9 @@ import {
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
+  if (!accountsEnabled()) {
+    return new NextResponse('Not found', {status: 404});
+  }
   const config = authConfig();
   const state = request.nextUrl.searchParams.get('state') ?? '';
   const code = request.nextUrl.searchParams.get('code') ?? '';
@@ -52,7 +59,7 @@ export async function GET(request: NextRequest) {
   }
   let subject: string;
   let authTime = 0;
-  let verifiedPhone = '';
+  let provisioning: ReturnType<typeof profileProvisioningRequest> = null;
   try {
     const {payload} = await jwtVerify(
       tokens.id_token,
@@ -64,24 +71,11 @@ export async function GET(request: NextRequest) {
     }
     subject = payload.sub;
     authTime = typeof payload.auth_time === 'number' ? payload.auth_time : 0;
-    verifiedPhone = payload.phone_number_verified === true && typeof payload.phone_number === 'string'
-      ? payload.phone_number
-      : '';
+    provisioning = profileProvisioningRequest(subject, payload);
   } catch {
     return NextResponse.redirect(new URL('/ko/login?error=invalid_id_token', config.siteUrl));
   }
   const registration = await readRegistrationTransaction();
-  const provisioning = registration
-    ? {
-        path: '/v1/internal/profiles',
-        body: {subject, registrationGrant: registration.registrationGrant}
-      }
-    : verifiedPhone
-      ? {
-          path: '/v1/internal/profiles/from-authenticated-phone',
-          body: {subject, phone: verifiedPhone}
-        }
-      : null;
   if (provisioning) {
     const customerBaseUrl = process.env.CUSTOMER_BACKEND_URL?.replace(/\/+$/, '');
     const profileResponse = customerBaseUrl

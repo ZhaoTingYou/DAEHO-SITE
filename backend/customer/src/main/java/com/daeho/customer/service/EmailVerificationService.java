@@ -34,6 +34,9 @@ public class EmailVerificationService {
   private final String mode;
   private final String from;
   private final byte[] hmacSecret;
+  private final boolean accountsEnabled;
+  private final String termsVersion;
+  private final String privacyVersion;
 
   public EmailVerificationService(
       JdbcTemplate jdbc,
@@ -43,7 +46,10 @@ public class EmailVerificationService {
       Clock clock,
       @Value("${customer.email.mode:disabled}") String mode,
       @Value("${customer.email.from:}") String from,
-      @Value("${customer.verification-hmac-secret:}") String hmacSecret) {
+      @Value("${customer.verification-hmac-secret:}") String hmacSecret,
+      @Value("${customer.accounts-enabled:false}") boolean accountsEnabled,
+      @Value("${customer.consent.terms-version:terms-2026-09}") String termsVersion,
+      @Value("${customer.consent.privacy-version:privacy-2026-09}") String privacyVersion) {
     this.jdbc = jdbc;
     this.sessions = sessions;
     this.grants = grants;
@@ -52,10 +58,13 @@ public class EmailVerificationService {
     this.mode = mode;
     this.from = from;
     this.hmacSecret = hmacSecret.getBytes(StandardCharsets.UTF_8);
+    this.accountsEnabled = accountsEnabled;
+    this.termsVersion = termsVersion;
+    this.privacyVersion = privacyVersion;
   }
 
   public EmailStartResult start(EmailStartRequest request) {
-    if ("disabled".equals(mode)) {
+    if (!accountsEnabled || "disabled".equals(mode)) {
       throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Email verification is not configured");
     }
     if (hmacSecret.length < 24) {
@@ -63,7 +72,8 @@ public class EmailVerificationService {
     }
     var email = request.email() == null ? "" : request.email().trim().toLowerCase();
     if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$") || request.birthDate() == null
-        || !request.adultDeclaration() || !AdultEligibility.isAdult(request.birthDate(), clock)) {
+        || !request.adultDeclaration() || !request.requiredConsent()
+        || !AdultEligibility.isAdult(request.birthDate(), clock)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid adult verification details are required");
     }
     var id = UUID.randomUUID();
@@ -74,8 +84,8 @@ public class EmailVerificationService {
           id, method, identifier, adult_verified, locale, terms_version, privacy_version,
           marketing_consent, status, challenge_hash, expires_at, created_at, updated_at
         ) VALUES (?, 'email_declaration', ?, true, ?, ?, ?, ?, 'pending', ?, ?, now(), now())
-        """, id, email, locale(request.locale()), required(request.termsVersion()),
-        required(request.privacyVersion()), request.marketingConsent(), hmac(id, code), expiresAt);
+        """, id, email, locale(request.locale()), required(termsVersion),
+        required(privacyVersion), request.marketingConsent(), hmac(id, code), expiresAt);
     sendCode(email, code, request.locale());
     return new EmailStartResult(id, expiresAt, "log".equals(mode) ? code : null);
   }
@@ -170,9 +180,8 @@ public class EmailVerificationService {
       String email,
       LocalDate birthDate,
       boolean adultDeclaration,
+      boolean requiredConsent,
       String locale,
-      String termsVersion,
-      String privacyVersion,
       boolean marketingConsent
   ) {}
 

@@ -17,6 +17,10 @@ let golfVisibilityCache: {enabled: boolean; expiresAt: number} | null = null;
 let englishVisibilityCache: {enabled: boolean; expiresAt: number} | null = null;
 
 export default async function proxy(request: NextRequest) {
+  if (isCustomerAccountPath(request.nextUrl.pathname)
+      && process.env.CUSTOMER_ACCOUNTS_ENABLED !== 'true') {
+    return notFoundResponse();
+  }
   if (isAdminProtectedPath(request.nextUrl.pathname)) {
     if (!isAdminIpAllowed(request.headers)) {
       return notFoundResponse();
@@ -53,8 +57,15 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/admin/:path*', '/((?!api|trpc|_next|_vercel|.*\\..*).*)']
+  matcher: ['/api/admin/:path*', '/api/customer/:path*', '/((?!api|trpc|_next|_vercel|.*\\..*).*)']
 };
+
+export function isCustomerAccountPath(pathname: string) {
+  if (pathname.startsWith('/api/customer/')) return true;
+  const segments = pathname.split('/').filter(Boolean);
+  const index = segments[0] === 'ko' || segments[0] === 'en' ? 1 : 0;
+  return ['login', 'register', 'my-daeho'].includes(segments[index]);
+}
 
 export function isGolfRequestPath(pathname: string) {
   const segments = pathname.split('/').filter(Boolean);

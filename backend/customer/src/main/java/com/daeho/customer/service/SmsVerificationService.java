@@ -149,6 +149,7 @@ public class SmsVerificationService {
     );
   }
 
+  @Transactional(noRollbackFor = ResponseStatusException.class)
   public RegistrationGrantService.IssuedGrant complete(UUID id, String code) {
     if (code == null || !code.matches("\\d{6}")) {
       throw invalidCode();
@@ -169,7 +170,7 @@ public class SmsVerificationService {
       throw invalidCode();
     }
     var verified = new VerificationSession(
-        id, "sms_declaration", challenge.phone(), "", challenge.phone(), "", true,
+        id, "sms_declaration", challenge.phone(), "", challenge.phone(), hmac("phone:" + challenge.phone()), true,
         challenge.locale(), challenge.termsVersion(), challenge.privacyVersion(),
         challenge.marketingConsent(), "verified", "", null, challenge.expiresAt(), null
     );

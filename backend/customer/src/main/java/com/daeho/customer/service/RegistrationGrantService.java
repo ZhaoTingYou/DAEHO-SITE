@@ -9,7 +9,12 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 @Service
 public class RegistrationGrantService {
@@ -17,10 +22,18 @@ public class RegistrationGrantService {
   private final VerificationSessionStore store;
   private final Clock clock;
   private final SecureRandom random = new SecureRandom();
+  private final byte[] hmacSecret;
 
-  public RegistrationGrantService(VerificationSessionStore store, Clock clock) {
+  @Autowired
+  public RegistrationGrantService(VerificationSessionStore store, Clock clock,
+      @Value("${customer.verification-hmac-secret:}") String secret) {
     this.store = store;
     this.clock = clock;
+    this.hmacSecret = secret.getBytes(StandardCharsets.UTF_8);
+  }
+
+  public RegistrationGrantService(VerificationSessionStore store, Clock clock) {
+    this(store, clock, "test-verification-secret-at-least-24-chars");
   }
 
   public IssuedGrant issue(VerificationSession session) {
@@ -54,12 +67,23 @@ public class RegistrationGrantService {
     if (phone == null || !phone.matches("^\\+8210\\d{8}$")) {
       throw new RegistrationGrantException("A verified Korean phone is required");
     }
-    var session = store.findLatestConsumedByPhone(phone);
+    var session = store.findLatestConsumedByPhoneFingerprint(phoneFingerprint(phone));
+    if (session == null) session = store.findLatestConsumedByPhone(phone);
     if (session == null || session.consumedAt() == null || !"verified".equals(session.status())
-        || !session.adultVerified() || !phone.equals(session.phone())) {
+        || !session.adultVerified()) {
       throw new RegistrationGrantException("No completed registration exists for this verified phone");
     }
-    return session;
+    return session.withPhone(phone);
+  }
+
+  public void consumeProvisioningReceipt(UUID id) { store.delete(id); }
+
+  private String phoneFingerprint(String phone) {
+    try {
+      var mac = Mac.getInstance("HmacSHA256");
+      mac.init(new SecretKeySpec(hmacSecret, "HmacSHA256"));
+      return java.util.HexFormat.of().formatHex(mac.doFinal(("phone:" + phone).getBytes(StandardCharsets.UTF_8)));
+    } catch (Exception error) { throw new IllegalStateException(error); }
   }
 
   private VerificationSession requireGrant(String grant, boolean mustBeConsumed) {

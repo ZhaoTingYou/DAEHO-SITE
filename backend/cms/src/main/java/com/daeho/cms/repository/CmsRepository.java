@@ -466,6 +466,17 @@ public class CmsRepository {
   @Transactional
   public Map<String, Object> linkInquiryByAdmin(
       String id, String customerId, String actor, String reason) {
+    return linkInquiry(id, customerId, "admin", actor, reason);
+  }
+
+  @Transactional
+  public Map<String, Object> linkInquiryByClaim(
+      String id, String customerId, String actor, String reason) {
+    return linkInquiry(id, customerId, "claim", actor, reason);
+  }
+
+  private Map<String, Object> linkInquiry(
+      String id, String customerId, String source, String actor, String reason) {
     var existing = getInquiry(id);
     if (existing == null) {
       return null;
@@ -478,14 +489,14 @@ public class CmsRepository {
       return null;
     }
     var updated = jdbc.update("""
-        UPDATE cms_inquiries SET customer_id = ?::uuid, link_source = 'admin',
+        UPDATE cms_inquiries SET customer_id = ?::uuid, link_source = ?,
           linked_at = COALESCE(linked_at, now()), updated_at = now()
         WHERE id = ? AND (customer_id IS NULL OR customer_id = ?::uuid)
-        """, customerId, id, customerId);
+        """, customerId, source, id, customerId);
     if (updated != 1) {
       return null;
     }
-    auditInquiryLink(id, customerId, "admin", actor, reason);
+    auditInquiryLink(id, customerId, source, actor, reason);
     return getInquiry(id);
   }
 

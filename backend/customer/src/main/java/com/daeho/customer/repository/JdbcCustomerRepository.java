@@ -60,6 +60,20 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
   }
 
   @Override
+  public VerificationSession findLatestConsumedByPhoneFingerprint(String fingerprint) {
+    return jdbc.query("""
+        SELECT * FROM verification_sessions
+        WHERE method = 'sms_declaration' AND ci_fingerprint = ? AND status = 'verified'
+          AND consumed_at IS NOT NULL ORDER BY consumed_at DESC LIMIT 1
+        """, this::mapVerification, fingerprint).stream().findFirst().orElse(null);
+  }
+
+  @Override
+  public void delete(UUID id) {
+    jdbc.update("DELETE FROM verification_sessions WHERE id = ?", id);
+  }
+
+  @Override
   public boolean consumeGrant(UUID id, String grantHash, Instant consumedAt) {
     return jdbc.update("""
         UPDATE verification_sessions SET consumed_at = ?, updated_at = now()

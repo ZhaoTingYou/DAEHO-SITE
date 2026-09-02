@@ -66,6 +66,15 @@ public class CustomerInquiryController {
     return Map.of("inquiry", inquiry);
   }
 
+  @PatchMapping("/{id}/claim-link")
+  public Map<String, Object> claimLink(
+      HttpServletRequest request, @PathVariable String id, @RequestBody AdminLinkRequest input) {
+    auth.requireService(request);
+    var inquiry = inquiries.linkInquiryByClaim(id, input.customerId().toString(), input.actor(), input.reason());
+    if (inquiry == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Inquiry not found");
+    return Map.of("inquiry", inquiry);
+  }
+
   @PatchMapping("/customer/{customerId}/unlink")
   public Map<String, Object> unlinkDeletedCustomer(
       HttpServletRequest request, @PathVariable UUID customerId) {

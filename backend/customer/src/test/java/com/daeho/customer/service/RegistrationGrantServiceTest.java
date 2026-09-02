@@ -89,6 +89,12 @@ class RegistrationGrantServiceTest {
     }
 
     @Override
+    public VerificationSession findLatestConsumedByPhoneFingerprint(String fingerprint) { return null; }
+
+    @Override
+    public void delete(UUID id) { sessions.remove(id); }
+
+    @Override
     public boolean consumeGrant(UUID id, String grantHash, Instant consumedAt) {
       var session = sessions.get(id);
       if (session == null || session.consumedAt() != null || !grantHash.equals(session.grantHash())) {

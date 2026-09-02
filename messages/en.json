@@ -2395,7 +2395,7 @@
             "3. Access logs and security records: up to 3 months from collection. However, records may be retained for the necessary period where required for security incident investigation, dispute response, or legal preservation.",
             "4. Records required to be retained under applicable law: for the period specified by the relevant law",
             "5. Customer profile: while the account is active and for up to 30 days after a deletion request. Inquiry snapshots are retained under the three-year inquiry policy, but the account link and user access are removed when deletion is completed.",
-            "6. Temporary mobile-verification sessions, including abandoned attempts, rate-limit fingerprints, and provider message identifiers: deleted within 7 days after the session expires."
+            "6. Temporary mobile-verification sessions, including abandoned attempts, rate-limit fingerprints, and provider message identifiers: deleted or stripped of those temporary fields within 7 days after expiry. A non-reversible phone fingerprint and consent receipt may remain until customer-profile provisioning succeeds."
           ]
         },
         {

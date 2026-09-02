@@ -35,7 +35,7 @@ public class CmsInquiryUnlinkClient {
         {"customerId":"%s","actor":"claim-reconciler","reason":"approved legacy claim"}
         """.formatted(customerId);
     return patch(
-        "/api/customer/inquiries/" + pathSegment(inquiryId) + "/link",
+        "/api/customer/inquiries/" + pathSegment(inquiryId) + "/claim-link",
         body
     );
   }

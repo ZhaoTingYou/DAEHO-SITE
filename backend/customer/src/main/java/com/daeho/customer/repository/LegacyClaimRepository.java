@@ -138,6 +138,8 @@ public class LegacyClaimRepository {
     return jdbc.query("""
         SELECT id, customer_id, inquiry_id FROM legacy_inquiry_claims
         WHERE status = 'approved' AND link_state = 'pending'
+          AND EXISTS (SELECT 1 FROM customer_profiles p
+            WHERE p.customer_id = legacy_inquiry_claims.customer_id AND p.status = 'active')
         ORDER BY reviewed_at ASC LIMIT ?
         """, (rs, row) -> Map.of(
             "id", rs.getObject("id", UUID.class),

@@ -36,4 +36,10 @@ public record VerificationSession(
         expiresAt, value
     );
   }
+
+  public VerificationSession withPhone(String value) {
+    return new VerificationSession(id, method, identifier, legalName, value, ciFingerprint,
+        adultVerified, locale, termsVersion, privacyVersion, marketingConsent, status,
+        grantHash, grantExpiresAt, expiresAt, consumedAt);
+  }
 }

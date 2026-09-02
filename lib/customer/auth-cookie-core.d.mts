@@ -20,6 +20,10 @@ export type CustomerSession = {
 };
 
 export function sanitizeReturnTo(value: unknown, fallback?: string): string;
+export function profileProvisioningRequest(
+  subject: string,
+  claims: Record<string, unknown>
+): {path: string; body: {subject: string; phone: string}} | null;
 export function createLoginTransaction(input?: {returnTo?: string; now?: number}): LoginTransaction;
 export function verifyLoginTransaction(
   cookieValue: string | undefined,
