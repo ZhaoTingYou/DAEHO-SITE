@@ -3,10 +3,12 @@
 import {type FormEvent, useEffect, useRef, useState} from 'react';
 
 import {currentAnalyticsPagePath, trackAnalyticsEvent} from '@/lib/analytics';
+import {InquiryPhoneField} from '@/components/forms/inquiry-phone-field';
 import {
   resolveContactInquiryType,
   type ContactInquiryType
 } from '@/lib/inquiry-query-core.mjs';
+import {toDomesticInquiryPhone} from '@/lib/inquiry-phone-core.mjs';
 import {isLocale} from '@/lib/locales';
 import type {CustomerProfile} from '@/lib/customer/types';
 import {useLocationSearch} from '@/lib/use-location-search';
@@ -20,6 +22,8 @@ type ContactFormCopy = {
   name: string;
   organization: string;
   contact: string;
+  phoneHint: string;
+  phonePlaceholder: string;
   email: string;
   type: string;
   message: string;
@@ -56,7 +60,7 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
           ...values,
           ...(nextProfile ? {
             name: nextProfile.legalName || nextProfile.displayName || values.name,
-            phone: nextProfile.phone,
+            phone: toDomesticInquiryPhone(nextProfile.phone),
             email: nextProfile.email || values.email,
             organization: nextProfile.organization || values.organization
           } : {})
@@ -84,14 +88,11 @@ export function ContactForm({copy: text, defaultType = 'appointment'}: ContactFo
       <SpamTrapField />
       <TextField id="contact-name" label={text.name} name="name" autoComplete="name" maxLength={120} required />
       <TextField id="contact-organization" label={text.organization} name="organization" autoComplete="organization" maxLength={160} />
-      <TextField
+      <InquiryPhoneField
         id="contact-contact"
         label={text.contact}
-        name="phone"
-        type="tel"
-        inputMode="tel"
-        autoComplete="tel"
-        maxLength={180}
+        hint={text.phoneHint}
+        placeholder={text.phonePlaceholder}
         readOnly={Boolean(profile?.phone)}
       />
       <TextField

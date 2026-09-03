@@ -12,6 +12,7 @@ import {rejectUnsafeInquiry} from '@/lib/cms/inquiry-protection';
 import {createContactInquiry} from '@/lib/cms/repositories';
 import {contactInquirySchema} from '@/lib/cms/validation';
 import {isSameOriginMutation} from '@/lib/customer/request-security';
+import {toDomesticInquiryPhone} from '@/lib/inquiry-phone-core.mjs';
 import {
   accountFeatureSettings,
   currentCustomerProfile,
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
   const inquiryData = profile ? {
     ...parsed.data,
     name: profile.legalName || profile.displayName || parsed.data.name,
-    phone: profile.phone,
+    phone: toDomesticInquiryPhone(profile.phone),
     email: profile.email || parsed.data.email,
     organization: profile.organization || parsed.data.organization
   } : parsed.data;

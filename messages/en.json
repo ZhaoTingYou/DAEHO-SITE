@@ -1990,7 +1990,9 @@
     "contact": {
       "name": "Name",
       "organization": "Company / Team",
-      "contact": "Contact",
+      "contact": "Mobile number",
+      "phoneHint": "Enter 11 digits beginning with 010. Example: 01012341234",
+      "phonePlaceholder": "01012341234",
       "email": "Email",
       "type": "Inquiry type",
       "message": "Message",
@@ -2018,7 +2020,9 @@
     },
     "golfInquiry": {
       "name": "Name",
-      "contact": "Contact",
+      "contact": "Mobile number",
+      "phoneHint": "Enter 11 digits beginning with 010. Example: 01012341234",
+      "phonePlaceholder": "01012341234",
       "email": "Email",
       "quantity": "Quantity",
       "due": "Desired delivery",

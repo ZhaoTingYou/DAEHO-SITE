@@ -10,10 +10,33 @@ class RequestValidationContactEmailTest {
   private final RequestValidation validation = new RequestValidation();
 
   @Test
+  void requiresElevenDomesticDigitsWhenAnInquiryPhoneIsProvided() {
+    assertTrue(validation.contactInquiry(Map.of(
+        "name", "Tester",
+        "phone", "01012341234"
+    )).success());
+
+    for (var phone : new String[] {
+        "010-1234-1234",
+        "+821012341234",
+        "01112341234",
+        "0101234123",
+        "010123412345"
+    }) {
+      var invalid = validation.contactInquiry(Map.of(
+          "name", "Tester",
+          "phone", phone
+      ));
+      assertFalse(invalid.success(), phone);
+      assertTrue(invalid.issues().stream().anyMatch(issue -> "phone".equals(issue.get("path"))));
+    }
+  }
+
+  @Test
   void acceptsEitherEmailOrPhoneAndValidatesProvidedEmail() {
     var phoneOnly = validation.contactInquiry(Map.of(
         "name", "Tester",
-        "phone", "010-1234-5678"
+        "phone", "01012345678"
     ));
     assertTrue(phoneOnly.success());
 
@@ -41,9 +64,9 @@ class RequestValidationContactEmailTest {
   void keepsLegacyContactAsTheCanonicalPhone() {
     var valid = validation.golfInquiry(Map.of(
         "name", "Tester",
-        "contact", "010-9876-5432"
+        "contact", "01098765432"
     ));
     assertTrue(valid.success());
-    assertTrue("010-9876-5432".equals(valid.data().get("phone")));
+    assertTrue("01098765432".equals(valid.data().get("phone")));
   }
 }

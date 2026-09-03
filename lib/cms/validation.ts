@@ -1,5 +1,6 @@
 import {z} from 'zod';
 
+import {isValidOptionalInquiryPhone} from '@/lib/inquiry-phone-core.mjs';
 import {locales} from '@/lib/locales';
 
 export const localeSchema = z.enum(locales);
@@ -8,7 +9,15 @@ const optionalText = z.string().trim().optional().default('');
 const optionalJson = z.unknown().optional().default({});
 const optionalJsonArray = z.array(z.unknown()).optional().default([]);
 const inquiryName = z.string().trim().min(1).max(120);
-const inquiryContact = z.string().trim().max(180).optional().default('');
+const inquiryPhone = z
+  .string()
+  .trim()
+  .max(11)
+  .refine(isValidOptionalInquiryPhone, {
+    message: 'Expected an 11-digit mobile number beginning with 010.'
+  })
+  .optional()
+  .default('');
 const inquiryEmail = z
   .string()
   .trim()
@@ -92,8 +101,8 @@ export const collectionPayloadSchema = z.object({
 });
 
 const contactFields = {
-  phone: inquiryContact,
-  contact: inquiryContact,
+  phone: inquiryPhone,
+  contact: inquiryPhone,
   email: inquiryEmail
 };
 

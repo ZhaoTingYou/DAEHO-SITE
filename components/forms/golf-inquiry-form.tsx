@@ -3,7 +3,9 @@
 import {type FormEvent, useEffect, useRef, useState} from 'react';
 
 import {currentAnalyticsPagePath, trackAnalyticsEvent} from '@/lib/analytics';
+import {InquiryPhoneField} from '@/components/forms/inquiry-phone-field';
 import {isLocale} from '@/lib/locales';
+import {toDomesticInquiryPhone} from '@/lib/inquiry-phone-core.mjs';
 import type {CustomerProfile} from '@/lib/customer/types';
 
 type GolfInquiryFormProps = {
@@ -19,6 +21,8 @@ type GolfInquiryFormProps = {
 type GolfInquiryFormCopy = {
   name: string;
   contact: string;
+  phoneHint: string;
+  phonePlaceholder: string;
   email: string;
   quantity: string;
   due: string;
@@ -52,7 +56,7 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
           ...values,
           ...(nextProfile ? {
             name: nextProfile.legalName || nextProfile.displayName || values.name,
-            phone: nextProfile.phone,
+            phone: toDomesticInquiryPhone(nextProfile.phone),
             email: nextProfile.email || values.email,
             team: nextProfile.team || values.team
           } : {})
@@ -87,14 +91,11 @@ export function GolfInquiryForm({copy: text, configuration}: GolfInquiryFormProp
         </>
       ) : null}
       <TextField id="golf-name" label={text.name} name="name" autoComplete="name" maxLength={120} required />
-      <TextField
+      <InquiryPhoneField
         id="golf-contact"
         label={text.contact}
-        name="phone"
-        type="tel"
-        inputMode="tel"
-        autoComplete="tel"
-        maxLength={180}
+        hint={text.phoneHint}
+        placeholder={text.phonePlaceholder}
         readOnly={Boolean(profile?.phone)}
       />
       <TextField

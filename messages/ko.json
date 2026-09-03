@@ -1990,7 +1990,9 @@
     "contact": {
       "name": "이름",
       "organization": "회사 / 팀",
-      "contact": "연락처",
+      "contact": "휴대전화 번호",
+      "phoneHint": "010으로 시작하는 숫자 11자리를 입력해 주세요. 예: 01012341234",
+      "phonePlaceholder": "01012341234",
       "email": "이메일",
       "type": "문의 유형",
       "message": "메시지",
@@ -2018,7 +2020,9 @@
     },
     "golfInquiry": {
       "name": "이름",
-      "contact": "연락처",
+      "contact": "휴대전화 번호",
+      "phoneHint": "010으로 시작하는 숫자 11자리를 입력해 주세요. 예: 01012341234",
+      "phonePlaceholder": "01012341234",
       "email": "이메일",
       "quantity": "수량",
       "due": "희망 납기",

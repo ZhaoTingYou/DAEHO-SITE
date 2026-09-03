@@ -27,6 +27,7 @@ public class RequestValidation {
       "admin_url"
   );
   private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+  private static final Pattern INQUIRY_PHONE_PATTERN = Pattern.compile("^010\\d{8}$");
   private static final Pattern INQUIRY_STATUS_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{0,31}$");
   private static final Pattern TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{\\{\\s*([^{}]+?)\\s*}}");
   private static final int TELEGRAM_TEMPLATE_LITERAL_LIMIT = 200;
@@ -86,10 +87,11 @@ public class RequestValidation {
     payload.putIfAbsent("pagePath", "");
     requireText(payload, "name", issues);
     requireInquiryContact(payload, issues);
+    validateInquiryPhone(payload.get("phone"), "phone", issues);
     validateEmail(payload.get("email"), "email", issues);
     validateLocale(payload.get("locale"), "locale", issues);
     maxLength(payload, "name", 120, issues);
-    maxLength(payload, "phone", 180, issues);
+    maxLength(payload, "phone", 11, issues);
     maxLength(payload, "email", 254, issues);
     maxLength(payload, "organization", 160, issues);
     maxLength(payload, "type", 160, issues);
@@ -114,10 +116,11 @@ public class RequestValidation {
     payload.putIfAbsent("pagePath", "");
     requireText(payload, "name", issues);
     requireInquiryContact(payload, issues);
+    validateInquiryPhone(payload.get("phone"), "phone", issues);
     validateEmail(payload.get("email"), "email", issues);
     validateLocale(payload.get("locale"), "locale", issues);
     maxLength(payload, "name", 120, issues);
-    maxLength(payload, "phone", 180, issues);
+    maxLength(payload, "phone", 11, issues);
     maxLength(payload, "email", 254, issues);
     maxLength(payload, "due", 160, issues);
     maxLength(payload, "team", 160, issues);
@@ -525,6 +528,13 @@ public class RequestValidation {
     var email = stringValue(value);
     if (!email.isBlank() && !EMAIL_PATTERN.matcher(email).matches()) {
       issues.add(issue(path, "Expected a valid email address."));
+    }
+  }
+
+  private void validateInquiryPhone(Object value, String path, List<Map<String, String>> issues) {
+    var phone = stringValue(value);
+    if (!phone.isBlank() && !INQUIRY_PHONE_PATTERN.matcher(phone).matches()) {
+      issues.add(issue(path, "Expected an 11-digit mobile number beginning with 010."));
     }
   }
 

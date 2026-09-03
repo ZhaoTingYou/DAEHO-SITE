@@ -13,6 +13,7 @@ import {createGolfInquiry} from '@/lib/cms/repositories';
 import {golfInquirySchema} from '@/lib/cms/validation';
 import {isGolfEnabledForSite} from '@/lib/golf-visibility';
 import {isSameOriginMutation} from '@/lib/customer/request-security';
+import {toDomesticInquiryPhone} from '@/lib/inquiry-phone-core.mjs';
 import {
   accountFeatureSettings,
   currentCustomerProfile,
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
   const inquiryData = profile ? {
     ...parsed.data,
     name: profile.legalName || profile.displayName || parsed.data.name,
-    phone: profile.phone,
+    phone: toDomesticInquiryPhone(profile.phone),
     email: profile.email || parsed.data.email,
     team: profile.team || parsed.data.team
   } : parsed.data;
