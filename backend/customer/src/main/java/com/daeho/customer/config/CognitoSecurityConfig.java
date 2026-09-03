@@ -55,6 +55,7 @@ public class CognitoSecurityConfig {
     return new OrRequestMatcher(
         PathPatternRequestMatcher.pathPattern("/actuator/**"),
         PathPatternRequestMatcher.pathPattern("/v1/verifications/**"),
+        PathPatternRequestMatcher.pathPattern("/v1/recovery/**"),
         PathPatternRequestMatcher.pathPattern("/v1/internal/**")
     );
   }

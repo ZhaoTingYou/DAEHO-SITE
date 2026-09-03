@@ -25,6 +25,8 @@
       "passwordPlaceholder": "Enter your password",
       "showPassword": "Show password",
       "continue": "Sign in",
+      "recoverUsername": "Find username",
+      "resetPassword": "Reset password",
       "newCustomer": "New to DAEHO?",
       "createAccount": "Create an account",
       "registered": "Your account is ready. Sign in with the username and password you created.",
@@ -33,7 +35,7 @@
         "username": "Enter a valid username with 4–24 characters, starting with a letter.",
         "password": "Enter your password.",
         "invalidCredentials": "The username or password is incorrect.",
-        "resetRequired": "Your password must be reset. Please contact customer support.",
+        "resetRequired": "Your password must be reset. Use the password reset page.",
         "rateLimit": "Too many sign-in attempts. Wait a moment and try again.",
         "profileProvisioning": "We could not prepare your customer profile. Please try again shortly.",
         "generic": "Sign-in could not be completed. Please try again."
@@ -81,9 +83,65 @@
         "cognitoConnection": "Unable to reach the sign-in service. Please try again shortly.",
         "invalidPassword": "Use 8 or more characters with uppercase, lowercase, a number, and a symbol.",
         "usernameExists": "That username is already in use. Choose another username.",
-        "duplicatePhone": "That phone number already has an account. Contact support until account recovery is available.",
+        "duplicatePhone": "That phone number already has an account. Use Find username or Reset password.",
         "expiredGrant": "Phone verification has expired. Request a new verification code.",
         "rateLimit": "Too many requests. Wait a moment and try again.",
+        "generic": "A temporary error occurred. Please try again shortly."
+      }
+    },
+    "recoverUsername": {
+      "metadataTitle": "Find your DAEHO username",
+      "eyebrow": "MY DAEHO",
+      "title": "Find username",
+      "intro": "We will send your username to the mobile number verified at registration.",
+      "unavailable": "Customer accounts are being prepared.",
+      "phoneLabel": "Mobile number",
+      "phonePlaceholder": "010-1234-5678",
+      "submit": "Send my username",
+      "sent": "If a matching account exists, we sent its username by SMS.",
+      "backToLogin": "Back to sign in",
+      "errors": {
+        "invalidPhone": "Enter a valid mobile number.",
+        "rateLimit": "Too many requests. Wait a moment and try again.",
+        "generic": "We could not process the request. Please try again shortly."
+      }
+    },
+    "resetPassword": {
+      "metadataTitle": "Reset your DAEHO password",
+      "eyebrow": "MY DAEHO",
+      "title": "Reset password",
+      "intro": "Verify your username and registered mobile number, then choose a new password.",
+      "unavailable": "Customer accounts are being prepared.",
+      "fields": {
+        "username": "Username",
+        "phone": "Mobile number",
+        "code": "6-digit code",
+        "password": "New password",
+        "passwordConfirm": "Confirm new password"
+      },
+      "requestCode": "Request code",
+      "codeSent": "If the account details match, we sent a verification code by SMS.",
+      "verifyCode": "Verify code",
+      "phoneVerified": "Mobile verified. Choose your new password.",
+      "resetPassword": "Change password",
+      "success": "Your password has been changed. Sign in with your new password.",
+      "backToLogin": "Back to sign in",
+      "passwordRules": {
+        "minLength": "Use at least 8 characters.",
+        "uppercase": "Include at least one uppercase letter.",
+        "lowercase": "Include at least one lowercase letter.",
+        "number": "Include at least one number.",
+        "symbol": "Include at least one symbol."
+      },
+      "errors": {
+        "invalidUsername": "Check the username format and try again.",
+        "invalidPhone": "Enter a valid mobile number.",
+        "request": "We could not request verification. Please try again shortly.",
+        "code": "The verification code is invalid or expired.",
+        "passwordMismatch": "Passwords do not match.",
+        "invalidPassword": "Meet every password requirement before continuing.",
+        "rateLimit": "Too many requests. Wait a moment and try again.",
+        "reset": "We could not change the password. Try again shortly. If verification has expired, the process will restart.",
         "generic": "A temporary error occurred. Please try again shortly."
       }
     },

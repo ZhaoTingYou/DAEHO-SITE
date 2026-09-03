@@ -1,6 +1,8 @@
 package com.daeho.customer.repository;
 
 import com.daeho.customer.model.CustomerProfile;
+import com.daeho.customer.service.AccountRecoveryAttempt;
+import com.daeho.customer.service.AccountRecoveryDelivery;
 import com.daeho.customer.service.RegistrationGrantException;
 import com.daeho.customer.service.VerificationSession;
 import java.sql.ResultSet;
@@ -15,7 +17,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public class JdbcCustomerRepository implements CustomerProfileStore, VerificationSessionStore, SmsChallengeStore {
+public class JdbcCustomerRepository implements CustomerProfileStore, VerificationSessionStore,
+    SmsChallengeStore, AccountRecoveryStore {
   private final JdbcTemplate jdbc;
 
   public JdbcCustomerRepository(JdbcTemplate jdbc) {
@@ -208,6 +211,301 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         WHERE id = ? AND method = 'sms_declaration' AND status = 'pending'
           AND sent_at IS NOT NULL AND attempt_count < 5 AND expires_at > ?
         """, databaseTimestamp(verifiedAt), id, databaseTimestamp(verifiedAt)) == 1;
+  }
+
+  @Override
+  public void acquireRecoveryRateLimitLocks(
+      String purpose, String phoneFingerprint, String ipFingerprint, String idempotencyHash) {
+    java.util.stream.Stream.of(
+        "recovery:" + purpose + ":phone:" + phoneFingerprint,
+        "recovery:" + purpose + ":ip:" + ipFingerprint,
+        "recovery:idempotency:" + idempotencyHash
+    ).sorted().forEach(lockKey -> jdbc.queryForList(
+        "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))", lockKey));
+  }
+
+  @Override
+  public long countRecentRecoveryForPhone(
+      String purpose, String phoneFingerprint, Instant since) {
+    var count = jdbc.queryForObject("""
+        SELECT COUNT(*) FROM account_recovery_attempts
+        WHERE purpose = ? AND phone_fingerprint = ? AND created_at >= ?
+        """, Long.class, purpose, phoneFingerprint, databaseTimestamp(since));
+    return count == null ? 0 : count;
+  }
+
+  @Override
+  public long countRecentRecoveryForIp(String purpose, String ipFingerprint, Instant since) {
+    var count = jdbc.queryForObject("""
+        SELECT COUNT(*) FROM account_recovery_attempts
+        WHERE purpose = ? AND ip_fingerprint = ? AND created_at >= ?
+        """, Long.class, purpose, ipFingerprint, databaseTimestamp(since));
+    return count == null ? 0 : count;
+  }
+
+  @Override
+  public AccountRecoveryAttempt findRecoveryByIdempotencyHash(String hash) {
+    return jdbc.query("""
+        SELECT * FROM account_recovery_attempts WHERE idempotency_key_hash = ?
+        """, this::mapRecovery, hash).stream().findFirst().orElse(null);
+  }
+
+  @Override
+  public void createRecovery(AccountRecoveryAttempt attempt) {
+    jdbc.update("""
+        INSERT INTO account_recovery_attempts (
+          id, purpose, customer_id, login_name, phone_fingerprint, ip_fingerprint,
+          idempotency_key_hash, locale, status, challenge_hash, attempt_count,
+          provider_message_id, sent_at, delivery_lease_expires_at, expires_at,
+          grant_hash, grant_expires_at, verified_at, consumed_at, reset_operation_hash,
+          reset_stage, reset_lease_expires_at, reset_deadline_at, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, attempt.id(), attempt.purpose(), attempt.customerId(), attempt.loginName(),
+        attempt.phoneFingerprint(), attempt.ipFingerprint(), attempt.idempotencyHash(),
+        attempt.locale(), attempt.status(), attempt.challengeHash(), attempt.attemptCount(),
+        attempt.providerMessageId(), databaseTimestamp(attempt.sentAt()),
+        databaseTimestamp(attempt.deliveryLeaseExpiresAt()), databaseTimestamp(attempt.expiresAt()),
+        attempt.grantHash(),
+        databaseTimestamp(attempt.grantExpiresAt()), databaseTimestamp(attempt.verifiedAt()),
+        databaseTimestamp(attempt.consumedAt()), attempt.resetOperationHash(),
+        attempt.resetStage(), databaseTimestamp(attempt.resetLeaseExpiresAt()),
+        databaseTimestamp(attempt.resetDeadlineAt()),
+        databaseTimestamp(attempt.createdAt()),
+        databaseTimestamp(attempt.createdAt()));
+  }
+
+  @Override
+  public AccountRecoveryDelivery findNextPendingRecovery(Instant now) {
+    return jdbc.query("""
+        SELECT recovery.*, profile.phone AS delivery_phone
+        FROM account_recovery_attempts recovery
+        JOIN customer_profiles profile ON profile.customer_id = recovery.customer_id
+        WHERE recovery.status = 'pending' AND recovery.expires_at > ?
+          AND profile.status = 'active' AND profile.login_name = recovery.login_name
+        ORDER BY recovery.created_at
+        FOR UPDATE OF recovery SKIP LOCKED
+        LIMIT 1
+        """, (rs, rowNum) -> new AccountRecoveryDelivery(
+            mapRecovery(rs, rowNum), rs.getString("delivery_phone")),
+        databaseTimestamp(now)).stream().findFirst().orElse(null);
+  }
+
+  @Override
+  public void expireStaleRecoveryDeliveries(Instant now) {
+    jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET status = 'delivery_unknown', challenge_hash = '', updated_at = ?
+        WHERE status = 'sending' AND delivery_lease_expires_at <= ?
+        """, databaseTimestamp(now), databaseTimestamp(now));
+  }
+
+  @Override
+  public void prepareRecoveryChallenge(UUID id, String challengeHash, Instant preparedAt) {
+    var updated = jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET challenge_hash = ?, updated_at = ?
+        WHERE id = ? AND purpose = 'password' AND status = 'pending'
+        """, challengeHash, databaseTimestamp(preparedAt), id);
+    if (updated != 1) throw new IllegalStateException("Recovery code could not be prepared");
+  }
+
+  @Override
+  public void markRecoverySending(UUID id, Instant leaseExpiresAt, Instant claimedAt) {
+    var updated = jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET status = 'sending', delivery_lease_expires_at = ?, updated_at = ?
+        WHERE id = ? AND status = 'pending'
+        """, databaseTimestamp(leaseExpiresAt), databaseTimestamp(claimedAt), id);
+    if (updated != 1) throw new IllegalStateException("Recovery SMS could not be claimed");
+  }
+
+  @Override
+  public void markRecoverySent(UUID id, String providerMessageId, Instant sentAt) {
+    var updated = jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET status = 'sent', provider_message_id = ?, sent_at = ?,
+          delivery_lease_expires_at = NULL, updated_at = ?
+        WHERE id = ? AND status = 'sending'
+        """, providerMessageId, databaseTimestamp(sentAt), databaseTimestamp(sentAt), id);
+    if (updated != 1) throw new IllegalStateException("Recovery SMS could not be marked as sent");
+  }
+
+  @Override
+  public void markRecoveryFailed(UUID id, Instant failedAt) {
+    jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET status = 'failed', challenge_hash = '', delivery_lease_expires_at = NULL,
+          updated_at = ?
+        WHERE id = ? AND status = 'sending'
+        """, databaseTimestamp(failedAt), id);
+  }
+
+  @Override
+  public void markRecoveryDeliveryUnknown(UUID id, Instant failedAt) {
+    jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET status = 'delivery_unknown', challenge_hash = '',
+          delivery_lease_expires_at = NULL, updated_at = ?
+        WHERE id = ? AND status = 'sending'
+        """, databaseTimestamp(failedAt), id);
+  }
+
+  @Override
+  public void markRecoveryDecoy(UUID id, Instant completedAt) {
+    jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET status = 'decoy', challenge_hash = '', updated_at = ?
+        WHERE id = ? AND status = 'pending'
+        """, databaseTimestamp(completedAt), id);
+  }
+
+  @Override
+  public AccountRecoveryAttempt findRecovery(UUID id) {
+    return jdbc.query("""
+        SELECT * FROM account_recovery_attempts WHERE id = ?
+        """, this::mapRecovery, id).stream().findFirst().orElse(null);
+  }
+
+  @Override
+  public void recordRecoveryFailedAttempt(UUID id, Instant attemptedAt) {
+    jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET attempt_count = attempt_count + 1, updated_at = ?
+        WHERE id = ? AND purpose = 'password' AND status = 'sent' AND attempt_count < 5
+        """, databaseTimestamp(attemptedAt), id);
+  }
+
+  @Override
+  public boolean markRecoveryVerified(
+      UUID id, String grantHash, Instant grantExpiresAt, Instant verifiedAt) {
+    return jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET status = 'verified', grant_hash = ?, grant_expires_at = ?,
+          verified_at = ?, updated_at = ?
+        WHERE id = ? AND purpose = 'password' AND status = 'sent'
+          AND attempt_count < 5 AND expires_at > ?
+        """, grantHash, databaseTimestamp(grantExpiresAt), databaseTimestamp(verifiedAt),
+        databaseTimestamp(verifiedAt), id, databaseTimestamp(verifiedAt)) == 1;
+  }
+
+  @Override
+  public AccountRecoveryAttempt findRecoveryByGrantHash(String grantHash) {
+    return jdbc.query("""
+        SELECT * FROM account_recovery_attempts WHERE grant_hash = ?
+        """, this::mapRecovery, grantHash).stream().findFirst().orElse(null);
+  }
+
+  @Override
+  public void acquireRecoveryGrantLock(String grantHash) {
+    jdbc.queryForList(
+        "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))", "recovery:grant:" + grantHash);
+  }
+
+  @Override
+  public boolean markRecoveryResetting(
+      UUID id, String loginName, String operationHash, Instant leaseExpiresAt,
+      Instant deadlineAt, Instant reservedAt) {
+    return jdbc.update("""
+        UPDATE account_recovery_attempts recovery
+        SET status = 'resetting', reset_operation_hash = ?, reset_stage = 'reserved',
+          reset_lease_expires_at = ?, reset_deadline_at = ?, updated_at = ?
+        WHERE recovery.id = ? AND recovery.purpose = 'password' AND recovery.status = 'verified'
+          AND grant_expires_at > ?
+          AND EXISTS (
+            SELECT 1 FROM customer_profiles profile
+            WHERE profile.customer_id = recovery.customer_id
+              AND profile.status = 'active' AND profile.login_name = ?
+          )
+        """, operationHash, databaseTimestamp(leaseExpiresAt), databaseTimestamp(deadlineAt),
+        databaseTimestamp(reservedAt), id,
+        databaseTimestamp(reservedAt), loginName) == 1;
+  }
+
+  @Override
+  public boolean isRecoveryAccountActive(UUID id, String loginName, Instant now) {
+    var active = jdbc.queryForObject("""
+        SELECT EXISTS (
+          SELECT 1 FROM account_recovery_attempts recovery
+          JOIN customer_profiles profile ON profile.customer_id = recovery.customer_id
+          WHERE recovery.id = ? AND recovery.status = 'resetting'
+            AND recovery.reset_deadline_at > ?
+            AND profile.status = 'active' AND profile.login_name = ?
+        )
+        """, Boolean.class, id, databaseTimestamp(now), loginName);
+    return Boolean.TRUE.equals(active);
+  }
+
+  @Override
+  public boolean renewRecoveryResetting(
+      UUID id, String loginName, String operationHash, Instant leaseExpiresAt, Instant renewedAt) {
+    return jdbc.update("""
+        UPDATE account_recovery_attempts recovery
+        SET reset_lease_expires_at = ?, updated_at = ?
+        WHERE recovery.id = ? AND recovery.status = 'resetting'
+          AND recovery.reset_operation_hash = ? AND recovery.reset_deadline_at > ?
+          AND recovery.reset_lease_expires_at <= ?
+          AND EXISTS (
+            SELECT 1 FROM customer_profiles profile
+            WHERE profile.customer_id = recovery.customer_id
+              AND profile.status = 'active' AND profile.login_name = ?
+          )
+        """, databaseTimestamp(leaseExpiresAt), databaseTimestamp(renewedAt), id,
+        operationHash, databaseTimestamp(renewedAt), databaseTimestamp(renewedAt), loginName) == 1;
+  }
+
+  @Override
+  public boolean markRecoverySessionsInvalidated(
+      UUID id, String operationHash, Instant leaseExpiresAt, Instant invalidatedAt) {
+    return jdbc.update("""
+        WITH invalidated AS (
+          UPDATE customer_profiles profile
+          SET session_version = session_version + 1, sessions_valid_after = ?, updated_at = ?
+          WHERE profile.customer_id = (
+            SELECT recovery.customer_id FROM account_recovery_attempts recovery
+            WHERE recovery.id = ? AND recovery.status = 'resetting'
+              AND recovery.reset_operation_hash = ? AND recovery.reset_stage = 'reserved'
+              AND recovery.reset_deadline_at > ?
+          ) AND profile.status = 'active'
+          RETURNING profile.customer_id
+        )
+        UPDATE account_recovery_attempts recovery
+        SET reset_stage = 'sessions_invalidated', reset_lease_expires_at = ?, updated_at = ?
+        WHERE recovery.id = ? AND recovery.status = 'resetting'
+          AND recovery.reset_operation_hash = ? AND recovery.reset_stage = 'reserved'
+          AND recovery.customer_id IN (SELECT customer_id FROM invalidated)
+        """, databaseTimestamp(invalidatedAt), databaseTimestamp(invalidatedAt), id,
+        operationHash, databaseTimestamp(invalidatedAt), databaseTimestamp(leaseExpiresAt),
+        databaseTimestamp(invalidatedAt), id, operationHash) == 1;
+  }
+
+  @Override
+  public boolean markRecoveryResetCompleted(
+      UUID id, String operationHash, Instant completedAt) {
+    return jdbc.update("""
+        UPDATE account_recovery_attempts recovery
+        SET status = 'consumed', consumed_at = ?, updated_at = ?
+        WHERE recovery.id = ? AND recovery.status = 'resetting'
+          AND recovery.reset_operation_hash = ? AND recovery.reset_stage = 'sessions_invalidated'
+          AND recovery.reset_deadline_at > ?
+          AND EXISTS (
+            SELECT 1 FROM customer_profiles profile
+            WHERE profile.customer_id = recovery.customer_id AND profile.status = 'active'
+          )
+        """, databaseTimestamp(completedAt), databaseTimestamp(completedAt), id,
+        operationHash, databaseTimestamp(completedAt)) == 1;
+  }
+
+  @Override
+  public boolean releaseRecoveryReset(UUID id, String operationHash, Instant releasedAt) {
+    return jdbc.update("""
+        UPDATE account_recovery_attempts
+        SET status = CASE WHEN grant_expires_at > ? THEN 'verified' ELSE 'failed' END,
+          reset_operation_hash = '', reset_stage = '', reset_lease_expires_at = NULL,
+          reset_deadline_at = NULL, updated_at = ?
+        WHERE id = ? AND status = 'resetting' AND reset_operation_hash = ?
+          AND reset_stage = 'reserved'
+        """, databaseTimestamp(releasedAt), databaseTimestamp(releasedAt), id,
+        operationHash) == 1;
   }
 
   @Override
@@ -440,6 +738,11 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
   }
 
   @Override
+  public void recordAudit(UUID customerId, String eventType, String actor) {
+    audit(customerId, eventType, actor);
+  }
+
+  @Override
   public List<CustomerProfile> search(String query, int limit) {
     var needle = "%" + (query == null ? "" : query.trim().toLowerCase()) + "%";
     return jdbc.query("""
@@ -478,6 +781,22 @@ public class JdbcCustomerRepository implements CustomerProfileStore, Verificatio
         instant(rs, "consumed_at"), rs.getString("signup_user_pool_id"),
         rs.getString("signup_client_id"), rs.getString("signup_username")
     );
+  }
+
+  private AccountRecoveryAttempt mapRecovery(ResultSet rs, int rowNum) throws SQLException {
+    return new AccountRecoveryAttempt(
+        rs.getObject("id", UUID.class), rs.getString("purpose"),
+        rs.getObject("customer_id", UUID.class), rs.getString("login_name"),
+        rs.getString("phone_fingerprint"), rs.getString("ip_fingerprint"),
+        rs.getString("idempotency_key_hash"), rs.getString("locale"), rs.getString("status"),
+        rs.getString("challenge_hash"), rs.getInt("attempt_count"),
+        rs.getString("provider_message_id"), instant(rs, "sent_at"),
+        instant(rs, "delivery_lease_expires_at"), instant(rs, "expires_at"),
+        rs.getString("grant_hash"), instant(rs, "grant_expires_at"),
+        instant(rs, "verified_at"), instant(rs, "consumed_at"),
+        rs.getString("reset_operation_hash"), rs.getString("reset_stage"),
+        instant(rs, "reset_lease_expires_at"), instant(rs, "reset_deadline_at"),
+        instant(rs, "created_at"));
   }
 
   private Instant instant(ResultSet rs, String column) throws SQLException {

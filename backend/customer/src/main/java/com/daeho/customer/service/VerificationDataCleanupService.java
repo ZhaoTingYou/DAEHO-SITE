@@ -27,5 +27,6 @@ public class VerificationDataCleanupService {
           provider_message_id = '', updated_at = now()
         WHERE expires_at < ? AND consumed_at IS NOT NULL
         """, cutoff);
+    jdbc.update("DELETE FROM account_recovery_attempts WHERE expires_at < ?", cutoff);
   }
 }

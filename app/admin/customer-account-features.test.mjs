@@ -28,6 +28,10 @@ test('public login, registration, SMS and inquiry enforcement use CMS runtime se
     'app/api/auth/session/route.ts',
     'app/api/auth/login/route.ts',
     'app/api/auth/register/route.ts',
+    'app/api/auth/recovery/username/route.ts',
+    'app/api/auth/recovery/password/start/route.ts',
+    'app/api/auth/recovery/password/[id]/complete/route.ts',
+    'app/api/auth/recovery/password/reset/route.ts',
     'app/api/customer/verifications/sms/start/route.ts',
     'app/api/customer/verifications/sms/[id]/complete/route.ts',
     'app/api/inquiries/contact/route.ts',
@@ -35,15 +39,20 @@ test('public login, registration, SMS and inquiry enforcement use CMS runtime se
   ];
 
   for (const relativePath of guardedPaths) {
-    assert.match(read(relativePath), /accountFeatureSettings|accountsEnabled/);
+    assert.match(read(relativePath), /accountFeatureSettings|accountsEnabled|proxyRecoveryRequest/);
   }
   assert.doesNotMatch(read('app/api/auth/session/route.ts'), /INQUIRY_ACCOUNT_REQUIRED/);
   assert.doesNotMatch(read('app/api/inquiries/contact/route.ts'), /INQUIRY_ACCOUNT_REQUIRED/);
   assert.doesNotMatch(read('app/api/inquiries/golf/route.ts'), /INQUIRY_ACCOUNT_REQUIRED/);
   assert.match(read('app/[locale]/(site)/login/page.tsx'), /dynamic = 'force-dynamic'/);
   assert.match(read('app/[locale]/(site)/register/page.tsx'), /dynamic = 'force-dynamic'/);
+  assert.match(read('app/[locale]/(site)/recover-username/page.tsx'), /dynamic = 'force-dynamic'/);
+  assert.match(read('app/[locale]/(site)/reset-password/page.tsx'), /dynamic = 'force-dynamic'/);
   assert.match(read('app/[locale]/(site)/login/page.tsx'), /await connection\(\)/);
   assert.match(read('app/[locale]/(site)/register/page.tsx'), /await connection\(\)/);
+  assert.match(read('app/[locale]/(site)/recover-username/page.tsx'), /await connection\(\)/);
+  assert.match(read('app/[locale]/(site)/reset-password/page.tsx'), /await connection\(\)/);
+  assert.match(read('proxy.ts'), /\['login', 'register', 'recover-username', 'reset-password', 'my-daeho'\][\s\S]*?\.includes/);
 });
 
 test('turning customer accounts off blocks retained sessions from every MY DAEHO surface', () => {

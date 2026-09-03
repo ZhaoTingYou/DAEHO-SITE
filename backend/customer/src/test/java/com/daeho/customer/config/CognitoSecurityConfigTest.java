@@ -13,7 +13,10 @@ class CognitoSecurityConfigTest {
     var matcher = CognitoSecurityConfig.publicEndpoints();
 
     assertThat(matcher.matches(request("POST", "/v1/verifications/sms/start"))).isTrue();
+    assertThat(matcher.matches(request("POST", "/v1/recovery/password/start"))).isTrue();
+    assertThat(matcher.matches(request("POST", "/v1/recovery/password/00000000-0000-0000-0000-000000000000/complete"))).isTrue();
     assertThat(matcher.matches(request("POST", "/v1/internal/registration-grants/validate"))).isTrue();
+    assertThat(matcher.matches(request("POST", "/v1/internal/recovery-grants/reserve"))).isTrue();
     assertThat(matcher.matches(request("GET", "/actuator/health"))).isTrue();
     assertThat(matcher.matches(request("GET", "/v1/me"))).isFalse();
   }

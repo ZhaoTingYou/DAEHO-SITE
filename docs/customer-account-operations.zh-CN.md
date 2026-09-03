@@ -1,10 +1,10 @@
 # DAEHO 统一会员系统：配置、费用与上线手册
 
-更新时间：2026-09-02
+更新时间：2026-09-03
 
 ## 当前实现边界
 
-- 韩国用户：自定义用户名 + 密码；注册使用 SOLAPI 验证手机号。找回用户名和重置密码仍是启用会员入口前必须完成的阻断项。
+- 韩国用户：自定义用户名 + 密码；注册、找回用户名和重置密码均使用 SOLAPI 验证已登记手机号。
 - 账号认证：Amazon Cognito Essentials，区域 `ap-northeast-2`；注册页和登录页均由 DAEHO 官网代码渲染，不向普通客户展示 Cognito Managed Login。
 - 会员资料与认证记录：独立 `customer-api` Spring Boot 服务及 `customer_account` schema。
 - MY DAEHO：个人资料、문의列表、详情、状态、旧 문의认领、退出所有设备、删除账号。
@@ -40,6 +40,7 @@ COGNITO_REGION=ap-northeast-2
 COGNITO_ISSUER_URI=https://cognito-idp.ap-northeast-2.amazonaws.com/<USER_POOL_ID>
 COGNITO_DOMAIN=https://login.daeho.works
 COGNITO_CLIENT_ID=<官网 App Client ID>
+COGNITO_RECOVERY_FUNCTION_URL=<密码重置 Lambda 的 HTTPS Function URL>
 
 SOLAPI_API_KEY=<SOLAPI API Key>
 SOLAPI_API_SECRET=<SOLAPI API Secret>
@@ -76,12 +77,19 @@ SOLAPI_SENDER_NUMBER=<已登记发信号码，仅数字>
 6. Lambda 必须能访问上述 HTTPS 地址。Nginx 只公开这一个精确的验证路径，并由内部密钥和限流保护。该路径会在 Cognito 建号前把一次性凭证原子绑定到准确的 User Pool、App Client 和用户名；只有完全相同的 Cognito 密码策略重试可以复用，改换用户名、客户端或用户池会被拒绝。手机号 HMAC 指纹会持续占用到资料建立完成，避免用户建号后未首次登录而绕过重复手机号限制。资料建立还必须同时持有浏览器的加密注册事务 Cookie，并匹配已验签 ID Token 中的手机号和用户名。
 7. 未安装并实测 Pre sign-up trigger 前，不得把 `CUSTOMER_ACCOUNTS_ENABLED` 改为 `true`。该触发器会拒绝没有有效短信注册凭证、重复消费凭证、手机号不匹配或未成年声明未通过的直接 Cognito 注册。
 8. 注册页先让 BFF 把一次性凭证加密保存在 `HttpOnly` Cookie，再由浏览器直接把用户名、手机号和密码提交给 Cognito。注册密码不经过 Next 或 Customer Service。账号创建后返回 DAEHO 自写登录页；登录密码通过 HTTPS 提交给同源 BFF，BFF 只转交 Cognito 校验，不记录、不持久化密码。已验签的 ID Token、手机号、用户名和同一注册 Cookie 用于幂等建立客户资料。如果同一已验证手机号原来属于旧手机号用户池，Customer Account Service 仅允许一次迁移：保留原 `customer_id`、문의关联和资料，把新旧两个 Cognito `sub` 都保存在身份映射表中，将新用户名设为当前身份，并补记本次短信验证、条款、隐私与营销选择；迁移完成后同一手机号不能再创建第二个用户名账号，停用或待删除账号也不能借此恢复。旧池仍可解析原 `sub`，用于受控回滚。
+9. 将 `infra/cognito/account-recovery` 按其中的 lockfile 安装生产依赖并打包为 Node.js 22 Lambda。Lambda 只授予当前 User Pool 的 `cognito-idp:AdminSetUserPassword` 与 `cognito-idp:AdminUserGlobalSignOut`，环境变量设置为：
+   - `COGNITO_USER_POOL_ID=<当前自定义用户名 User Pool ID>`
+   - `CUSTOMER_INTERNAL_API_KEY=<与服务端相同的内部密钥>`
+   - 创建 `NONE` Function URL，并由至少 32 字节的上述内部密钥做等时比较；调用方还会把 URL 限定为首尔区域的 AWS Lambda Function URL。URL 只写入服务端的 `COGNITO_RECOVERY_FUNCTION_URL`，不得出现在 `NEXT_PUBLIC_*`、页面源码或日志中。该函数不发送短信，不需要 Cognito Custom SMS Sender，也不需要单独的 KMS 密钥月租。
+   - 函数只接受 `signOut` 与 `setPassword` 两个内部动作。先撤销 Cognito 会话，Customer Service 再原子提升本地会话版本，最后才设置新密码；这样不会出现密码已经改变但旧本地会话仍有效的窗口。
+10. 找回账号只接受已验证手机号，并把完整用户名通过 SOLAPI 发到原手机号；HTTP 响应始终相同。真实短信由数据库队列在响应结束后异步发送，未知账号只写入 decoy 记录，避免通过 SOLAPI 网络耗时枚举账号。短信请求的幂等键在网络超时或 5xx 后保持不变，只有用户修改账号资料才开始新请求，避免响应丢失造成重复付费短信。重置密码要求用户名与原手机号同时匹配，SOLAPI 验证码最多尝试 5 次，成功后签发 10 分钟、单次使用的重置凭证。验证码完成步骤也使用独立幂等键，凭证由服务端 HMAC 确定性派生；响应丢失时提交相同验证码和操作键会返回完全相同的凭证。所有手机号、IP、验证码与凭证在数据库中只保留 HMAC 指纹。
+11. 密码重置使用可重试的 `verified → resetting → consumed` 状态机。BFF 以内部 HMAC 把浏览器操作键、用户名和准确的新密码绑定为不可伪造的幂等操作；短租约用于接管中断请求，独立的 3 分钟截止时间限制整个重置。流程依次为 Cognito 全局退出、本地会话失效和设置新密码，成功后再消费凭证。只有调用 Cognito 前的明确配置或鉴权失败才释放预留；网络超时、限流和服务端错误视为结果未知，保持预留并只允许同一操作在租约到期后安全重试。已完成请求重放会直接返回成功，不会再次修改密码。
 
 ## 功能开关与发布顺序
 
-> 生产开放前置：自定义用户名池需要补齐 SOLAPI 手机验证后的“找回用户名 / 重置密码”流程。该流程未完成前，只能创建和配置测试池，不得在 CMS 开启会员入口。
+> 生产开放前置：必须先部署并实测 Pre sign-up Lambda、找回账号短信以及密码重置 Lambda。任一项未通过时不得在 CMS 开启会员入口。
 
-1. 保持 `CUSTOMER_ACCOUNTS_ENABLED=false` 和 CMS 内的两个开关关闭，先启动 PostgreSQL、CMS、`customer-api`、Next 和 Nginx；确认两个 Spring 服务 health 为 `UP`。
+1. 保持 `CUSTOMER_ACCOUNTS_ENABLED=false` 和 CMS 内的两个开关关闭。生产发布统一执行 `sudo COMPOSE_PROJECT_NAME=daeho-prod ./scripts/deploy-production.sh`；脚本先取得独占发布锁，并在任何 Flyway 迁移启动前以不可覆盖方式生成、校验 PostgreSQL 压缩备份，随后等待服务健康、校验并重载 Nginx，最后检查官网与实时咨询接口。并发发布、同名备份或任一环节失败都会立即终止，不继续开放会员入口。
 2. 在测试 User Pool、测试 SOLAPI Key 和测试域名上完成全部验收。
 3. 设置一次基础设施总保险 `CUSTOMER_ACCOUNTS_ENABLED=true` 并重启 `customer-api` 与 Next；此时 CMS 开关仍关闭，公众入口不会出现。
 4. 在 CMS > 会员中开启“开放登录、注册和 MY DAEHO”，先只开放会员功能。
@@ -96,6 +104,8 @@ CMS 每次保存这两个开关都会写入 `cms_account_feature_events` 审计�
 - Access Token 在 `customer-api` 校验 issuer、`token_use=access` 和 App Client ID。
 - 自写登录调用 Cognito `USER_PASSWORD_AUTH`，并校验 ID Token 签名、issuer、audience、`token_use` 和 `sub`；预留的 OIDC 回调仍校验 state、PKCE 和 nonce。
 - 登录接口在调用 Cognito 前按 HMAC 化的用户名和客户端 IP 做 15 分钟失败次数限流；不在内存中保存明文用户名或 IP。当前单实例部署与 Cognito 自身限流共同生效，扩为多实例前应迁移到共享限流存储。
+- 找回账号和密码重置分别按手机号与 IP 限流；不存在、手机号不匹配、停用和待删除账号均返回与正常请求相同的启动响应，不发送短信，也不能取得有效重置凭证。
+- 账号找回短信使用 `FOR UPDATE SKIP LOCKED` 的持久队列领取，并在独立短事务内从 `pending` 原子转换为 `sending` 后才调用 SOLAPI，外部短信请求不占用数据库事务。发送结果不确定时转为 `delivery_unknown`，禁止自动重发，避免同一次领取重复发送；日志只记录不含手机号、用户名或短信正文的 attempt ID、用途和异常类型，供人工核对与告警使用。
 - BFF 令牌只存于加密的 `HttpOnly + Secure + SameSite=Lax` Cookie；浏览器不写 `localStorage`。
 - 注册密码由浏览器直接发送给 Cognito；登录密码只经 HTTPS 到同源 BFF 并立即转交 Cognito，不写入日志、数据库、Cookie 或浏览器存储。
 - 本地会话闲置 7 天、绝对 30 天。退出所有设备同时更新 `sessions_valid_after` 并调用 Cognito GlobalSignOut。
@@ -111,4 +121,5 @@ CMS 每次保存这两个开关都会写入 `cms_account_feature_events` 审计�
 - 韩国隐私律师复核韩英条款和隐私政策，特别是 SOLAPI/AWS 委托处理、跨境或境外主体说明、成年人限制、账号删除和 문의三年保留政策。
 - 在 SOLAPI 完成发信号码登记并保存证明文件。
 - 在 Cognito 生产池安装 Pre sign-up Lambda，验证无法绕过短信注册。
+- 部署专用密码重置 Lambda，限制为单个生产 User Pool，并实测错误账号、错误手机号、验证码过期、5 次错误、凭证过期和凭证重复使用。
 - 跨主域名商城启用前，先实现并测试 `login.daeho.works` 中央自写登录站与一次性授权票据；每个商城使用独立 App Client 和精确回调地址，禁止通配符。

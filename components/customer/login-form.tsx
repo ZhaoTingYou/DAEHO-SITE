@@ -77,6 +77,14 @@ export function LoginForm({
           {message}
         </p>
       ) : null}
+      <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+        <Link className="font-semibold text-accent underline underline-offset-4" href={`/${locale}/recover-username`}>
+          {copy.recoverUsername}
+        </Link>
+        <Link className="font-semibold text-accent underline underline-offset-4" href={`/${locale}/reset-password`}>
+          {copy.resetPassword}
+        </Link>
+      </div>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-hairline pt-6 text-sm">
         <span className="text-subtext">{copy.newCustomer}</span>
         <Link className="font-semibold text-accent underline underline-offset-4" href={`/${locale}/register`}>

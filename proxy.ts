@@ -67,7 +67,8 @@ export function isCustomerAccountPath(pathname: string) {
   if (pathname.startsWith('/api/customer/')) return true;
   const segments = pathname.split('/').filter(Boolean);
   const index = segments[0] === 'ko' || segments[0] === 'en' ? 1 : 0;
-  return ['login', 'register', 'my-daeho'].includes(segments[index]);
+  return ['login', 'register', 'recover-username', 'reset-password', 'my-daeho']
+    .includes(segments[index]);
 }
 
 export function isGolfRequestPath(pathname: string) {

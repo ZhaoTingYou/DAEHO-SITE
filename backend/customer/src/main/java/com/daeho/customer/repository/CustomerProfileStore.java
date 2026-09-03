@@ -2,9 +2,9 @@ package com.daeho.customer.repository;
 
 import com.daeho.customer.model.CustomerProfile;
 import com.daeho.customer.service.VerificationSession;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.time.Instant;
 
 public interface CustomerProfileStore {
   CustomerProfile findBySubject(String subject);
@@ -31,6 +31,8 @@ public interface CustomerProfileStore {
   List<UUID> findCustomersAwaitingInquiryUnlink(int limit);
 
   void markInquiriesUnlinked(UUID customerId);
+
+  void recordAudit(UUID customerId, String eventType, String actor);
 
   List<CustomerProfile> search(String query, int limit);
 }
