@@ -236,7 +236,9 @@ export function WebLiveChatWidget({
   }, [enabled, refreshAuthoritative]);
 
   useEffect(() => {
-    if (!enabled || !state.panelOpen || state.conversationState !== null) return;
+    if (!enabled
+        || !state.panelOpen
+        || (state.conversationState !== null && state.conversationState !== 'closed')) return;
     let active = true;
     let timer: number | undefined;
     const scheduleRefresh = () => {
@@ -524,7 +526,8 @@ export function WebLiveChatWidget({
     }
   }, [refreshAuthoritative, state.messageDraft]);
 
-  const startNewConsultation = useCallback(() => {
+  const startNewConsultation = useCallback(async () => {
+    const latest = await refreshAuthoritative().catch(() => null);
     startMutationRef.current.reset();
     sendMutationRef.current.reset();
     formStartedAtRef.current = Date.now();
@@ -533,9 +536,10 @@ export function WebLiveChatWidget({
     setCompanyWebsite('');
     dispatch({
       type: 'new_consultation',
-      available: isWithinLiveChatBusinessHours(state.businessHours)
+      available: latest !== null
+        && isWithinLiveChatBusinessHours(latest.businessHours)
     });
-  }, [state.businessHours]);
+  }, [refreshAuthoritative]);
 
   if (!enabled) return null;
 
