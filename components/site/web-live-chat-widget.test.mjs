@@ -143,6 +143,7 @@ test('outside business hours uses dedicated customer copy and the Seoul schedule
   assert.match(source, /isWithinLiveChatBusinessHours\(state\.businessHours\)/);
   assert.match(source, /state\.conversationState !== 'closed'/);
   assert.match(source, /const latest = await refreshAuthoritative\(\)/);
+  assert.match(source, /latest\.acceptingNewConversations/);
   assert.match(source, /isWithinLiveChatBusinessHours\(latest\.businessHours\)/);
   assert.match(source, /error instanceof WebLiveChatApiError && error\.status === 503/);
   assert.match(source, /if \(!isWithinLiveChatBusinessHours\(state\.businessHours\)\)/);

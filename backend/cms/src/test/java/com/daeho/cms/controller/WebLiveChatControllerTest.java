@@ -444,6 +444,7 @@ class WebLiveChatControllerTest {
             .header("Origin", "https://daeho.works"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.available").value(false))
+        .andExpect(jsonPath("$.acceptingNewConversations").value(false))
         .andExpect(header().doesNotExist("Set-Cookie"));
 
     mvc.perform(post("/api/live-chat/conversations")
@@ -469,7 +470,25 @@ class WebLiveChatControllerTest {
             .cookie(cookie()).header("Origin", "https://daeho.works"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.available").value(true))
+        .andExpect(jsonPath("$.acceptingNewConversations").value(false))
         .andExpect(jsonPath("$.conversation.state").value("active"));
+  }
+
+  @Test
+  void closedConversationHistoryRemainsVisibleButCannotStartWhenAdmissionsAreDisabled() throws Exception {
+    var visitor = visitor();
+    existingCookie(visitor);
+    when(liveChat.acceptingNewConversations(any(Instant.class))).thenReturn(false);
+    when(liveChat.session(visitor)).thenReturn(new SessionView(
+        conversation("closed"), List.of(), 0L
+    ));
+
+    mvc.perform(get("/api/live-chat/session")
+            .cookie(cookie()).header("Origin", "https://daeho.works"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.available").value(true))
+        .andExpect(jsonPath("$.acceptingNewConversations").value(false))
+        .andExpect(jsonPath("$.conversation.state").value("closed"));
   }
 
   @Test

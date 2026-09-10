@@ -54,6 +54,7 @@ test('conversation wrappers reject array, object, number, and null enum values',
   };
   const sessionResponse = (conversation) => ({
     available: true,
+    acceptingNewConversations: true,
     businessHours: {start: '09:00', end: '19:00', timeZone: 'Asia/Seoul'},
     conversation, messages: [], nextCursor: 0, hasMore: false, unreadCount: 0
   });
@@ -79,6 +80,7 @@ test('owner-scoped session parsing retains initial and follow-up visitor history
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => jsonResponse({
     available: true,
+    acceptingNewConversations: false,
     businessHours: {start: '09:00', end: '19:00', timeZone: 'Asia/Seoul'},
     conversation: null,
     messages: [
@@ -91,6 +93,7 @@ test('owner-scoped session parsing retains initial and follow-up visitor history
   });
   try {
     const session = await api.getSession();
+    assert.equal(session.acceptingNewConversations, false);
     assert.deepEqual(session.businessHours, {
       start: '09:00', end: '19:00', timeZone: 'Asia/Seoul'
     });

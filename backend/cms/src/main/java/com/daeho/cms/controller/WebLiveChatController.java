@@ -90,6 +90,7 @@ public class WebLiveChatController {
       return sessionResponse(
           new WebLiveChatRepository.SessionView(null, List.of(), 0L),
           acceptingNewConversations,
+          acceptingNewConversations,
           businessHours
       );
     }
@@ -97,6 +98,7 @@ public class WebLiveChatController {
     return sessionResponse(
         view,
         view.conversation() != null || acceptingNewConversations,
+        acceptingNewConversations,
         businessHours
     );
   }
@@ -345,10 +347,12 @@ public class WebLiveChatController {
   private Map<String, Object> sessionResponse(
       WebLiveChatRepository.SessionView view,
       boolean available,
+      boolean acceptingNewConversations,
       LiveChatBusinessHours businessHours
   ) {
     var result = new LinkedHashMap<String, Object>();
     result.put("available", available);
+    result.put("acceptingNewConversations", acceptingNewConversations);
     result.put("businessHours", Map.of(
         "start", businessHours.startText(),
         "end", businessHours.endText(),

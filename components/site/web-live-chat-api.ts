@@ -23,6 +23,7 @@ export type WebLiveChatMessage = {
 
 export type WebLiveChatSession = {
   available: boolean;
+  acceptingNewConversations: boolean;
   businessHours: LiveChatBusinessHours;
   conversation: WebLiveChatConversation | null;
   messages: WebLiveChatMessage[];
@@ -263,6 +264,7 @@ function parseSession(value: unknown): WebLiveChatSession {
   const object = responseObject(value);
   const businessHours = parseBusinessHours(object.businessHours);
   if (typeof object.available !== 'boolean'
+      || typeof object.acceptingNewConversations !== 'boolean'
       || !Array.isArray(object.messages)
       || !nonnegativeInteger(object.nextCursor)
       || typeof object.hasMore !== 'boolean'
@@ -271,6 +273,7 @@ function parseSession(value: unknown): WebLiveChatSession {
   }
   return {
     available: object.available,
+    acceptingNewConversations: object.acceptingNewConversations,
     businessHours,
     conversation: object.conversation === null
       ? null

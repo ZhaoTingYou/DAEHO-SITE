@@ -537,6 +537,7 @@ export function WebLiveChatWidget({
     dispatch({
       type: 'new_consultation',
       available: latest !== null
+        && latest.acceptingNewConversations
         && isWithinLiveChatBusinessHours(latest.businessHours)
     });
   }, [refreshAuthoritative]);
