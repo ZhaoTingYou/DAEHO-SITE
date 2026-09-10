@@ -18,6 +18,12 @@ export default async function AdminTelegramLiveChatPage() {
         sessions={sessions}
         copy={{
           setup: t('liveChat.setup'),
+          businessHours: t('liveChat.businessHours'),
+          businessHoursDescription: t('liveChat.businessHoursDescription'),
+          businessHoursStart: t('liveChat.businessHoursStart'),
+          businessHoursEnd: t('liveChat.businessHoursEnd'),
+          businessHoursTimeZone: t('liveChat.businessHoursTimeZone'),
+          businessHoursInvalid: t('liveChat.businessHoursInvalid'),
           status: t('liveChat.status'),
           enabled: t('liveChat.enabled'),
           disabled: t('liveChat.disabled'),

@@ -1509,7 +1509,10 @@
       "closedBody": "이전 답변은 읽을 수 있으며, 새로운 문의는 별도 상담으로 시작됩니다.",
       "newConsultationLabel": "새 상담 시작하기",
       "unavailableTitle": "잠시 이용할 수 없습니다",
-      "unavailableBody": "실시간 상담 연결을 준비하고 있습니다. 잠시 후 다시 이용해 주세요."
+      "unavailableBody": "실시간 상담 연결을 준비하고 있습니다. 잠시 후 다시 이용해 주세요.",
+      "outsideHoursTitle": "상담 가능 시간이 아닙니다",
+      "outsideHoursBody": "상담 가능 시간에 다시 이용해 주세요.",
+      "businessHoursLabel": "상담 가능 시간(대한민국 시간)"
     },
     "navigation": {
       "brandLabel": "DAEHO",

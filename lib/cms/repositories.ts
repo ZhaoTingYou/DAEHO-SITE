@@ -132,6 +132,9 @@ export type TelegramLiveChatSettings = {
   setupState?: string;
   setupErrorCode?: string;
   setupNeedsAttention?: boolean;
+  businessHoursStart: string;
+  businessHoursEnd: string;
+  businessHoursTimeZone: string;
   verifiedAt: string;
   updatedAt: string;
 };
@@ -812,6 +815,8 @@ export async function updateTelegramLiveChatSettings(payload: {
   botToken: string;
   clearBotToken: boolean;
   targetChatId: string;
+  businessHoursStart: string;
+  businessHoursEnd: string;
 }) {
   const response = await cmsFetch<{settings: TelegramLiveChatSettings}>('/api/admin/live-chat', {
     admin: true,
@@ -903,16 +908,30 @@ export async function setTelegramLiveChatEnabled(enabled: boolean) {
 
 export async function getWebLiveChatPublicConfig() {
   if (process.env.CMS_PREVIEW_STATIC === 'true') {
-    return {enabled: false};
+    return defaultWebLiveChatPublicConfig();
   }
   try {
-    return await cmsFetch<{enabled: boolean}>('/api/cms/live-chat', {
+    return await cmsFetch<{
+      enabled: boolean;
+      businessHoursStart: string;
+      businessHoursEnd: string;
+      businessHoursTimeZone: string;
+    }>('/api/cms/live-chat', {
       cacheTags: ['cms:all', 'cms-live-chat']
     });
   } catch (error) {
     console.error('[cms] Web live-chat configuration is unavailable; the public entry stays disabled.', error);
-    return {enabled: false};
+    return defaultWebLiveChatPublicConfig();
   }
+}
+
+function defaultWebLiveChatPublicConfig() {
+  return {
+    enabled: false,
+    businessHoursStart: '09:00',
+    businessHoursEnd: '19:00',
+    businessHoursTimeZone: 'Asia/Seoul'
+  };
 }
 
 export async function createNotificationTemplateVersion(

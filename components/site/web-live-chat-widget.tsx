@@ -27,6 +27,11 @@ import {
   nextMessageScrollAction,
   nextFocusIndex
 } from './web-live-chat-widget-core.mjs';
+import {
+  formatLiveChatBusinessHours,
+  isWithinLiveChatBusinessHours,
+  type LiveChatBusinessHours
+} from './live-chat-business-hours-core.mjs';
 
 export type WebLiveChatCopy = {
   label: string;
@@ -73,6 +78,9 @@ export type WebLiveChatCopy = {
   newConsultationLabel: string;
   unavailableTitle: string;
   unavailableBody: string;
+  outsideHoursTitle: string;
+  outsideHoursBody: string;
+  businessHoursLabel: string;
 };
 
 type StartStatus = 'idle' | 'pending' | 'accepted' | 'failed';
@@ -91,11 +99,13 @@ const FOCUSABLE = [
 export function WebLiveChatWidget({
   copy,
   locale,
-  enabled
+  enabled,
+  businessHours
 }: {
   copy: WebLiveChatCopy;
   locale: Locale;
   enabled: boolean;
+  businessHours: LiveChatBusinessHours;
 }) {
   const [state, dispatch] = useReducer(
     reduceWebLiveChatState,
@@ -483,10 +493,16 @@ export function WebLiveChatWidget({
     setStartStatus('idle');
     setStartError('');
     setCompanyWebsite('');
-    dispatch({type: 'new_consultation'});
-  }, []);
+    dispatch({
+      type: 'new_consultation',
+      available: isWithinLiveChatBusinessHours(businessHours)
+    });
+  }, [businessHours]);
 
   if (!enabled) return null;
+
+  const outsideBusinessHours = !isWithinLiveChatBusinessHours(businessHours);
+  const businessHoursText = formatLiveChatBusinessHours(businessHours);
 
   const transition = reduceMotion
     ? {duration: 0.12}
@@ -590,7 +606,12 @@ export function WebLiveChatWidget({
                     <ClosedView copy={copy} messages={state.messages} onStartNew={startNewConsultation} />
                   ) : null}
                   {state.view === 'temporarily_unavailable' ? (
-                    <StatusView title={copy.unavailableTitle} body={copy.unavailableBody} />
+                    <StatusView
+                      title={outsideBusinessHours ? copy.outsideHoursTitle : copy.unavailableTitle}
+                      body={outsideBusinessHours
+                        ? `${copy.outsideHoursBody} ${copy.businessHoursLabel}: ${businessHoursText}`
+                        : copy.unavailableBody}
+                    />
                   ) : null}
                 </div>
               )}

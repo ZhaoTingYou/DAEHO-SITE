@@ -60,7 +60,7 @@ export type WebLiveChatReducerEvent =
   | {type: 'session_metadata_loaded'; session: Omit<WebLiveChatSessionInput, 'messages'>}
   | {type: 'messages_merged'; messages: WebLiveChatSessionInput['messages']}
   | {type: 'conversation_closed'}
-  | {type: 'new_consultation'}
+  | {type: 'new_consultation'; available?: boolean}
   | {type: 'mark_read'; messageId?: number}
   | {type: 'durable_event'; event: WebLiveChatDurableEvent}
   | {type: 'sse_failure' | 'sse_connected'};

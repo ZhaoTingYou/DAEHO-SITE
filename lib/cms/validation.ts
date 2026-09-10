@@ -210,6 +210,11 @@ export const notificationSettingsSchema = z
     }
   });
 
+const liveChatClockSchema = z.string().trim().regex(
+  /^(?:[01]\d|2[0-3]):[0-5]\d$/,
+  'Live-chat hours must use HH:mm.'
+);
+
 export const telegramLiveChatSettingsSchema = z.object({
   enabled: z.boolean().default(false),
   botToken: z.string().trim().max(512).refine(
@@ -220,7 +225,17 @@ export const telegramLiveChatSettingsSchema = z.object({
   targetChatId: z.string().trim().max(80).refine(
     (value) => value === '' || /^-?\d+$/.test(value),
     'Telegram group Chat ID must contain only digits and an optional leading minus sign.'
-  ).default('')
+  ).default(''),
+  businessHoursStart: liveChatClockSchema.default('09:00'),
+  businessHoursEnd: liveChatClockSchema.default('19:00')
+}).superRefine((value, context) => {
+  if (value.businessHoursStart >= value.businessHoursEnd) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['businessHoursEnd'],
+      message: 'Closing time must be later than opening time.'
+    });
+  }
 });
 
 export const notificationTemplateSchema = z

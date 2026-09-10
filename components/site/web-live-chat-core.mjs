@@ -197,13 +197,16 @@ export function reduceWebLiveChatState(state, event) {
     }
     case 'new_consultation': {
       const reset = createWebLiveChatState();
+      const available = typeof event.available === 'boolean'
+        ? event.available
+        : state.available;
       return {
         ...reset,
         panelOpen: state.panelOpen,
         hovered: state.hovered,
-        available: state.available,
+        available,
         view: state.panelOpen
-          ? (state.available === false ? 'temporarily_unavailable' : 'registration')
+          ? (available === false ? 'temporarily_unavailable' : 'registration')
           : 'closed_launcher'
       };
     }

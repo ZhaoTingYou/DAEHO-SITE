@@ -75,6 +75,7 @@ class WebLiveChatControllerTest {
     when(repository.consumeRateBucket(anyString(), anyString(), anyInt(), any(Duration.class)))
         .thenReturn(true);
     when(liveChat.session(visitor)).thenReturn(new SessionView(null, List.of(), 0L));
+    when(liveChat.acceptingNewConversations(any(Instant.class))).thenReturn(true);
     controller = new WebLiveChatController(
         properties, codec, repository, new WebLiveChatInputValidator(), liveChat, broker
     );
@@ -179,6 +180,7 @@ class WebLiveChatControllerTest {
     var visitor = visitor();
     existingCookie(visitor);
     when(liveChat.resolveExistingStart(eq(visitor), any())).thenReturn(conversation("active"));
+    when(liveChat.acceptingNewConversations(any(Instant.class))).thenReturn(false);
     when(repository.consumeRateBucket(anyString(), anyString(), anyInt(), any(Duration.class)))
         .thenReturn(false);
 
@@ -421,6 +423,42 @@ class WebLiveChatControllerTest {
 
     verify(repository, never()).createVisitor(anyString(), any(Duration.class));
     verify(liveChat, never()).session(any());
+  }
+
+  @Test
+  void outsideBusinessHoursDoesNotIssueAVisitorOrStartANewConsultation() throws Exception {
+    when(liveChat.acceptingNewConversations(any(Instant.class))).thenReturn(false);
+
+    mvc.perform(get("/api/live-chat/session?issue=true")
+            .header("Origin", "https://daeho.works"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.available").value(false))
+        .andExpect(header().doesNotExist("Set-Cookie"));
+
+    mvc.perform(post("/api/live-chat/conversations")
+            .header("Origin", "https://daeho.works")
+            .contentType(MediaType.APPLICATION_JSON).content(startJson("")))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(header().doesNotExist("Set-Cookie"));
+
+    verify(repository, never()).createVisitor(anyString(), any(Duration.class));
+    verify(liveChat, never()).start(any(), any(), any());
+  }
+
+  @Test
+  void activeConversationRemainsVisibleAfterBusinessHours() throws Exception {
+    var visitor = visitor();
+    existingCookie(visitor);
+    when(liveChat.acceptingNewConversations(any(Instant.class))).thenReturn(false);
+    when(liveChat.session(visitor)).thenReturn(new SessionView(
+        conversation("active"), List.of(), 0L
+    ));
+
+    mvc.perform(get("/api/live-chat/session")
+            .cookie(cookie()).header("Origin", "https://daeho.works"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.available").value(true))
+        .andExpect(jsonPath("$.conversation.state").value("active"));
   }
 
   @Test

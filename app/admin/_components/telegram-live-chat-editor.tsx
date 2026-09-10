@@ -10,6 +10,12 @@ import type {
 
 type Copy = Record<
   | 'setup'
+  | 'businessHours'
+  | 'businessHoursDescription'
+  | 'businessHoursStart'
+  | 'businessHoursEnd'
+  | 'businessHoursTimeZone'
+  | 'businessHoursInvalid'
   | 'status'
   | 'enabled'
   | 'disabled'
@@ -174,6 +180,11 @@ export function TelegramLiveChatEditor({
           className="mt-5 grid gap-5"
           onSubmit={(event) => {
             event.preventDefault();
+            if (settings.businessHoursStart >= settings.businessHoursEnd) {
+              setState('error');
+              setMessage(copy.businessHoursInvalid);
+              return;
+            }
             void run(
               () => fetch('/api/admin/live-chat', {
                 method: 'PUT',
@@ -182,7 +193,9 @@ export function TelegramLiveChatEditor({
                   enabled: settings.enabled,
                   botToken,
                   clearBotToken,
-                  targetChatId: settings.targetChatId
+                  targetChatId: settings.targetChatId,
+                  businessHoursStart: settings.businessHoursStart,
+                  businessHoursEnd: settings.businessHoursEnd
                 })
               }),
               copy.saved
@@ -247,6 +260,42 @@ export function TelegramLiveChatEditor({
                 <span className="font-normal leading-5 text-[#647084]">{copy.targetChatIdHint}</span>
               </label>
             </div>
+          </div>
+
+          <div className="border-t border-[#e4e7ec] pt-5">
+            <h3 className="text-sm font-semibold text-[#344054]">{copy.businessHours}</h3>
+            <p className="mt-1 text-sm leading-6 text-[#647084]">{copy.businessHoursDescription}</p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+                <span>{copy.businessHoursStart}</span>
+                <input
+                  required
+                  type="time"
+                  step={300}
+                  value={settings.businessHoursStart}
+                  onChange={(event) => setSettings((current) => ({
+                    ...current,
+                    businessHoursStart: event.target.value
+                  }))}
+                  className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
+                />
+              </label>
+              <label className="grid gap-1.5 text-sm font-semibold text-[#344054]">
+                <span>{copy.businessHoursEnd}</span>
+                <input
+                  required
+                  type="time"
+                  step={300}
+                  value={settings.businessHoursEnd}
+                  onChange={(event) => setSettings((current) => ({
+                    ...current,
+                    businessHoursEnd: event.target.value
+                  }))}
+                  className="min-h-11 rounded-md border border-[#cbd3df] bg-white px-3"
+                />
+              </label>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-[#647084]">{copy.businessHoursTimeZone}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 border-t border-[#e4e7ec] pt-5">

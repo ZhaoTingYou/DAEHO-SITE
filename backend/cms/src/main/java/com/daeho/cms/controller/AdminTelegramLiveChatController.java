@@ -3,6 +3,7 @@ package com.daeho.cms.controller;
 import com.daeho.cms.repository.TelegramLiveChatRepository;
 import com.daeho.cms.repository.WebLiveChatRepository;
 import com.daeho.cms.security.AdminAuth;
+import com.daeho.cms.service.LiveChatBusinessHours;
 import com.daeho.cms.service.TelegramLiveChatCredentialService;
 import com.daeho.cms.service.TelegramLiveChatService;
 import com.daeho.cms.service.WebLiveChatService;
@@ -348,6 +349,9 @@ public class AdminTelegramLiveChatController {
         Map.entry("setupState", settings.setupState()),
         Map.entry("setupErrorCode", settings.setupErrorCode()),
         Map.entry("setupNeedsAttention", "needs_attention".equals(settings.setupState())),
+        Map.entry("businessHoursStart", settings.businessHoursStart()),
+        Map.entry("businessHoursEnd", settings.businessHoursEnd()),
+        Map.entry("businessHoursTimeZone", LiveChatBusinessHours.TIME_ZONE),
         Map.entry("verifiedAt", settings.verifiedAt()),
         Map.entry("updatedAt", settings.updatedAt())
     );
@@ -361,6 +365,14 @@ public class AdminTelegramLiveChatController {
     }
     if (chatId.length() > 80 || (!chatId.isBlank() && !chatId.matches("^-?\\d+$"))) {
       invalid("Telegram group Chat ID is invalid.");
+    }
+    try {
+      LiveChatBusinessHours.parse(
+          text(body.get("businessHoursStart")),
+          text(body.get("businessHoursEnd"))
+      );
+    } catch (IllegalArgumentException error) {
+      invalid("Live-chat opening time must be before closing time and use HH:mm.");
     }
   }
 

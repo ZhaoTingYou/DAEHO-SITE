@@ -48,9 +48,15 @@ public class WebLiveChatService {
       StartInput input,
       Map<String, String> requestMeta
   ) {
+    var now = Instant.now();
+    if (!acceptingNewConversations(now)) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE,
+          "New live-chat consultations are outside business hours."
+      );
+    }
     var configuration = requireConfiguration();
     var settings = configuration.settings();
-    var now = Instant.now();
     var candidate = new Conversation(
         UUID.randomUUID().toString(), visitor.id(), settings.configurationGeneration(),
         settings.targetChatId(), "", input.locale(), "opening", input.name(), input.contact(),
@@ -87,6 +93,10 @@ public class WebLiveChatService {
       }
     }
     return openTopic(conversation, configuration);
+  }
+
+  public boolean acceptingNewConversations(Instant now) {
+    return credentials.acceptingNewConversations(now);
   }
 
   public Conversation resolveExistingStart(

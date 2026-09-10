@@ -281,6 +281,12 @@ test('closed state is retained until an explicit new consultation resets private
   assert.equal(reset.messageDraft, '');
   assert.equal(reset.highestDurableEventId, 0);
   assert.equal(reset.unread, 0);
+
+  const outsideHours = reduceWebLiveChatState(drafted, {
+    type: 'new_consultation',
+    available: false
+  });
+  assert.equal(outsideHours.view, 'temporarily_unavailable');
 });
 
 test('SSE failures back off and switch to polling on the third consecutive failure', () => {

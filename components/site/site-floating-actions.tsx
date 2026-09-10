@@ -10,7 +10,12 @@ type SiteFloatingActionsProps = {
   backToTopLabel: string;
   locale: Locale;
   liveChatCopy: WebLiveChatCopy;
-  liveChatConfig: {enabled: boolean};
+  liveChatConfig: {
+    enabled: boolean;
+    businessHoursStart: string;
+    businessHoursEnd: string;
+    businessHoursTimeZone: string;
+  };
 };
 
 export function SiteFloatingActions({
@@ -29,6 +34,11 @@ export function SiteFloatingActions({
         copy={liveChatCopy}
         locale={locale}
         enabled={liveChatConfig.enabled}
+        businessHours={{
+          start: liveChatConfig.businessHoursStart,
+          end: liveChatConfig.businessHoursEnd,
+          timeZone: liveChatConfig.businessHoursTimeZone
+        }}
       />
     </div>
   );

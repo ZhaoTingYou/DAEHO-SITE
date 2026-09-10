@@ -3,7 +3,9 @@ package com.daeho.cms.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class TelegramLiveChatRepository {
+  private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm");
   private final JdbcTemplate jdbc;
 
   public TelegramLiveChatRepository(JdbcTemplate jdbc) {
@@ -38,7 +41,9 @@ public class TelegramLiveChatRepository {
       String targetChatId,
       String topicName,
       boolean enabled,
-      boolean connectionChanged
+      boolean connectionChanged,
+      String businessHoursStart,
+      String businessHoursEnd
   ) {
     jdbc.update("""
         UPDATE cms_telegram_live_chat_settings SET
@@ -46,6 +51,8 @@ public class TelegramLiveChatRepository {
           bot_token_ciphertext = ?,
           target_chat_id = ?,
           topic_name = ?,
+          business_hours_start = ?::time,
+          business_hours_end = ?::time,
           bot_username = CASE WHEN ? THEN '' ELSE bot_username END,
           message_thread_id = CASE WHEN ? THEN '' ELSE message_thread_id END,
           webhook_secret_hash = CASE WHEN ? THEN '' ELSE webhook_secret_hash END,
@@ -65,6 +72,8 @@ public class TelegramLiveChatRepository {
         text(tokenCiphertext),
         text(targetChatId),
         firstNonBlank(topicName, "실시간 상담"),
+        text(businessHoursStart),
+        text(businessHoursEnd),
         connectionChanged,
         connectionChanged,
         connectionChanged,
@@ -989,8 +998,15 @@ public class TelegramLiveChatRepository {
         text(rs.getString("setup_error_code")),
         rs.getLong("configuration_generation"),
         rs.getObject("verified_at") == null ? "" : rs.getObject("verified_at").toString(),
-        rs.getObject("updated_at") == null ? "" : rs.getObject("updated_at").toString()
+        rs.getObject("updated_at") == null ? "" : rs.getObject("updated_at").toString(),
+        clock(rs, "business_hours_start", "09:00"),
+        clock(rs, "business_hours_end", "19:00")
     );
+  }
+
+  private String clock(ResultSet rs, String column, String fallback) throws SQLException {
+    var value = rs.getObject(column, LocalTime.class);
+    return value == null ? fallback : CLOCK.format(value);
   }
 
   private Session mapSession(ResultSet rs, int rowNum) throws SQLException {
@@ -1055,10 +1071,35 @@ public class TelegramLiveChatRepository {
       String setupErrorCode,
       long configurationGeneration,
       String verifiedAt,
-      String updatedAt
+      String updatedAt,
+      String businessHoursStart,
+      String businessHoursEnd
   ) {
     public static Settings empty() {
-      return new Settings(false, "", "", "", "", "실시간 상담", "", "idle", "", 1, "", "");
+      return new Settings(
+          false, "", "", "", "", "실시간 상담", "", "idle", "", 1, "", "", "09:00", "19:00"
+      );
+    }
+
+    public Settings(
+        boolean enabled,
+        String botTokenCiphertext,
+        String botUsername,
+        String targetChatId,
+        String messageThreadId,
+        String topicName,
+        String webhookSecretHash,
+        String setupState,
+        String setupErrorCode,
+        long configurationGeneration,
+        String verifiedAt,
+        String updatedAt
+    ) {
+      this(
+          enabled, botTokenCiphertext, botUsername, targetChatId, messageThreadId, topicName,
+          webhookSecretHash, setupState, setupErrorCode, configurationGeneration,
+          verifiedAt, updatedAt, "09:00", "19:00"
+      );
     }
 
     public Settings(
@@ -1076,7 +1117,8 @@ public class TelegramLiveChatRepository {
     ) {
       this(
           enabled, botTokenCiphertext, botUsername, targetChatId, messageThreadId, topicName,
-          webhookSecretHash, setupState, setupErrorCode, 1, verifiedAt, updatedAt
+          webhookSecretHash, setupState, setupErrorCode, 1, verifiedAt, updatedAt,
+          "09:00", "19:00"
       );
     }
 
@@ -1093,7 +1135,7 @@ public class TelegramLiveChatRepository {
     ) {
       this(
           enabled, botTokenCiphertext, botUsername, targetChatId, messageThreadId, topicName,
-          webhookSecretHash, "idle", "", 1, verifiedAt, updatedAt
+          webhookSecretHash, "idle", "", 1, verifiedAt, updatedAt, "09:00", "19:00"
       );
     }
 

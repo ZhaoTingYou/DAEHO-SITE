@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -90,6 +91,20 @@ class AdminLiveChatControllerTest {
         .andExpect(jsonPath("$.sessions[1].unreadCount").value(0))
         .andExpect(jsonPath("$.settings.botTokenCiphertext").doesNotExist())
         .andExpect(jsonPath("$.settings.webhookSecretHash").doesNotExist());
+  }
+
+  @Test
+  void rejectsMalformedOrReversedBusinessHoursBeforeUpdatingSettings() throws Exception {
+    mvc.perform(put("/api/admin/live-chat")
+            .header("x-admin-api-key", ADMIN_KEY)
+            .contentType("application/json")
+            .content("""
+                {"enabled":false,"botToken":"","targetChatId":"",
+                 "businessHoursStart":"19:00","businessHoursEnd":"09:00"}
+                """))
+        .andExpect(status().isUnprocessableEntity());
+
+    verify(credentials, never()).update(org.mockito.ArgumentMatchers.anyMap());
   }
 
   @Test

@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -124,6 +125,10 @@ public class TelegramLiveChatCredentialService {
     var targetChatId = text(input.get("targetChatId"));
     var topicName = LIVE_TOPIC_NAME;
     var requestedEnabled = booleanValue(input.get("enabled"));
+    var businessHours = LiveChatBusinessHours.parse(
+        text(input.get("businessHoursStart")),
+        text(input.get("businessHoursEnd"))
+    );
     var connectionChanged = tokenChanged
         || !current.targetChatId().equals(targetChatId)
         || !current.topicName().equals(topicName);
@@ -137,7 +142,9 @@ public class TelegramLiveChatCredentialService {
         targetChatId,
         topicName,
         requestedEnabled,
-        connectionChanged
+        connectionChanged,
+        businessHours.startText(),
+        businessHours.endText()
     );
   }
 
@@ -193,11 +200,37 @@ public class TelegramLiveChatCredentialService {
     result.put("encryptionConfigured", cipher.configured());
     result.put("verifiedAt", settings.verifiedAt());
     result.put("updatedAt", settings.updatedAt());
+    putBusinessHours(result, settings);
     return result;
   }
 
   public Map<String, Object> publicView(boolean webSessionCodecConfigured) {
-    return Map.of("enabled", current().ready() && webSessionCodecConfigured);
+    var settings = repository.settings();
+    var result = new LinkedHashMap<String, Object>();
+    result.put("enabled", new Credentials(settings, decrypt(settings.botTokenCiphertext())).ready()
+        && webSessionCodecConfigured);
+    putBusinessHours(result, settings);
+    return result;
+  }
+
+  public boolean acceptingNewConversations(Instant now) {
+    var configuration = current();
+    return configuration.ready() && LiveChatBusinessHours.parse(
+        configuration.settings().businessHoursStart(),
+        configuration.settings().businessHoursEnd()
+    ).includes(now);
+  }
+
+  private void putBusinessHours(
+      Map<String, Object> result,
+      TelegramLiveChatRepository.Settings settings
+  ) {
+    var hours = LiveChatBusinessHours.parse(
+        settings.businessHoursStart(), settings.businessHoursEnd()
+    );
+    result.put("businessHoursStart", hours.startText());
+    result.put("businessHoursEnd", hours.endText());
+    result.put("businessHoursTimeZone", LiveChatBusinessHours.TIME_ZONE);
   }
 
   private String decrypt(String ciphertext) {

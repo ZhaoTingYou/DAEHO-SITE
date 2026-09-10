@@ -82,11 +82,16 @@ public class WebLiveChatController {
       HttpServletResponse response
   ) {
     authorize(request);
-    var identity = identity(request, response, issue);
+    var acceptingNewConversations = liveChat.acceptingNewConversations(Instant.now());
+    var identity = identity(request, response, issue && acceptingNewConversations);
     if (identity == null) {
-      return sessionResponse(new WebLiveChatRepository.SessionView(null, List.of(), 0L));
+      return sessionResponse(
+          new WebLiveChatRepository.SessionView(null, List.of(), 0L),
+          acceptingNewConversations
+      );
     }
-    return sessionResponse(liveChat.session(identity.visitor()));
+    var view = liveChat.session(identity.visitor());
+    return sessionResponse(view, view.conversation() != null || acceptingNewConversations);
   }
 
   @PostMapping("/conversations")
@@ -101,14 +106,22 @@ public class WebLiveChatController {
     }
     var input = validator.validateStart(body, formAge(body));
     var identity = identity(request, response, false);
+    if (identity != null) {
+      var existing = liveChat.resolveExistingStart(identity.visitor(), input);
+      if (existing != null) {
+        return Map.of("conversation", publicConversation(existing));
+      }
+    }
+    if (!liveChat.acceptingNewConversations(Instant.now())) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE,
+          "New live-chat consultations are outside business hours."
+      );
+    }
     if (identity == null) {
       enforceStartIpLimit(request);
       identity = issueIdentity(request, response);
       enforceStartVisitorLimit(identity.visitor());
-    }
-    var existing = liveChat.resolveExistingStart(identity.visitor(), input);
-    if (existing != null) {
-      return Map.of("conversation", publicConversation(existing));
     }
     if (!identity.newlyIssued()) {
       enforceStartLimits(identity.visitor(), request);
@@ -321,9 +334,12 @@ public class WebLiveChatController {
     return codec.ipHash(source);
   }
 
-  private Map<String, Object> sessionResponse(WebLiveChatRepository.SessionView view) {
+  private Map<String, Object> sessionResponse(
+      WebLiveChatRepository.SessionView view,
+      boolean available
+  ) {
     var result = new LinkedHashMap<String, Object>();
-    result.put("available", true);
+    result.put("available", available);
     result.put("conversation", view.conversation() == null ? null : publicConversation(view.conversation()));
     result.put("unreadCount", view.unreadCount());
     return historyResponse(result, "messages", view.messages(), 0L);

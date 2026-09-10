@@ -107,7 +107,7 @@ test('stream source stays native-stable until polling threshold and broadcasts o
   assert.doesNotMatch(broadcastHandler, /dispatch\(/);
 });
 
-test('site integration uses embedded copy and an enabled-only public config', () => {
+test('site integration uses embedded copy and a privacy-safe public schedule', () => {
   const layout = read('../../app/[locale]/(site)/layout.tsx');
   const actions = read('./site-floating-actions.tsx');
   const repositories = read('../../lib/cms/repositories.ts');
@@ -118,7 +118,9 @@ test('site integration uses embedded copy and an enabled-only public config', ()
   assert.match(layout, /getWebLiveChatPublicConfig/);
   assert.match(layout, /messages\.common\.webLiveChat/);
   assert.match(actions, /<WebLiveChatWidget/);
-  assert.match(repositories, /cmsFetch<\{enabled: boolean\}>/);
+  assert.match(repositories, /businessHoursStart: string/);
+  assert.match(repositories, /businessHoursEnd: string/);
+  assert.match(repositories, /businessHoursTimeZone: string/);
   assert.doesNotMatch(repositories.match(/export async function getWebLiveChatPublicConfig[\s\S]*?\n\}/)?.[0] ?? '', /botUsername/);
   assert.match(controller, /codec\.configured\(\)/);
   assert.equal(ko.common.webLiveChat.label, '실시간 상담');
@@ -126,6 +128,18 @@ test('site integration uses embedded copy and an enabled-only public config', ()
   assert.equal(en.common.webLiveChat.label, 'Live consultation');
   assert.equal(en.common.webLiveChat.noSignIn, 'No sign-in required');
   assert.equal(existsSync(new URL('./telegram-live-chat-button.tsx', import.meta.url)), false);
+});
+
+test('outside business hours uses dedicated customer copy and the Seoul schedule', () => {
+  const ko = JSON.parse(read('../../messages/ko.json'));
+  const en = JSON.parse(read('../../messages/en.json'));
+
+  assert.match(source, /isWithinLiveChatBusinessHours/);
+  assert.match(source, /formatLiveChatBusinessHours/);
+  assert.match(source, /copy\.outsideHoursTitle/);
+  assert.match(source, /copy\.businessHoursLabel/);
+  assert.equal(ko.common.webLiveChat.outsideHoursTitle, '상담 가능 시간이 아닙니다');
+  assert.equal(en.common.webLiveChat.outsideHoursTitle, 'Outside consultation hours');
 });
 
 test('closed launcher refreshes authoritative unread state without marking it read', () => {

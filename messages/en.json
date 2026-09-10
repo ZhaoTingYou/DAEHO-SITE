@@ -1509,7 +1509,10 @@
       "closedBody": "You can still read previous replies. A new inquiry starts a separate consultation.",
       "newConsultationLabel": "Start a new consultation",
       "unavailableTitle": "Temporarily unavailable",
-      "unavailableBody": "Live consultation is being prepared. Please try again shortly."
+      "unavailableBody": "Live consultation is being prepared. Please try again shortly.",
+      "outsideHoursTitle": "Outside consultation hours",
+      "outsideHoursBody": "Please return during consultation hours.",
+      "businessHoursLabel": "Consultation hours (Korea time)"
     },
     "navigation": {
       "brandLabel": "DAEHO",

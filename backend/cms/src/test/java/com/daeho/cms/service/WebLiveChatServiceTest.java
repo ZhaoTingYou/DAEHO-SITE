@@ -56,7 +56,21 @@ class WebLiveChatServiceTest {
     when(credentials.current()).thenReturn(
         new TelegramLiveChatCredentialService.Credentials(settings, "token")
     );
+    when(credentials.acceptingNewConversations(any(Instant.class))).thenReturn(true);
     service = new WebLiveChatService(repository, credentials, gateway, inquiries, broker);
+  }
+
+  @Test
+  void startFailsClosedOutsideBusinessHoursBeforeWritingAnything() {
+    when(credentials.acceptingNewConversations(any(Instant.class))).thenReturn(false);
+
+    var error = assertThrows(ResponseStatusException.class,
+        () -> service.start(visitor(), validStart(), requestMeta()));
+
+    assertEquals(503, error.getStatusCode().value());
+    verify(repository, never()).claimOpen(any());
+    verify(inquiries, never()).createWebLiveChat(anyMap(), anyMap());
+    verify(gateway, never()).createForumTopic(anyString(), anyString(), anyString());
   }
 
   @Test

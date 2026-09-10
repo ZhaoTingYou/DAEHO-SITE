@@ -49,6 +49,17 @@ test('CMS names the live-chat area for the website experience rather than the in
   assert.match(i18n, /'liveChat\.title': '웹사이트 실시간 상담 관리'/);
 });
 
+test('CMS exposes editable Seoul business hours and saves them with the live-chat settings', () => {
+  assert.match(repositories, /businessHoursStart: string/);
+  assert.match(repositories, /businessHoursEnd: string/);
+  assert.match(editor, /type="time"/);
+  assert.match(editor, /businessHoursStart: settings\.businessHoursStart/);
+  assert.match(editor, /businessHoursEnd: settings\.businessHoursEnd/);
+  assert.match(page, /businessHours: t\('liveChat\.businessHours'\)/);
+  assert.match(i18n, /'liveChat\.businessHours': '상담 가능 시간'/);
+  assert.match(i18n, /'liveChat\.businessHoursTimeZone': '대한민국 시간/);
+});
+
 test('admin live-chat rows show text source badges, website states, unread count, and accessible targets', () => {
   assert.match(editor, /session\.source === 'website'/);
   assert.match(editor, /copy\.sourceWebsite/);
