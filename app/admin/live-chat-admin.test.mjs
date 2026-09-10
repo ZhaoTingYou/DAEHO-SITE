@@ -18,6 +18,10 @@ const i18n = readFileSync(
   new URL('../../lib/admin-i18n.ts', import.meta.url),
   'utf8'
 );
+const sqliteSchema = readFileSync(
+  new URL('../../database/cms-schema.sql', import.meta.url),
+  'utf8'
+);
 
 test('admin live-chat repository exposes one source-aware privacy-safe session contract', () => {
   assert.match(repositories, /export type LiveChatAdminSession = \{/);
@@ -58,6 +62,9 @@ test('CMS exposes editable Seoul business hours and saves them with the live-cha
   assert.match(page, /businessHours: t\('liveChat\.businessHours'\)/);
   assert.match(i18n, /'liveChat\.businessHours': '상담 가능 시간'/);
   assert.match(i18n, /'liveChat\.businessHoursTimeZone': '대한민국 시간/);
+  assert.match(sqliteSchema, /business_hours_start TEXT NOT NULL DEFAULT '09:00'/);
+  assert.match(sqliteSchema, /business_hours_end TEXT NOT NULL DEFAULT '19:00'/);
+  assert.match(sqliteSchema, /CHECK \(business_hours_start < business_hours_end\)/);
 });
 
 test('admin live-chat rows show text source badges, website states, unread count, and accessible targets', () => {

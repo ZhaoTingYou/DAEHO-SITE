@@ -112,7 +112,8 @@ public class WebLiveChatController {
         return Map.of("conversation", publicConversation(existing));
       }
     }
-    if (!liveChat.acceptingNewConversations(Instant.now())) {
+    var admissionTime = Instant.now();
+    if (!liveChat.acceptingNewConversations(admissionTime)) {
       throw new ResponseStatusException(
           HttpStatus.SERVICE_UNAVAILABLE,
           "New live-chat consultations are outside business hours."
@@ -126,7 +127,7 @@ public class WebLiveChatController {
     if (!identity.newlyIssued()) {
       enforceStartLimits(identity.visitor(), request);
     }
-    var conversation = liveChat.start(identity.visitor(), input, Map.of());
+    var conversation = liveChat.start(identity.visitor(), input, Map.of(), admissionTime);
     renewAfterCustomerWrite(identity, response);
     return Map.of("conversation", publicConversation(conversation));
   }

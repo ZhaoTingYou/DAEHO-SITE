@@ -74,6 +74,19 @@ class WebLiveChatServiceTest {
   }
 
   @Test
+  void startUsesTheControllersAdmissionTimeAcrossTheClosingBoundary() {
+    var admittedAt = Instant.parse("2026-09-10T09:59:59Z");
+    when(credentials.acceptingNewConversations(admittedAt)).thenReturn(false);
+
+    var error = assertThrows(ResponseStatusException.class,
+        () -> service.start(visitor(), validStart(), requestMeta(), admittedAt));
+
+    assertEquals(503, error.getStatusCode().value());
+    verify(credentials).acceptingNewConversations(admittedAt);
+    verify(repository, never()).claimOpen(any());
+  }
+
+  @Test
   void startCreatesOneInquiryOneTopicAndOnePrivacySafeRegistrationCardInOrder() {
     var opening = conversation("opening", "", "", "", 0L, 0L);
     var withInquiry = conversation("opening", "inquiry-1", "", "", 0L, 0L);

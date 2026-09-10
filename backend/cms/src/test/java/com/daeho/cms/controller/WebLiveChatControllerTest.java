@@ -143,14 +143,15 @@ class WebLiveChatControllerTest {
             .content(startJson("spam.example")))
         .andExpect(status().isUnprocessableEntity());
 
-    verify(liveChat, never()).start(any(), any(), any());
+    verify(liveChat, never()).start(any(), any(), any(), any(Instant.class));
   }
 
   @Test
   void startConsumesExactIpAndVisitorBucketsBeforeReusingAnActiveConversation() throws Exception {
     var visitor = visitor();
     existingCookie(visitor);
-    when(liveChat.start(eq(visitor), any(), eq(Map.of()))).thenReturn(conversation("active"));
+    when(liveChat.start(eq(visitor), any(), eq(Map.of()), any(Instant.class)))
+        .thenReturn(conversation("active"));
     when(repository.touchVisitor(visitor.id(), Duration.ofDays(30))).thenReturn(visitor);
 
     mvc.perform(post("/api/live-chat/conversations")
@@ -173,6 +174,9 @@ class WebLiveChatControllerTest {
         codec.hash("rate:visitor:" + visitor.id()), "start_visitor_hour", 3, Duration.ofHours(1)
     );
     verify(repository).touchVisitor(visitor.id(), Duration.ofDays(30));
+    var admissionTime = ArgumentCaptor.forClass(Instant.class);
+    verify(liveChat).acceptingNewConversations(admissionTime.capture());
+    verify(liveChat).start(eq(visitor), any(), eq(Map.of()), eq(admissionTime.getValue()));
   }
 
   @Test
@@ -192,7 +196,7 @@ class WebLiveChatControllerTest {
 
     verify(repository, never()).consumeRateBucket(anyString(), anyString(), anyInt(), any());
     verify(repository, never()).createVisitor(anyString(), any(Duration.class));
-    verify(liveChat, never()).start(any(), any(), any());
+    verify(liveChat, never()).start(any(), any(), any(), any(Instant.class));
   }
 
   @Test
@@ -442,7 +446,7 @@ class WebLiveChatControllerTest {
         .andExpect(header().doesNotExist("Set-Cookie"));
 
     verify(repository, never()).createVisitor(anyString(), any(Duration.class));
-    verify(liveChat, never()).start(any(), any(), any());
+    verify(liveChat, never()).start(any(), any(), any(), any(Instant.class));
   }
 
   @Test

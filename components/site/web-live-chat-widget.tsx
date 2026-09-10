@@ -234,6 +234,25 @@ export function WebLiveChatWidget({
     };
   }, [enabled, refreshAuthoritative]);
 
+  useEffect(() => {
+    if (!enabled || !state.panelOpen || state.conversationState !== null) return;
+    let active = true;
+    let timer: number | undefined;
+    const scheduleRefresh = () => {
+      const delay = 60_050 - (Date.now() % 60_000);
+      timer = window.setTimeout(async () => {
+        if (!active) return;
+        await refreshAuthoritative().catch(() => undefined);
+        if (active) scheduleRefresh();
+      }, delay);
+    };
+    scheduleRefresh();
+    return () => {
+      active = false;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [enabled, refreshAuthoritative, state.conversationState, state.panelOpen]);
+
   const tryEnterFocus = useCallback((generation: number) => {
     if (generation !== focusGenerationRef.current
         || !stateRef.current.panelOpen
@@ -413,6 +432,15 @@ export function WebLiveChatWidget({
       setStartError(copy.requiredError);
       return;
     }
+    if (!isWithinLiveChatBusinessHours(businessHours)) {
+      setStartStatus('idle');
+      setStartError('');
+      dispatch({
+        type: 'session_metadata_loaded',
+        session: {available: false, conversation: null, unreadCount: 0}
+      });
+      return;
+    }
     const operationPayload = JSON.stringify({
       locale,
       name: name.trim(),
@@ -447,6 +475,15 @@ export function WebLiveChatWidget({
         }
       }
     } catch (error) {
+      if (error instanceof WebLiveChatApiError && error.status === 503) {
+        const session = await refreshAuthoritative().catch(() => null);
+        if (session && !session.available && session.conversation === null) {
+          startMutationRef.current.finish(operation, 'definitive_failure');
+          setStartStatus('idle');
+          setStartError('');
+          return;
+        }
+      }
       const outcome = isDefinitiveMutationFailure(error)
         ? 'definitive_failure'
         : 'ambiguous_failure';
@@ -454,7 +491,7 @@ export function WebLiveChatWidget({
       setStartStatus('failed');
       setStartError(copy.submissionError);
     }
-  }, [companyWebsite, copy.hydrationError, copy.requiredError, copy.submissionError, locale, refreshAuthoritative, state.formDraft]);
+  }, [businessHours, companyWebsite, copy.hydrationError, copy.requiredError, copy.submissionError, locale, refreshAuthoritative, state.formDraft]);
 
   const changeMessage = useCallback((body: string) => {
     if (!sendMutationRef.current.edit()) return;

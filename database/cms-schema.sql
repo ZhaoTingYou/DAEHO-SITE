@@ -267,9 +267,12 @@ CREATE TABLE IF NOT EXISTS cms_telegram_live_chat_settings (
     CHECK (setup_state IN ('idle', 'connecting', 'needs_attention')),
   setup_error_code TEXT NOT NULL DEFAULT '',
   setup_attempt_id TEXT NOT NULL DEFAULT '',
+  business_hours_start TEXT NOT NULL DEFAULT '09:00',
+  business_hours_end TEXT NOT NULL DEFAULT '19:00',
   configuration_generation INTEGER NOT NULL DEFAULT 1,
   verified_at TEXT,
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  CHECK (business_hours_start < business_hours_end)
 );
 
 INSERT OR IGNORE INTO cms_telegram_live_chat_settings (id) VALUES ('default');

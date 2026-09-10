@@ -48,8 +48,16 @@ public class WebLiveChatService {
       StartInput input,
       Map<String, String> requestMeta
   ) {
-    var now = Instant.now();
-    if (!acceptingNewConversations(now)) {
+    return start(visitor, input, requestMeta, Instant.now());
+  }
+
+  public Conversation start(
+      WebLiveChatRepository.Visitor visitor,
+      StartInput input,
+      Map<String, String> requestMeta,
+      Instant admissionTime
+  ) {
+    if (!acceptingNewConversations(admissionTime)) {
       throw new ResponseStatusException(
           HttpStatus.SERVICE_UNAVAILABLE,
           "New live-chat consultations are outside business hours."
@@ -60,8 +68,8 @@ public class WebLiveChatService {
     var candidate = new Conversation(
         UUID.randomUUID().toString(), visitor.id(), settings.configurationGeneration(),
         settings.targetChatId(), "", input.locale(), "opening", input.name(), input.contact(),
-        input.content(), input.consentVersion(), now, "", "", 0L, "", 0L, 0L, 0L,
-        now, now, now, null
+        input.content(), input.consentVersion(), admissionTime, "", "", 0L, "", 0L, 0L, 0L,
+        admissionTime, admissionTime, admissionTime, null
     );
     var conversation = repository.claimOpen(candidate);
     if (conversation != null) {
