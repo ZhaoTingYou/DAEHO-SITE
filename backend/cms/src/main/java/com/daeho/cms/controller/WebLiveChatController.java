@@ -6,6 +6,7 @@ import com.daeho.cms.repository.WebLiveChatRepository.Conversation;
 import com.daeho.cms.repository.WebLiveChatRepository.Message;
 import com.daeho.cms.repository.WebLiveChatRepository.Visitor;
 import com.daeho.cms.security.WebLiveChatTokenCodec;
+import com.daeho.cms.service.LiveChatBusinessHours;
 import com.daeho.cms.service.WebLiveChatEventBroker;
 import com.daeho.cms.service.WebLiveChatInputValidator;
 import com.daeho.cms.service.WebLiveChatService;
@@ -83,15 +84,21 @@ public class WebLiveChatController {
   ) {
     authorize(request);
     var acceptingNewConversations = liveChat.acceptingNewConversations(Instant.now());
+    var businessHours = liveChat.currentBusinessHours();
     var identity = identity(request, response, issue && acceptingNewConversations);
     if (identity == null) {
       return sessionResponse(
           new WebLiveChatRepository.SessionView(null, List.of(), 0L),
-          acceptingNewConversations
+          acceptingNewConversations,
+          businessHours
       );
     }
     var view = liveChat.session(identity.visitor());
-    return sessionResponse(view, view.conversation() != null || acceptingNewConversations);
+    return sessionResponse(
+        view,
+        view.conversation() != null || acceptingNewConversations,
+        businessHours
+    );
   }
 
   @PostMapping("/conversations")
@@ -337,10 +344,16 @@ public class WebLiveChatController {
 
   private Map<String, Object> sessionResponse(
       WebLiveChatRepository.SessionView view,
-      boolean available
+      boolean available,
+      LiveChatBusinessHours businessHours
   ) {
     var result = new LinkedHashMap<String, Object>();
     result.put("available", available);
+    result.put("businessHours", Map.of(
+        "start", businessHours.startText(),
+        "end", businessHours.endText(),
+        "timeZone", LiveChatBusinessHours.TIME_ZONE
+    ));
     result.put("conversation", view.conversation() == null ? null : publicConversation(view.conversation()));
     result.put("unreadCount", view.unreadCount());
     return historyResponse(result, "messages", view.messages(), 0L);

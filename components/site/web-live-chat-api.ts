@@ -1,3 +1,5 @@
+import type {LiveChatBusinessHours} from './live-chat-business-hours-core.mjs';
+
 const API_ROOT = '/api/live-chat';
 const MAX_RESPONSE_BYTES = 256 * 1024;
 const MAX_EVENT_BYTES = 64 * 1024;
@@ -21,6 +23,7 @@ export type WebLiveChatMessage = {
 
 export type WebLiveChatSession = {
   available: boolean;
+  businessHours: LiveChatBusinessHours;
   conversation: WebLiveChatConversation | null;
   messages: WebLiveChatMessage[];
   nextCursor: number;
@@ -258,6 +261,7 @@ async function request<T>(
 
 function parseSession(value: unknown): WebLiveChatSession {
   const object = responseObject(value);
+  const businessHours = parseBusinessHours(object.businessHours);
   if (typeof object.available !== 'boolean'
       || !Array.isArray(object.messages)
       || !nonnegativeInteger(object.nextCursor)
@@ -267,6 +271,7 @@ function parseSession(value: unknown): WebLiveChatSession {
   }
   return {
     available: object.available,
+    businessHours,
     conversation: object.conversation === null
       ? null
       : parseConversation(object.conversation),
@@ -275,6 +280,20 @@ function parseSession(value: unknown): WebLiveChatSession {
     hasMore: object.hasMore,
     unreadCount: object.unreadCount
   };
+}
+
+function parseBusinessHours(value: unknown): LiveChatBusinessHours {
+  const object = responseObject(value);
+  const clock = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+  if (typeof object.start !== 'string'
+      || typeof object.end !== 'string'
+      || object.timeZone !== 'Asia/Seoul'
+      || !clock.test(object.start)
+      || !clock.test(object.end)
+      || object.start >= object.end) {
+    throw new TypeError('Invalid live-chat business hours.');
+  }
+  return {start: object.start, end: object.end, timeZone: object.timeZone};
 }
 
 function parseConversationResponse(value: unknown): {conversation: WebLiveChatConversation} {

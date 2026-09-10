@@ -107,6 +107,10 @@ public class WebLiveChatService {
     return credentials.acceptingNewConversations(now);
   }
 
+  public LiveChatBusinessHours currentBusinessHours() {
+    return credentials.currentBusinessHours();
+  }
+
   public Conversation resolveExistingStart(
       WebLiveChatRepository.Visitor visitor,
       StartInput input

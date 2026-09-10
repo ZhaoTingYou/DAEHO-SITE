@@ -15,6 +15,11 @@ export type PublicMessage = {
 
 export type WebLiveChatSessionInput = {
   available: boolean;
+  businessHours?: {
+    start: string;
+    end: string;
+    timeZone: string;
+  };
   conversation: {
     state: 'opening' | 'active' | 'closed' | 'needs_attention';
     locale?: 'ko' | 'en';
@@ -35,6 +40,11 @@ export type WebLiveChatState = {
   launcherExpanded: false;
   view: WebLiveChatView;
   available: boolean;
+  businessHours: {
+    start: string;
+    end: string;
+    timeZone: string;
+  };
   conversationFingerprint: string | null;
   conversationState: 'opening' | 'active' | 'closed' | 'needs_attention' | null;
   messages: PublicMessage[];
@@ -65,7 +75,9 @@ export type WebLiveChatReducerEvent =
   | {type: 'durable_event'; event: WebLiveChatDurableEvent}
   | {type: 'sse_failure' | 'sse_connected'};
 
-export function createWebLiveChatState(): WebLiveChatState;
+export function createWebLiveChatState(
+  businessHours?: WebLiveChatState['businessHours']
+): WebLiveChatState;
 export function reduceWebLiveChatState(
   state: WebLiveChatState,
   event: WebLiveChatReducerEvent

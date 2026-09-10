@@ -149,6 +149,25 @@ test('session payloads map only to the six supported view states', () => {
   ]));
 });
 
+test('authoritative session metadata replaces stale CMS business hours', () => {
+  const opened = reduceWebLiveChatState(createWebLiveChatState({
+    start: '09:00', end: '19:00', timeZone: 'Asia/Seoul'
+  }), {type: 'toggle'});
+  const updated = reduceWebLiveChatState(opened, {
+    type: 'session_metadata_loaded',
+    session: {
+      available: true,
+      businessHours: {start: '08:00', end: '17:00', timeZone: 'Asia/Seoul'},
+      conversation: null,
+      unreadCount: 0
+    }
+  });
+
+  assert.deepEqual(updated.businessHours, {
+    start: '08:00', end: '17:00', timeZone: 'Asia/Seoul'
+  });
+});
+
 test('durable team events deduplicate by positive ID and increment unread only while closed', () => {
   const messageEvent = {
     type: 'durable_event',

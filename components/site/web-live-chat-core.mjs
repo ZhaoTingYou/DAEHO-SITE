@@ -38,13 +38,16 @@ export function mergeVisibleMessages(existing, incoming) {
   ]).sort((left, right) => left.id - right.id);
 }
 
-export function createWebLiveChatState() {
+export function createWebLiveChatState(businessHours = {
+  start: '09:00', end: '19:00', timeZone: 'Asia/Seoul'
+}) {
   return {
     panelOpen: false,
     hovered: false,
     launcherExpanded: false,
     view: 'closed_launcher',
     available: true,
+    businessHours,
     conversationFingerprint: null,
     conversationState: null,
     messages: [],
@@ -122,6 +125,7 @@ export function reduceWebLiveChatState(state, event) {
       const next = {
         ...state,
         available: session.available !== false,
+        businessHours: session.businessHours ?? state.businessHours,
         conversationFingerprint: fingerprint,
         conversationState: session.conversation?.state ?? null,
         messages,
@@ -147,6 +151,7 @@ export function reduceWebLiveChatState(state, event) {
       const next = {
         ...state,
         available: session.available !== false,
+        businessHours: session.businessHours ?? state.businessHours,
         conversationFingerprint: fingerprint,
         conversationState: session.conversation?.state ?? null,
         messages,
@@ -196,7 +201,7 @@ export function reduceWebLiveChatState(state, event) {
       return {...next, view: next.panelOpen ? 'closed' : 'closed_launcher'};
     }
     case 'new_consultation': {
-      const reset = createWebLiveChatState();
+      const reset = createWebLiveChatState(state.businessHours);
       const available = typeof event.available === 'boolean'
         ? event.available
         : state.available;

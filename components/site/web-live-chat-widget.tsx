@@ -109,7 +109,7 @@ export function WebLiveChatWidget({
 }) {
   const [state, dispatch] = useReducer(
     reduceWebLiveChatState,
-    undefined,
+    businessHours,
     createWebLiveChatState
   );
   const [initializing, setInitializing] = useState(false);
@@ -152,6 +152,7 @@ export function WebLiveChatWidget({
       type: 'session_metadata_loaded',
       session: {
         available: session.available,
+        businessHours: session.businessHours,
         conversation: session.conversation,
         unreadCount: session.unreadCount
       }
@@ -432,7 +433,7 @@ export function WebLiveChatWidget({
       setStartError(copy.requiredError);
       return;
     }
-    if (!isWithinLiveChatBusinessHours(businessHours)) {
+    if (!isWithinLiveChatBusinessHours(state.businessHours)) {
       setStartStatus('idle');
       setStartError('');
       dispatch({
@@ -491,7 +492,7 @@ export function WebLiveChatWidget({
       setStartStatus('failed');
       setStartError(copy.submissionError);
     }
-  }, [businessHours, companyWebsite, copy.hydrationError, copy.requiredError, copy.submissionError, locale, refreshAuthoritative, state.formDraft]);
+  }, [companyWebsite, copy.hydrationError, copy.requiredError, copy.submissionError, locale, refreshAuthoritative, state.businessHours, state.formDraft]);
 
   const changeMessage = useCallback((body: string) => {
     if (!sendMutationRef.current.edit()) return;
@@ -532,14 +533,14 @@ export function WebLiveChatWidget({
     setCompanyWebsite('');
     dispatch({
       type: 'new_consultation',
-      available: isWithinLiveChatBusinessHours(businessHours)
+      available: isWithinLiveChatBusinessHours(state.businessHours)
     });
-  }, [businessHours]);
+  }, [state.businessHours]);
 
   if (!enabled) return null;
 
-  const outsideBusinessHours = !isWithinLiveChatBusinessHours(businessHours);
-  const businessHoursText = formatLiveChatBusinessHours(businessHours);
+  const outsideBusinessHours = !isWithinLiveChatBusinessHours(state.businessHours);
+  const businessHoursText = formatLiveChatBusinessHours(state.businessHours);
 
   const transition = reduceMotion
     ? {duration: 0.12}

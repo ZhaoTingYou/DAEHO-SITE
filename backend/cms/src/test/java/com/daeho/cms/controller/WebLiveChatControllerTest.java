@@ -29,10 +29,11 @@ import com.daeho.cms.repository.WebLiveChatRepository.Conversation;
 import com.daeho.cms.repository.WebLiveChatRepository.Message;
 import com.daeho.cms.repository.WebLiveChatRepository.Visitor;
 import com.daeho.cms.security.WebLiveChatTokenCodec;
+import com.daeho.cms.service.LiveChatBusinessHours;
+import com.daeho.cms.service.TelegramLiveChatException;
 import com.daeho.cms.service.WebLiveChatEventBroker;
 import com.daeho.cms.service.WebLiveChatInputValidator;
 import com.daeho.cms.service.WebLiveChatService;
-import com.daeho.cms.service.TelegramLiveChatException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -76,6 +77,9 @@ class WebLiveChatControllerTest {
         .thenReturn(true);
     when(liveChat.session(visitor)).thenReturn(new SessionView(null, List.of(), 0L));
     when(liveChat.acceptingNewConversations(any(Instant.class))).thenReturn(true);
+    when(liveChat.currentBusinessHours()).thenReturn(
+        LiveChatBusinessHours.parse("09:00", "19:00")
+    );
     controller = new WebLiveChatController(
         properties, codec, repository, new WebLiveChatInputValidator(), liveChat, broker
     );
@@ -377,7 +381,10 @@ class WebLiveChatControllerTest {
             containsString("Secure"), containsString("SameSite=Lax"),
             containsString("Path=/api/live-chat"))))
         .andExpect(jsonPath("$.token").doesNotExist())
-        .andExpect(jsonPath("$.unreadCount").value(0));
+        .andExpect(jsonPath("$.unreadCount").value(0))
+        .andExpect(jsonPath("$.businessHours.start").value("09:00"))
+        .andExpect(jsonPath("$.businessHours.end").value("19:00"))
+        .andExpect(jsonPath("$.businessHours.timeZone").value("Asia/Seoul"));
 
     verify(repository).createVisitor(anyString(), eq(Duration.ofDays(30)));
     verify(repository).consumeRateBucket(

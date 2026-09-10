@@ -215,22 +215,29 @@ public class TelegramLiveChatCredentialService {
 
   public boolean acceptingNewConversations(Instant now) {
     var configuration = current();
-    return configuration.ready() && LiveChatBusinessHours.parse(
-        configuration.settings().businessHoursStart(),
-        configuration.settings().businessHoursEnd()
-    ).includes(now);
+    return configuration.ready() && currentBusinessHours(configuration.settings()).includes(now);
+  }
+
+  public LiveChatBusinessHours currentBusinessHours() {
+    return currentBusinessHours(repository.settings());
   }
 
   private void putBusinessHours(
       Map<String, Object> result,
       TelegramLiveChatRepository.Settings settings
   ) {
-    var hours = LiveChatBusinessHours.parse(
-        settings.businessHoursStart(), settings.businessHoursEnd()
-    );
+    var hours = currentBusinessHours(settings);
     result.put("businessHoursStart", hours.startText());
     result.put("businessHoursEnd", hours.endText());
     result.put("businessHoursTimeZone", LiveChatBusinessHours.TIME_ZONE);
+  }
+
+  private LiveChatBusinessHours currentBusinessHours(
+      TelegramLiveChatRepository.Settings settings
+  ) {
+    return LiveChatBusinessHours.parse(
+        settings.businessHoursStart(), settings.businessHoursEnd()
+    );
   }
 
   private String decrypt(String ciphertext) {

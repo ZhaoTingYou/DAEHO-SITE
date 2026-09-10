@@ -139,8 +139,10 @@ test('outside business hours uses dedicated customer copy and the Seoul schedule
   assert.match(source, /copy\.outsideHoursTitle/);
   assert.match(source, /copy\.businessHoursLabel/);
   assert.match(source, /60_050 - \(Date\.now\(\) % 60_000\)/);
+  assert.match(source, /businessHours: session\.businessHours/);
+  assert.match(source, /isWithinLiveChatBusinessHours\(state\.businessHours\)/);
   assert.match(source, /error instanceof WebLiveChatApiError && error\.status === 503/);
-  assert.match(source, /if \(!isWithinLiveChatBusinessHours\(businessHours\)\)/);
+  assert.match(source, /if \(!isWithinLiveChatBusinessHours\(state\.businessHours\)\)/);
   assert.equal(ko.common.webLiveChat.outsideHoursTitle, '상담 가능 시간이 아닙니다');
   assert.equal(en.common.webLiveChat.outsideHoursTitle, 'Outside consultation hours');
 });
