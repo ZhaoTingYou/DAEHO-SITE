@@ -161,6 +161,47 @@ class WebLiveChatRepositoryTest {
   }
 
   @Test
+  void automatedWelcomeIsStoredAsOneDeliveredTeamMessagePerConversation() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> List.of(messageRow("team", 0L, "auto-welcome-v1"));
+    var repository = new WebLiveChatRepository(jdbc);
+
+    var message = repository.storeAutomatedWelcomeMessage(
+        "conversation-1", "안녕하세요, 대호입니다."
+    );
+
+    assertEquals("team", message.direction());
+    var call = jdbc.calls.get(0);
+    assertTrue(call.sql().contains("'team'"));
+    assertTrue(call.sql().contains("'delivered'"));
+    assertTrue(call.sql().contains("ON CONFLICT (conversation_id, client_message_key)"));
+    assertFalse(call.sql().contains("body = excluded.body"));
+    assertEquals(
+        List.of("안녕하세요, 대호입니다.", "conversation-1"),
+        Arrays.asList(call.args())
+    );
+  }
+
+  @Test
+  void activationReturnsTheDurableWelcomeWrittenInTheSameOperation() {
+    var jdbc = new RecordingJdbcTemplate();
+    jdbc.queryResult = call -> call.sql().contains("UPDATE cms_web_live_chat_conversations")
+        ? List.of(conversationRow())
+        : List.of(messageRow("team", 0L, "auto-welcome-v1"));
+    var repository = new WebLiveChatRepository(jdbc);
+
+    var result = repository.activateWithAutomatedWelcome(
+        "conversation-1", 702L, "안녕하세요, 대호입니다."
+    );
+
+    assertEquals("conversation-1", result.conversation().id());
+    assertEquals("team", result.welcome().direction());
+    assertEquals(2, jdbc.calls.size());
+    assertTrue(jdbc.calls.get(0).sql().contains("pending_action = 'registration_delivery'"));
+    assertTrue(jdbc.calls.get(1).sql().contains("state = 'active'"));
+  }
+
+  @Test
   void topicLookupIncludesConfigurationChatAndThread() {
     var jdbc = new RecordingJdbcTemplate();
     jdbc.queryResult = call -> List.of(conversationRow());

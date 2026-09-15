@@ -85,6 +85,21 @@ test('message history uses compact WeChat-style participant bubbles and a center
   assert.doesNotMatch(system, /rounded-t[lr]-sm/);
 });
 
+test('submitted consultations localize the durable automated welcome as a team bubble', () => {
+  const ko = JSON.parse(read('../../messages/ko.json'));
+  const en = JSON.parse(read('../../messages/en.json'));
+
+  assert.equal(
+    ko.common.webLiveChat.automatedWelcomeMessage,
+    '안녕하세요, 대호입니다. 현재 상담 직원이 다른 업무로 인해 바로 답변드리기 어려울 수 있습니다.\n연락처를 아직 입력하지 않으셨다면, 원활한 상담을 위해 전화번호를 남겨주시면 확인 후 담당자가 연락드려 자세히 안내드리겠습니다.\n이미 연락처를 입력하셨다면, 확인 후 담당자가 연락드리겠습니다. 감사합니다.'
+  );
+  assert.match(en.common.webLiveChat.automatedWelcomeMessage, /^Hello, this is DAEHO\./);
+  assert.match(source, /AUTOMATED_WELCOME_TEMPLATE/);
+  assert.match(source, /teamMessageBody\(copy, newestTeamMessage\.body\)/);
+  assert.match(source, /teamMessageBody\(copy, event\.message\.body\)/);
+  assert.match(source, /teamMessageBody\(copy, message\.body\)/);
+});
+
 test('history uses a bottom sentinel and preserves older-reading position with an accessible below affordance', () => {
   assert.match(source, /bottomSentinelRef/);
   assert.match(source, /historyScrollRef/);

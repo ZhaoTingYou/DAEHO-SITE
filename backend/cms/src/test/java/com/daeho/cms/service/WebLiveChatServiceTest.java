@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import com.daeho.cms.repository.TelegramLiveChatRepository;
 import com.daeho.cms.repository.WebLiveChatRepository;
+import com.daeho.cms.repository.WebLiveChatRepository.ActivationResult;
 import com.daeho.cms.repository.WebLiveChatRepository.Conversation;
 import com.daeho.cms.repository.WebLiveChatRepository.Message;
 import com.daeho.cms.repository.WebLiveChatRepository.VisitorMessageClaim;
@@ -33,6 +34,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 class WebLiveChatServiceTest {
   private static final Instant NOW = Instant.parse("2026-09-01T08:00:00Z");
+  private static final String AUTOMATED_WELCOME_TEMPLATE = "auto-welcome-v1";
 
   private WebLiveChatRepository repository;
   private TelegramLiveChatCredentialService credentials;
@@ -108,11 +110,21 @@ class WebLiveChatServiceTest {
     when(gateway.sendMessage(
         eq("token"), eq("-1003425727647"), eq("701"), any(), eq(Map.of()), eq(null)
     )).thenReturn(702L);
-    when(repository.activate("conversation-1", 702L)).thenReturn(active);
+    when(repository.activateWithAutomatedWelcome(
+        "conversation-1", 702L, AUTOMATED_WELCOME_TEMPLATE
+    )).thenReturn(new ActivationResult(
+        active, welcomeMessage("conversation-1", AUTOMATED_WELCOME_TEMPLATE)
+    ));
 
     var result = service.start(visitor(), validStart(), requestMeta());
 
     assertEquals("active", result.state());
+    verify(repository).activateWithAutomatedWelcome(
+        "conversation-1", 702L, AUTOMATED_WELCOME_TEMPLATE
+    );
+    verify(broker).publish(
+        "conversation-1", welcomeMessage("conversation-1", AUTOMATED_WELCOME_TEMPLATE)
+    );
     var card = ArgumentCaptor.forClass(String.class);
     verify(gateway).sendMessage(
         eq("token"), eq("-1003425727647"), eq("701"), card.capture(), eq(Map.of()), eq(null)
@@ -138,7 +150,9 @@ class WebLiveChatServiceTest {
     order.verify(gateway).sendMessage(
         eq("token"), eq("-1003425727647"), eq("701"), any(), eq(Map.of()), eq(null)
     );
-    order.verify(repository).activate("conversation-1", 702L);
+    order.verify(repository).activateWithAutomatedWelcome(
+        "conversation-1", 702L, AUTOMATED_WELCOME_TEMPLATE
+    );
   }
 
   @Test
@@ -194,10 +208,15 @@ class WebLiveChatServiceTest {
     when(gateway.sendMessage(
         eq("token"), eq("-1003425727647"), eq("801"), anyString(), eq(Map.of()), eq(null)
     )).thenReturn(802L);
-    when(repository.activate(anyString(), eq(802L))).thenAnswer(invocation ->
-        conversationWithId(invocation.getArgument(0), "active", invocation.getArgument(0),
-            "", "", 801L, 802L)
-    );
+    when(repository.activateWithAutomatedWelcome(anyString(), eq(802L), anyString()))
+        .thenAnswer(invocation -> {
+          var id = invocation.getArgument(0, String.class);
+          var body = invocation.getArgument(2, String.class);
+          return new ActivationResult(
+              conversationWithId(id, "active", id, "", "", 801L, 802L),
+              welcomeMessage(id, body)
+          );
+        });
 
     var closedResult = service.closeFromCms("conversation-closed");
     var result = service.start(visitor(), validStart(), requestMeta());
@@ -679,7 +698,11 @@ class WebLiveChatServiceTest {
         "🔔 새 실시간 상담\n\n이름: 홍길동\n연락처: 01012345678\n문의 내용:\n반지 제작 상담",
         Map.of(), null
     )).thenReturn(704L);
-    when(repository.activate("conversation-1", 704L)).thenReturn(active);
+    when(repository.activateWithAutomatedWelcome(
+        eq("conversation-1"), eq(704L), anyString()
+    )).thenReturn(new ActivationResult(
+        active, welcomeMessage("conversation-1", AUTOMATED_WELCOME_TEMPLATE)
+    ));
 
     var result = service.retryRegistrationFromCms(
         "conversation-1", "registration_delivery_failed"
@@ -695,7 +718,9 @@ class WebLiveChatServiceTest {
         "🔔 새 실시간 상담\n\n이름: 홍길동\n연락처: 01012345678\n문의 내용:\n반지 제작 상담",
         Map.of(), null
     );
-    order.verify(repository).activate("conversation-1", 704L);
+    order.verify(repository).activateWithAutomatedWelcome(
+        "conversation-1", 704L, AUTOMATED_WELCOME_TEMPLATE
+    );
   }
 
   @Test
@@ -746,7 +771,11 @@ class WebLiveChatServiceTest {
     when(repository.recordTopic("conversation-1", 701L)).thenReturn(delivering);
     when(gateway.sendMessage(eq("token"), eq("-1003425727647"), eq("701"), anyString(), eq(Map.of()), eq(null)))
         .thenReturn(702L);
-    when(repository.activate("conversation-1", 702L)).thenReturn(active);
+    when(repository.activateWithAutomatedWelcome(
+        eq("conversation-1"), eq(702L), anyString()
+    )).thenReturn(new ActivationResult(
+        active, welcomeMessage("conversation-1", AUTOMATED_WELCOME_TEMPLATE)
+    ));
 
     assertEquals(
         active,
@@ -815,8 +844,24 @@ class WebLiveChatServiceTest {
       long topicThreadId,
       long rootMessageId
   ) {
+    return conversationWithLocale(
+        id, "ko", state, inquiryId, pendingAction, attentionCode,
+        topicThreadId, rootMessageId
+    );
+  }
+
+  private Conversation conversationWithLocale(
+      String id,
+      String locale,
+      String state,
+      String inquiryId,
+      String pendingAction,
+      String attentionCode,
+      long topicThreadId,
+      long rootMessageId
+  ) {
     return new Conversation(
-        id, "visitor-1", 3L, "-1003425727647", inquiryId, "ko", state,
+        id, "visitor-1", 3L, "-1003425727647", inquiryId, locale, state,
         "홍길동", "01012345678", "반지 제작 상담", "2026-09", NOW, attentionCode,
         pendingAction, 0L, "", topicThreadId, rootMessageId, 0L, NOW, NOW, NOW, null
     );
@@ -826,6 +871,13 @@ class WebLiveChatServiceTest {
     return new Message(
         id, "conversation-1", "visitor", "추가 문의", state,
         "client-key-0000000002", telegramMessageId, NOW
+    );
+  }
+
+  private Message welcomeMessage(String conversationId, String body) {
+    return new Message(
+        42L, conversationId, "team", body, "delivered",
+        "auto-welcome-v1", 0L, NOW
     );
   }
 }

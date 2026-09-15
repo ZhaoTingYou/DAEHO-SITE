@@ -23,6 +23,7 @@ public class WebLiveChatService {
   private static final int MESSAGE_QUERY_LIMIT = 65;
   private static final Duration VISITOR_DELIVERY_LEASE = Duration.ofMinutes(2);
   private static final String CLOSED_MESSAGE = "상담이 종료되었습니다.";
+  private static final String AUTOMATED_WELCOME_TEMPLATE = "auto-welcome-v1";
   private final WebLiveChatRepository repository;
   private final TelegramLiveChatCredentialService credentials;
   private final TelegramLiveChatGateway gateway;
@@ -480,29 +481,32 @@ public class WebLiveChatService {
       );
       throw error;
     }
-    Conversation active;
+    WebLiveChatRepository.ActivationResult activation;
     try {
-      active = repository.activate(conversation.id(), rootMessageId);
+      activation = repository.activateWithAutomatedWelcome(
+          conversation.id(), rootMessageId, AUTOMATED_WELCOME_TEMPLATE
+      );
     } catch (RuntimeException error) {
       markAttentionAfterMappingFailure(
           conversation.id(), "registration_delivery", "registration_mapping_pending", error
       );
       throw new TelegramLiveChatException(
-          "The registration card was delivered but its mapping could not be recorded.",
+          "The registration card was delivered but activation could not be recorded.",
           error,
           true,
           true
       );
     }
-    if (active == null) {
+    if (activation == null) {
       repository.markNeedsAttention(
           conversation.id(), "registration_delivery", "registration_mapping_pending"
       );
       throw new TelegramLiveChatException(
-          "The registration card was delivered but its mapping could not be recorded.", true
+          "The registration card was delivered but activation could not be recorded.", true
       );
     }
-    return active;
+    broker.publish(conversation.id(), activation.welcome());
+    return activation.conversation();
   }
 
   private String topicTitle(Conversation conversation) {

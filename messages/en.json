@@ -1493,6 +1493,7 @@
       "waitingBody": "The DAEHO consultation team will review it and reply in this window.",
       "retentionNote": "You can return in this browser to read replies and history for up to 30 days.",
       "activeTitle": "Consultation in progress",
+      "automatedWelcomeMessage": "Hello, this is DAEHO. Our consultation staff may not be able to respond immediately while handling other work.\nIf you have not entered your contact details yet, please leave your phone number so the person in charge can contact you and provide detailed assistance after reviewing your inquiry.\nIf you have already entered your contact details, the person in charge will contact you after reviewing your inquiry. Thank you.",
       "teamLabel": "DAEHO consultation team",
       "systemLabel": "Consultation status",
       "messageLabel": "Follow-up message",

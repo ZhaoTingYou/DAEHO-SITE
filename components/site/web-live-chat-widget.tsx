@@ -61,6 +61,7 @@ export type WebLiveChatCopy = {
   waitingBody: string;
   retentionNote: string;
   activeTitle: string;
+  automatedWelcomeMessage: string;
   teamLabel: string;
   systemLabel: string;
   messageLabel: string;
@@ -87,6 +88,7 @@ type StartStatus = 'idle' | 'pending' | 'accepted' | 'failed';
 type ChatState = ReturnType<typeof createWebLiveChatState>;
 
 const CLOSED_REFRESH_MS = 30_000;
+const AUTOMATED_WELCOME_TEMPLATE = 'auto-welcome-v1';
 
 const FOCUSABLE = [
   'button:not([disabled])',
@@ -173,10 +175,10 @@ export function WebLiveChatWidget({
       .sort((left, right) => right.id - left.id)[0];
     if (newestTeamMessage && newestTeamMessage.id > announcedTeamIdRef.current) {
       announcedTeamIdRef.current = newestTeamMessage.id;
-      setAnnouncement(newestTeamMessage.body);
+      setAnnouncement(teamMessageBody(copy, newestTeamMessage.body));
     }
     return session;
-  }, []);
+  }, [copy]);
 
   const closePanel = useCallback(() => {
     if (state.panelOpen) {
@@ -370,7 +372,7 @@ export function WebLiveChatWidget({
         dispatch({type: 'durable_event', event});
         if (event.type === 'message' && event.id > announcedTeamIdRef.current) {
           announcedTeamIdRef.current = event.id;
-          setAnnouncement(event.message.body);
+          setAnnouncement(teamMessageBody(copy, event.message.body));
         }
         if (event.type === 'state') broadcastRef.current?.postMessage({type: 'closed'});
       },
@@ -384,7 +386,7 @@ export function WebLiveChatWidget({
       stream.close();
       window.removeEventListener('pagehide', onPageHide);
     };
-  }, [openCycle, state.panelOpen, streamEligible]);
+  }, [copy, openCycle, state.panelOpen, streamEligible]);
 
   useEffect(() => {
     if (!state.polling) return;
@@ -826,7 +828,7 @@ function MessageHistory({copy, messages, bottomSentinelRef}: {copy: WebLiveChatC
       ) : message.direction === 'team' ? (
         <li key={message.id} className="mr-auto w-fit max-w-[78%] rounded-2xl rounded-tl-sm bg-[#101D30] px-3.5 py-2.5 text-white shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#E4C77D]">{copy.teamLabel}</p>
-          <p className="mt-1 whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-6">{message.body}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-6">{teamMessageBody(copy, message.body)}</p>
         </li>
       ) : (
         <li key={message.id} className="mx-auto w-fit max-w-[90%] rounded-full bg-[#E9E1D2] px-3 py-1.5 text-center text-xs leading-5 text-[#46566B]">
@@ -836,6 +838,10 @@ function MessageHistory({copy, messages, bottomSentinelRef}: {copy: WebLiveChatC
       <li aria-hidden="true" className="h-px"><div ref={bottomSentinelRef} /></li>
     </ol>
   );
+}
+
+function teamMessageBody(copy: WebLiveChatCopy, body: string) {
+  return body === AUTOMATED_WELCOME_TEMPLATE ? copy.automatedWelcomeMessage : body;
 }
 
 function useMessageScroll(messages: ChatState['messages']) {

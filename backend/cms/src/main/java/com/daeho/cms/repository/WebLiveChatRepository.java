@@ -142,6 +142,20 @@ public class WebLiveChatRepository {
         """, this::mapMessage, body, clientMessageKey, conversationId));
   }
 
+  public Message storeAutomatedWelcomeMessage(String conversationId, String body) {
+    return one(jdbc.query("""
+        INSERT INTO cms_web_live_chat_messages (
+          conversation_id, direction, body, delivery_state, client_message_key, delivered_at
+        )
+        SELECT id, 'team', ?, 'delivered', 'auto-welcome-v1', now()
+        FROM cms_web_live_chat_conversations
+        WHERE id = ? AND state = 'active'
+        ON CONFLICT (conversation_id, client_message_key) DO UPDATE
+        SET client_message_key = excluded.client_message_key
+        RETURNING *
+        """, this::mapMessage, body, conversationId));
+  }
+
   public Conversation attachInquiry(String conversationId, String inquiryId) {
     return transition("""
         UPDATE cms_web_live_chat_conversations
@@ -178,6 +192,23 @@ public class WebLiveChatRepository {
         WHERE id = ? AND state = 'opening' AND pending_action = 'registration_delivery'
         RETURNING *
         """, topicRootMessageId, conversationId);
+  }
+
+  @Transactional
+  public ActivationResult activateWithAutomatedWelcome(
+      String conversationId,
+      long topicRootMessageId,
+      String welcomeBody
+  ) {
+    var conversation = activate(conversationId, topicRootMessageId);
+    if (conversation == null) {
+      return null;
+    }
+    var welcome = storeAutomatedWelcomeMessage(conversationId, welcomeBody);
+    if (welcome == null) {
+      throw new IllegalStateException("The automated welcome message could not be stored.");
+    }
+    return new ActivationResult(conversation, welcome);
   }
 
   public Conversation markNeedsAttention(
@@ -929,6 +960,8 @@ public class WebLiveChatRepository {
   ) {}
 
   public record VisitorMessageClaim(Message message, String status) {}
+
+  public record ActivationResult(Conversation conversation, Message welcome) {}
 
   public record CloseResult(Conversation conversation, Message event) {}
 
