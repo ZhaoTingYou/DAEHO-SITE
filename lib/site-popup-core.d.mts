@@ -1,8 +1,13 @@
-export type SitePopupConfig = {
+export type SitePopupItem = {
+  id: string;
   enabled: boolean;
   image: string;
   startsAt: string;
   endsAt: string;
+};
+
+export type SitePopupConfig = {
+  items: SitePopupItem[];
 };
 
 export type SitePopupValidationError =
@@ -12,11 +17,12 @@ export type SitePopupValidationError =
   | 'endAfterStart';
 
 export type SitePopupValidationResult =
-  | {ok: true; config: SitePopupConfig}
+  | {ok: true; item: SitePopupItem}
   | {ok: false; error: SitePopupValidationError};
 
 export const emptySitePopupConfig: Readonly<SitePopupConfig>;
 export function normalizeSitePopupConfig(value: unknown): SitePopupConfig;
+export function normalizeSitePopupItem(value: unknown, fallbackId?: string): SitePopupItem;
 export function seoulDateTimeInputToIso(value: unknown): string;
 export function sitePopupIsoToDateTimeInput(value: unknown): string;
 export function validateSitePopupSubmission(input: {
@@ -31,6 +37,7 @@ export function getSitePopupStatus(
   now?: number
 ): 'inactive' | 'scheduled' | 'active' | 'expired';
 export function createSitePopupVersion(value: unknown): string;
+export function getActiveSitePopupItems(value: unknown, now?: number): SitePopupItem[];
 export function sitePopupStorageKeys(version: string): {
   session: string;
   persistent: string;

@@ -4,10 +4,7 @@
     "description": "The moment of victory, shaped for eternity."
   },
   "sitePopup": {
-    "enabled": false,
-    "image": "",
-    "startsAt": "",
-    "endsAt": ""
+    "items": []
   },
   "account": {
     "login": {

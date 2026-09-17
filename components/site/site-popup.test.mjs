@@ -10,14 +10,22 @@ test('public locale layout mounts one popup with CMS config', () => {
   assert.ok(layout.includes('<SitePopup config={messages.sitePopup} locale={locale as Locale} />'));
 });
 
-test('popup applies active and dismissal rules before opening', () => {
+test('popup applies active collection and dismissal rules before opening', () => {
   assert.ok(source.includes('useSyncExternalStore'));
   assert.ok(source.includes('getServerSnapshot: () => false'));
-  assert.ok(source.includes('isSitePopupActive(config)'));
+  assert.ok(source.includes('getActiveSitePopupItems(config)'));
   assert.ok(source.includes('createSitePopupVersion(config)'));
   assert.ok(source.includes('isSitePopupDismissed'));
   assert.ok(source.includes('sessionStorage.getItem'));
   assert.ok(source.includes('localStorage.getItem'));
+});
+
+test('one dialog automatically rotates and supports direct announcement selection', () => {
+  assert.ok(source.includes('window.setInterval(showNext, 5000)'));
+  assert.ok(source.includes('showPrevious'));
+  assert.ok(source.includes('role="tablist"'));
+  assert.ok(source.includes('onClick={() => setActiveIndex(index)}'));
+  assert.ok(source.includes('activeItems.map'));
 });
 
 test('popup supports persistent dismissal and accessible closing', () => {
@@ -29,6 +37,6 @@ test('popup supports persistent dismissal and accessible closing', () => {
   assert.ok(source.includes("event.key !== 'Tab'"));
   assert.ok(source.includes("document.body.style.overflow = 'hidden'"));
   assert.ok(source.includes("document.documentElement.style.overflow = 'hidden'"));
-  assert.ok(source.includes('onError={closeWithoutSaving}'));
+  assert.ok(source.includes('onError={activeItems.length > 1 ? showNext : closeWithoutSaving}'));
   assert.ok(source.includes('object-contain'));
 });

@@ -406,26 +406,49 @@ export async function saveSitePopupAction(formData: FormData) {
   try {
     const previousPage = await getPage('site-popup');
     const previousImages = collectImageFilenames(previousPage);
-    const file = formData.get('imageUpload');
-    let image = stringFromForm(formData, 'image');
-    const upload = file instanceof File && file.size > 0 ? file : null;
-    const result = validateSitePopupSubmission({
-      enabled: formData.get('enabled') === 'on',
-      image: upload?.name || image,
-      startsAtInput: stringFromForm(formData, 'startsAt'),
-      endsAtInput: stringFromForm(formData, 'endsAt')
+    const popupIds = [...new Set(
+      formData.getAll('popupId')
+        .filter((value): value is string => typeof value === 'string')
+        .map((value) => value.trim())
+        .filter(Boolean)
+    )];
+    const submissions = popupIds.map((id) => {
+      const file = formData.get(`imageUpload.${id}`);
+      const image = stringFromForm(formData, `image.${id}`);
+      const upload = file instanceof File && file.size > 0 ? file : null;
+      const result = validateSitePopupSubmission({
+        enabled: formData.get(`enabled.${id}`) === 'on',
+        image: upload?.name || image,
+        startsAtInput: stringFromForm(formData, `startsAt.${id}`),
+        endsAtInput: stringFromForm(formData, `endsAt.${id}`)
+      });
+
+      return {id, image, upload, result};
     });
+    const invalidSubmission = submissions.find(({result}) => !result.ok);
 
-    if (!result.ok) {
+    if (invalidSubmission && !invalidSubmission.result.ok) {
       const {t} = await getAdminI18n();
-      throw new Error(t(sitePopupErrorMessageKeys[result.error]));
+      throw new Error(t(sitePopupErrorMessageKeys[invalidSubmission.result.error]));
     }
 
-    if (upload) {
-      image = await saveSharedPageImage(upload, returnTo, image);
+    const items = [];
+
+    for (const submission of submissions) {
+      if (!submission.result.ok) {
+        continue;
+      }
+
+      let image = submission.image;
+
+      if (submission.upload) {
+        image = await saveSharedPageImage(submission.upload, returnTo, image);
+      }
+
+      items.push({...submission.result.item, id: submission.id, image});
     }
 
-    const config = {...result.config, image};
+    const config = {items};
     const payload = pagePayloadSchema.parse({
       section: 'settings',
       sortOrder: 990,

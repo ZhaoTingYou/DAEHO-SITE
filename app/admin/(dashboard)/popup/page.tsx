@@ -5,18 +5,13 @@ import {listMedia} from '@/lib/cms/repositories';
 import {getLocaleMessages} from '@/lib/locale-messages';
 import {
   getSitePopupStatus,
-  normalizeSitePopupConfig,
-  sitePopupIsoToDateTimeInput
+  normalizeSitePopupConfig
 } from '@/lib/site-popup-core.mjs';
 
 import {AdminActionAlert} from '../../_components/admin-feedback';
-import {
-  ImageUploadField,
-  SubmitButton,
-  TextField,
-  type MediaLibraryItem
-} from '../../_components/admin-fields';
-import {PageHeader, Panel} from '../../_components/admin-shell';
+import {SubmitButton, type MediaLibraryItem} from '../../_components/admin-fields';
+import {PageHeader} from '../../_components/admin-shell';
+import {SitePopupEditor} from '../../_components/site-popup-editor';
 
 type AdminPopupPageProps = {
   searchParams?: Promise<Record<string, string | undefined>>;
@@ -38,7 +33,16 @@ export default async function AdminPopupPage({searchParams}: AdminPopupPageProps
     getMediaLibraryItems()
   ]);
   const config = normalizeSitePopupConfig(messages.sitePopup);
-  const status = getSitePopupStatus(config);
+  const statusCounts = config.items.reduce<Record<string, number>>((counts, item) => {
+    const status = getSitePopupStatus(item);
+    counts[status] = (counts[status] ?? 0) + 1;
+    return counts;
+  }, {});
+  const primaryStatus: keyof typeof statusClassNames = statusCounts.active
+    ? 'active'
+    : statusCounts.scheduled
+      ? 'scheduled'
+      : 'inactive';
 
   return (
     <>
@@ -46,8 +50,8 @@ export default async function AdminPopupPage({searchParams}: AdminPopupPageProps
         title={t('popup.title')}
         description={t('popup.description')}
         action={
-          <span className={`inline-flex min-h-10 items-center rounded-md border px-3 text-sm font-semibold ${statusClassNames[status]}`}>
-            {t(`popup.${status}`)}
+          <span className={`inline-flex min-h-10 items-center rounded-md border px-3 text-sm font-semibold ${statusClassNames[primaryStatus]}`}>
+            {t(`popup.${primaryStatus}`)} · {config.items.length}
           </span>
         }
       />
@@ -65,52 +69,31 @@ export default async function AdminPopupPage({searchParams}: AdminPopupPageProps
       />
 
       <form action={saveSitePopupAction} className="grid gap-6 pb-24">
-        <Panel className="grid gap-5 p-5">
-          <label className="flex min-h-11 items-center gap-3 text-sm font-semibold text-[#344054]">
-            <input
-              name="enabled"
-              type="checkbox"
-              defaultChecked={config.enabled}
-              className="size-4 accent-[#7a2230]"
-            />
-            <span>{t('popup.enabled')}</span>
-          </label>
-
-          <ImageUploadField
-            label={t('popup.image')}
-            name="image"
-            uploadName="imageUpload"
-            defaultValue={config.image}
-            uploadLabel={t('page.uploadLocalImage')}
-            uploadHint={t('page.uploadLocalImageHint')}
-            emptyLabel={t('common.noImage')}
-            changedLabel={t('common.changed')}
-            selectedLabel={t('common.imageSelected')}
-            mediaItems={mediaItems}
-            mediaSelectLabel={t('media.selectFromLibrary')}
-            mediaLibraryTitle={t('media.libraryTitle')}
-            mediaEmptyLabel={t('media.libraryEmpty')}
-            mediaSelectedLabel={t('media.selectedExisting')}
-            imageGuide={t('popup.imageGuide')}
-          />
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <TextField
-              label={t('popup.startsAt')}
-              name="startsAt"
-              type="datetime-local"
-              defaultValue={sitePopupIsoToDateTimeInput(config.startsAt)}
-            />
-            <TextField
-              label={t('popup.endsAt')}
-              name="endsAt"
-              type="datetime-local"
-              defaultValue={sitePopupIsoToDateTimeInput(config.endsAt)}
-            />
-          </div>
-
-          <p className="text-sm text-[#647084]">{t('popup.timezoneHint')}</p>
-        </Panel>
+        <SitePopupEditor
+          initialItems={config.items}
+          mediaItems={mediaItems}
+          text={{
+            add: t('popup.add'),
+            empty: t('popup.empty'),
+            enabled: t('popup.enabled'),
+            endsAt: t('popup.endsAt'),
+            image: t('popup.image'),
+            imageGuide: t('popup.imageGuide'),
+            item: t('popup.item'),
+            remove: t('common.delete'),
+            startsAt: t('popup.startsAt'),
+            timezoneHint: t('popup.timezoneHint'),
+            uploadLabel: t('page.uploadLocalImage'),
+            uploadHint: t('page.uploadLocalImageHint'),
+            noImage: t('common.noImage'),
+            changed: t('common.changed'),
+            imageSelected: t('common.imageSelected'),
+            mediaSelect: t('media.selectFromLibrary'),
+            mediaTitle: t('media.libraryTitle'),
+            mediaEmpty: t('media.libraryEmpty'),
+            mediaSelected: t('media.selectedExisting')
+          }}
+        />
 
         <div className="flex justify-end">
           <SubmitButton>{t('page.save')}</SubmitButton>
