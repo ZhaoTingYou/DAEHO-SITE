@@ -42,7 +42,7 @@ export default async function SiteLayout({children, params}: Props) {
   return (
     <AnalyticsProvider locale={locale as Locale} privacyHref={privacyHref}>
       <SiteCursor />
-      <SitePopup config={messages.sitePopup} locale={locale as Locale} />
+      <SitePopup config={messages.sitePopup} labels={messages.sitePopup.labels} />
       <div className="site-cursor-scope">
         <SiteHeader
           locale={locale as Locale}

@@ -7,7 +7,7 @@ const layout = readFileSync(new URL('../../app/[locale]/(site)/layout.tsx', impo
 
 test('public locale layout mounts one popup with CMS config', () => {
   assert.ok(layout.includes("import {SitePopup}"));
-  assert.ok(layout.includes('<SitePopup config={messages.sitePopup} locale={locale as Locale} />'));
+  assert.ok(layout.includes('<SitePopup config={messages.sitePopup} labels={messages.sitePopup.labels} />'));
 });
 
 test('popup applies active collection and dismissal rules before opening', () => {
@@ -21,11 +21,25 @@ test('popup applies active collection and dismissal rules before opening', () =>
 });
 
 test('one dialog automatically rotates and supports direct announcement selection', () => {
-  assert.ok(source.includes('window.setInterval(showNext, 5000)'));
-  assert.ok(source.includes('showPrevious'));
+  assert.ok(source.includes('window.setInterval(advanceNext, 5000)'));
+  assert.ok(source.includes('selectPrevious'));
   assert.ok(source.includes('role="tablist"'));
-  assert.ok(source.includes('onClick={() => setActiveIndex(index)}'));
+  assert.ok(source.includes('setActiveIndex(index)'));
   assert.ok(source.includes('activeItems.map'));
+});
+
+test('autoplay respects reduced motion, can be paused, and refreshes at schedule boundaries', () => {
+  assert.ok(source.includes('usePrefersReducedMotion'));
+  assert.ok(source.includes('!autoRotate || prefersReducedMotion'));
+  assert.ok(source.includes('aria-pressed={!autoRotate}'));
+  assert.ok(source.includes('window.setTimeout'));
+  assert.ok(source.includes('setNow(Date.now())'));
+});
+
+test('failed announcement images are removed from rotation without an error loop', () => {
+  assert.ok(source.includes('failedImages.has'));
+  assert.ok(source.includes('setFailedImages'));
+  assert.doesNotMatch(source, /onError=\{activeItems\.length > 1/);
 });
 
 test('popup supports persistent dismissal and accessible closing', () => {
@@ -37,6 +51,6 @@ test('popup supports persistent dismissal and accessible closing', () => {
   assert.ok(source.includes("event.key !== 'Tab'"));
   assert.ok(source.includes("document.body.style.overflow = 'hidden'"));
   assert.ok(source.includes("document.documentElement.style.overflow = 'hidden'"));
-  assert.ok(source.includes('onError={activeItems.length > 1 ? showNext : closeWithoutSaving}'));
+  assert.ok(source.includes('onError={() => setFailedImages'));
   assert.ok(source.includes('object-contain'));
 });

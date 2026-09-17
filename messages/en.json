@@ -4,7 +4,18 @@
     "description": "The moment of victory, shaped for eternity."
   },
   "sitePopup": {
-    "items": []
+    "items": [],
+    "labels": {
+      "close": "Close popup",
+      "never": "Do not show again",
+      "dialog": "Announcement popup",
+      "image": "Announcement image",
+      "previous": "Previous announcement",
+      "next": "Next announcement",
+      "pause": "Pause autoplay",
+      "resume": "Resume autoplay",
+      "select": "View announcement {number}"
+    }
   },
   "account": {
     "login": {

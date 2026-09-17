@@ -4,7 +4,18 @@
     "description": "승리의 순간을, 영원의 형태로."
   },
   "sitePopup": {
-    "items": []
+    "items": [],
+    "labels": {
+      "close": "팝업 닫기",
+      "never": "다시 보지 않기",
+      "dialog": "공지 팝업",
+      "image": "공지 이미지",
+      "previous": "이전 공지",
+      "next": "다음 공지",
+      "pause": "자동 재생 멈춤",
+      "resume": "자동 재생",
+      "select": "{number}번 공지 보기"
+    }
   },
   "account": {
     "login": {

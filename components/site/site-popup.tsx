@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
 
-import type {Locale} from '@/i18n/routing';
+import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {imageSrc} from '@/lib/image-src';
 import {
   createSitePopupVersion,
@@ -12,8 +12,27 @@ import {
   type SitePopupConfig
 } from '@/lib/site-popup-core.mjs';
 
-export function SitePopup({config, locale}: {config: SitePopupConfig; locale: Locale}) {
-  const activeItems = useMemo(() => getActiveSitePopupItems(config), [config]);
+type SitePopupLabels = {
+  close: string;
+  never: string;
+  dialog: string;
+  image: string;
+  previous: string;
+  next: string;
+  pause: string;
+  resume: string;
+  select: string;
+};
+
+export function SitePopup({config, labels}: {config: SitePopupConfig; labels: SitePopupLabels}) {
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const [now, setNow] = useState(() => Date.now());
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
+  const [autoRotate, setAutoRotate] = useState(true);
+  const activeItems = useMemo(
+    () => getActiveSitePopupItems(config, now).filter((item) => !failedImages.has(imageFailureKey(item.id, item.image))),
+    [config, failedImages, now]
+  );
   const version = useMemo(() => createSitePopupVersion(config), [config]);
   const visibilityStore = useMemo(
     () => createPopupVisibilityStore(config, version),
@@ -31,55 +50,54 @@ export function SitePopup({config, locale}: {config: SitePopupConfig; locale: Lo
   const [activeIndex, setActiveIndex] = useState(0);
   const displayIndex = activeIndex % Math.max(activeItems.length, 1);
   const activeItem = activeItems[displayIndex];
-  const labels = locale === 'ko'
-    ? {
-        close: '팝업 닫기',
-        never: '다시 보지 않기',
-        dialog: '공지 팝업',
-        image: '공지 이미지',
-        previous: '이전 공지',
-        next: '다음 공지',
-        select: (index: number) => `${index + 1}번 공지 보기`,
-        position: (index: number, total: number) => `${index + 1} / ${total}`
-      }
-    : {
-        close: 'Close popup',
-        never: 'Do not show again',
-        dialog: 'Announcement popup',
-        image: 'Announcement image',
-        previous: 'Previous announcement',
-        next: 'Next announcement',
-        select: (index: number) => `View announcement ${index + 1}`,
-        position: (index: number, total: number) => `${index + 1} / ${total}`
-      };
-
-  const closeWithoutSaving = useCallback(() => {
-    visibilityStore.hide();
-  }, [visibilityStore]);
+  const visibleOpen = open && Boolean(activeItem);
 
   const closePopup = useCallback(() => {
     visibilityStore.dismiss(neverShowRef.current?.checked === true);
   }, [visibilityStore]);
 
-  const showPrevious = useCallback(() => {
+  const selectPrevious = useCallback(() => {
+    setAutoRotate(false);
     setActiveIndex((index) => (index - 1 + activeItems.length) % activeItems.length);
   }, [activeItems.length]);
 
-  const showNext = useCallback(() => {
+  const selectNext = useCallback(() => {
+    setAutoRotate(false);
+    setActiveIndex((index) => (index + 1) % activeItems.length);
+  }, [activeItems.length]);
+
+  const advanceNext = useCallback(() => {
     setActiveIndex((index) => (index + 1) % activeItems.length);
   }, [activeItems.length]);
 
   useEffect(() => {
-    if (!open || activeItems.length < 2) {
+    const boundaries = config.items
+      .flatMap((item) => [Date.parse(item.startsAt), Date.parse(item.endsAt)])
+      .filter((timestamp) => Number.isFinite(timestamp) && timestamp > now);
+
+    if (boundaries.length === 0) {
       return;
     }
 
-    const timer = window.setInterval(showNext, 5000);
-    return () => window.clearInterval(timer);
-  }, [activeItems.length, open, showNext]);
+    const nextBoundary = Math.min(...boundaries);
+    const timer = window.setTimeout(
+      () => setNow(Date.now()),
+      Math.min(nextBoundary - now + 50, 2_147_483_647)
+    );
+    return () => window.clearTimeout(timer);
+  }, [config.items, now]);
 
   useEffect(() => {
-    if (!open) {
+    if (!visibleOpen || !autoRotate || prefersReducedMotion || activeItems.length < 2) {
+      return;
+    }
+
+    const timer = window.setInterval(advanceNext, 5000);
+    return () => window.clearInterval(timer);
+  }, [activeItems.length, advanceNext, autoRotate, prefersReducedMotion, visibleOpen]);
+
+  useEffect(() => {
+    if (!visibleOpen) {
       return;
     }
 
@@ -132,15 +150,15 @@ export function SitePopup({config, locale}: {config: SitePopupConfig; locale: Lo
       document.documentElement.style.overflow = previousRootOverflow;
       previousFocusRef.current?.focus();
     };
-  }, [closePopup, open]);
+  }, [closePopup, visibleOpen]);
 
-  if (!activeItem || !open) {
+  if (!visibleOpen || !activeItem) {
     return null;
   }
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/65 p-4 md:p-8"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-primary/65 p-4 md:p-8"
       onPointerDown={(event) => {
         if (event.target === event.currentTarget) {
           closePopup();
@@ -159,7 +177,7 @@ export function SitePopup({config, locale}: {config: SitePopupConfig; locale: Lo
           type="button"
           aria-label={labels.close}
           onClick={closePopup}
-          className="absolute right-2 top-2 z-10 grid size-11 place-items-center border border-black/10 bg-white/95 text-2xl leading-none text-[#101827] shadow-sm transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]"
+          className="absolute right-2 top-2 z-10 grid size-11 place-items-center border border-hairline bg-white/95 text-2xl leading-none text-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           ×
         </button>
@@ -170,17 +188,17 @@ export function SitePopup({config, locale}: {config: SitePopupConfig; locale: Lo
           key={activeItem.id}
           src={imageSrc(activeItem.image)}
           alt={labels.image}
-          onError={activeItems.length > 1 ? showNext : closeWithoutSaving}
+          onError={() => setFailedImages((current) => new Set(current).add(imageFailureKey(activeItem.id, activeItem.image)))}
           className="max-h-[75dvh] max-w-[88vw] object-contain"
         />
 
         {activeItems.length > 1 ? (
-          <div className="flex min-h-12 items-center justify-center gap-3 px-2 pt-2" aria-label={labels.position(displayIndex, activeItems.length)}>
+          <div className="flex min-h-12 items-center justify-center gap-3 px-2 pt-2" aria-label={`${displayIndex + 1} / ${activeItems.length}`}>
             <button
               type="button"
               aria-label={labels.previous}
-              onClick={showPrevious}
-              className="grid size-10 place-items-center rounded-full border border-black/15 text-xl text-[#101827] transition hover:bg-[#f4f5f7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]"
+              onClick={selectPrevious}
+              className="grid size-10 place-items-center rounded-full border border-hairline text-xl text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               ‹
             </button>
@@ -191,12 +209,15 @@ export function SitePopup({config, locale}: {config: SitePopupConfig; locale: Lo
                   type="button"
                   role="tab"
                   aria-selected={index === displayIndex}
-                  aria-label={labels.select(index)}
-                  onClick={() => setActiveIndex(index)}
-                  className={`min-h-10 min-w-10 rounded-full border px-3 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230] ${
+                  aria-label={labels.select.replace('{number}', String(index + 1))}
+                  onClick={() => {
+                    setAutoRotate(false);
+                    setActiveIndex(index);
+                  }}
+                  className={`min-h-10 min-w-10 rounded-full border px-3 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                     index === displayIndex
-                      ? 'border-[#7a2230] bg-[#7a2230] text-white'
-                      : 'border-black/15 bg-white text-[#344054] hover:bg-[#f4f5f7]'
+                      ? 'border-accent bg-accent text-white'
+                      : 'border-hairline bg-white text-primary'
                   }`}
                 >
                   {index + 1}
@@ -206,25 +227,37 @@ export function SitePopup({config, locale}: {config: SitePopupConfig; locale: Lo
             <button
               type="button"
               aria-label={labels.next}
-              onClick={showNext}
-              className="grid size-10 place-items-center rounded-full border border-black/15 text-xl text-[#101827] transition hover:bg-[#f4f5f7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7a2230]"
+              onClick={selectNext}
+              className="grid size-10 place-items-center rounded-full border border-hairline text-xl text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               ›
+            </button>
+            <button
+              type="button"
+              aria-pressed={!autoRotate}
+              onClick={() => setAutoRotate((playing) => !playing)}
+              className="min-h-10 rounded-full border border-hairline px-3 text-sm font-semibold text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              {autoRotate && !prefersReducedMotion ? labels.pause : labels.resume}
             </button>
           </div>
         ) : null}
 
-        <label className="flex min-h-11 items-center gap-2 px-2 pt-2 text-sm font-semibold text-[#101827]">
+        <label className="flex min-h-11 items-center gap-2 px-2 pt-2 text-sm font-semibold text-primary">
           <input
             ref={neverShowRef}
             type="checkbox"
-            className="size-4 accent-[#7a2230]"
+            className="size-4 accent-accent"
           />
           <span>{labels.never}</span>
         </label>
       </div>
     </div>
   );
+}
+
+function imageFailureKey(id: string, image: string) {
+  return `${id}\u0000${image}`;
 }
 
 function createPopupVisibilityStore(config: SitePopupConfig, version: string) {

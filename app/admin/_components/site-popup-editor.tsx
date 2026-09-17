@@ -62,29 +62,29 @@ export function SitePopupEditor({
   return (
     <div className="grid gap-5">
       {items.length === 0 ? (
-        <Panel className="p-8 text-center text-sm text-[#647084]">{text.empty}</Panel>
+        <Panel className="p-8 text-center text-sm text-subtext">{text.empty}</Panel>
       ) : null}
 
       {items.map((item, index) => (
         <Panel key={item.id} className="grid gap-5 p-5">
           <input type="hidden" name="popupId" value={item.id} />
-          <div className="flex items-center justify-between gap-4 border-b border-[#e4e7ec] pb-4">
-            <h2 className="text-base font-bold text-[#101827]">{text.item} {index + 1}</h2>
+          <div className="flex items-center justify-between gap-4 border-b border-hairline pb-4">
+            <h2 className="text-base font-bold text-primary">{text.item} {index + 1}</h2>
             <button
               type="button"
               onClick={() => setItems((current) => current.filter(({id}) => id !== item.id))}
-              className="inline-flex min-h-11 min-w-16 items-center justify-center rounded-md border border-[#f2b8b5] bg-[#fff5f5] px-3 text-sm font-semibold text-[#b42318] transition hover:bg-[#fee4e2]"
+              className="inline-flex min-h-11 min-w-16 items-center justify-center rounded-md border border-accent bg-white px-3 text-sm font-semibold text-accent"
             >
               {text.remove}
             </button>
           </div>
 
-          <label className="flex min-h-11 items-center gap-3 text-sm font-semibold text-[#344054]">
+          <label className="flex min-h-11 items-center gap-3 text-sm font-semibold text-primary">
             <input
               name={`enabled.${item.id}`}
               type="checkbox"
               defaultChecked={item.enabled}
-              className="size-4 accent-[#7a2230]"
+              className="size-4 accent-accent"
             />
             <span>{text.enabled}</span>
           </label>
@@ -122,14 +122,14 @@ export function SitePopupEditor({
             />
           </div>
 
-          <p className="text-sm text-[#647084]">{text.timezoneHint}</p>
+          <p className="text-sm text-subtext">{text.timezoneHint}</p>
         </Panel>
       ))}
 
       <button
         type="button"
         onClick={addItem}
-        className="min-h-11 rounded-md border border-dashed border-[#98a2b3] bg-white px-4 text-sm font-bold text-[#344054] transition hover:border-[#7a2230] hover:text-[#7a2230]"
+        className="min-h-11 rounded-md border border-dashed border-hairline bg-white px-4 text-sm font-bold text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         + {text.add}
       </button>

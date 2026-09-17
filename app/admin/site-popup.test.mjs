@@ -8,10 +8,12 @@ const readJson = (path) => JSON.parse(readText(path));
 test('popup fallback config is structurally identical in both public locales', () => {
   const ko = readJson('../../messages/ko.json').sitePopup;
   const en = readJson('../../messages/en.json').sitePopup;
-  const expected = {items: []};
 
-  assert.deepEqual(ko, expected);
-  assert.deepEqual(en, expected);
+  assert.deepEqual(ko.items, []);
+  assert.deepEqual(en.items, []);
+  assert.deepEqual(Object.keys(ko.labels), Object.keys(en.labels));
+  assert.match(ko.labels.select, /\{number\}/);
+  assert.match(en.labels.select, /\{number\}/);
 });
 
 test('popup is a managed site-wide page with a dedicated editor', () => {
