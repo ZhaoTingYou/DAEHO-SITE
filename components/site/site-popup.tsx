@@ -46,7 +46,6 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
     visibilityStore.getSnapshot,
     visibilityStore.getServerSnapshot
   );
-  const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const neverShowRef = useRef<HTMLInputElement | null>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -104,41 +103,12 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
     previousFocusRef.current = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null;
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousRootOverflow = document.documentElement.style.overflow;
-
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
     closeRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         closePopup();
-        return;
-      }
-
-      if (event.key !== 'Tab' || !dialogRef.current) {
-        return;
-      }
-
-      const focusable = [
-        ...dialogRef.current.querySelectorAll<HTMLElement>('button, input:not([disabled])')
-      ];
-
-      if (focusable.length === 0) {
-        return;
-      }
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
       }
     };
 
@@ -146,8 +116,6 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = previousBodyOverflow;
-      document.documentElement.style.overflow = previousRootOverflow;
       previousFocusRef.current?.focus();
     };
   }, [closePopup, visibleOpen]);
@@ -158,19 +126,12 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-bg/95 p-4 backdrop-blur-sm md:p-8"
-      onPointerDown={(event) => {
-        if (event.target === event.currentTarget) {
-          closePopup();
-        }
-      }}
+      className="pointer-events-none fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8"
     >
       <div
-        ref={dialogRef}
         role="dialog"
-        aria-modal="true"
         aria-label={labels.dialog}
-        className="relative flex max-h-[90dvh] max-w-[92vw] flex-col bg-white p-2 shadow-2xl md:p-3"
+        className="pointer-events-auto relative flex max-h-[90dvh] max-w-[92vw] flex-col bg-white p-2 shadow-2xl md:p-3"
       >
         <button
           ref={closeRef}

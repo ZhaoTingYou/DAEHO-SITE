@@ -47,11 +47,18 @@ test('popup supports persistent dismissal and accessible closing', () => {
   assert.ok(source.includes('sessionStorage.setItem'));
   assert.ok(source.includes('localStorage.setItem'));
   assert.ok(source.includes('role="dialog"'));
-  assert.ok(source.includes('aria-modal="true"'));
   assert.ok(source.includes("event.key === 'Escape'"));
-  assert.ok(source.includes("event.key !== 'Tab'"));
-  assert.ok(source.includes("document.body.style.overflow = 'hidden'"));
-  assert.ok(source.includes("document.documentElement.style.overflow = 'hidden'"));
+  assert.ok(source.includes('closeRef.current?.focus()'));
   assert.ok(source.includes("onError={() => dispatchCarousel({type: 'image-failed'"));
   assert.ok(source.includes('object-contain'));
+});
+
+test('popup leaves the surrounding page visible without a backdrop treatment', () => {
+  assert.ok(source.includes('className="pointer-events-none fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8"'));
+  assert.ok(source.includes('className="pointer-events-auto relative flex'));
+  assert.doesNotMatch(source, /backdrop-blur/);
+  assert.doesNotMatch(source, /bg-(?:bg|primary|black)\//);
+  assert.doesNotMatch(source, /aria-modal="true"/);
+  assert.doesNotMatch(source, /document\.(?:body|documentElement)\.style\.overflow/);
+  assert.doesNotMatch(source, /event\.target === event\.currentTarget/);
 });
