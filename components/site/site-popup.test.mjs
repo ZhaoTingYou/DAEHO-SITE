@@ -24,7 +24,7 @@ test('one dialog automatically rotates and supports direct announcement selectio
   assert.ok(source.includes('window.setInterval(advanceNext, 5000)'));
   assert.ok(source.includes('selectPrevious'));
   assert.ok(source.includes('role="tablist"'));
-  assert.ok(source.includes('setActiveIndex(index)'));
+  assert.ok(source.includes("dispatchCarousel({type: 'select', index, length: activeItems.length})"));
   assert.ok(source.includes('activeItems.map'));
 });
 
@@ -36,9 +36,10 @@ test('autoplay respects reduced motion, can be paused, and refreshes at schedule
   assert.ok(source.includes('setNow(Date.now())'));
 });
 
-test('failed announcement images are removed from rotation without an error loop', () => {
-  assert.ok(source.includes('failedImages.has'));
-  assert.ok(source.includes('setFailedImages'));
+test('failed announcement images become named placeholders without an error loop', () => {
+  assert.ok(source.includes('failedImages.includes'));
+  assert.ok(source.includes("dispatchCarousel({type: 'image-failed'"));
+  assert.ok(source.includes('popupImageName(activeItem.image)'));
   assert.doesNotMatch(source, /onError=\{activeItems\.length > 1/);
 });
 
@@ -51,6 +52,6 @@ test('popup supports persistent dismissal and accessible closing', () => {
   assert.ok(source.includes("event.key !== 'Tab'"));
   assert.ok(source.includes("document.body.style.overflow = 'hidden'"));
   assert.ok(source.includes("document.documentElement.style.overflow = 'hidden'"));
-  assert.ok(source.includes('onError={() => setFailedImages'));
+  assert.ok(source.includes("onError={() => dispatchCarousel({type: 'image-failed'"));
   assert.ok(source.includes('object-contain'));
 });

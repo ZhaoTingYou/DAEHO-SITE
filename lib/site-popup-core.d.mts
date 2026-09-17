@@ -38,6 +38,21 @@ export function getSitePopupStatus(
 ): 'inactive' | 'scheduled' | 'active' | 'expired';
 export function createSitePopupVersion(value: unknown): string;
 export function getActiveSitePopupItems(value: unknown, now?: number): SitePopupItem[];
+export type SitePopupCarouselState = {
+  activeIndex: number;
+  autoRotate: boolean;
+  failedImages: string[];
+};
+export type SitePopupCarouselAction =
+  | {type: 'advance' | 'previous' | 'next'; length: number}
+  | {type: 'select'; index: number; length: number}
+  | {type: 'toggle-autoplay'}
+  | {type: 'image-failed'; key: string};
+export function createSitePopupCarouselState(): SitePopupCarouselState;
+export function reduceSitePopupCarouselState(
+  state: SitePopupCarouselState,
+  action: SitePopupCarouselAction
+): SitePopupCarouselState;
 export function sitePopupStorageKeys(version: string): {
   session: string;
   persistent: string;

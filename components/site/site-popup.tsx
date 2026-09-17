@@ -1,13 +1,15 @@
 'use client';
 
-import {useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
+import {useCallback, useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore} from 'react';
 
 import {usePrefersReducedMotion} from '@/components/motion/reduced-motion-provider';
 import {imageSrc} from '@/lib/image-src';
 import {
   createSitePopupVersion,
+  createSitePopupCarouselState,
   getActiveSitePopupItems,
   isSitePopupDismissed,
+  reduceSitePopupCarouselState,
   sitePopupStorageKeys,
   type SitePopupConfig
 } from '@/lib/site-popup-core.mjs';
@@ -27,12 +29,13 @@ type SitePopupLabels = {
 export function SitePopup({config, labels}: {config: SitePopupConfig; labels: SitePopupLabels}) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [now, setNow] = useState(() => Date.now());
-  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
-  const [autoRotate, setAutoRotate] = useState(true);
-  const activeItems = useMemo(
-    () => getActiveSitePopupItems(config, now).filter((item) => !failedImages.has(imageFailureKey(item.id, item.image))),
-    [config, failedImages, now]
+  const [carousel, dispatchCarousel] = useReducer(
+    reduceSitePopupCarouselState,
+    undefined,
+    createSitePopupCarouselState
   );
+  const {activeIndex, autoRotate, failedImages} = carousel;
+  const activeItems = useMemo(() => getActiveSitePopupItems(config, now), [config, now]);
   const version = useMemo(() => createSitePopupVersion(config), [config]);
   const visibilityStore = useMemo(
     () => createPopupVisibilityStore(config, version),
@@ -47,7 +50,6 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const neverShowRef = useRef<HTMLInputElement | null>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
   const displayIndex = activeIndex % Math.max(activeItems.length, 1);
   const activeItem = activeItems[displayIndex];
   const visibleOpen = open && Boolean(activeItem);
@@ -57,17 +59,15 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
   }, [visibilityStore]);
 
   const selectPrevious = useCallback(() => {
-    setAutoRotate(false);
-    setActiveIndex((index) => (index - 1 + activeItems.length) % activeItems.length);
+    dispatchCarousel({type: 'previous', length: activeItems.length});
   }, [activeItems.length]);
 
   const selectNext = useCallback(() => {
-    setAutoRotate(false);
-    setActiveIndex((index) => (index + 1) % activeItems.length);
+    dispatchCarousel({type: 'next', length: activeItems.length});
   }, [activeItems.length]);
 
   const advanceNext = useCallback(() => {
-    setActiveIndex((index) => (index + 1) % activeItems.length);
+    dispatchCarousel({type: 'advance', length: activeItems.length});
   }, [activeItems.length]);
 
   useEffect(() => {
@@ -158,7 +158,7 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-primary/65 p-4 md:p-8"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-bg/95 p-4 backdrop-blur-sm md:p-8"
       onPointerDown={(event) => {
         if (event.target === event.currentTarget) {
           closePopup();
@@ -182,15 +182,21 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
           ×
         </button>
 
-        {/* CMS popup images have unknown intrinsic dimensions and must retain their natural ratio. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          key={activeItem.id}
-          src={imageSrc(activeItem.image)}
-          alt={labels.image}
-          onError={() => setFailedImages((current) => new Set(current).add(imageFailureKey(activeItem.id, activeItem.image)))}
-          className="max-h-[75dvh] max-w-[88vw] object-contain"
-        />
+        {failedImages.includes(imageFailureKey(activeItem.id, activeItem.image)) ? (
+          <div className="grid min-h-[min(60dvh,32rem)] min-w-[min(80vw,24rem)] place-items-center bg-bg p-8 text-center text-sm text-subtext">
+            {popupImageName(activeItem.image)}
+          </div>
+        ) : (
+          /* CMS popup images have unknown intrinsic dimensions and must retain their natural ratio. */
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            key={activeItem.id}
+            src={imageSrc(activeItem.image)}
+            alt={labels.image}
+            onError={() => dispatchCarousel({type: 'image-failed', key: imageFailureKey(activeItem.id, activeItem.image)})}
+            className="max-h-[75dvh] max-w-[88vw] object-contain"
+          />
+        )}
 
         {activeItems.length > 1 ? (
           <div className="flex min-h-12 items-center justify-center gap-3 px-2 pt-2" aria-label={`${displayIndex + 1} / ${activeItems.length}`}>
@@ -211,8 +217,7 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
                   aria-selected={index === displayIndex}
                   aria-label={labels.select.replace('{number}', String(index + 1))}
                   onClick={() => {
-                    setAutoRotate(false);
-                    setActiveIndex(index);
+                    dispatchCarousel({type: 'select', index, length: activeItems.length});
                   }}
                   className={`min-h-10 min-w-10 rounded-full border px-3 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                     index === displayIndex
@@ -232,14 +237,16 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
             >
               ›
             </button>
-            <button
-              type="button"
-              aria-pressed={!autoRotate}
-              onClick={() => setAutoRotate((playing) => !playing)}
-              className="min-h-10 rounded-full border border-hairline px-3 text-sm font-semibold text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-            >
-              {autoRotate && !prefersReducedMotion ? labels.pause : labels.resume}
-            </button>
+            {!prefersReducedMotion ? (
+              <button
+                type="button"
+                aria-pressed={!autoRotate}
+                onClick={() => dispatchCarousel({type: 'toggle-autoplay'})}
+                className="min-h-10 rounded-full border border-hairline px-3 text-sm font-semibold text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              >
+                {autoRotate ? labels.pause : labels.resume}
+              </button>
+            ) : null}
           </div>
         ) : null}
 
@@ -258,6 +265,16 @@ export function SitePopup({config, labels}: {config: SitePopupConfig; labels: Si
 
 function imageFailureKey(id: string, image: string) {
   return `${id}\u0000${image}`;
+}
+
+function popupImageName(image: string) {
+  const filename = image.split('/').pop() || image;
+
+  try {
+    return decodeURIComponent(filename);
+  } catch {
+    return filename;
+  }
 }
 
 function createPopupVisibilityStore(config: SitePopupConfig, version: string) {
